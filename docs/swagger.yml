@@ -1380,20 +1380,14 @@ definitions:
   Host:
     type: "object"
     properties:
-        id:
-          type: "integer"
-          format: "int64"
-          description: "Host database identifier"
-          example: 15
-        system_platform_id:
+        display_name:
           type: "string"
-          description: "Globally unique uuid for host"
-          example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
-        deployment_report:
-            type: "integer"
-            format: "int64"
-            description: "Deployments report identifier"
-            example: 20
+          description: "Display name of the host"
+          example: "7cent.cfoo.example.com"
+        fqdn:
+          type: "string"
+          description: "fqdn. Same as display name"
+          example: "7cent.cfoo.example.com"
         name:
           type: "string"
           description: "The system name"
@@ -1510,22 +1504,45 @@ definitions:
         type: object
         properties:
           report_id:
-            type: "integer"
-            format: "int64"
-            description: "The insights report identifier"
-            example: 1
-          report_type:
-            type: "string"
-            description: "The report type"
-            example: "insights"
-          report_version:
-            type: "string"
-            description: "The report version"
-            example: "1.0.0.afdsgev"
-          report_platform_id:
             type: "string"
             description: "Globally unique uuid for report"
             example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+          host_inventory_api_version:
+            type: "string"
+            description: "Host inventory API version"
+            example: "1.0"
+          source:
+            type: "string"
+            description: "Source where the report is generated"
+            example: "qpc"
+          source_metadata:
+            type: object
+            properties:
+              report_platform_id:
+                type: "string"
+                description: "Globally unique uuid for report"
+                example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
+              report_type:
+                type: "string"
+                description: "The report type"
+                example: "insights"
+              report_version:
+                type: "string"
+                description: "The report version"
+                example: "1.0.0.afdsgev"
+              qpc_server_report_id:
+                type: "integer"
+                format: "int64"
+                description: "Globally unique id for a report generated from QPC"
+                example: 1
+              qpc_server_version: 
+                type: "string"
+                description: "The version of QPC server"
+                example: "1.0.0.4d07092"
+              qpc_server_id:
+                type: "string"
+                description: "ID for the QPC server"
+                example: "66592153-a307-420c-9662-3a810c53655f"
           report_slices:
             type: object
             properties:
@@ -1540,16 +1557,11 @@ definitions:
             type: "string"
             description: "The Insights report slice identifier"
             example: "abc075ac-84d3-4b62-9f5c-a418a36f802d"
-          report_platform_id:
-            type: "string"
-            description: "Globally unique uuid for report"
-            example: "be3075ac-84d3-4b62-9f5c-a418a36f802d"
           hosts:
-            type: object
-            properties:
-              system_platform_id:
-                $ref: "#/definitions/Host"
-            description: "The hosts that were scanned"  
+            type: "array"
+            items:
+              $ref: "https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml#/components/schemas/Facts"
+            description: "List of the hosts scanned (refers to host inventory api.spec.yaml file, but it does not work as of last time I checked - Doston Toirov)" 
         description: "Slices of the Insights report"
   InsightsReportSliceMetadata:
     properties:
