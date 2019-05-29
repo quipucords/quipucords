@@ -1155,7 +1155,6 @@ class EngineTest(TestCase):
             ]
             self.assertIn('success', status_message.lower())
             self.assertEqual(status, 'completed')
-            print(repr(json.loads(deployments_report.cached_insights)))
             self.assertEqual(
                 json.loads(deployments_report.cached_insights),
                 expected_insights)

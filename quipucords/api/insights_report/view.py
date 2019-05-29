@@ -83,12 +83,6 @@ def insights(request, pk=None):
     return Response(error, status=404)
 
 
-def slice_it(host_index_list, hosts_per_slice):
-    """Create slices from host_index_list."""
-    for i in range(0, len(host_index_list), hosts_per_slice):
-        yield host_index_list[i:i + hosts_per_slice]
-
-
 def _create_report_slices(report, insights_hosts):
     """Process facts and convert to fingerprints.
 
@@ -98,8 +92,7 @@ def _create_report_slices(report, insights_hosts):
     """
     # pylint: disable=too-many-locals
     slice_size_limit = settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
-    host_indices = [i for i in range(len(insights_hosts))]
-    number_hosts = len(host_indices)
+    number_hosts = len(insights_hosts)
 
     if number_hosts % slice_size_limit:
         number_of_slices = number_hosts // slice_size_limit + 1
@@ -108,7 +101,6 @@ def _create_report_slices(report, insights_hosts):
         number_of_slices = number_hosts // slice_size_limit
         hosts_per_slice = number_hosts // number_of_slices
 
-    index_slices = list(slice_it(host_indices, hosts_per_slice))
     insights_report_pieces = {}
     metadata_report_slices = {}
     source_metadata = {
@@ -128,11 +120,15 @@ def _create_report_slices(report, insights_hosts):
     }
     insights_report_pieces[create_filename(
         'metadata', 'json', report.id)] = metadata
-    for index_slice in index_slices:
+    for each_slice in range(number_of_slices):
         hosts = []
-        for index in index_slice:
+        if hosts_per_slice * (1 + each_slice) < number_hosts:
+            slice_end = hosts_per_slice * (1 + each_slice)
+        else:
+            slice_end = number_hosts
+        for host_index in range(each_slice * hosts_per_slice, slice_end):
             try:
-                host = insights_hosts[index]
+                host = insights_hosts[host_index]
                 if host:
                     hosts.append(host)
             except KeyError as e:
@@ -141,7 +137,7 @@ def _create_report_slices(report, insights_hosts):
         report_slice_filename = create_filename(
             report_slice_id, 'json', report.id)
         metadata_report_slices[report_slice_id] = {
-            'number_hosts': len(index_slice)
+            'number_hosts': len(hosts)
         }
         report_slice = {
             'report_slice_id': report_slice_id,
