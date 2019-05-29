@@ -1388,116 +1388,137 @@ definitions:
           type: "string"
           description: "fqdn. Same as display name"
           example: "7cent.cfoo.example.com"
-        name:
-          type: "string"
-          description: "The system name"
-          example: "hostname.com"
-        os_release:
-          type: "string"
-          description: "The operating system release"
-          example: "Red Hat Enterprise Linux Server release 5.9 (Tikanga)"
-        os_version:
-          type: "string"
-          description: "The operating system version"
-          example: "5.9 (Tikanga)"
-        infrastructure_type:
-          type: "string"
-          enum:
-            - virtualized
-            - bare_metal
-            - hypervisor
-            - unknown
-          description: "The infrastructure type"
-        mac_addresses:
+        facts:
           type: "array"
-          items:
-            type: "string"
-            description: "MAC addresses of system"
-            example: "0B:AA:CC:44:A8:25"
-          description: "The infrastructure type"
-        ip_addresses:
-          type: "array"
-          items:
-            type: "string"
-            description: "IP addresses of system"
-          example: ["192.168.0.1","192.168.0.2"]
-          description: "The infrastructure type"
-        cpu_count:
-          type: "integer"
-          format: "int64"
-          description: "The count of cpus"
-          example: 8
-        cpu_core_per_socket:
-          type: "integer"
-          format: "int64"
-          description: "The cpu core count per socket."
-          example: 1
-        architecture:
-          type: "string"
-          description: "The system architecture"
-          example: "x86_64"
-        bios_uuid:
-          type: "string"
-          description: "The system bios uuid"
-          example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
-        insights_client_id:
-          type: "string"
-          description: "The insights client id"
-          example: "b077190b74f14b3582e57ce8243ae356"
-        etc_machine_id:
-          type: "string"
-          description: "The system machine id"
-          example: "b077190b74f14b3582e57ce8243ae356"
-        subscription_manager_id:
-          type: "string"
-          description: "The subscription manager identitifer"
-          example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
-        cpu_socket_count:
-          type: "integer"
-          format: "int64"
-          description: "The count of cpu sockets"
-          example: 2
-        cpu_core_count:
-          type: "integer"
-          format: "int64"
-          description: "The count of cpu cores"
-          example: 4
-        vm_uuid:
-          type: "string"
-          description: "The uuid of virtual machine"
-          example: "9808421e-8426-0dfd-55bd-246c95434e1a"
-        vm_host:
-          type: "string"
-          description: "The host of virtual machine"
-          example: "host.redhat.com"
-        vm_host_socket_count:
-          type: "string"
-          description: "The socket count for the virtual machine host"
-          example: ""
-        vm_host_core_count:
-          type: "string"
-          description: "The core count for the virtual machine host"
-          example: "8"
-        products:
-          type: "array"
-          items:
-            $ref: "#/definitions/SystemProducts"
-        entitlements:
-          type: "array"
-          items:
-            $ref: "#/definitions/SystemEntitlements"
-        is_redhat:
-          type: "boolean"
-          description: "Indicates if the system is a RedHat system"
-        redhat_certs:
-            type: "string"
-            description: "RedHat certificates"
-            example: "183.pem"
-        redhat_package_count:
-            type: "integer"
-            format: "int64"
-            description: "RedHat package count"
-            example: 65
+          items: 
+            type: object
+            properties:
+              namespace:
+                type: "string"
+                description: "The system name"
+                example: "qpc"
+              facts:
+                type: object
+                properties:
+                  ip_addresses:
+                    type: "array"
+                    items:
+                      type: "string"
+                      description: "IP addresses of system"
+                    example: ["192.168.0.1","192.168.0.2"]
+                    description: "The infrastructure type"
+                  mac_addresses:
+                    type: "array"
+                    items:
+                      type: "string"
+                      description: "MAC addresses of system"
+                      example: "0B:AA:CC:44:A8:25"
+                    description: "The infrastructure type"
+                  subscription_manager_id:
+                    type: "string"
+                    description: "Subscription manager id"
+                    example: "f14ea675-7292-4bcd-9bc7-62197dd98e1b"
+                  name:
+                    type: "string"
+                    description: "Display name of the host"
+                    example: "7cent.cfoo.example.com"
+                  os_release:
+                    type: "string"
+                    description: "The operating system release"
+                    example: "Red Hat Enterprise Linux Server release 5.9 (Tikanga)"
+                  os_version:
+                    type: "string"
+                    description: "The operating system version"
+                    example: "5.9 (Tikanga)"
+                  infrastructure_type:
+                    type: "string"
+                    enum:
+                      - virtualized
+                      - bare_metal
+                      - hypervisor
+                      - unknown
+                    description: "The infrastructure type"
+                  cpu_count:
+                    type: "integer"
+                    format: "int64"
+                    description: "The count of cpus"
+                    example: 8
+                  cpu_core_per_socket:
+                    type: "integer"
+                    format: "int64"
+                    description: "The cpu core count per socket."
+                    example: 1
+                  architecture:
+                    type: "string"
+                    description: "The system architecture"
+                    example: "x86_64"
+                  bios_uuid:
+                    type: "string"
+                    description: "The system bios uuid"
+                    example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
+                  insights_client_id:
+                    type: "string"
+                    description: "The insights client id"
+                    example: "b077190b74f14b3582e57ce8243ae356"
+                  etc_machine_id:
+                    type: "string"
+                    description: "The system machine id"
+                    example: "b077190b74f14b3582e57ce8243ae356"
+                  cpu_socket_count:
+                    type: "integer"
+                    format: "int64"
+                    description: "The count of cpu sockets"
+                    example: 2
+                  cpu_core_count:
+                    type: "integer"
+                    format: "int64"
+                    description: "The count of cpu cores"
+                    example: 4
+                  vm_uuid:
+                    type: "string"
+                    description: "The uuid of virtual machine"
+                    example: "9808421e-8426-0dfd-55bd-246c95434e1a"
+                  vm_host:
+                    type: "string"
+                    description: "The host of virtual machine"
+                    example: "host.redhat.com"
+                  vm_host_socket_count:
+                    type: "string"
+                    description: "The socket count for the virtual machine host"
+                    example: ""
+                  vm_host_core_count:
+                    type: "string"
+                    description: "The core count for the virtual machine host"
+                    example: "8"
+                  is_redhat:
+                    type: "boolean"
+                    description: "Indicates if the system is a RedHat system"
+                  products:
+                    type: "array"
+                    items:
+                      $ref: "#/definitions/SystemProducts"
+                  entitlements:
+                    type: "array"
+                    items:
+                      $ref: "#/definitions/SystemEntitlements"
+                  redhat_certs:
+                    type: "string"
+                    description: "RedHat certificates"
+                    example: "183.pem"
+                  redhat_package_count:
+                    type: "integer"
+                    format: "int64"
+                    description: "RedHat package count"
+                    example: 65
+                  rh_products_installed:
+                    type: "array"
+                    items:
+                      type: "string"
+                      description: "Red Hat product"
+                      example: "RHEL"
+                    description: "List of installed Red Hat products"
+                description: "List of facts on the host"
+            description: "List of facts on the host"
   InsightsReport:
     properties:
       metadata_tar_path:
@@ -1560,8 +1581,8 @@ definitions:
           hosts:
             type: "array"
             items:
-              $ref: "https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml#/components/schemas/Facts"
-            description: "List of the hosts scanned (refers to host inventory api.spec.yaml file, but it does not work as of last time I checked - Doston Toirov)" 
+              $ref: "#/definitions/Host"
+            description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml" 
         description: "Slices of the Insights report"
   InsightsReportSliceMetadata:
     properties:
@@ -2637,3 +2658,4 @@ definitions:
         type: "string"
         description: "The username"
         example: "admin"
+        
