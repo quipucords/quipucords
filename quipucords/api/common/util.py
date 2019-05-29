@@ -31,7 +31,7 @@ NONCANONICAL_FACTS = ['name', 'os_release', 'os_version',
                       'infrastructure_type', 'cpu_count', 'architecture',
                       'vm_host', 'vm_host_socket_count', 'vm_host_core_count',
                       'is_redhat', 'redhat_certs', 'cpu_core_per_socket',
-                      'products', 'entitlements', 'cpu_socket_count',
+                      'entitlements', 'cpu_socket_count',
                       'cpu_core_count']
 
 INSIGHTS_FACTS = CANONICAL_FACTS + NONCANONICAL_FACTS

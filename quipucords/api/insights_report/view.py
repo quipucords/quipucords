@@ -120,19 +120,14 @@ def _create_report_slices(report, insights_hosts):
     }
     insights_report_pieces[create_filename(
         'metadata', 'json', report.id)] = metadata
-    for each_slice in range(number_of_slices):
+    list_slice_start = 0
+    list_slice_end = hosts_per_slice
+    for host_index in range(0, number_hosts, hosts_per_slice):
         hosts = []
-        if hosts_per_slice * (1 + each_slice) < number_hosts:
-            slice_end = hosts_per_slice * (1 + each_slice)
-        else:
-            slice_end = number_hosts
-        for host_index in range(each_slice * hosts_per_slice, slice_end):
-            try:
-                host = insights_hosts[host_index]
-                if host:
-                    hosts.append(host)
-            except KeyError as e:
-                print(e)
+        try:
+            hosts = insights_hosts[list_slice_start:list_slice_end]
+        except TypeError as e:
+            print(e)
         report_slice_id = str(uuid.uuid4())
         report_slice_filename = create_filename(
             report_slice_id, 'json', report.id)
@@ -144,4 +139,9 @@ def _create_report_slices(report, insights_hosts):
             'hosts': hosts
         }
         insights_report_pieces[report_slice_filename] = report_slice
+        list_slice_start = list_slice_end
+        if list_slice_end + hosts_per_slice < number_hosts:
+            list_slice_end += hosts_per_slice
+        else:
+            list_slice_end = number_hosts
     return Response(insights_report_pieces)
