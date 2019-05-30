@@ -122,7 +122,7 @@ def _create_report_slices(report, insights_hosts):
         'metadata', 'json', report.id)] = metadata
     list_slice_start = 0
     list_slice_end = hosts_per_slice
-    for _i in range(0, number_hosts, hosts_per_slice):
+    for i in range(0, number_hosts, hosts_per_slice):
         hosts = []
         try:
             hosts = insights_hosts[list_slice_start:list_slice_end]
@@ -141,7 +141,7 @@ def _create_report_slices(report, insights_hosts):
         insights_report_pieces[report_slice_filename] = report_slice
         list_slice_start = list_slice_end
         if list_slice_end + hosts_per_slice < number_hosts:
-            list_slice_end += hosts_per_slice
+            list_slice_end = hosts_per_slice * (i + 2)
         else:
             list_slice_end = number_hosts
     return Response(insights_report_pieces)

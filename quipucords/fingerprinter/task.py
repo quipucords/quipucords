@@ -149,7 +149,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         qpc_to_system_profile = {
             'infrastructure_type': 'infrastructure_type',
-            'architecture': 'arch',
+            'architecture': 'architecture',
             'os_release': 'os_release',
             'os_version': 'os_kernel_version',
             'vm_host': 'infrastructure_vendor'

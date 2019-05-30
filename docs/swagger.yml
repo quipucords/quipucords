@@ -1455,7 +1455,7 @@ definitions:
                 format: "int64"
                 description: "Globally unique id for a report generated from QPC"
                 example: 1
-              qpc_server_version:
+              qpc_server_version: 
                 type: "string"
                 description: "The version of QPC server"
                 example: "1.0.0.4d07092"
@@ -1481,7 +1481,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/Host"
-            description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml"
+            description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml" 
         description: "Slices of the Insights report"
   InsightsReportSliceMetadata:
     properties:
@@ -2557,3 +2557,4 @@ definitions:
         type: "string"
         description: "The username"
         example: "admin"
+        
