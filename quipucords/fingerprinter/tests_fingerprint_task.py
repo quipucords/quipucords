@@ -1133,31 +1133,31 @@ class EngineTest(TestCase):
             status_message, status = \
                 self.fp_task_runner._process_details_report('',
                                                             details_report)
-            expected_insights = [
-                {
-                    'display_name':
-                    'dhcp181-3.gsslab.rdu2.redhat.com',
-                    'fqdn': 'dhcp181-3.gsslab.rdu2.redhat.com',
-                    'facts': [
-                        {
-                            'namespace': 'qpc',
-                            'facts':
-                                {
-                                    'ip_addresses': ['1.2.3.4'],
-                                    'name': 'dhcp181-3.gsslab.rdu2.redhat.com'
-                                },
-                            'rh_product_certs': [],
-                            'rh_products_installed': []
-                        }
-                    ],
-                    'system_profile': {}
-                }
-            ]
-            self.assertIn('success', status_message.lower())
-            self.assertEqual(status, 'completed')
-            self.assertEqual(
-                json.loads(deployments_report.cached_insights),
-                expected_insights)
+        expected_insights = [
+            {
+                'display_name':
+                'dhcp181-3.gsslab.rdu2.redhat.com',
+                'fqdn': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                'facts': [
+                    {
+                        'namespace': 'qpc',
+                        'facts':
+                            {
+                                'ip_addresses': ['1.2.3.4'],
+                                'name': 'dhcp181-3.gsslab.rdu2.redhat.com'
+                            },
+                        'rh_product_certs': [],
+                        'rh_products_installed': []
+                    }
+                ],
+                'system_profile': {}
+            }
+        ]
+        self.assertIn('success', status_message.lower())
+        self.assertEqual(status, 'completed')
+        self.assertEqual(
+            json.loads(deployments_report.cached_insights),
+            expected_insights)
 
     def test_process_details_report_exception(self):
         """Test processing a details report with an exception."""
