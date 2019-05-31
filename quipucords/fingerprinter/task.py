@@ -11,6 +11,7 @@
 """ScanTask used for network connection discovery."""
 import json
 import logging
+import math
 import uuid
 from datetime import datetime
 
@@ -104,6 +105,87 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         super().__init__(scan_job, scan_task)
         self.scan_task = scan_task
+
+    @staticmethod
+    def format_certs(redhat_certs):
+        """Strip the .pem from each cert in the list.
+
+        :param redhat_certs: <list> of redhat certs.
+        :returns: <list> of formatted certs.
+        """
+        try:
+            return [int(cert.strip('.pem')) for cert in redhat_certs if cert]
+        except Exception:  # pylint: disable=broad-except
+            return []
+
+    @staticmethod
+    def format_products(redhat_products, is_rhel):
+        """Return the installed products on the system.
+
+        :param redhat_products: <dict> of products.
+        :returns: a list of the installed products.
+        """
+        products = []
+        name_to_product = {'JBoss EAP': 'EAP',
+                           'JBoss Fuse': 'FUSE',
+                           'JBoss BRMS': 'DCSM',
+                           'JBoss Web Server': 'JWS'}
+        if is_rhel:
+            products.append('RHEL')
+        for product_dict in redhat_products:
+            if product_dict.get('presence') == 'present':
+                name = name_to_product.get(product_dict.get('name'))
+                if name:
+                    products.append(name)
+
+        return products
+
+    @staticmethod
+    def format_system_profile(host):
+        """Grab facts from original host for system profile.
+
+        :param host: <dict> the host to pull facts from
+        :returns: a list with the system profile facts.
+        """
+        qpc_to_system_profile = {
+            'infrastructure_type': 'infrastructure_type',
+            'architecture': 'architecture',
+            'os_release': 'os_release',
+            'os_version': 'os_kernel_version',
+            'vm_host': 'infrastructure_vendor'
+        }
+        system_profile = {}
+        for qpc_fact, system_fact in qpc_to_system_profile.items():
+            fact_value = host.get(qpc_fact)
+            if fact_value:
+                system_profile[system_fact] = str(fact_value)
+        cpu_count = host.get('cpu_count')
+        # grab the default socket count
+        cpu_socket_count = host.get('cpu_socket_count')
+        # grab the preferred socket count, and default if it does not exist
+        socket_count = host.get('vm_host_socket_count', cpu_socket_count)
+        # grab the default core count
+        cpu_core_count = host.get('cpu_core_count')
+        # grab the preferred core count, and default if it does not exist
+        core_count = host.get('vm_host_core_count', cpu_core_count)
+        try:
+            # try to get the cores per socket but wrap it in a try/catch
+            # because these values might not exist
+            core_per_socket = math.ceil(int(core_count) / int(socket_count))
+        except Exception:  # pylint: disable=broad-except
+            core_per_socket = None
+        # grab the preferred core per socket, but default if it does not exist
+        cpu_core_per_socket = host.get('cpu_core_per_socket', core_per_socket)
+        # check for each of the above facts and add them to the profile if they
+        # are not none
+        if cpu_count:
+            system_profile['number_of_cpus'] = math.ceil(cpu_count)
+        if socket_count:
+            system_profile['number_of_sockets'] = math.ceil(socket_count)
+        if cpu_core_per_socket:
+            system_profile['cores_per_socket'] = math.ceil(cpu_core_per_socket)
+
+        return system_profile
 
     def check_for_interrupt(self, manager_interrupt):
         """Process the details report.
@@ -202,7 +284,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         date_field = DateField()
         uuid_field = UUIDField()
         final_fingerprint_list = []
-        insights_hosts = {}
+        insights_hosts = []
         insights_valid = 0
         invalid_hosts = []
 
@@ -262,11 +344,25 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         'system_platform_id')
                     if found_canonical_facts:
                         insights_host = {}
+                        insights_host['display_name'] = \
+                            fingerprint_dict.get('name')
+                        insights_host['fqdn'] = \
+                            fingerprint_dict.get('name')
+                        nested_facts = {}
                         for fact in INSIGHTS_FACTS:
                             if fingerprint_dict.get(fact):
-                                insights_host[fact] = \
+                                nested_facts[fact] = \
                                     fingerprint_dict.get(fact)
-                        insights_hosts[insights_id] = insights_host
+                        facts = {'namespace': 'qpc', 'facts': nested_facts,
+                                 'rh_product_certs': self.format_certs(
+                                     fingerprint_dict.get('redhat_certs', [])),
+                                 'rh_products_installed': self.format_products(
+                                     fingerprint_dict.get('products', []),
+                                     fingerprint_dict.get('is_redhat'))}
+                        insights_host['facts'] = [facts]
+                        insights_host['system_profile'] = \
+                            self.format_system_profile(nested_facts)
+                        insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:
                         invalid_hosts.append(insights_id)
