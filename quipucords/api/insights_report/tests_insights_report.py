@@ -154,7 +154,7 @@ class InsightsReportTest(TestCase):
         returned_host_ids = {host['unique_id'] for slice_key in report_slices
                              for host in report_slices[slice_key]['hosts']}
         expected_host_ids = {host['unique_id'] for host in expected_hosts}
-        self.assertEqual(returned_host_ids, expected_host_ids)
+        self.assertSetEqual(returned_host_ids, expected_host_ids)
         # sum of all hosts in a slice is equal to
         # the total number of host (before call)
         self.assertEqual(total_returned_hosts_num, len(expected_hosts))
