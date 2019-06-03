@@ -120,6 +120,9 @@ class ConnectResultCallback():
             event = event_dict.get('event')
             event_data = event_dict.get('event_data')
             unexpected_error = False
+            ignore_states = ['runner_on_start']
+            if event in ignore_states:
+                return
             if 'runner' in event:
                 host = event_data.get('host')
                 task_result = event_data.get('res')
