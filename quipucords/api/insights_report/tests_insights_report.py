@@ -58,6 +58,62 @@ class InsightsReportTest(TestCase):
                 'virt_what_type': 'vt',
                 'system_platform_id': self.sys_platform_id,
                 'ip_addresses': ['1.2.3.4']}]
+        self.insights_hosts = [
+            {
+                'display_name': 'ccc-katest-2ps6tlnglpgs8zus.lab.redhat.com',
+                'fqdn': 'ccc-katest-2ps6tlnglpgs8zus.lab.redhat.com',
+                'facts': [
+                    {
+                        'namespace': 'qpc',
+                        'facts': {
+                            'ip_addresses': [
+                                '172.17.0.11'
+                            ],
+                            'mac_addresses': [
+                                '02:42:ac:11:00:0b'
+                            ],
+                            'subscription_manager_id':
+                                '9d31217b-3661-44c2-8a08-c2d56c9733f3',
+                            'name':
+                                'ccc-katest-2ps6tlnglpgs8zus.lab.redhat.com',
+                            'os_release': 'RHEL Server 7.4',
+                            'os_version': 7.4,
+                            'infrastructure_type': 'virtualized',
+                            'cpu_count': 8.0,
+                            'architecture': 'x86_64',
+                            'is_redhat': True,
+                            'entitlements': [
+                                {
+                                    'name': 'Employee SKU',
+                                    'metadata': {
+                                        'server_id':
+                                        '0e221f91-5e19-44b7-8f54-b69f999c62af',
+                                        'source_name': 'S62Source',
+                                        'source_type': 'satellite',
+                                        'raw_fact_key': 'entitlements'
+                                    }
+                                }
+                            ],
+                            'cpu_socket_count': 1.0,
+                            'cpu_core_count': 8.0
+                        },
+                        'rh_product_certs': [],
+                        'rh_products_installed': [
+                            'RHEL'
+                        ]
+                    }
+                ],
+                'system_profile': {
+                    'infrastructure_type': 'virtualized',
+                    'architecture': 'x86_64',
+                    'os_release': 'RHEL Server 7.4',
+                    'os_kernel_version': '7.4',
+                    'number_of_cpus': 8,
+                    'number_of_sockets': 1,
+                    'cores_per_socket': 8
+                }
+            }
+        ]
         self.deployments_report = DeploymentsReport(
             id=1, report_id=1, report_version=self.report_version,
             status=DeploymentsReport.STATUS_COMPLETE,
@@ -67,70 +123,47 @@ class InsightsReportTest(TestCase):
     def test_get_insights_report_200_exists(self):
         """Retrieve insights report."""
         url = '/api/v1/reports/1/insights/'
-        expected_hosts = {
-            self.sys_platform_id:
-                {'connection_host': '1.2.3.4',
-                 'connection_port': 22,
-                 'connection_uuid': self.connection_uuid,
-                 'cpu_count': 2,
-                 'cpu_core_per_socket': 1,
-                 'cpu_siblings': 1,
-                 'cpu_hyperthreading': False,
-                 'cpu_socket_count': 2,
-                 'cpu_core_count': 2,
-                 'date_anaconda_log': '2017-07-18',
-                 'date_yum_history': '2017-07-18',
-                 'etc_release_name': '',
-                 'etc_release_version': '',
-                 'etc_release_release': '',
-                 'uname_hostname': '1.2.3.4',
-                 'virt_virt': 'virt-guest',
-                 'virt_type': 'vmware',
-                 'virt_num_guests': 1,
-                 'virt_num_running_guests': 1,
-                 'virt_what_type': 'vt',
-                 'ip_addresses': ['4.3.2.1']}}
-        self.deployments_report.cached_insights = \
-            json.dumps(expected_hosts)
+        expected_hosts = [{'unique_id': i} for i in range(10001)]
+        self.deployments_report.cached_insights = json.dumps(
+            expected_hosts)
         self.deployments_report.save()
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
+
         self.assertIn(create_filename('metadata', 'json', 1),
                       response_json.keys())
+        report_slices = {}
         for key in response_json:
             self.assertIn('report_id_1/', key)
+            if key != 'report_id_1/metadata.json':
+                report_slices[key] = response_json[key]
+        # metadata slice number_hosts matches the actual
+        # number of hosts in a slice
+        report_slices_in_metadata = \
+            response_json['report_id_1/metadata.json']['report_slices']
+        total_returned_hosts_num = 0
+        for key_1, key_2 in zip(report_slices_in_metadata, report_slices):
+            self.assertEqual(report_slices_in_metadata[key_1]['number_hosts'],
+                             len(report_slices[key_2]['hosts']))
+            # used later to check for the total size
+            total_returned_hosts_num += len(report_slices[key_2]['hosts'])
+        # no hosts lost
+        returned_host_ids = {host['unique_id'] for slice_key in report_slices
+                             for host in report_slices[slice_key]['hosts']}
+        expected_host_ids = {host['unique_id'] for host in expected_hosts}
+        self.assertSetEqual(returned_host_ids, expected_host_ids)
+        # sum of all hosts in a slice is equal to
+        # the total number of host (before call)
+        self.assertEqual(total_returned_hosts_num, len(expected_hosts))
 
     def test_get_insights_report_200_generate_exists(self):
         """Retrieve insights report."""
         url = '/api/v1/reports/1/insights/'
-        expected_hosts = {
-            self.sys_platform_id:
-                {'connection_host': '1.2.3.4',
-                 'connection_port': 22,
-                 'connection_uuid': self.connection_uuid,
-                 'cpu_count': 2,
-                 'cpu_core_per_socket': 1,
-                 'cpu_siblings': 1,
-                 'cpu_hyperthreading': False,
-                 'cpu_socket_count': 2,
-                 'cpu_core_count': 2,
-                 'date_anaconda_log': '2017-07-18',
-                 'date_yum_history': '2017-07-18',
-                 'etc_release_name': '',
-                 'etc_release_version': '',
-                 'etc_release_release': '',
-                 'uname_hostname': '1.2.3.4',
-                 'virt_virt': 'virt-guest',
-                 'virt_type': 'vmware',
-                 'virt_num_guests': 1,
-                 'virt_num_running_guests': 1,
-                 'virt_what_type': 'vt',
-                 'ip_addresses': ['4.3.2.1']}}
         self.deployments_report.cached_insights = json.dumps(
-            expected_hosts)
+            self.insights_hosts)
         self.deployments_report.save()
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):

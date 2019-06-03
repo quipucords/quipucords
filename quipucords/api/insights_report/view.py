@@ -19,13 +19,14 @@ import api.messages as messages
 from api.common.common_report import create_filename
 from api.common.util import is_int
 from api.insights_report.insights_gzip_renderer import (InsightsGzipRenderer)
-from api.models import (DeploymentsReport)
+from api.models import (DeploymentsReport, ServerInformation)
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
 from quipucords import settings
+from quipucords.environment import server_version
 
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication)
@@ -82,12 +83,6 @@ def insights(request, pk=None):
     return Response(error, status=404)
 
 
-def slice_it(host_key_list, hosts_per_slice):
-    """Create slices from host_key_list."""
-    for i in range(0, len(host_key_list), hosts_per_slice):
-        yield host_key_list[i:i + hosts_per_slice]
-
-
 def _create_report_slices(report, insights_hosts):
     """Process facts and convert to fingerprints.
 
@@ -97,8 +92,7 @@ def _create_report_slices(report, insights_hosts):
     """
     # pylint: disable=too-many-locals
     slice_size_limit = settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
-    host_keys = list(insights_hosts.keys())
-    number_hosts = len(host_keys)
+    number_hosts = len(insights_hosts)
 
     if number_hosts % slice_size_limit:
         number_of_slices = number_hosts // slice_size_limit + 1
@@ -107,34 +101,45 @@ def _create_report_slices(report, insights_hosts):
         number_of_slices = number_hosts // slice_size_limit
         hosts_per_slice = number_hosts // number_of_slices
 
-    key_slices = list(slice_it(host_keys, hosts_per_slice))
     insights_report_pieces = {}
     metadata_report_slices = {}
-    metadata = {
-        'report_id': report.id,
+    source_metadata = {
         'report_platform_id': str(report.report_platform_id),
         'report_type': 'insights',
         'report_version': report.report_version,
+        'qpc_server_report_id': report.id,
+        'qpc_server_version': server_version(),
+        'qpc_server_id': ServerInformation.create_or_retreive_server_id()
+    }
+    metadata = {
+        'report_id': str(report.report_platform_id),
+        'host_inventory_api_version': '1.0',
+        'source': 'qpc',
+        'source_metadata': source_metadata,
         'report_slices': metadata_report_slices
     }
     insights_report_pieces[create_filename(
         'metadata', 'json', report.id)] = metadata
-    for key_slice in key_slices:
-        hosts = {}
-        for key in key_slice:
-            host = insights_hosts.get(key)
-            if host:
-                hosts[key] = host
+    list_slice_start = 0
+    list_slice_end = hosts_per_slice
+    for i in range(0, number_hosts, hosts_per_slice):
+        hosts = []
+        hosts = insights_hosts[list_slice_start:list_slice_end]
+
         report_slice_id = str(uuid.uuid4())
         report_slice_filename = create_filename(
             report_slice_id, 'json', report.id)
         metadata_report_slices[report_slice_id] = {
-            'number_hosts': len(key_slice)
+            'number_hosts': len(hosts)
         }
         report_slice = {
             'report_slice_id': report_slice_id,
-            'report_platform_id': str(report.report_platform_id),
             'hosts': hosts
         }
         insights_report_pieces[report_slice_filename] = report_slice
+        list_slice_start = list_slice_end
+        if list_slice_end + hosts_per_slice < number_hosts:
+            list_slice_end = hosts_per_slice * (i + 2)
+        else:
+            list_slice_end = number_hosts
     return Response(insights_report_pieces)
