@@ -348,6 +348,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             fingerprint_dict.get('name')
                         insights_host['fqdn'] = \
                             fingerprint_dict.get('name')
+                        for fact in CANONICAL_FACTS:
+                            if fingerprint_dict.get(fact):
+                                insights_host[fact] = \
+                                    fingerprint_dict.get(fact)
                         nested_facts = {}
                         for fact in INSIGHTS_FACTS:
                             if fingerprint_dict.get(fact):
