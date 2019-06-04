@@ -192,6 +192,11 @@ class InspectResultCallback():
                              'runner_item_on_skipped']
             event = event_dict.get('event')
             event_data = event_dict.get('event_data')
+
+            ignore_states = ['runner_on_start']
+            if event in ignore_states:
+                return
+
             if event_dict:
                 # Check if it is a task event
                 if 'runner' in event:
