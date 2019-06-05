@@ -338,20 +338,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     for fact in CANONICAL_FACTS:
                         if fingerprint_dict.get(fact):
                             found_canonical_facts = True
-                            not_null_facts = {
-                                'bios_uuid': 'bios_uuid',
-                                'ip_addresses': 'ip_addresses',
-                                'mac_addresses': 'mac_addresses',
-                                'insights_id': 'insights_client_id',
-                                'subscription_manager_id':
-                                    'subscription_manager_id',
-                                'rhel_machine_id': 'etc_machine_id'
-                            }
                             break
                     # If canonical facts, add it to the insights_hosts dict
                     insights_id = fingerprint_dict.get(
                         'system_platform_id')
                     if found_canonical_facts:
+                        not_null_facts = {
+                            'bios_uuid': 'bios_uuid',
+                            'ip_addresses': 'ip_addresses',
+                            'mac_addresses': 'mac_addresses',
+                            'insights_id': 'insights_client_id',
+                            'subscription_manager_id':
+                                'subscription_manager_id',
+                            'rhel_machine_id': 'etc_machine_id'
+                        }
                         insights_host = {}
                         insights_host['display_name'] = \
                             fingerprint_dict.get('name')
