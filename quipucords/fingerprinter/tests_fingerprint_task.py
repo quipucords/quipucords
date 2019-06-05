@@ -1138,6 +1138,7 @@ class EngineTest(TestCase):
                 'display_name':
                 'dhcp181-3.gsslab.rdu2.redhat.com',
                 'fqdn': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                'ip_addresses': ['1.2.3.4'],
                 'facts': [
                     {
                         'namespace': 'qpc',

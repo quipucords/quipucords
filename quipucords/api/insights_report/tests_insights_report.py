@@ -60,58 +60,52 @@ class InsightsReportTest(TestCase):
                 'ip_addresses': ['1.2.3.4']}]
         self.insights_hosts = [
             {
-                'display_name': 'ccc-katest-2ps6tlnglpgs8zus.lab.redhat.com',
-                'fqdn': 'ccc-katest-2ps6tlnglpgs8zus.lab.redhat.com',
+                'display_name': 'dhcp181-116.gsslab.rdu2.redhat.com',
+                'fqdn': 'dhcp181-116.gsslab.rdu2.redhat.com',
+                'bios_uuid': 'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
+                'ip_addresses': [
+                    '10.10.181.116'
+                ],
+                'mac_addresses': [
+                    '00:50:56:9e:7b:19'
+                ],
+                'subscription_manager_id':
+                    'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
                 'facts': [
                     {
                         'namespace': 'qpc',
                         'facts': {
+                            'bios_uuid':
+                                'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
                             'ip_addresses': [
-                                '172.17.0.11'
+                                '10.10.181.116'
                             ],
                             'mac_addresses': [
-                                '02:42:ac:11:00:0b'
+                                '00:50:56:9e:7b:19'
                             ],
                             'subscription_manager_id':
-                                '9d31217b-3661-44c2-8a08-c2d56c9733f3',
-                            'name':
-                                'ccc-katest-2ps6tlnglpgs8zus.lab.redhat.com',
-                            'os_release': 'RHEL Server 7.4',
-                            'os_version': 7.4,
+                                'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
+                            'name': 'dhcp181-116.gsslab.rdu2.redhat.com',
+                            'os_release':
+                                'Red Hat Enterprise Linux \
+                                Server release 5.9 (Tikanga)',
+                            'os_version': '5.9 (Tikanga)',
                             'infrastructure_type': 'virtualized',
-                            'cpu_count': 8.0,
+                            'cpu_count': 1,
                             'architecture': 'x86_64',
                             'is_redhat': True,
-                            'entitlements': [
-                                {
-                                    'name': 'Employee SKU',
-                                    'metadata': {
-                                        'server_id':
-                                        '0e221f91-5e19-44b7-8f54-b69f999c62af',
-                                        'source_name': 'S62Source',
-                                        'source_type': 'satellite',
-                                        'raw_fact_key': 'entitlements'
-                                    }
-                                }
-                            ],
-                            'cpu_socket_count': 1.0,
-                            'cpu_core_count': 8.0
+                            'redhat_certs': '69.pem',
+                            'cpu_socket_count': 1,
+                            'cpu_core_count': 1
                         },
                         'rh_product_certs': [],
                         'rh_products_installed': [
-                            'RHEL'
+                            'RHEL',
+                            'EAP',
+                            'FUSE'
                         ]
                     }
-                ],
-                'system_profile': {
-                    'infrastructure_type': 'virtualized',
-                    'architecture': 'x86_64',
-                    'os_release': 'RHEL Server 7.4',
-                    'os_kernel_version': '7.4',
-                    'number_of_cpus': 8,
-                    'number_of_sockets': 1,
-                    'cores_per_socket': 8
-                }
+                ]
             }
         ]
         self.deployments_report = DeploymentsReport(
