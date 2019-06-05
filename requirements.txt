@@ -1,5 +1,5 @@
 ansible==2.8.0
-Django==2.2.1
+Django==2.2.2
 django-filter==2.1.0
 djangorestframework==3.9.4
 drf-generators==0.4.0
