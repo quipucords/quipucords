@@ -1377,9 +1377,256 @@ definitions:
           $ref: "#/definitions/SystemFact"
         description: "The facts associated with this source"
         minItems: 1
+  NestedFacts:
+    title: Nested facts 
+    description: Nested facts of a host 
+    type: object
+    properties:
+      name:
+        type: "string"
+        description: "The system name"
+        example: "hostname.com"
+      os_release:
+        type: "string"
+        description: "The operating system release"
+        example: "Red Hat Enterprise Linux Server release 5.9 (Tikanga)"
+      os_version:
+        type: "string"
+        description: "The operating system version"
+        example: "5.9 (Tikanga)"
+      infrastructure_type:
+        type: "string"
+        enum:
+          - virtualized
+          - bare_metal
+          - hypervisor
+          - unknown
+        description: "The infrastructure type"
+      mac_addresses:
+        type: "array"
+        items:
+          type: "string"
+          description: "MAC addresses of system"
+          example: "0B:AA:CC:44:A8:25"
+        description: "The infrastructure type"
+      ip_addresses:
+        type: "array"
+        items:
+          type: "string"
+          description: "IP addresses of system"
+        example: ["192.168.0.1","192.168.0.2"]
+        description: "The infrastructure type"
+      cpu_count:
+        type: "integer"
+        format: "int64"
+        description: "The count of cpus"
+        example: 8
+      cpu_core_per_socket:
+        type: "integer"
+        format: "int64"
+        description: "The cpu core count per socket."
+        example: 1
+      architecture:
+        type: "string"
+        description: "The system architecture"
+        example: "x86_64"
+      bios_uuid:
+        type: "string"
+        description: "The system bios uuid"
+        example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
+      insights_client_id:
+        type: "string"
+        description: "The insights client id"
+        example: "b077190b74f14b3582e57ce8243ae356"
+      etc_machine_id:
+        type: "string"
+        description: "The system machine id"
+        example: "b077190b74f14b3582e57ce8243ae356"
+      subscription_manager_id:
+        type: "string"
+        description: "The subscription manager identitifer"
+        example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
+      cpu_socket_count:
+        type: "integer"
+        format: "int64"
+        description: "The count of cpu sockets"
+        example: 2
+      cpu_core_count:
+        type: "integer"
+        format: "int64"
+        description: "The count of cpu cores"
+        example: 4
+      vm_uuid:
+        type: "string"
+        description: "The uuid of virtual machine"
+        example: "9808421e-8426-0dfd-55bd-246c95434e1a"
+      vm_host:
+        type: "string"
+        description: "The host of virtual machine"
+        example: "host.redhat.com"
+      vm_host_socket_count:
+        type: "string"
+        description: "The socket count for the virtual machine host"
+        example: ""
+      vm_host_core_count:
+        type: "string"
+        description: "The core count for the virtual machine host"
+        example: "8"
+      entitlements:
+        type: "array"
+        items:
+          $ref: "#/definitions/SystemEntitlements"
+      is_redhat:
+        type: "boolean"
+        description: "Indicates if the system is a RedHat system"
+      redhat_certs:
+          type: "string"
+          description: "RedHat certificates"
+          example: "183.pem"
+      redhat_package_count:
+          type: "integer"
+          format: "int64"
+          description: "RedHat package count"
+          example: 65 
+  Facts:
+    title: Host facts 
+    description: Facts of a host 
+    type: object
+    properties:
+      namespace:
+        type: "string"
+        description: "Namespace (defaults to 'qpc')"
+        example: "qpc"
+      facts:
+        $ref: "#/definitions/NestedFacts"
+      rh_product_certs:
+        type: array
+        items:
+          type: string
+        description: "List of Red Hat product certificates"
+        example: ""
+      rh_products_installed:
+        type: array
+        items:
+          type: string
+        description: "List of Red Hat products installed"
+        example: [
+          "RHEL"
+        ]
+  SystemProfile:
+      title: System profile fields
+      description: Representation of the system profile fields
+      type: object
+      properties:
+        number_of_cpus:
+          type: integer
+        number_of_sockets:
+          type: integer
+        cores_per_socket:
+          type: integer
+        infrastructure_type:
+          type: string
+        infrastructure_vendor:
+          type: string
+        os_release:
+          type: string
+        os_kernel_version:
+          type: string
+        architecture:
+          type: string
   Host:
-    type: "object"
-    description: "Host data should conform to the host inventory swagger definition described here: https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml"
+    title: Host data
+    description: >-
+      Data of a single host belonging to an account. Represents the hosts
+      without its Inventory metadata.
+    type: object
+    properties:
+      display_name:
+        description: >-
+          A host’s human-readable display name, e.g. in a form of a domain
+          name.
+        type: string
+        minLength: 1
+        maxLength: 200
+        example: host1.mydomain.com
+      insights_id:
+        description: >-
+          An ID defined in /etc/insights-client/machine-id. This field is
+          considered a canonical fact.
+        type: string
+        format: uuid
+        example: 3f01b55457674041b75e41829bcee1dc
+        minLength: 32
+        maxLength: 36
+      rhel_machine_id:
+        description: >-
+          A Machine ID of a RHEL host.  This field is considered to be a
+          canonical fact.
+        type: string
+        format: uuid
+        example: 3f01b55457674041b75e41829bcee1dc
+        minLength: 32
+        maxLength: 36
+      subscription_manager_id:
+        description: >-
+          A Red Hat Subcription Manager ID of a RHEL host.  This field is
+          considered to be a canonical fact.
+        type: string
+        format: uuid
+        example: 3f01b55457674041b75e41829bcee1dc
+        minLength: 32
+        maxLength: 36
+      bios_uuid:
+        description: >-
+          A UUID of the host machine BIOS.  This field is considered to be a
+          canonical fact.
+        type: string
+        format: uuid
+        example: 3f01b55457674041b75e41829bcee1dc
+        minLength: 32
+        maxLength: 36
+      ip_addresses:
+        description: >-
+          Host’s network IP addresses.  This field is considered to be a
+          canonical fact.
+        type: array
+        items:
+          type: string
+          format: ip_address
+          minLength: 7
+          maxLength: 45
+        minItems: 1
+        example:
+          - 10.10.0.1
+          - 10.0.0.2
+      fqdn:
+        description: >-
+          A host’s Fully Qualified Domain Name.  This field is considered to
+          be a canonical fact.
+        type: string
+        example: my.host.example.com
+        minLength: 1
+        maxLength: 255
+      mac_addresses:
+        description: >-
+          Host’s network interfaces MAC addresses.  This field is considered
+          to be a canonical fact.
+        type: array
+        items:
+          type: string
+          format: mac_address
+          minLength: 1
+          maxLength: 23
+        minItems: 1
+        example:
+          - 'c2:00:d0:c8:61:01'
+      facts:
+        description: A set of facts belonging to the host.
+        type: array
+        items:
+          $ref: '#/definitions/Facts'
+      system_profile:
+        $ref: '#/definitions/SystemProfile'
     example: {
       "display_name": "ok-ocp-infra",
       "fqdn": "ok-ocp-infra",
@@ -1481,7 +1728,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/Host"
-            description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml" 
+            description: "List of the hosts scanned" 
         description: "Slices of the Insights report"
   InsightsReportSliceMetadata:
     properties:
