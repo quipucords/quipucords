@@ -25,14 +25,14 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'ip_addresses', 'mac_addresses',
-                   'subscription_manager_id', 'vm_uuid']
+                   'subscription_manager_id']
 
 NONCANONICAL_FACTS = ['name', 'os_release', 'os_version',
                       'infrastructure_type', 'cpu_count', 'architecture',
                       'vm_host', 'vm_host_socket_count', 'vm_host_core_count',
                       'is_redhat', 'redhat_certs', 'cpu_core_per_socket',
                       'entitlements', 'cpu_socket_count',
-                      'cpu_core_count']
+                      'cpu_core_count', 'vm_uuid']
 
 INSIGHTS_FACTS = CANONICAL_FACTS + NONCANONICAL_FACTS
 

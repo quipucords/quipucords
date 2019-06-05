@@ -1121,6 +1121,10 @@ class EngineTest(TestCase):
         """Test processing a details report success."""
         fact_collection = {'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
                            'metadata': {},
+                           'etc_machine_id':
+                           '3f01b55457674041b75e41829bcee1dc',
+                           'insights_client_id':
+                           '3f01b55457674041b75e41829bcee1dc',
                            'ip_addresses': ['1.2.3.4'],
                            'sources': []}
         deployments_report = DeploymentsReport(report_id=1,
@@ -1136,16 +1140,22 @@ class EngineTest(TestCase):
         expected_insights = [
             {
                 'display_name':
-                'dhcp181-3.gsslab.rdu2.redhat.com',
+                    'dhcp181-3.gsslab.rdu2.redhat.com',
                 'fqdn': 'dhcp181-3.gsslab.rdu2.redhat.com',
+                'ip_addresses': ['1.2.3.4'],
+                'insights_id': '3f01b55457674041b75e41829bcee1dc',
+                'rhel_machine_id': '3f01b55457674041b75e41829bcee1dc',
                 'facts': [
                     {
                         'namespace': 'qpc',
-                        'facts':
-                            {
-                                'ip_addresses': ['1.2.3.4'],
-                                'name': 'dhcp181-3.gsslab.rdu2.redhat.com'
-                            },
+                        'facts': {
+                            'etc_machine_id':
+                                '3f01b55457674041b75e41829bcee1dc',
+                            'insights_client_id':
+                                '3f01b55457674041b75e41829bcee1dc',
+                            'ip_addresses': ['1.2.3.4'],
+                            'name': 'dhcp181-3.gsslab.rdu2.redhat.com'
+                        },
                         'rh_product_certs': [],
                         'rh_products_installed': []
                     }

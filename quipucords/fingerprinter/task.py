@@ -343,11 +343,24 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     insights_id = fingerprint_dict.get(
                         'system_platform_id')
                     if found_canonical_facts:
+                        not_null_facts = {
+                            'bios_uuid': 'bios_uuid',
+                            'ip_addresses': 'ip_addresses',
+                            'mac_addresses': 'mac_addresses',
+                            'insights_id': 'insights_client_id',
+                            'subscription_manager_id':
+                                'subscription_manager_id',
+                            'rhel_machine_id': 'etc_machine_id'
+                        }
                         insights_host = {}
                         insights_host['display_name'] = \
                             fingerprint_dict.get('name')
                         insights_host['fqdn'] = \
                             fingerprint_dict.get('name')
+                        for host_inv_fact, qpc_fact in not_null_facts.items():
+                            if fingerprint_dict.get(qpc_fact):
+                                insights_host[host_inv_fact] = \
+                                    fingerprint_dict.get(qpc_fact)
                         nested_facts = {}
                         for fact in INSIGHTS_FACTS:
                             if fingerprint_dict.get(fact):
@@ -360,8 +373,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                      fingerprint_dict.get('products', []),
                                      fingerprint_dict.get('is_redhat'))}
                         insights_host['facts'] = [facts]
-                        insights_host['system_profile'] = \
-                            self.format_system_profile(nested_facts)
+                        if bool(nested_facts):
+                            insights_host['system_profile'] = \
+                                self.format_system_profile(nested_facts)
                         insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:
