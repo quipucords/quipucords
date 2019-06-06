@@ -27,7 +27,7 @@ node('f28-os') {
         sh "sudo setenforce 0"
     }
     stage('Copy UI into Server') {
-        copyArtifacts filter: 'quipucords-ui.*.tar.gz', fingerprintArtifacts: true, projectName: 'qpc_master_ui_distribution', selector: lastCompleted()
+        copyArtifacts filter: 'quipucords-ui.*.tar.gz', fingerprintArtifacts: true, projectName: ${UI_DISTRIBUTION_ARTIFACT_NAME}, selector: lastCompleted()
         sh "tar -xvf quipucords-ui.*.tar.gz"
         sh "cp -rf dist/client quipucords/"
     	sh "cp -rf dist/templates quipucords/quipucords/"
