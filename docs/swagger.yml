@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "The models and API for the Quipucords server."
-  version: "1.0.0"
+  version: "0.9.0"
   title: "Quipucords API"
   contact:
     email: "quipucords@redhat.com"
@@ -1292,7 +1292,7 @@ definitions:
         report_version:
           type: "string"
           description: "The report version"
-          example: "1.0.0.afdsgev"
+          example: "0.9.0.afdsgev"
         report_platform_id:
           type: "string"
           description: "Globally unique uuid for report"
@@ -1338,7 +1338,7 @@ definitions:
         report_version:
           type: "string"
           description: "The report version"
-          example: "1.0.0.afdsgev"
+          example: "0.9.0.afdsgev"
         sources:
           type: "array"
           items:
@@ -1359,7 +1359,7 @@ definitions:
       report_version:
         type: "string"
         description: "The report version"
-        example: "1.0.0.afdsgev"
+        example: "0.9.0.afdsgev"
       source_name:
         type: "string"
         description: "The source name associated with these facts"
@@ -1482,16 +1482,16 @@ definitions:
               report_version:
                 type: "string"
                 description: "The report version"
-                example: "1.0.0.afdsgev"
+                example: "0.9.0.afdsgev"
               qpc_server_report_id:
                 type: "integer"
                 format: "int64"
                 description: "Globally unique id for a report generated from QPC"
                 example: 1
-              qpc_server_version: 
+              qpc_server_version:
                 type: "string"
                 description: "The version of QPC server"
-                example: "1.0.0.4d07092"
+                example: "0.9.0.4d07092"
               qpc_server_id:
                 type: "string"
                 description: "ID for the QPC server"
@@ -1514,7 +1514,7 @@ definitions:
             type: "array"
             items:
               $ref: "#/definitions/Host"
-            description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml" 
+            description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml"
         description: "Slices of the Insights report"
   InsightsReportSliceMetadata:
     properties:
@@ -2011,7 +2011,7 @@ definitions:
       server_version:
         type: "string"
         description: "Server version number"
-        example: 1.0.0.17de132
+        example: 0.9.0.17de132
       build:
         type: "string"
         description: "The build number"
@@ -2590,4 +2590,3 @@ definitions:
         type: "string"
         description: "The username"
         example: "admin"
-        
