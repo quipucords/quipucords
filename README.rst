@@ -19,7 +19,6 @@ This *README* file contains information about the installation and development o
 - `Development`_
 - `Advanced Topics`_
 - `Issues`_
-- `Changes`_
 - `Authors`_
 - `Contributing`_
 - `Copyright and License`_
@@ -258,11 +257,6 @@ You can run the server locally inside of gunicorn.  This can be a useful way to 
 Issues
 ------
 To report bugs for quipucords `open issues <https://github.com/quipucords/quipucords/issues>`_ against this repository in Github. Complete the issue template when opening a new bug to improve investigation and resolution time.
-
-
-Changes
--------
-Track and find changes to the tool in `CHANGES <CHANGES.rst>`_.
 
 
 Authors
