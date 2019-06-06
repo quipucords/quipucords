@@ -170,7 +170,7 @@ Advanced Topics
 Container Image
 ^^^^^^^^^^^^^^^
 The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
-You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.  Example, all use version 0.0.46 but any version could be used.
+You must have `Docker installed <https://docs.docker.com/engine/installation/>`_ to create the image and run the container.  The following examples all use version 0.0.46 but any version could be used.
 
 1. Clone the repository::
 
