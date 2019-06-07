@@ -92,6 +92,7 @@ class CredentialFilter(FilterSet):
         model = Credential
         fields = ['name', 'cred_type', 'search_by_name']
 
+
 # pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model."""
