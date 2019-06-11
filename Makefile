@@ -77,6 +77,6 @@ serve:
 	$(PYTHON) quipucords/manage.py runserver --nostatic
 
 build-ui:
-	cd ../quipucords-ui;npm install;npm run build
+	cd ../quipucords-ui;yarn;yarn build
 	cp -rf ../quipucords-ui/dist/client quipucords/client
 	cp -rf ../quipucords-ui/dist/templates quipucords/quipucords/templates

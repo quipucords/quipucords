@@ -178,6 +178,7 @@ You must have `Docker installed <https://docs.docker.com/engine/installation/>`_
 
 2. *Optional* - Build UI.::
 
+    brew install yarn (if you don't already have yarn)
     make build-ui
 
   **NOTE:** You will need to install NodeJS.  See `<https://nodejs.org/>`_.

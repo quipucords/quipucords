@@ -28,8 +28,6 @@ from django_filters.rest_framework import (CharFilter,
                                            DjangoFilterBackend,
                                            FilterSet)
 
-from filters import mixins
-
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.filters import OrderingFilter
@@ -96,7 +94,7 @@ class CredentialFilter(FilterSet):
 
 
 # pylint: disable=too-many-ancestors
-class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
+class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model."""
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
@@ -116,7 +114,6 @@ class CredentialViewSet(mixins.FiltersMixin, ModelViewSet):
     def list(self, request):
         """List the host credentials."""
         queryset = self.filter_queryset(self.get_queryset())
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
