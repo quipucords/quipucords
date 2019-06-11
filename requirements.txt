@@ -1,14 +1,14 @@
-ansible==2.8.0
+ansible==2.8.1
 Django==2.2.2
 django-filter==2.1.0
 djangorestframework==3.9.4
 drf-generators==0.4.0
 drf-url-filters==0.5.1
 jmespath==0.9.4
-paramiko==2.4.2
+paramiko==2.5.0
 pexpect==4.7.0
 pyvmomi==6.7.1.2018.12
-PyYAML==5.1
+PyYAML==5.1.1
 requests==2.22.0
 whitenoise==4.1.2
 psycopg2-binary==2.8.2
