@@ -16,14 +16,17 @@ import uuid
 from datetime import datetime
 
 from api.common.common_report import create_report_version
-from api.common.util import (CANONICAL_FACTS,
-                             INSIGHTS_FACTS,
-                             convert_to_boolean,
+from api.common.util import (convert_to_boolean,
                              convert_to_float,
                              convert_to_int,
                              is_boolean,
                              is_float,
                              is_int)
+from api.deployments_report.util import (
+    NETWORK_DETECTION_KEY,
+    SATELLITE_DETECTION_KEY,
+    VCENTER_DETECTION_KEY,
+    compute_source_info)
 from api.models import (DeploymentsReport,
                         Product,
                         ScanJob,
@@ -85,6 +88,11 @@ RAW_DATE_KEYS = \
      ('registration_time', ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S %z']),
      ('date_machine_id', ['%Y-%m-%d'])]
 
+# Insights specific facts
+CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
+                   'ip_addresses', 'mac_addresses',
+                   'subscription_manager_id']
+
 
 class FingerprintTaskRunner(ScanTaskRunner):
     """ConnectTaskRunner system connection capabilities.
@@ -141,33 +149,34 @@ class FingerprintTaskRunner(ScanTaskRunner):
         return products
 
     @staticmethod
-    def format_system_profile(host):
-        """Grab facts from original host for system profile.
+    def format_system_profile(fingerprint_dict):
+        """Grab facts from original fingerprint_dict for system profile.
 
-        :param host: <dict> the host to pull facts from
+        :param fingerprint_dict: <dict> the fingerprint_dict to pull facts from
         :returns: a list with the system profile facts.
         """
         qpc_to_system_profile = {
             'infrastructure_type': 'infrastructure_type',
-            'architecture': 'architecture',
+            'architecture': 'arch',
             'os_release': 'os_release',
             'os_version': 'os_kernel_version',
             'vm_host': 'infrastructure_vendor'
         }
         system_profile = {}
         for qpc_fact, system_fact in qpc_to_system_profile.items():
-            fact_value = host.get(qpc_fact)
+            fact_value = fingerprint_dict.get(qpc_fact)
             if fact_value:
                 system_profile[system_fact] = str(fact_value)
-        cpu_count = host.get('cpu_count')
+        cpu_count = fingerprint_dict.get('cpu_count')
         # grab the default socket count
-        cpu_socket_count = host.get('cpu_socket_count')
+        cpu_socket_count = fingerprint_dict.get('cpu_socket_count')
         # grab the preferred socket count, and default if it does not exist
-        socket_count = host.get('vm_host_socket_count', cpu_socket_count)
+        socket_count = fingerprint_dict.get(
+            'vm_host_socket_count', cpu_socket_count)
         # grab the default core count
-        cpu_core_count = host.get('cpu_core_count')
+        cpu_core_count = fingerprint_dict.get('cpu_core_count')
         # grab the preferred core count, and default if it does not exist
-        core_count = host.get('vm_host_core_count', cpu_core_count)
+        core_count = fingerprint_dict.get('vm_host_core_count', cpu_core_count)
         try:
             # try to get the cores per socket but wrap it in a try/catch
             # because these values might not exist
@@ -175,7 +184,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         except Exception:  # pylint: disable=broad-except
             core_per_socket = None
         # grab the preferred core per socket, but default if it does not exist
-        cpu_core_per_socket = host.get('cpu_core_per_socket', core_per_socket)
+        cpu_core_per_socket = fingerprint_dict.get(
+            'cpu_core_per_socket', core_per_socket)
         # check for each of the above facts and add them to the profile if they
         # are not none
         if cpu_count:
@@ -361,21 +371,31 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             if fingerprint_dict.get(qpc_fact):
                                 insights_host[host_inv_fact] = \
                                     fingerprint_dict.get(qpc_fact)
-                        nested_facts = {}
-                        for fact in INSIGHTS_FACTS:
-                            if fingerprint_dict.get(fact):
-                                nested_facts[fact] = \
-                                    fingerprint_dict.get(fact)
-                        facts = {'namespace': 'qpc', 'facts': nested_facts,
-                                 'rh_product_certs': self.format_certs(
-                                     fingerprint_dict.get('redhat_certs', [])),
-                                 'rh_products_installed': self.format_products(
-                                     fingerprint_dict.get('products', []),
-                                     fingerprint_dict.get('is_redhat'))}
+                        nested_facts = {
+                            'rh_product_certs': self.format_certs(
+                                fingerprint_dict.get('redhat_certs', [])),
+                            'rh_products_installed': self.format_products(
+                                fingerprint_dict.get('products', []),
+                                fingerprint_dict.get('is_redhat'))
+                        }
+                        system_sources = fingerprint_dict.get(SOURCES_KEY)
+                        if system_sources is not None:
+                            sources_info = compute_source_info(system_sources)
+                            source_types = []
+                            if sources_info.get(NETWORK_DETECTION_KEY):
+                                source_types.append('network')
+                            if sources_info.get(VCENTER_DETECTION_KEY):
+                                source_types.append('vcenter')
+                            if sources_info.get(SATELLITE_DETECTION_KEY):
+                                source_types.append('satellite')
+                        if source_types:
+                            nested_facts['source_types'] = source_types
+
+                        facts = {'namespace': 'qpc', 'facts': nested_facts}
                         insights_host['facts'] = [facts]
                         if bool(nested_facts):
                             insights_host['system_profile'] = \
-                                self.format_system_profile(nested_facts)
+                                self.format_system_profile(fingerprint_dict)
                         insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:

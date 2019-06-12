@@ -122,23 +122,6 @@ class DeploymentReportTest(TestCase):
         details_report = self.create_details_report_expect_201(fc_json)
         return details_report
 
-    def test_get_details_report_group_report_count(self):
-        """Get a specific group count report."""
-        url = '/api/v1/reports/1/deployments/'
-
-        # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-
-        # Query API
-        filters = {'group_count': 'os_release'}
-        response = self.client.get(url, filters)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        report = response.json()
-        self.assertIsInstance(report, dict)
-        self.assertEqual(report['system_fingerprints'][0]['count'], 2)
-        self.assertEqual(report['system_fingerprints'][1]['count'], 1)
-
     def test_get_details_report_group_report(self):
         """Get a specific group count report."""
         url = '/api/v1/reports/1/deployments/'
@@ -153,26 +136,6 @@ class DeploymentReportTest(TestCase):
         report = response.json()
         self.assertIsInstance(report, dict)
         self.assertEqual(len(report['system_fingerprints'][0].keys()), 18)
-
-    def test_get_details_report_filter_report(self):
-        """Get a specific group count report with filter."""
-        url = '/api/v1/reports/1/deployments/'
-
-        # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-
-        # Query API
-        filters = {'os_name': True,
-                   'os_release': 'true'}
-        response = self.client.get(url, filters)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        report = response.json()
-        self.assertIsInstance(report, dict)
-        expected = [{'os_name': 'RHEL', 'os_release': 'RHEL 7.4'},
-                    {'os_name': 'RHEL', 'os_release': 'RHEL 7.5'}]
-        diff = [x for x in expected if x not in report['system_fingerprints']]
-        self.assertEqual(diff, [])
 
     def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""
@@ -219,48 +182,10 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code,
                          status.HTTP_404_NOT_FOUND)
 
-    def test_group_count_400_invalid_field(self):
-        """Fail to get report with invalid field for group_count."""
-        url = '/api/v1/reports/1/deployments/'
-
-        # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-
-        # Query API
-        response = self.client.get(url, {'group_count': 'no_field'})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_group_count_invalid_combo_400(self):
-        """Fail to get report due to invalid filter combo."""
-        url = '/api/v1/reports/1/deployments/'
-
-        # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-
-        # Query API
-        filters = {'group_count': 'os_release', 'os_name': 'true'}
-        response = self.client.get(url, filters)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_group_count_invalid_combo2_400(self):
-        """Fail to get report due to invalid filter combo."""
-        url = '/api/v1/reports/1/deployments/'
-
-        # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-
-        # Query API
-        filters = {'group_count': 'os_release',
-                   'os_name': 'true'}
-        response = self.client.get(url, filters)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     ##############################################################
     # Test CSV Renderer
     ##############################################################
+
     def test_sanitize_row(self):
         """Test sanitize_row function."""
         self.assertEqual(sanitize_row(['data', None, 'data,data']),
@@ -295,33 +220,6 @@ class DeploymentReportTest(TestCase):
                      ',,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,vmware,,,,,,,,']  # noqa
         for row in data_rows:
             self.assertIn(row, csv_result)
-
-    def test_csv_renderer_only_name(self):
-        """Test DeploymentCSVRenderer name filter."""
-        renderer = DeploymentCSVRenderer()
-        # Test no FC id
-        test_json = {}
-        value = renderer.render(test_json)
-        self.assertIsNone(value)
-
-        # Test doesn't exist
-        test_json = {'id': 42}
-        value = renderer.render(test_json)
-        self.assertIsNone(value)
-
-        # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-        filters = {'name': True}
-        url = '/api/v1/reports/1/deployments/'
-        response = self.client.get(url, filters)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        report = response.json()
-
-        csv_result = renderer.render(report)
-        # pylint: disable=line-too-long
-        expected = 'Report ID,Report Type,Report Version,Report Platform ID\r\n1,deployments,%s,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n,,,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,,,,,,\r\n,,,,,,,,,,,,,,,1.2.3.4,,,,,,,,,,,,,,,,,,,,,,\r\n\r\n' % (self.report_version, report.get('report_platform_id'))  # noqa
-        self.assertEqual(csv_result, expected)
 
     ##############################################################
     # Test Json Gzip Render

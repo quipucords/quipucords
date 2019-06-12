@@ -4,10 +4,9 @@ from django.db import migrations, models
 import json
 import uuid
 
-# pylint: disable=no-name-in-module,import-error
+# pylint: disable=no-name-in-module
 from distutils.version import LooseVersion
 
-from api.common.util import CANONICAL_FACTS
 from api.deployments_report.serializer import SystemFingerprintSerializer
 
 
