@@ -28,7 +28,7 @@ node('f28-os') {
     }
     stage('Copy UI into Server') {
         copyArtifacts filter: 'quipucords-ui-dist.tar.gz', fingerprintArtifacts: true, projectName: "qpc_${VERSION}_ui_distribution", selector: lastCompleted()
-        sh "tar -xvf quipucords-ui.*.tar.gz"
+        sh "tar -xvf quipucords-ui-dist.tar.gz"
         sh "cp -rf dist/client quipucords/"
     	sh "cp -rf dist/templates quipucords/quipucords/"
         sh "rm -rf dist"
