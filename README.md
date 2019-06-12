@@ -234,7 +234,7 @@ Authorship and current maintainer information can be found in [AUTHORS](AUTHORS.
 
 
 # <a name="contributing"></a> Contributing
-See the [CONTRIBUTING](CONTRIBUTING.rst) guide for information about contributing to the project.
+See the [CONTRIBUTING](CONTRIBUTING.md) guide for information about contributing to the project.
 
 
 # <a name="copyright"></a> Copyright and License
