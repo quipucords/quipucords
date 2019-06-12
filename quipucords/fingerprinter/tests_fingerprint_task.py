@@ -1149,15 +1149,9 @@ class EngineTest(TestCase):
                     {
                         'namespace': 'qpc',
                         'facts': {
-                            'etc_machine_id':
-                                '3f01b55457674041b75e41829bcee1dc',
-                            'insights_client_id':
-                                '3f01b55457674041b75e41829bcee1dc',
-                            'ip_addresses': ['1.2.3.4'],
-                            'name': 'dhcp181-3.gsslab.rdu2.redhat.com'
+                            'rh_product_certs': [],
+                            'rh_products_installed': []
                         },
-                        'rh_product_certs': [],
-                        'rh_products_installed': []
                     }
                 ],
                 'system_profile': {}
