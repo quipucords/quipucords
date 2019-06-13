@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: "The models and API for the Quipucords server."
-  version: "0.9.0"
+  version: "0.0.46"
   title: "Quipucords API"
   contact:
     email: "quipucords@redhat.com"
@@ -1292,7 +1292,7 @@ definitions:
         report_version:
           type: "string"
           description: "The report version"
-          example: "0.9.0.afdsgev"
+          example: "0.0.46.afdsgev"
         report_platform_id:
           type: "string"
           description: "Globally unique uuid for report"
@@ -1338,7 +1338,7 @@ definitions:
         report_version:
           type: "string"
           description: "The report version"
-          example: "0.9.0.afdsgev"
+          example: "0.0.46.afdsgev"
         sources:
           type: "array"
           items:
@@ -1359,7 +1359,7 @@ definitions:
       report_version:
         type: "string"
         description: "The report version"
-        example: "0.9.0.afdsgev"
+        example: "0.0.46.afdsgev"
       source_name:
         type: "string"
         description: "The source name associated with these facts"
@@ -1482,7 +1482,7 @@ definitions:
               report_version:
                 type: "string"
                 description: "The report version"
-                example: "0.9.0.afdsgev"
+                example: "0.0.46.afdsgev"
               qpc_server_report_id:
                 type: "integer"
                 format: "int64"
@@ -1491,7 +1491,7 @@ definitions:
               qpc_server_version:
                 type: "string"
                 description: "The version of QPC server"
-                example: "0.9.0.4d07092"
+                example: "0.0.46.4d07092"
               qpc_server_id:
                 type: "string"
                 description: "ID for the QPC server"
@@ -2011,7 +2011,7 @@ definitions:
       server_version:
         type: "string"
         description: "Server version number"
-        example: 0.9.0.17de132
+        example: 0.0.46.17de132
       build:
         type: "string"
         description: "The build number"
