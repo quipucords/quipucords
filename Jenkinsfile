@@ -1,4 +1,4 @@
-def qpc_version = "0.9.1"
+def qpc_version = "0.9.0"
 def image_name = "quipucords:${qpc_version}"
 def tarfile = "quipucords_server_image.tar"
 def targzfile = "${tarfile}.gz"
@@ -27,8 +27,8 @@ node('f28-os') {
         sh "sudo setenforce 0"
     }
     stage('Copy UI into Server') {
-        copyArtifacts filter: 'quipucords-ui.*.tar.gz', fingerprintArtifacts: true, projectName: "qpc_${VERSION}_ui_distribution", selector: lastCompleted()
-        sh "tar -xvf quipucords-ui.*.tar.gz"
+        copyArtifacts filter: 'quipucords-ui-dist.tar.gz', fingerprintArtifacts: true, projectName: "qpc_${VERSION}_ui_distribution", selector: lastCompleted()
+        sh "tar -xvf quipucords-ui-dist.tar.gz"
         sh "cp -rf dist/client quipucords/"
     	sh "cp -rf dist/templates quipucords/quipucords/"
         sh "rm -rf dist"
