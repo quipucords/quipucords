@@ -2,6 +2,7 @@ def qpc_version = "0.9.0"
 def image_name = "quipucords:${qpc_version}"
 def tarfile = "quipucords_server_image.tar"
 def targzfile = "${tarfile}.gz"
+def version_json_file = "version.json"
 def postgres_version = "9.6.10"
 def postgres_image_name = "postgres:${postgres_version}"
 def postgres_tarfile = "postgres.${postgres_version}.tar"
@@ -34,30 +35,6 @@ node('f28-os') {
         sh "rm -rf dist"
     }
     stage('Build Docker Image') {
-        sh "ls -lta"
-        sh "cat Dockerfile"
-
-        sh "git rev-parse HEAD > GIT_COMMIT"
-        sh 'cat GIT_COMMIT'
-        def commitHash = readFile('GIT_COMMIT').trim()
-
-        sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
-        sh "sudo docker save -o $tarfile $image_name"
-        sh "sudo chmod 755 $tarfile"
-        sh "sudo gzip -f --best $tarfile"
-        sh "sudo chmod 755 $targzfile"
-
-        sh "sudo docker pull $postgres_image_name"
-        sh "sudo docker save -o $postgres_tarfile $postgres_image_name"
-        sh "sudo chmod 755 $postgres_tarfile"
-
-        sh "mkdir $postgres_dir"
-        sh "mv $postgres_tarfile $postgres_dir"
-        sh "cp $postgres_license $rename_license"
-        sh "tar -zcvf $postgres_targzfile $postgres_dir"
-        sh "sudo chmod 775 $postgres_targzfile"
-
-        archiveArtifacts postgres_targzfile
-        archiveArtifacts targzfile
+        sh "echo { release_version : ${qpc_version} } >& ${version_json_file}"
     }
 }
