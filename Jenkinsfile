@@ -22,7 +22,7 @@ node('f28-os') {
         // sh "sudo cp /tmp/docker.conf /etc/sysconfig/docker"
         // sh "cat /etc/sysconfig/docker"
         // sh "sudo systemctl start docker"
-        // checkout scm
+        checkout scm
         // sh "sleep 35s"
         // sh "ps aux | grep docker"
         // sh "sudo docker -v"
