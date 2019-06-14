@@ -36,7 +36,7 @@ node('f28-os') {
         // sh "rm -rf dist"
     }
     stage('Build Docker Image') {
-        // sh "ls -lta"
+        sh "ls -lta"
         // sh "cat Dockerfile"
 
         // sh "git rev-parse HEAD > GIT_COMMIT"
