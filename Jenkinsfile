@@ -59,7 +59,9 @@ node('f28-os') {
         // sh "tar -zcvf $postgres_targzfile $postgres_dir"
         // sh "sudo chmod 775 $postgres_targzfile"
 
-        writeJSON(file: release_info_file, json: release_info)
+        def release_info_json = JsonOutput.toJson(release_info)
+        release_info_json = JsonOutput.prettyPrint(release_info_json)
+        writeFile(file:release_info_file, text: release_info_json)
 
         archiveArtifacts release_info_file
         // archiveArtifacts postgres_targzfile
