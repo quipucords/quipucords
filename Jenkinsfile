@@ -9,6 +9,8 @@ def postgres_dir = "postgres.${postgres_version}"
 def postgres_targzfile = "postgres.${postgres_version}.tar.gz"
 def postgres_license = "PostgreSQL_License.txt"
 def rename_license = "${postgres_dir}/license.txt"
+def release_info_template_file = "release_info_template.json"
+def release_info_file = "release_info.json"
 
 node('f28-os') {
     stage('Install') {
@@ -57,6 +59,9 @@ node('f28-os') {
         sh "tar -zcvf $postgres_targzfile $postgres_dir"
         sh "sudo chmod 775 $postgres_targzfile"
 
+        sh "sed s/REAL_VERSION/${qpc_version}/ ${release_info_template_file} > ${release_info_file}"
+
+        archiveArtifacts release_info_file
         archiveArtifacts postgres_targzfile
         archiveArtifacts targzfile
     }
