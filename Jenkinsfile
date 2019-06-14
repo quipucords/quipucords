@@ -60,6 +60,7 @@ node('f28-os') {
         // sh "sudo chmod 775 $postgres_targzfile"
 
         sh "echo ${release_info} >& temp_${release_info_file}"
+        sh "cat temp_${release_info_file}"
         sh "sed s/REAL_VERSION/${qpc_version}/ temp_${release_info_file} > ${release_info_file}"
 
         archiveArtifacts release_info_file
