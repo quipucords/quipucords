@@ -59,7 +59,7 @@ node('f28-os') {
         // sh "tar -zcvf $postgres_targzfile $postgres_dir"
         // sh "sudo chmod 775 $postgres_targzfile"
 
-        sh echo "${release_info}" | sed "s/REAL_VERSION/${qpc_version}/" > "${release_info_file}"
+        sh "echo ${release_info} | sed s/REAL_VERSION/${qpc_version}/ > ${release_info_file}"
 
         archiveArtifacts release_info_file
         // archiveArtifacts postgres_targzfile
