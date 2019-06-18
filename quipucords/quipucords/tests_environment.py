@@ -76,5 +76,5 @@ class EnvironmentTest(TestCase):
 
     def test_server_version_default(self):
         """Test the server version default."""
-        expected = '0.0.0.%s' % environment.commit()
+        expected = '%s.%s' % (release.DEFAULT_VERSION, environment.commit())
         self.assertEqual(expected, environment.server_version())
