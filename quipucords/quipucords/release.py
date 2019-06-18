@@ -21,6 +21,6 @@ BUILD_VERSION = 'BUILD_VERSION_PLACEHOLDER'
 DEFAULT_VERSION = '0.0.0'
 
 # pylint: disable=anomalous-backslash-in-string
-VERSION_PATTERN = re.compile('\d+\.\d+\.\d+')  # noqa: W605 (invalid-escape-sequence)
+VERSION_PATTERN = re.compile('\d+\.\d+\.\d+')  # noqa: E501,605 (invalid-escape-sequence)
 if not VERSION_PATTERN.match(BUILD_VERSION):
     BUILD_VERSION = DEFAULT_VERSION

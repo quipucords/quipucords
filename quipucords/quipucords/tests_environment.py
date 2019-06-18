@@ -16,6 +16,7 @@ from unittest.mock import ANY, Mock, patch
 from django.test import TestCase
 
 from . import environment
+from . import release
 
 
 class EnvironmentTest(TestCase):
@@ -72,3 +73,8 @@ class EnvironmentTest(TestCase):
         """Test the startup method."""
         environment.startup()
         mock_logger.assert_called_with(ANY, ANY)
+
+    def test_server_version_default(self):
+        """Test the server version default."""
+        expected = '0.0.0.%s' % environment.commit()
+        self.assertEqual(expected, environment.server_version())
