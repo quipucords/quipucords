@@ -42,8 +42,8 @@ node('f28-os') {
 
         sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ release_info.json > temp_release_info.json"
         sh "mv temp_release_info.json release_info.json"
-        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ release.py > temp_release.py"
-        sh "mv temp_release.py release.py"
+        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ quipucords/quipucords/release.py > release.py"
+        sh "mv release.py quipucords/quipucords/release.py"
 
         sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
         sh "sudo docker save -o $tarfile $image_name"
