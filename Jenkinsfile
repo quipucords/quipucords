@@ -1,5 +1,4 @@
-def qpc_version = "0.9.1"
-def image_name = "quipucords:${qpc_version}"
+def image_name = "quipucords:${BUILD_VERSION}"
 def tarfile = "quipucords_server_image.tar"
 def targzfile = "${tarfile}.gz"
 def postgres_version = "9.6.10"
@@ -9,8 +8,9 @@ def postgres_dir = "postgres.${postgres_version}"
 def postgres_targzfile = "postgres.${postgres_version}.tar.gz"
 def postgres_license = "PostgreSQL_License.txt"
 def rename_license = "${postgres_dir}/license.txt"
-def release_info_template_file = "release_info_template.json"
 def release_info_file = "release_info.json"
+def release_py_file = "release.py"
+def release_py_full_path = "quipucords/quipucords/${release_py_file}"
 
 node('f28-os') {
     stage('Install') {
@@ -43,6 +43,9 @@ node('f28-os') {
         sh 'cat GIT_COMMIT'
         def commitHash = readFile('GIT_COMMIT').trim()
 
+        sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_info_file}"
+        sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_py_full_path}"
+
         sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
         sh "sudo docker save -o $tarfile $image_name"
         sh "sudo chmod 755 $tarfile"
@@ -58,8 +61,6 @@ node('f28-os') {
         sh "cp $postgres_license $rename_license"
         sh "tar -zcvf $postgres_targzfile $postgres_dir"
         sh "sudo chmod 775 $postgres_targzfile"
-
-        sh "sed s/REAL_VERSION/${qpc_version}/ ${release_info_template_file} > ${release_info_file}"
 
         archiveArtifacts release_info_file
         archiveArtifacts postgres_targzfile
