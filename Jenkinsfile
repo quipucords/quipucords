@@ -43,10 +43,8 @@ node('f28-os') {
         sh 'cat GIT_COMMIT'
         def commitHash = readFile('GIT_COMMIT').trim()
 
-        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ ${release_info_file} > temp_${release_info_file}"
-        sh "mv temp_${release_info_file} ${release_info_file}"
-        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ ${release_py_full_path} > ${release_py_file}"
-        sh "mv ${release_py_file} ${release_py_full_path}"
+        sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_info_file}"
+        sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_py_full_path}"
 
         sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
         sh "sudo docker save -o $tarfile $image_name"
