@@ -8,6 +8,9 @@ def postgres_dir = "postgres.${postgres_version}"
 def postgres_targzfile = "postgres.${postgres_version}.tar.gz"
 def postgres_license = "PostgreSQL_License.txt"
 def rename_license = "${postgres_dir}/license.txt"
+def release_info_file = "release_info.json"
+def release_py_file = "release.py"
+def release_py_full_path = "quipucords/quipucords/${release_py_file}"
 
 node('f28-os') {
     stage('Install') {
@@ -40,10 +43,10 @@ node('f28-os') {
         sh 'cat GIT_COMMIT'
         def commitHash = readFile('GIT_COMMIT').trim()
 
-        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ release_info.json > temp_release_info.json"
-        sh "mv temp_release_info.json release_info.json"
-        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ quipucords/quipucords/release.py > release.py"
-        sh "mv release.py quipucords/quipucords/release.py"
+        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ ${release_info_file} > temp_${release_info_file}"
+        sh "mv temp_${release_info_file} ${release_info_file}"
+        sh "sed s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/ ${release_py_full_path} > ${release_py_file}"
+        sh "mv ${release_py_file} ${release_py_full_path}"
 
         sh "sudo docker -D build --build-arg BUILD_COMMIT=$commitHash . -t $image_name"
         sh "sudo docker save -o $tarfile $image_name"
