@@ -13,7 +13,7 @@ pipeline {
         postgres_targzfile = "postgres.${postgres_version}.tar.gz"
         postgres_license = "PostgreSQL_License.txt"
         rename_license = "${postgres_dir}/license.txt"
-        build_version = "${params.version_name == 'master' ? '0.0.0' : ${params.version_name}}"
+        build_version = "${params.version_name == 'master' ? '0.0.0' : params.version_name}"
         release_info_file = "release_info.json"
         release_py_file = "release.py"
         release_py_full_path = "quipucords/quipucords/${release_py_file}"
