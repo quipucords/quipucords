@@ -13,6 +13,9 @@ pipeline {
         postgres_targzfile = "postgres.${postgres_version}.tar.gz"
         postgres_license = "PostgreSQL_License.txt"
         rename_license = "${postgres_dir}/license.txt"
+        release_info_file = "release_info.json"
+        release_py_file = "release.py"
+        release_py_full_path = "quipucords/quipucords/${release_py_file}"
     }
 
 parameters {
@@ -74,6 +77,9 @@ stages {
             sh "git rev-parse HEAD > GIT_COMMIT"
             sh 'cat GIT_COMMIT'
 
+            sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_info_file}"
+            sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_py_full_path}"
+
             sh "sudo docker -D build --build-arg BUILD_COMMIT=`cat GIT_COMMIT` . -t $image_name"
             sh "sudo docker save -o $tarfile $image_name"
             sh "sudo chmod 755 $tarfile"
@@ -90,6 +96,7 @@ stages {
             sh "tar -zcvf $postgres_targzfile $postgres_dir"
             sh "sudo chmod 775 $postgres_targzfile"
 
+            archiveArtifacts release_info_file
             archiveArtifacts postgres_targzfile
             archiveArtifacts targzfile
         }
