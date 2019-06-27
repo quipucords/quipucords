@@ -78,8 +78,8 @@ stages {
             sh "git rev-parse HEAD > GIT_COMMIT"
             sh 'cat GIT_COMMIT'
 
-            sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_info_file}"
-            sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${BUILD_VERSION}/g ${release_py_full_path}"
+            sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${env.build_version}/g ${release_info_file}"
+            sh "sed -i s/BUILD_VERSION_PLACEHOLDER/${env.build_version}/g ${release_py_full_path}"
 
             sh "sudo docker -D build --build-arg BUILD_COMMIT=`cat GIT_COMMIT` . -t $image_name"
             sh "sudo docker save -o $tarfile $image_name"
