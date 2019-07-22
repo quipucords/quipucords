@@ -1,6 +1,6 @@
 ansible==2.8.2
 Django==2.2.3
-django-filter==2.1.0
+django-filter==2.2.0
 djangorestframework==3.9.4
 jmespath==0.9.4
 paramiko==2.5.0
