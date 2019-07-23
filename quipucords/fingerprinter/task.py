@@ -160,7 +160,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             'architecture': 'arch',
             'os_release': 'os_release',
             'os_version': 'os_kernel_version',
-            'vm_host': 'infrastructure_vendor'
+            'virtual_host_name': 'infrastructure_vendor'
         }
         system_profile = {}
         for qpc_fact, system_fact in qpc_to_system_profile.items():
@@ -1371,7 +1371,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'vm.dns_name', fact,
                                       'vm_dns_name', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.host.name',
-                                      fact, 'vm_host', fingerprint)
+                                      fact, 'virtual_host_name', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.host.cpu_count',
                                       fact, 'vm_host_socket_count',
                                       fingerprint)
@@ -1461,6 +1461,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       'subscription_manager_id', fingerprint)
         self._add_fact_to_fingerprint(source, 'virt_type', fact,
                                       'virtualized_type', fingerprint)
+
+        # Add a virtual guest's host name if available
+        self._add_fact_to_fingerprint(source, 'virtual_host_name', fact,
+                                      'virtual_host_name', fingerprint)
 
         is_virtualized = fact.get('is_virtualized')
         metadata_source = 'is_virtualized'
