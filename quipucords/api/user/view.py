@@ -20,7 +20,7 @@ from django.contrib.auth import logout
 from rest_framework import viewsets
 from rest_framework.authentication import (SessionAuthentication)
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import list_route
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -38,12 +38,12 @@ class UserViewSet(viewsets.GenericViewSet):
                                   SessionAuthentication)
         permission_classes = (IsAuthenticated,)
 
-    @list_route(methods=['get'])
+    @action(detail=False, methods=['get'])
     def current(self, request):  # pylint: disable=R0201
         """Get the username of currently authenticated user."""
         return Response({'username': request.user.username})
 
-    @list_route(methods=['put'])
+    @action(detail=False, methods=['put'])
     def logout(self, request):  # pylint: disable=R0201
         """Log out the current authenticated user."""
         authentication_enabled = os.getenv(
