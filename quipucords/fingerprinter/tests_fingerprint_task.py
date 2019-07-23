@@ -410,7 +410,7 @@ class EngineTest(TestCase):
         self.assertEqual(fact.get('vm.dns_name'),
                          fingerprint.get('vm_dns_name'))
         self.assertEqual(fact.get('vm.host.name'),
-                         fingerprint.get('vm_host'))
+                         fingerprint.get('virtual_host_name'))
 
         self.assertEqual(fact.get('vm.host.cpu_count'),
                          fingerprint.get('vm_host_socket_count'))
