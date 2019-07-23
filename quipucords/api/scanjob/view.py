@@ -39,7 +39,7 @@ from django_filters.rest_framework import (DjangoFilterBackend, FilterSet)
 
 from rest_framework import mixins, viewsets
 from rest_framework.authentication import (SessionAuthentication)
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -187,7 +187,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         return (ordering_filter, status_filter, source_id_filter)
 
     # pylint: disable=too-many-locals
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
         ordering_filter, status_filter, source_id_filter = \
@@ -225,7 +225,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         return Response(status=404)
 
     # pylint: disable=too-many-locals
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def inspection(self, request, pk=None):
         """Get the inspection results of a scan job."""
         ordering_filter, status_filter, source_id_filter = \
@@ -261,7 +261,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 
-    @detail_route(methods=['put'])
+    @action(detail=True, methods=['put'])
     def pause(self, request, pk=None):
         """Pause the running scan."""
         if not pk or (pk and not is_int(pk)):
@@ -286,7 +286,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         err_msg = _(messages.NO_PAUSE)
         return JsonResponse({'non_field_errors': [err_msg]}, status=400)
 
-    @detail_route(methods=['put'])
+    @action(detail=True, methods=['put'])
     def cancel(self, request, pk=None):
         """Cancel the running scan."""
         if not pk or (pk and not is_int(pk)):
@@ -309,7 +309,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan, status=200)
 
-    @detail_route(methods=['put'])
+    @action(detail=True, methods=['put'])
     def restart(self, request, pk=None):
         """Restart a paused scan."""
         if not pk or (pk and not is_int(pk)):
