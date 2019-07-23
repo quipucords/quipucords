@@ -102,7 +102,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     vm_uuid = CharField(required=False, max_length=36)
     vm_dns_name = CharField(required=False, max_length=256)
 
-    vm_host = CharField(required=False, max_length=128)
+    virtual_host_name = CharField(required=False, max_length=128)
     vm_host_socket_count = IntegerField(required=False, min_value=0)
     vm_host_core_count = IntegerField(required=False, min_value=0)
 
