@@ -1416,7 +1416,7 @@ definitions:
                   "is_redhat": true,
                   "cpu_socket_count": 2,
                   "cpu_core_count": 2,
-                  "vm_host": "7cent.cfoo.example.com",
+                  "virtual_host_name": "7cent.cfoo.example.com",
                   "vm_host_socket_count": 2,
                   "vm_host_core_count": 2,
                   "redhat_certs": "183.pem",
@@ -2477,7 +2477,7 @@ definitions:
           type: "string"
           description: "The DNS name of virtual machine"
           example: "dns.redhat.com"
-        vm_host:
+        virtual_host_name:
           type: "string"
           description: "The host of virtual machine"
           example: "host.redhat.com"

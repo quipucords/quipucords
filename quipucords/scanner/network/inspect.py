@@ -141,8 +141,11 @@ class InspectTaskRunner(ScanTaskRunner):
             return error_message, ScanTask.FAILED
 
         if self.scan_task.systems_failed > 0:
-            return '%d systems could not be scanned.' % \
-                self.scan_task.systems_failed, ScanTask.FAILED
+            scan_message = '%d systems could not be scanned.' % \
+                self.scan_task.systems_failed
+            scan_result = ScanTask.COMPLETED
+            self.scan_task.log_message(
+                scan_message, log_level=logging.WARNING)
         return scan_message, scan_result
 
     def _add_unreachable_hosts(self, systems_list):

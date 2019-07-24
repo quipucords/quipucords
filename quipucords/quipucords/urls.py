@@ -48,8 +48,13 @@ urlpatterns = [
 
     # docs files
     re_path(
-        r'^client/docs(/|)(index.html|)$',
-        RedirectView.as_view(url='/client/docs/index.html', permanent=False),
+        r'^client/docs(/|)(index.html|use.html|)$',
+        RedirectView.as_view(url='/client/docs/use.html', permanent=False),
+        name='docs'),
+
+    re_path(
+        r'^client/docs(/|)(install.html|)$',
+        RedirectView.as_view(url='/client/docs/install.html', permanent=False),
         name='docs'),
 
     # static files (*.css, *.js, *.jpg etc.)
