@@ -91,7 +91,8 @@ RAW_DATE_KEYS = \
 # Insights specific facts
 CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'ip_addresses', 'mac_addresses',
-                   'subscription_manager_id']
+                   'subscription_manager_id',
+                   'fqdn']
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -360,12 +361,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             'insights_id': 'insights_client_id',
                             'subscription_manager_id':
                                 'subscription_manager_id',
-                            'rhel_machine_id': 'etc_machine_id'
+                            'rhel_machine_id': 'etc_machine_id',
+                            'fqdn': 'name'
                         }
                         insights_host = {}
                         insights_host['display_name'] = \
-                            fingerprint_dict.get('name')
-                        insights_host['fqdn'] = \
                             fingerprint_dict.get('name')
                         for host_inv_fact, qpc_fact in not_null_facts.items():
                             if fingerprint_dict.get(qpc_fact):
