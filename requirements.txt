@@ -1,7 +1,7 @@
 ansible==2.8.3
 Django==2.2.3
 django-filter==2.2.0
-djangorestframework==3.10.1
+djangorestframework==3.10.2
 jmespath==0.9.4
 paramiko==2.6.0
 pexpect==4.7.0
