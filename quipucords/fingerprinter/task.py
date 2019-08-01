@@ -43,7 +43,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 
-from rest_framework.serializers import DateField, UUIDField
+from rest_framework.serializers import DateField, DateTimeField, UUIDField
 
 from scanner.task import ScanTaskRunner
 
@@ -293,6 +293,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         total_count = len(fingerprints_list)
         deployment_report = details_report.deployment_report
         date_field = DateField()
+        datetime_field = DateTimeField()
         uuid_field = UUIDField()
         final_fingerprint_list = []
         insights_hosts = []
@@ -302,6 +303,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         valid_fact_attributes = {
             field.name for field in SystemFingerprint._meta.get_fields()}
 
+        # Capture the start time of the scan task for the insights
+        insights_last_reported = datetime_field.to_representation(
+            self.scan_task.start_time)
         for fingerprint_dict in fingerprints_list:
             found_canonical_facts = False
             # Remove keys that are not part of SystemFingerprint model
@@ -329,7 +333,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 try:
                     fingerprint = serializer.save()
 
-                    # Add auto-generated fields
+                    # Add auto-generated fields for the insights report
                     fingerprint_dict['id'] = fingerprint.id
                     fingerprint_dict['system_platform_id'] = \
                         fingerprint.system_platform_id
@@ -376,7 +380,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                 fingerprint_dict.get('redhat_certs', [])),
                             'rh_products_installed': self.format_products(
                                 fingerprint_dict.get('products', []),
-                                fingerprint_dict.get('is_redhat'))
+                                fingerprint_dict.get('is_redhat')),
+                            'last_reported': insights_last_reported
                         }
                         system_sources = fingerprint_dict.get(SOURCES_KEY)
                         if system_sources is not None:
@@ -393,9 +398,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
                         facts = {'namespace': 'qpc', 'facts': nested_facts}
                         insights_host['facts'] = [facts]
-                        if bool(nested_facts):
-                            insights_host['system_profile'] = \
-                                self.format_system_profile(fingerprint_dict)
+                        insights_host['system_profile'] = \
+                            self.format_system_profile(fingerprint_dict)
                         insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:

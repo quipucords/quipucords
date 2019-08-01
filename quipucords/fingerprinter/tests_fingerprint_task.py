@@ -1149,8 +1149,10 @@ class EngineTest(TestCase):
                     {
                         'namespace': 'qpc',
                         'facts': {
+                            'last_reported': None,
                             'rh_product_certs': [],
-                            'rh_products_installed': []
+                            'rh_products_installed': [],
+
                         },
                     }
                 ],
