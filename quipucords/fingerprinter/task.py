@@ -398,8 +398,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
                         facts = {'namespace': 'qpc', 'facts': nested_facts}
                         insights_host['facts'] = [facts]
-                        insights_host['system_profile'] = \
-                            self.format_system_profile(fingerprint_dict)
+                        system_profile = self.format_system_profile(
+                            fingerprint_dict)
+                        if system_profile:
+                            insights_host['system_profile'] = system_profile
                         insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:
