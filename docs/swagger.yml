@@ -1381,75 +1381,37 @@ definitions:
     type: "object"
     description: "Host data should conform to the host inventory swagger definition described here: https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml"
     example: {
-      "display_name": "7cent.cfoo.example.com",
-      "fqdn": "7cent.cfoo.example.com",
-      "ip_addresses": [
-          "192.168.121.50"
-      ],
-      "mac_addresses": [
-          "52:54:00:ad:c3:c9"
-      ],
-      "rhel_machine_id": "3f01b55457674041b75e41829bcee1dc",
-      "subscription_manager_id": "f14ea675-7292-4bcd-9bc7-62197dd98e1b",
-      "bios_uuid": "3f01b55457674041b75e41829bcee1dc",
-      "insights_id": "3f01b55457674041b75e41829bcee1dc",
-      "facts": [
-          {
-              "namespace": "qpc",
-              "facts": {
-                  "ip_addresses": [
-                      "192.168.121.50"
-                  ],
-                  "mac_addresses": [
-                      "52:54:00:ad:c3:c9"
-                  ],
-                  "etc_machine_id": "3f01b55457674041b75e41829bcee1dc",
-                  "insights_client_id": "3f01b55457674041b75e41829bcee1dc",
-                  "bios_uuid": "3f01b55457674041b75e41829bcee1dc",
-                  "subscription_manager_id": "f14ea675-7292-4bcd-9bc7-62197dd98e1b",
-                  "name": "7cent.cfoo.example.com",
-                  "os_release": "RHEL Server 7.3",
-                  "os_version": 7.3,
-                  "infrastructure_type": "virtualized",
-                  "cpu_count": 2,
-                  "architecture": "x86_64",
-                  "is_redhat": true,
-                  "cpu_socket_count": 2,
-                  "cpu_core_count": 2,
-                  "virtual_host_name": "7cent.cfoo.example.com",
-                  "vm_host_socket_count": 2,
-                  "vm_host_core_count": 2,
-                  "redhat_certs": "183.pem",
-                  "cpu_core_per_socket": 2,
-                  "entitlements": [
-                    {
-                        "name": "Red Hat Enterprise Linux, Company-Wide Subscription",
-                        "entitlement_id": "ESA0001",
-                        "metadata": {
-                          "server_id": "1953cea7-4628-4eb7-a2d7-8344c0864dc4",
-                          "source_name": "TestMachines",
-                          "source_type": "network",
-                          "raw_fact_key": "jboss_eap_packages"
-                        }
-                    }
-                  ],
-                  "vm_uuid": "9808421e-8426-0dfd-55bd-246c95434e1a"
-              },
-              "rh_product_certs": [],
-              "rh_products_installed": [
-                  "RHEL"
-              ]
-          }
-      ],
-      "system_profile": {
-          "infrastructure_type": "virtualized",
-          "architecture": "x86_64",
-          "os_release": "RHEL Server 7.3",
-          "os_kernel_version": "7.3",
-          "number_of_cpus": 2,
-          "number_of_sockets": 2,
-          "cores_per_socket": 1
-      }
+        "display_name": "earth.usersys.redhat.com",
+        "ip_addresses": [
+            "10.8.30.252"
+        ],
+        "mac_addresses": [
+            "00:50:56:9e:25:80"
+        ],
+        "fqdn": "earth.usersys.redhat.com",
+        "facts": [
+            {
+                "namespace": "qpc",
+                "facts": {
+                    "rh_product_certs": [],
+                    "rh_products_installed": [
+                        "RHEL"
+                    ],
+                    "last_reported": "2019-08-01T17:21:23.842458",
+                    "source_types": [
+                        "vcenter"
+                    ]
+                }
+            }
+        ],
+        "system_profile": {
+            "infrastructure_type": "virtualized",
+            "os_release": "Red Hat Enterprise Linux 7 (64-bit)",
+            "infrastructure_vendor": "esxi3.lab.eng.rdu2.redhat.com",
+            "number_of_cpus": 16,
+            "number_of_sockets": 4,
+            "cores_per_socket": 8
+        }
     }
   InsightsReport:
     properties:
