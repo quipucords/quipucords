@@ -56,7 +56,6 @@ class InsightsReportTest(TestCase):
                 'virt_num_guests': 1,
                 'virt_num_running_guests': 1,
                 'virt_what_type': 'vt',
-                'system_platform_id': self.sys_platform_id,
                 'ip_addresses': ['1.2.3.4']}]
         self.insights_hosts = [
             {
@@ -193,8 +192,7 @@ class InsightsReportTest(TestCase):
             'virt_type': 'vmware',
             'virt_num_guests': 1,
             'virt_num_running_guests': 1,
-            'virt_what_type': 'vt',
-            'system_platform_id': self.sys_platform_id
+            'virt_what_type': 'vt'
         }]
         self.deployments_report.cached_insights = None
         self.deployments_report.cached_fingerprints = json.dumps(no_canonical)
@@ -248,8 +246,7 @@ class InsightsReportTest(TestCase):
                          'virt_num_guests': 1,
                          'virt_num_running_guests': 1,
                          'virt_what_type': 'vt',
-                         'mac_addresses': ['1.2.3.4'],
-                         'system_platform_id': self.sys_platform_id}]
+                         'mac_addresses': ['1.2.3.4']}]
 
         self.deployments_report.cached_insights = None
         self.deployments_report.cached_fingerprints = json.dumps(fingerprints)

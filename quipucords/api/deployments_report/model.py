@@ -86,8 +86,6 @@ class SystemFingerprint(models.Model):
     deployment_report = models.ForeignKey(
         DeploymentsReport, models.CASCADE, related_name='system_fingerprints')
 
-    system_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
-
     # Common facts
     name = models.CharField(max_length=256, unique=False, null=True)
     os_name = models.CharField(max_length=64, unique=False)

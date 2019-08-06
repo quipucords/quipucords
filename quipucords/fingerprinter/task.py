@@ -43,7 +43,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 
-from rest_framework.serializers import DateField, DateTimeField, UUIDField
+from rest_framework.serializers import DateField, DateTimeField
 
 from scanner.task import ScanTaskRunner
 
@@ -294,7 +294,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         deployment_report = details_report.deployment_report
         date_field = DateField()
         datetime_field = DateTimeField()
-        uuid_field = UUIDField()
         final_fingerprint_list = []
         insights_hosts = []
         insights_valid = 0
@@ -335,8 +334,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
                     # Add auto-generated fields for the insights report
                     fingerprint_dict['id'] = fingerprint.id
-                    fingerprint_dict['system_platform_id'] = \
-                        fingerprint.system_platform_id
 
                     # Serialize the date
                     for field in SystemFingerprint.DATE_FIELDS:
@@ -344,9 +341,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             fingerprint_dict[field] = \
                                 date_field.to_representation(
                                     fingerprint_dict.get(field))
-                    fingerprint_dict['system_platform_id'] = \
-                        uuid_field.to_representation(
-                            fingerprint_dict.get('system_platform_id'))
                     final_fingerprint_list.append(fingerprint_dict)
 
                     # Check if fingerprint has canonical facts
@@ -354,15 +348,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         if fingerprint_dict.get(fact):
                             found_canonical_facts = True
                             break
-                    # If canonical facts, add it to the insights_hosts dict
-                    insights_id = fingerprint_dict.get(
-                        'system_platform_id')
                     if found_canonical_facts:
                         not_null_facts = {
                             'bios_uuid': 'bios_uuid',
                             'ip_addresses': 'ip_addresses',
                             'mac_addresses': 'mac_addresses',
-                            'insights_id': 'insights_client_id',
+                            'insights_client_id': 'insights_client_id',
                             'subscription_manager_id':
                                 'subscription_manager_id',
                             'rhel_machine_id': 'etc_machine_id',
@@ -405,7 +396,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:
-                        invalid_hosts.append(insights_id)
+                        invalid_hosts.append(fingerprint_dict.get('name'))
 
                     number_valid += 1
                 except DataError as error:
