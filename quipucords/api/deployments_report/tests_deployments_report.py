@@ -135,7 +135,7 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['system_fingerprints'][0].keys()), 18)
+        self.assertEqual(len(report['system_fingerprints'][0].keys()), 17)
 
     def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""

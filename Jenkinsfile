@@ -2,7 +2,6 @@ pipeline {
     agent { label 'f28-os' }
 
     environment {
-        qpc_version = "${params.version_name}"
         build_version = "${params.version_name == 'master' ? '0.0.0' : params.version_name}"
         image_name = "quipucords:${build_version}"
         tarfile = "quipucords_server_image.tar"
