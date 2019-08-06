@@ -164,8 +164,6 @@ class ReportsTest(TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith('csv'):
                 if 'details' in file_contents:
-                    print(repr(file_contents))
-                    print(repr(details_csv))
                     self.assertEqual(file_contents, details_csv)
                 elif 'deployments' in file_contents:
                     self.assertEqual(file_contents, deployments_csv)

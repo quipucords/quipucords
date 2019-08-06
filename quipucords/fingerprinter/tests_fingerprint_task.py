@@ -1143,7 +1143,7 @@ class EngineTest(TestCase):
                     'dhcp181-3.gsslab.rdu2.redhat.com',
                 'fqdn': 'dhcp181-3.gsslab.rdu2.redhat.com',
                 'ip_addresses': ['1.2.3.4'],
-                'insights_client_id': '3f01b55457674041b75e41829bcee1dc',
+                'insights_id': '3f01b55457674041b75e41829bcee1dc',
                 'rhel_machine_id': '3f01b55457674041b75e41829bcee1dc',
                 'facts': [
                     {

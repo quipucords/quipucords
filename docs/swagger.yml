@@ -2368,7 +2368,7 @@ definitions:
           type: "string"
           description: "The system bios uuid"
           example: "65541E42-1234-A2C4-2BB4-F82448BDCEC"
-        insights_client_id:
+        insights_id:
           type: "string"
           description: "The insights client id"
           example: "b077190b74f14b3582e57ce8243ae356"

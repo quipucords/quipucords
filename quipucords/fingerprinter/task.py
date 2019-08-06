@@ -353,7 +353,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             'bios_uuid': 'bios_uuid',
                             'ip_addresses': 'ip_addresses',
                             'mac_addresses': 'mac_addresses',
-                            'insights_client_id': 'insights_client_id',
+                            'insights_id': 'insights_client_id',
                             'subscription_manager_id':
                                 'subscription_manager_id',
                             'rhel_machine_id': 'etc_machine_id',
