@@ -32,7 +32,6 @@ class InsightsReportTest(TestCase):
         """Create test case setup."""
         management.call_command('flush', '--no-input')
         self.report_version = create_report_version()
-        self.sys_platform_id = str(uuid.uuid4())
         self.connection_uuid = str(uuid.uuid4())
         self.fingerprints = \
             [{
