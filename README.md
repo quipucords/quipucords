@@ -83,7 +83,7 @@ To initialize the server with Postgres, run the following command:
 make server-init
 ```
 
-Both of the above commands create a superuser with name `admin` and password of `pass`.
+Both of the above commands create a superuser with name `admin` and password of `qpcpassw0rd`.
 
 ## Running the Server
 To run the development server using Postgres, run the following command:
