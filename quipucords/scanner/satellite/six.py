@@ -130,7 +130,7 @@ FACTS_V2_MAPPING = {
 }
 
 VIRTUAL_HOST_MAPPING = {
-    'virtual_host': 'uuid',
+    'virtual_host_uuid': 'uuid',
     'virtual_host_name': 'name',
 }
 
