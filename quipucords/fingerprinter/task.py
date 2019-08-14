@@ -374,9 +374,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             'last_reported': insights_last_reported,
                         }
                         if fingerprint_dict.get('virtual_host_name'):
-                            nested_facts['virtual_host_name'] = fingerprint_dict.get('virtual_host_name')
+                            nested_facts['virtual_host_name'] = \
+                                fingerprint_dict.get('virtual_host_name')
                         if fingerprint_dict.get('virtual_host_uuid'):
-                            nested_facts['virtual_host_uuid'] = fingerprint_dict.get('virtual_host_uuid')
+                            nested_facts['virtual_host_uuid'] = \
+                                fingerprint_dict.get('virtual_host_uuid')
                         system_sources = fingerprint_dict.get(SOURCES_KEY)
                         if system_sources is not None:
                             sources_info = compute_source_info(system_sources)
