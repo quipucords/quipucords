@@ -145,6 +145,8 @@ class InspectTaskRunner(ScanTaskRunner):
                     cluster_info.get('cluster.datacenter')
             elif prop.name == 'summary.config.name':
                 facts['host.name'] = prop.val
+            elif prop.name == 'hardware.systemInfo.uuid':
+                facts['host.uuid'] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
                 facts['host.cpu_cores'] = prop.val
             elif prop.name == 'summary.hardware.numCpuPkgs':
@@ -190,6 +192,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 host_facts = host_dict.get(str(prop.val))
                 if host_facts:
                     facts['vm.host.name'] = host_facts.get('host.name')
+                    facts['vm.host.uuid'] = host_facts.get('host.uuid')
                     facts['vm.host.cpu_cores'] = \
                         host_facts.get('host.cpu_cores')
                     facts['vm.host.cpu_count'] = \
@@ -309,6 +312,7 @@ class InspectTaskRunner(ScanTaskRunner):
             type=vim.HostSystem,
             pathSet=[
                 'parent',
+                'hardware.systemInfo.uuid',
                 'summary.config.name',
                 'summary.hardware.numCpuCores',
                 'summary.hardware.numCpuPkgs',

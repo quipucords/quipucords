@@ -191,7 +191,7 @@ class SatelliteFiveTest(TestCase):
                     'entitlements': [{'name': 'ent1'}],
                     'ip_addresses': ['1.2.3.4'],
                     'mac_addresses': ['1:a:2:b:3:c'],
-                    'is_virtualized': True, 'virtual_host': 2,
+                    'is_virtualized': True, 'virtual_host_uuid': 2,
                     'virtual_host_name': 'sys2'}
         client = mock_serverproxy.return_value
         client.auth.login.return_value = 'key'

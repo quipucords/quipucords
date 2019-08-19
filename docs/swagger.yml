@@ -2437,8 +2437,12 @@ definitions:
           example: "dns.redhat.com"
         virtual_host_name:
           type: "string"
-          description: "The host of virtual machine"
+          description: "The virtual machine's host's name"
           example: "host.redhat.com"
+        virtual_host_uuid:
+          type: "string"
+          description: "The virtual machine's host's UUID"
+          example: "9808421e-8426-0dfd-55bd-246c95434e1a"
         vm_host_socket_count:
           type: "string"
           description: "The socket count for the virtual machine host"

@@ -128,6 +128,8 @@ class SystemFingerprint(models.Model):
     virtualized_type = models.CharField(max_length=64, unique=False, null=True)
     virtual_host_name = models.CharField(
         max_length=128, unique=False, null=True)
+    virtual_host_uuid = models.CharField(
+        max_length=36, unique=False, null=True)
 
     # VCenter scan facts
     vm_state = models.CharField(max_length=24, unique=False, null=True)
@@ -177,6 +179,7 @@ class SystemFingerprint(models.Model):
             'vm_uuid:{}, '\
             'vm_dns_name:{}, '\
             'virtual_host_name:{}, '\
+            'virtual_host_uuid:{}, '\
             'vm_host_socket_count:{}, '\
             'vm_host_core_count:{}, '\
             'vm_datacenter:{}, '\
@@ -212,6 +215,7 @@ class SystemFingerprint(models.Model):
                                   self.vm_uuid,
                                   self.vm_dns_name,
                                   self.virtual_host_name,
+                                  self.virtual_host_uuid,
                                   self.vm_host_socket_count,
                                   self.vm_host_core_count,
                                   self.vm_datacenter,

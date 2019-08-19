@@ -55,7 +55,7 @@ SOCKETS = 'num_sockets'
 ENTITLEMENTS = 'entitlements'
 NUM_VIRTUAL_GUESTS = 'num_virtual_guests'
 VIRTUAL = 'virtual'
-VIRTUAL_HOST = 'virtual_host'
+VIRTUAL_HOST_UUID = 'virtual_host_uuid'
 VIRTUAL_HOST_NAME = 'virtual_host_name'
 HYPERVISOR = 'hypervisor'
 
@@ -280,7 +280,7 @@ class SatelliteFive(SatelliteInterface):
                     virtual_host = virtual_hosts.get(virt_host_id)
                     details[IS_VIRT] = True
                     if virtual_host.get(UUID):
-                        details[VIRTUAL_HOST] = virtual_host.get(UUID)
+                        details[VIRTUAL_HOST_UUID] = virtual_host.get(UUID)
                     if virtual_host.get(NAME):
                         details[VIRTUAL_HOST_NAME] = virtual_host.get(NAME)
 

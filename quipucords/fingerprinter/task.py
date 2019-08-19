@@ -160,8 +160,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             'infrastructure_type': 'infrastructure_type',
             'architecture': 'arch',
             'os_release': 'os_release',
-            'os_version': 'os_kernel_version',
-            'virtual_host_name': 'infrastructure_vendor'
+            'os_version': 'os_kernel_version'
         }
         system_profile = {}
         for qpc_fact, system_fact in qpc_to_system_profile.items():
@@ -372,8 +371,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             'rh_products_installed': self.format_products(
                                 fingerprint_dict.get('products', []),
                                 fingerprint_dict.get('is_redhat')),
-                            'last_reported': insights_last_reported
+                            'last_reported': insights_last_reported,
                         }
+                        if fingerprint_dict.get('virtual_host_name'):
+                            nested_facts['virtual_host_name'] = \
+                                fingerprint_dict.get('virtual_host_name')
+                        if fingerprint_dict.get('virtual_host_uuid'):
+                            nested_facts['virtual_host_uuid'] = \
+                                fingerprint_dict.get('virtual_host_uuid')
                         system_sources = fingerprint_dict.get(SOURCES_KEY)
                         if system_sources is not None:
                             sources_info = compute_source_info(system_sources)
@@ -1369,6 +1374,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       'vm_dns_name', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.host.name',
                                       fact, 'virtual_host_name', fingerprint)
+        self._add_fact_to_fingerprint(source, 'vm.host.uuid',
+                                      fact, 'virtual_host_uuid', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.host.cpu_count',
                                       fact, 'vm_host_socket_count',
                                       fingerprint)
@@ -1462,6 +1469,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Add a virtual guest's host name if available
         self._add_fact_to_fingerprint(source, 'virtual_host_name', fact,
                                       'virtual_host_name', fingerprint)
+        self._add_fact_to_fingerprint(source, 'virtual_host_uuid', fact,
+                                      'virtual_host_uuid', fingerprint)
 
         is_virtualized = fact.get('is_virtualized')
         metadata_source = 'is_virtualized'
