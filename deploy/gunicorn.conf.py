@@ -30,8 +30,8 @@ raw_env = [
 ]
 
 # SSL configuration
-keyfile = '/etc/ssl/server.key'
-certfile = '/etc/ssl/server.crt'
+keyfile = '/etc/ssl/qpc/server.key'
+certfile = '/etc/ssl/qpc/server.crt'
 
 proc_name = None
 
