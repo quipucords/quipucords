@@ -14,10 +14,13 @@ RUN mkdir -p /app
 COPY requirements.txt /app/requirements.txt
 RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt gunicorn==19.9.0
 
-# Create /etc/ssl
-RUN mkdir -p /etc/ssl/
-COPY deploy/ssl/* /etc/ssl/
-VOLUME /etc/ssl
+# Create /etc/ssl/qpc
+RUN mkdir -p /etc/ssl/qpc/
+VOLUME /etc/ssl/qpc/
+COPY deploy/ssl/server.crt /etc/ssl/qpc/
+COPY deploy/ssl/server.csr /etc/ssl/qpc/
+COPY deploy/ssl/server.key /etc/ssl/qpc/
+
 
 # Create /deploy
 RUN mkdir -p /deploy
