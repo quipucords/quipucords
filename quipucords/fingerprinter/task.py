@@ -43,7 +43,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 
-from rest_framework.serializers import DateField, UUIDField
+from rest_framework.serializers import DateField, DateTimeField
 
 from scanner.task import ScanTaskRunner
 
@@ -160,8 +160,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             'infrastructure_type': 'infrastructure_type',
             'architecture': 'arch',
             'os_release': 'os_release',
-            'os_version': 'os_kernel_version',
-            'virtual_host_name': 'infrastructure_vendor'
+            'os_version': 'os_kernel_version'
         }
         system_profile = {}
         for qpc_fact, system_fact in qpc_to_system_profile.items():
@@ -293,7 +292,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         total_count = len(fingerprints_list)
         deployment_report = details_report.deployment_report
         date_field = DateField()
-        uuid_field = UUIDField()
+        datetime_field = DateTimeField()
         final_fingerprint_list = []
         insights_hosts = []
         insights_valid = 0
@@ -302,6 +301,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         valid_fact_attributes = {
             field.name for field in SystemFingerprint._meta.get_fields()}
 
+        # Capture the start time of the scan task for the insights
+        insights_last_reported = datetime_field.to_representation(
+            self.scan_task.start_time)
         for fingerprint_dict in fingerprints_list:
             found_canonical_facts = False
             # Remove keys that are not part of SystemFingerprint model
@@ -329,10 +331,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 try:
                     fingerprint = serializer.save()
 
-                    # Add auto-generated fields
+                    # Add auto-generated fields for the insights report
                     fingerprint_dict['id'] = fingerprint.id
-                    fingerprint_dict['system_platform_id'] = \
-                        fingerprint.system_platform_id
 
                     # Serialize the date
                     for field in SystemFingerprint.DATE_FIELDS:
@@ -340,9 +340,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             fingerprint_dict[field] = \
                                 date_field.to_representation(
                                     fingerprint_dict.get(field))
-                    fingerprint_dict['system_platform_id'] = \
-                        uuid_field.to_representation(
-                            fingerprint_dict.get('system_platform_id'))
                     final_fingerprint_list.append(fingerprint_dict)
 
                     # Check if fingerprint has canonical facts
@@ -350,9 +347,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         if fingerprint_dict.get(fact):
                             found_canonical_facts = True
                             break
-                    # If canonical facts, add it to the insights_hosts dict
-                    insights_id = fingerprint_dict.get(
-                        'system_platform_id')
                     if found_canonical_facts:
                         not_null_facts = {
                             'bios_uuid': 'bios_uuid',
@@ -376,8 +370,15 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                 fingerprint_dict.get('redhat_certs', [])),
                             'rh_products_installed': self.format_products(
                                 fingerprint_dict.get('products', []),
-                                fingerprint_dict.get('is_redhat'))
+                                fingerprint_dict.get('is_redhat')),
+                            'last_reported': insights_last_reported,
                         }
+                        if fingerprint_dict.get('virtual_host_name'):
+                            nested_facts['virtual_host_name'] = \
+                                fingerprint_dict.get('virtual_host_name')
+                        if fingerprint_dict.get('virtual_host_uuid'):
+                            nested_facts['virtual_host_uuid'] = \
+                                fingerprint_dict.get('virtual_host_uuid')
                         system_sources = fingerprint_dict.get(SOURCES_KEY)
                         if system_sources is not None:
                             sources_info = compute_source_info(system_sources)
@@ -393,13 +394,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
                         facts = {'namespace': 'qpc', 'facts': nested_facts}
                         insights_host['facts'] = [facts]
-                        if bool(nested_facts):
-                            insights_host['system_profile'] = \
-                                self.format_system_profile(fingerprint_dict)
+                        system_profile = self.format_system_profile(
+                            fingerprint_dict)
+                        if system_profile:
+                            insights_host['system_profile'] = system_profile
                         insights_hosts.append(insights_host)
                         insights_valid += 1
                     else:
-                        invalid_hosts.append(insights_id)
+                        invalid_hosts.append(fingerprint_dict.get('name'))
 
                     number_valid += 1
                 except DataError as error:
@@ -1372,6 +1374,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       'vm_dns_name', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.host.name',
                                       fact, 'virtual_host_name', fingerprint)
+        self._add_fact_to_fingerprint(source, 'vm.host.uuid',
+                                      fact, 'virtual_host_uuid', fingerprint)
         self._add_fact_to_fingerprint(source, 'vm.host.cpu_count',
                                       fact, 'vm_host_socket_count',
                                       fingerprint)
@@ -1465,6 +1469,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Add a virtual guest's host name if available
         self._add_fact_to_fingerprint(source, 'virtual_host_name', fact,
                                       'virtual_host_name', fingerprint)
+        self._add_fact_to_fingerprint(source, 'virtual_host_uuid', fact,
+                                      'virtual_host_uuid', fingerprint)
 
         is_virtualized = fact.get('is_virtualized')
         metadata_source = 'is_virtualized'

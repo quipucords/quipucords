@@ -1149,12 +1149,12 @@ class EngineTest(TestCase):
                     {
                         'namespace': 'qpc',
                         'facts': {
+                            'last_reported': None,
                             'rh_product_certs': [],
                             'rh_products_installed': []
                         },
                     }
-                ],
-                'system_profile': {}
+                ]
             }
         ]
         self.assertIn('success', status_message.lower())

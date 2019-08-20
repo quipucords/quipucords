@@ -27,6 +27,7 @@ RUN mkdir -p /deploy
 COPY deploy/gunicorn.conf.py  /deploy
 COPY deploy/docker_run.sh  /deploy
 COPY deploy/server_run.sh  /deploy
+COPY deploy/setup_user.py  /deploy
 
 # Config supervisor
 COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

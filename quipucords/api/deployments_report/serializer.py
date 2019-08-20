@@ -59,8 +59,6 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     """Serializer for the Fingerprint model."""
 
     # Common facts
-    system_platform_id = UUIDField(format='hex_verbose',
-                                   read_only=True)
     name = CharField(required=False, max_length=256)
 
     os_name = CharField(required=False, max_length=64)
@@ -103,6 +101,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     vm_dns_name = CharField(required=False, max_length=256)
 
     virtual_host_name = CharField(required=False, max_length=128)
+    virtual_host_uuid = CharField(required=False, max_length=36)
     vm_host_socket_count = IntegerField(required=False, min_value=0)
     vm_host_core_count = IntegerField(required=False, min_value=0)
 
