@@ -309,7 +309,9 @@ class InspectTaskRunner(ScanTaskRunner):
                     else:
                         error_msg = log_messages.NETWORK_UNKNOWN_ERR
                     scan_result = ScanTask.FAILED
-                call.finalize_failed_hosts()
+
+            # Always run this as our scans are more tolerant of errors
+            call.finalize_failed_hosts()
         return error_msg, scan_result
 
     def _obtain_discovery_data(self):
