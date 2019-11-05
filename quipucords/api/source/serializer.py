@@ -111,8 +111,7 @@ class SourceSerializer(NotEmptySerializer):
             if invalid_options:
                 error = {
                     'options': [_(messages.SAT_INVALID_OPTIONS %
-                                  ', '.join([key for key in
-                                             invalid_options]))]
+                                  ', '.join(invalid_options))]
                 }
                 raise ValidationError(error)
             if options.get('ssl_cert_verify') is None:
@@ -124,8 +123,7 @@ class SourceSerializer(NotEmptySerializer):
             if invalid_options:
                 error = {
                     'options': [_(messages.VC_INVALID_OPTIONS %
-                                  ', '.join([key for key in
-                                             invalid_options]))]
+                                  ', '.join(invalid_options))]
                 }
                 raise ValidationError(error)
             if options.get('ssl_cert_verify') is None:
@@ -137,8 +135,7 @@ class SourceSerializer(NotEmptySerializer):
             if invalid_options:
                 error = {
                     'options': [_(messages.NET_SSL_OPTIONS_NOT_ALLOWED %
-                                  ', '.join([key for key in
-                                             invalid_options]))]
+                                  ', '.join(invalid_options))]
                 }
                 raise ValidationError(error)
 

@@ -240,6 +240,7 @@ class ScanJob(models.Model):
         if self.report_id and \
                 self.details_report:
             self.details_report.refresh_from_db()
+            # pylint: disable=using-constant-test
             if self.details_report.deployment_report:
                 # pylint: disable=no-member
                 system_fingerprint_count = \

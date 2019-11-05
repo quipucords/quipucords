@@ -108,9 +108,8 @@ def detect_jboss_ws(source, facts):
                 break
     # Versions prior to 3.0.0 can only be detected by the presence of certain
     # EWS components and don't guarantee the installation of EWS
-            else:
-                product_dict[PRESENCE_KEY] = Product.POTENTIAL
-                break
+            product_dict[PRESENCE_KEY] = Product.POTENTIAL
+            break
     if installed_with_rpm:
         product_dict[PRESENCE_KEY] = Product.PRESENT
         raw_facts[JWS_INSTALLED_WITH_RPM] = installed_with_rpm
