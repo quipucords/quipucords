@@ -76,6 +76,7 @@ def modules():
 
 def init_server_identifier():
     """Create or retreive server's global identifier."""
+    # pylint: disable=import-outside-toplevel
     from api.status.model import ServerInformation
 
     server_id = ServerInformation.create_or_retreive_server_id()
