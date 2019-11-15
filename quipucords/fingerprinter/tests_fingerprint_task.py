@@ -365,6 +365,8 @@ class EngineTest(TestCase):
                              'redhat_package_count'))
         system_purpose_json = fact.get('system_purpose_json', None)
         if system_purpose_json:
+            self.assertEqual(system_purpose_json,
+                             fingerprint.get('system_purpose'))
             self.assertEqual(
                 system_purpose_json.get('role', None),
                 fingerprint.get('system_role'))
@@ -544,9 +546,18 @@ class EngineTest(TestCase):
         self._create_network_fingerprint(
             system_purpose_json=system_purpose_json)
 
-    def test_process_network_system_intent(self):
+    def test_process_network_system_purpose(self):
         """Test process network system_purpose."""
-        details_report = self._create_network_fc_json()
+        system_purpose_json = {
+            '_version': '1',
+            'role': 'server',
+            'service_level_agreement': 'self-support',
+            'usage_type': 'test',
+            'addons': ['a', 'b', 'c']
+        }
+
+        details_report = self._create_network_fc_json(
+            system_purpose_json=system_purpose_json)
         fact = details_report['facts'][0]
         source = {'server_id': self.server_id,
                   'source_name': 'source1',

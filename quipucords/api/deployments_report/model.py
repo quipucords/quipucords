@@ -169,6 +169,7 @@ class SystemFingerprint(models.Model):
             'cpu_core_count:{}, '\
             'cpu_core_per_socket:{}, '\
             'system_creation_date:{}, '\
+            'system_purpose:{}, '\
             'system_role:{}, '\
             'system_addons:{}, '\
             'system_service_level_agreement:{}, '\
@@ -205,6 +206,7 @@ class SystemFingerprint(models.Model):
                                   self.cpu_core_count,
                                   self.cpu_core_per_socket,
                                   self.system_creation_date,
+                                  self.system_purpose,
                                   self.system_role,
                                   self.system_addons,
                                   self.system_service_level_agreement,
