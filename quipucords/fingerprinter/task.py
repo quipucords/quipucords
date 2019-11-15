@@ -379,6 +379,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         if fingerprint_dict.get('virtual_host_uuid'):
                             nested_facts['virtual_host_uuid'] = \
                                 fingerprint_dict.get('virtual_host_uuid')
+                        if fingerprint_dict.get('system_purpose'):
+                            nested_facts['system_purpose'] = \
+                                fingerprint_dict.get('system_purpose')
                         system_sources = fingerprint_dict.get(SOURCES_KEY)
                         if system_sources is not None:
                             sources_info = compute_source_info(system_sources)
@@ -1261,6 +1264,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # System purpose facts
         system_purpose_json = fact.get('system_purpose_json', None)
         if system_purpose_json:
+            self._add_fact_to_fingerprint(
+                source,
+                'system_purpose_json', fact,
+                'system_purpose', fingerprint,
+                fact_value=system_purpose_json
+            )
+
             system_purpose_role = system_purpose_json.get('role', None)
             if system_purpose_role:
                 self._add_fact_to_fingerprint(

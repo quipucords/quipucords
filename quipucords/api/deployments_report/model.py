@@ -115,6 +115,7 @@ class SystemFingerprint(models.Model):
     system_creation_date = models.DateField(null=True)
     system_last_checkin_date = models.DateField(null=True)
 
+    system_purpose = models.TextField(unique=False, null=True)
     system_role = models.CharField(
         max_length=128, unique=False, null=True)
     system_addons = models.TextField(unique=False, null=True)
