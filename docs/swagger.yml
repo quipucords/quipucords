@@ -1398,8 +1398,20 @@ definitions:
                         "RHEL"
                     ],
                     "last_reported": "2019-08-01T17:21:23.842458",
+                    "system_purpose": {
+                        "_version": "1",
+                        "role": "server",
+                        "service_level_agreement": "self-support",
+                        "usage_type": "test",
+                        "addons": [
+                            "a",
+                            "b",
+                            "c"
+                        ]
+                    },
                     "source_types": [
-                        "vcenter"
+                        "vcenter",
+                        "network"
                     ]
                 }
             }
@@ -2372,22 +2384,32 @@ definitions:
           type: "string"
           description: "The insights client id"
           example: "b077190b74f14b3582e57ce8243ae356"
-        system_intent_role:
+        system_purpose:
+          type: "object"
+          description: "The system purpose"
+          example: {
+              "_version": "1",
+              "role": "server",
+              "service_level_agreement": "self-support",
+              "usage_type": "test",
+              "addons" : ["a", "b", "c"]
+          }
+        system_role:
           type: "string"
           description: "The system role"
           example: "server"
-        system_intent_addons:
+        system_addons:
           type: "array"
           items:
             type: "string"
             description: "System addon"
           example: ["addon1","addon2"]
           description: "System addons"
-        system_intent_sla:
+        system_service_level_agreement:
           type: "string"
           description: "The system service level agreement"
           example: "self-service"
-        system_intent_usage_type:
+        system_usage_type:
           type: "string"
           description: "The system usage type"
           example: "dev"

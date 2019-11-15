@@ -111,7 +111,8 @@ def create_deployments_csv(deployments_report_dict):
                  'report_id',
                  'metadata',
                  'deployment_report',
-                 'cpu_core_per_socket'})
+                 'cpu_core_per_socket',
+                 'system_purpose'})
     if SOURCES_KEY in headers:
         headers += source_headers
         headers = sorted(list(set(headers)))
