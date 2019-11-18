@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 from api.common.common_report import (create_filename,
                                       create_report_version)
+from api.insights_report.view import _create_report_slices
 from api.models import DeploymentsReport
 
 from django.core import management
@@ -253,6 +254,11 @@ class InsightsReportTest(TestCase):
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):
             response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_insights_report_no_hosts(self):
+        """Check that api returns 404 if there are no hosts."""
+        response = _create_report_slices(self.deployments_report, [])
         self.assertEqual(response.status_code, 404)
 
     def test_get_insights_report_bad_id(self):
