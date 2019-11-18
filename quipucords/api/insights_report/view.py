@@ -94,6 +94,15 @@ def _create_report_slices(report, insights_hosts):
     slice_size_limit = settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
     number_hosts = len(insights_hosts)
 
+    if not number_hosts:
+        error = {
+            'detail':
+            'Insights report %s was not generated because '
+            'there were 0 valid hosts. '
+            'Report version %s. See server logs.' % (report.id,
+                                                     report.report_version)}
+        return Response(error, status=404)
+
     if number_hosts % slice_size_limit:
         number_of_slices = number_hosts // slice_size_limit + 1
         hosts_per_slice = number_hosts // number_of_slices + 1
