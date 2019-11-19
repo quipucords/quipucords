@@ -69,6 +69,12 @@ class SystemFingerprint(models.Model):
     UNKNOWN = 'unknown'
     VIRTUALIZED = 'virtualized'
     HYPERVISOR = 'hypervisor'
+
+    AMAZON = 'AWS'
+    GOOGLE = 'GOOGLE'
+    AZURE = 'AZURE'
+    ALIBABA = 'ALIBABA'
+
     SOURCE_TYPE = (
         ('network', 'Ansible'),
         ('vcenter', 'VCenter'),
@@ -95,6 +101,8 @@ class SystemFingerprint(models.Model):
 
     infrastructure_type = models.CharField(
         max_length=12, choices=INFRASTRUCTURE_TYPE)
+
+    cloud_provider = models.CharField(max_length=16, unique=False, null=True)
 
     mac_addresses = models.TextField(unique=False, null=True)
     ip_addresses = models.TextField(unique=False, null=True)
@@ -176,6 +184,7 @@ class SystemFingerprint(models.Model):
             'system_usage_type:{}, '\
             'insights_client_id:{}, '\
             'infrastructure_type:{}, '\
+            'cloud_provider:{}, '\
             'virtualized_type:{}, '\
             'vm_state:{}, '\
             'vm_uuid:{}, '\
@@ -213,6 +222,7 @@ class SystemFingerprint(models.Model):
                                   self.system_usage_type,
                                   self.insights_client_id,
                                   self.infrastructure_type,
+                                  self.cloud_provider,
                                   self.virtualized_type,
                                   self.vm_state,
                                   self.vm_uuid,

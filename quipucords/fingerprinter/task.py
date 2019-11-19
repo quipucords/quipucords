@@ -160,7 +160,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             'infrastructure_type': 'infrastructure_type',
             'architecture': 'arch',
             'os_release': 'os_release',
-            'os_version': 'os_kernel_version'
+            'os_version': 'os_kernel_version',
+            'cloud_provider': 'cloud_provider'
         }
         system_profile = {}
         for qpc_fact, system_fact in qpc_to_system_profile.items():
@@ -1225,6 +1226,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       fact, 'date_yum_history', fingerprint)
         self._add_fact_to_fingerprint(source, 'insights_client_id',
                                       fact, 'insights_client_id', fingerprint)
+
+        # public cloud fact
+        self._add_fact_to_fingerprint(source, 'cloud_provider',
+                                      fact, 'cloud_provider', fingerprint)
 
         if fact.get('connection_timestamp'):
             last_checkin = self._multi_format_dateparse(
