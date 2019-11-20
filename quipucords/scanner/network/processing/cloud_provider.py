@@ -11,8 +11,14 @@
 
 from scanner.network.processing import process
 
+AMAZON = 'aws'
+GOOGLE = 'google'
+AZURE = 'azure'
+ALIBABA = 'alibaba'
 
 # pylint: disable=too-few-public-methods
+
+
 class ProcessDmiChassisAssetTag(process.Processor):
     """Process the dmi chassis asset tag."""
 
@@ -80,12 +86,12 @@ class ProcessCloudProvider(process.Processor):
         dmi_system_product_name = dependencies.get(
             'dmi_system_product_name', '')
         if 'amazon' in dmi_bios_version.lower():
-            return 'AWS'
+            return AMAZON
         if 'google' in dmi_bios_version.lower():
-            return 'GOOGLE'
+            return GOOGLE
         if '7783-7084-3265-9085-8269-3286-77' in dmi_chassis_asset_tag:
-            return 'AZURE'
+            return AZURE
         if 'alibaba cloud' in dmi_system_manufacturer.lower() or \
                 'alibaba cloud ecs' in dmi_system_product_name.lower():
-            return 'ALIBABA'
+            return ALIBABA
         return ''

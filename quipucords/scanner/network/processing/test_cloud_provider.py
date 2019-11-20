@@ -96,32 +96,32 @@ class TestProcessCloudProvider(unittest.TestCase):
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            'AWS')
+            cloud_provider.AMAZON)
         dependencies['dmi_bios_version'] = '6.0'
         dependencies['dmi_chassis_asset_tag'] = \
             'Asset Tag: 7783-7084-3265-9085-8269-3286-77'
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            'AZURE')
+            cloud_provider.AZURE)
         dependencies['dmi_bios_version'] = 'Google, 1.2.6'
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            'GOOGLE')
+            cloud_provider.GOOGLE)
         dependencies['dmi_bios_version'] = '6.0'
         dependencies['dmi_system_manufacturer'] = 'Alibaba Cloud'
         dependencies['dmi_chassis_asset_tag'] = 'Asset Tag: No Asset Tag'
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            'ALIBABA')
+            cloud_provider.ALIBABA)
         dependencies['dmi_system_manufacturer'] = 'empty'
         dependencies['dmi_system_product_name'] = '	Alibaba Cloud ECS'
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            'ALIBABA')
+            cloud_provider.ALIBABA)
 
     def test_not_found(self):
         """Did not find any dmi facts to compute the cloud provider."""

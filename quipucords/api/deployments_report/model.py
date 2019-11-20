@@ -70,11 +70,6 @@ class SystemFingerprint(models.Model):
     VIRTUALIZED = 'virtualized'
     HYPERVISOR = 'hypervisor'
 
-    AMAZON = 'AWS'
-    GOOGLE = 'GOOGLE'
-    AZURE = 'AZURE'
-    ALIBABA = 'ALIBABA'
-
     SOURCE_TYPE = (
         ('network', 'Ansible'),
         ('vcenter', 'VCenter'),
