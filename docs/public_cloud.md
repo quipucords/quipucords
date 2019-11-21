@@ -2,7 +2,7 @@
 Quipucords can identify the following cloud providers through a network scan; Amazon, Azure, and Google. The following instructions explain how to set up vms on each of the above clouds and run a scan with quipucords.
 - [Amazon](#amazon)
 - [Azure](#azure)
-- [Google Topics](#google)
+- [Google](#google)
 
 # <a name="amazon"></a> Amazon
 ### Official Documentation:
@@ -82,7 +82,7 @@ Quipucords can identify the following cloud providers through a network scan; Am
 ```
         Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
 ```
-* You can solve this by creating a fake ssh directory with `700` permissions and move the private key that you generated for your instance to this directory with `600` permissions (as expected). When you ssh to your instance, provide the path to this private key.
+* You can potentially solve this by creating a fake ssh directory with `700` permissions and move the private key that you generated for your instance to this directory with `600` permissions (as expected). When you ssh to your instance, provide the path to this private key.
 3. Once you have successfully connected you can create a cred, source, and scan to use Quipucords to scan your instance:
 ```
         qpc cred add --name google --type network --username yourUser --sshkeyfile ~/path/to/private-key
