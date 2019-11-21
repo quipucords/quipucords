@@ -22,7 +22,6 @@ class TestProcessDmiChassisAssetTag(unittest.TestCase):
 
     def test_success_case(self):
         """Found dmi chassis asset tag."""
-        #
         dependencies = {'internal_dmi_chassis_asset_tag':
                         ansible_result('a\nb\nc')}
         self.assertEqual(
@@ -57,7 +56,6 @@ class TestProcessDmiSystemProductName(unittest.TestCase):
 
     def test_success_case(self):
         """Found dmi system product name."""
-        #
         dependencies = {'internal_dmi_system_product_name':
                         ansible_result('a\nb\nc')}
         self.assertEqual(
