@@ -25,3 +25,4 @@ from . import yum
 from . import virt
 from . import redhat_packages
 from . import dmi
+from . import cloud_provider

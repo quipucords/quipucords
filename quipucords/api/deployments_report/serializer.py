@@ -68,6 +68,9 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     infrastructure_type = ChoiceField(
         required=False, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
 
+    cloud_provider = CharField(
+        required=False, max_length=16)
+
     mac_addresses = CustomJSONField(required=False)
     ip_addresses = CustomJSONField(required=False)
 

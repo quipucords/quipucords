@@ -128,6 +128,8 @@ To run the unit tests, use the following command:
 make test
 ```
 
+To test quipucords against virtual machines running on a cloud provider, view the documentation found [here](https://github.com/quipucords/quipucords/blob/master/docs/public_cloud.md).
+
 # <a name="advanced"></a> Advanced Topics
 
 ## Container Image

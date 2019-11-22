@@ -10,6 +10,7 @@
     - cpu
     - date
     - dmi
+    - cloud_provider
     - etc_release
     - file_contents
     - jboss_eap

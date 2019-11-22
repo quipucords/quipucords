@@ -1422,7 +1422,8 @@ definitions:
             "infrastructure_vendor": "esxi3.lab.eng.rdu2.redhat.com",
             "number_of_cpus": 16,
             "number_of_sockets": 4,
-            "cores_per_socket": 8
+            "cores_per_socket": 8,
+            "cloud_provider": "aws"
         }
     }
   InsightsReport:
@@ -2516,6 +2517,10 @@ definitions:
             format: "date"
             description: "Last time the system was seen.  For VCenter sources, this is the last time the system was powered on.  For Satellite sources, this is the last time the system satellite agent reportd.  For network sources, this is the last time the system was scanned."
             example: "183.pem"
+        cloud_provideer:
+          type: "string"
+          description: "The cloud provider."
+          example: "google"
   SystemInspectResultOut:
     type: "object"
     required:

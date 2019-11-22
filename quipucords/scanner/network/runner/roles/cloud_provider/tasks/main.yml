@@ -1,0 +1,47 @@
+---
+
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "cloud_provider"
+
+# Azure cloud facts
+- name: gather dmi.chassis.asset_tag fact
+  raw: /usr/sbin/dmidecode -t chassis 2>/dev/null | grep "Asset Tag"
+  register: internal_dmi_chassis_asset_tag_cmd
+  ignore_errors: yes
+  become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
+
+- name: set internal_dmi_chassis_asset_tag fact
+  set_fact:
+    internal_dmi_chassis_asset_tag: "{{ internal_dmi_chassis_asset_tag_cmd }}"
+  ignore_errors: yes
+
+- name: initialize dmi_chassis_asset_tag
+  set_fact:
+    dmi_chassis_asset_tag: "QPC_FORCE_POST_PROCESS"
+  ignore_errors: yes
+
+# ## Alibaba cloud facts
+- name: gather dmi.system.product_name fact
+  raw: /usr/sbin/dmidecode -t system 2>/dev/null | grep "Product Name"
+  register: internal_dmi_system_product_name_cmd
+  ignore_errors: yes
+  become: yes
+  when: 'user_has_sudo and internal_have_dmidecode'
+
+- name: set internal_dmi_system_product_name fact
+  set_fact:
+    internal_dmi_system_product_name: "{{ internal_dmi_system_product_name_cmd }}"
+  ignore_errors: yes
+
+- name: initialize dmi_system_product_name
+  set_fact:
+    dmi_system_product_name: "QPC_FORCE_POST_PROCESS"
+  ignore_errors: yes
+
+# set the public cloud fact to post process
+- name: initialize cloud_provider fact
+  set_fact:
+    cloud_provider: "QPC_FORCE_POST_PROCESS"
+  ignore_errors: yes
