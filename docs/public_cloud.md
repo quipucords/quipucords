@@ -36,7 +36,7 @@ Quipucords can identify the following cloud providers through a network scan; Am
         qpc scan start --name awsScan
 ```
 
-##### ** NOTE: when finished, make sure to stop and/or terminate your VMS
+##### NOTE: when finished, make sure to stop and/or terminate your VMS
 
 # <a name="azure"></a> Azure
 ### Official Documentation:
@@ -74,7 +74,7 @@ Quipucords can identify the following cloud providers through a network scan; Am
         qpc scan add --name azureScan --sources azure
         qpc scan start --name azureScan
 ```
-##### ** NOTE: when finished, make sure to stop and/or terminate your VMS
+##### NOTE: when finished, make sure to stop and/or terminate your VMS
 
 # <a name="google"></a> Google
 1. Follow this [blog](https://www.freecodecamp.org/news/how-to-create-and-connect-to-google-cloud-virtual-machine-with-ssh-81a68b8f74dd/), except choose a RHEL marketplace image.
@@ -91,4 +91,4 @@ Quipucords can identify the following cloud providers through a network scan; Am
         qpc scan start --name googleScan
 
 ```
-##### ** NOTE: when finished, make sure to stop and/or terminate your VMS
+##### NOTE: when finished, make sure to stop and/or terminate your VMS
