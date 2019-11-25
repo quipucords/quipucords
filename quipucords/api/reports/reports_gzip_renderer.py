@@ -16,6 +16,7 @@ import api.messages as messages
 from api.common.common_report import (create_filename, create_tar_buffer)
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
+from api.hash_report.view import create_hash
 
 from rest_framework import renderers
 
@@ -59,12 +60,30 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         # Collect CSV Data
         details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)
-        if any(value is None for value in [details_csv, deployments_json]):
+
+        # grab hashes
+        details_hash = create_hash(details_json)
+        deployments_hash = create_hash(deployments_json)
+        details_csv_hash = create_hash(details_csv)
+        deployments_csv_hash = create_hash(deployments_csv)
+
+        if any(value is None for value in [details_csv, deployments_csv]):
             return None
         details_csv_name = create_filename('details', 'csv', report_id)
         files_data[details_csv_name] = details_csv
         deployments_csv_name = create_filename('deployments', 'csv', report_id)
         files_data[deployments_csv_name] = deployments_csv
+
+        # map hashes to files
+        hash_dictionary = {
+            details_name: details_hash,
+            deployments_name: deployments_hash,
+            details_csv_name: details_csv_hash,
+            deployments_csv_name: deployments_csv_hash
+        }
+        hash_file_name = create_filename('hash', 'json', report_id)
+        files_data[hash_file_name] = hash_dictionary
+
         tar_buffer = create_tar_buffer(files_data)
         if tar_buffer is None:
             logger.error(messages.REPORTS_TAR_ERROR)

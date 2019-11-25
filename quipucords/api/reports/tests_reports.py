@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -15,6 +15,7 @@ import sys
 import tarfile
 
 from api.common.common_report import create_report_version
+from api.hash_report.view import create_hash
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -158,7 +159,7 @@ class ReportsTest(TestCase):
         tar = tarfile.open(fileobj=tar_gz_result)
         files = tar.getmembers()
         filenames = tar.getnames()
-        self.assertEqual(len(files), 4)
+        self.assertEqual(len(files), 5)
         # tar.getnames() always returns same order as tar.getmembers()
         for idx, file in enumerate(files):
             file_contents = tar.extractfile(file).read().decode()
@@ -177,4 +178,16 @@ class ReportsTest(TestCase):
                 elif tar_json_type == 'deployments':
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
-                    sys.exit('Could not identify .json return')
+                    # verify the hashes
+                    self.assertEqual(
+                        tar_json['report_id_1/details.json'],
+                        create_hash(self.details_json))
+                    self.assertEqual(
+                        tar_json['report_id_1/deployments.json'],
+                        create_hash(self.deployments_json))
+                    self.assertEqual(
+                        tar_json['report_id_1/details.csv'],
+                        create_hash(details_csv))
+                    self.assertEqual(
+                        tar_json['report_id_1/deployments.csv'],
+                        create_hash(deployments_csv))

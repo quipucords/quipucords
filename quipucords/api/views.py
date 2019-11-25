@@ -17,6 +17,7 @@ from api.credential.view import CredentialViewSet
 from api.source.view import SourceViewSet
 from api.deployments_report.view import deployments
 from api.details_report.view import details
+from api.hash_report.view import validate_hash
 from api.insights_report.view import insights
 from api.merge_report.view import (async_merge_reports,
                                    sync_merge_reports)
