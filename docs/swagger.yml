@@ -1077,7 +1077,7 @@ paths:
       tags:
         - "Report"
       summary: "Retrieves a tar.gz file for the deployments and details reports."
-      description: "The tar.gz contains the reports in both the .csv and .json format."
+      description: "The tar.gz contains the reports in both the .csv and .json format as well as a file containing the data integrity hashes for each report in .json format."
       operationId: "downloadReports"
       produces:
       - "application/gzip"
