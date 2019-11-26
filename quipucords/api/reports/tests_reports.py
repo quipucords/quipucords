@@ -15,11 +15,11 @@ import sys
 import tarfile
 
 from api.common.common_report import create_report_version
-from api.hash_report.view import create_hash
 from api.models import (Credential,
                         ServerInformation,
                         Source)
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
+from api.validate_report.view import create_hash
 
 from django.core import management
 from django.test import TestCase

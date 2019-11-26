@@ -16,7 +16,7 @@ import api.messages as messages
 from api.common.common_report import (create_filename, create_tar_buffer)
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
-from api.hash_report.view import create_hash
+from api.validate_report.view import create_hash
 
 from rest_framework import renderers
 
