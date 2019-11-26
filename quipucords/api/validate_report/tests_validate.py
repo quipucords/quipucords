@@ -41,7 +41,7 @@ class ValidateReportsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
         self.assertEqual(
-            json_response, False)
+            json_response['detail'], False)
 
     def test_validate_report_match(self):
         """Test the validate endpoint correct report and hash."""
@@ -56,7 +56,7 @@ class ValidateReportsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json_response = response.json()
         self.assertEqual(
-            json_response, True)
+            json_response['detail'], True)
 
     def test_validate_report_none(self):
         """Test the validate endpoint missing hash."""
