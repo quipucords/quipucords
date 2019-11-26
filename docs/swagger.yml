@@ -1095,6 +1095,27 @@ paths:
           description: "Reports id not found"
         401:
           description: "Not authorized"
+  /reports/validate/:
+    put:
+      tags:
+        - "Report"
+      summary: "Validate a reports authenticity against its hash."
+      description: "Validate a report against its associated hash."
+      operationId: "validateReports"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "The report to verify and the hash to verify it against"
+        required: true
+        schema:
+          $ref: "#/definitions/ValidateReport"
+      responses:
+        200:
+          description: "Report authenticity verified - either valid or invalid"
+        424:
+          description: "Report could not be validated due to missing dependency"
   /token/:
     post:
       tags:
@@ -2579,3 +2600,17 @@ definitions:
         type: "string"
         description: "The username"
         example: "admin"
+  ValidateReport:
+    type: "object"
+    required:
+      - report
+      - hash
+    properties:
+      report:
+        type: "string"
+        example: "The contents of a deployments or details report."
+        description: "The report to validate"
+      hash:
+        type: "string"
+        description: "The hash to validate the report against."
+        example: "9ac1223bcaa57d75a78022cff787bbeba3c0a54416ecef27d7c7301e93d3770d"

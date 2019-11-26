@@ -61,4 +61,5 @@ def validate_hash(request):
     hash_matches = False
     if actual_hash == test_hash:
         hash_matches = True
-    return Response(hash_matches, status=status.HTTP_200_OK)
+    return Response({'detail': hash_matches},
+                    status=status.HTTP_200_OK)
