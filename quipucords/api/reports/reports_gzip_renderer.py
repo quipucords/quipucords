@@ -10,18 +10,55 @@
 #
 """tar.gz renderer for reports."""
 
+import hashlib
+import json
 import logging
+import os
 
 import api.messages as messages
 from api.common.common_report import (create_filename, create_tar_buffer)
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
-from api.validate_report.view import create_hash
 
 from rest_framework import renderers
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+
+
+def create_tempfile(report_data, suffix):
+    """Create a temporary file with the report data."""
+    temp_rep = open('mytemprep.txt', 'wb')
+    if suffix == 'json':
+        myrepcontents = json.dumps(report_data).encode('utf-8')
+    elif suffix == 'csv':
+        myrepcontents = str(report_data).encode('utf-8')
+    temp_rep.write(myrepcontents)
+    temp_rep.close()
+    return temp_rep.name
+
+
+def create_hash(report_data, suffix):
+    """Create a temporary file, generate a hash, and delete the file.
+
+    :param: report_data: <dict> or <str> the report data in csv or json format
+    :param: suffix: <str> the file suffix (json or csv)
+    :returns: sha256 hash.
+    """
+    temp_file = create_tempfile(report_data, suffix)  # create a temp file
+    block_size = 65536  # The size of each read from the file
+    # Create the hash object
+    file_hash = hashlib.sha256()
+    with open(temp_file, 'rb') as temp_rep:  # Open the file to read it's bytes
+        # Read from the file. Take in the amount declared above
+        file_block = temp_rep.read(block_size)
+        while len(file_block) > 0:  # While there is still data being read
+            file_hash.update(file_block)  # Update the hash
+            # Read the next block from the file
+            file_block = temp_rep.read(block_size)
+        temp_rep.close()
+    os.remove(temp_file)  # remove the temp file
+    return file_hash.hexdigest()  # Get the hexadecimal digest of the hash
 
 
 class ReportsGzipRenderer(renderers.BaseRenderer):
@@ -41,9 +78,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         reports_dict = data
         if not bool(reports_dict):
             return None
-
-        files_data = dict()
-
         report_id = reports_dict.get('report_id')
         # Collect Json Data
         details_json = reports_dict.get('details_json')
@@ -52,37 +86,39 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
                                            details_json,
                                            deployments_json]):
             return None
-        details_name = create_filename('details', 'json', report_id)
-        files_data[details_name] = details_json
-        deployments_name = create_filename('deployments', 'json', report_id)
-        files_data[deployments_name] = deployments_json
 
         # Collect CSV Data
         details_csv = create_details_csv(details_json)
         deployments_csv = create_deployments_csv(deployments_json)
-
-        # grab hashes
-        details_hash = create_hash(details_json)
-        deployments_hash = create_hash(deployments_json)
-        details_csv_hash = create_hash(details_csv)
-        deployments_csv_hash = create_hash(deployments_csv)
-
         if any(value is None for value in [details_csv, deployments_csv]):
             return None
-        details_csv_name = create_filename('details', 'csv', report_id)
-        files_data[details_csv_name] = details_csv
-        deployments_csv_name = create_filename('deployments', 'csv', report_id)
-        files_data[deployments_csv_name] = deployments_csv
 
-        # map hashes to files
-        hash_dictionary = {
-            details_name: details_hash,
-            deployments_name: deployments_hash,
-            details_csv_name: details_csv_hash,
-            deployments_csv_name: deployments_csv_hash
+        # grab hashes
+        details_json_hash = create_hash(details_json, 'json')
+        deployments_json_hash = create_hash(deployments_json, 'json')
+        details_csv_hash = create_hash(details_csv, 'csv')
+        deployments_csv_hash = create_hash(deployments_csv, 'csv')
+
+        # create the file names
+        details_json_name = create_filename('details', 'json', report_id)
+        deployments_json_name = create_filename(
+            'deployments', 'json', report_id)
+        details_csv_name = create_filename('details', 'csv', report_id)
+        deployments_csv_name = create_filename('deployments', 'csv', report_id)
+        sha256sum_name = create_filename('SHA256SUM', None, report_id)
+
+        # map the file names to the file data
+        files_data = {
+            details_json_name: details_json,
+            deployments_json_name: deployments_json,
+            details_csv_name: details_csv,
+            deployments_csv_name: deployments_csv,
+            sha256sum_name:
+                details_json_hash + '  details.json\n' +
+                deployments_json_hash + '  deployments.json\n' +
+                details_csv_hash + '  details.csv\n' +
+                deployments_csv_hash + '  deployments.csv'
         }
-        hash_file_name = create_filename('hash', 'json', report_id)
-        files_data[hash_file_name] = hash_dictionary
 
         tar_buffer = create_tar_buffer(files_data)
         if tar_buffer is None:

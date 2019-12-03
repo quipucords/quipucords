@@ -18,8 +18,7 @@ from api.common.common_report import create_report_version
 from api.models import (Credential,
                         ServerInformation,
                         Source)
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer
-from api.validate_report.view import create_hash
+from api.reports.reports_gzip_renderer import ReportsGzipRenderer, create_hash
 
 from django.core import management
 from django.test import TestCase
@@ -145,7 +144,7 @@ class ReportsTest(TestCase):
         reports_dict['deployments_json'] = self.deployments_json
         return reports_dict
 
-    def test_reports_gzip_renderer(self):
+    def test_reports_gzip_renderer(self):  # pylint: disable=too-many-locals
         """Get a tar.gz return for report_id via API."""
         # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict()
@@ -170,24 +169,23 @@ class ReportsTest(TestCase):
                     self.assertEqual(file_contents, deployments_csv)
                 else:
                     sys.exit('Could not identify .csv return.')
-            else:
+            elif filenames[idx].endswith('json'):
                 tar_json = json.loads(file_contents)
                 tar_json_type = tar_json.get('report_type')
                 if tar_json_type == 'details':
                     self.assertEqual(tar_json, self.details_json)
                 elif tar_json_type == 'deployments':
                     self.assertEqual(tar_json, self.deployments_json)
-                else:
-                    # verify the hashes
-                    self.assertEqual(
-                        tar_json['report_id_1/details.json'],
-                        create_hash(self.details_json))
-                    self.assertEqual(
-                        tar_json['report_id_1/deployments.json'],
-                        create_hash(self.deployments_json))
-                    self.assertEqual(
-                        tar_json['report_id_1/details.csv'],
-                        create_hash(details_csv))
-                    self.assertEqual(
-                        tar_json['report_id_1/deployments.csv'],
-                        create_hash(deployments_csv))
+            else:
+                # verify the hashes
+                name_to_hash = {
+                    'details.json': create_hash(self.details_json, 'json'),
+                    'deployments.json': create_hash(self.deployments_json,
+                                                    'json'),
+                    'details.csv': create_hash(details_csv, 'csv'),
+                    'deployments.csv': create_hash(deployments_csv, 'csv')
+                }
+                for name, rep_hash in name_to_hash.items():
+                    for line in file_contents:
+                        if name in line:
+                            self.assertIn(rep_hash, line)

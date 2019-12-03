@@ -24,8 +24,7 @@ from api.views import (CredentialViewSet,
                        jobs,
                        reports,
                        status,
-                       sync_merge_reports,
-                       validate_hash,)
+                       sync_merge_reports)
 
 from django.urls import path
 
@@ -58,7 +57,6 @@ urlpatterns = [
     path('reports/<int:pk>/deployments/', deployments),
     path('reports/<int:pk>/insights/', insights),
     path('reports/<int:pk>/', reports),
-    path('reports/validate/', validate_hash),
     path('reports/merge/', sync_merge_reports),
     path('reports/merge/jobs/', async_merge_reports),
     path('reports/merge/jobs/<int:pk>/', async_merge_reports),
