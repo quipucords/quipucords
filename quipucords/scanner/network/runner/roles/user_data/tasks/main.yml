@@ -40,7 +40,7 @@
   ignore_errors: yes
 
 - name: gather user_delete_history data fact
-  raw: cat /var/log/secure 2>/dev/null | grep userdel
+  raw: grep userdel /var/log/secure*
   register: internal_user_delete_history_cmd
   ignore_errors: yes
   become: yes
