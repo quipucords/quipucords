@@ -14,6 +14,7 @@ import hashlib
 import json
 import logging
 import os
+import tempfile
 
 import api.messages as messages
 from api.common.common_report import (create_filename, create_tar_buffer)
@@ -28,14 +29,15 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 def create_tempfile(report_data, suffix):
     """Create a temporary file with the report data."""
-    temp_rep = open('mytemprep.txt', 'wb')
+    temporary_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_rep = open(temporary_file.name, 'wb')
     if suffix == 'json':
         myrepcontents = json.dumps(report_data).encode('utf-8')
     elif suffix == 'csv':
         myrepcontents = str(report_data).encode('utf-8')
     temp_rep.write(myrepcontents)
     temp_rep.close()
-    return temp_rep.name
+    return temporary_file.name
 
 
 def create_hash(report_data, suffix):

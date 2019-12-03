@@ -144,7 +144,8 @@ class ReportsTest(TestCase):
         reports_dict['deployments_json'] = self.deployments_json
         return reports_dict
 
-    def test_reports_gzip_renderer(self):  # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals, too-many-branches
+    def test_reports_gzip_renderer(self):
         """Get a tar.gz return for report_id via API."""
         # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict()
@@ -176,6 +177,8 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.details_json)
                 elif tar_json_type == 'deployments':
                     self.assertEqual(tar_json, self.deployments_json)
+                else:
+                    sys.exit('Could not identify .json return')
             else:
                 # verify the hashes
                 name_to_hash = {
