@@ -78,9 +78,10 @@ def extract_tar_gz(file_like_obj):
 
 def create_filename(file_name, file_ext, report_id):
     """Create the filename."""
-    file_name = 'report_id_%s/%s.%s' % (report_id,
-                                        file_name,
-                                        file_ext)
+    file_name = 'report_id_%s/%s' % (report_id,
+                                     file_name)
+    if file_ext:
+        file_name += '.%s' % file_ext
     return file_name
 
 
@@ -103,6 +104,8 @@ def create_tar_buffer(files_data):
                     io.BytesIO(json.dumps(file_content).encode('utf-8'))
             elif file_name.endswith('csv'):
                 file_buffer = io.BytesIO(file_content.encode('utf-8'))
+            elif 'SHA256SUM' in file_name:
+                file_buffer = io.BytesIO(str(file_content).encode('utf-8'))
             else:
                 return None
             info = tarfile.TarInfo(name=file_name)
