@@ -1232,12 +1232,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       fact, 'cloud_provider', fingerprint)
 
         # user data facts
-        self._add_fact_to_fingerprint(source, 'user_info',
-                                      fact, 'user_info', fingerprint)
+        self._add_fact_to_fingerprint(source, 'system_user_count',
+                                      fact, 'system_user_count', fingerprint)
         self._add_fact_to_fingerprint(source, 'user_login_history',
                                       fact, 'user_login_history', fingerprint)
-        self._add_fact_to_fingerprint(source, 'user_delete_history',
-                                      fact, 'user_delete_history', fingerprint)
 
         if fact.get('connection_timestamp'):
             last_checkin = self._multi_format_dateparse(

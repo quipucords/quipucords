@@ -2521,13 +2521,11 @@ definitions:
           type: "string"
           description: "The cloud provider."
           example: "google"
-        user_info:
-          type: "array"
-          items:
-            type: "string"
-            description: "User entry in the /etc/passwd file"
-          example: ["user_entry1","user_entry2"]
-          description: "User information from the /etc/passwd file"
+        system_user_count:
+          type: "integer"
+          format: "int64"
+          description: "Number of users derived from /etc/passwd file"
+          example: 4
         user_login_history:
           type: "array"
           items:
@@ -2535,13 +2533,6 @@ definitions:
             description: "User login entries found from the last command"
           example: ["user_login1","user_login2"]
           description: "User login history found from running the last command"
-        user_delete_history:
-          type: "array"
-          items:
-            type: "string"
-            description: "User delete entries"
-          example: ["userdel1","userdel2"]
-          description: "User delete entries found in the /var/log/secure file"
   SystemInspectResultOut:
     type: "object"
     required:

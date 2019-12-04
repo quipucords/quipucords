@@ -15,36 +15,39 @@ from scanner.network.processing import user_data
 from scanner.network.processing.util_for_test import ansible_result
 
 
-class TestProcessUserInfo(unittest.TestCase):
-    """Test ProcessUserInfo."""
+class TestProcessSystemUserCount(unittest.TestCase):
+    """Test ProcessSystemUserCount."""
 
     def test_success_case(self):
-        """Processed result of user_info."""
-        dependencies = {'internal_user_info':
-                        ansible_result('a\nb\nc')}
+        """Processed result of system_user_count."""
+        dependencies = {
+            'internal_system_user_count':
+            ansible_result('root:x:0:0:root:/root:/bin/bash\nb\nc')}
         self.assertEqual(
-            user_data.ProcessUserInfo.process(
+            user_data.ProcessSystemUserCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            ['a', 'b', 'c'])
+            1)
         # stdout_lines looks like ['', 'b']
-        dependencies['internal_user_info'] = \
-            ansible_result('\nb\n')
+        dependencies['internal_system_user_count'] = \
+            ansible_result(
+                '\ntestuser:x:502:502::/home/testuser:/bin/bash\n'
+                'sysuser:x:32:32:system user:/:/sbin/nologin')
         self.assertEqual(
-            user_data.ProcessUserInfo.process(
+            user_data.ProcessSystemUserCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
-            ['b'])
-        dependencies['internal_user_info'] = ansible_result(
+            1)
+        dependencies['internal_system_user_count'] = ansible_result(
             'Failed', 1)
         self.assertEqual(
-            user_data.ProcessUserInfo.process(
+            user_data.ProcessSystemUserCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
             '')
 
     def test_not_found(self):
-        """No result for the user_info fact."""
+        """No result for the system_user_count fact."""
         dependencies = {}
         self.assertEqual(
-            user_data.ProcessUserInfo.process(
+            user_data.ProcessSystemUserCount.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
             '')
 
@@ -79,39 +82,5 @@ class TestProcessUserLoginHistory(unittest.TestCase):
         dependencies = {}
         self.assertEqual(
             user_data.ProcessUserLoginHistory.process(
-                'QPC_FORCE_POST_PROCESS', dependencies),
-            '')
-
-
-class TestProcessUserDeleteHistory(unittest.TestCase):
-    """Test ProcessUserDeleteHistory."""
-
-    def test_success_case(self):
-        """Found user delete history fact."""
-        dependencies = {'internal_user_delete_history':
-                        ansible_result('a\nb\nc')}
-        self.assertEqual(
-            user_data.ProcessUserDeleteHistory.process(
-                'QPC_FORCE_POST_PROCESS', dependencies),
-            ['a', 'b', 'c'])
-        # stdout_lines looks like ['', 'b']
-        dependencies['internal_user_delete_history'] = \
-            ansible_result('\nb\n')
-        self.assertEqual(
-            user_data.ProcessUserDeleteHistory.process(
-                'QPC_FORCE_POST_PROCESS', dependencies),
-            ['b'])
-        dependencies['internal_user_delete_history'] = ansible_result(
-            'Failed', 1)
-        self.assertEqual(
-            user_data.ProcessUserDeleteHistory.process(
-                'QPC_FORCE_POST_PROCESS', dependencies),
-            '')
-
-    def test_not_found(self):
-        """Did not find user delete history."""
-        dependencies = {}
-        self.assertEqual(
-            user_data.ProcessUserDeleteHistory.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),
             '')

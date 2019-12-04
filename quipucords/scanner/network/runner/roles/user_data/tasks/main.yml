@@ -4,30 +4,12 @@
   set_fact:
     internal_host_started_processing_role: "user_data"
 
-# Facts to determine number of users
-- name: gather etc/passwd data fact
-  raw: tail -5 /etc/passwd
-  register: internal_user_info_cmd
-  ignore_errors: yes
-  become: yes
-  when: 'user_has_sudo'
-
-- name: set internal_user_info_cmd fact
-  set_fact:
-    internal_user_info: "{{ internal_user_info_cmd }}"
-  ignore_errors: yes
-
-- name: initialize user_info_data
-  set_fact:
-    user_info: "QPC_FORCE_POST_PROCESS"
-  ignore_errors: yes
-
+# Facts to gather last 25 logins
 - name: gather user_login_history data fact
   raw: last -25
   register: internal_user_login_history_cmd
   ignore_errors: yes
   become: yes
-  when: 'user_has_sudo'
 
 - name: set internal_user_login_history_cmd fact
   set_fact:
@@ -39,19 +21,19 @@
     user_login_history: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes
 
-- name: gather user_delete_history data fact
-  raw: grep userdel /var/log/secure*
-  register: internal_user_delete_history_cmd
+# Facts to determine number of users
+- name: gather etc/passwd data fact
+  raw: cat /etc/passwd
+  register: internal_system_user_count_cmd
   ignore_errors: yes
   become: yes
-  when: 'user_has_sudo'
 
-- name: set internal_user_delete_history_cmd fact
+- name: set internal_system_user_count_cmd fact
   set_fact:
-    internal_user_delete_history: "{{ internal_user_delete_history_cmd }}"
+    internal_system_user_count: "{{ internal_system_user_count_cmd }}"
   ignore_errors: yes
 
-- name: initialize user_delete_history
+- name: initialize system_user_count info
   set_fact:
-    user_delete_history: "QPC_FORCE_POST_PROCESS"
+    system_user_count: "QPC_FORCE_POST_PROCESS"
   ignore_errors: yes

@@ -13,23 +13,27 @@ from scanner.network.processing import process
 
 
 # pylint: disable=too-few-public-methods
-class ProcessUserInfo(process.Processor):
-    """Process the user_info fact."""
+class ProcessSystemUserCount(process.Processor):
+    """Process the system_user_count fact."""
 
-    KEY = 'user_info'
+    KEY = 'system_user_count'
 
-    DEPS = ['internal_user_info']
+    DEPS = ['internal_system_user_count']
     REQUIRE_DEPS = False
 
     @staticmethod
     def process(output, dependencies):
         """Pass the output back through."""
-        user_info = dependencies.get(
-            'internal_user_info')
-        if user_info and user_info.get('rc') == 0:
-            result = [line for line in user_info.get(
-                'stdout_lines') if line != '']
-            return result
+        system_user_count = dependencies.get(
+            'internal_system_user_count')
+        if system_user_count and system_user_count.get('rc') == 0:
+            # differentiate between system and regular users
+            users = \
+                [line for line in system_user_count.get(
+                    'stdout_lines') if '/sbin/nologin' not in line and
+                 ('/home/' in line or '/root:/' in line)]
+            unique_users = set(users)
+            return len(unique_users)
         return ''
 
 
@@ -48,26 +52,6 @@ class ProcessUserLoginHistory(process.Processor):
             'internal_user_login_history')
         if user_login_history and user_login_history.get('rc') == 0:
             result = [line for line in user_login_history.get(
-                'stdout_lines') if line != '']
-            return result
-        return ''
-
-
-class ProcessUserDeleteHistory(process.Processor):
-    """Process the user_delete_history fact."""
-
-    KEY = 'user_delete_history'
-
-    DEPS = ['internal_user_delete_history']
-    REQUIRE_DEPS = False
-
-    @staticmethod
-    def process(output, dependencies):
-        """Pass the output back through."""
-        user_delete_history = dependencies.get(
-            'internal_user_delete_history')
-        if user_delete_history and user_delete_history.get('rc') == 0:
-            result = [line for line in user_delete_history.get(
                 'stdout_lines') if line != '']
             return result
         return ''
