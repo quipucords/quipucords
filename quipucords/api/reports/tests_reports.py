@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 #
 # This software is licensed to you under the GNU General Public License,
 # version 3 (GPLv3). There is NO WARRANTY for this software, express or
@@ -18,7 +18,7 @@ from api.common.common_report import create_report_version
 from api.models import (Credential,
                         ServerInformation,
                         Source)
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer
+from api.reports.reports_gzip_renderer import ReportsGzipRenderer, create_hash
 
 from django.core import management
 from django.test import TestCase
@@ -144,6 +144,7 @@ class ReportsTest(TestCase):
         reports_dict['deployments_json'] = self.deployments_json
         return reports_dict
 
+    # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer(self):
         """Get a tar.gz return for report_id via API."""
         # pylint: disable=line-too-long
@@ -158,7 +159,7 @@ class ReportsTest(TestCase):
         tar = tarfile.open(fileobj=tar_gz_result)
         files = tar.getmembers()
         filenames = tar.getnames()
-        self.assertEqual(len(files), 4)
+        self.assertEqual(len(files), 5)
         # tar.getnames() always returns same order as tar.getmembers()
         for idx, file in enumerate(files):
             file_contents = tar.extractfile(file).read().decode()
@@ -169,7 +170,7 @@ class ReportsTest(TestCase):
                     self.assertEqual(file_contents, deployments_csv)
                 else:
                     sys.exit('Could not identify .csv return.')
-            else:
+            elif filenames[idx].endswith('json'):
                 tar_json = json.loads(file_contents)
                 tar_json_type = tar_json.get('report_type')
                 if tar_json_type == 'details':
@@ -178,3 +179,16 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
                     sys.exit('Could not identify .json return')
+            else:
+                # verify the hashes
+                name_to_hash = {
+                    'details.json': create_hash(self.details_json, 'json'),
+                    'deployments.json': create_hash(self.deployments_json,
+                                                    'json'),
+                    'details.csv': create_hash(details_csv, 'csv'),
+                    'deployments.csv': create_hash(deployments_csv, 'csv')
+                }
+                for name, rep_hash in name_to_hash.items():
+                    for line in file_contents:
+                        if name in line:
+                            self.assertIn(rep_hash, line)
