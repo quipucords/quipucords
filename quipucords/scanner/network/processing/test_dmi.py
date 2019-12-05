@@ -42,6 +42,23 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
                 'QPC_FORCE_POST_PROCESS', dependencies),
             '')
 
+    def test_invalid_uuid_case(self):
+        """Found cpu model ver."""
+        # stdout_lines looks like ['a', 'b', 'c']
+        dependencies = {'internal_dmi_system_uuid':
+                        ansible_result('%s\nb\nc' % ('a' * 37))}
+        self.assertEqual(
+            dmi.ProcessDmiSystemUuid.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            '')
+        # stdout_lines looks like ['', 'b']
+        dependencies['internal_dmi_system_uuid'] = \
+            ansible_result('\n%s\n' % ('b' * 37))
+        self.assertEqual(
+            dmi.ProcessDmiSystemUuid.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            '')
+
     def test_not_found(self):
         """Did not find dmi system uuid."""
         dependencies = {}
