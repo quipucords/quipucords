@@ -135,6 +135,9 @@ class SystemFingerprint(models.Model):
     virtual_host_uuid = models.CharField(
         max_length=36, unique=False, null=True)
 
+    system_user_count = models.PositiveIntegerField(unique=False, null=True)
+    user_login_history = models.TextField(unique=False, null=True)
+
     # VCenter scan facts
     vm_state = models.CharField(max_length=24, unique=False, null=True)
     vm_uuid = models.CharField(max_length=36, unique=False, null=True)
@@ -195,6 +198,8 @@ class SystemFingerprint(models.Model):
             'redhat_package_count:{}, '\
             'architecture:{}, '\
             'sources:{}, '\
+            'system_user_count:{}, '\
+            'user_login_history:{}, '\
             'metadata:{} '.format(self.id,
                                   self.deployment_report.id,
                                   self.name,
@@ -233,6 +238,8 @@ class SystemFingerprint(models.Model):
                                   self.redhat_package_count,
                                   self.architecture,
                                   self.sources,
+                                  self.system_user_count,
+                                  self.user_login_history,
                                   self.metadata) + '}'
 
 

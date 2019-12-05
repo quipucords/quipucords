@@ -98,6 +98,8 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     insights_client_id = CharField(required=False, max_length=128)
 
     virtualized_type = CharField(required=False, max_length=64)
+    system_user_count = IntegerField(required=False, min_value=0)
+    user_login_history = CustomJSONField(required=False)
 
     # VCenter scan facts
     vm_state = CharField(required=False, max_length=24)

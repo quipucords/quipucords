@@ -2517,10 +2517,22 @@ definitions:
             format: "date"
             description: "Last time the system was seen.  For VCenter sources, this is the last time the system was powered on.  For Satellite sources, this is the last time the system satellite agent reportd.  For network sources, this is the last time the system was scanned."
             example: "183.pem"
-        cloud_provideer:
+        cloud_provider:
           type: "string"
           description: "The cloud provider."
           example: "google"
+        system_user_count:
+          type: "integer"
+          format: "int64"
+          description: "Number of users derived from /etc/passwd file"
+          example: 4
+        user_login_history:
+          type: "array"
+          items:
+            type: "string"
+            description: "User login entries found from the last command"
+          example: ["user_login1","user_login2"]
+          description: "User login history found from running the last command"
   SystemInspectResultOut:
     type: "object"
     required:
