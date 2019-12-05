@@ -21,7 +21,7 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
     """Test ProcessDmiSystemUuid."""
 
     def test_success_case(self):
-        """Found cpu model ver."""
+        """Test multiple dmi_system_uuid values."""
         # stdout_lines looks like ['a', 'b', 'c']
         dependencies = {'internal_dmi_system_uuid':
                         ansible_result('a\nb\nc')}
@@ -43,7 +43,7 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
             '')
 
     def test_invalid_uuid_case(self):
-        """Found cpu model ver."""
+        """Test dmi_system_uuid too long."""
         # stdout_lines looks like ['a', 'b', 'c']
         dependencies = {'internal_dmi_system_uuid':
                         ansible_result('%s\nb\nc' % ('a' * 37))}
