@@ -114,6 +114,7 @@ class SystemFingerprint(models.Model):
     cpu_socket_count = models.PositiveIntegerField(unique=False, null=True)
     cpu_core_count = models.FloatField(unique=False, null=True)
     cpu_core_per_socket = models.PositiveIntegerField(unique=False, null=True)
+    cpu_hyperthreading = models.NullBooleanField()
 
     system_creation_date = models.DateField(null=True)
     system_last_checkin_date = models.DateField(null=True)
@@ -174,6 +175,7 @@ class SystemFingerprint(models.Model):
             'cpu_socket_count:{}, '\
             'cpu_core_count:{}, '\
             'cpu_core_per_socket:{}, '\
+            'cpu_hyperthreading:{}, '\
             'system_creation_date:{}, '\
             'system_purpose:{}, '\
             'system_role:{}, '\
@@ -214,6 +216,7 @@ class SystemFingerprint(models.Model):
                                   self.cpu_socket_count,
                                   self.cpu_core_count,
                                   self.cpu_core_per_socket,
+                                  self.cpu_hyperthreading,
                                   self.system_creation_date,
                                   self.system_purpose,
                                   self.system_role,
