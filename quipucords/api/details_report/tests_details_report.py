@@ -29,6 +29,15 @@ from django.urls import reverse
 from rest_framework import status
 
 
+class MockRequest():
+    """Mock a request object for the renderer."""
+
+    # pylint: disable=too-few-public-methods
+    def __init__(self, hash_rep=False):
+        """Initialize a fake request object."""
+        self.query_params = {'hash': hash_rep}
+
+
 class DetailReportTest(TestCase):
     """Tests against the Detail reports function."""
 
@@ -51,6 +60,8 @@ class DetailReportTest(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
         self.report_version = create_report_version()
+        self.mock_req = MockRequest()
+        self.mock_renderer_context = {'request': self.mock_req}
 
     def tearDown(self):
         """Create test case tearDown."""
@@ -72,9 +83,9 @@ class DetailReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def retrieve_expect_200(self, identifier):
+    def retrieve_expect_200(self, identifier, query_param=''):
         """Create a source, return the response as a dict."""
-        url = '/api/v1/reports/' + str(identifier) + '/details/'
+        url = '/api/v1/reports/' + str(identifier) + '/details/' + query_param
         response = self.client.get(url)
 
         if response.status_code != status.HTTP_200_OK:
@@ -110,20 +121,51 @@ class DetailReportTest(TestCase):
         response_json = self.retrieve_expect_200(identifier)
         self.assertEqual(response_json['report_id'], identifier)
 
+    def test_details_masked(self):
+        """Get details report with masked values for a report via API."""
+        request_json = {'report_type': 'details',
+                        'sources':
+                        [{'server_id': self.server_id,
+                          'report_version': create_report_version(),
+                          'source_name': self.net_source.name,
+                          'source_type': self.net_source.source_type,
+                          'facts': [{'ip_addresses': ['1.2.3.4'],
+                                     'mac_addresses': ['1.2.3.5', '2.4.5.6'],
+                                     'uname_hostname': 'foo',
+                                     'vm.name': 'foo'}]}]}
+
+        response_json = self.create_expect_201(
+            request_json)
+        identifier = response_json['report_id']
+        response_json = self.retrieve_expect_200(identifier,
+                                                 query_param='?hash=True')
+        self.assertEqual(response_json['report_id'], identifier)
+        # assert the ips/macs/hostname is masked
+        source_to_check = response_json.get('sources')[0]
+        facts = source_to_check.get('facts')
+        expected_facts = [{'ip_addresses': ['-7334718598697473719'],
+                           'mac_addresses':['-7048634151319043688',
+                                            '-3493454847440916718'],
+                           'uname_hostname': '-1958070316383817865',
+                           'vm.name': '-5539988930185779509'}]
+        self.assertEqual(facts, expected_facts)
     ##############################################################
     # Test CSV Renderer
     ##############################################################
-    def test_csv_renderer(self):
+
+    def test_csv_renderer(self):  # pylint:disable=too-many-statements
         """Test DetailsCSVRenderer."""
         renderer = DetailsCSVRenderer()
         # Test no FC id
         test_json = {}
-        value = renderer.render(test_json)
+        value = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         self.assertIsNone(value)
 
         # Test doesn't exist
         test_json = {'id': 42}
-        value = renderer.render(test_json)
+        value = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         self.assertIsNone(value)
 
         request_json = {'report_type': 'details',
@@ -132,22 +174,60 @@ class DetailReportTest(TestCase):
                           'report_version': create_report_version(),
                           'source_name': self.net_source.name,
                           'source_type': self.net_source.source_type,
-                          'facts': [{'key': 'value'}]}]}
+                          'facts': [{'ip_addresses': ['1.2.3.4'],
+                                     'mac_addresses': ['1.2.3.5', '2.4.5.6'],
+                                     'uname_hostname': 'foo',
+                                     'vm.name': 'foo'}]}]}
 
         response_json = self.create_expect_201(
             request_json)
         test_json = copy.deepcopy(response_json)
-        csv_result = renderer.render(test_json)
+        csv_result = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         # pylint: disable=line-too-long
-        expected = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nkey\r\nvalue\r\n\r\n\r\n' % (self.report_version, test_json.get('report_platform_id'), self.server_id)  # noqa
+        expected = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nip_addresses,mac_addresses,uname_hostname,vm.name\r\n[1.2.3.4],[1.2.3.5;2.4.5.6],foo,foo\r\n\r\n\r\n' % (self.report_version, test_json.get('report_platform_id'), self.server_id)  # noqa
         self.assertEqual(csv_result, expected)
 
         # Test cached works too
         test_json = copy.deepcopy(response_json)
         test_json['sources'][0]['facts'] = []
-        csv_result = renderer.render(test_json)
+        csv_result = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         # These would be different if not cached
         self.assertEqual(csv_result, expected)
+
+        # Clear cache
+        details_report = DetailsReport.objects.get(
+            report_id=response_json['report_id'])
+        details_report.cached_csv = None
+        details_report.save()
+
+        # Test with hashing
+        test_json['sources'][0]['facts'] = [
+            {'ip_addresses': [str(hash('1.2.3.4'))],
+             'mac_addresses': [str(hash('1.2.3.5')), str(hash('2.4.5.6'))],
+             'uname_hostname': str(hash('foo')), 'vm.name': str(hash('foo'))}]
+        new_mock_req = MockRequest(hash_rep=True)
+        new_renderer = {'request': new_mock_req}
+        csv_result = renderer.render(
+            test_json, renderer_context=new_renderer)
+        # pylint: disable=line-too-long
+        expected = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nip_addresses,mac_addresses,uname_hostname,vm.name\r\n[-7334718598697473719],[-7048634151319043688;-3493454847440916718],-2457967226571033580,-2457967226571033580\r\n\r\n\r\n' % (self.report_version, test_json.get('report_platform_id'), self.server_id)  # noqa
+        self.assertEqual(csv_result, expected)
+
+        # Test cached works too for hashed
+        test_json = copy.deepcopy(response_json)
+        test_json['sources'][0]['facts'] = []
+        csv_result = renderer.render(
+            test_json, renderer_context=new_renderer)
+        # These would be different if not cached
+        self.assertEqual(csv_result, expected)
+
+        # Clear cache
+        details_report = DetailsReport.objects.get(
+            report_id=response_json['report_id'])
+        details_report.cached_csv = None
+        details_report.save()
 
         # Clear cache
         details_report = DetailsReport.objects.get(
@@ -158,7 +238,8 @@ class DetailReportTest(TestCase):
         # Remove sources
         test_json = copy.deepcopy(response_json)
         test_json['sources'] = None
-        csv_result = renderer.render(test_json)
+        csv_result = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         expected = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,0\r\n' % (self.report_version, test_json.get('report_platform_id'))  # noqa
         self.assertEqual(csv_result, expected)
 
@@ -171,7 +252,8 @@ class DetailReportTest(TestCase):
         # Remove sources
         test_json = copy.deepcopy(response_json)
         test_json['sources'] = []
-        csv_result = renderer.render(test_json)
+        csv_result = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         expected = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,0\r\n\r\n\r\n' % (self.report_version, test_json.get('report_platform_id'))  # noqa
         self.assertEqual(csv_result, expected)
 
@@ -184,7 +266,8 @@ class DetailReportTest(TestCase):
         # Remove facts
         test_json = copy.deepcopy(response_json)
         test_json['sources'][0]['facts'] = []
-        csv_result = renderer.render(test_json)
+        csv_result = renderer.render(
+            test_json, renderer_context=self.mock_renderer_context)
         # pylint: disable=line-too-long
         expected = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n' % (self.report_version, test_json.get('report_platform_id'), self.server_id)  # noqa
         self.assertEqual(csv_result, expected)

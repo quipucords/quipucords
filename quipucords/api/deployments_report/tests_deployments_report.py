@@ -18,6 +18,7 @@ from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
 from api.deployments_report.util import (sanitize_row)
+from api.details_report.tests_details_report import MockRequest
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -52,6 +53,8 @@ class DeploymentReportTest(TestCase):
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retreive_server_id()
         self.report_version = create_report_version()
+        self.mock_request = MockRequest()
+        self.mock_renderer_context = {'request': self.mock_request}
 
     def create_details_report(self, data):
         """Call the create endpoint."""
@@ -137,6 +140,24 @@ class DeploymentReportTest(TestCase):
         self.assertIsInstance(report, dict)
         self.assertEqual(len(report['system_fingerprints'][0].keys()), 17)
 
+    # def test_get_details_report_group_report_masked(self):
+    #     """Get a specific group count report masking sensitive info."""
+    #     url = '/api/v1/reports/1/deployments/?hash=True'
+    #     # Query API
+    #     self.generate_fingerprints()
+    #     response = self.client.get(url)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     report = response.json()
+    #     self.assertIsInstance(report, dict)
+    #     self.assertEqual(len(report['system_fingerprints'][0].keys()), 17)
+
+    #     # Check the masked values
+    #     fingerprints = report.get('system_fingerprints')
+    #     for source in fingerprints:
+    #         print('\n\n')
+    #         print(source)
+    #         self.assertEqual(source.get('name'), str(hash('1.2.3.4')))
+
     def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""
         url = '/api/v1/reports/2/deployments/'
@@ -196,12 +217,14 @@ class DeploymentReportTest(TestCase):
         renderer = DeploymentCSVRenderer()
         # Test no FC id
         test_json = {}
-        value = renderer.render(test_json)
+        value = renderer.render(test_json,
+                                renderer_context=self.mock_renderer_context)
         self.assertIsNone(value)
 
         # Test doesn't exist
         test_json = {'id': 42}
-        value = renderer.render(test_json)
+        value = renderer.render(test_json,
+                                renderer_context=self.mock_renderer_context)
         self.assertIsNone(value)
 
         # Create a system fingerprint via collection receiver
@@ -212,12 +235,33 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
-        csv_result = renderer.render(report)
+        csv_result = renderer.render(
+            report, renderer_context=self.mock_renderer_context)
         # pylint: disable=line-too-long
         data_rows = ['architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid',  # noqa
                      ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
                      ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
                      ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,'  # noqa
+                     ]
+        for row in data_rows:
+            self.assertIn(row, csv_result)
+        # test the masked deployments report
+        url = '/api/v1/reports/1/deployments/?hash=True'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report = response.json()
+
+        new_mock_req = MockRequest(hash_rep=True)
+        new_mock_renderer = {'request': new_mock_req}
+
+        csv_result = renderer.render(
+            report, renderer_context=new_mock_renderer)
+
+        # pylint: disable=line-too-long
+        data_rows = ['architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid',  # noqa
+                     ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,7665187733878324228,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
+                     ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,7665187733878324228,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
+                     ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,7665187733878324228,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,'  # noqa
                      ]
         for row in data_rows:
             self.assertIn(row, csv_result)

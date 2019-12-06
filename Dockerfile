@@ -68,6 +68,7 @@ ENV DJANGO_LOG_FILE=/var/log/app.log
 ENV QUIPUCORDS_LOGGING_LEVEL=INFO
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
+ENV PYTHONHASHSEED=0
 
 # Initialize database & Collect static files
 RUN . ~/venv/bin/activate;make server-static

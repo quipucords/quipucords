@@ -21,6 +21,7 @@ env:
   QPC_DBMS_USER=postgres
   QPC_DBMS_PASSWORD=password
   QPC_DBMS_HOST=127.0.0.1
+  PYTHONHASHSEED=0
 
 # command to install dependencies
 install:
