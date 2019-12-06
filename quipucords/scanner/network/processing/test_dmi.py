@@ -21,7 +21,7 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
     """Test ProcessDmiSystemUuid."""
 
     def test_success_case(self):
-        """Found cpu model ver."""
+        """Test multiple dmi_system_uuid values."""
         # stdout_lines looks like ['a', 'b', 'c']
         dependencies = {'internal_dmi_system_uuid':
                         ansible_result('a\nb\nc')}
@@ -37,6 +37,23 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
                 'QPC_FORCE_POST_PROCESS', dependencies),
             'b')
         dependencies['internal_dmi_system_uuid'] = ansible_result('Failed', 1)
+        self.assertEqual(
+            dmi.ProcessDmiSystemUuid.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            '')
+
+    def test_invalid_uuid_case(self):
+        """Test dmi_system_uuid too long."""
+        # stdout_lines looks like ['a', 'b', 'c']
+        dependencies = {'internal_dmi_system_uuid':
+                        ansible_result('%s\nb\nc' % ('a' * 37))}
+        self.assertEqual(
+            dmi.ProcessDmiSystemUuid.process(
+                'QPC_FORCE_POST_PROCESS', dependencies),
+            '')
+        # stdout_lines looks like ['', 'b']
+        dependencies['internal_dmi_system_uuid'] = \
+            ansible_result('\n%s\n' % ('b' * 37))
         self.assertEqual(
             dmi.ProcessDmiSystemUuid.process(
                 'QPC_FORCE_POST_PROCESS', dependencies),

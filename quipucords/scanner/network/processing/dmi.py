@@ -8,14 +8,17 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
 """Initial processing of the shell output from the dmi role."""
+import logging
 
 from scanner.network.processing import process
 
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=too-few-public-methods
+
 class ProcessDmiSystemUuid(process.Processor):
     """Process the dmi system uuid."""
 
+    # pylint: disable=too-few-public-methods
     KEY = 'dmi_system_uuid'
 
     DEPS = ['internal_dmi_system_uuid']
@@ -28,7 +31,13 @@ class ProcessDmiSystemUuid(process.Processor):
         if dmi_system_uuid and dmi_system_uuid.get('rc') == 0:
             result = dmi_system_uuid.get('stdout_lines')
             if result:
+                dmi_system_uuid = result[0]
                 if result[0] == '' and len(result) > 1:
-                    return result[1]
-                return result[0]
+                    dmi_system_uuid = result[1]
+                if len(dmi_system_uuid) <= 36:
+                    return dmi_system_uuid
+                logger.warning(
+                    'dmi_system_uuid is invalid because '
+                    'its length is greater than 36.  '
+                    'dmi_system_uuid value: %s', dmi_system_uuid)
         return ''

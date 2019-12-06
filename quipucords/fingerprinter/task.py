@@ -1212,6 +1212,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       fact, 'cpu_core_count', fingerprint)
         self._add_fact_to_fingerprint(source, 'cpu_core_per_socket',
                                       fact, 'cpu_core_per_socket', fingerprint)
+        self._add_fact_to_fingerprint(source, 'cpu_hyperthreading',
+                                      fact, 'cpu_hyperthreading', fingerprint)
 
         # Determine system_creation_date
         self._add_fact_to_fingerprint(source, 'date_machine_id',
@@ -1230,6 +1232,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # public cloud fact
         self._add_fact_to_fingerprint(source, 'cloud_provider',
                                       fact, 'cloud_provider', fingerprint)
+
+        # user data facts
+        self._add_fact_to_fingerprint(source, 'system_user_count',
+                                      fact, 'system_user_count', fingerprint)
+        self._add_fact_to_fingerprint(source, 'user_login_history',
+                                      fact, 'user_login_history', fingerprint)
 
         if fact.get('connection_timestamp'):
             last_checkin = self._multi_format_dateparse(

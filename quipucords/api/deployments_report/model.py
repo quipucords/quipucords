@@ -114,6 +114,7 @@ class SystemFingerprint(models.Model):
     cpu_socket_count = models.PositiveIntegerField(unique=False, null=True)
     cpu_core_count = models.FloatField(unique=False, null=True)
     cpu_core_per_socket = models.PositiveIntegerField(unique=False, null=True)
+    cpu_hyperthreading = models.NullBooleanField()
 
     system_creation_date = models.DateField(null=True)
     system_last_checkin_date = models.DateField(null=True)
@@ -134,6 +135,9 @@ class SystemFingerprint(models.Model):
         max_length=128, unique=False, null=True)
     virtual_host_uuid = models.CharField(
         max_length=36, unique=False, null=True)
+
+    system_user_count = models.PositiveIntegerField(unique=False, null=True)
+    user_login_history = models.TextField(unique=False, null=True)
 
     # VCenter scan facts
     vm_state = models.CharField(max_length=24, unique=False, null=True)
@@ -171,6 +175,7 @@ class SystemFingerprint(models.Model):
             'cpu_socket_count:{}, '\
             'cpu_core_count:{}, '\
             'cpu_core_per_socket:{}, '\
+            'cpu_hyperthreading:{}, '\
             'system_creation_date:{}, '\
             'system_purpose:{}, '\
             'system_role:{}, '\
@@ -195,6 +200,8 @@ class SystemFingerprint(models.Model):
             'redhat_package_count:{}, '\
             'architecture:{}, '\
             'sources:{}, '\
+            'system_user_count:{}, '\
+            'user_login_history:{}, '\
             'metadata:{} '.format(self.id,
                                   self.deployment_report.id,
                                   self.name,
@@ -209,6 +216,7 @@ class SystemFingerprint(models.Model):
                                   self.cpu_socket_count,
                                   self.cpu_core_count,
                                   self.cpu_core_per_socket,
+                                  self.cpu_hyperthreading,
                                   self.system_creation_date,
                                   self.system_purpose,
                                   self.system_role,
@@ -233,6 +241,8 @@ class SystemFingerprint(models.Model):
                                   self.redhat_package_count,
                                   self.architecture,
                                   self.sources,
+                                  self.system_user_count,
+                                  self.user_login_history,
                                   self.metadata) + '}'
 
 

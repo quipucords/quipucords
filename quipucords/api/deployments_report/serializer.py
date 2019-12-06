@@ -85,6 +85,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     cpu_socket_count = IntegerField(required=False, min_value=0)
     cpu_core_count = FloatField(required=False, min_value=0)
     cpu_core_per_socket = IntegerField(required=False, min_value=0)
+    cpu_hyperthreading = NullBooleanField(required=False)
 
     system_creation_date = DateField(required=False)
     system_last_checkin_date = DateField(required=False)
@@ -98,6 +99,8 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     insights_client_id = CharField(required=False, max_length=128)
 
     virtualized_type = CharField(required=False, max_length=64)
+    system_user_count = IntegerField(required=False, min_value=0)
+    user_login_history = CustomJSONField(required=False)
 
     # VCenter scan facts
     vm_state = CharField(required=False, max_length=24)
