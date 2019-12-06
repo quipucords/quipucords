@@ -120,6 +120,7 @@ db.sqlite3-journal
 # node
 node_modules
 package-lock.json
+yarn.lock
 
 # symbolic link to roles
 quipucords/roles/

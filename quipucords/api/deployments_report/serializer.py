@@ -85,6 +85,7 @@ class SystemFingerprintSerializer(NotEmptySerializer):
     cpu_socket_count = IntegerField(required=False, min_value=0)
     cpu_core_count = FloatField(required=False, min_value=0)
     cpu_core_per_socket = IntegerField(required=False, min_value=0)
+    cpu_hyperthreading = NullBooleanField(required=False)
 
     system_creation_date = DateField(required=False)
     system_last_checkin_date = DateField(required=False)

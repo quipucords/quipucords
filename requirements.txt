@@ -1,12 +1,12 @@
-ansible==2.9.0
-Django==2.2.6
+ansible==2.9.2
+Django==2.2.8
 django-filter==2.2.0
 djangorestframework==3.10.3
 jmespath==0.9.4
-paramiko==2.6.0
+paramiko==2.7.0
 pexpect==4.7.0
 pyvmomi==6.7.3
-PyYAML==5.1.2
+PyYAML==5.2.0
 requests==2.22.0
 whitenoise==4.1.4
 psycopg2-binary==2.8.4

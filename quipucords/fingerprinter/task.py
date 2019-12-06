@@ -1234,6 +1234,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                       fact, 'cpu_core_count', fingerprint)
         self._add_fact_to_fingerprint(source, 'cpu_core_per_socket',
                                       fact, 'cpu_core_per_socket', fingerprint)
+        self._add_fact_to_fingerprint(source, 'cpu_hyperthreading',
+                                      fact, 'cpu_hyperthreading', fingerprint)
 
         # Determine system_creation_date
         self._add_fact_to_fingerprint(source, 'date_machine_id',
