@@ -203,8 +203,9 @@ def create_details_report(report_version, json_details_report):
     return None
 
 
-def create_details_csv(details_report_dict):
+def create_details_csv(details_report_dict, request):
     """Create details csv."""
+    # pylint: disable=too-many-locals
     report_id = details_report_dict.get('report_id')
     if report_id is None:
         return None
@@ -213,9 +214,11 @@ def create_details_csv(details_report_dict):
         report_id=report_id).first()
     if details_report is None:
         return None
-
+    use_hashed = request.query_params.get('hash', False)
     # Check for a cached copy of csv
     cached_csv = details_report.cached_csv
+    if use_hashed:
+        cached_csv = details_report.cached_hashed_csv
     if cached_csv:
         logger.info('Using cached csv results for details report %d',
                     report_id)
@@ -284,7 +287,43 @@ def create_details_csv(details_report_dict):
     logger.info('Caching csv results for details report %d',
                 report_id)
     cached_csv = details_report_csv_buffer.getvalue()
-    details_report.cached_csv = cached_csv
+    if use_hashed:
+        details_report.cached_hashed_csv = cached_csv
+    else:
+        details_report.cached_csv = cached_csv
     details_report.save()
 
     return cached_csv
+
+
+def mask_details_facts(report):
+    """Mask sensitive facts from the details report.
+
+    :param: report <dict> The details report to mask
+
+    :returns: report <dict> The masked details report.
+    """
+    sources = report.get('sources', [])
+    for source in sources:
+        facts = source.get('facts')
+        for host in facts:
+            mac_and_ip_facts = ['ifconfig_ip_addresses', 'ip_addresses',
+                                'vm.ip_addresses',
+                                'ifconfig_mac_addresses', 'mac_addresses',
+                                'vm.mac_addresses']
+            for address_list in mac_and_ip_facts:
+                new_addrs = []
+                addrs_to_mask = host.get(address_list)
+                if addrs_to_mask:
+                    for addr in addrs_to_mask:
+                        new_addrs.append(str(hash(addr)))
+                    host[address_list] = new_addrs
+
+            # VM NAME/ CLUSTER NAME/ HOST NAME
+            name_related_facts = ['vm.host_name', 'vm.dns_name',
+                                  'vm.cluster', 'vm.name', 'uname_hostname']
+            for name in name_related_facts:
+                name_to_change = host.get(name)
+                if name_to_change:
+                    host[name] = str(hash(name))
+    return report

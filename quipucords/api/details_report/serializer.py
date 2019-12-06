@@ -31,6 +31,7 @@ class DetailsReportSerializer(NotEmptySerializer):
     report_platform_id = UUIDField(format='hex_verbose',
                                    read_only=True)
     cached_csv = CharField(required=False, read_only=True)
+    cached_hashed_csv = CharField(required=False, read_only=True)
 
     class Meta:
         """Meta class for DetailsReportSerializer."""

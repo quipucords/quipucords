@@ -171,7 +171,9 @@ class DeploymentReportSerializer(NotEmptySerializer):
         queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
     cached_fingerprints = CustomJSONField(read_only=True)
+    cached_hashed_fingerprints = CustomJSONField(read_only=True)
     cached_csv = CharField(read_only=True)
+    cached_hashed_csv = CharField(read_only=True)
     cached_insights = CharField(read_only=True)
 
     status = ChoiceField(

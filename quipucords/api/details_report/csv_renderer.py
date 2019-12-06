@@ -27,4 +27,4 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
                accepted_media_type=None,
                renderer_context=None):
         """Render report as CSV."""
-        return create_details_csv(data)
+        return create_details_csv(data, renderer_context.get('request'))

@@ -64,7 +64,7 @@ def deployments(request, pk=None):
             'report_id': [_(messages.COMMON_ID_INV)]
         }
         raise ValidationError(error)
-
+    hash_rep = request.query_params.get('hash', False)
     report = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
     if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response({'detail':
@@ -72,19 +72,25 @@ def deployments(request, pk=None):
                          '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
 
-    return Response(build_cached_json_report(report))
+    return Response(build_cached_json_report(report, hash_rep))
 
 
-def build_cached_json_report(report):
+def build_cached_json_report(report, hash_rep):
     """Create a count report based on the fingerprints and the group.
 
     :param report: the DeploymentsReport used to group count
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
-    return {'report_id': report.id,
-            'status': report.status,
-            'report_type': report.report_type,
-            'report_version': report.report_version,
-            'report_platform_id': str(report.report_platform_id),
-            'system_fingerprints': json.loads(report.cached_fingerprints)}
+    system_fingerprints = json.loads(
+        report.cached_fingerprints)
+    if hash_rep:
+        system_fingerprints = json.loads(
+            report.cached_hashed_fingerprints)
+    return {
+        'report_id': report.id,
+        'status': report.status,
+        'report_type': report.report_type,
+        'report_version': report.report_version,
+        'report_platform_id': str(report.report_platform_id),
+        'system_fingerprints': system_fingerprints}

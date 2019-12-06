@@ -95,6 +95,26 @@ CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'fqdn']
 
 
+def mask_data(report):
+    """Mask the ips/mac addrs/etc."""
+    # fingerprints = report.get('system_fingerprints')
+    for system in report:
+        mac_and_ip_facts = ['ip_addresses', 'mac_addresses']
+        name_related_facts = ['name', 'vm_dns_name', 'virtual_host_name']
+        for address_list in mac_and_ip_facts:
+            new_addrs = []
+            addrs_to_mask = system.get(address_list)
+            if addrs_to_mask:
+                for addr in addrs_to_mask:
+                    new_addrs.append(str(hash(addr)))
+                system[address_list] = new_addrs
+        for name in name_related_facts:
+            name_to_change = system.get(name)
+            if name_to_change:
+                system[name] = str(hash(name))
+    return report
+
+
 class FingerprintTaskRunner(ScanTaskRunner):
     """ConnectTaskRunner system connection capabilities.
 
@@ -441,6 +461,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             status = ScanTask.FAILED
         deployment_report.cached_fingerprints = json.dumps(
             final_fingerprint_list)
+        deployment_report.cached_hashed_fingerprints = \
+            json.dumps(mask_data(final_fingerprint_list))
         deployment_report.save()
         self.scan_task.log_message('RESULTS (report id=%d) -  '
                                    '(valid fingerprints=%d, '
