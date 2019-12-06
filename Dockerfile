@@ -12,7 +12,7 @@ RUN mkdir -p /app
 
 # Setup dependencies
 COPY requirements.txt /app/requirements.txt
-RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt gunicorn==19.9.0
+RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt gunicorn==20.0.4
 
 # Create /etc/ssl/qpc
 RUN mkdir -p /etc/ssl/qpc/

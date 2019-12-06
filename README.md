@@ -1,9 +1,9 @@
-[![GitHub license](https://img.shields.io/github/license/quipucords/yupana.svg)](https://github.com/quipucords/yupana/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/quipucords/quipucords.svg)](https://github.com/quipucords/quipucords/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/quipucords/quipucords.svg?branch=master)](https://travis-ci.org/quipucords/quipucords)
 [![Code Coverage](https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg)](https://codecov.io/gh/quipucords/quipucords)
-[![Documentation Status](https://readthedocs.org/projects/yupana/badge/)](https://yupana.readthedocs.io/en/latest/)
-[![Updates](https://pyup.io/repos/github/quipucords/yupana/shield.svg)](https://pyup.io/repos/github/quipucords/yupana/)
-[![Python 3](https://pyup.io/repos/github/quipucords/yupana/python-3-shield.svg)](https://pyup.io/repos/github/quipucords/yupana/)
+[![Documentation Status](https://readthedocs.org/projects/quipucords/badge/)](https://quipucords.readthedocs.io/en/latest/)
+[![Updates](https://pyup.io/repos/github/quipucords/quipucords/shield.svg)](https://pyup.io/repos/github/quipucords/quipucords/)
+[![Python 3](https://pyup.io/repos/github/quipucords/quipucords/python-3-shield.svg)](https://pyup.io/repos/github/quipucords/quipucords/)
 
 
 # Overview
