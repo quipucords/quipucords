@@ -21,7 +21,8 @@ from api.common.util import (convert_to_boolean,
                              convert_to_int,
                              is_boolean,
                              is_float,
-                             is_int)
+                             is_int,
+                             mask_data_general)
 from api.deployments_report.util import (
     NETWORK_DETECTION_KEY,
     SATELLITE_DETECTION_KEY,
@@ -94,25 +95,8 @@ CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'subscription_manager_id',
                    'fqdn']
 
-
-def mask_data(report):
-    """Mask the ips/mac addrs/etc."""
-    # fingerprints = report.get('system_fingerprints')
-    for system in report:
-        mac_and_ip_facts = ['ip_addresses', 'mac_addresses']
-        name_related_facts = ['name', 'vm_dns_name', 'virtual_host_name']
-        for address_list in mac_and_ip_facts:
-            new_addrs = []
-            addrs_to_mask = system.get(address_list)
-            if addrs_to_mask:
-                for addr in addrs_to_mask:
-                    new_addrs.append(str(hash(addr)))
-                system[address_list] = new_addrs
-        for name in name_related_facts:
-            name_to_change = system.get(name)
-            if name_to_change:
-                system[name] = str(hash(name))
-    return report
+MAC_AND_IP_FACTS = ['ip_addresses', 'mac_addresses']
+NAME_RELATED_FACTS = ['name', 'vm_dns_name', 'virtual_host_name']
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -461,8 +445,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             status = ScanTask.FAILED
         deployment_report.cached_fingerprints = json.dumps(
             final_fingerprint_list)
-        deployment_report.cached_hashed_fingerprints = \
-            json.dumps(mask_data(final_fingerprint_list))
+        deployment_report.cached_masked_fingerprints = \
+            json.dumps(mask_data_general(
+                final_fingerprint_list, MAC_AND_IP_FACTS, NAME_RELATED_FACTS))
         deployment_report.save()
         self.scan_task.log_message('RESULTS (report id=%d) -  '
                                    '(valid fingerprints=%d, '

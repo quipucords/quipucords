@@ -15,7 +15,7 @@ import logging
 import os
 
 import api.messages as messages
-from api.common.util import is_int
+from api.common.util import is_int, validate_query_param_bool
 from api.deployments_report.view import (build_cached_json_report)
 from api.details_report.util import mask_details_facts
 from api.models import DeploymentsReport, DetailsReport
@@ -58,7 +58,7 @@ else:
 def reports(request, pk=None):
     """Lookup and return reports."""
     reports_dict = dict()
-    hash_rep = request.query_params.get('hash', False)
+    mask_report = request.query_params.get('mask', False)
     if pk is not None:
         if not is_int(pk):
             error = {
@@ -70,7 +70,7 @@ def reports(request, pk=None):
     details_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
     serializer = DetailsReportSerializer(details_data)
     json_details = serializer.data
-    if hash_rep:
+    if validate_query_param_bool(mask_report):
         json_details = mask_details_facts(json_details)
     json_details.pop('cached_csv', None)
     reports_dict['details_json'] = json_details
@@ -84,5 +84,5 @@ def reports(request, pk=None):
                          '  See server logs.' % deployments_id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
     reports_dict['deployments_json'] = \
-        build_cached_json_report(deployments_data, hash_rep)
+        build_cached_json_report(deployments_data, mask_report)
     return Response(reports_dict)

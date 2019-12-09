@@ -40,7 +40,7 @@ class DetailsReport(models.Model):
         related_name='details_report',
         null=True)
     cached_csv = models.TextField(null=True)
-    cached_hashed_csv = models.TextField(null=True)
+    cached_masked_csv = models.TextField(null=True)
 
     def __str__(self):
         """Convert to string."""

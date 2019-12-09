@@ -140,23 +140,29 @@ class DeploymentReportTest(TestCase):
         self.assertIsInstance(report, dict)
         self.assertEqual(len(report['system_fingerprints'][0].keys()), 18)
 
-    # def test_get_details_report_group_report_masked(self):
-    #     """Get a specific group count report masking sensitive info."""
-    #     url = '/api/v1/reports/1/deployments/?hash=True'
-    #     # Query API
-    #     self.generate_fingerprints()
-    #     response = self.client.get(url)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     report = response.json()
-    #     self.assertIsInstance(report, dict)
-    #     self.assertEqual(len(report['system_fingerprints'][0].keys()), 17)
+    def test_get_deployments_report_masked(self):
+        """Get a specific group count report masking sensitive info."""
+        url = '/api/v1/reports/1/deployments/?mask=True'
+        # Query API
+        self.generate_fingerprints()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        report = response.json()
+        self.assertIsInstance(report, dict)
+        self.assertEqual(len(report['system_fingerprints'][0].keys()), 18)
 
-    #     # Check the masked values
-    #     fingerprints = report.get('system_fingerprints')
-    #     for source in fingerprints:
-    #         print('\n\n')
-    #         print(source)
-    #         self.assertEqual(source.get('name'), str(hash('1.2.3.4')))
+        # Check the masked values
+        fingerprints = report.get('system_fingerprints')
+        for source in fingerprints:
+            self.assertEqual(source.get('name'), str(hash('1.2.3.4')))
+
+    def test_get_deployments_report_bad_param(self):
+        """Test a bad query param returns a 400."""
+        url = '/api/v1/reports/1/deployments/?mask=foo'
+        # Query API
+        self.generate_fingerprints()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""
@@ -245,22 +251,22 @@ class DeploymentReportTest(TestCase):
         for row in data_rows:
             self.assertIn(row, csv_result)
         # test the masked deployments report
-        url = '/api/v1/reports/1/deployments/?hash=True'
+        url = '/api/v1/reports/1/deployments/?mask=True'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
-        new_mock_req = MockRequest(hash_rep=True)
+        new_mock_req = MockRequest(mask_rep=True)
         new_mock_renderer = {'request': new_mock_req}
 
         csv_result = renderer.render(
             report, renderer_context=new_mock_renderer)
 
         # pylint: disable=line-too-long
-        data_rows = ['architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid',  # noqa
-                     ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,7665187733878324228,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
-                     ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,7665187733878324228,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
-                     ',,,2,2,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,7665187733878324228,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,'  # noqa
+        data_rows = ['architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid',  # noqa
+                     ',,,2,2,,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
+                     ',,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
+                     ',,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,'  # noqa
                      ]
         for row in data_rows:
             self.assertIn(row, csv_result)

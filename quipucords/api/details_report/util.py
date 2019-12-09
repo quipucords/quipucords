@@ -19,6 +19,7 @@ from api import messages
 from api.common.common_report import (CSVHelper,
                                       create_report_version,
                                       sanitize_row)
+from api.common.util import mask_data_general, validate_query_param_bool
 from api.models import (DetailsReport,
                         ScanTask,
                         ServerInformation,
@@ -214,11 +215,11 @@ def create_details_csv(details_report_dict, request):
         report_id=report_id).first()
     if details_report is None:
         return None
-    use_hashed = request.query_params.get('hash', False)
+    mask_report = request.query_params.get('mask', False)
     # Check for a cached copy of csv
     cached_csv = details_report.cached_csv
-    if use_hashed:
-        cached_csv = details_report.cached_hashed_csv
+    if validate_query_param_bool(mask_report):
+        cached_csv = details_report.cached_masked_csv
     if cached_csv:
         logger.info('Using cached csv results for details report %d',
                     report_id)
@@ -287,8 +288,8 @@ def create_details_csv(details_report_dict, request):
     logger.info('Caching csv results for details report %d',
                 report_id)
     cached_csv = details_report_csv_buffer.getvalue()
-    if use_hashed:
-        details_report.cached_hashed_csv = cached_csv
+    if validate_query_param_bool(mask_report):
+        details_report.cached_masked_csv = cached_csv
     else:
         details_report.cached_csv = cached_csv
     details_report.save()
@@ -303,27 +304,16 @@ def mask_details_facts(report):
 
     :returns: report <dict> The masked details report.
     """
+    mac_and_ip_facts = ['ifconfig_ip_addresses', 'ip_addresses',
+                        'vm.ip_addresses',
+                        'ifconfig_mac_addresses', 'mac_addresses',
+                        'vm.mac_addresses']
+    name_related_facts = ['vm.host_name', 'vm.dns_name',
+                          'vm.cluster', 'vm.name', 'uname_hostname']
     sources = report.get('sources', [])
     for source in sources:
         facts = source.get('facts')
-        for host in facts:
-            mac_and_ip_facts = ['ifconfig_ip_addresses', 'ip_addresses',
-                                'vm.ip_addresses',
-                                'ifconfig_mac_addresses', 'mac_addresses',
-                                'vm.mac_addresses']
-            for address_list in mac_and_ip_facts:
-                new_addrs = []
-                addrs_to_mask = host.get(address_list)
-                if addrs_to_mask:
-                    for addr in addrs_to_mask:
-                        new_addrs.append(str(hash(addr)))
-                    host[address_list] = new_addrs
-
-            # VM NAME/ CLUSTER NAME/ HOST NAME
-            name_related_facts = ['vm.host_name', 'vm.dns_name',
-                                  'vm.cluster', 'vm.name', 'uname_hostname']
-            for name in name_related_facts:
-                name_to_change = host.get(name)
-                if name_to_change:
-                    host[name] = str(hash(name))
+        source['facts'] = mask_data_general(facts,
+                                            mac_and_ip_facts,
+                                            name_related_facts)
     return report

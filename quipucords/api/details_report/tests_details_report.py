@@ -33,9 +33,9 @@ class MockRequest():
     """Mock a request object for the renderer."""
 
     # pylint: disable=too-few-public-methods
-    def __init__(self, hash_rep=False):
+    def __init__(self, mask_rep=False):
         """Initialize a fake request object."""
-        self.query_params = {'hash': hash_rep}
+        self.query_params = {'mask': mask_rep}
 
 
 class DetailReportTest(TestCase):
@@ -138,17 +138,23 @@ class DetailReportTest(TestCase):
             request_json)
         identifier = response_json['report_id']
         response_json = self.retrieve_expect_200(identifier,
-                                                 query_param='?hash=True')
+                                                 query_param='?mask=True')
         self.assertEqual(response_json['report_id'], identifier)
         # assert the ips/macs/hostname is masked
         source_to_check = response_json.get('sources')[0]
         facts = source_to_check.get('facts')
         expected_facts = [{'ip_addresses': ['-7334718598697473719'],
-                           'mac_addresses':['-7048634151319043688',
-                                            '-3493454847440916718'],
-                           'uname_hostname': '-1958070316383817865',
-                           'vm.name': '-5539988930185779509'}]
+                           'mac_addresses':
+                           ['-7048634151319043688', '-3493454847440916718'],
+                           'uname_hostname': '-2457967226571033580',
+                           'vm.name': '-2457967226571033580'}]
         self.assertEqual(facts, expected_facts)
+        # test bad query param
+        url = '/api/v1/reports/' + str(identifier) + '/details/?mask=foo'
+        # Query API
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     ##############################################################
     # Test CSV Renderer
     ##############################################################
@@ -207,7 +213,7 @@ class DetailReportTest(TestCase):
             {'ip_addresses': [str(hash('1.2.3.4'))],
              'mac_addresses': [str(hash('1.2.3.5')), str(hash('2.4.5.6'))],
              'uname_hostname': str(hash('foo')), 'vm.name': str(hash('foo'))}]
-        new_mock_req = MockRequest(hash_rep=True)
+        new_mock_req = MockRequest(mask_rep=True)
         new_renderer = {'request': new_mock_req}
         csv_result = renderer.render(
             test_json, renderer_context=new_renderer)

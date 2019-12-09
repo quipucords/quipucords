@@ -46,9 +46,9 @@ class DeploymentsReport(models.Model):
     )
     report_id = models.IntegerField(null=True)
     cached_fingerprints = models.TextField(null=True)
-    cached_hashed_fingerprints = models.TextField(null=True)
+    cached_masked_fingerprints = models.TextField(null=True)
     cached_csv = models.TextField(null=True)
-    cached_hashed_csv = models.TextField(null=True)
+    cached_masked_csv = models.TextField(null=True)
     cached_insights = models.TextField(null=True)
 
     def __str__(self):

@@ -16,7 +16,7 @@ import os
 
 import api.messages as messages
 from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import is_int
+from api.common.util import is_int, validate_query_param_bool
 from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
 from api.models import (DeploymentsReport)
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -64,7 +64,7 @@ def deployments(request, pk=None):
             'report_id': [_(messages.COMMON_ID_INV)]
         }
         raise ValidationError(error)
-    hash_rep = request.query_params.get('hash', False)
+    mask_report = request.query_params.get('mask', False)
     report = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
     if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response({'detail':
@@ -72,10 +72,10 @@ def deployments(request, pk=None):
                          '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
 
-    return Response(build_cached_json_report(report, hash_rep))
+    return Response(build_cached_json_report(report, mask_report))
 
 
-def build_cached_json_report(report, hash_rep):
+def build_cached_json_report(report, mask_report):
     """Create a count report based on the fingerprints and the group.
 
     :param report: the DeploymentsReport used to group count
@@ -84,9 +84,17 @@ def build_cached_json_report(report, hash_rep):
     """
     system_fingerprints = json.loads(
         report.cached_fingerprints)
-    if hash_rep:
-        system_fingerprints = json.loads(
-            report.cached_hashed_fingerprints)
+    if validate_query_param_bool(mask_report):
+        if report.cached_masked_fingerprints:
+            system_fingerprints = json.loads(
+                report.cached_masked_fingerprints)
+        else:
+            error = {'detail':
+                     'Masked deployments report %s was not generated. '
+                     'Report version %s.'
+                     'See server logs.' % (report.id,
+                                           report.report_version)}
+            return Response(error, status=404)
     return {
         'report_id': report.id,
         'status': report.status,
