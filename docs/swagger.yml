@@ -961,6 +961,8 @@ paths:
           description: "Not authorized"
         404:
           description: "Report for report id not found"
+        428:
+          description: "Precondition required."
   /reports/{report_id}/insights/:
     get:
       tags:
@@ -1116,6 +1118,10 @@ paths:
           description: "Reports id not found"
         401:
           description: "Not authorized"
+        424:
+          description: "Failed dependency"
+        428:
+          description: "Precondition required."
   /token/:
     post:
       tags:

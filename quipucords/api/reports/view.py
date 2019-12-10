@@ -83,6 +83,14 @@ def reports(request, pk=None):
                          'Deployment report %s could not be created.'
                          '  See server logs.' % deployments_id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
-    reports_dict['deployments_json'] = \
-        build_cached_json_report(deployments_data, mask_report)
-    return Response(reports_dict)
+    deployments_report = build_cached_json_report(
+        deployments_data, mask_report)
+    if deployments_report:
+        reports_dict['deployments_json'] = deployments_report
+        return Response(reports_dict)
+    error = {'detail':
+             'Deployments report %s could not be masked. '
+             'Rerun the scan to generate a masked deployments report.'
+             % (pk)}
+    return(Response(error,
+                    status=status.HTTP_428_PRECONDITION_REQUIRED))

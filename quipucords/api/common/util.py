@@ -118,12 +118,13 @@ def validate_query_param_bool(param, param_name='mask'):
     """Validate that the query param is a boolean return the bool.
 
     :param: param: The query param to evaluate
+    :param name: <str> The name of the param
     :return The value as a boolean or a validation error
     """
     if is_boolean(param):
         return convert_to_boolean(param)
     error = {
-        'mask': [_(
+        param_name: [_(
             messages.QUERY_PARAM_INVALID %
             (param_name, [True, False, 'true', 'false', 'True', 'False']))]
     }

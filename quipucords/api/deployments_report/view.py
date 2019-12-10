@@ -71,30 +71,37 @@ def deployments(request, pk=None):
                          'Deployment report %s could not be created.'
                          '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
-
-    return Response(build_cached_json_report(report, mask_report))
+    deployments_report = build_cached_json_report(report, mask_report)
+    if deployments_report:
+        return Response(deployments_report)
+    error = {'detail':
+             'Deployments report %s could not be masked. '
+             'Report version %s. '
+             'Rerun the scan to generate a masked deployments report.'
+             % (report.id,
+                report.report_version)}
+    return(Response(error,
+                    status=status.HTTP_428_PRECONDITION_REQUIRED))
 
 
 def build_cached_json_report(report, mask_report):
     """Create a count report based on the fingerprints and the group.
 
     :param report: the DeploymentsReport used to group count
+    :param mask_report: <boolean> bool associated with whether
+        or not we should mask the report.
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
-    system_fingerprints = json.loads(
-        report.cached_fingerprints)
     if validate_query_param_bool(mask_report):
         if report.cached_masked_fingerprints:
             system_fingerprints = json.loads(
                 report.cached_masked_fingerprints)
         else:
-            error = {'detail':
-                     'Masked deployments report %s was not generated. '
-                     'Report version %s.'
-                     'See server logs.' % (report.id,
-                                           report.report_version)}
-            return Response(error, status=404)
+            return None
+    else:
+        system_fingerprints = json.loads(
+            report.cached_fingerprints)
     return {
         'report_id': report.id,
         'status': report.status,
