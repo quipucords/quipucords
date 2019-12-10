@@ -14,8 +14,10 @@
 import logging
 import os
 
-
+import api.messages as messages
 from api.scantask.model import ScanTask
+
+from django.utils.translation import ugettext as _
 
 from rest_framework.serializers import ValidationError
 
@@ -112,6 +114,23 @@ def convert_to_boolean(value):
     return False
 
 
+def validate_query_param_bool(param, param_name='mask'):
+    """Validate that the query param is a boolean return the bool.
+
+    :param: param: The query param to evaluate
+    :param name: <str> The name of the param
+    :return The value as a boolean or a validation error
+    """
+    if is_boolean(param):
+        return convert_to_boolean(param)
+    error = {
+        param_name: [_(
+            messages.QUERY_PARAM_INVALID %
+            (param_name, [True, False, 'true', 'false', 'True', 'False']))]
+    }
+    raise ValidationError(error)
+
+
 def check_for_existing_name(queryset, name, error_message, search_id=None):
     """Look for existing (different object) with same name.
 
@@ -206,3 +225,27 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
                 status_details[task_key] = task.status_message
 
     return job_json
+
+
+def mask_data_general(report, mac_and_ip_facts, name_related_facts):
+    """Mask the data that is given and return it.
+
+    :param report: <dict> the report to mask
+    :param mac_and_ip_facts: <list> a list of mac/ip related facts
+    :param name_related_facts: <list> a list of name related facts
+
+    :returns: <dict> the report with sensitive info masked.
+    """
+    for system in report:
+        for address_list in mac_and_ip_facts:
+            new_addrs = []
+            addrs_to_mask = system.get(address_list)
+            if addrs_to_mask:
+                for addr in addrs_to_mask:
+                    new_addrs.append(str(hash(addr)))
+                system[address_list] = new_addrs
+        for name in name_related_facts:
+            name_to_change = system.get(name)
+            if name_to_change:
+                system[name] = str(hash(name_to_change))
+    return report

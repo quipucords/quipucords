@@ -21,7 +21,8 @@ from api.common.util import (convert_to_boolean,
                              convert_to_int,
                              is_boolean,
                              is_float,
-                             is_int)
+                             is_int,
+                             mask_data_general)
 from api.deployments_report.util import (
     NETWORK_DETECTION_KEY,
     SATELLITE_DETECTION_KEY,
@@ -93,6 +94,9 @@ CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
                    'ip_addresses', 'mac_addresses',
                    'subscription_manager_id',
                    'fqdn']
+
+MAC_AND_IP_FACTS = ['ip_addresses', 'mac_addresses']
+NAME_RELATED_FACTS = ['name', 'vm_dns_name', 'virtual_host_name']
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -441,6 +445,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             status = ScanTask.FAILED
         deployment_report.cached_fingerprints = json.dumps(
             final_fingerprint_list)
+        deployment_report.cached_masked_fingerprints = \
+            json.dumps(mask_data_general(
+                final_fingerprint_list, MAC_AND_IP_FACTS, NAME_RELATED_FACTS))
         deployment_report.save()
         self.scan_task.log_message('RESULTS (report id=%d) -  '
                                    '(valid fingerprints=%d, '

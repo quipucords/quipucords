@@ -15,6 +15,7 @@ import sys
 import tarfile
 
 from api.common.common_report import create_report_version
+from api.details_report.tests_details_report import MockRequest
 from api.models import (Credential,
                         ServerInformation,
                         Source)
@@ -25,12 +26,14 @@ from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
+from rest_framework.serializers import ValidationError
 
 
 class ReportsTest(TestCase):
     """Tests against the Reports function."""
 
     # pylint: disable= no-self-use, invalid-name
+    # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
         management.call_command('flush', '--no-input')
@@ -52,6 +55,8 @@ class ReportsTest(TestCase):
         self.report_version = create_report_version()
         self.details_json = None
         self.deployments_json = None
+        self.mock_req = MockRequest()
+        self.mock_renderer_context = {'request': self.mock_req}
 
     def tearDown(self):
         """Create test case tearDown."""
@@ -74,15 +79,6 @@ class ReportsTest(TestCase):
         details_json = response.json()
         self.details_json = details_json
         return details_json
-
-    def create_details_report_expect_400(self, data):
-        """Create a source, return the response as a dict."""
-        response = self.create_details_report(data)
-        if response.status_code != status.HTTP_400_BAD_REQUEST:
-            print('Failure cause: ')
-            print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        return response.json()
 
     def generate_fingerprints(self,
                               os_name='RHEL',
@@ -128,16 +124,28 @@ class ReportsTest(TestCase):
         details_report = self.create_details_report_expect_201(fc_json)
         return details_report
 
-    def create_reports_dict(self):
+    def retrieve_expect_200_details(self, identifier, query_param=''):
+        """Create a source, return the response as a dict."""
+        url = '/api/v1/reports/' + str(identifier) + '/details/' + query_param
+        response = self.client.get(url)
+
+        if response.status_code != status.HTTP_200_OK:
+            print('Failure cause: ')
+            print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.json()
+
+    def create_reports_dict(self, query_params=''):
         """Create a deployments report."""
-        url = '/api/v1/reports/1/deployments/'
+        url = '/api/v1/reports/1/deployments/' + query_params
         self.generate_fingerprints(
             os_versions=['7.4', '7.4', '7.5'])
-        filters = {'group_count': 'os_release'}
-        response = self.client.get(url, filters)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.deployments_json = report
+        self.details_json = self.retrieve_expect_200_details(1, query_params)
+
         reports_dict = dict()
         reports_dict['report_id'] = 1
         reports_dict['details_json'] = self.details_json
@@ -155,7 +163,8 @@ class ReportsTest(TestCase):
         details_csv = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n' % (self.report_version, reports_dict.get('details_json').get('report_platform_id'), self.server_id)  # noqa
 
         renderer = ReportsGzipRenderer()
-        tar_gz_result = renderer.render(reports_dict)
+        tar_gz_result = renderer.render(
+            reports_dict, renderer_context=self.mock_renderer_context)
         self.assertNotEqual(tar_gz_result, None)
         tar = tarfile.open(fileobj=tar_gz_result)
         files = tar.getmembers()
@@ -193,3 +202,65 @@ class ReportsTest(TestCase):
                     for line in file_contents:
                         if name in line:
                             self.assertIn(rep_hash, line)
+
+    # pylint: disable=too-many-locals, too-many-branches
+    def test_reports_gzip_renderer_masked(self):
+        """Get a tar.gz return for report_id via API with masked values."""
+        # pylint: disable=line-too-long
+        reports_dict = self.create_reports_dict(query_params='?mask=True')
+        deployments_csv = 'Report ID,Report Type,Report Version,Report Platform ID\r\n1,deployments,%s,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n,,,2,2,,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n,,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n,,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n\r\n' % (self.report_version, reports_dict.get('deployments_json').get('report_platform_id'))  # noqa
+        # pylint: disable=line-too-long
+        details_csv = 'Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n\r\n\r\n' % (self.report_version, reports_dict.get('details_json').get('report_platform_id'), self.server_id)  # noqa
+        renderer = ReportsGzipRenderer()
+        mock_req = MockRequest(mask_rep=True)
+        mock_renderer_context = {'request': mock_req}
+        tar_gz_result = renderer.render(
+            reports_dict, renderer_context=mock_renderer_context)
+        self.assertNotEqual(tar_gz_result, None)
+        tar = tarfile.open(fileobj=tar_gz_result)
+        files = tar.getmembers()
+        filenames = tar.getnames()
+        self.assertEqual(len(files), 5)
+        # tar.getnames() always returns same order as tar.getmembers()
+        for idx, file in enumerate(files):
+            file_contents = tar.extractfile(file).read().decode()
+            if filenames[idx].endswith('csv'):
+                if 'details' in file_contents:
+                    self.assertEqual(file_contents, details_csv)
+                elif 'deployments' in file_contents:
+                    self.assertEqual(file_contents, deployments_csv)
+                else:
+                    sys.exit('Could not identify .csv return.')
+            elif filenames[idx].endswith('json'):
+                tar_json = json.loads(file_contents)
+                tar_json_type = tar_json.get('report_type')
+                if tar_json_type == 'details':
+                    self.assertEqual(tar_json, self.details_json)
+                elif tar_json_type == 'deployments':
+                    self.assertEqual(tar_json, self.deployments_json)
+                else:
+                    sys.exit('Could not identify .json return')
+            else:
+                # verify the hashes
+                name_to_hash = {
+                    'details.json': create_hash(self.details_json, 'json'),
+                    'deployments.json': create_hash(self.deployments_json,
+                                                    'json'),
+                    'details.csv': create_hash(details_csv, 'csv'),
+                    'deployments.csv': create_hash(deployments_csv, 'csv')
+                }
+                for name, rep_hash in name_to_hash.items():
+                    for line in file_contents:
+                        if name in line:
+                            self.assertIn(rep_hash, line)
+
+    def test_reports_gzip_renderer_masked_bad_req(self):
+        """Get a tar.gz return for report_id via API with a bad query param."""
+        reports_dict = self.create_reports_dict(query_params='?mask=True')
+        renderer = ReportsGzipRenderer()
+        mock_req = MockRequest(mask_rep='foo')
+        mock_renderer_context = {'request': mock_req}
+        with self.assertRaises(ValidationError):
+            tar_gz_result = renderer.render(
+                reports_dict, renderer_context=mock_renderer_context)
+            self.assertEqual(tar_gz_result, None)

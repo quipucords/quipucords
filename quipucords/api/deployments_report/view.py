@@ -16,7 +16,7 @@ import os
 
 import api.messages as messages
 from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import is_int
+from api.common.util import is_int, validate_query_param_bool
 from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
 from api.models import (DeploymentsReport)
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -64,27 +64,48 @@ def deployments(request, pk=None):
             'report_id': [_(messages.COMMON_ID_INV)]
         }
         raise ValidationError(error)
-
+    mask_report = request.query_params.get('mask', False)
     report = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
     if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response({'detail':
                          'Deployment report %s could not be created.'
                          '  See server logs.' % report.details_report.id},
                         status=status.HTTP_424_FAILED_DEPENDENCY)
+    deployments_report = build_cached_json_report(report, mask_report)
+    if deployments_report:
+        return Response(deployments_report)
+    error = {'detail':
+             'Deployments report %s could not be masked. '
+             'Report version %s. '
+             'Rerun the scan to generate a masked deployments report.'
+             % (report.id,
+                report.report_version)}
+    return(Response(error,
+                    status=status.HTTP_428_PRECONDITION_REQUIRED))
 
-    return Response(build_cached_json_report(report))
 
-
-def build_cached_json_report(report):
+def build_cached_json_report(report, mask_report):
     """Create a count report based on the fingerprints and the group.
 
     :param report: the DeploymentsReport used to group count
+    :param mask_report: <boolean> bool associated with whether
+        or not we should mask the report.
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
-    return {'report_id': report.id,
-            'status': report.status,
-            'report_type': report.report_type,
-            'report_version': report.report_version,
-            'report_platform_id': str(report.report_platform_id),
-            'system_fingerprints': json.loads(report.cached_fingerprints)}
+    if validate_query_param_bool(mask_report):
+        if report.cached_masked_fingerprints:
+            system_fingerprints = json.loads(
+                report.cached_masked_fingerprints)
+        else:
+            return None
+    else:
+        system_fingerprints = json.loads(
+            report.cached_fingerprints)
+    return {
+        'report_id': report.id,
+        'status': report.status,
+        'report_type': report.report_type,
+        'report_version': report.report_version,
+        'report_platform_id': str(report.report_platform_id),
+        'system_fingerprints': system_fingerprints}

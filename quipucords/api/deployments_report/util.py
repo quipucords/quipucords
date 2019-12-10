@@ -16,6 +16,7 @@ import logging
 from io import StringIO
 
 from api.common.common_report import CSVHelper, sanitize_row
+from api.common.util import validate_query_param_bool
 from api.models import (DeploymentsReport,
                         Source,
                         SystemFingerprint)
@@ -51,8 +52,9 @@ def compute_source_info(sources):
     return result
 
 
-def create_deployments_csv(deployments_report_dict):
+def create_deployments_csv(deployments_report_dict, request):
     """Create deployments report csv."""
+    mask_report = request.query_params.get('mask', False)
     source_headers = {NETWORK_DETECTION_KEY,
                       VCENTER_DETECTION_KEY,
                       SATELLITE_DETECTION_KEY,
@@ -68,6 +70,8 @@ def create_deployments_csv(deployments_report_dict):
 
     # Check for a cached copy of csv
     cached_csv = deployment_report.cached_csv
+    if validate_query_param_bool(mask_report):
+        cached_csv = deployment_report.cached_masked_csv
     if cached_csv:
         logger.info('Using cached csv results for deployment report %d',
                     report_id)
@@ -144,6 +148,9 @@ def create_deployments_csv(deployments_report_dict):
     csv_writer.writerow([])
     logger.info('Caching csv results for deployment report %d', report_id)
     cached_csv = deployment_report_buffer.getvalue()
-    deployment_report.cached_csv = cached_csv
+    if validate_query_param_bool(mask_report):
+        deployment_report.cached_masked_csv = cached_csv
+    else:
+        deployment_report.cached_csv = cached_csv
     deployment_report.save()
     return cached_csv

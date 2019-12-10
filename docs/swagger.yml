@@ -912,11 +912,18 @@ paths:
         required: true
         type: "integer"
         format: "int64"
+      - name: "mask"
+        in: "query"
+        type: "boolean"
+        description: "Query parameter for optionally masking the sensitive information in a report."
+        required: false
       responses:
         200:
           description: "Detailed report successfully retrieved"
           schema:
             $ref: "#/definitions/DetailsReportOut"
+        400:
+          description: "Invalid input"
         401:
           description: "Not authorized"
         404:
@@ -938,15 +945,24 @@ paths:
           required: true
           type: "integer"
           format: "int64"
+        - name: "mask"
+          in: "query"
+          type: "boolean"
+          description: "Query parameter for optionally masking the sensitive information in a report."
+          required: false
       responses:
         200:
           description: "Deployment report for scanned systems retrieved"
           schema:
             $ref: "#/definitions/DeploymentsReport"
+        400:
+          description: "Invalid input"
         401:
           description: "Not authorized"
         404:
           description: "Report for report id not found"
+        428:
+          description: "Precondition required."
   /reports/{report_id}/insights/:
     get:
       tags:
@@ -1088,13 +1104,24 @@ paths:
           required: true
           type: "integer"
           format: "int64"
+        - name: "mask"
+          in: "query"
+          type: "boolean"
+          description: "Query parameter for optionally masking the sensitive information in a report."
+          required: false
       responses:
         200:
           description: "Downloads a tar.gz file"
+        400:
+          description: "Invalid input"
         404:
           description: "Reports id not found"
         401:
           description: "Not authorized"
+        424:
+          description: "Failed dependency"
+        428:
+          description: "Precondition required."
   /token/:
     post:
       tags:

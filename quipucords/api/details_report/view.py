@@ -17,9 +17,10 @@ import os
 import api.messages as messages
 from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import is_int
+from api.common.util import is_int, validate_query_param_bool
 from api.details_report.csv_renderer import (DetailsCSVRenderer)
 from api.details_report.util import (create_details_report,
+                                     mask_details_facts,
                                      validate_details_report_json)
 from api.models import (DetailsReport,
                         ScanJob,
@@ -75,6 +76,9 @@ def details(request, pk=None):
     detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
     serializer = DetailsReportSerializer(detail_data)
     json_details = serializer.data
+    mask_report = request.query_params.get('mask', False)
+    if validate_query_param_bool(mask_report):
+        json_details = mask_details_facts(json_details)
     http_accept = request.META.get('HTTP_ACCEPT')
     if http_accept and 'text/csv' not in http_accept:
         json_details.pop('cached_csv', None)

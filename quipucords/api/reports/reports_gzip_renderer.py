@@ -77,6 +77,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
                renderer_context=None):
         """Render all reports as gzip."""
         # pylint: disable=too-many-locals
+        request = renderer_context.get('request')
         reports_dict = data
         if not bool(reports_dict):
             return None
@@ -90,8 +91,8 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
             return None
 
         # Collect CSV Data
-        details_csv = create_details_csv(details_json)
-        deployments_csv = create_deployments_csv(deployments_json)
+        details_csv = create_details_csv(details_json, request)
+        deployments_csv = create_deployments_csv(deployments_json, request)
         if any(value is None for value in [details_csv, deployments_csv]):
             return None
 
