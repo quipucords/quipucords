@@ -461,9 +461,9 @@ class SourceSerializer(NotEmptySerializer):
         # type HOST NUMERIC RANGE:  abcd[2:4].foo.com
         # type HOST ALPHA RANGE:    abcd[a:f].foo.com
         host_regex_list = [
-            r'[a-zA-Z0-9-\.]+',
-            r'[a-zA-Z0-9-\.]*\[[0-9]+:[0-9]+\]*[a-zA-Z0-9-\.]*',
-            r'[a-zA-Z0-9-\.]*\[[a-zA-Z]{1}:[a-zA-Z]{1}\][a-zA-Z0-9-\.]*']
+            r'[a-zA-Z0-9-_\.]+',
+            r'[a-zA-Z0-9-_\.]*\[[0-9]+:[0-9]+\]*[a-zA-Z0-9-_\.]*',
+            r'[a-zA-Z0-9-_\.]*\[[a-zA-Z]{1}:[a-zA-Z]{1}\][a-zA-Z0-9-_\.]*']
 
         normalized_hosts = []
         host_errors = []
