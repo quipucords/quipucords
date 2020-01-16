@@ -96,6 +96,10 @@ class SourceTest(TestCase):
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""
         response = self.create(data)
+        if response.status_code != status.HTTP_201_CREATED:
+            print('#' * 1200)
+            print('Status code not 201.  See JSON response.')
+            print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
@@ -370,9 +374,13 @@ class SourceTest(TestCase):
                        '10.10.[1:20].25',
                        '10.10.[1:20].[1:25]',
                        'localhost',
+                       'my_cool_underscore.com',
                        'mycentos.com',
+                       'my_rhel[a:d].company.com',
+                       'my_rhel[120:400].company.com',
                        'my-rhel[a:d].company.com',
-                       'my-rhel[120:400].company.com'],
+                       'my-rhel[120:400].company.com',
+                       'my-rh_el[120:400].comp_a-ny.com'],
              'port': '22',
              'credentials': [self.net_cred_for_upload]})
 
@@ -410,8 +418,7 @@ class SourceTest(TestCase):
                  '10.10.128.[a:25]',
                  '10.10.[1-20].25',
                  '1.1.1.1/33',
-                 'my_rhel[a:d].company.com',
-                 'my-rhel[a:400].company.com']
+                 'myrhel[a:400].company.com']
 
         response = self.create(
             {'name': 'source1',
