@@ -98,6 +98,7 @@ class SourceTest(TestCase):
         response = self.create(data)
         if response.status_code != status.HTTP_201_CREATED:
             print('#' * 1200)
+            print('Status code not 201.  See JSON response.')
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
