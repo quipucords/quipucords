@@ -4,7 +4,7 @@ django-filter==2.2.0
 djangorestframework==3.11.0
 jmespath==0.9.4
 paramiko==2.7.1
-pexpect==4.7.0
+pexpect==4.8.0
 pyvmomi==6.7.3
 PyYAML==5.2.0
 requests==2.22.0
