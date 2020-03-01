@@ -6,7 +6,7 @@ jmespath==0.9.5
 paramiko==2.7.1
 pexpect==4.8.0
 pyvmomi==6.7.3
-PyYAML==5.2.0
+PyYAML==5.3
 requests==2.22.0
 whitenoise==4.1.4
 psycopg2-binary==2.8.4
