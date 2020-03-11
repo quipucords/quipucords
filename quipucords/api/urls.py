@@ -34,22 +34,22 @@ ROUTER = SimpleRouter()
 
 ROUTER.register(r'credentials',
                 CredentialViewSet,
-                base_name='cred')
+                basename='cred')
 ROUTER.register(r'reports',
                 DetailsReportsViewSet,
-                base_name='reports')
+                basename='reports')
 ROUTER.register(r'sources',
                 SourceViewSet,
-                base_name='source')
+                basename='source')
 ROUTER.register(r'scans',
                 ScanViewSet,
-                base_name='scan')
+                basename='scan')
 ROUTER.register(r'jobs',
                 ScanJobViewSet,
-                base_name='scanjob')
+                basename='scanjob')
 ROUTER.register(r'users',
                 UserViewSet,
-                base_name='users')
+                basename='users')
 
 # pylint: disable=invalid-name
 urlpatterns = [

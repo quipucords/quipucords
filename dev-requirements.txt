@@ -2,27 +2,27 @@
 -r requirements.txt
 
 #Coverage
-coverage==4.5.4
+coverage==5.0.3
 
 # Test runner/testing utils
-pytest==5.3.1
-pytest-django==3.7.0
+pytest==5.3.5
+pytest-django==3.8.0
 requests-mock==1.7.0
 
 
 # Linting
-pydocstyle==4.0.1
+pydocstyle==5.0.2
 flake8==3.7.9
 flake8-docstrings==1.5.0
 flake8-import-order==0.18.1
 flake8-quotes==2.1.1
-pylint==2.4.3
-pylint-django==2.0.13
+pylint==2.4.4
+pylint-django==2.0.14
 pylint-plugin-utils==0.6
 pyflakes==2.1.1
 
 # Editor
-autopep8==1.4.4
+autopep8==1.5
 
 # Gunicorn local development
 gunicorn==20.0.4
