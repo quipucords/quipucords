@@ -9,15 +9,15 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 
-"""Test the fact engine utils."""
+"""Test the fingerprinter utils."""
 
 from django.test import TestCase
 
 from fingerprinter.utils import product_entitlement_found
 
 
-class EngineTest(TestCase):
-    """Tests Utils class."""
+class FingerprinterUtilTest(TestCase):
+    """Tests Fingerprinter Utils class."""
 
     def test_product_entitlement_no_name(self):
         """Test product entitlement without name is false."""
