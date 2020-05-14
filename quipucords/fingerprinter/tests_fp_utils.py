@@ -12,13 +12,14 @@
 """Test the fact engine utils."""
 
 from django.test import TestCase
+
 from fingerprinter.utils import product_entitlement_found
 
 
 class EngineTest(TestCase):
     """Tests Utils class."""
 
-    def test_process_network_source(self):
-        """Test process network source."""
+    def test_product_entitlement_no_name(self):
+        """Test product entitlement without name is false."""
         result = product_entitlement_found([{}], 'Foo')
         self.assertFalse(result)
