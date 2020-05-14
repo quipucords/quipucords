@@ -24,7 +24,7 @@ def product_entitlement_found(entitlements, product_name):
     :returns: True if found, False otherwise
     """
     for entitlement in entitlements:
-        name = entitlement.get(NAME)
+        name = entitlement.get(NAME, '')
         if product_name in name:
             return True
     return False
