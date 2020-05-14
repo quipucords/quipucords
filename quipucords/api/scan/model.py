@@ -94,7 +94,7 @@ class DisabledOptionalProductsOptions(models.Model):
         return '{' + 'id:{}, '\
             'jboss_eap: {}, '\
             'jboss_fuse: {}, '\
-            'jboss_brms:' \
+            'jboss_brms: {}' \
             'jboss_ws:' \
                      ' {}'.format(self.id,
                                   self.jboss_eap,
