@@ -46,13 +46,13 @@ test-coverage:
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 swagger-valid:
-	node_modules/swagger-cli/bin/swagger-cli.js validate docs/swagger.yml
+	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
 	flake8 . --ignore D203,W504 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv,deploy,quipucords/local_gunicorn.conf.py
 
 lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" -not -path "./quipucords/local_gunicorn.conf.py" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code,wrong-import-order,useless-import-alias,unnecessary-pass
+	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" -not -path "./quipucords/local_gunicorn.conf.py" | xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code,wrong-import-order,useless-import-alias,unnecessary-pass,too-many-lines
 
 lint: lint-flake8 lint-pylint
 
