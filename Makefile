@@ -46,7 +46,7 @@ test-coverage:
 	coverage report -m --omit $(OMIT_PATTERNS)
 
 swagger-valid:
-	node_modules/swagger-cli/bin/swagger-cli.js validate docs/swagger.yml
+	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
 	flake8 . --ignore D203,W504 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv,deploy,quipucords/local_gunicorn.conf.py
