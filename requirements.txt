@@ -1,4 +1,4 @@
-ansible==2.9.7
+ansible==2.9.11
 Django==3.0.5
 django-filter==2.2.0
 djangorestframework==3.11.0
