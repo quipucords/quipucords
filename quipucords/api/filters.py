@@ -25,4 +25,6 @@ class ListFilter(Filter):
         # use lookup_type instead of lookup_expr
         self.lookup_expr = 'in'
         values = value.split(',')
+
+        # pylint: disable=super-with-arguments
         return super(ListFilter, self).filter(qs, values)
