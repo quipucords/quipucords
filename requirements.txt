@@ -5,7 +5,7 @@ djangorestframework==3.12.2
 jmespath==0.10.0
 paramiko==2.7.2
 pexpect==4.8.0
-pyvmomi==7.0
+pyvmomi==7.0.1
 PyYAML==5.3.1
 requests==2.24.0
 whitenoise==5.2.0
