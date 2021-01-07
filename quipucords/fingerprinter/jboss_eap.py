@@ -106,7 +106,9 @@ EAP_CLASSIFICATIONS = {
     '1.4.4.Final-redhat-1': '7.0',
     '1.5.1.Final-redhat-1': '7.0.0',
     '1.5.4.Final-redhat-1': '7.0',
-    '1.6.0.Final-redhat-1': '7.1.0'
+    '1.6.0.Final-redhat-1': '7.1.0',
+    '1.8.6.Final-redhat-00001': '7.2.0',
+    '1.9.1.Final-redhat-00001': '7.3.0'
 }
 
 

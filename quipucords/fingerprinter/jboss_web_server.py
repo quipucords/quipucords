@@ -43,8 +43,25 @@ JWS_CLASSIFICATIONS = {
     'JWS_3.0.2': 'JWS 3.0.2',
     'JWS_3.0.3': 'JWS 3.0.3',
     'JWS_3.1.0': 'JWS 3.1.0',
+    'JWS_3.1.1': 'JWS 3.1.1',
+    'JWS_3.1.2': 'JWS 3.1.2',
+    'JWS_3.1.3': 'JWS 3.1.3',
+    'JWS_3.1.4': 'JWS 3.1.4',
+    'JWS_3.1.5': 'JWS 3.1.5',
+    'JWS_3.1.6': 'JWS 3.1.6',
+    'JWS_3.1.7': 'JWS 3.1.7',
+    'JWS_3.1.8': 'JWS 3.1.8',
+    'JWS_3.1.9': 'JWS 3.1.9',
+    'Red Hat JBoss Web Server - Version 5.0 GA': 'JWS 5.0',
     'Red Hat JBoss Web Server - Version 5.0.0 GA': 'JWS 5.0.0',
     'jws5': 'JWS 5.x.x',
+    'Red Hat JBoss Web Server - Version 5.1 GA': 'JWS 5.1',
+    'Red Hat JBoss Web Server - Version 5.1.0 GA': 'JWS 5.1.0',
+    'Red Hat JBoss Web Server - Version 5.2 GA': 'JWS 5.2',
+    'Red Hat JBoss Web Server - Version 5.2.0 GA': 'JWS 5.2.0',
+    'Red Hat JBoss Web Server - Version 5.3 GA': 'JWS 5.3',
+    'Red Hat JBoss Web Server - Version 5.3.0 GA': 'JWS 5.3',
+    'Red Hat JBoss Web Server - Version 5.3.1 GA': 'JWS 5.3.1'
 }
 
 
