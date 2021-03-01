@@ -16,7 +16,7 @@ flake8==3.8.4
 flake8-docstrings==1.5.0
 flake8-import-order==0.18.1
 flake8-quotes==3.2.0
-pylint==2.6.0
+pylint==2.7.2
 pylint-django==2.3.0
 pylint-plugin-utils==0.6
 pyflakes==2.2.0
