@@ -13,7 +13,7 @@ requests-mock==1.9.3
 # Linting
 pydocstyle==6.1.1
 flake8==3.9.2
-flake8-docstrings==1.5.0
+flake8-docstrings==1.6.0
 flake8-import-order==0.18.1
 flake8-quotes==3.2.0
 pylint==2.6.0
