@@ -10,4 +10,4 @@ PyYAML==5.4.1
 requests==2.26.0
 whitenoise==5.3.0
 psycopg2-binary==2.9.1
-ansible-runner==1.4.6
+ansible-runner==2.0.1
