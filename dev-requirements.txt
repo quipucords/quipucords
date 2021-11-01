@@ -22,7 +22,7 @@ pylint-plugin-utils==0.6
 pyflakes==2.4.0
 
 # Editor
-autopep8==1.5.4
+autopep8==1.6.0
 
 # Gunicorn local development
 gunicorn==20.0.4
