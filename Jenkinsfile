@@ -6,7 +6,7 @@ pipeline {
         image_name = "quipucords:${build_version}"
         tarfile = "quipucords_server_image.tar"
         targzfile = "${tarfile}.gz"
-        postgres_version = "9.6.10"
+        postgres_version = "14.1"
         postgres_image_name = "postgres:${postgres_version}"
         postgres_tarfile = "postgres.${postgres_version}.tar"
         postgres_dir = "postgres.${postgres_version}"
