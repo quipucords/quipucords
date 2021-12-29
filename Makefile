@@ -7,8 +7,6 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
-OMIT_PATTERNS = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*,*/deploy/*,*/local_gunicorn.conf.py
-
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                to show this message"
@@ -43,7 +41,6 @@ test-case:
 
 test-coverage:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto --cov=quipucords
-	coverage report -m --omit $(OMIT_PATTERNS)
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
