@@ -39,7 +39,7 @@ make lint
 
 ### Testing
 Before opening a pull requests, please make sure the tests pass
-in a Python 3.6 environments.
+in a Python 3.9 environments.
 You should also add tests for any new features and bug fixes.
 
 quipucords uses [pytest](http://pytest.org/) for testing.
