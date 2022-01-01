@@ -7,7 +7,7 @@ paramiko==2.9.1
 pexpect==4.8.0
 pyvmomi==7.0.3
 PyYAML==6.0
-requests==2.25.1
+requests==2.26.0
 whitenoise==5.2.0
 psycopg2-binary==2.8.6
 ansible-runner==1.4.6
