@@ -1,0 +1,35 @@
+name: Test
+on: pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: pip install -r dev-requirements
+
+      - name: Run Tests
+        run: make test
+        env:
+          QPC_DBMS: postgres
+          QPC_DBMS_DATABASE: postgres
+          QPC_DBMS_PORT: 5432
+          QPC_DBMS_USER: postgres
+          QPC_DBMS_PASSWORD: postgres
+          QPC_DBMS_HOST: postgres
+          PYTHONHASHSEED: 0
