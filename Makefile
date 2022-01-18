@@ -7,6 +7,8 @@ PYDIRS	= quipucords
 
 BINDIR  = bin
 
+QUIPUCORDS_UI_PATH = ../quipucords-ui
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                to show this message"
@@ -74,6 +76,6 @@ serve:
 	$(PYTHON) quipucords/manage.py runserver --nostatic
 
 build-ui:
-	cd ../quipucords-ui;yarn;yarn build
-	cp -rf ../quipucords-ui/dist/client quipucords/client
-	cp -rf ../quipucords-ui/dist/templates quipucords/quipucords/templates
+	cd $(QUIPUCORDS_UI_PATH);yarn;yarn build
+	cp -rf $(QUIPUCORDS_UI_PATH)/dist/client quipucords/client
+	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
