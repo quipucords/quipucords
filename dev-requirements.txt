@@ -20,7 +20,7 @@ flake8-quotes==3.3.1
 pylint==2.12.2
 pylint-django==2.5.0
 pylint-plugin-utils==0.7
-pyflakes==2.2.0
+pyflakes==2.4.0
 
 # Editor
 autopep8==1.5.4
