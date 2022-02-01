@@ -19,7 +19,7 @@ flake8-import-order==0.18.1
 flake8-quotes==3.3.1
 pylint==2.12.2
 pylint-django==2.5.0
-pylint-plugin-utils==0.6
+pylint-plugin-utils==0.7
 pyflakes==2.2.0
 
 # Editor
