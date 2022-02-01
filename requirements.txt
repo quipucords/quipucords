@@ -1,5 +1,5 @@
 ansible==5.2.0
-Django==3.1.14
+Django==4.0.2
 django-filter==2.4.0
 djangorestframework==3.12.2
 jmespath==0.10.0
