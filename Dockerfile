@@ -1,26 +1,21 @@
-FROM fedora:26
+FROM redhat/ubi8
 
-RUN dnf -y groupinstall "Development tools" \
-    && dnf -y install python-devel python-tools python3-devel python3-tools sshpass which supervisor procps\
-    && dnf clean all \
-    && rm -rf /var/cache/dnf
+RUN dnf -yq install python39 make openssh-clients glibc-langpack-en &&\
+    dnf update &&\
+    dnf clean all &&\
+    python3 -m venv /opt/venv
 
-RUN pip install --no-cache-dir virtualenv
-RUN virtualenv -p python3 ~/venv
-# Create base directory
-RUN mkdir -p /app
+ENV PATH="/opt/venv/bin:${PATH}"
 
-# Setup dependencies
-COPY requirements.txt /app/requirements.txt
-RUN . ~/venv/bin/activate; pip install -r /app/requirements.txt gunicorn==20.0.4
+RUN pip install --upgrade pip
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 # Create /etc/ssl/qpc
 RUN mkdir -p /etc/ssl/qpc/
-VOLUME /etc/ssl/qpc/
-COPY deploy/ssl/server.crt /etc/ssl/qpc/
-COPY deploy/ssl/server.csr /etc/ssl/qpc/
-COPY deploy/ssl/server.key /etc/ssl/qpc/
-
+COPY deploy/ssl/* /etc/ssl/qpc/
 
 # Create /deploy
 RUN mkdir -p /deploy
@@ -36,10 +31,6 @@ COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN mkdir -p /var/log/supervisor/
 VOLUME /var/log
 
-# Create /sshkeys
-RUN mkdir -p /sshkeys
-VOLUME /sshkeys
-
 # Create /var/data
 RUN mkdir -p /var/data
 VOLUME /var/data
@@ -50,9 +41,7 @@ COPY quipucords/scanner/network/runner/roles/ /etc/ansible/roles/
 VOLUME /etc/ansible/roles/
 
 # Copy server code
-COPY . /app/
-WORKDIR /app
-VOLUME /app
+COPY . .
 
 # Set production environment
 ARG BUILD_COMMIT=master
@@ -71,7 +60,7 @@ ENV LANG=en_US.UTF-8
 ENV PYTHONHASHSEED=0
 
 # Initialize database & Collect static files
-RUN . ~/venv/bin/activate;make server-static
+RUN make server-static
 RUN ls -lta /var/data
 
 WORKDIR /var/log
