@@ -1,7 +1,6 @@
 FROM redhat/ubi8
 
 RUN dnf -yq install python39 make openssh-clients glibc-langpack-en &&\
-    dnf update &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
 
@@ -23,9 +22,6 @@ COPY deploy/gunicorn.conf.py  /deploy
 COPY deploy/docker_run.sh  /deploy
 COPY deploy/server_run.sh  /deploy
 COPY deploy/setup_user.py  /deploy
-
-# Config supervisor
-COPY deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Create log directories
 RUN mkdir -p /var/log/supervisor/
