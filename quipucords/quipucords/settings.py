@@ -23,6 +23,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import logging
 import os
 
+from .featureflag import FeatureFlag
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -405,3 +407,6 @@ QPC_INSIGHTS_REPORT_SLICE_SIZE = os.getenv(
     'QPC_INSIGHTS_REPORT_SLICE_SIZE', '10000')
 if is_int(QPC_INSIGHTS_REPORT_SLICE_SIZE):
     QPC_INSIGHTS_REPORT_SLICE_SIZE = int(QPC_INSIGHTS_REPORT_SLICE_SIZE)
+
+# Load Feature Flags
+QPC_FEATURE_FLAGS = FeatureFlag()
