@@ -1,0 +1,31 @@
+[tool.flakeheaven]
+exclude = [
+    "quipucords/api/migrations",
+    "docs",
+    "build",
+    ".vscode",
+    "client",
+    "venv",
+    "deploy",
+    "quipucords/local_gunicorn.conf.py",
+]
+
+[tool.flakeheaven.plugins]
+pycodestyle = ["+*","-W504","-W605"]
+pyflakes = ["+*"]
+"flake8-*" = ["+*", "-Q000"]
+
+[tool.pylint.master]
+init-hook = "import sys; sys.path.append('./quipucords')"
+django-settings-module = "quipucords.settings"
+load-plugins = "pylint_django"
+
+[tool.pylint.messages_control]
+disable = [
+    "duplicate-code",
+    "wrong-import-order",
+    "useless-import-alias",
+    "unnecessary-pass",
+    "too-many-lines",
+    "raise-missing-from",
+]
