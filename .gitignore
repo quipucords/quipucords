@@ -125,3 +125,6 @@ yarn.lock
 
 # symbolic link to roles
 quipucords/roles/
+
+# asdf
+.tool-versions
