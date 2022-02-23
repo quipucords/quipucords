@@ -29,3 +29,15 @@ disable = [
     "too-many-lines",
     "raise-missing-from",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = "quipucords/"
+addopts = [
+    "--ds=quipucords.settings",
+]
+python_files = [
+    "tests.py",
+    "test_*.py",
+    "*_tests.py",
+    "tests_*.py",
+]
