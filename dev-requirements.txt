@@ -6,9 +6,9 @@ coverage==5.3.1
 
 # Test runner/testing utils
 pytest-cov==3.0.0
-pytest-django==4.1.0
+pytest-django==4.5.2
 pytest-xdist==2.5.0
-pytest==6.2.1
+pytest==7.0.1
 requests-mock==1.8.0
 
 # Linting
