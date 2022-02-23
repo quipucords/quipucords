@@ -130,7 +130,7 @@ def setup_feature_flag_instance_for_tests():
 
 
 def test_if_instance_contains_all_attributes(
-    setup_feature_flag_instance_for_tests,  # pylint: disable=redefined-outer-name  # noqa: E501
+    setup_feature_flag_instance_for_tests,
 ):
     """Tests if the constructor loads all attributes correctly."""
     assert hasattr(setup_feature_flag_instance_for_tests, "TEST")
@@ -138,14 +138,14 @@ def test_if_instance_contains_all_attributes(
 
 
 def test_if_instance_attributes_values_are_correct(
-    setup_feature_flag_instance_for_tests,  # pylint: disable=redefined-outer-name  # noqa: E501
+    setup_feature_flag_instance_for_tests,
 ):
     """Tests if the right values are attributed to attribute."""
     assert setup_feature_flag_instance_for_tests.TEST is True
     assert setup_feature_flag_instance_for_tests.OVERALL_STATUS is False
 
 
-def test_is_feature_active(setup_feature_flag_instance_for_tests):  # pylint: disable=redefined-outer-name  # noqa: E501
+def test_is_feature_active(setup_feature_flag_instance_for_tests):
     """Tests method is_feature_active."""
     assert (
         setup_feature_flag_instance_for_tests.is_feature_active("TEST") is True

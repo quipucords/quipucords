@@ -22,6 +22,7 @@ pydocstyle==5.1.1
 pyflakes==2.4.0
 pylint-django==2.5.2
 pylint-plugin-utils==0.7
+pylint-pytest==1.1.2
 pylint==2.12.2
 
 # Editor

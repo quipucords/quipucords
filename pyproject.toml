@@ -18,7 +18,10 @@ pyflakes = ["+*"]
 [tool.pylint.master]
 init-hook = "import sys; sys.path.append('./quipucords')"
 django-settings-module = "quipucords.settings"
-load-plugins = "pylint_django"
+load-plugins = [
+    "pylint_django",
+    "pylint_pytest",
+]
 
 [tool.pylint.messages_control]
 disable = [
