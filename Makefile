@@ -52,12 +52,7 @@ swagger-valid:
 lint-flake8:
 	flakeheaven lint .
 
-lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" -not -path "./quipucords/local_gunicorn.conf.py" | \
-	DJANGO_SETTINGS_MODULE=quipucords.settings \
-	xargs $(PYTHON) -m pylint
-
-lint: lint-flake8 lint-pylint
+lint: lint-flake8
 
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
