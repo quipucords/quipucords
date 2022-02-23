@@ -1,3 +1,7 @@
+[tool.darker]
+revision = "a362b28db064c7a4ee38fe66685ba891f33ee5ba"
+isort = true
+
 [tool.flakeheaven]
 exclude = [
     "quipucords/api/migrations",
@@ -9,11 +13,18 @@ exclude = [
     "deploy",
     "quipucords/local_gunicorn.conf.py",
 ]
+max_line_length = 88
 
 [tool.flakeheaven.plugins]
 pycodestyle = ["+*","-W504","-W605"]
 pyflakes = ["+*"]
 "flake8-*" = ["+*", "-Q000"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.format]
+max-line-length = "88"
 
 [tool.pylint.master]
 init-hook = "import sys; sys.path.append('./quipucords')"

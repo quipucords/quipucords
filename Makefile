@@ -52,7 +52,10 @@ swagger-valid:
 lint-flake8:
 	flakeheaven lint .
 
-lint: lint-flake8
+lint-black:
+	darker --check --diff .
+
+lint: lint-black lint-flake8
 
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
