@@ -15,9 +15,7 @@ from .featureflag import FeatureFlag
         ("QPC_FEATURE_TEST", "1", "TEST", True),
     ),
 )
-def test_get_feature_flags_from_env(
-    env_name, env_value, feature_name, feature_value
-):
+def test_get_feature_flags_from_env(env_name, env_value, feature_name, feature_value):
     """Tests if function retrieves new variables set in .env."""
     with mock.patch.dict(os.environ, {env_name: env_value}):
         dict_with_test_flags = FeatureFlag.get_feature_flags_from_env()
@@ -74,7 +72,8 @@ def test_when_value_cant_be_cast_to_int():
     ),
 )
 def test_when_int_is_not_valid_value_for_env(
-    env_name, env_value,
+    env_name,
+    env_value,
 ):
     """Test when int is not a valid value for env."""
     with mock.patch.dict(os.environ, ({env_name: env_value})), pytest.raises(
@@ -93,9 +92,7 @@ def test_when_int_is_not_valid_value_for_env(
         ("QPC_TEST1_FEATURE_", "0", "TEST1_"),
     ),
 )
-def test_function_only_adds_names_follow_standard(
-    env_name, env_value, feature_name
-):
+def test_function_only_adds_names_follow_standard(env_name, env_value, feature_name):
     """Tests if function only adds variables that start with QPC_FEATURE_."""
     with mock.patch.dict(os.environ, ({env_name: env_value})):
         dict_with_test_flags = FeatureFlag.get_feature_flags_from_env()
@@ -147,16 +144,10 @@ def test_if_instance_attributes_values_are_correct(
 
 def test_is_feature_active(setup_feature_flag_instance_for_tests):
     """Tests method is_feature_active."""
+    assert setup_feature_flag_instance_for_tests.is_feature_active("TEST") is True
     assert (
-        setup_feature_flag_instance_for_tests.is_feature_active("TEST") is True
-    )
-    assert (
-        setup_feature_flag_instance_for_tests.is_feature_active(
-            "OVERALL_STATUS"
-        )
+        setup_feature_flag_instance_for_tests.is_feature_active("OVERALL_STATUS")
         is False
     )
     with pytest.raises(ValueError):
-        setup_feature_flag_instance_for_tests.is_feature_active(
-            "FALSE_ATTRIBUTE"
-        )
+        setup_feature_flag_instance_for_tests.is_feature_active("FALSE_ATTRIBUTE")
