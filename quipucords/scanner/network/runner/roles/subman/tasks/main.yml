@@ -93,7 +93,10 @@
   register: internal_subman_overall_status_cmd
   ignore_errors: yes
   become: yes
-  when: 'user_has_sudo and internal_have_subscription_manager'
+  when:
+    - user_has_sudo
+    - internal_have_subscription_manager
+    - "{{ QPC_FEATURE_FLAGS.OVERALL_STATUS }}"
 
 - name: extract result value for subman.overall.status
   set_fact:
