@@ -4,6 +4,8 @@ PYTHON		= $(shell which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
+TEST_OPTS := -n auto -ra
+QPC_COMPARISON_REVISION = a362b28db064c7a4ee38fe66685ba891f33ee5ba
 
 BINDIR  = bin
 
@@ -35,25 +37,26 @@ clean:
 	rm -rf quipucords/quipucords/templates
 
 test:
-	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto
+	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
+	pytest $(TEST_OPTS)
 
 test-case:
 	echo $(pattern)
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ -p $(pattern)
+	$(MAKE) test -e TEST_OPTS="${TEST_OPTS} $(pattern)"
 
 test-coverage:
-	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto --cov=quipucords
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" 
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
-	flake8 . --ignore D203,W504,W605,Q000 --exclude quipucords/api/migrations,docs,build,.vscode,client,venv,deploy,quipucords/local_gunicorn.conf.py
+	git diff $(QPC_COMPARISON_REVISION) | flakeheaven lint --diff .
 
-lint-pylint:
-	find . -name "*.py" -not -name "*0*.py" -not -path "./build/*" -not -path "./docs/*" -not -path "./.vscode/*" -not -path "./client/*" -not -path "./venv/*" -not -path "./deploy/*" -not -path "./quipucords/local_gunicorn.conf.py" | DJANGO_SETTINGS_MODULE=quipucords.settings xargs $(PYTHON) -m pylint --load-plugins=pylint_django --disable=duplicate-code,wrong-import-order,useless-import-alias,unnecessary-pass,too-many-lines,raise-missing-from
+lint-black:
+	darker --check --diff --revision $(QPC_COMPARISON_REVISION) .
 
-lint: lint-flake8 lint-pylint
+lint: lint-black lint-flake8
 
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings

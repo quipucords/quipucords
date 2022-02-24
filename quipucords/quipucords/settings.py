@@ -203,10 +203,10 @@ if QPC_DBMS == 'sqlite':
                            'db.sqlite3')
     DB_PATH = PROD_DB if PRODUCTION else DEV_DB
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': DB_PATH,
-            'TEST': {'NAME': ':memory:'}
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": DB_PATH,
+            "TEST": {"NAME": ":memory:"},
         }
     }
 else:

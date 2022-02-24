@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # fetches all commits/tags
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
@@ -36,7 +38,7 @@ jobs:
         run: pip install -r dev-requirements.txt
 
       - name: Run linters
-        run: make lint
+        run: make lint -k
 
       - name: Run Tests
         run: make test-coverage

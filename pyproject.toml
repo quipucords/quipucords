@@ -1,0 +1,45 @@
+[tool.darker]
+revision = "a362b28db064c7a4ee38fe66685ba891f33ee5ba"
+isort = true
+
+[tool.flakeheaven]
+baseline = ".flakeheaven-baseline"
+exclude = [
+    "docs",
+    "build",
+    ".vscode",
+    "client",
+    "venv",
+]
+max_line_length = 88
+
+[tool.flakeheaven.plugins]
+pycodestyle = ["+*","-W504","-W605"]
+pyflakes = ["+*"]
+"flake8-*" = ["+*", "-Q000"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.format]
+max-line-length = "88"
+
+[tool.pylint.master]
+init-hook = "import sys; sys.path.append('./quipucords')"
+django-settings-module = "quipucords.settings"
+load-plugins = [
+    "pylint_django",
+    "pylint_pytest",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "quipucords/"
+addopts = [
+    "--ds=quipucords.settings",
+]
+python_files = [
+    "tests.py",
+    "test_*.py",
+    "*_tests.py",
+    "tests_*.py",
+]
