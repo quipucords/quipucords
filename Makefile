@@ -4,6 +4,7 @@ PYTHON		= $(shell which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
+TEST_OPTS := -n auto -ra
 
 BINDIR  = bin
 
@@ -35,14 +36,15 @@ clean:
 	rm -rf quipucords/quipucords/templates
 
 test:
-	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto
+	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
+	pytest $(TEST_OPTS)
 
 test-case:
 	echo $(pattern)
-	QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True $(PYTHON) quipucords/manage.py test -v 2 quipucords/ -p $(pattern)
+	$(MAKE) test -e TEST_OPTS="${TEST_OPTS} $(pattern)"
 
 test-coverage:
-	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords pytest -ra -n auto --cov=quipucords
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" 
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
