@@ -5,6 +5,7 @@ TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
 TEST_OPTS := -n auto -ra
+QPC_COMPARISON_REVISION = a362b28db064c7a4ee38fe66685ba891f33ee5ba
 
 BINDIR  = bin
 
@@ -50,10 +51,10 @@ swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
-	flakeheaven lint .
+	git diff $(QPC_COMPARISON_REVISION) | flakeheaven lint --diff .
 
 lint-black:
-	darker --check --diff .
+	darker --check --diff --revision $(QPC_COMPARISON_REVISION) .
 
 lint: lint-black lint-flake8
 

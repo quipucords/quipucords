@@ -3,15 +3,13 @@ revision = "a362b28db064c7a4ee38fe66685ba891f33ee5ba"
 isort = true
 
 [tool.flakeheaven]
+baseline = ".flakeheaven-baseline"
 exclude = [
-    "quipucords/api/migrations",
     "docs",
     "build",
     ".vscode",
     "client",
     "venv",
-    "deploy",
-    "quipucords/local_gunicorn.conf.py",
 ]
 max_line_length = 88
 
@@ -32,16 +30,6 @@ django-settings-module = "quipucords.settings"
 load-plugins = [
     "pylint_django",
     "pylint_pytest",
-]
-
-[tool.pylint.messages_control]
-disable = [
-    "duplicate-code",
-    "wrong-import-order",
-    "useless-import-alias",
-    "unnecessary-pass",
-    "too-many-lines",
-    "raise-missing-from",
 ]
 
 [tool.pytest.ini_options]
