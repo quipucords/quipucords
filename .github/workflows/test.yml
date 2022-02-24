@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # fetches all commits/tags
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
