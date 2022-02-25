@@ -1,0 +1,37 @@
+services:
+  qpc-server:
+    build: .
+    environment:
+      QPC_DBMS: postgres
+      QPC_DBMS_DATABASE: postgres
+      QPC_DBMS_HOST: 10.0.2.2
+      QPC_DBMS_PASSWORD: qpc
+      QPC_DBMS_PORT: 54321
+      QPC_DBMS_USER: qpc
+      QPC_SERVER_PASSWORD: q1w2e3r4
+      QPC_SERVER_TIMEOUT: 5
+      QPC_SERVER_USERNAME: admin
+      USE_SUPERVISORD: "false"
+
+    ports:
+      - "9443:443"
+    volumes:
+      - .:/app
+      - ./deploy:/deploy
+    depends_on:
+      - qpc-db
+    network_mode: "slirp4netns:allow_host_loopback=true"
+
+  qpc-db:
+    image: postgres:14.1
+    environment:
+      POSTGRES_USER: qpc
+      POSTGRES_PASSWORD: qpc
+    ports:
+      - 54321:5432
+    # Set health checks to wait until postgres has started
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
