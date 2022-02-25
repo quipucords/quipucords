@@ -20,6 +20,13 @@ pyflakes = ["+*"]
 
 [tool.isort]
 profile = "black"
+known_first_party = [
+    "api",
+    "fingerprinter",
+    "log_messages",
+    "quipucords",
+    "scanner",
+]
 
 [tool.pylint.format]
 max-line-length = "88"
@@ -30,6 +37,11 @@ django-settings-module = "quipucords.settings"
 load-plugins = [
     "pylint_django",
     "pylint_pytest",
+]
+
+[tool.pylint.message_control]
+disable = [
+    "wrong-import-order",
 ]
 
 [tool.pytest.ini_options]
