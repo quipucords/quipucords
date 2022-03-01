@@ -29,7 +29,7 @@ pylint-pytest==1.1.2
 pylint==2.12.2
 
 # Editor
-autopep8==1.5.4
+autopep8==1.6.0
 
 # Gunicorn local development
 gunicorn==20.0.4
