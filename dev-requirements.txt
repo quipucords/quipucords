@@ -2,7 +2,7 @@
 -r requirements.txt
 
 #Coverage
-coverage==5.3.1
+coverage==6.3.2
 
 # Test runner/testing utils
 pytest-cov==3.0.0
