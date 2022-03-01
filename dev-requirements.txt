@@ -32,4 +32,4 @@ pylint==2.12.2
 autopep8==1.6.0
 
 # Gunicorn local development
-gunicorn==20.0.4
+gunicorn==20.1.0
