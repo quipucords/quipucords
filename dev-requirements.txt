@@ -21,7 +21,7 @@ flake8-quotes==3.3.1
 flake8==4.0.1
 flakeheaven==0.11.1
 isort==5.10.1
-pydocstyle==5.1.1
+pydocstyle==6.1.1
 pyflakes==2.4.0
 pylint-django==2.5.2
 pylint-plugin-utils==0.7
