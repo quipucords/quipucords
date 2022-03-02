@@ -14,28 +14,30 @@ import os.path
 
 import ansible_runner
 from ansible_runner.exceptions import AnsibleRunnerException
-
-from api.credential.serializer import CredentialSerializer
-from api.models import (ScanJob,
-                        ScanOptions,
-                        ScanTask,
-                        SystemConnectionResult,
-                        SystemInspectionResult)
-from api.vault import write_to_yaml
+from django.conf import settings
 
 import log_messages
-
-from quipucords import settings
-
-from scanner.network.exceptions import (NetworkCancelException,
-                                        NetworkPauseException,
-                                        ScannerException)
+from api.credential.serializer import CredentialSerializer
+from api.models import (
+    ScanJob,
+    ScanOptions,
+    ScanTask,
+    SystemConnectionResult,
+    SystemInspectionResult,
+)
+from api.vault import write_to_yaml
+from scanner.network.exceptions import (
+    NetworkCancelException,
+    NetworkPauseException,
+    ScannerException,
+)
 from scanner.network.inspect_callback import InspectResultCallback
-from scanner.network.utils import (_construct_vars,
-                                   _credential_vars,
-                                   check_manager_interrupt)
+from scanner.network.utils import (
+    _construct_vars,
+    _credential_vars,
+    check_manager_interrupt,
+)
 from scanner.task import ScanTaskRunner
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -78,16 +80,15 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = 'Prerequisites scan task %d failed.' %\
-                self.connect_scan_task.sequence_number
+            error_message = (
+                f"Prerequisites scan task {self.connect_scan_task.sequence_number}"
+                f" failed."
+            )
             return error_message, ScanTask.FAILED
 
         try:
             # Execute scan
-            connected, \
-                completed, \
-                failed, \
-                unreachable = self._obtain_discovery_data()
+            connected, completed, failed, unreachable = self._obtain_discovery_data()
             processed_hosts = failed + completed
             num_total = len(connected) + len(processed_hosts)
 
@@ -113,17 +114,17 @@ class InspectTaskRunner(ScanTaskRunner):
             fact_size = len(temp_facts)
             self._add_unreachable_hosts(temp_facts)
             if temp_facts is None or fact_size == 0:
-                msg = 'SystemFacts set is empty.  '\
-                    'No results will be reported to fact endpoint.'
+                msg = (
+                    "SystemFacts set is empty.  "
+                    "No results will be reported to fact endpoint."
+                )
                 return msg, ScanTask.FAILED
 
         except AnsibleRunnerException as ansible_error:
-            error_message = 'Scan task encountered error: %s' % \
-                ansible_error
+            error_message = f"Scan task encountered error: {ansible_error}"
             return error_message, ScanTask.FAILED
         except AssertionError as assertion_error:
-            error_message = 'Scan task encountered error: %s' % \
-                assertion_error
+            error_message = f"Scan task encountered error: {assertion_error}"
             return error_message, ScanTask.FAILED
         except NetworkCancelException:
             error_message = 'Inspect scan cancel for %s.' % (
@@ -136,13 +137,13 @@ class InspectTaskRunner(ScanTaskRunner):
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
         except ScannerException as scan_error:
-            error_message = 'Scan task encountered error: %s' % \
-                scan_error
+            error_message = f"Scan task encountered error: {scan_error}"
             return error_message, ScanTask.FAILED
 
         if self.scan_task.systems_failed > 0:
-            scan_message = '%d systems could not be scanned.' % \
-                self.scan_task.systems_failed
+            scan_message = (
+                f"{self.scan_task.systems_failed} systems could not be scanned."
+            )
             scan_result = ScanTask.COMPLETED
             self.scan_task.log_message(
                 scan_message, log_level=logging.WARNING)
@@ -210,6 +211,8 @@ class InspectTaskRunner(ScanTaskRunner):
             extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = \
                 ' '.join(DEFAULT_SCAN_DIRS)
 
+        extra_vars["QPC_FEATURE_FLAGS"] = settings.QPC_FEATURE_FLAGS.as_dict()
+
         ssh_executable = os.path.abspath(
             os.path.join(os.path.dirname(__file__),
                          '../../../bin/timeout_ssh'))
@@ -233,11 +236,11 @@ class InspectTaskRunner(ScanTaskRunner):
         inventory_file = write_to_yaml(inventory)
 
         error_msg = None
-        log_message = 'START INSPECT PROCESSING GROUPS'\
-            ' with use_paramiko: %s, '\
-            '%d forks and extra_vars=%s' % (use_paramiko,
-                                            forks,
-                                            extra_vars)
+        log_message = (
+            "START INSPECT PROCESSING GROUPS"
+            f" with use_paramiko: {use_paramiko}, "
+            f"{forks} forks and extra_vars={extra_vars}"
+        )
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
 

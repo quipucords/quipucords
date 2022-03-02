@@ -18,10 +18,16 @@ class FeatureFlag:
         Attributes keys-values are received in initial_data.
         """
         initial_data = self.get_feature_flags_from_env()
-        for key, value in initial_data.items():
-            setattr(self, key, value)
+        self._feature_flags = initial_data
 
-    def is_feature_active(self, feature_name):
+    def __getattr__(self, item):
+        """Look for attribute in self._feature_flags."""
+        try:
+            return self._feature_flags[item]
+        except KeyError:
+            return super().__getattribute__(item)
+
+    def is_feature_active(self, feature_name):  # pylint: disable=no-member
         """Return attribute value."""
         try:
             return getattr(self, feature_name)
@@ -44,3 +50,7 @@ class FeatureFlag:
                         "to int, verify your environment variables."
                     )
         return feature_flags
+
+    def as_dict(self):
+        """Return all feature flags in dict format."""
+        return self._feature_flags

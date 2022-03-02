@@ -87,6 +87,23 @@
   ignore_errors: yes
   when: '"stdout" in internal_subman_virt_uuid_cmd'
 
+# subman_overall_status fact
+- name: gather subman.overall.status fact
+  raw: LANG=C subscription-manager status | grep -e 'Overall Status:'| cut -d ":" -f2
+  register: internal_subman_overall_status_cmd
+  ignore_errors: yes
+  become: yes
+  when:
+    - user_has_sudo
+    - internal_have_subscription_manager
+    - "{{ QPC_FEATURE_FLAGS.OVERALL_STATUS }}"
+
+- name: extract result value for subman.overall.status
+  set_fact:
+    subman_overall_status: "{{ internal_subman_overall_status_cmd['stdout'] | string() | trim | default(None) }}"
+  ignore_errors: yes
+  when: '"stdout" in internal_subman_overall_status_cmd'
+
 # subman fact
 - name: gather subman.has_facts_file fact
   raw: ls /etc/rhsm/facts 2>/dev/null | grep .facts | wc -l

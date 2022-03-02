@@ -151,3 +151,10 @@ def test_is_feature_active(setup_feature_flag_instance_for_tests):
     )
     with pytest.raises(ValueError):
         setup_feature_flag_instance_for_tests.is_feature_active("FALSE_ATTRIBUTE")
+
+
+def test_as_dict(setup_feature_flag_instance_for_tests):
+    """Tests method as_dict."""
+    assert isinstance(setup_feature_flag_instance_for_tests.as_dict(), dict)
+    assert setup_feature_flag_instance_for_tests.as_dict()["OVERALL_STATUS"] is False
+    assert setup_feature_flag_instance_for_tests.as_dict()["TEST"] is True
