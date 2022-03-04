@@ -39,9 +39,11 @@ load-plugins = [
     "pylint_pytest",
 ]
 
-[tool.pylint.message_control]
+[tool.pylint.messages_control]
 disable = [
-    "wrong-import-order",
+    # flakeheaven lint with --diff parameter seems to be incompatible with this check
+    "cannot-enumerate-pytest-fixtures",
+    "wrong-import-order",  
 ]
 
 [tool.pytest.ini_options]
