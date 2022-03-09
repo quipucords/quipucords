@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    # replace these tasks with whatever you find suitable to test
+    - name: Copy something to test use of synchronize module
+      ansible.posix.synchronize:
+        src: /etc/hosts
+        dest: /tmp/hosts-from-controller
+      # synchronize module works with podman connections only with 2.11+ so
+      # we skip running it on unsupported platforms.
+      when: "ansible_version.full is version_compare('2.11', '>=')"
+    - name: "Include date"
+      include_role:
+        name: "date"
