@@ -1,0 +1,35 @@
+---
+
+- name: test if user has sudo cmd
+  shell:
+    cmd: echo "user has sudo" 2>/dev/null
+  register: internal_user_has_sudo_cmd
+  become: yes
+  ignore_errors: yes
+
+- name: test if user has sudo cmd
+  set_fact:
+    user_has_sudo: "{{ internal_user_has_sudo_cmd.get('rc') == 0 }}"
+  ignore_errors: yes
+
+- name: gather internal_have_tune2fs_cmd
+  shell:
+    cmd: command -v tune2fs
+  register: internal_have_tune2fs_cmd
+  failed_when: "internal_have_tune2fs_cmd.get('rc') not in [0, 1]"
+
+- name: set internal_have_tune2fs
+  set_fact:
+    internal_have_tune2fs: "{{ internal_have_tune2fs_cmd.get('rc') == 0 }}"
+  ignore_errors: yes
+
+- name: gather internal_have_yum_cmd
+  shell:
+    cmd: command -v yum
+  register: internal_have_yum_cmd
+  ignore_errors: yes
+
+- name: set internal_have_yum
+  set_fact:
+    internal_have_yum: "{{ internal_have_yum_cmd.get('rc') == 0 }}"
+  ignore_errors: yes
