@@ -20,6 +20,7 @@ exclude = [
     ".vscode",
     "client",
     "venv",
+    ".egg",
 ]
 max_line_length = 88
 
