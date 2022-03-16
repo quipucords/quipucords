@@ -1,3 +1,13 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = [
+    "setuptools", 
+    "setuptools_scm[toml]",
+    "wheel",
+]  # PEP 508 specifications.
+
+[tool.setuptools_scm]
+
 [tool.darker]
 revision = "a362b28db064c7a4ee38fe66685ba891f33ee5ba"
 isort = true
