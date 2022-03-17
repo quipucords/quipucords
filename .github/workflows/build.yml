@@ -24,7 +24,8 @@ jobs:
         # this might seem odd but is the recommended way to set variables
         # reference: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
         run: |
-          BUILD_VERSION=$(git describe --tags)
+          pip install setuptools-scm
+          BUILD_VERSION=$(python -m setuptools-scm)
           echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
           echo "IMAGE_NAME_WITH_TAG=$IMAGE_NAME:$BUILD_VERSION" >> $GITHUB_ENV
           echo "TARGZFILE=${TARFILE}.gz" >> $GITHUB_ENV
@@ -32,7 +33,6 @@ jobs:
       - name: Bump version
         run: |
             sed -i 's/BUILD_VERSION_PLACEHOLDER/${{ env.BUILD_VERSION }}/g' ${{ env.RELEASE_INFO_FILE }}
-            sed -i 's/BUILD_VERSION_PLACEHOLDER/${{ env.BUILD_VERSION }}/g' ${{ env.RELEASE_PY_FILE }}
 
       - name: Clone UI repo
         uses: actions/checkout@v2

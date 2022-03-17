@@ -17,7 +17,7 @@ import platform
 import subprocess
 import sys
 
-from quipucords.release import BUILD_VERSION
+from quipucords.release import infer_version
 
 # pylint: disable=invalid-name
 # Get an instance of a logger
@@ -43,7 +43,7 @@ def commit():
 
 def server_version():
     """Return server version."""
-    return '%s.%s' % (BUILD_VERSION, commit())
+    return f"{infer_version()}.{commit()}"
 
 
 def platform_info():

@@ -11,12 +11,13 @@
 """Test the environment utility."""
 
 from collections import namedtuple
+from importlib.metadata import PackageNotFoundError
 from unittest.mock import ANY, Mock, patch
 
+import pytest
 from django.test import TestCase
 
-from . import environment
-from . import release
+from . import environment, release
 
 
 class EnvironmentTest(TestCase):
@@ -74,7 +75,20 @@ class EnvironmentTest(TestCase):
         environment.startup()
         mock_logger.assert_called_with(ANY, ANY)
 
-    def test_server_version_default(self):
-        """Test the server version default."""
-        expected = '%s.%s' % (release.DEFAULT_VERSION, environment.commit())
-        self.assertEqual(expected, environment.server_version())
+
+@pytest.mark.parametrize(
+    "package_version", [None, "unexpected_tag", PackageNotFoundError()]
+)
+def test_server_fallback_version(package_version):
+    """Test the server fallback version."""
+    release.infer_version.cache_clear()
+
+    if isinstance(package_version, Exception):
+        mock_kwargs = {"side_effect": package_version}
+    else:
+        mock_kwargs = {"return_value": package_version}
+
+    expected = f"0.0.0.{environment.commit()}"
+
+    with patch.object(release, "version", **mock_kwargs):
+        assert expected == environment.server_version()
