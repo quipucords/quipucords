@@ -39,7 +39,7 @@ clean:
 	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -P '(.*\.pyc)|(\.coverage(\..+)*)(.*__pycache__)$$')
 
 clean-ui:
-	rm -rf quipucords/client 
+	rm -rf quipucords/client
 	rm -rf quipucords/quipucords/templates
 	rm -rf quipucords/staticfiles
 

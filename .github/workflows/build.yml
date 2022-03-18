@@ -39,25 +39,6 @@ jobs:
         run: |
             sed -i 's/BUILD_VERSION_PLACEHOLDER/${{ env.BUILD_VERSION }}/g' ${{ env.RELEASE_INFO_FILE }}
 
-      - name: Clone UI repo
-        uses: actions/checkout@v2
-        with:
-          repository: quipucords/quipucords-ui
-          path: "./quipucords-ui-src"
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
-          cache: "yarn"
-          cache-dependency-path: "quipucords-ui-src/yarn.lock"
-
-      - name: Build UI
-        run: make build-ui -e QUIPUCORDS_UI_PATH=quipucords-ui-src
-
-      - name: Remove UI source code
-        run: rm -rf quipucords-ui-src
-
       - name: Docker Layer Caching
         uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.

@@ -1,6 +1,6 @@
 FROM redhat/ubi8
 
-RUN dnf -yq install python39 make openssh-clients glibc-langpack-en &&\
+RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
 
@@ -38,6 +38,13 @@ VOLUME /etc/ansible/roles/
 
 # Copy server code
 COPY . .
+
+# Fetch UI code
+ARG UI_RELEASE=0.9.3
+RUN make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
+
+# Install quipucords as package
+RUN pip install -v -e .
 
 # Set production environment
 ARG BUILD_COMMIT=master
