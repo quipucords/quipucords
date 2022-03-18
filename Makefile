@@ -16,9 +16,12 @@ help:
 	@echo "  help                to show this message"
 	@echo "  all                 to execute all following targets (except test)"
 	@echo "  lint                to run all linters"
-	@echo "  clean               to remove postgres docker container"
+	@echo "  clean               to remove pyc/cache files"
+	@echo "  clean-db            to remove postgres docker container / sqlite db"
+	@echo "  clean-ui            to remove UI assets"
 	@echo "  lint-flake8         to run the flake8 linter"
 	@echo "  lint-pylint         to run the pylint linter"
+	@echo "  lock-requirements   to lock all python dependencies"
 	@echo "  test                to run unit tests"
 	@echo "  test-coverage       to run unit tests and measure test coverage"
 	@echo "  swagger-valid       to run swagger-cli validation"
@@ -31,10 +34,21 @@ help:
 all: lint test-coverage
 
 clean:
-	rm -rf quipucords/db.sqlite3
-	docker rm -f qpc-db
+	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -P '(.*\.pyc)|(\.coverage(\..+)*)(.*__pycache__)$$')
+
+clean-ui:
 	rm -rf quipucords/client
 	rm -rf quipucords/quipucords/templates
+	rm -rf quipucords/staticfiles
+
+clean-db:
+	rm -rf quipucords/db.sqlite3
+	docker rm -f qpc-db
+
+lock-requirements:
+	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
+	pip-compile --allow-unsafe --generate-hashes --output-file=requirements-build.txt requirements-build.in
+	pip-compile --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
 
 test:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
