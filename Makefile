@@ -10,6 +10,7 @@ QPC_COMPARISON_REVISION = a362b28db064c7a4ee38fe66685ba891f33ee5ba
 BINDIR  = bin
 
 QUIPUCORDS_UI_PATH = ../quipucords-ui
+QUIPUCORDS_UI_RELEASE = 0.9.3
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -29,7 +30,8 @@ help:
 	@echo "  server-init         to run server initializion steps"
 	@echo "  serve               to run the server with default db"
 	@echo "  manpage             to build the manpage"
-	@echo "  build-ui       to build ui and place result in django server"
+	@echo "  build-ui            to build ui and place result in django server"
+	@echo "  fetch-ui            to fetch prebuilt ui and place it in django server"
 
 all: lint test-coverage
 
@@ -37,7 +39,7 @@ clean:
 	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -P '(.*\.pyc)|(\.coverage(\..+)*)(.*__pycache__)$$')
 
 clean-ui:
-	rm -rf quipucords/client
+	rm -rf quipucords/client 
 	rm -rf quipucords/quipucords/templates
 	rm -rf quipucords/staticfiles
 
@@ -92,7 +94,14 @@ server-static:
 serve:
 	$(PYTHON) quipucords/manage.py runserver --nostatic
 
-build-ui:
+build-ui: clean-ui
 	cd $(QUIPUCORDS_UI_PATH);yarn;yarn build
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/client quipucords/client
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
+
+fetch-ui: clean-ui
+	curl -k -SL https://github.com/quipucords/quipucords-ui/releases/download/$(QUIPUCORDS_UI_RELEASE)/quipucords-ui-dist.tar.gz -o ui-dist.tar.gz &&\
+    tar -xzvf ui-dist.tar.gz &&\
+    mv dist/templates quipucords/quipucords/templates &&\
+    mv dist/client quipucords/client &&\
+    rm -rf ui-dist* dist
