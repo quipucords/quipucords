@@ -1,9 +1,12 @@
-name: Build release
+name: Build Container Image
 
 on:
   push:
+    branches: [ master ]
     tags:
       - "*"
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
@@ -19,13 +22,15 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # fetches all commits/tags
 
       - name: Set dynamic variables
         # this might seem odd but is the recommended way to set variables
         # reference: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
         run: |
           pip install setuptools-scm
-          BUILD_VERSION=$(python -m setuptools-scm)
+          BUILD_VERSION=$(python -m setuptools_scm)
           echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
           echo "IMAGE_NAME_WITH_TAG=$IMAGE_NAME:$BUILD_VERSION" >> $GITHUB_ENV
           echo "TARGZFILE=${TARFILE}.gz" >> $GITHUB_ENV
@@ -62,6 +67,7 @@ jobs:
         run: docker build --build-arg BUILD_COMMIT=$GITHUB_SHA . -t $IMAGE_NAME_WITH_TAG
 
       - name: Export image
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           docker save -o ${TARFILE} ${IMAGE_NAME_WITH_TAG}
           chmod 755 ${TARFILE}
@@ -70,6 +76,7 @@ jobs:
 
       - name: Release artifacts
         uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           prerelease: true
           artifacts: "${{ env.TARGZFILE }},${{ env.RELEASE_INFO_FILE }}"

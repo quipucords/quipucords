@@ -7,6 +7,8 @@ requires = [
 ]  # PEP 508 specifications.
 
 [tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "no-local-version"
 
 [tool.darker]
 revision = "a362b28db064c7a4ee38fe66685ba891f33ee5ba"

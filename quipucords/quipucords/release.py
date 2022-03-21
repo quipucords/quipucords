@@ -18,6 +18,7 @@
 import re
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version
+from warnings import warn
 
 VERSION_PATTERN = re.compile(r"\d+\.\d+\.\d+")
 
@@ -29,6 +30,7 @@ def infer_version():
     try:
         package_version = version("quipucords")
     except PackageNotFoundError:
+        warn("Package 'quipucords' can't be found. Is it installed?")
         return fallback_version
 
     if not package_version or not VERSION_PATTERN.match(package_version):
