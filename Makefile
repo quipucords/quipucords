@@ -29,6 +29,7 @@ help:
 	@echo "  setup-postgres      to create a default postgres container"
 	@echo "  server-init         to run server initializion steps"
 	@echo "  serve               to run the server with default db"
+	@echo "  serve-swagger       to run the openapi/swagger ui for quipucords"
 	@echo "  manpage             to build the manpage"
 	@echo "  build-ui            to build ui and place result in django server"
 	@echo "  fetch-ui            to fetch prebuilt ui and place it in django server"
@@ -94,7 +95,12 @@ server-static:
 serve:
 	$(PYTHON) quipucords/manage.py runserver --nostatic
 
-build-ui: clean-ui
+$(QUIPUCORDS_UI_PATH):
+	@echo "Couldn't find quipucords-ui repo (${QUIPUCORDS_UI_PATH})"
+	@echo "Tip: git clone https://github.com/quipucords/quipucords-ui.git ${QUIPUCORDS_UI_PATH}"
+	exit 1
+
+build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
 	cd $(QUIPUCORDS_UI_PATH);yarn;yarn build
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/client quipucords/client
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
@@ -105,3 +111,12 @@ fetch-ui: clean-ui
     mv dist/templates quipucords/quipucords/templates &&\
     mv dist/client quipucords/client &&\
     rm -rf ui-dist* dist
+
+qpc_on_ui_dir = ${QUIPUCORDS_UI_PATH}/.qpc/quipucords
+$(qpc_on_ui_dir): $(QUIPUCORDS_UI_PATH)
+	@echo "Creating quipucords symlink on UI repo"
+	mkdir -p $(QUIPUCORDS_UI_PATH)/.qpc
+	ln -sf $(TOPDIR) $(QUIPUCORDS_UI_PATH)/.qpc/quipucords
+
+serve-swagger: $(qpc_on_ui_dir)
+	cd $(QUIPUCORDS_UI_PATH);yarn;node ./scripts/swagger.js

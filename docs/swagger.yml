@@ -1407,7 +1407,8 @@ definitions:
   Host:
     type: "object"
     description: "Host data should conform to the host inventory swagger definition described here: https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml"
-    example: {
+    example: |
+      {
         "display_name": "earth.usersys.redhat.com",
         "ip_addresses": [
             "10.8.30.252"
@@ -1452,7 +1453,7 @@ definitions:
             "cores_per_socket": 8,
             "cloud_provider": "aws"
         }
-    }
+      }
   InsightsReport:
     properties:
       metadata_tar_path:
