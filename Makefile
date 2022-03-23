@@ -6,7 +6,7 @@ DIRS	= test bin locale src
 PYDIRS	= quipucords
 TEST_OPTS := -n auto -ra
 QPC_COMPARISON_REVISION = a362b28db064c7a4ee38fe66685ba891f33ee5ba
-
+PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 
 QUIPUCORDS_UI_PATH = ../quipucords-ui
@@ -49,9 +49,12 @@ clean-db:
 	docker rm -f qpc-db
 
 lock-requirements:
-	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
-	pip-compile --allow-unsafe --generate-hashes --output-file=requirements-build.txt requirements-build.in
-	pip-compile --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
+	pip-compile $(PIP_COMPILE_ARGS) --generate-hashes --output-file=requirements.txt requirements.in
+	pip-compile $(PIP_COMPILE_ARGS) --allow-unsafe --generate-hashes --output-file=requirements-build.txt requirements-build.in
+	pip-compile $(PIP_COMPILE_ARGS) --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
+
+upgrade-requirements:
+	 $(MAKE) lock-requirements -e PIP_COMPILE_ARGS='--upgrade'
 
 test:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
