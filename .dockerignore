@@ -12,3 +12,9 @@ logs
 
 .DS_Store
 .egg
+quipucords.egg-info
+**.pyc
+quipucords/client
+quipucords/quipucords/template
+quipucords/staticfiles
+
