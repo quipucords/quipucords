@@ -13,18 +13,16 @@
 import logging
 import os
 
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.contrib.auth import logout
-
 from rest_framework import viewsets
-from rest_framework.authentication import (SessionAuthentication)
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer as EmptySerializer
 
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

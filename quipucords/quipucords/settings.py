@@ -183,12 +183,12 @@ WSGI_APPLICATION = 'quipucords.wsgi.application'
 DEFAULT_PAGINATION_CLASS = 'api.common.pagination.StandardResultsSetPagination'
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS':
-        ('django_filters.rest_framework.DjangoFilterBackend',),
-    'DEFAULT_PAGINATION_CLASS': DEFAULT_PAGINATION_CLASS,
-    'DEFAULT_AUTHENTICATION_CLASSES':
-        ('api.user.authentication.QuipucordsExpiringTokenAuthentication',),
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_PAGINATION_CLASS": DEFAULT_PAGINATION_CLASS,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.user.authentication.QuipucordsExpiringTokenAuthentication",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
 
 # Database

@@ -33,16 +33,12 @@ from django.views.generic.base import TemplateView
 from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-
-    path('admin/', admin.site.urls),
-    path('api/v1/', include('api.urls')),
-    path('api/docs/', include_docs_urls()),
-
-    path('', RedirectView.as_view(url='/login', permanent=False),
-         name='home'),
-
+    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("admin/", admin.site.urls),
+    path("api/v1/", include("api.urls")),
+    path("api/docs/", include_docs_urls()),
+    path("", RedirectView.as_view(url="/login", permanent=False), name="home"),
     # ui routing
     re_path(r'^(client/(sources|scans|credentials|)(/|)(index.html|))$',
             TemplateView.as_view(template_name='client/index.html'),
