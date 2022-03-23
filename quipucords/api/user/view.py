@@ -23,6 +23,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer as EmptySerializer
 
 
 # Get an instance of a logger
@@ -31,6 +32,8 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 class UserViewSet(viewsets.GenericViewSet):
     """User view for logout and user data."""
+
+    serializer_class = EmptySerializer
 
     authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
     if authentication_enabled:

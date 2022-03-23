@@ -30,6 +30,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, re_path
 from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
+from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(), name='login'),
@@ -37,6 +38,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('api/v1/', include('api.urls')),
+    path('api/docs/', include_docs_urls()),
 
     path('', RedirectView.as_view(url='/login', permanent=False),
          name='home'),
