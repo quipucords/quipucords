@@ -94,7 +94,12 @@ server-static:
 serve:
 	$(PYTHON) quipucords/manage.py runserver --nostatic
 
-build-ui: clean-ui
+$(QUIPUCORDS_UI_PATH):
+	@echo "Couldn't find quipucords-ui repo (${QUIPUCORDS_UI_PATH})"
+	@echo "Tip: git clone https://github.com/quipucords/quipucords-ui.git ${QUIPUCORDS_UI_PATH}"
+	exit 1
+
+build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
 	cd $(QUIPUCORDS_UI_PATH);yarn;yarn build
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/client quipucords/client
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
