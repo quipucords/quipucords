@@ -1,0 +1,15 @@
+FROM redhat/ubi8-init
+
+RUN dnf -y install openssh-server openssl sudo; \
+    dnf clean all
+
+ARG USERNAME=container-user
+ARG PASSWORD=q1w2e3r4
+ARG SSH_PORT=2222
+
+RUN sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config; \
+    echo "Port ${SSH_PORT}" >> /etc/ssh/sshd_config; \
+    systemctl enable sshd; \
+    useradd --user-group --system --create-home -G wheel -p "$(openssl passwd -1 ${PASSWORD})" ${USERNAME};
+
+EXPOSE ${SSH_PORT}
