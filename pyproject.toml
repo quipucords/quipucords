@@ -40,6 +40,7 @@ known_first_party = [
     "log_messages",
     "quipucords",
     "scanner",
+    "tests",
 ]
 
 [tool.pylint.format]

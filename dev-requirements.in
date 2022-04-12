@@ -25,4 +25,6 @@ pylint-pytest==1.1.2
 pylint==2.12.2
 
 # other dev tools
+docker-compose
 pip-tools
+pytest-docker-tools
