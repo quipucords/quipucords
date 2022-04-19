@@ -13,6 +13,7 @@
 
 import csv
 import logging
+from copy import deepcopy
 from io import StringIO
 
 from api.common.common_report import CSVHelper, sanitize_row
@@ -54,6 +55,7 @@ def compute_source_info(sources):
 
 def create_deployments_csv(deployments_report_dict, request):
     """Create deployments report csv."""
+    deployments_report_dict = deepcopy(deployments_report_dict)
     mask_report = request.query_params.get('mask', False)
     source_headers = {NETWORK_DETECTION_KEY,
                       VCENTER_DETECTION_KEY,
