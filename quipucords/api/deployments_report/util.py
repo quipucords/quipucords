@@ -18,10 +18,7 @@ from io import StringIO
 
 from api.common.common_report import CSVHelper, sanitize_row
 from api.common.util import validate_query_param_bool
-from api.models import (DeploymentsReport,
-                        Source,
-                        SystemFingerprint)
-
+from api.models import DeploymentsReport, Source, SystemFingerprint
 
 # pylint: disable=arguments-differ,unused-argument,too-many-locals
 # pylint: disable=too-many-branches,too-many-statements
@@ -85,8 +82,6 @@ def create_deployments_csv(deployments_report_dict, request):
     deployment_report_buffer = StringIO()
     csv_writer = csv.writer(deployment_report_buffer, delimiter=',')
 
-    systems_list = deployments_report_dict.get('system_fingerprints')
-
     csv_writer.writerow(['Report ID',
                          'Report Type',
                          'Report Version',
@@ -98,8 +93,10 @@ def create_deployments_csv(deployments_report_dict, request):
     csv_writer.writerow([])
     csv_writer.writerow([])
 
+    systems_list = deployments_report_dict.get("system_fingerprints")
     if not systems_list:
         return None
+
     csv_writer.writerow(['System Fingerprints:'])
 
     valid_fact_attributes = {
