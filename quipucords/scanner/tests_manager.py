@@ -14,10 +14,9 @@ from multiprocessing import Process
 from unittest.mock import Mock
 
 import pytest
+from django.test import TestCase
 
 from api.models import ScanTask
-
-from django.test import TestCase
 
 
 class MockTask(Process):
@@ -30,11 +29,10 @@ class MockTask(Process):
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
-        self.identifier = 'TestScan'
+        self.identifier = "TestScan"
 
     def log_message(self, message):
         """Fake log message."""
-        pass
 
 
 class ScanManagerTest(TestCase):
@@ -68,5 +66,5 @@ class ScanManagerTest(TestCase):
 
     def test_kill_missing(self):
         """Test kill on missing id."""
-        killed = self.scan_manager.kill(self.task, 'cancel')
+        killed = self.scan_manager.kill(self.task, "cancel")
         self.assertFalse(killed)
