@@ -4,9 +4,9 @@ PYTHON		= $(shell which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
-TEST_OPTS := -n auto -ra
+TEST_OPTS := -n auto -ra -m 'not integration'
 QPC_COMPARISON_REVISION = a362b28db064c7a4ee38fe66685ba891f33ee5ba
-
+PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 
 QUIPUCORDS_UI_PATH = ../quipucords-ui
@@ -37,7 +37,7 @@ help:
 all: lint test-coverage
 
 clean:
-	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -P '(.*\.pyc)|(\.coverage(\..+)*)(.*__pycache__)$$')
+	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -P '(.*\.pyc)|(\.coverage(\..+)*)$$|__pycache__')
 
 clean-ui:
 	rm -rf quipucords/client
@@ -49,9 +49,12 @@ clean-db:
 	docker rm -f qpc-db
 
 lock-requirements:
-	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
-	pip-compile --allow-unsafe --generate-hashes --output-file=requirements-build.txt requirements-build.in
-	pip-compile --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
+	pip-compile $(PIP_COMPILE_ARGS) --generate-hashes --output-file=requirements.txt requirements.in
+	pip-compile $(PIP_COMPILE_ARGS) --allow-unsafe --generate-hashes --output-file=requirements-build.txt requirements-build.in
+	pip-compile $(PIP_COMPILE_ARGS) --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
+
+upgrade-requirements:
+	 $(MAKE) lock-requirements -e PIP_COMPILE_ARGS='--upgrade'
 
 test:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
@@ -62,7 +65,10 @@ test-case:
 	$(MAKE) test -e TEST_OPTS="${TEST_OPTS} $(pattern)"
 
 test-coverage:
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" 
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords"
+
+test-integration:
+	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml

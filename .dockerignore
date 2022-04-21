@@ -2,6 +2,7 @@
 .gitignore
 
 Dockerfile
+Dockerfile.scan-target
 client
 quipucords/db.sqlite3
 node_modules
@@ -17,4 +18,3 @@ quipucords.egg-info
 quipucords/client
 quipucords/quipucords/template
 quipucords/staticfiles
-

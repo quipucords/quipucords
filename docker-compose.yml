@@ -4,14 +4,13 @@ services:
     environment:
       QPC_DBMS: postgres
       QPC_DBMS_DATABASE: postgres
-      QPC_DBMS_HOST: 10.0.2.2
+      QPC_DBMS_HOST: qpc-db
       QPC_DBMS_PASSWORD: qpc
-      QPC_DBMS_PORT: 54321
+      QPC_DBMS_PORT: 5432
       QPC_DBMS_USER: qpc
       QPC_SERVER_PASSWORD: q1w2e3r4
       QPC_SERVER_TIMEOUT: 5
       QPC_SERVER_USERNAME: admin
-      USE_SUPERVISORD: "false"
 
     ports:
       - "9443:443"
@@ -20,7 +19,7 @@ services:
       - ./deploy:/deploy
     depends_on:
       - qpc-db
-    network_mode: "slirp4netns:allow_host_loopback=true"
+    restart: always
 
   qpc-db:
     image: postgres:14.1
@@ -35,3 +34,8 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+    restart: always
+  scan-target:
+    build:
+      context: .
+      dockerfile: Dockerfile.scan-target
