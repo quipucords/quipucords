@@ -587,9 +587,9 @@ pylint==2.13.7 \
     #   pylint-django
     #   pylint-plugin-utils
     #   pylint-pytest
-pylint-django==2.5.2 \
-    --hash=sha256:1933d82b4a92538a3b12aef91adfd7d866befd051d7a02d6245b0f965587d97c \
-    --hash=sha256:286dce8a31bc8ed5a523e8d8742b5a0e083b87f5f140ea4cde9aad612c03bd2d
+pylint-django==2.5.3 \
+    --hash=sha256:0ac090d106c62fe33782a1d01bda1610b761bb1c9bf5035ced9d5f23a13d8591 \
+    --hash=sha256:56b12b6adf56d548412445bd35483034394a1a94901c3f8571980a13882299d5
     # via -r dev-requirements.in
 pylint-plugin-utils==0.7 \
     --hash=sha256:b3d43e85ab74c4f48bb46ae4ce771e39c3a20f8b3d56982ab17aa73b4f98d535 \
