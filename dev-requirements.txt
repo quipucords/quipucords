@@ -682,8 +682,8 @@ pytz==2022.1 \
     --hash=sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7 \
     --hash=sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c
     # via django
-pyvmomi==7.0.1 \
-    --hash=sha256:028c4dec176d28805be7fc647cfe7f14357324522d6f08860fd34efaa66ec834
+pyvmomi==7.0.3 \
+    --hash=sha256:2ab52d940061d25307e4e4867ffea6e8ed597e7263025b0abaacc5b1d652da31
     # via -r requirements.in
 pyyaml==5.4 \
     --hash=sha256:02c78d77281d8f8d07a255e57abdbf43b02257f59f50cc6b636937d68efa5dd0 \
