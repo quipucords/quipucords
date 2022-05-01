@@ -562,9 +562,9 @@ pycparser==2.21 \
     --hash=sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9 \
     --hash=sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206
     # via cffi
-pydocstyle==5.1.1 \
-    --hash=sha256:19b86fa8617ed916776a11cd8bc0197e5b9856d5433b777f51a3defe13075325 \
-    --hash=sha256:aca749e190a01726a4fb472dd4ef23b5c9da7b9205c0a7857c06533de13fd678
+pydocstyle==6.1.1 \
+    --hash=sha256:1d41b7c459ba0ee6c345f2eb9ae827cab14a7533a88c5c6f7e94923f72df92dc \
+    --hash=sha256:6987826d6775056839940041beef5c08cc7e3d71d63149b48e36727f70144dc4
     # via
     #   -r dev-requirements.in
     #   flake8-docstrings
