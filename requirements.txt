@@ -401,9 +401,9 @@ urllib3==1.26.9 \
     --hash=sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14 \
     --hash=sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e
     # via requests
-whitenoise==5.2.0 \
-    --hash=sha256:05ce0be39ad85740a78750c86a93485c40f08ad8c62a6006de0233765996e5c7 \
-    --hash=sha256:05d00198c777028d72d8b0bbd234db605ef6d60e9410125124002518a48e515d
+whitenoise==6.0.0 \
+    --hash=sha256:08c42bc535f9777eea1a599289d9433f081921f97887eaf6f559446b2a080374 \
+    --hash=sha256:5a4aff543ee860fbe40d743e556adf92ccd41b7df45697cae074afdf657056b9
     # via -r requirements.in
 
 # WARNING: The following packages were not pinned, but pip requires them to be
