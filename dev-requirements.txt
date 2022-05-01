@@ -10,9 +10,9 @@ ansible==5.7.0 \
 ansible-base==2.10.17 \
     --hash=sha256:ef925882ca8d4c3c2ccd091cde199e0c869024ccad0d07a337dcf207bff32f34
     # via ansible
-ansible-runner==1.4.6 \
-    --hash=sha256:0744642cff32d23310b3a5f5aae23d07bea1051724e66b27f9bbccefec8427dd \
-    --hash=sha256:53605de32f7d3d3442a6deb8937bf1d9c1f91c785e3f71003d22c3e63f85c71d
+ansible-runner==2.1.3 \
+    --hash=sha256:da6e5d0fe8060cbe4b9d8ed06c362219dbb8198bb40b8f56536f46658d9b9c1a \
+    --hash=sha256:fd166683d8e7594cb652a706e391c4037d2c51c25ffbd90a1e32b23063388598
     # via -r requirements.in
 asgiref==3.5.0 \
     --hash=sha256:2f8abc20f7248433085eda803936d98992f1343ddb022065779f37c5da0181d0 \
