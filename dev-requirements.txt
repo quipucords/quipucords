@@ -220,9 +220,9 @@ distro==1.7.0 \
     --hash=sha256:151aeccf60c216402932b52e40ee477a939f8d58898927378a02abbe852c1c39 \
     --hash=sha256:d596311d707e692c2160c37807f83e3820c5d539d5a83e87cfb6babd8ba3a06b
     # via docker-compose
-django==3.1.14 \
-    --hash=sha256:0fabc786489af16ad87a8c170ba9d42bfd23f7b699bd5ef05675864e8d012859 \
-    --hash=sha256:72a4a5a136a214c39cf016ccdd6b69e2aa08c7479c66d93f3a9b5e4bb9d8a347
+django==4.0.4 \
+    --hash=sha256:07c8638e7a7f548dc0acaaa7825d84b7bd42b10e8d22268b3d572946f1e9b687 \
+    --hash=sha256:4e8177858524417563cc0430f29ea249946d831eacb0068a1455686587df40b5
     # via
     #   -r requirements.in
     #   django-filter
