@@ -212,9 +212,9 @@ cryptography==37.0.1 \
     # via
     #   ansible-base
     #   paramiko
-darker==1.4.1 \
-    --hash=sha256:c63cbfcf707987bc5cb3da30eaf5f2348aabc03f96b7b69bc31a34e96d8f2b8a \
-    --hash=sha256:d423f4d791ff9a752a4a567a074d6c352cf6eb938d24d026a5799fcaa739c6c5
+darker==1.5.0 \
+    --hash=sha256:a23a917b9abee0725ba68da5f564ed25dd4e63eab6dc5a43d9e2f88b7c19899e \
+    --hash=sha256:effd451a364d603578c9df569cc4ab72900b4bb3ffb7b918160ff559ef8af892
     # via -r dev-requirements.in
 distro==1.7.0 \
     --hash=sha256:151aeccf60c216402932b52e40ee477a939f8d58898927378a02abbe852c1c39 \
