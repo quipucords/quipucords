@@ -5,7 +5,8 @@
     internal_host_started_processing_role: "virt_what"
 
 - name: set virt-what.type fact if virt-what not found
-  set_fact: virt_what_type=''
+  set_fact: 
+    virt_what_type: ""
   ignore_errors: yes
   when: 'not internal_have_virt_what'
 

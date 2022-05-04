@@ -38,7 +38,8 @@
   ignore_errors: yes
 
 - name: set internal_release_file when a release file is found
-  set_fact: internal_release_file={{ internal_release_found["stdout_lines"][0] }}
+  set_fact: 
+    internal_release_file: '{{ internal_release_found["stdout_lines"][0] }}'
   ignore_errors: yes
   when:
     - '"stdout_lines" in internal_release_found'
