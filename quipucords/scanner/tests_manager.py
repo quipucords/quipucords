@@ -13,11 +13,10 @@
 from multiprocessing import Process
 from unittest.mock import Mock
 
-from api.models import ScanTask
-
+import pytest
 from django.test import TestCase
 
-from scanner.manager import Manager
+from api.models import ScanTask
 
 
 class MockTask(Process):
@@ -30,45 +29,42 @@ class MockTask(Process):
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
-        self.identifier = 'TestScan'
+        self.identifier = "TestScan"
 
     def log_message(self, message):
         """Fake log message."""
-        pass
 
 
 class ScanManagerTest(TestCase):
     """Tests against the Manager class and functions."""
 
-    scan_manager = None
-
-    def setUp(self):
-        """Create test case setup."""
-        self.scan_manager = Manager()
+    @pytest.fixture(autouse=True)
+    def _set_scan_manager(self, scan_manager):
+        # pylint: disable=attribute-defined-outside-init
+        self.scan_manager = scan_manager
         self.scan_manager.start()
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-        if self.scan_manager.is_alive():
-            self.scan_manager.running = False
-            self.scan_manager.join()
+    @pytest.fixture(autouse=True)
+    def _set_task(self):
+        # pylint: disable=attribute-defined-outside-init
+        self.task = MockTask()
+        yield
+        if self.task.is_alive():
+            self.task.kill()
 
     def test_put(self):
         """Test the put feature of the manager."""
-        task = MockTask()
-        self.scan_manager.put(task)
+        self.scan_manager.put(self.task)
         self.assertEqual(len(self.scan_manager.scan_queue), 1)
 
     def test_work(self):
         """Test the work function."""
-        task = MockTask()
         self.assertIsNone(self.scan_manager.current_job_runner)
-        self.scan_manager.put(task)
+        self.scan_manager.put(self.task)
         self.assertIsNone(self.scan_manager.current_job_runner)
         self.scan_manager.work()
 
     def test_kill_missing(self):
         """Test kill on missing id."""
-        task = MockTask()
-        killed = self.scan_manager.kill(task, 'cancel')
+        killed = self.scan_manager.kill(self.task, "cancel")
         self.assertFalse(killed)
