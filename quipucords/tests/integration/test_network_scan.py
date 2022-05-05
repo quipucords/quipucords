@@ -194,6 +194,7 @@ def fingerprint_fact_map():
     """Map fingerprint to raw fact name."""
     return {
         "architecture": "uname_processor",
+        "bios_uuid": "dmi_system_uuid",
         "cpu_core_count": "cpu_core_count",
         "cpu_core_per_socket": "cpu_core_per_socket",
         "cpu_count": "cpu_count",
@@ -208,8 +209,11 @@ def fingerprint_fact_map():
         "os_version": "etc_release_version",
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
+        "subscription_manager_id": "subman_virt_uuid",
         "system_creation_date": "date_machine_id",
         "system_last_checkin_date": "connection_timestamp",
+        "system_user_count": "system_user_count",
+        "user_login_history": "user_login_history",
         "virtualized_type": "virt_type",
     }
 
@@ -235,6 +239,7 @@ class TestNetworkScan:
                 "name": "testing credential",
                 "cred_type": self.SOURCE_TYPE,
                 "become_method": "sudo",
+                "become_password": constants.SCAN_TARGET_PASSWORD,
             },
         )
         assert response.ok, response.text
@@ -287,7 +292,7 @@ class TestNetworkScan:
             response = apiclient.get(f"scans/{scan_id}/")
             assert response.ok, response.text
 
-        assert scan_status == ScanTask.COMPLETED
+        assert scan_status == ScanTask.COMPLETED, response.text
 
         return response
 
@@ -324,6 +329,7 @@ class TestNetworkScan:
             etc_release_name="Red Hat Enterprise Linux",
             redhat_packages_gpg_is_redhat=True,
             date_machine_id=datetime.utcnow().date().isoformat(),
+            user_has_sudo=True,
         )
         report_details_facts = report_details_dict["sources"][0]["facts"][0]
         assert report_details_facts | some_expected_facts == report_details_facts
@@ -342,7 +348,7 @@ class TestNetworkScan:
                 source_name=self.SOURCE_NAME,
                 source_type=self.SOURCE_TYPE,
                 raw_fact_key=raw_fact,
-                has_sudo=mock.ANY,
+                has_sudo=True,
             )
         return metadata
 
