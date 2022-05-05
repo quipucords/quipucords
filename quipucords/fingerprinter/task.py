@@ -15,29 +15,34 @@ import math
 import uuid
 from datetime import datetime
 
+from django.db import DataError
+from rest_framework.serializers import DateField, DateTimeField
+
 from api.common.common_report import create_report_version
-from api.common.util import (convert_to_boolean,
-                             convert_to_float,
-                             convert_to_int,
-                             is_boolean,
-                             is_float,
-                             is_int,
-                             mask_data_general)
+from api.common.util import (
+    convert_to_boolean,
+    convert_to_float,
+    convert_to_int,
+    is_boolean,
+    is_float,
+    is_int,
+    mask_data_general,
+)
 from api.deployments_report.util import (
     NETWORK_DETECTION_KEY,
     SATELLITE_DETECTION_KEY,
     VCENTER_DETECTION_KEY,
-    compute_source_info)
-from api.models import (DeploymentsReport,
-                        Product,
-                        ScanJob,
-                        ScanTask,
-                        Source,
-                        SystemFingerprint)
-from api.serializers import (SystemFingerprintSerializer)
-
-from django.db import DataError
-
+    compute_source_info,
+)
+from api.models import (
+    DeploymentsReport,
+    Product,
+    ScanJob,
+    ScanTask,
+    Source,
+    SystemFingerprint,
+)
+from api.serializers import SystemFingerprintSerializer
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -51,9 +56,6 @@ from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
-
-from rest_framework.serializers import DateField, DateTimeField
-
 from scanner.task import ScanTaskRunner
 
 # pylint: disable=too-many-lines
