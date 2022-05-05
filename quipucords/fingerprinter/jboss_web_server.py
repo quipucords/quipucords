@@ -12,16 +12,13 @@
 """Ingests raw facts to determine the status of JBoss Web Server on system."""
 
 from api.models import Product
-
-from fingerprinter.utils import (generate_raw_fact_members,
-                                 product_entitlement_found)
+from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
+from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
 
 NAME = 'name'
 PRODUCT = 'JBoss Web Server'
-PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
-META_DATA_KEY = 'metadata'
 SUBMAN_CONSUMED = 'subman_consumed'
 
 JWS_INSTALLED_WITH_RPM = 'jws_installed_with_rpm'

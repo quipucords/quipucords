@@ -14,17 +14,14 @@
 import logging
 
 from api.models import Product
-
-from fingerprinter.utils import (generate_raw_fact_members,
-                                 product_entitlement_found)
+from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
+from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 PRODUCT = 'JBoss Fuse'
-PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
-META_DATA_KEY = 'metadata'
 EAP_HOME_BIN = 'eap_home_bin'
 KARAF_HOME_BIN_FUSE = 'karaf_home_bin_fuse'
 JBOSS_FUSE_SYSTEMCTL_FILES = 'jboss_fuse_systemctl_unit_files'

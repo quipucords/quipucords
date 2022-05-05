@@ -38,6 +38,14 @@ from api.serializers import (SystemFingerprintSerializer)
 
 from django.db import DataError
 
+from fingerprinter.constants import (
+    ENTITLEMENTS_KEY,
+    META_DATA_KEY,
+    NAME_KEY,
+    PRESENCE_KEY,
+    PRODUCTS_KEY,
+    SOURCES_KEY,
+)
 from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
@@ -72,13 +80,6 @@ NETWORK_VCENTER_MERGE_KEYS = [
     ('mac_addresses', 'mac_addresses')]
 
 FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
-
-META_DATA_KEY = 'metadata'
-ENTITLEMENTS_KEY = 'entitlements'
-PRODUCTS_KEY = 'products'
-NAME_KEY = 'name'
-PRESENCE_KEY = 'presence'
-SOURCES_KEY = 'sources'
 
 # keys are in reverse order of accuracy (last most accurate)
 # (date_key, date_pattern)

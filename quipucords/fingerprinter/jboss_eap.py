@@ -15,7 +15,7 @@ import bisect
 import logging
 
 from api.models import Product
-
+from fingerprinter.constants import META_DATA_KEY
 from fingerprinter.utils import product_entitlement_found
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -25,7 +25,6 @@ PRODUCT = 'JBoss EAP'
 PRESENCE = 'presence'
 VERSION = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
-META_DATA_KEY = 'metadata'
 JBOSS_EAP_RUNNING_PATHS = 'jboss_eap_running_paths'
 JBOSS_EAP_JBOSS_USER = 'jboss_eap_id_jboss'
 JBOSS_EAP_COMMON_FILES = 'jboss_eap_common_files'

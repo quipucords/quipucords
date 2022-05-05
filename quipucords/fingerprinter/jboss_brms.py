@@ -15,17 +15,14 @@ import itertools
 import logging
 
 from api.models import Product
-
-from fingerprinter.utils import (generate_raw_fact_members,
-                                 product_entitlement_found)
+from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
+from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 PRODUCT = 'JBoss BRMS'
-PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
-META_DATA_KEY = 'metadata'
 JBOSS_BRMS_MANIFEST_MF = 'jboss_brms_manifest_mf'
 JBOSS_BRMS_KIE_IN_BC = 'jboss_brms_kie_in_business_central'
 JBOSS_BRMS_LOCATE_KIE_API = 'jboss_brms_locate_kie_api'
