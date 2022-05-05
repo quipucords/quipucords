@@ -17,6 +17,7 @@ import logging
 from api.models import Product
 from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
 from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
+from utils import default_getter
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -84,14 +85,14 @@ def detect_jboss_brms(source, facts):
     :param facts: facts for a system
     :returns: dictionary defining the product presence
     """
-    manifest_mfs = facts.get(JBOSS_BRMS_MANIFEST_MF, set())
-    kie_in_bc = facts.get(JBOSS_BRMS_KIE_IN_BC, set())
-    locate_kie_api = facts.get(JBOSS_BRMS_LOCATE_KIE_API, set())
-    find_kie_api = facts.get(JBOSS_BRMS_KIE_API_VER, set())
-    find_kie_war = facts.get(JBOSS_BRMS_KIE_WAR_VER, set())
-    find_drools = facts.get(JBOSS_BRMS_DROOLS_CORE_VER, set())
-    subman_consumed = facts.get(SUBMAN_CONSUMED, [])
-    entitlements = facts.get(ENTITLEMENTS, [])
+    manifest_mfs = default_getter(facts, JBOSS_BRMS_MANIFEST_MF, set())
+    kie_in_bc = default_getter(facts, JBOSS_BRMS_KIE_IN_BC, set())
+    locate_kie_api = default_getter(facts, JBOSS_BRMS_LOCATE_KIE_API, set())
+    find_kie_api = default_getter(facts, JBOSS_BRMS_KIE_API_VER, set())
+    find_kie_war = default_getter(facts, JBOSS_BRMS_KIE_WAR_VER, set())
+    find_drools = default_getter(facts, JBOSS_BRMS_DROOLS_CORE_VER, set())
+    subman_consumed = default_getter(facts, SUBMAN_CONSUMED, [])
+    entitlements = default_getter(facts, ENTITLEMENTS, [])
 
     metadata = {
         'server_id': source['server_id'],
