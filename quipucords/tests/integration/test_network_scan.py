@@ -195,6 +195,7 @@ def fingerprint_fact_map():
     return {
         "architecture": "uname_processor",
         "bios_uuid": "dmi_system_uuid",
+        "cloud_provider": "cloud_provider",
         "cpu_core_count": "cpu_core_count",
         "cpu_core_per_socket": "cpu_core_per_socket",
         "cpu_count": "cpu_count",
