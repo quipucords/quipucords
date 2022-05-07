@@ -992,10 +992,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # merge facts
         for fact_key in keys_to_add_list:
             to_merge_fact = to_merge_fingerprint.get(fact_key)
-            if to_merge_fact:
-                priority_fingerprint[META_DATA_KEY][fact_key] = \
-                    to_merge_fingerprint[META_DATA_KEY][fact_key]
-                priority_fingerprint[fact_key] = to_merge_fact
+            priority_fingerprint[META_DATA_KEY][fact_key] = to_merge_fingerprint[
+                META_DATA_KEY
+            ][fact_key]
+            priority_fingerprint[fact_key] = to_merge_fact
 
         # merge sources
         priority_sources = priority_fingerprint[SOURCES_KEY]
