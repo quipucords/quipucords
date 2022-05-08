@@ -221,8 +221,13 @@ def fingerprint_fact_map():
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
         "subscription_manager_id": "subman_virt_uuid",
+        "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
+        "system_purpose": "system_purpose_json",
+        "system_role": "system_purpose_json__role",
+        "system_service_level_agreement": "system_purpose_json__service_level_agreement",  # noqa:E501
+        "system_usage_type": "system_purpose_json__usage_type",
         "system_user_count": "system_user_count",
         "user_login_history": "user_login_history",
         "virtualized_type": "virt_type",

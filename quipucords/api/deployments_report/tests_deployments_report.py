@@ -30,7 +30,7 @@ from django.urls import reverse
 from rest_framework import status
 
 
-EXPECTED_NUMBER_OF_FINGERPRINTS = 31
+EXPECTED_NUMBER_OF_FINGERPRINTS = 37
 
 
 class DeploymentReportTest(TestCase):
