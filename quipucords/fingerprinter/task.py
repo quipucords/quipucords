@@ -58,7 +58,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 from scanner.task import ScanTaskRunner
-from utils import default_getter
+from utils import deepget, default_getter
 
 # pylint: disable=too-many-lines
 
@@ -1070,10 +1070,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         # pylint: disable=too-many-arguments
         actual_fact_value = None
+        raw_fact_value = deepget(raw_fact, raw_fact_key)
         if fact_value is not None:
             actual_fact_value = fact_value
-        elif raw_fact.get(raw_fact_key) is not None:
-            actual_fact_value = raw_fact.get(raw_fact_key)
+        elif raw_fact_value is not None:
+            actual_fact_value = raw_fact_value
         if fingerprint_key == 'mac_addresses':
             if isinstance(actual_fact_value, list):
                 actual_fact_value = list(map(lambda x: x.lower(),
@@ -1091,11 +1092,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
-            'server_id': source['server_id'],
-            'source_name': source['source_name'],
-            'source_type': source['source_type'],
-            'raw_fact_key': raw_fact_key,
-            'has_sudo': raw_fact.get('user_has_sudo', False)
+            "server_id": source["server_id"],
+            "source_name": source["source_name"],
+            "source_type": source["source_type"],
+            "raw_fact_key": raw_fact_key,
+            "has_sudo": raw_fact.get("user_has_sudo", False),
         }
 
     def _add_products_to_fingerprint(self, source,
@@ -1248,16 +1249,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'user_login_history',
                                       fact, 'user_login_history', fingerprint)
 
+        last_checkin = None
         if fact.get('connection_timestamp'):
             last_checkin = self._multi_format_dateparse(
                 source,
-                'connection_timestamp',
-                fact['connection_timestamp'],
-                ['%Y%m%d%H%M%S'])
-            self._add_fact_to_fingerprint(source, 'connection_timestamp',
-                                          fact, 'system_last_checkin_date',
-                                          fingerprint,
-                                          fact_value=last_checkin)
+                "connection_timestamp",
+                fact["connection_timestamp"],
+                ["%Y%m%d%H%M%S"],
+            )
+        self._add_fact_to_fingerprint(
+            source,
+            "connection_timestamp",
+            fact,
+            "system_last_checkin_date",
+            fingerprint,
+            fact_value=last_checkin,
+        )
 
         # Determine if running on VM or bare metal
         virt_what_type = fact.get('virt_what_type')
@@ -1284,52 +1291,45 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 fingerprint, fact_value=SystemFingerprint.UNKNOWN)
 
         # System purpose facts
-        system_purpose_json = fact.get('system_purpose_json', None)
-        if system_purpose_json:
-            self._add_fact_to_fingerprint(
-                source,
-                'system_purpose_json', fact,
-                'system_purpose', fingerprint,
-                fact_value=system_purpose_json
-            )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json",
+            fact,
+            "system_purpose",
+            fingerprint,
+        )
 
-            system_purpose_role = system_purpose_json.get('role', None)
-            if system_purpose_role:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_role', fingerprint,
-                    fact_value=system_purpose_role
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__role",
+            fact,
+            "system_role",
+            fingerprint,
+        )
 
-            system_addons = system_purpose_json.get('addons', None)
-            if system_addons:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_addons', fingerprint,
-                    fact_value=system_addons
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__addons",
+            fact,
+            "system_addons",
+            fingerprint,
+        )
 
-            system_service_level_agreement = system_purpose_json.get(
-                'service_level_agreement', None)
-            if system_service_level_agreement:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_service_level_agreement', fingerprint,
-                    fact_value=system_service_level_agreement
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__service_level_agreement",
+            fact,
+            "system_service_level_agreement",
+            fingerprint,
+        )
 
-            system_usage_type = system_purpose_json.get(
-                'usage_type', None)
-            if system_usage_type:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_usage_type', fingerprint,
-                    fact_value=system_usage_type
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__usage_type",
+            fact,
+            "system_usage_type",
+            fingerprint,
+        )
 
         # Determine if VM facts
         self._add_fact_to_fingerprint(source, 'virt_type', fact,
