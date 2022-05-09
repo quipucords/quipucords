@@ -1,12 +1,25 @@
 FROM redhat/ubi8
 
+ENV DJANGO_DB_PATH=/var/data/
+ENV DJANGO_DEBUG=False
+ENV DJANGO_LOG_FILE=/var/log/app.log
+ENV DJANGO_LOG_FORMATTER=verbose
+ENV DJANGO_LOG_HANDLERS=console,file
+ENV DJANGO_LOG_LEVEL=INFO
+ENV DJANGO_SECRET_PATH=/var/data/secret.txt
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV PATH="/opt/venv/bin:${PATH}"
+ENV PRODUCTION=True
+ENV PYTHONPATH=/app/quipucords
+ENV QUIPUCORDS_LOG_LEVEL=INFO
+
 RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
 
-ENV PATH="/opt/venv/bin:${PATH}"
 
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip wheel
 
 WORKDIR /app
 COPY requirements.txt .
@@ -34,24 +47,12 @@ RUN mkdir -p /etc/ansible/roles/
 COPY quipucords/scanner/network/runner/roles/ /etc/ansible/roles/
 VOLUME /etc/ansible/roles/
 
-# Copy server code
-COPY . .
-
 # Set production environment
 ARG BUILD_COMMIT=master
 ENV QUIPUCORDS_COMMIT=$BUILD_COMMIT
-ENV PRODUCTION=True
-ENV DJANGO_SECRET_PATH=/var/data/secret.txt
-ENV DJANGO_DB_PATH=/var/data/
-ENV DJANGO_DEBUG=False
-ENV DJANGO_LOG_LEVEL=INFO
-ENV DJANGO_LOG_FORMATTER=verbose
-ENV DJANGO_LOG_HANDLERS=console,file
-ENV DJANGO_LOG_FILE=/var/log/app.log
-ENV QUIPUCORDS_LOG_LEVEL=INFO
-ENV LC_ALL=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV PYTHONPATH=/app/quipucords
+
+# Copy server code
+COPY . .
 
 # Install quipucords as package
 RUN pip install -v -e .
