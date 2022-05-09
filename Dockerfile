@@ -60,7 +60,5 @@ RUN pip install -v -e .
 # Collect static files
 RUN make server-static
 
-WORKDIR /var/log
-
 EXPOSE 443
 CMD ["/bin/bash", "/deploy/docker_run.sh"]
