@@ -114,6 +114,7 @@ build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
 fetch-ui: clean-ui
 	curl -k -SL https://github.com/quipucords/quipucords-ui/releases/download/$(QUIPUCORDS_UI_RELEASE)/quipucords-ui-dist.tar.gz -o ui-dist.tar.gz &&\
     tar -xzvf ui-dist.tar.gz &&\
+	mkdir -p quipucords/quipucords/templates quipucords/client &&\
     mv dist/templates quipucords/quipucords/templates &&\
     mv dist/client quipucords/client &&\
     rm -rf ui-dist* dist

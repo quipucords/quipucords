@@ -44,6 +44,11 @@ jobs:
           pip install -r dev-requirements.txt
           pip install -e .
 
+      - name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
       - name: Run Test
         run: make ${{ matrix.type }} -k
         env:

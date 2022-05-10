@@ -38,7 +38,8 @@ postgres_container = container(
 
 qpc_server_image = build(
     path=constants.PROJECT_ROOT_DIR.as_posix(),
-    cache_from=["quay.io/quipucords/quipucords:latest"],
+    rm=constants.CLEANUP_DOCKER_LAYERS,
+    forcerm=constants.CLEANUP_DOCKER_LAYERS,
 )
 qpc_server_container = container(
     environment=dict(
