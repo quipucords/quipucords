@@ -14,6 +14,7 @@ These models are used in the REST definitions.
 """
 import json
 import logging
+import traceback
 from datetime import datetime
 
 from api import messages
@@ -201,10 +202,14 @@ class ScanTask(models.Model):
         self.log_message(message)
 
     # All task types
-    def log_message(self, message, log_level=logging.INFO,
-                    static_options=None):
+    def log_message(
+        self, message, log_level=logging.INFO, static_options=None, exception=None
+    ):
         """Log a message for this task."""
         # pylint: disable=no-member
+        if exception:
+            logger.error(traceback.format_tb(exception.__traceback__))
+
         if self.scan_job_task_count is None:
             self.scan_job_task_count = self.job.tasks.all().count()
         if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:

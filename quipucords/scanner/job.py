@@ -132,7 +132,8 @@ class ScanJobRunner(Process):
                     'DETAILS REPORT - '
                     'The following details report failed to generate a'
                     ' deployments report: %s' % details_report,
-                    log_level=logging.ERROR
+                    log_level=logging.ERROR,
+                    exception=error,
                 )
                 raise error
             if task_status in [ScanTask.CANCELED, ScanTask.PAUSED]:
