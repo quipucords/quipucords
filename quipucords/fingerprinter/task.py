@@ -1089,15 +1089,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
         elif is_int(actual_fact_value):
             actual_fact_value = convert_to_int(actual_fact_value)
 
-        if actual_fact_value is not None:
-            fingerprint[fingerprint_key] = actual_fact_value
-            fingerprint[META_DATA_KEY][fingerprint_key] = {
-                'server_id': source['server_id'],
-                'source_name': source['source_name'],
-                'source_type': source['source_type'],
-                'raw_fact_key': raw_fact_key,
-                'has_sudo': raw_fact.get('user_has_sudo', False)
-            }
+        fingerprint[fingerprint_key] = actual_fact_value
+        fingerprint[META_DATA_KEY][fingerprint_key] = {
+            'server_id': source['server_id'],
+            'source_name': source['source_name'],
+            'source_type': source['source_type'],
+            'raw_fact_key': raw_fact_key,
+            'has_sudo': raw_fact.get('user_has_sudo', False)
+        }
 
     def _add_products_to_fingerprint(self, source,
                                      raw_fact,
