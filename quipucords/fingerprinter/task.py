@@ -87,12 +87,15 @@ FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
 
 # keys are in reverse order of accuracy (last most accurate)
 # (date_key, date_pattern)
-RAW_DATE_KEYS = \
-    [('date_yum_history', ['%Y-%m-%d']),
-     ('date_filesystem_create', ['%Y-%m-%d']),
-     ('date_anaconda_log', ['%Y-%m-%d']),
-     ('registration_time', ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S %z']),
-     ('date_machine_id', ['%Y-%m-%d'])]
+RAW_DATE_KEYS = dict(
+    [
+        ("date_yum_history", ["%Y-%m-%d"]),
+        ("date_filesystem_create", ["%Y-%m-%d"]),
+        ("date_anaconda_log", ["%Y-%m-%d"]),
+        ("registration_time", ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"]),
+        ("date_machine_id", ["%Y-%m-%d"]),
+    ]
+)
 
 # Insights specific facts
 CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
@@ -689,22 +692,26 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         # keys are in reverse order of accuracy (last most accurate)
         system_creation_date = None
-        system_creation_date_metadata = None
-        for date_key, date_pattern in RAW_DATE_KEYS:
+        system_creation_date_metadata = {}
+        sys_creation_key = "system_creation_date"
+        for date_key, date_pattern in RAW_DATE_KEYS.items():
             date_value = fingerprint.pop(date_key, None)
+            date_metadata_dict = fingerprint[META_DATA_KEY].pop(date_key, None)
             if date_value is not None:
-                system_creation_date_metadata = fingerprint[META_DATA_KEY].pop(
-                    date_key, None)
+                system_creation_date_metadata = date_metadata_dict
                 system_creation_date = self._multi_format_dateparse(
                     system_creation_date_metadata,
                     date_key,
                     date_value,
                     date_pattern)
 
+        fingerprint[sys_creation_key] = system_creation_date
         if system_creation_date is not None:
-            fingerprint['system_creation_date'] = system_creation_date
-            fingerprint[META_DATA_KEY]['system_creation_date'] = \
-                system_creation_date_metadata
+            fingerprint[META_DATA_KEY][sys_creation_key] = system_creation_date_metadata
+        else:
+            raw_fact_key = "/".join(RAW_DATE_KEYS.keys())
+            system_creation_date_metadata["raw_fact_key"] = raw_fact_key
+            fingerprint[META_DATA_KEY][sys_creation_key] = system_creation_date_metadata
 
     def _process_source(self, source):
         """Process facts and convert to fingerprints.
