@@ -13,6 +13,7 @@ import json
 import logging
 import math
 import uuid
+from copy import deepcopy
 from datetime import datetime
 
 from django.db import DataError
@@ -857,7 +858,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if not fingerprint_list:
             return fingerprint_list
 
-        result_list = fingerprint_list[:]
+        result_list = deepcopy(fingerprint_list)
         for id_key in id_key_list:
             unique_dict = {}
             no_global_id_list = []
@@ -906,6 +907,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         result_by_key = {}
         key_not_found_list = []
         number_duplicates = 0
+        fingerprint_list = deepcopy(fingerprint_list)
         for value_dict in fingerprint_list:
             # Add globally unique key for de-duplication later
             if create_global_id:
@@ -952,6 +954,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         of to_merge_fingerprint should be used instead of the
         priority_fingerprint value.
         """
+        priority_fingerprint = deepcopy(priority_fingerprint)
+        to_merge_fingerprint = deepcopy(to_merge_fingerprint)
         priority_keys = set(priority_fingerprint.keys())
         to_merge_keys = set(to_merge_fingerprint.keys())
 
