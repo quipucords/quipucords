@@ -20,6 +20,12 @@ from unittest import mock
 import pytest
 
 from api.models import ScanTask
+from fingerprinter.constants import (
+    ENTITLEMENTS_KEY,
+    META_DATA_KEY,
+    PRODUCTS_KEY,
+    SOURCES_KEY,
+)
 from tests import constants
 
 logger = getLogger(__name__)
@@ -312,7 +318,7 @@ class TestNetworkScan:
             "report_platform_id": mock.ANY,
             "report_type": "details",
             "report_version": mock.ANY,
-            "sources": [
+            SOURCES_KEY: [
                 {
                     "facts": [
                         {fact: mock.ANY for fact in expected_network_scan_facts},
@@ -376,19 +382,21 @@ class TestNetworkScan:
         }
 
         fingerprints_dict = report_deployments_dict["system_fingerprints"][0]
+        fingerprint_fact_names = set(fingerprints_dict[META_DATA_KEY].keys())
+        assert fingerprint_fact_names == set(fingerprint_fact_map.keys())
         assert fingerprints_dict == {
             "id": mock.ANY,
             "deployment_report": mock.ANY,
-            "entitlements": [],
-            "sources": [
+            ENTITLEMENTS_KEY: [],
+            SOURCES_KEY: [
                 {
                     "server_id": mock.ANY,
                     "source_name": self.SOURCE_NAME,
                     "source_type": self.SOURCE_TYPE,
                 }
             ],
-            "metadata": expected_fingerprint_metadata,
-            "products": mock.ANY,
+            META_DATA_KEY: expected_fingerprint_metadata,
+            PRODUCTS_KEY: mock.ANY,
             **{fingerprint: mock.ANY for fingerprint in fingerprint_fact_map.keys()},
         }
 

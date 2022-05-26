@@ -43,7 +43,8 @@ qpc_server_image = build(
 )
 qpc_server_container = container(
     environment=dict(
-        DJANGO_LOG_LEVEL="ERROR",
+        ANSIBLE_LOG_LEVEL=constants.QPC_ANSIBLE_LOG_LEVEL,
+        DJANGO_LOG_LEVEL=constants.QUIPUCORDS_LOG_LEVEL,
         QPC_DBMS="postgres",
         QPC_DBMS_DATABASE=constants.POSTGRES_DB,
         QPC_DBMS_HOST="{postgres_container.ips.primary}",
@@ -52,7 +53,8 @@ qpc_server_container = container(
         QPC_SERVER_PASSWORD=constants.QPC_SERVER_PASSWORD,
         QPC_SERVER_USERNAME=constants.QPC_SERVER_USERNAME,
         QUIPUCORDS_COMMIT=constants.QPC_COMMIT,
-        QUIPUCORDS_LOG_LEVEL="ERROR",
+        QUIPUCORDS_LOG_LEVEL=constants.QUIPUCORDS_LOG_LEVEL,
+        QUIPUCORDS_MANAGER_HEARTBEAT=constants.QUIPUCORDS_MANAGER_HEARTBEAT,
     ),
     image="{qpc_server_image.id}",
     ports={"443/tcp": None},
