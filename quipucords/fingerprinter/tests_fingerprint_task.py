@@ -12,6 +12,7 @@
 """Test the fact engine API."""
 
 import json
+from copy import deepcopy
 from datetime import datetime
 from unittest import mock
 from unittest.mock import patch
@@ -848,6 +849,10 @@ class EngineTest(TestCase):
             vfingerprint_no_key
         ]
 
+        expected_merge_fingerprint = deepcopy(nfingerprint_to_merge)
+        expected_merge_fingerprint["vm_uuid"] = "match"
+        expected_merge_fingerprint["metadata"]["vm_uuid"] = vmetadata["vm_uuid"]
+
         _, merge_list, no_match_found_list = \
             self.fp_task_runner._merge_matching_fingerprints(
                 'bios_uuid', nfingerprints, 'vm_uuid', vfingerprints)
@@ -857,17 +862,16 @@ class EngineTest(TestCase):
 
         # merge list should always contain all nfingerprints (base_list)
         self.assertEqual(len(merge_list), 3)
-        self.assertTrue(nfingerprint_to_merge in merge_list)
+        self.assertTrue(expected_merge_fingerprint in merge_list)
         self.assertTrue(nfingerprint_no_match in merge_list)
         self.assertTrue(nfingerprint_no_key in merge_list)
 
         # assert VM property merged
-        self.assertIsNotNone(nfingerprint_to_merge.get('vm_uuid'))
+        self.assertIsNotNone(expected_merge_fingerprint.get("vm_uuid"))
 
         # assert network os_release had priority
-        self.assertEqual(nfingerprint_to_merge.get('os_release'), 'RHEL 7')
-        self.assertEqual(nfingerprint_to_merge.get(
-            'sources'), merged_sources)
+        self.assertEqual(expected_merge_fingerprint.get("os_release"), "RHEL 7")
+        self.assertEqual(expected_merge_fingerprint.get("sources"), merged_sources)
 
         # assert those that didn't match, don't have VM properties
         self.assertIsNone(nfingerprint_no_match.get('vm_uuid'))
