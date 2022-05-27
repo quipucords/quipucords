@@ -17,17 +17,27 @@ isort = true
 [tool.flakeheaven]
 baseline = ".flakeheaven-baseline"
 exclude = [
-    "docs",
-    "build",
-    ".vscode",
-    "client",
-    "venv",
     ".egg",
+    ".vscode",
+    "build",
+    "client",
+    "docs",
+    "var",
+    "venv",
 ]
 max_line_length = 88
 
 [tool.flakeheaven.exceptions."**/__init__.py"]
-pyflakes = ["-F401*"]
+pyflakes = ["-F401"]
+
+[tool.flakeheaven.exceptions."quipucords/api/migrations/*.py"]
+"flake8-*" = [
+    "-D100",
+    "-D101",
+    "-PLC0103", # invalid-name
+    "-PLC0114", # missing-module-docstring
+    "-PLC0115", # missing-class-docstring
+]
 
 [tool.flakeheaven.plugins]
 pycodestyle = ["+*", "-W503", "-W504", "-W605" ]

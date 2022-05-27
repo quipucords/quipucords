@@ -14,21 +14,17 @@ import json
 import tarfile
 import uuid
 
-from api.common.common_report import create_report_version
-from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
-from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
-from api.deployments_report.util import (sanitize_row)
-from api.details_report.tests_details_report import MockRequest
-from api.models import (Credential,
-                        ServerInformation,
-                        Source)
-
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework import status
 
+from api.common.common_report import create_report_version
+from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
+from api.deployments_report.csv_renderer import DeploymentCSVRenderer
+from api.deployments_report.util import sanitize_row
+from api.details_report.tests_details_report import MockRequest
+from api.models import Credential, ServerInformation, Source
 
 EXPECTED_NUMBER_OF_FINGERPRINTS = 37
 
@@ -141,7 +137,10 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['system_fingerprints'][0].keys()), EXPECTED_NUMBER_OF_FINGERPRINTS)
+        self.assertEqual(
+            len(report["system_fingerprints"][0].keys()),
+            EXPECTED_NUMBER_OF_FINGERPRINTS,
+        )
 
     def test_get_deployments_report_masked(self):
         """Get a specific group count report masking sensitive info."""
@@ -152,7 +151,10 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['system_fingerprints'][0].keys()), EXPECTED_NUMBER_OF_FINGERPRINTS)
+        self.assertEqual(
+            len(report["system_fingerprints"][0].keys()),
+            EXPECTED_NUMBER_OF_FINGERPRINTS,
+        )
 
         # Check the masked values
         fingerprints = report.get('system_fingerprints')
