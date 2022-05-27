@@ -995,6 +995,31 @@ class EngineTest(TestCase):
         self.assertIsNotNone(new_fingerprint.get('cpu_socket_count'))
         self.assertIsNotNone(new_fingerprint.get('cpu_core_count'))
 
+    def assert_all_fingerprints_have_sudo(self, metadata_dict):
+        """
+        Check if all fingerprints have 'has_sudo' set to True.
+
+        If its not True, all offending fingerprints will appear on the error log.
+        """
+        # fp <<< abbreviation for fingerprint
+        self.assertTrue(
+            all(fp_meta["has_sudo"] for fp_meta in metadata_dict.values()),
+            [
+                fp_name
+                for fp_name, fp_meta in metadata_dict.items()
+                if not fp_meta["has_sudo"]
+            ],
+        )
+        return True
+
+    def test_assert_all_fingerprints_have_sudo(self):
+        """Test assert_all_fingerprints_have_sudo."""
+        fake_fingerprints = {"foo": {"has_sudo": True}, "bar": {"has_sudo": True}}
+        self.assert_all_fingerprints_have_sudo(fake_fingerprints)
+        fake_fingerprints["foo"]["has_sudo"] = False
+        with self.assertRaisesMessage(AssertionError, "False is not true : ['foo']"):
+            self.assert_all_fingerprints_have_sudo(fake_fingerprints)
+
     def test_merge_fingerprint_sudo(self):
         """Test merging two network one sudo and one without."""
         # Test that sudo is preferred when part of priority fingerprint
@@ -1010,9 +1035,7 @@ class EngineTest(TestCase):
         result = self.fp_task_runner._merge_fingerprint(
             sudo_fingerprint, regular_fingerprint)
         self.assertEqual(result, sudo_fingerprint)
-        metadata = result.get('metadata')
-        for key in metadata:
-            self.assertTrue(metadata.get(key).get('has_sudo'))
+        self.assert_all_fingerprints_have_sudo(result["metadata"])
 
         # Test that sudo is preferred when part of to merge fingerprint
         sudo_fingerprint = self._create_network_fingerprint()
@@ -1025,10 +1048,9 @@ class EngineTest(TestCase):
         regular_fingerprint['entitlements'] = []
 
         result = self.fp_task_runner._merge_fingerprint(
-            regular_fingerprint, sudo_fingerprint)
-        metadata = result.get('metadata')
-        for key in metadata:
-            self.assertTrue(metadata.get(key).get('has_sudo'))
+            regular_fingerprint, sudo_fingerprint
+        )
+        self.assert_all_fingerprints_have_sudo(result["metadata"])
 
     def test_merge_fingerprint_network_win(self):
         """Test merge of fingerprint prioritizes network values."""
