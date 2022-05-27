@@ -881,9 +881,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             # Strip id key from fingerprints if requested
             if remove_key:
                 for fingerprint in result_list:
-                    unique_id_value = fingerprint.get(id_key)
-                    if unique_id_value:
-                        del fingerprint[id_key]
+                    fingerprint.pop(id_key, None)
 
         return result_list
 
@@ -968,10 +966,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 isinstance(reverse_priority_keys, set):
             keys_to_add_list = keys_to_add_list | reverse_priority_keys
 
-        # Look for keys that are in both but none in priority
-        key_intersection = priority_keys.intersection(to_merge_fingerprint)
-        for key in key_intersection:
-            if priority_fingerprint.get(key, None) is None:
+        non_fact_keys = set([ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY])
+        for key in (priority_keys & to_merge_keys) - non_fact_keys:
+            if (
+                priority_fingerprint[key] is None
+                and to_merge_fingerprint[key] is not None
+            ):
                 # reverse the priority since value is None
                 keys_to_add_list.add(key)
                 continue
@@ -984,14 +984,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 META_DATA_KEY, {}).get(key, {}).get('has_sudo', False)
             if not priority_sudo and to_merge_sudo:
                 keys_to_add_list.add(key)
-
-        keys_to_add_list = list(keys_to_add_list)
-        if META_DATA_KEY in keys_to_add_list:
-            keys_to_add_list.remove(META_DATA_KEY)
-        if ENTITLEMENTS_KEY in keys_to_add_list:
-            keys_to_add_list.remove(ENTITLEMENTS_KEY)
-        if PRODUCTS_KEY in keys_to_add_list:
-            keys_to_add_list.remove(PRODUCTS_KEY)
 
         # merge facts
         for fact_key in keys_to_add_list:
