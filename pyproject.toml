@@ -26,6 +26,9 @@ exclude = [
 ]
 max_line_length = 88
 
+[tool.flakeheaven.exceptions."**/__init__.py"]
+pyflakes = ["-F401*"]
+
 [tool.flakeheaven.plugins]
 pycodestyle = ["+*", "-W503", "-W504", "-W605" ]
 pyflakes = ["+*"]
@@ -41,6 +44,7 @@ known_first_party = [
     "quipucords",
     "scanner",
     "tests",
+    "utils",
 ]
 
 [tool.pylint.format]

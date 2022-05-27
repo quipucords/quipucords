@@ -27,4 +27,5 @@
     - virt_what
     - insights
     - system_purpose
+    - redhat_release
     - host_done

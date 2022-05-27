@@ -13,27 +13,31 @@
 
 import json
 from datetime import datetime
+from unittest import mock
 from unittest.mock import patch
 
-from api.models import (DeploymentsReport,
-                        DetailsReport,
-                        ServerInformation,
-                        Source)
-
 from django.db import DataError
-from django.test import TestCase  # pylint: disable=wrong-import-order
+from django.test import TestCase
 
-from fingerprinter.task import (FINGERPRINT_GLOBAL_ID_KEY,
-                                FingerprintTaskRunner,
-                                NETWORK_SATELLITE_MERGE_KEYS,
-                                NETWORK_VCENTER_MERGE_KEYS)
-
-
+from api.deployments_report.model import SystemFingerprint
+from api.models import DeploymentsReport, DetailsReport, ServerInformation, Source
+from fingerprinter.constants import ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY
+from fingerprinter.task import (
+    FINGERPRINT_GLOBAL_ID_KEY,
+    NETWORK_SATELLITE_MERGE_KEYS,
+    NETWORK_VCENTER_MERGE_KEYS,
+    FingerprintTaskRunner,
+)
+from scanner.network.utils import results_template
 from scanner.test_util import create_scan_job
 
 SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
                     'entitlement_id': 'ESA0009'}]
 SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
+
+EXPECTED_FINGERPRINT_MAP = {
+    "infrastructure_type": "virt_what_type/virt_type",
+}
 
 
 class EngineTest(TestCase):
@@ -95,7 +99,7 @@ class EngineTest(TestCase):
             user_has_sudo=True):
         """Create an in memory DetailsReport for tests."""
         # pylint: disable=too-many-statements
-        fact = {}
+        fact = results_template()
         if source_name:
             fact['source_name'] = source_name
         if source_type:
@@ -1048,6 +1052,37 @@ class EngineTest(TestCase):
         self.assertEqual(
             result['metadata']['infrastructure_type']['source_name'],
             'source1')
+
+    def test_all_facts_with_null_value(self):
+        """Test fingerprinting method with all facts set to null value."""
+        source_dict = {
+            "server_id": self.server_id,
+            "source_name": self.source.name,
+            "source_type": self.source.source_type,
+        }
+        facts_dict = results_template()
+        result = self.fp_task_runner._process_network_fact(source_dict, facts_dict)
+        metadata_dict = result.pop(META_DATA_KEY)
+        self.assertDictEqual(
+            {
+                fingerprint_name: {
+                    "server_id": self.server_id,
+                    "source_name": self.source.name,
+                    "source_type": self.source.source_type,
+                    "has_sudo": None,
+                    "raw_fact_key": fact_name,
+                }
+                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP.items()
+            },
+            metadata_dict,
+        )
+        expected_fingerprints = {
+            fingerprint_name: None for fingerprint_name in EXPECTED_FINGERPRINT_MAP
+        }
+        expected_fingerprints[PRODUCTS_KEY] = mock.ANY
+        expected_fingerprints[ENTITLEMENTS_KEY] = []
+        expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
+        self.assertDictEqual(result, expected_fingerprints)
 
     ################################################################
     # Test post processing

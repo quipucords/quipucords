@@ -22,6 +22,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import logging
 import os
+from pathlib import Path
 
 from .featureflag import FeatureFlag
 
@@ -29,7 +30,7 @@ from .featureflag import FeatureFlag
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).absolute().parent.parent
 
 
 # Quick-start development settings - unsuitable for production

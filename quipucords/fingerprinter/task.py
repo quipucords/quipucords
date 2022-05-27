@@ -15,37 +15,47 @@ import math
 import uuid
 from datetime import datetime
 
+from django.db import DataError
+from rest_framework.serializers import DateField, DateTimeField
+
 from api.common.common_report import create_report_version
-from api.common.util import (convert_to_boolean,
-                             convert_to_float,
-                             convert_to_int,
-                             is_boolean,
-                             is_float,
-                             is_int,
-                             mask_data_general)
+from api.common.util import (
+    convert_to_boolean,
+    convert_to_float,
+    convert_to_int,
+    is_boolean,
+    is_float,
+    is_int,
+    mask_data_general,
+)
 from api.deployments_report.util import (
     NETWORK_DETECTION_KEY,
     SATELLITE_DETECTION_KEY,
     VCENTER_DETECTION_KEY,
-    compute_source_info)
-from api.models import (DeploymentsReport,
-                        Product,
-                        ScanJob,
-                        ScanTask,
-                        Source,
-                        SystemFingerprint)
-from api.serializers import (SystemFingerprintSerializer)
-
-from django.db import DataError
-
+    compute_source_info,
+)
+from api.models import (
+    DeploymentsReport,
+    Product,
+    ScanJob,
+    ScanTask,
+    Source,
+    SystemFingerprint,
+)
+from api.serializers import SystemFingerprintSerializer
+from fingerprinter.constants import (
+    ENTITLEMENTS_KEY,
+    META_DATA_KEY,
+    NAME_KEY,
+    PRESENCE_KEY,
+    PRODUCTS_KEY,
+    SOURCES_KEY,
+)
 from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
-
-from rest_framework.serializers import DateField, DateTimeField
-
 from scanner.task import ScanTaskRunner
 
 # pylint: disable=too-many-lines
@@ -72,13 +82,6 @@ NETWORK_VCENTER_MERGE_KEYS = [
     ('mac_addresses', 'mac_addresses')]
 
 FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
-
-META_DATA_KEY = 'metadata'
-ENTITLEMENTS_KEY = 'entitlements'
-PRODUCTS_KEY = 'products'
-NAME_KEY = 'name'
-PRESENCE_KEY = 'presence'
-SOURCES_KEY = 'sources'
 
 # keys are in reverse order of accuracy (last most accurate)
 # (date_key, date_pattern)

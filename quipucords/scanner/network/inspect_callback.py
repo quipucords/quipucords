@@ -14,18 +14,13 @@ import json
 import logging
 
 from ansible_runner.exceptions import AnsibleRunnerException
-
-from api.models import (RawFact,
-                        SystemInspectionResult)
-
+from django.conf import settings
 from django.db import transaction
 
 import log_messages
-
-from quipucords import settings
-
+from api.models import RawFact, SystemInspectionResult
 from scanner.network.processing import process
-from scanner.network.utils import STOP_STATES
+from scanner.network.utils import STOP_STATES, results_template
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -128,7 +123,9 @@ class InspectResultCallback():
     @transaction.atomic
     def _finalize_host(self, host, host_status):
         """Save facts collected and update the scan counts."""
-        results = self._ansible_facts.pop(host, {})
+        results = results_template()
+        results.update(self._ansible_facts.pop(host, {}))
+
         if settings.QPC_EXCLUDE_INTERNAL_FACTS:
             # remove internal facts before saving result
             results = {fact_key: fact_value
@@ -161,7 +158,7 @@ class InspectResultCallback():
         # Generate facts for host
         for result_key, result_value in results.items():
             if result_value == process.NO_DATA:
-                continue
+                result_value = None
 
             # Convert all values to JSON.  Noop for str, int
             final_value = json.dumps(result_value)

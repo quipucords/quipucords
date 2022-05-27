@@ -14,17 +14,15 @@
 import logging
 
 from api.models import Product
-
-from fingerprinter.utils import (generate_raw_fact_members,
-                                 product_entitlement_found)
+from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
+from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
+from utils import default_getter
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 PRODUCT = 'JBoss Fuse'
-PRESENCE_KEY = 'presence'
 VERSION_KEY = 'version'
 RAW_FACT_KEY = 'raw_fact_key'
-META_DATA_KEY = 'metadata'
 EAP_HOME_BIN = 'eap_home_bin'
 KARAF_HOME_BIN_FUSE = 'karaf_home_bin_fuse'
 JBOSS_FUSE_SYSTEMCTL_FILES = 'jboss_fuse_systemctl_unit_files'
@@ -83,22 +81,25 @@ def detect_jboss_fuse(source, facts):
     karaf_home_bin_fuse = facts.get(KARAF_HOME_BIN_FUSE)
     systemctl_files = facts.get(JBOSS_FUSE_SYSTEMCTL_FILES)
     chkconfig = facts.get(JBOSS_FUSE_CHKCONFIG)
-    subman_consumed = facts.get(SUBMAN_CONSUMED, [])
-    entitlements = facts.get(ENTITLEMENTS, [])
+    subman_consumed = default_getter(facts, SUBMAN_CONSUMED, [])
+    entitlements = default_getter(facts, ENTITLEMENTS, [])
     # Get activemq versions
-    fuse_activemq = facts.get(FUSE_ACTIVEMQ_VERSION, [])
-    eap_activemq = get_version(facts.get(JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER, []))
-    ext_fuse_activemq = facts.get(JBOSS_ACTIVEMQ_VER, [])
+    fuse_activemq = default_getter(facts, FUSE_ACTIVEMQ_VERSION, [])
+    eap_activemq = get_version(
+        default_getter(facts, JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER, [])
+    )
+    ext_fuse_activemq = default_getter(facts, JBOSS_ACTIVEMQ_VER, [])
     activemq_list = fuse_activemq + eap_activemq + ext_fuse_activemq
     # Get camel-core versions
-    fuse_camel = facts.get(FUSE_CAMEL_VERSION, [])
-    eap_camel = get_version(facts.get(JBOSS_FUSE_ON_EAP_CAMEL_VER, []))
-    ext_fuse_camel = facts.get(JBOSS_CAMEL_VER, [])
+    fuse_camel = default_getter(facts, FUSE_CAMEL_VERSION, [])
+    eap_camel = get_version(default_getter(facts, JBOSS_FUSE_ON_EAP_CAMEL_VER, []))
+    ext_fuse_camel = default_getter(facts, JBOSS_CAMEL_VER, [])
     camel_list = fuse_camel + eap_camel + ext_fuse_camel
     # Get cxf-rt versions
-    fuse_cxf = facts.get(FUSE_CXF_VERSION, [])
-    eap_cxf = get_version(facts.get(JBOSS_FUSE_ON_EAP_CXF_VER, []))
-    ext_fuse_cxf = facts.get(JBOSS_CXF_VER, [])
+    fuse_cxf = default_getter(facts, FUSE_CXF_VERSION, [])
+    eap_cxf = get_version(default_getter(facts, JBOSS_FUSE_ON_EAP_CXF_VER, []))
+    ext_fuse_cxf = default_getter(facts, JBOSS_CXF_VER, [])
+
     cxf_list = fuse_cxf + eap_cxf + ext_fuse_cxf
     fuse_versions = []
 

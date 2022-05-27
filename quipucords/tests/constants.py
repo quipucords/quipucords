@@ -13,14 +13,17 @@ from pathlib import Path
 
 PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent.parent
 
+CLEANUP_DOCKER_LAYERS = False
 POSTGRES_DB = "qpc-db"
 POSTGRES_PASSWORD = "qpc"
 POSTGRES_USER = "qpc"
+QPC_ANSIBLE_LOG_LEVEL = "0"
 QPC_COMMIT = "test-commit"
 QPC_SERVER_PASSWORD = "test-password"
 QPC_SERVER_USERNAME = "test-username"
+QUIPUCORDS_LOG_LEVEL = "INFO"
+QUIPUCORDS_MANAGER_HEARTBEAT = 1
 READINESS_TIMEOUT_SECONDS = 60
 SCAN_TARGET_PASSWORD = "super-secret-password"
 SCAN_TARGET_SSH_PORT = "2222"
 SCAN_TARGET_USERNAME = "non-root-user"
-CLEANUP_DOCKER_LAYERS = False

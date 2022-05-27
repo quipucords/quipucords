@@ -23,6 +23,8 @@ def product_entitlement_found(entitlements, product_name):
     :param product_name: product name to check in entitlements
     :returns: True if found, False otherwise
     """
+    if not entitlements:
+        return False
     for entitlement in entitlements:
         name = entitlement.get(NAME, '')
         if product_name in name:
