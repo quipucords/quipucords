@@ -11,6 +11,7 @@
 """Utilities used for VCenter operations."""
 import atexit
 import ssl
+from enum import Enum, unique
 
 from api.vault import decrypt_data_as_unicode
 
@@ -96,3 +97,52 @@ def retrieve_properties(content, filter_spec_set, max_objects=None):
         result = continue_retrieve_properties_ex(token)
 
     return objects
+
+
+@unique
+class HostRawFacts(Enum):
+    CLUSTER = "host.cluster"
+    CPU_CORES = "host.cpu_cores"
+    CPU_COUNT = "host.cpu_count"
+    CPU_THREADS = "host.cpu_threads"
+    DATACENTER = "host.datacenter"
+    NAME = "host.name"
+    UUID = "host.uuid"
+
+
+@unique
+class VcenterRawFacts(Enum):
+    CLUSTER = "vm.cluster"
+    CPU_COUNT = "vm.cpu_count"
+    DATACENTER = "vm.datacenter"
+    DNS_NAME = "vm.dns_name"
+    HOST_CPU_CORES = "vm." + HostRawFacts.CPU_CORES.value
+    HOST_CPU_COUNT = "vm." + HostRawFacts.CPU_COUNT.value
+    HOST_CPU_THREADS = "vm." + HostRawFacts.CPU_THREADS.value
+    HOST_NAME = "vm." + HostRawFacts.NAME.value
+    HOST_UUID = "vm." + HostRawFacts.UUID.value
+    IP_ADDRESSES = "vm.ip_addresses"
+    LAST_CHECK_IN = "vm.last_check_in"
+    MAC_ADDRESSES = "vm.mac_addresses"
+    MEMORY_SIZE = "vm.memory_size"
+    NAME = "vm.name"
+    OS = "vm.os"
+    STATE = "vm.state"
+    UUID = "vm.uuid"
+
+
+@unique
+class HostRawFacts(Enum):
+    CLUSTER = "host.cluster"
+    CPU_CORES = "host.cpu_cores"
+    CPU_COUNT = "host.cpu_count"
+    CPU_THREADS = "host.cpu_threads"
+    DATACENTER = "host.datacenter"
+    NAME = "host.name"
+    UUID = "host.uuid"
+
+
+@unique
+class ClusterRawFacts(Enum):
+    DATACENTER = "cluster.datacenter"
+    NAME = "cluster.name"
