@@ -12,6 +12,7 @@
 import atexit
 import ssl
 from enum import Enum, unique
+from functools import cache
 
 from api.vault import decrypt_data_as_unicode
 
@@ -132,17 +133,12 @@ class VcenterRawFacts(Enum):
 
 
 @unique
-class HostRawFacts(Enum):
-    CLUSTER = "host.cluster"
-    CPU_CORES = "host.cpu_cores"
-    CPU_COUNT = "host.cpu_count"
-    CPU_THREADS = "host.cpu_threads"
-    DATACENTER = "host.datacenter"
-    NAME = "host.name"
-    UUID = "host.uuid"
-
-
-@unique
 class ClusterRawFacts(Enum):
     DATACENTER = "cluster.datacenter"
     NAME = "cluster.name"
+
+
+@cache
+def raw_facts_template():
+    """Results template for fact collection on Vcenter scans."""
+    return {f'{fact_name.value}': None for fact_name in VcenterRawFacts}

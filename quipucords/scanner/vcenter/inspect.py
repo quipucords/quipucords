@@ -16,7 +16,7 @@ from datetime import datetime
 from api.models import (RawFact,
                         ScanTask,
                         SystemInspectionResult)
-from scanner.vcenter.utils import VcenterRawFacts, HostRawFacts, ClusterRawFacts
+from scanner.vcenter.utils import VcenterRawFacts, HostRawFacts, ClusterRawFacts, raw_facts_template
 from django.db import transaction
 
 from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
@@ -166,7 +166,7 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
-        facts = {}
+        facts = raw_facts_template()
         for prop in props:
             if prop.name == 'name':
                 facts[VcenterRawFacts.NAME.value] = prop.val
