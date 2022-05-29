@@ -119,6 +119,6 @@ def collect_all_fact_names():
 
 
 @cache
-def results_template():
+def raw_facts_template():
     """Results template for fact collection on network scans."""
     return {fact_name: None for fact_name in sorted(collect_all_fact_names())}
