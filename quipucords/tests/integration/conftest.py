@@ -20,7 +20,7 @@ from tests.utils.container_wrappers import (
     QuipucordsContainer,
     ScanTargetContainer,
 )
-from tests.utils.http import ApiClient, QPCAuth
+from tests.utils.http import BaseUrlClient, QPCAuth
 
 # pylint: disable=no-value-for-parameter
 postgres_container = container(
@@ -88,7 +88,7 @@ scan_target_container = container(
 @pytest.fixture(scope="class")
 def apiclient(qpc_server_container: QuipucordsContainer):
     """QPC api client configured make requests to containerized qpc server."""
-    client = ApiClient(
+    client = BaseUrlClient(
         base_url=urljoin(qpc_server_container.server_url, "api/v1/"),
     )
     client.auth = QPCAuth(
