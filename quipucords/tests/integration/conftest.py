@@ -97,3 +97,11 @@ def apiclient(qpc_server_container: QuipucordsContainer):
         password=constants.QPC_SERVER_PASSWORD,
     )
     return client
+
+
+@pytest.fixture(scope="class")
+def qpc_client(qpc_server_container: QuipucordsContainer):
+    """QPC client configured make requests to containerized qpc server."""
+    return BaseUrlClient(
+        base_url=qpc_server_container.server_url,
+    )
