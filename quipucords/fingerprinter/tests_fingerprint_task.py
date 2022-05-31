@@ -29,8 +29,8 @@ from fingerprinter.task import (
     FingerprintTaskRunner,
 )
 from scanner.network.utils import raw_facts_template as network_template
-from scanner.vcenter.utils import raw_facts_template as vcenter_template
 from scanner.test_util import create_scan_job
+from scanner.vcenter.utils import raw_facts_template as vcenter_template
 
 SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
                     'entitlement_id': 'ESA0009'}]

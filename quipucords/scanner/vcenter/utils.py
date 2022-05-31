@@ -14,11 +14,10 @@ import ssl
 from enum import Enum, unique
 from functools import cache
 
-from api.vault import decrypt_data_as_unicode
-
 from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
-
 from pyVmomi import vmodl  # pylint: disable=no-name-in-module
+
+from api.vault import decrypt_data_as_unicode
 
 
 def vcenter_connect(scan_task):
@@ -102,6 +101,8 @@ def retrieve_properties(content, filter_spec_set, max_objects=None):
 
 @unique
 class HostRawFacts(Enum):
+    """Constants of vcenter hosts raw facts."""
+
     CLUSTER = "host.cluster"
     CPU_CORES = "host.cpu_cores"
     CPU_COUNT = "host.cpu_count"
@@ -113,6 +114,8 @@ class HostRawFacts(Enum):
 
 @unique
 class VcenterRawFacts(Enum):
+    """Constants of vcenter raw facts."""
+
     CLUSTER = "vm.cluster"
     CPU_COUNT = "vm.cpu_count"
     DATACENTER = "vm.datacenter"
@@ -134,6 +137,8 @@ class VcenterRawFacts(Enum):
 
 @unique
 class ClusterRawFacts(Enum):
+    """Constants of vcenter cluster raw facts."""
+
     DATACENTER = "cluster.datacenter"
     NAME = "cluster.name"
 
@@ -141,4 +146,4 @@ class ClusterRawFacts(Enum):
 @cache
 def raw_facts_template():
     """Results template for fact collection on Vcenter scans."""
-    return {f'{fact_name.value}': None for fact_name in VcenterRawFacts}
+    return {f"{fact_name.value}": None for fact_name in VcenterRawFacts}
