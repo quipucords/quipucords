@@ -1203,16 +1203,15 @@ class EngineTest(TestCase):
 
     def test_process_details_report_success(self):
         """Test processing a details report success."""
-        fact_collection = {'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
-                           'metadata': {},
-                           'etc_machine_id':
-                           '3f01b55457674041b75e41829bcee1dc',
-                           'insights_client_id':
-                           '3f01b55457674041b75e41829bcee1dc',
-                           'ip_addresses': ['1.2.3.4'],
-                           'sources': []}
-        deployments_report = DeploymentsReport(report_id=1,
-                                               id=1)
+        fact_collection = {
+            "name": "dhcp181-3.gsslab.rdu2.redhat.com",
+            "metadata": {},
+            "etc_machine_id": "3f01b55457674041b75e41829bcee1dc",
+            "insights_client_id": "3f01b55457674041b75e41829bcee1dc",
+            "ip_addresses": ["1.2.3.4"],
+            "sources": [],
+        }
+        deployments_report = DeploymentsReport(report_id=1, id=1)
         deployments_report.save()
         details_report = DetailsReport(id=1,
                                        deployment_report=deployments_report)

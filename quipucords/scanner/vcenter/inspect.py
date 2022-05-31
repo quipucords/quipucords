@@ -13,16 +13,18 @@ import json
 import logging
 from datetime import datetime
 
-from api.models import (RawFact,
-                        ScanTask,
-                        SystemInspectionResult)
-from scanner.vcenter.utils import VcenterRawFacts, HostRawFacts, ClusterRawFacts, raw_facts_template
 from django.db import transaction
-
 from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
+from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.task import ScanTaskRunner
-from scanner.vcenter.utils import vcenter_connect
+from scanner.vcenter.utils import (
+    ClusterRawFacts,
+    HostRawFacts,
+    VcenterRawFacts,
+    raw_facts_template,
+    vcenter_connect,
+)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -77,18 +79,22 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = 'Prerequisites scan task %d failed.' %\
-                self.connect_scan_task.sequence_number
+            error_message = (
+                "Prerequisites scan task f'{self.connect_scan_task.sequence_number}'"
+                " failed."
+            )
             return error_message, ScanTask.FAILED
 
         try:
             self.inspect()
-        except vim.fault.InvalidLogin as vm_error:
-            error_message = 'Unable to connect to VCenter source, %s, '\
-                'with supplied credential, %s.\n' %\
-                (source.name, credential.name)
-            error_message += 'Discovery scan failed for %s. %s' %\
-                (self.scan_task, vm_error)
+        except vim.fault.InvalidLogin as vm_error:  # pylint: disable=unused-variable # noqa
+            error_message = (
+                "Unable to connect to VCenter source, f'{source.name}', "
+                "with supplied credential, f'{credential.name}'.\n"
+            )
+            error_message += (
+                "Discovery scan failed for f'{self.scan_task,}'." "f'{vm_error}'"
+            )
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED
