@@ -1085,6 +1085,38 @@ class EngineTest(TestCase):
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
         self.assertDictEqual(result, expected_fingerprints)
 
+    def test_process_vcenter_scan_all_facts_with_null_value(self):
+        """Test fingerprinting method with all facts set to null value."""
+        source_dict = {
+            "server_id": self.server_id,
+            "source_name": "source2",
+            "source_type": Source.VCENTER_SOURCE_TYPE,
+        }
+        facts_dict = vcenter_template()
+        result = self.fp_task_runner._process_vcenter_fact(source_dict, facts_dict)
+        metadata_dict = result.pop(META_DATA_KEY)
+
+        self.assertDictEqual(
+            {
+                fingerprint_name: {
+                    "server_id": self.server_id,
+                    "source_name": "source2",
+                    "source_type": Source.VCENTER_SOURCE_TYPE,
+                    "has_sudo": None,
+                    "raw_fact_key": fact_name,
+                }
+                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP.items()
+            },
+            metadata_dict,
+        )
+        expected_fingerprints = {
+            fingerprint_name: None for fingerprint_name in EXPECTED_FINGERPRINT_MAP
+        }
+        expected_fingerprints[PRODUCTS_KEY] = mock.ANY
+        expected_fingerprints[ENTITLEMENTS_KEY] = []
+        # expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
+        self.assertDictEqual(result, expected_fingerprints)
+
     ################################################################
     # Test post processing
     ################################################################
