@@ -31,8 +31,8 @@ pyflakes = ["-F401*"]
 
 [tool.flakeheaven.plugins]
 pycodestyle = ["+*", "-W503", "-W504", "-W605" ]
-pyflakes = ["+*"]
-"flake8-*" = ["+*", "-Q000"]
+pyflakes = ["-F841*"]
+"flake8-*" = ["+*", "-Q000", "-PLW0612"]
 mccabe = ["+*"]
 
 [tool.isort]
