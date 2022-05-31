@@ -28,7 +28,8 @@ from fingerprinter.task import (
     NETWORK_VCENTER_MERGE_KEYS,
     FingerprintTaskRunner,
 )
-from scanner.network.utils import raw_facts_template
+from scanner.network.utils import raw_facts_template as network_template
+from scanner.vcenter.utils import raw_facts_template as vcenter_template
 from scanner.test_util import create_scan_job
 
 SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
@@ -99,7 +100,7 @@ class EngineTest(TestCase):
             user_has_sudo=True):
         """Create an in memory DetailsReport for tests."""
         # pylint: disable=too-many-statements
-        fact = raw_facts_template()
+        fact = network_template()
         if source_name:
             fact['source_name'] = source_name
         if source_type:
@@ -197,7 +198,7 @@ class EngineTest(TestCase):
             architecture='x86_64',
             is_redhat=True):
         """Create an in memory DetailsReport for tests."""
-        fact = {}
+        fact = vcenter_template()
         if source_name:
             fact['source_name'] = source_name
         if source_type:
@@ -1060,7 +1061,7 @@ class EngineTest(TestCase):
             "source_name": self.source.name,
             "source_type": self.source.source_type,
         }
-        facts_dict = raw_facts_template()
+        facts_dict = network_template()
         result = self.fp_task_runner._process_network_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
         self.assertDictEqual(
