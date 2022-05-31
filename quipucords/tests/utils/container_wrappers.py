@@ -14,7 +14,7 @@ from abc import ABCMeta, abstractmethod
 from pytest_docker_tools import wrappers
 
 from tests.constants import POSTGRES_USER
-from tests.utils.http import ApiClient
+from tests.utils.http import BaseUrlClient
 
 SYSTEMCTL_ACTIVE_STATUS_STRING = "Active: active (running)"
 
@@ -66,6 +66,6 @@ class QuipucordsContainer(ReadinessProbeMixin, wrappers.Container):
 
     def readiness_probe(self):
         """Return true if quipucords api is responsive."""
-        client = ApiClient(base_url=self.server_url)
+        client = BaseUrlClient(base_url=self.server_url)
         response = client.get("api/v1/status/")
         return response.ok

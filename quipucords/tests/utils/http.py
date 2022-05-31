@@ -15,7 +15,7 @@ from urllib.parse import urljoin
 import requests
 
 
-class ApiClient(requests.Session):
+class BaseUrlClient(requests.Session):
     """Specialized request session with a configurable base_url."""
 
     def __init__(self, *, base_url=None, auth=None, verify=False, **kwargs):
@@ -42,7 +42,7 @@ class QPCAuth(requests.auth.AuthBase):
 
     def __init__(self, *, base_url, username, password):
         """Initialize QPCAuth."""
-        self._qpc_client = ApiClient(base_url=base_url)
+        self._qpc_client = BaseUrlClient(base_url=base_url)
         self._username = username
         self._password = password
 
