@@ -40,6 +40,7 @@ COPY deploy/*  /deploy/
 VOLUME /var/log
 
 # Create /var/data
+RUN mkdir -p /var/data
 VOLUME /var/data
 
 # Create /etc/ansible/roles/
