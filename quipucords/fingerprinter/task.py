@@ -13,6 +13,7 @@ import json
 import logging
 import math
 import uuid
+from copy import deepcopy
 from datetime import datetime
 
 from django.db import DataError
@@ -857,7 +858,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if not fingerprint_list:
             return fingerprint_list
 
-        result_list = fingerprint_list[:]
+        result_list = deepcopy(fingerprint_list)
         for id_key in id_key_list:
             unique_dict = {}
             no_global_id_list = []
@@ -880,9 +881,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             # Strip id key from fingerprints if requested
             if remove_key:
                 for fingerprint in result_list:
-                    unique_id_value = fingerprint.get(id_key)
-                    if unique_id_value:
-                        del fingerprint[id_key]
+                    fingerprint.pop(id_key, None)
 
         return result_list
 
@@ -906,6 +905,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         result_by_key = {}
         key_not_found_list = []
         number_duplicates = 0
+        fingerprint_list = deepcopy(fingerprint_list)
         for value_dict in fingerprint_list:
             # Add globally unique key for de-duplication later
             if create_global_id:
@@ -952,6 +952,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         of to_merge_fingerprint should be used instead of the
         priority_fingerprint value.
         """
+        priority_fingerprint = deepcopy(priority_fingerprint)
+        to_merge_fingerprint = deepcopy(to_merge_fingerprint)
         priority_keys = set(priority_fingerprint.keys())
         to_merge_keys = set(to_merge_fingerprint.keys())
 
@@ -964,10 +966,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 isinstance(reverse_priority_keys, set):
             keys_to_add_list = keys_to_add_list | reverse_priority_keys
 
-        # Look for keys that are in both but none in priority
-        key_intersection = priority_keys.intersection(to_merge_fingerprint)
-        for key in key_intersection:
-            if priority_fingerprint.get(key, None) is None:
+        non_fact_keys = set([ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY])
+        for key in (priority_keys & to_merge_keys) - non_fact_keys:
+            if (
+                priority_fingerprint[key] is None
+                and to_merge_fingerprint[key] is not None
+            ):
                 # reverse the priority since value is None
                 keys_to_add_list.add(key)
                 continue
@@ -980,14 +984,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 META_DATA_KEY, {}).get(key, {}).get('has_sudo', False)
             if not priority_sudo and to_merge_sudo:
                 keys_to_add_list.add(key)
-
-        keys_to_add_list = list(keys_to_add_list)
-        if META_DATA_KEY in keys_to_add_list:
-            keys_to_add_list.remove(META_DATA_KEY)
-        if ENTITLEMENTS_KEY in keys_to_add_list:
-            keys_to_add_list.remove(ENTITLEMENTS_KEY)
-        if PRODUCTS_KEY in keys_to_add_list:
-            keys_to_add_list.remove(PRODUCTS_KEY)
 
         # merge facts
         for fact_key in keys_to_add_list:
