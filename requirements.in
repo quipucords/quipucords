@@ -1,4 +1,4 @@
-ansible<4
+ansible<5
 Django<3.2
 django-filter
 djangorestframework
