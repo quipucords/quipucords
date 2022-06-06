@@ -268,8 +268,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             # Transition from persisted to failed after engine failed
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
-            error_message = 'Fact collection %d failed'\
-                ' to be processed.' % details_report.id
+            error_message = 'Fact collection %d failed' \
+                            ' to be processed.' % details_report.id
 
             self.scan_task.log_message(
                 '%s' % (error_message), log_level=logging.ERROR)
@@ -441,9 +441,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if final_fingerprint_list:
             deployment_report.status = DeploymentsReport.STATUS_COMPLETE
         else:
-            status_message = 'FAILED to create report id=%d - '\
-                'produced no valid fingerprints ' % (
-                    deployment_report.report_id)
+            status_message = 'FAILED to create report id=%d - ' \
+                             'produced no valid fingerprints ' % (
+                                 deployment_report.report_id)
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             status = ScanTask.FAILED
@@ -470,9 +470,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'facts and will be excluded from the Insights '
                 'report: %s' % str(invalid_hosts))
         if not insights_hosts:
-            insights_message = 'FAILED to create Insights report id=%d - '\
-                'produced no valid hosts ' % (
-                    deployment_report.report_id)
+            insights_message = 'FAILED to create Insights report id=%d - ' \
+                               'produced no valid hosts ' % (
+                                   deployment_report.report_id)
             self.scan_task.log_message(insights_message,
                                        log_level=logging.WARN)
         else:
@@ -595,7 +595,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         number_satellite_before = len(satellite_fingerprints)
         number_vcenter_before = len(vcenter_fingerprints)
         total_before = number_network_before + \
-            number_satellite_before + number_vcenter_before
+                       number_satellite_before + number_vcenter_before
         self.scan_task.log_message(
             'NETWORK and SATELLITE DEDUPLICATION '
             'START COUNT - (network=%d, satellite=%d, '
@@ -829,7 +829,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Merge base items without key, matched, and remainder
         # who did not match
         base_result_list = base_no_key + \
-            base_match_list + list(base_dict.values())
+                           base_match_list + list(base_dict.values())
         base_result_list = self._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], base_result_list, True)
 
@@ -969,8 +969,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         non_fact_keys = set([ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY])
         for key in (priority_keys & to_merge_keys) - non_fact_keys:
             if (
-                priority_fingerprint[key] is None
-                and to_merge_fingerprint[key] is not None
+                    priority_fingerprint[key] is None
+                    and to_merge_fingerprint[key] is not None
             ):
                 # reverse the priority since value is None
                 keys_to_add_list.add(key)
