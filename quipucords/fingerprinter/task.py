@@ -1363,11 +1363,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         vcenter_os_release = fact.get('vm.os', '')
         is_redhat = False
         if vcenter_os_release != '':
-            rhel_os_releases = ['red hat enterprise linux', 'rhel']
-            for rhel_release in rhel_os_releases:
-                if rhel_release in vcenter_os_release.lower():
-                    is_redhat = True
-                    break
+            rhel_os_releases = {'red hat enterprise linux', 'rhel'}
+            if any(element in vcenter_os_release.lower() for element in rhel_os_releases):
+                is_redhat = True
+
         self._add_fact_to_fingerprint(source, 'vm.os',
                                       fact, 'is_redhat', fingerprint,
                                       fact_value=is_redhat)
