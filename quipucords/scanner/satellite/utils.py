@@ -14,20 +14,17 @@ import logging
 import ssl
 import xmlrpc.client
 
-from api.vault import decrypt_data_as_unicode
-
-from quipucords import settings
-
 import requests
-
 from rest_framework import status as codes
 
-
-from scanner.satellite.api import (SATELLITE_VERSION_5,
-                                   SATELLITE_VERSION_6,
-                                   SatelliteAuthException,
-                                   SatelliteException)
-
+from api.vault import decrypt_data_as_unicode
+from quipucords import settings
+from scanner.satellite.api import (
+    SATELLITE_VERSION_5,
+    SATELLITE_VERSION_6,
+    SatelliteAuthException,
+    SatelliteException,
+)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -155,15 +152,16 @@ def status(scan_task):
     """
     try:
         return _status6(scan_task)
-    except SatelliteException as sat_error:
-        message = 'Satellite 6 status check failed with error:' \
-            ' "%s". Attempting Satellite 5.' % sat_error
+    except SatelliteException as sat_error:  # pylint: disable=unused-variable # noqa F841
+        message = (
+            "Satellite 6 status check failed with error:"
+            ' f"{sat_error}". Attempting Satellite 5.'
+        )
         scan_task.log_message(message)
     try:
         return _status5(scan_task)
-    except SatelliteException as sat_error:
-        message = 'Satellite 5 status check failed with error:' \
-            ' "%s".' % sat_error
+    except SatelliteException as sat_error:  # pylint: disable=unused-variable  # noqa F841
+        message = "Satellite 5 status check failed with error: f'{sat_error}'."
         scan_task.log_message(message, log_level=logging.ERROR)
     except xmlrpc.client.ProtocolError:
         message = 'Satellite 5 status check endpoint not found. '
@@ -242,10 +240,12 @@ def validate_task_stats(task):
     :param task: ScanTask to evaluate
     :throws: SatelliteException if task stats are not valid
     """
-    systems_count,\
-        systems_scanned, \
-        systems_failed, \
-        systems_unreachable = task.calculate_counts()
+    (
+        systems_count,
+        systems_scanned,
+        systems_failed,
+        systems_unreachable,
+    ) = task.calculate_counts()
     totals = + systems_scanned + systems_failed + systems_unreachable
     if totals != systems_count:
         missing_sys = systems_count - totals

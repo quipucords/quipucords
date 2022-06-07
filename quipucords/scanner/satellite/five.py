@@ -14,13 +14,14 @@ import xmlrpc.client
 from multiprocessing import Pool
 
 from api.models import ScanJob, SystemInspectionResult
-
 from scanner.satellite import utils
-from scanner.satellite.api import (SatelliteCancelException,
-                                   SatelliteException,
-                                   SatelliteInterface,
-                                   SatellitePauseException)
-
+from scanner.satellite.api import (
+    SatelliteCancelException,
+    SatelliteException,
+    SatelliteInterface,
+    SatellitePauseException,
+)
+from scanner.satellite.utils import raw_facts_template
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
