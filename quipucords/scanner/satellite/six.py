@@ -247,7 +247,7 @@ def host_subscriptions(response):
     :returns: dictionary of facts created from response object.
     """
     entitlements = response.get(RESULTS, [])
-    subscriptons = []
+    subscriptions = []
     for entitlement in entitlements:
         sub = {
             DERIVED_ENTITLEMENT: False,
@@ -266,9 +266,9 @@ def host_subscriptions(response):
         if (entitlement_type and
                 entitlement_type in ENTITLEMENT_DERIVED_LIST):
             sub[DERIVED_ENTITLEMENT] = True
-        subscriptons.append(sub)
+        subscriptions.append(sub)
 
-    subs_dict = {ENTITLEMENTS: subscriptons}
+    subs_dict = {ENTITLEMENTS: subscriptions}
     return subs_dict
 
 

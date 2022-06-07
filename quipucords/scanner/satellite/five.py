@@ -202,7 +202,7 @@ class SatelliteFive(SatelliteInterface):
         :param results: A list of responses
         :param virtual_hosts: A dictionary of virtual host data
         :param virtual_guests: A dictionary of guest to host data
-        :param physical_hosts: A list of phyiscal host ids
+        :param physical_hosts: A list of physical host ids
 
         """
         for raw_result in results:
