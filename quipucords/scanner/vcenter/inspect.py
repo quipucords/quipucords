@@ -16,7 +16,7 @@ from datetime import datetime
 from api.models import (RawFact,
                         ScanTask,
                         SystemInspectionResult)
-
+from scanner.vcenter.utils import VcenterRawFacts, HostRawFacts, ClusterRawFacts, raw_facts_template
 from django.db import transaction
 
 from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
@@ -120,13 +120,14 @@ class InspectTaskRunner(ScanTaskRunner):
         facts = {}
         for prop in props:
             if prop.name == 'name':
-                facts['cluster.name'] = prop.val
+                facts[ClusterRawFacts.NAME] = prop.val
             elif prop.name == 'parent':
                 parent = parents_dict.get(str(prop.val))
-                while parent and parent.get('type') != 'vim.Datacenter':
-                    parent = parents_dict.get(parent.get('parent'))
-                facts['cluster.datacenter'] = \
-                    parent.get('name') if parent else None
+                while parent and parent.get("type") != "vim.Datacenter":
+                    parent = parents_dict.get(parent.get("parent"))
+                facts[ClusterRawFacts.DATACENTER] = (
+                    parent.get("name") if parent else None
+                )
         return facts
 
     # pylint: disable=no-self-use
@@ -140,19 +141,20 @@ class InspectTaskRunner(ScanTaskRunner):
         for prop in props:
             if prop.name == 'parent':
                 cluster_info = cluster_dict.get(str(prop.val), {})
-                facts['host.cluster'] = cluster_info.get('cluster.name')
-                facts['host.datacenter'] = \
-                    cluster_info.get('cluster.datacenter')
-            elif prop.name == 'summary.config.name':
-                facts['host.name'] = prop.val
+                facts[HostRawFacts.CLUSTER] = cluster_info.get(ClusterRawFacts.NAME)
+                facts[HostRawFacts.DATACENTER] = cluster_info.get(
+                    ClusterRawFacts.DATACENTER
+                )
+            elif prop.name == "summary.config.name":
+                facts[HostRawFacts.NAME] = prop.val
             elif prop.name == 'hardware.systemInfo.uuid':
-                facts['host.uuid'] = prop.val
+                facts[HostRawFacts.UUID] = prop.val
             elif prop.name == 'summary.hardware.numCpuCores':
-                facts['host.cpu_cores'] = prop.val
+                facts[HostRawFacts.CPU_CORES] = prop.val
             elif prop.name == 'summary.hardware.numCpuPkgs':
-                facts['host.cpu_count'] = prop.val
+                facts[HostRawFacts.CPU_COUNT] = prop.val
             elif prop.name == 'summary.hardware.numCpuThreads':
-                facts['host.cpu_threads'] = prop.val
+                facts[HostRawFacts.CPU_THREADS] = prop.val
 
         return facts
 
@@ -166,43 +168,50 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
-        facts = {}
+        facts = raw_facts_template()
         for prop in props:
             if prop.name == 'name':
-                facts['vm.name'] = prop.val
+                facts[VcenterRawFacts.NAME] = prop.val
             if prop.name == 'guest.net':
                 mac_addresses, ip_addresses = get_nics(prop.val)
-                facts['vm.mac_addresses'] = mac_addresses
-                facts['vm.ip_addresses'] = ip_addresses
+                facts[VcenterRawFacts.MAC_ADDRESSES] = mac_addresses
+                facts[VcenterRawFacts.IP_ADDRESSES] = ip_addresses
             elif prop.name == 'summary.runtime.powerState':
-                facts['vm.state'] = prop.val
-                if facts['vm.state'] == 'poweredOn':
-                    facts['vm.last_check_in'] = now
+                facts[VcenterRawFacts.STATE] = prop.val
+                if facts[VcenterRawFacts.STATE] == "poweredOn":
+                    facts[VcenterRawFacts.LAST_CHECK_IN] = now
             elif prop.name == 'summary.guest.hostName':
-                facts['vm.dns_name'] = prop.val
+                facts[VcenterRawFacts.DNS_NAME] = prop.val
             elif prop.name == 'summary.config.guestFullName':
-                facts['vm.os'] = prop.val
+                facts[VcenterRawFacts.OS] = prop.val
             elif prop.name == 'summary.config.memorySizeMB':
-                facts['vm.memory_size'] = int(prop.val / 1024)
+                facts[VcenterRawFacts.MEMORY_SIZE] = int(prop.val / 1024)
             elif prop.name == 'summary.config.numCpu':
-                facts['vm.cpu_count'] = prop.val
+                facts[VcenterRawFacts.CPU_COUNT] = prop.val
             elif prop.name == 'summary.config.uuid':
-                facts['vm.uuid'] = prop.val
+                facts[VcenterRawFacts.UUID] = prop.val
             elif prop.name == 'runtime.host':
                 host_facts = host_dict.get(str(prop.val))
                 if host_facts:
-                    facts['vm.host.name'] = host_facts.get('host.name')
-                    facts['vm.host.uuid'] = host_facts.get('host.uuid')
-                    facts['vm.host.cpu_cores'] = \
-                        host_facts.get('host.cpu_cores')
-                    facts['vm.host.cpu_count'] = \
-                        host_facts.get('host.cpu_count')
-                    facts['vm.host.cpu_threads'] = \
-                        host_facts.get('host.cpu_threads')
-                    facts['vm.cluster'] = host_facts.get('host.cluster')
-                    facts['vm.datacenter'] = host_facts.get('host.datacenter')
+                    facts[VcenterRawFacts.HOST_NAME] = host_facts.get(HostRawFacts.NAME)
+                    facts[VcenterRawFacts.HOST_UUID] = host_facts.get(HostRawFacts.UUID)
+                    facts[VcenterRawFacts.HOST_CPU_CORES] = host_facts.get(
+                        HostRawFacts.CPU_CORES
+                    )
+                    facts[VcenterRawFacts.HOST_CPU_COUNT] = host_facts.get(
+                        HostRawFacts.CPU_COUNT
+                    )
+                    facts[VcenterRawFacts.HOST_CPU_THREADS] = host_facts.get(
+                        HostRawFacts.CPU_THREADS
+                    )
+                    facts[VcenterRawFacts.CLUSTER] = host_facts.get(
+                        HostRawFacts.CLUSTER
+                    )
+                    facts[VcenterRawFacts.DATACENTER] = host_facts.get(
+                        HostRawFacts.DATACENTER
+                    )
 
-        vm_name = facts['vm.name']
+        vm_name = facts[VcenterRawFacts.NAME]
 
         logger.debug('system %s facts=%s', vm_name, facts)
 
