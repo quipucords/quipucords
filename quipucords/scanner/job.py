@@ -12,20 +12,17 @@
 import logging
 from multiprocessing import Process, Value
 
-from api.common.common_report import create_report_version
-from api.details_report.util import (build_sources_from_tasks,
-                                     create_details_report,
-                                     validate_details_report_json)
-from api.models import (ScanJob,
-                        ScanTask,
-                        Source)
-
 from django.db.models import Q
 
+from api.common.common_report import create_report_version
+from api.details_report.util import (
+    build_sources_from_tasks,
+    create_details_report,
+    validate_details_report_json,
+)
+from api.models import ScanJob, ScanTask, Source
 from fingerprinter.task import FingerprintTaskRunner
-
 from scanner import network, satellite, vcenter
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
