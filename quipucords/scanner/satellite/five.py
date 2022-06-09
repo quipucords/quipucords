@@ -77,7 +77,7 @@ def request_host_details(host_id, host_name, last_checkin, scan_task,
         scan_task id, and source_type, and the source_name
     """
     unique_name = '%s_%s' % (host_name, host_id)
-    results = {}
+    results = raw_facts_template()
     client, user, password = utils.get_sat5_client(scan_task,
                                                    request_options)
     try:

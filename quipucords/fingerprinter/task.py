@@ -1447,7 +1447,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'os_name', fact,
                                       'os_name', fingerprint)
         # Get the os name
-        satellite_os_name = fact.get('os_name')
+        satellite_os_name = default_getter(fact, "os_name", "")
         is_redhat = False
         rhel_version = None
         # if the os name is none
@@ -1504,9 +1504,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'virtual_host_uuid', fact,
                                       'virtual_host_uuid', fingerprint)
 
-        is_virtualized = fact.get('is_virtualized')
-        metadata_source = 'is_virtualized'
-        name = fact.get('hostname', '')
+        is_virtualized = default_getter(fact, "is_virtualized", "")
+        metadata_source = "is_virtualized"
+        name = default_getter(fact, "hostname", "")
         if is_virtualized:
             infrastructure_type = SystemFingerprint.VIRTUALIZED
         elif is_virtualized is False:

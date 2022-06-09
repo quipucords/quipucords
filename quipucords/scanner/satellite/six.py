@@ -157,7 +157,8 @@ def host_fields(api_version, response):
     cf_errata_counts = None
     sub_facet_attributes = fields.get(SUBSCRIPTION_FACET)
     content_facet_attributes = fields.get(CONTENT_FACET)
-    facts = fields.get(FACTS, {})
+    facts = raw_facts_template()
+    facts.update(fields.get(FACTS, {}))
     virtual_host = fields.get(VIRTUAL_HOST, {})
     virtual_guests = fields.get(VIRTUAL_GUESTS)
     errata_counts = fields.get(ERRATA_COUNTS, {})
