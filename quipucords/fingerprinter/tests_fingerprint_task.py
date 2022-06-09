@@ -30,6 +30,7 @@ from fingerprinter.task import (
     FingerprintTaskRunner,
 )
 from scanner.network.utils import raw_facts_template as network_template
+from scanner.satellite.utils import raw_facts_template as satellite_template
 from scanner.test_util import create_scan_job
 from scanner.vcenter.utils import raw_facts_template as vcenter_template
 
@@ -272,7 +273,7 @@ class EngineTest(TestCase):
             architecture='x86_64',
             is_redhat=True):
         """Create an in memory DetailsReport for tests."""
-        fact = {}
+        fact = satellite_template()
         if source_name:
             fact['source_name'] = source_name
         if source_type:

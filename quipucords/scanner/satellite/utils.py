@@ -256,3 +256,29 @@ def validate_task_stats(task):
             'Missed failed systems', sys_failed=new_failed)
         raise SatelliteException(
             'hosts_facts could not scan all systems')
+
+
+def raw_facts_template():
+    """Results template for fact collection on Satellite scans."""
+    satellite_raw_facts = (
+        "architecture",
+        "cores",
+        "errata_out_of_date",
+        "hostname",
+        "ip_addresses",
+        "is_virtualized",
+        "katello_agent_installed",
+        "kernel_version",
+        "last_checkin_time",
+        "location",
+        "mac_addresses",
+        "num_sockets",
+        "os_name",
+        "os_release",
+        "os_version",
+        "packages_out_of_date",
+        "registration_time",
+        "uuid",
+        "virt_type",
+    )
+    return {fact_name: None for fact_name in satellite_raw_facts}
