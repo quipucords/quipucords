@@ -20,7 +20,7 @@ from django.db import transaction
 import log_messages
 from api.models import RawFact, SystemInspectionResult
 from scanner.network.processing import process
-from scanner.network.utils import STOP_STATES, results_template
+from scanner.network.utils import STOP_STATES, raw_facts_template
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -123,7 +123,7 @@ class InspectResultCallback():
     @transaction.atomic
     def _finalize_host(self, host, host_status):
         """Save facts collected and update the scan counts."""
-        results = results_template()
+        results = raw_facts_template()
         results.update(self._ansible_facts.pop(host, {}))
 
         if settings.QPC_EXCLUDE_INTERNAL_FACTS:

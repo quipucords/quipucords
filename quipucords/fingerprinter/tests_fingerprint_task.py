@@ -29,8 +29,9 @@ from fingerprinter.task import (
     NETWORK_VCENTER_MERGE_KEYS,
     FingerprintTaskRunner,
 )
-from scanner.network.utils import results_template
+from scanner.network.utils import raw_facts_template as network_template
 from scanner.test_util import create_scan_job
+from scanner.vcenter.utils import raw_facts_template as vcenter_template
 
 SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
                     'entitlement_id': 'ESA0009'}]
@@ -38,6 +39,10 @@ SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
 
 EXPECTED_FINGERPRINT_MAP = {
     "infrastructure_type": "virt_what_type/virt_type",
+}
+EXPECTED_FINGERPRINT_MAP_VCENTER = {
+    "is_redhat": "vm.os",
+    "infrastructure_type": "vcenter_source",
 }
 
 
@@ -100,7 +105,7 @@ class EngineTest(TestCase):
             user_has_sudo=True):
         """Create an in memory DetailsReport for tests."""
         # pylint: disable=too-many-statements
-        fact = results_template()
+        fact = network_template()
         if source_name:
             fact['source_name'] = source_name
         if source_type:
@@ -198,7 +203,7 @@ class EngineTest(TestCase):
             architecture='x86_64',
             is_redhat=True):
         """Create an in memory DetailsReport for tests."""
-        fact = {}
+        fact = vcenter_template()
         if source_name:
             fact['source_name'] = source_name
         if source_type:
@@ -1079,14 +1084,14 @@ class EngineTest(TestCase):
             result['metadata']['infrastructure_type']['source_name'],
             'source1')
 
-    def test_all_facts_with_null_value(self):
+    def test_all_facts_with_null_value_in_process_network_scan(self):
         """Test fingerprinting method with all facts set to null value."""
         source_dict = {
             "server_id": self.server_id,
             "source_name": self.source.name,
             "source_type": self.source.source_type,
         }
-        facts_dict = results_template()
+        facts_dict = network_template()
         result = self.fp_task_runner._process_network_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
         self.assertDictEqual(
@@ -1108,6 +1113,39 @@ class EngineTest(TestCase):
         expected_fingerprints[PRODUCTS_KEY] = mock.ANY
         expected_fingerprints[ENTITLEMENTS_KEY] = []
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
+        self.assertDictEqual(result, expected_fingerprints)
+
+    def test_scan_all_facts_with_null_value_in_process_vcenter_scan(self):
+        """Test fingerprinting method with all facts set to null value."""
+        source_dict = {
+            "server_id": self.server_id,
+            "source_name": "source2",
+            "source_type": Source.VCENTER_SOURCE_TYPE,
+        }
+        facts_dict = vcenter_template()
+        result = self.fp_task_runner._process_vcenter_fact(source_dict, facts_dict)
+        metadata_dict = result.pop(META_DATA_KEY)
+
+        self.assertDictEqual(
+            {
+                fingerprint_name: {
+                    "server_id": self.server_id,
+                    "source_name": "source2",
+                    "source_type": Source.VCENTER_SOURCE_TYPE,
+                    "has_sudo": False,
+                    "raw_fact_key": fact_name,
+                }
+                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_VCENTER.items()  # noqa E501
+            },
+            metadata_dict,
+        )
+        expected_fingerprints = {
+            fingerprint_name: False
+            for fingerprint_name in EXPECTED_FINGERPRINT_MAP_VCENTER
+        }
+        expected_fingerprints[PRODUCTS_KEY] = []
+        expected_fingerprints[ENTITLEMENTS_KEY] = []
+        expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
         self.assertDictEqual(result, expected_fingerprints)
 
     ################################################################
@@ -1191,16 +1229,15 @@ class EngineTest(TestCase):
 
     def test_process_details_report_success(self):
         """Test processing a details report success."""
-        fact_collection = {'name': 'dhcp181-3.gsslab.rdu2.redhat.com',
-                           'metadata': {},
-                           'etc_machine_id':
-                           '3f01b55457674041b75e41829bcee1dc',
-                           'insights_client_id':
-                           '3f01b55457674041b75e41829bcee1dc',
-                           'ip_addresses': ['1.2.3.4'],
-                           'sources': []}
-        deployments_report = DeploymentsReport(report_id=1,
-                                               id=1)
+        fact_collection = {
+            "name": "dhcp181-3.gsslab.rdu2.redhat.com",
+            "metadata": {},
+            "etc_machine_id": "3f01b55457674041b75e41829bcee1dc",
+            "insights_client_id": "3f01b55457674041b75e41829bcee1dc",
+            "ip_addresses": ["1.2.3.4"],
+            "sources": [],
+        }
+        deployments_report = DeploymentsReport(report_id=1, id=1)
         deployments_report.save()
         details_report = DetailsReport(id=1,
                                        deployment_report=deployments_report)

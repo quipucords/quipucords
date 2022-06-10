@@ -58,6 +58,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 from scanner.task import ScanTaskRunner
+from utils import default_getter
 
 # pylint: disable=too-many-lines
 
@@ -1358,9 +1359,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             self._add_fact_to_fingerprint(
                 source, 'vm.name', fact, 'name', fingerprint)
 
-        self._add_fact_to_fingerprint(source, 'vm.os', fact,
-                                      'os_release', fingerprint)
-        vcenter_os_release = fact.get('vm.os', '')
+        self._add_fact_to_fingerprint(source, "vm.os", fact, "os_release", fingerprint)
+        vcenter_os_release = default_getter(fact, "vm.os", "")
         is_redhat = False
         if vcenter_os_release != '':
             rhel_os_releases = ['red hat enterprise linux', 'rhel']

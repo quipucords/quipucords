@@ -12,11 +12,10 @@
 import atexit
 import ssl
 
-from api.vault import decrypt_data_as_unicode
-
 from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
-
 from pyVmomi import vmodl  # pylint: disable=no-name-in-module
+
+from api.vault import decrypt_data_as_unicode
 
 
 def vcenter_connect(scan_task):
@@ -96,3 +95,53 @@ def retrieve_properties(content, filter_spec_set, max_objects=None):
         result = continue_retrieve_properties_ex(token)
 
     return objects
+
+
+class HostRawFacts:  # pylint: disable=too-few-public-methods
+    """Constants of vcenter hosts raw facts."""
+
+    CLUSTER = "host.cluster"
+    CPU_CORES = "host.cpu_cores"
+    CPU_COUNT = "host.cpu_count"
+    CPU_THREADS = "host.cpu_threads"
+    DATACENTER = "host.datacenter"
+    NAME = "host.name"
+    UUID = "host.uuid"
+
+
+class VcenterRawFacts:  # pylint: disable=too-few-public-methods
+    """Constants of vcenter raw facts."""
+
+    CLUSTER = "vm.cluster"
+    CPU_COUNT = "vm.cpu_count"
+    DATACENTER = "vm.datacenter"
+    DNS_NAME = "vm.dns_name"
+    HOST_CPU_CORES = "vm.host.cpu_cores"
+    HOST_CPU_COUNT = "vm.host.cpu_count"
+    HOST_CPU_THREADS = "vm.host.cpu_threads"
+    HOST_NAME = "vm.host.name"
+    HOST_UUID = "vm.host.uuid"
+    IP_ADDRESSES = "vm.ip_addresses"
+    LAST_CHECK_IN = "vm.last_check_in"
+    MAC_ADDRESSES = "vm.mac_addresses"
+    MEMORY_SIZE = "vm.memory_size"
+    NAME = "vm.name"
+    OS = "vm.os"
+    STATE = "vm.state"
+    UUID = "vm.uuid"
+
+
+class ClusterRawFacts:  # pylint: disable=too-few-public-methods
+    """Constants of vcenter cluster raw facts."""
+
+    DATACENTER = "cluster.datacenter"
+    NAME = "cluster.name"
+
+
+def raw_facts_template():
+    """Results template for fact collection on Vcenter scans."""
+    template = {}
+    for attr_name, fact_name in VcenterRawFacts.__dict__.items():
+        if not attr_name.startswith("_"):
+            template[fact_name] = None
+    return template
