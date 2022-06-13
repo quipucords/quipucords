@@ -41,6 +41,10 @@ SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
 EXPECTED_FINGERPRINT_MAP = {
     "infrastructure_type": "virt_what_type/virt_type",
 }
+EXPECTED_FINGERPRINT_MAP_SATELLITE = {
+    "is_redhat": "os_release",
+    "infrastructure_type": "is_virtualized",
+}
 EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "is_redhat": "vm.os",
     "infrastructure_type": "vcenter_source",
@@ -1147,6 +1151,39 @@ class EngineTest(TestCase):
         expected_fingerprints[PRODUCTS_KEY] = []
         expected_fingerprints[ENTITLEMENTS_KEY] = []
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
+        self.assertDictEqual(result, expected_fingerprints)
+
+    def test_scan_all_facts_with_null_value_in_process_satellite_scan(self):
+        """Test fingerprinting method with all facts set to null value."""
+        source_dict = {
+            "server_id": self.server_id,
+            "source_name": "source3",
+            "source_type": Source.SATELLITE_SOURCE_TYPE,
+        }
+        facts_dict = satellite_template()
+        result = self.fp_task_runner._process_satellite_fact(source_dict, facts_dict)
+        metadata_dict = result.pop(META_DATA_KEY)
+
+        self.assertDictEqual(
+            {
+                fingerprint_name: {
+                    "server_id": self.server_id,
+                    "source_name": "source3",
+                    "source_type": Source.SATELLITE_SOURCE_TYPE,
+                    "has_sudo": False,
+                    "raw_fact_key": fact_name,
+                }
+                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_SATELLITE.items()  # noqa E501
+            },
+            metadata_dict,
+        )
+        expected_fingerprints = {
+            fingerprint_name: False
+            for fingerprint_name in EXPECTED_FINGERPRINT_MAP_SATELLITE
+        }
+        expected_fingerprints[PRODUCTS_KEY] = mock.ANY
+        expected_fingerprints[ENTITLEMENTS_KEY] = []
+        expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
         self.assertDictEqual(result, expected_fingerprints)
 
     ################################################################
