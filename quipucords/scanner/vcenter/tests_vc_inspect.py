@@ -184,15 +184,18 @@ class InspectTaskRunnerTest(TestCase):
 
         ip_addresses, mac_addresses = ['1.2.3.4'], ['00:50:56:9e:09:8c']
 
-        facts = {'name': 'vm1',
-                 'guest.net': '',  # mac/ip addr returned by get_nics
-                 'summary.runtime.powerState': 'poweredOn',
-                 'summary.guest.hostName': 'hostname',
-                 'summary.config.guestFullName': 'Red Hat 7',
-                 'summary.config.memorySizeMB': 1024,
-                 'summary.config.numCpu': 4,
-                 'summary.config.uuid': '1111',
-                 'runtime.host': ''}  # runs through host_facts values
+        facts = {
+            "name": "vm1",
+            "guest.net": "",  # mac/ip addr returned by get_nics
+            "summary.runtime.powerState": "poweredOn",
+            "summary.guest.hostName": "hostname",
+            "summary.config.guestFullName": "Red Hat 7",
+            "summary.config.memorySizeMB": 1024,
+            "summary.config.numCpu": 4,
+            "summary.config.uuid": "1111",
+            "runtime.host": "",
+            "config.template": False,
+        }  # runs through host_facts values
         host_facts = {
             'host.name': 'host1',
             'host.cpu_cores': 12,
@@ -227,22 +230,25 @@ class InspectTaskRunnerTest(TestCase):
 
             inspect_result = self.scan_task.inspection_result
             sys_results = inspect_result.systems.all()
-            expected_facts = {'vm.cluster': 'cluster1',
-                              'vm.cpu_count': 4,
-                              'vm.datacenter': 'dc1',
-                              'vm.dns_name': 'hostname',
-                              'vm.host.cpu_cores': 12,
-                              'vm.host.cpu_count': 2,
-                              'vm.host.cpu_threads': 24,
-                              'vm.host.name': 'host1',
-                              'vm.ip_addresses': ['1.2.3.4'],
-                              'vm.mac_addresses': ['00:50:56:9e:09:8c'],
-                              'vm.memory_size': 1,
-                              'vm.name': 'vm1',
-                              'vm.os': 'Red Hat 7',
-                              'vm.state': 'poweredOn',
-                              'vm.last_check_in': '2000-01-01 04:20:00',
-                              'vm.uuid': '1111'}
+            expected_facts = {
+                "vm.cluster": "cluster1",
+                "vm.cpu_count": 4,
+                "vm.datacenter": "dc1",
+                "vm.dns_name": "hostname",
+                "vm.host.cpu_cores": 12,
+                "vm.host.cpu_count": 2,
+                "vm.host.cpu_threads": 24,
+                "vm.host.name": "host1",
+                "vm.ip_addresses": ["1.2.3.4"],
+                "vm.is_template": False,
+                "vm.mac_addresses": ["00:50:56:9e:09:8c"],
+                "vm.memory_size": 1,
+                "vm.name": "vm1",
+                "vm.os": "Red Hat 7",
+                "vm.state": "poweredOn",
+                "vm.last_check_in": "2000-01-01 04:20:00",
+                "vm.uuid": "1111",
+            }
             sys_fact = {}
             for raw_fact in sys_results.first().facts.all():
                 # Must read as JSON as this is what task.py does
