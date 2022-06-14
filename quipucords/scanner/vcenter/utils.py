@@ -128,6 +128,7 @@ class VcenterRawFacts:  # pylint: disable=too-few-public-methods
     NAME = "vm.name"
     OS = "vm.os"
     STATE = "vm.state"
+    TEMPLATE = "vm.is_template"
     UUID = "vm.uuid"
 
 
