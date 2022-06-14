@@ -15,17 +15,12 @@ from datetime import datetime
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
-from api.models import (Credential,
-                        ScanJob,
-                        ScanTask,
-                        Source,)
-
 from django.test import TestCase
-
 from pyVmomi import vim  # pylint: disable=no-name-in-module
 
+from api.models import Credential, ScanJob, ScanTask, Source
 from scanner.test_util import create_scan_job
-from scanner.vcenter.inspect import (InspectTaskRunner, get_nics)
+from scanner.vcenter.inspect import InspectTaskRunner, get_nics
 
 
 def invalid_login():
