@@ -13,17 +13,18 @@
 import logging
 from multiprocessing import Pool
 
-from api.models import (ScanJob, SystemInspectionResult)
-
 import requests
 from requests.exceptions import Timeout
 
+from api.models import ScanJob, SystemInspectionResult
 from scanner.satellite import utils
-from scanner.satellite.api import (SatelliteCancelException,
-                                   SatelliteException,
-                                   SatelliteInterface,
-                                   SatellitePauseException)
-
+from scanner.satellite.api import (
+    SatelliteCancelException,
+    SatelliteException,
+    SatelliteInterface,
+    SatellitePauseException,
+)
+from scanner.satellite.utils import raw_facts_template
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -156,7 +157,8 @@ def host_fields(api_version, response):
     cf_errata_counts = None
     sub_facet_attributes = fields.get(SUBSCRIPTION_FACET)
     content_facet_attributes = fields.get(CONTENT_FACET)
-    facts = fields.get(FACTS, {})
+    facts = raw_facts_template()
+    facts.update(fields.get(FACTS, {}))
     virtual_host = fields.get(VIRTUAL_HOST, {})
     virtual_guests = fields.get(VIRTUAL_GUESTS)
     errata_counts = fields.get(ERRATA_COUNTS, {})
@@ -245,7 +247,7 @@ def host_subscriptions(response):
     :returns: dictionary of facts created from response object.
     """
     entitlements = response.get(RESULTS, [])
-    subscriptons = []
+    subscriptions = []
     for entitlement in entitlements:
         sub = {
             DERIVED_ENTITLEMENT: False,
@@ -264,9 +266,9 @@ def host_subscriptions(response):
         if (entitlement_type and
                 entitlement_type in ENTITLEMENT_DERIVED_LIST):
             sub[DERIVED_ENTITLEMENT] = True
-        subscriptons.append(sub)
+        subscriptions.append(sub)
 
-    subs_dict = {ENTITLEMENTS: subscriptons}
+    subs_dict = {ENTITLEMENTS: subscriptions}
     return subs_dict
 
 

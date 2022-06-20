@@ -14,13 +14,14 @@ import xmlrpc.client
 from multiprocessing import Pool
 
 from api.models import ScanJob, SystemInspectionResult
-
 from scanner.satellite import utils
-from scanner.satellite.api import (SatelliteCancelException,
-                                   SatelliteException,
-                                   SatelliteInterface,
-                                   SatellitePauseException)
-
+from scanner.satellite.api import (
+    SatelliteCancelException,
+    SatelliteException,
+    SatelliteInterface,
+    SatellitePauseException,
+)
+from scanner.satellite.utils import raw_facts_template
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -76,7 +77,7 @@ def request_host_details(host_id, host_name, last_checkin, scan_task,
         scan_task id, and source_type, and the source_name
     """
     unique_name = '%s_%s' % (host_name, host_id)
-    results = {}
+    results = raw_facts_template()
     client, user, password = utils.get_sat5_client(scan_task,
                                                    request_options)
     try:
@@ -201,7 +202,7 @@ class SatelliteFive(SatelliteInterface):
         :param results: A list of responses
         :param virtual_hosts: A dictionary of virtual host data
         :param virtual_guests: A dictionary of guest to host data
-        :param physical_hosts: A list of phyiscal host ids
+        :param physical_hosts: A list of physical host ids
 
         """
         for raw_result in results:

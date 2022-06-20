@@ -269,8 +269,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             # Transition from persisted to failed after engine failed
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
-            error_message = 'Fact collection %d failed'\
-                ' to be processed.' % details_report.id
+            error_message = (
+                "Fact collection f'{details_report.id} failed to be processed."
+            )
 
             self.scan_task.log_message(
                 '%s' % (error_message), log_level=logging.ERROR)
@@ -442,9 +443,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if final_fingerprint_list:
             deployment_report.status = DeploymentsReport.STATUS_COMPLETE
         else:
-            status_message = 'FAILED to create report id=%d - '\
-                'produced no valid fingerprints ' % (
-                    deployment_report.report_id)
+            status_message = (
+                "FAILED to create report id=f'{deployment_report.report_id}' - "
+                "produced no valid fingerprints"
+            )
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             status = ScanTask.FAILED
@@ -471,9 +473,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 'facts and will be excluded from the Insights '
                 'report: %s' % str(invalid_hosts))
         if not insights_hosts:
-            insights_message = 'FAILED to create Insights report id=%d - '\
-                'produced no valid hosts ' % (
-                    deployment_report.report_id)
+            insights_message = (
+                "FAILED to create Insights report "
+                "id=f'{deployment_report.report_id}' - produced no valid hosts"
+            )
             self.scan_task.log_message(insights_message,
                                        log_level=logging.WARN)
         else:
@@ -595,8 +598,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         number_network_before = len(network_fingerprints)
         number_satellite_before = len(satellite_fingerprints)
         number_vcenter_before = len(vcenter_fingerprints)
-        total_before = number_network_before + \
-            number_satellite_before + number_vcenter_before
+        total_before = (
+            number_network_before + number_satellite_before + number_vcenter_before
+        )
         self.scan_task.log_message(
             'NETWORK and SATELLITE DEDUPLICATION '
             'START COUNT - (network=%d, satellite=%d, '
@@ -829,8 +833,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Merge base items without key, matched, and remainder
         # who did not match
-        base_result_list = base_no_key + \
-            base_match_list + list(base_dict.values())
+        base_result_list = base_no_key + base_match_list + list(base_dict.values())
         base_result_list = self._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], base_result_list, True)
 
@@ -1444,7 +1447,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'os_name', fact,
                                       'os_name', fingerprint)
         # Get the os name
-        satellite_os_name = fact.get('os_name')
+        satellite_os_name = default_getter(fact, "os_name", "")
         is_redhat = False
         rhel_version = None
         # if the os name is none
@@ -1501,9 +1504,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'virtual_host_uuid', fact,
                                       'virtual_host_uuid', fingerprint)
 
-        is_virtualized = fact.get('is_virtualized')
-        metadata_source = 'is_virtualized'
-        name = fact.get('hostname', '')
+        is_virtualized = default_getter(fact, "is_virtualized", "")
+        metadata_source = "is_virtualized"
+        name = default_getter(fact, "hostname", "")
         if is_virtualized:
             infrastructure_type = SystemFingerprint.VIRTUALIZED
         elif is_virtualized is False:
