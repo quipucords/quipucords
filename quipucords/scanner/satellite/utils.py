@@ -152,16 +152,18 @@ def status(scan_task):
     """
     try:
         return _status6(scan_task)
-    except SatelliteException as sat_error:  # pylint: disable=unused-variable # noqa F841
+    except SatelliteException:
         message = (
             "Satellite 6 status check failed with error:"
-            ' f"{sat_error}". Attempting Satellite 5.'
+            f' f"{SatelliteException}". Attempting Satellite 5.'
         )
         scan_task.log_message(message)
     try:
         return _status5(scan_task)
-    except SatelliteException as sat_error:  # pylint: disable=unused-variable  # noqa F841
-        message = "Satellite 5 status check failed with error: f'{sat_error}'."
+    except SatelliteException:
+        message = (
+            f"Satellite 5 status check failed with error: f'{SatelliteException}'."
+        )
         scan_task.log_message(message, log_level=logging.ERROR)
     except xmlrpc.client.ProtocolError:
         message = 'Satellite 5 status check endpoint not found. '
