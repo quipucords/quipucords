@@ -270,7 +270,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
             error_message = (
-                "Fact collection f'{details_report.id} failed to be processed."
+                f"Fact collection {details_report.id} failed to be processed."
             )
 
             self.scan_task.log_message(
@@ -444,7 +444,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report.status = DeploymentsReport.STATUS_COMPLETE
         else:
             status_message = (
-                "FAILED to create report id=f'{deployment_report.report_id}' - "
+                f"FAILED to create report id={deployment_report.report_id} - "
                 "produced no valid fingerprints"
             )
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
@@ -475,7 +475,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if not insights_hosts:
             insights_message = (
                 "FAILED to create Insights report "
-                "id=f'{deployment_report.report_id}' - produced no valid hosts"
+                f"id={deployment_report.report_id} - produced no valid hosts"
             )
             self.scan_task.log_message(insights_message,
                                        log_level=logging.WARN)

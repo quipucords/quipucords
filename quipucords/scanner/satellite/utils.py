@@ -155,15 +155,13 @@ def status(scan_task):
     except SatelliteException:
         message = (
             "Satellite 6 status check failed with error:"
-            f' f"{SatelliteException}". Attempting Satellite 5.'
+            f' "{SatelliteException}". Attempting Satellite 5.'
         )
         scan_task.log_message(message)
     try:
         return _status5(scan_task)
     except SatelliteException:
-        message = (
-            f"Satellite 5 status check failed with error: f'{SatelliteException}'."
-        )
+        message = f'Satellite 5 status check failed with error: "{SatelliteException}".'
         scan_task.log_message(message, log_level=logging.ERROR)
     except xmlrpc.client.ProtocolError:
         message = 'Satellite 5 status check endpoint not found. '
