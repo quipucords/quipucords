@@ -188,6 +188,8 @@ class InspectTaskRunner(ScanTaskRunner):
                     facts[VcenterRawFacts.LAST_CHECK_IN] = now
             elif prop.name == 'summary.guest.hostName':
                 facts[VcenterRawFacts.DNS_NAME] = prop.val
+            elif prop.name == "config.template":
+                facts[VcenterRawFacts.TEMPLATE] = prop.val
             elif prop.name == 'summary.config.guestFullName':
                 facts[VcenterRawFacts.OS] = prop.val
             elif prop.name == 'summary.config.memorySizeMB':
@@ -339,15 +341,16 @@ class InspectTaskRunner(ScanTaskRunner):
             all=False,
             type=vim.VirtualMachine,
             pathSet=[
-                'guest.net',
-                'name',
-                'runtime.host',
-                'summary.guest.hostName',
-                'summary.runtime.powerState',
-                'summary.config.guestFullName',
-                'summary.config.memorySizeMB',
-                'summary.config.numCpu',
-                'summary.config.uuid'
+                "guest.net",
+                "name",
+                "runtime.host",
+                "config.template",
+                "summary.guest.hostName",
+                "summary.runtime.powerState",
+                "summary.config.guestFullName",
+                "summary.config.memorySizeMB",
+                "summary.config.numCpu",
+                "summary.config.uuid",
             ],
         )
 
