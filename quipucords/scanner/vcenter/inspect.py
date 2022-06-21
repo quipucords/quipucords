@@ -80,20 +80,18 @@ class InspectTaskRunner(ScanTaskRunner):
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = (
-                "Prerequisites scan task f'{self.connect_scan_task.sequence_number}'"
+                f"Prerequisites scan task {self.connect_scan_task.sequence_number}"
                 " failed."
             )
             return error_message, ScanTask.FAILED
 
         try:
             self.inspect()
-        except vim.fault.InvalidLogin as vm_error:  # pylint: disable=unused-variable # noqa
+        except vim.fault.InvalidLogin as vm_error:
             error_message = (
-                "Unable to connect to VCenter source, f'{source.name}', "
-                "with supplied credential, f'{credential.name}'.\n"
-            )
-            error_message += (
-                "Discovery scan failed for f'{self.scan_task,}'." "f'{vm_error}'"
+                f"Unable to connect to VCenter source, {source.name}, "
+                f"with supplied credential, {credential.name}.\n"
+                f"Discovery scan failed for {self.scan_task,}. {vm_error}"
             )
             return error_message, ScanTask.FAILED
 
