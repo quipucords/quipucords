@@ -19,7 +19,7 @@ from unittest import mock
 
 import pytest
 
-from api.models import ScanTask
+from api.models import ScanTask, SystemFingerprint
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -27,6 +27,7 @@ from fingerprinter.constants import (
     SOURCES_KEY,
 )
 from tests import constants
+from tests.utils.facts import RawFactComparator, fact_expander
 
 logger = getLogger(__name__)
 
@@ -208,8 +209,11 @@ def fingerprint_fact_map():
         "cpu_hyperthreading": "cpu_hyperthreading",
         "cpu_socket_count": "cpu_socket_count",
         "etc_machine_id": "etc_machine_id",
-        "infrastructure_type": "virt_type",
+        "infrastructure_type": "virt_what_type/virt_type",
+        "insights_client_id": "insights_client_id",
+        "ip_addresses": "ifconfig_ip_addresses",
         "is_redhat": "redhat_packages_gpg_is_redhat",
+        "mac_addresses": "ifconfig_mac_addresses",
         "name": "uname_hostname",
         "os_name": "etc_release_name",
         "os_release": "etc_release_release",
@@ -217,12 +221,58 @@ def fingerprint_fact_map():
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
         "subscription_manager_id": "subman_virt_uuid",
-        "system_creation_date": "date_machine_id",
+        "system_addons": "system_purpose_json__addons",
+        "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # pylint: disable=line-too-long # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
+        "system_purpose": "system_purpose_json",
+        "system_role": "system_purpose_json__role",
+        "system_service_level_agreement": "system_purpose_json__service_level_agreement",  # pylint: disable=line-too-long # noqa:E501
+        "system_usage_type": "system_purpose_json__usage_type",
         "system_user_count": "system_user_count",
         "user_login_history": "user_login_history",
         "virtualized_type": "virt_type",
     }
+
+
+@pytest.fixture
+def unexpected_fingerprints():
+    """Set of facts that wouldn't appear on network scans."""
+    return {
+        # sattelite / vcenter exclusive
+        "virtual_host_name",
+        "virtual_host_uuid",
+        # vcenter exclusive
+        "vm_cluster",
+        "vm_datacenter",
+        "vm_dns_name",
+        "vm_host_core_count",
+        "vm_host_socket_count",
+        "vm_state",
+        "vm_uuid",
+    }
+
+
+def test_sanity_check_raw_fact_matches(
+    expected_network_scan_facts, fingerprint_fact_map, unexpected_fingerprints
+):
+    """Ensure raw facts mapped to fingerprint facts match known facts."""
+    raw_facts_for_fingerprints = set()
+    for fact in fingerprint_fact_map.values():
+        raw_facts_for_fingerprints |= fact_expander(fact)
+    assert "registration_time" in raw_facts_for_fingerprints
+    # remove "registration_time" as this is a sattelite fact
+    raw_facts_for_fingerprints -= {"registration_time"}
+
+    assert raw_facts_for_fingerprints < expected_network_scan_facts, (
+        f"Expected facts not found: "
+        f"{raw_facts_for_fingerprints - expected_network_scan_facts}"
+    )
+    # excluding vcenter/sattelite exclusives, all fingerprints should be the ones
+    # expected on fingerprint_fact_map
+    network_scan_fingerprints = (
+        SystemFingerprint.get_valid_fact_names() - unexpected_fingerprints
+    )
+    assert network_scan_fingerprints == set(fingerprint_fact_map.keys())
 
 
 # pylint: disable=no-self-use
@@ -354,7 +404,7 @@ class TestNetworkScan:
                 server_id=mock.ANY,
                 source_name=self.SOURCE_NAME,
                 source_type=self.SOURCE_TYPE,
-                raw_fact_key=raw_fact,
+                raw_fact_key=RawFactComparator(raw_fact),
                 has_sudo=True,
             )
         return metadata

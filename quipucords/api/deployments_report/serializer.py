@@ -11,23 +11,27 @@
 
 """Serializer for system fingerprint models."""
 
+from rest_framework.serializers import (
+    CharField,
+    ChoiceField,
+    DateField,
+    FloatField,
+    IntegerField,
+    JSONField,
+    ModelSerializer,
+    NullBooleanField,
+    PrimaryKeyRelatedField,
+    UUIDField,
+)
+
 from api.common.serializer import CustomJSONField, NotEmptySerializer
 from api.models import (
     DeploymentsReport,
     DetailsReport,
     Entitlement,
     Product,
-    SystemFingerprint)
-
-from rest_framework.serializers import (CharField,
-                                        ChoiceField,
-                                        DateField,
-                                        FloatField,
-                                        IntegerField,
-                                        JSONField,
-                                        NullBooleanField,
-                                        PrimaryKeyRelatedField,
-                                        UUIDField)
+    SystemFingerprint,
+)
 
 
 class ProductSerializer(NotEmptySerializer):
@@ -55,81 +59,80 @@ class EntitlementSerializer(NotEmptySerializer):
         fields = ('name', 'entitlement_id', 'metadata')
 
 
-class SystemFingerprintSerializer(NotEmptySerializer):
+default_args = dict(required=False, allow_null=True)
+
+
+class SystemFingerprintSerializer(ModelSerializer):
     """Serializer for the Fingerprint model."""
 
     # Common facts
-    name = CharField(required=False, max_length=256)
+    name = CharField(max_length=256, **default_args)
 
-    os_name = CharField(required=False, max_length=64)
-    os_release = CharField(required=False, max_length=128)
-    os_version = CharField(required=False, max_length=64)
+    os_name = CharField(max_length=64, **default_args)
+    os_release = CharField(max_length=128, **default_args)
+    os_version = CharField(max_length=64, **default_args)
 
     infrastructure_type = ChoiceField(
         required=False, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
 
-    cloud_provider = CharField(
-        required=False, max_length=16)
+    cloud_provider = CharField(max_length=16, **default_args)
 
-    mac_addresses = CustomJSONField(required=False)
-    ip_addresses = CustomJSONField(required=False)
+    mac_addresses = CustomJSONField(**default_args)
+    ip_addresses = CustomJSONField(**default_args)
 
-    cpu_count = IntegerField(required=False, min_value=0)
+    cpu_count = IntegerField(min_value=0, **default_args)
 
-    architecture = CharField(required=False, max_length=64)
+    architecture = CharField(max_length=64, **default_args)
 
     # Network scan facts
-    bios_uuid = CharField(required=False, max_length=36)
-    subscription_manager_id = CharField(required=False, max_length=36)
+    bios_uuid = CharField(max_length=36, **default_args)
+    subscription_manager_id = CharField(max_length=36, **default_args)
 
-    cpu_socket_count = IntegerField(required=False, min_value=0)
-    cpu_core_count = FloatField(required=False, min_value=0)
-    cpu_core_per_socket = IntegerField(required=False, min_value=0)
+    cpu_socket_count = IntegerField(min_value=0, **default_args)
+    cpu_core_count = FloatField(min_value=0, **default_args)
+    cpu_core_per_socket = IntegerField(min_value=0, **default_args)
     cpu_hyperthreading = NullBooleanField(required=False)
 
-    system_creation_date = DateField(required=False)
-    system_last_checkin_date = DateField(required=False)
+    system_creation_date = DateField(**default_args)
+    system_last_checkin_date = DateField(**default_args)
 
-    system_purpose = JSONField(required=False)
-    system_role = CharField(required=False, max_length=128)
-    system_addons = JSONField(required=False)
-    system_service_level_agreement = CharField(required=False, max_length=128)
-    system_usage_type = CharField(required=False, max_length=128)
+    system_purpose = JSONField(**default_args)
+    system_role = CharField(max_length=128, **default_args)
+    system_addons = JSONField(**default_args)
+    system_service_level_agreement = CharField(max_length=128, **default_args)
+    system_usage_type = CharField(max_length=128, **default_args)
 
-    insights_client_id = CharField(required=False, max_length=128)
+    insights_client_id = CharField(max_length=128, **default_args)
 
-    virtualized_type = CharField(required=False, max_length=64)
-    system_user_count = IntegerField(required=False, min_value=0)
-    user_login_history = CustomJSONField(required=False)
+    virtualized_type = CharField(max_length=64, **default_args)
+    system_user_count = IntegerField(min_value=0, **default_args)
+    user_login_history = CustomJSONField(**default_args)
 
     # VCenter scan facts
-    vm_state = CharField(required=False, max_length=24)
-    vm_uuid = CharField(required=False, max_length=36)
-    vm_dns_name = CharField(required=False, max_length=256)
+    vm_state = CharField(max_length=24, **default_args)
+    vm_uuid = CharField(max_length=36, **default_args)
+    vm_dns_name = CharField(max_length=256, **default_args)
 
-    virtual_host_name = CharField(required=False, max_length=128)
-    virtual_host_uuid = CharField(required=False, max_length=36)
-    vm_host_socket_count = IntegerField(required=False, min_value=0)
-    vm_host_core_count = IntegerField(required=False, min_value=0)
+    virtual_host_name = CharField(max_length=128, **default_args)
+    virtual_host_uuid = CharField(max_length=36, **default_args)
+    vm_host_socket_count = IntegerField(min_value=0, **default_args)
+    vm_host_core_count = IntegerField(min_value=0, **default_args)
 
-    vm_cluster = CharField(required=False, max_length=128)
-    vm_datacenter = CharField(required=False, max_length=128)
+    vm_cluster = CharField(max_length=128, **default_args)
+    vm_datacenter = CharField(max_length=128, **default_args)
 
-    products = ProductSerializer(many=True, allow_null=True, required=False)
-    entitlements = EntitlementSerializer(many=True,
-                                         allow_null=True,
-                                         required=False)
+    products = ProductSerializer(many=True, **default_args)
+    entitlements = EntitlementSerializer(many=True, **default_args)
 
     # Red Hat facts
     is_redhat = NullBooleanField(required=False)
-    redhat_certs = CharField(required=False)
+    redhat_certs = CharField(**default_args)
     # pylint: disable=invalid-name
-    redhat_package_count = IntegerField(
-        required=False, min_value=0)
+    redhat_package_count = IntegerField(min_value=0, **default_args)
 
     metadata = CustomJSONField(required=True)
     sources = CustomJSONField(required=True)
-    etc_machine_id = CharField(required=False, max_length=48)
+    etc_machine_id = CharField(max_length=48, **default_args)
 
     class Meta:
         """Meta class for SystemFingerprintSerializer."""
