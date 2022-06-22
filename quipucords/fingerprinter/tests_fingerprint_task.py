@@ -101,6 +101,7 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "mac_addresses": "vm.mac_addresses",
     "name": "vm.name",
     "os_release": "vm.os",
+    "system_last_checkin_date": "vm.last_check_in",
     "virtual_host_name": "vm.host.name",
     "virtual_host_uuid": "vm.host.uuid",
     "vm_cluster": "vm.cluster",
