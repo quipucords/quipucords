@@ -1361,12 +1361,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Common facts
         # Set name
-        if fact.get('vm.dns_name'):
-            self._add_fact_to_fingerprint(
-                source, 'vm.dns_name', fact, 'name', fingerprint)
+        if fact.get("vm.dns_name"):
+            raw_fact = "vm.dns_name"
         else:
-            self._add_fact_to_fingerprint(
-                source, 'vm.name', fact, 'name', fingerprint)
+            raw_fact = "vm.name"
+
+        self._add_fact_to_fingerprint(source, raw_fact, fact, "name", fingerprint)
 
         self._add_fact_to_fingerprint(source, "vm.os", fact, "os_release", fingerprint)
         vcenter_os_release = default_getter(fact, "vm.os", "")
@@ -1398,15 +1398,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'vm.uuid', fact,
                                       'vm_uuid', fingerprint)
 
+        last_checkin = None
         if fact.get('vm.last_check_in'):
             last_checkin = self._multi_format_dateparse(
                 source, 'vm.last_check_in',
                 fact['vm.last_check_in'],
                 ['%Y-%m-%d %H:%M:%S'])
-            self._add_fact_to_fingerprint(source, 'vm.last_check_in',
-                                          fact, 'system_last_checkin_date',
-                                          fingerprint,
-                                          fact_value=last_checkin)
+        self._add_fact_to_fingerprint(
+            source,
+            "vm.last_check_in",
+            fact,
+            "system_last_checkin_date",
+            fingerprint,
+            fact_value=last_checkin,
+        )
 
         self._add_fact_to_fingerprint(source, 'vm.dns_name', fact,
                                       'vm_dns_name', fingerprint)
