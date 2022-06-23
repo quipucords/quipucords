@@ -79,8 +79,24 @@ EXPECTED_FINGERPRINT_MAP_SATELLITE = {
     "infrastructure_type": "is_virtualized",
 }
 EXPECTED_FINGERPRINT_MAP_VCENTER = {
+    "name": "vm.name",
+    "os_release": "vm.os",
     "is_redhat": "vm.os",
     "infrastructure_type": "vcenter_source",
+    "mac_addresses": "vm.mac_addresses",
+    "ip_addresses": "vm.ip_addresses",
+    "cpu_count": "vm.cpu_count",
+    "architecture": "uname_processor",
+    "vm_state": "vm.state",
+    "vm_uuid": "vm.uuid",
+    "system_last_checkin_date": "vm.last_check_in",
+    "vm_dns_name": "vm.dns_name",
+    "virtual_host_name": "vm.host.name",
+    "virtual_host_uuid": "vm.host.uuid",
+    "vm_host_socket_count": "vm.host.cpu_count",
+    "vm_host_core_count": "vm.host.cpu_cores",
+    "vm_datacenter": "vm.datacenter",
+    "vm_cluster": "vm.cluster",
 }
 
 
@@ -1178,12 +1194,13 @@ class EngineTest(TestCase):
             metadata_dict,
         )
         expected_fingerprints = {
-            fingerprint_name: False
+            fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_VCENTER
         }
+        expected_fingerprints["is_redhat"] = False
+        expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
         expected_fingerprints[PRODUCTS_KEY] = []
         expected_fingerprints[ENTITLEMENTS_KEY] = []
-        expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
         self.assertDictEqual(result, expected_fingerprints)
 
     def test_scan_all_facts_with_null_value_in_process_satellite_scan(self):
