@@ -75,8 +75,24 @@ EXPECTED_FINGERPRINT_MAP = {
     "virtualized_type": "virt_type",
 }
 EXPECTED_FINGERPRINT_MAP_SATELLITE = {
+    "name": "hostname",
+    "os_name": "os_name",
     "is_redhat": "os_release",
+    "os_release": "os_release",
+    "os_version": "os_version",
+    "mac_addresses": "mac_addresses",
+    "ip_addresses": "ip_addresses",
+    "cpu_count": "cores",
+    "architecture": "architecture",
+    "subscription_manager_id": "uuid",
+    "virtualized_type": "virt_type",
+    "virtual_host_name": "virtual_host_name",
+    "virtual_host_uuid": "virtual_host_uuid",
     "infrastructure_type": "is_virtualized",
+    "cpu_core_count": "cores",
+    "cpu_socket_count": "num_sockets",
+    "registration_time": "registration_time",
+    "system_last_checkin_date": "last_checkin_time",
 }
 EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "name": "vm.name",
@@ -98,6 +114,13 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "vm_datacenter": "vm.datacenter",
     "vm_cluster": "vm.cluster",
 }
+
+PRODUCTS = [
+    {"name": "JBoss EAP", "presence": "absent"},
+    {"name": "JBoss Fuse", "presence": "absent"},
+    {"name": "JBoss BRMS", "presence": "absent"},
+    {"name": "JBoss Web Server", "presence": "absent", "version": []},
+]
 
 
 class EngineTest(TestCase):
@@ -1228,12 +1251,23 @@ class EngineTest(TestCase):
             metadata_dict,
         )
         expected_fingerprints = {
-            fingerprint_name: False
+            fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_SATELLITE
         }
-        expected_fingerprints[PRODUCTS_KEY] = mock.ANY
-        expected_fingerprints[ENTITLEMENTS_KEY] = []
+        expected_fingerprints["is_redhat"] = False
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
+        expected_fingerprints[ENTITLEMENTS_KEY] = []
+
+        copy_products_list = deepcopy(PRODUCTS)
+        for product in copy_products_list:
+            product["metadata"] = {
+                "server_id": self.server_id,
+                "source_name": "source3",
+                "source_type": "satellite",
+                "raw_fact_key": None,
+            }
+        expected_fingerprints[PRODUCTS_KEY] = copy_products_list
+
         self.assertDictEqual(result, expected_fingerprints)
 
     ################################################################
