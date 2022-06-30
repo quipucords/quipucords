@@ -1528,10 +1528,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 name.endswith(tuple(['-' + str(num) for num in range(1, 10)])):
             infrastructure_type = SystemFingerprint.HYPERVISOR
             metadata_source = 'hostname'
-        if infrastructure_type:
-            self._add_fact_to_fingerprint(source, metadata_source, fact,
-                                          'infrastructure_type', fingerprint,
-                                          fact_value=infrastructure_type)
+        self._add_fact_to_fingerprint(
+            source,
+            metadata_source,
+            fact,
+            "infrastructure_type",
+            fingerprint,
+            fact_value=infrastructure_type,
+        )
         # Satellite specific facts
         self._add_fact_to_fingerprint(source, 'cores', fact,
                                       'cpu_core_count', fingerprint)
@@ -1542,23 +1546,32 @@ class FingerprintTaskRunner(ScanTaskRunner):
         reg_time = fact.get('registration_time')
         if reg_time:
             reg_time = strip_suffix(reg_time, ' UTC')
-            self._add_fact_to_fingerprint(source, 'registration_time', fact,
-                                          'registration_time', fingerprint,
-                                          fact_value=reg_time)
+        self._add_fact_to_fingerprint(
+            source,
+            "registration_time",
+            fact,
+            "registration_time",
+            fingerprint,
+            fact_value=reg_time,
+        )
 
-        last_checkin = fact.get('last_checkin_time')
-        if last_checkin:
-            last_checkin = \
-                self._multi_format_dateparse(source,
-                                             'last_checkin_time',
-                                             last_checkin,
-                                             ['%Y-%m-%d %H:%M:%S',
-                                              '%Y-%m-%d %H:%M:%S %z'])
+        last_checkin = None
+        if fact.get("last_checkin_time"):
+            last_checkin = self._multi_format_dateparse(
+                source,
+                "last_checkin_time",
+                last_checkin,
+                ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"],
+            )
 
-            self._add_fact_to_fingerprint(source, 'last_checkin_time',
-                                          fact, 'system_last_checkin_date',
-                                          fingerprint,
-                                          fact_value=last_checkin)
+        self._add_fact_to_fingerprint(
+            source,
+            "last_checkin_time",
+            fact,
+            "system_last_checkin_date",
+            fingerprint,
+            fact_value=last_checkin,
+        )
 
         self._add_entitlements_to_fingerprint(source, 'entitlements',
                                               fact, fingerprint)
