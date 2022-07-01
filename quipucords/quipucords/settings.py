@@ -293,9 +293,11 @@ LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
 VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
     '%(process)d %(thread)d %(message)s'
 
-LOG_DIRECTORY = os.getenv('LOG_DIRECTORY', BASE_DIR)
-DEFAULT_LOG_FILE = os.path.join(LOG_DIRECTORY, 'app.log')
-LOGGING_FILE = os.getenv('DJANGO_LOG_FILE', DEFAULT_LOG_FILE)
+# pylint: disable=invalid-envvar-default
+LOG_DIRECTORY = Path(os.getenv("LOG_DIRECTORY", BASE_DIR))
+DEFAULT_LOG_FILE = LOG_DIRECTORY / "app.log"
+LOGGING_FILE = Path(os.getenv("DJANGO_LOG_FILE", DEFAULT_LOG_FILE))
+# pylint: enable=invalid-envvar-default
 
 LOGGING = {
     'version': 1,
