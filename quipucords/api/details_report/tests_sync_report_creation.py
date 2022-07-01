@@ -28,7 +28,7 @@ from rest_framework import status
 class DetailsReportTest(TestCase):
     """Tests against the DetailsReport model and view set."""
 
-    # pylint: disable=no-self-use,too-many-arguments,invalid-name
+    # pylint: disable=too-many-arguments,invalid-name
     # pylint: disable=too-many-locals,too-many-branches
 
     def setUp(self):

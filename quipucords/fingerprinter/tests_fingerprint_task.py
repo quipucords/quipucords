@@ -67,7 +67,7 @@ class EngineTest(TestCase):
         self.fp_task = scan_job.tasks.last()  # pylint: disable=no-member
         self.fp_task_runner = FingerprintTaskRunner(scan_job, self.fp_task)
 
-    # pylint: disable=no-self-use,too-many-arguments,too-many-lines
+    # pylint: disable=too-many-arguments,too-many-lines
     # pylint: disable=too-many-locals,too-many-branches,invalid-name
     # pylint: disable=protected-access, W0102
 

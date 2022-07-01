@@ -34,7 +34,7 @@ class CredentialTest(TestCase):
         """Create test case tear down."""
         pass
 
-    # pylint: disable= no-self-use,invalid-name
+    # pylint: disable=invalid-name
     def create_credential(self, name='test_cred',
                           username='testuser', password='testpass',
                           cred_type=Credential.NETWORK_CRED_TYPE):

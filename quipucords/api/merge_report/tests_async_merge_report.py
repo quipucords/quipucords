@@ -37,7 +37,7 @@ def dummy_start():
 class AsyncMergeReports(TestCase):
     """Tests against the Deployment reports function."""
 
-    # pylint: disable= no-self-use, invalid-name,too-many-public-methods
+    # pylint: disable=invalid-name,too-many-public-methods
     def setUp(self):
         """Create test case setup."""
         management.call_command('flush', '--no-input')
