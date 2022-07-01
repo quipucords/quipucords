@@ -39,12 +39,12 @@ class UserViewSet(viewsets.GenericViewSet):
         permission_classes = (IsAuthenticated,)
 
     @action(detail=False, methods=['get'])
-    def current(self, request):  # pylint: disable=R0201
+    def current(self, request):
         """Get the username of currently authenticated user."""
         return Response({'username': request.user.username})
 
     @action(detail=False, methods=['put'])
-    def logout(self, request):  # pylint: disable=R0201
+    def logout(self, request):
         """Log out the current authenticated user."""
         authentication_enabled = os.getenv(
             'QPC_DISABLE_AUTHENTICATION') != 'True'

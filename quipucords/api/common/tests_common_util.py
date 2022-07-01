@@ -25,7 +25,7 @@ from django.test import TestCase
 class CommonUtilTest(TestCase):
     """Tests common util functions."""
 
-    # pylint: disable=no-self-use,too-many-arguments,invalid-name
+    # pylint: disable=too-many-arguments,invalid-name
     # pylint: disable=too-many-locals,too-many-branches
 
     def setUp(self):

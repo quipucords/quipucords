@@ -37,8 +37,6 @@ def expand_filepath(filepath):
 class CredentialSerializer(NotEmptySerializer):
     """Serializer for the Credential model."""
 
-    # pylint: disable= no-self-use
-
     name = CharField(required=True, max_length=64)
     cred_type = ValidStringChoiceField(
         required=False, choices=Credential.CRED_TYPE_CHOICES)

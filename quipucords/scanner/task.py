@@ -65,7 +65,7 @@ class ScanTaskRunner():
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status
         """
-        # pylint: disable=no-self-use,unused-argument
+        # pylint: disable=unused-argument
         # Make sure job is not cancelled or paused
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK

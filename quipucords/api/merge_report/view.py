@@ -212,7 +212,6 @@ def _validate_merge_report(data):
     :param data: dict with list of report ids
     :returns QuerySet DetailsReport
     """
-    # pylint: disable=no-self-use
     error = {
         'reports': []
     }

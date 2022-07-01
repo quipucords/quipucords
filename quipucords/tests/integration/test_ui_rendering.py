@@ -19,7 +19,6 @@ def _parse_html(raw_html_string) -> BeautifulSoup:
     return BeautifulSoup(raw_html_string, "html.parser")
 
 
-# pylint: disable=no-self-use
 @pytest.mark.slow
 @pytest.mark.integration
 class TestUIRendering:

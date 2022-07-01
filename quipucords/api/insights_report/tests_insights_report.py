@@ -28,7 +28,7 @@ from rest_framework import status
 class InsightsReportTest(TestCase):
     """Tests against the Insights reports function."""
 
-    # pylint: disable= no-self-use, invalid-name
+    # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
         management.call_command('flush', '--no-input')

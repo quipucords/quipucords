@@ -112,7 +112,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    # pylint: disable=too-many-locals,no-self-use
+    # pylint: disable=too-many-locals
     # pylint: disable=too-many-arguments,too-few-public-methods
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.

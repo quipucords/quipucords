@@ -32,8 +32,7 @@ from rest_framework.serializers import ValidationError
 class ReportsTest(TestCase):
     """Tests against the Reports function."""
 
-    # pylint: disable= no-self-use, invalid-name
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=invalid-name,too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
         management.call_command('flush', '--no-input')

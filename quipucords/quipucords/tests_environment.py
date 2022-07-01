@@ -69,8 +69,8 @@ class EnvironmentTest(TestCase):
         result = environment.modules()
         self.assertEqual(result, expected)
 
-    @patch('quipucords.environment.logger.info')
-    def test_startup(self, mock_logger):  # pylint: disable=no-self-use
+    @patch("quipucords.environment.logger.info")
+    def test_startup(self, mock_logger):
         """Test the startup method."""
         environment.startup()
         mock_logger.assert_called_with(ANY, ANY)
