@@ -11,24 +11,27 @@
 
 """Serializer for system fingerprint models."""
 
+from rest_framework.serializers import (
+    CharField,
+    ChoiceField,
+    DateField,
+    FloatField,
+    IntegerField,
+    JSONField,
+    ModelSerializer,
+    NullBooleanField,
+    PrimaryKeyRelatedField,
+    UUIDField,
+)
+
 from api.common.serializer import CustomJSONField, NotEmptySerializer
 from api.models import (
     DeploymentsReport,
     DetailsReport,
     Entitlement,
     Product,
-    SystemFingerprint)
-
-from rest_framework.serializers import (CharField,
-                                        ChoiceField,
-                                        DateField,
-                                        FloatField,
-                                        IntegerField,
-                                        JSONField,
-                                        ModelSerializer,
-                                        NullBooleanField,
-                                        PrimaryKeyRelatedField,
-                                        UUIDField)
+    SystemFingerprint,
+)
 
 
 class ProductSerializer(NotEmptySerializer):

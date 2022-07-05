@@ -142,7 +142,7 @@ class DeploymentReportTest(TestCase):
         report = response.json()
         self.assertIsInstance(report, dict)
         self.assertEqual(
-            len(report['system_fingerprints'][0].keys()),
+            len(report["system_fingerprints"][0].keys()),
             EXPECTED_NUMBER_OF_FINGERPRINTS,
         )
 
@@ -156,7 +156,7 @@ class DeploymentReportTest(TestCase):
         report = response.json()
         self.assertIsInstance(report, dict)
         self.assertEqual(
-            len(report['system_fingerprints'][0].keys()),
+            len(report["system_fingerprints"][0].keys()),
             EXPECTED_NUMBER_OF_FINGERPRINTS,
         )
 

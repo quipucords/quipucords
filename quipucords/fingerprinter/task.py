@@ -1098,11 +1098,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
-            'server_id': source['server_id'],
-            'source_name': source['source_name'],
-            'source_type': source['source_type'],
-            'raw_fact_key': raw_fact_key,
-            'has_sudo': raw_fact.get('user_has_sudo', False)
+            "server_id": source["server_id"],
+            "source_name": source["source_name"],
+            "source_type": source["source_type"],
+            "raw_fact_key": raw_fact_key,
+            "has_sudo": raw_fact.get("user_has_sudo", False),
         }
 
     def _add_products_to_fingerprint(self, source,
