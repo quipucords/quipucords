@@ -15,25 +15,8 @@ revision = "a362b28db064c7a4ee38fe66685ba891f33ee5ba"
 isort = true
 
 [tool.flakeheaven]
+base = "https://raw.githubusercontent.com/quipucords/linting/main/base-flakeheaven.toml"
 baseline = ".flakeheaven-baseline"
-exclude = [
-    "docs",
-    "build",
-    ".vscode",
-    "client",
-    "venv",
-    ".egg",
-]
-max_line_length = 88
-
-[tool.flakeheaven.exceptions."**/__init__.py"]
-pyflakes = ["-F401*"]
-
-[tool.flakeheaven.plugins]
-pycodestyle = ["+*", "-W503", "-W504", "-W605" ]
-pyflakes = ["+*"]
-"flake8-*" = ["+*", "-Q000"]
-mccabe = ["+*"]
 
 [tool.isort]
 profile = "black"
@@ -47,23 +30,12 @@ known_first_party = [
     "utils",
 ]
 
-[tool.pylint.format]
-max-line-length = "88"
-
 [tool.pylint.master]
 init-hook = "import sys; sys.path.append('./quipucords')"
 django-settings-module = "quipucords.settings"
 load-plugins = [
     "pylint_django",
     "pylint_pytest",
-]
-
-[tool.pylint.messages_control]
-disable = [
-    # flakeheaven lint with --diff parameter seems to be incompatible with this check
-    "cannot-enumerate-pytest-fixtures",
-    "logging-fstring-interpolation",
-    "wrong-import-order",
 ]
 
 [tool.pytest.ini_options]
