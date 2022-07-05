@@ -18,6 +18,13 @@ from api.common.common_report import (REPORT_TYPE_CHOICES,
 
 from django.db import models
 
+from fingerprinter.constants import (
+    ENTITLEMENTS_KEY,
+    META_DATA_KEY,
+    PRODUCTS_KEY,
+    SOURCES_KEY,
+)
+
 
 class DeploymentsReport(models.Model):
     """Represents deployment report."""
@@ -160,6 +167,21 @@ class SystemFingerprint(models.Model):
     metadata = models.TextField(unique=False, null=False)
     sources = models.TextField(unique=False, null=False)
     etc_machine_id = models.CharField(max_length=48, unique=False, null=True)
+
+    @classmethod
+    def get_valid_fact_names(cls):
+        """All expected fact names."""
+        non_fact_fields = set(
+            [
+                "id",
+                "deployment_report",
+                META_DATA_KEY,
+                SOURCES_KEY,
+                ENTITLEMENTS_KEY,
+                PRODUCTS_KEY,
+            ]
+        )
+        return {field.name for field in cls._meta.get_fields()} - non_fact_fields
 
     def __str__(self):
         """Convert to string."""

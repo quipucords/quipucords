@@ -19,7 +19,7 @@ from unittest import mock
 
 import pytest
 
-from api.models import ScanTask
+from api.models import ScanTask, SystemFingerprint
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -27,7 +27,7 @@ from fingerprinter.constants import (
     SOURCES_KEY,
 )
 from tests import constants
-from tests.utils.facts import RawFactComparator
+from tests.utils.facts import RawFactComparator, fact_expander
 
 logger = getLogger(__name__)
 
@@ -224,6 +224,47 @@ def fingerprint_fact_map():
         "user_login_history": "user_login_history",
         "virtualized_type": "virt_type",
     }
+
+
+@pytest.fixture
+def unexpected_fingerprints():
+    """Set of facts that wouldn't appear on network scans."""
+    return {
+        # sattelite / vcenter exclusive
+        "virtual_host_name",
+        "virtual_host_uuid",
+        # vcenter exclusive
+        "vm_cluster",
+        "vm_datacenter",
+        "vm_dns_name",
+        "vm_host_core_count",
+        "vm_host_socket_count",
+        "vm_state",
+        "vm_uuid",
+    }
+
+
+def test_sanity_check_raw_fact_matches(
+    expected_network_scan_facts, fingerprint_fact_map, unexpected_fingerprints
+):
+    """Ensure raw facts mapped to fingerprint facts match known facts."""
+    raw_facts_for_fingerprints = set()
+    for fact in fingerprint_fact_map.values():
+        raw_facts_for_fingerprints |= fact_expander(fact)
+    assert "registration_time" in raw_facts_for_fingerprints
+    # remove "registration_time" as this is a satellite fact
+    raw_facts_for_fingerprints -= {"registration_time"}
+
+    assert raw_facts_for_fingerprints < expected_network_scan_facts, (
+        f"Expected facts not found: "
+        f"{raw_facts_for_fingerprints - expected_network_scan_facts}"
+    )
+    # excluding vcenter/satellite exclusives, all fingerprints should be the ones
+    # expected on fingerprint_fact_map
+    network_scan_fingerprints = (
+        SystemFingerprint.get_valid_fact_names() - unexpected_fingerprints
+    )
+    assert network_scan_fingerprints == set(fingerprint_fact_map.keys())
 
 
 @pytest.mark.slow
