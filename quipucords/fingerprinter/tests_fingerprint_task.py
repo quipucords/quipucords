@@ -38,17 +38,89 @@ SUBMAN_CONSUMED = [{'name': 'Red Hat JBoss Fuse',
                     'entitlement_id': 'ESA0009'}]
 SAT_ENTITLEMENTS = [{'name': 'Satellite Tools 6.3'}]
 
-EXPECTED_FINGERPRINT_MAP = {
+EXPECTED_FINGERPRINT_MAP_NETWORK = {
+    "architecture": "uname_processor",
+    "bios_uuid": "dmi_system_uuid",
+    "cloud_provider": "cloud_provider",
+    "cpu_core_count": "cpu_core_count",
+    "cpu_core_per_socket": "cpu_core_per_socket",
+    "cpu_count": "cpu_count",
+    "cpu_hyperthreading": "cpu_hyperthreading",
+    "cpu_socket_count": "cpu_socket_count",
+    "date_anaconda_log": "date_anaconda_log",
+    "date_filesystem_create": "date_filesystem_create",
+    "date_machine_id": "date_machine_id",
+    "date_yum_history": "date_yum_history",
+    "etc_machine_id": "etc_machine_id",
     "infrastructure_type": "virt_what_type/virt_type",
+    "insights_client_id": "insights_client_id",
+    "ip_addresses": "ifconfig_ip_addresses",
+    "is_redhat": "redhat_packages_gpg_is_redhat",
+    "mac_addresses": "ifconfig_mac_addresses",
+    "name": "uname_hostname",
+    "os_name": "etc_release_name",
+    "os_release": "etc_release_release",
+    "os_version": "etc_release_version",
+    "redhat_certs": "redhat_packages_certs",
+    "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
+    "subscription_manager_id": "subman_virt_uuid",
+    "system_addons": "system_purpose_json__addons",
+    "system_last_checkin_date": "connection_timestamp",
+    "system_purpose": "system_purpose_json",
+    "system_role": "system_purpose_json__role",
+    "system_service_level_agreement": "system_purpose_json__service_level_agreement",
+    "system_usage_type": "system_purpose_json__usage_type",
+    "system_user_count": "system_user_count",
+    "user_login_history": "user_login_history",
+    "virtualized_type": "virt_type",
 }
 EXPECTED_FINGERPRINT_MAP_SATELLITE = {
-    "is_redhat": "os_release",
+    "architecture": "architecture",
+    "cpu_core_count": "cores",
+    "cpu_count": "cores",
+    "cpu_socket_count": "num_sockets",
     "infrastructure_type": "is_virtualized",
+    "ip_addresses": "ip_addresses",
+    "is_redhat": "os_release",
+    "mac_addresses": "mac_addresses",
+    "name": "hostname",
+    "os_name": "os_name",
+    "os_release": "os_release",
+    "os_version": "os_version",
+    "registration_time": "registration_time",
+    "subscription_manager_id": "uuid",
+    "system_last_checkin_date": "last_checkin_time",
+    "virtual_host_name": "virtual_host_name",
+    "virtual_host_uuid": "virtual_host_uuid",
+    "virtualized_type": "virt_type",
 }
 EXPECTED_FINGERPRINT_MAP_VCENTER = {
-    "is_redhat": "vm.os",
+    "architecture": "uname_processor",
+    "cpu_count": "vm.cpu_count",
     "infrastructure_type": "vcenter_source",
+    "ip_addresses": "vm.ip_addresses",
+    "is_redhat": "vm.os",
+    "mac_addresses": "vm.mac_addresses",
+    "name": "vm.name",
+    "os_release": "vm.os",
+    "system_last_checkin_date": "vm.last_check_in",
+    "virtual_host_name": "vm.host.name",
+    "virtual_host_uuid": "vm.host.uuid",
+    "vm_cluster": "vm.cluster",
+    "vm_datacenter": "vm.datacenter",
+    "vm_dns_name": "vm.dns_name",
+    "vm_host_core_count": "vm.host.cpu_cores",
+    "vm_host_socket_count": "vm.host.cpu_count",
+    "vm_state": "vm.state",
+    "vm_uuid": "vm.uuid",
 }
+
+PRODUCTS = [
+    {"name": "JBoss EAP", "presence": "absent"},
+    {"name": "JBoss Fuse", "presence": "absent"},
+    {"name": "JBoss BRMS", "presence": "absent"},
+    {"name": "JBoss Web Server", "presence": "absent", "version": []},
+]
 
 
 class EngineTest(TestCase):
@@ -1099,6 +1171,9 @@ class EngineTest(TestCase):
         facts_dict = network_template()
         result = self.fp_task_runner._process_network_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
+        self.assertEqual(
+            set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
+        )
         self.assertDictEqual(
             {
                 fingerprint_name: {
@@ -1108,12 +1183,13 @@ class EngineTest(TestCase):
                     "has_sudo": None,
                     "raw_fact_key": fact_name,
                 }
-                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP.items()
+                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_NETWORK.items()  # noqa: E501
             },
             metadata_dict,
         )
         expected_fingerprints = {
-            fingerprint_name: None for fingerprint_name in EXPECTED_FINGERPRINT_MAP
+            fingerprint_name: None
+            for fingerprint_name in EXPECTED_FINGERPRINT_MAP_NETWORK
         }
         expected_fingerprints[PRODUCTS_KEY] = mock.ANY
         expected_fingerprints[ENTITLEMENTS_KEY] = []
@@ -1130,7 +1206,9 @@ class EngineTest(TestCase):
         facts_dict = vcenter_template()
         result = self.fp_task_runner._process_vcenter_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
-
+        self.assertEqual(
+            set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_VCENTER.keys())
+        )
         self.assertDictEqual(
             {
                 fingerprint_name: {
@@ -1145,12 +1223,13 @@ class EngineTest(TestCase):
             metadata_dict,
         )
         expected_fingerprints = {
-            fingerprint_name: False
+            fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_VCENTER
         }
+        expected_fingerprints["is_redhat"] = False
+        expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
         expected_fingerprints[PRODUCTS_KEY] = []
         expected_fingerprints[ENTITLEMENTS_KEY] = []
-        expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
         self.assertDictEqual(result, expected_fingerprints)
 
     def test_scan_all_facts_with_null_value_in_process_satellite_scan(self):
@@ -1163,6 +1242,10 @@ class EngineTest(TestCase):
         facts_dict = satellite_template()
         result = self.fp_task_runner._process_satellite_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
+
+        self.assertEqual(
+            set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_SATELLITE.keys())
+        )
 
         self.assertDictEqual(
             {
@@ -1178,12 +1261,23 @@ class EngineTest(TestCase):
             metadata_dict,
         )
         expected_fingerprints = {
-            fingerprint_name: False
+            fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_SATELLITE
         }
-        expected_fingerprints[PRODUCTS_KEY] = mock.ANY
-        expected_fingerprints[ENTITLEMENTS_KEY] = []
+        expected_fingerprints["is_redhat"] = False
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
+        expected_fingerprints[ENTITLEMENTS_KEY] = []
+
+        copy_products_list = deepcopy(PRODUCTS)
+        for product in copy_products_list:
+            product["metadata"] = {
+                "server_id": self.server_id,
+                "source_name": "source3",
+                "source_type": "satellite",
+                "raw_fact_key": None,
+            }
+        expected_fingerprints[PRODUCTS_KEY] = copy_products_list
+
         self.assertDictEqual(result, expected_fingerprints)
 
     ################################################################

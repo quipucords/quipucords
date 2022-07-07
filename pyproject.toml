@@ -18,6 +18,17 @@ isort = true
 base = "https://raw.githubusercontent.com/quipucords/linting/main/base-flakeheaven.toml"
 baseline = ".flakeheaven-baseline"
 
+[tool.flakeheaven.exceptions."quipucords/api/migrations/*.py"]
+"flake8-*" = [
+    "-D100",
+    "-D101",
+]
+pylint = [
+    "-C0103", # invalid-name
+    "-C0114", # missing-module-docstring
+    "-C0115", # missing-class-docstring
+]
+
 [tool.isort]
 profile = "black"
 known_first_party = [

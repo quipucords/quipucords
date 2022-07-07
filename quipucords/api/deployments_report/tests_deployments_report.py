@@ -30,6 +30,9 @@ from django.urls import reverse
 from rest_framework import status
 
 
+EXPECTED_NUMBER_OF_FINGERPRINTS = 37
+
+
 class DeploymentReportTest(TestCase):
     """Tests against the Deployment reports function."""
 
@@ -138,7 +141,10 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['system_fingerprints'][0].keys()), 18)
+        self.assertEqual(
+            len(report["system_fingerprints"][0].keys()),
+            EXPECTED_NUMBER_OF_FINGERPRINTS,
+        )
 
     def test_get_deployments_report_masked(self):
         """Get a specific group count report masking sensitive info."""
@@ -149,7 +155,10 @@ class DeploymentReportTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
         self.assertIsInstance(report, dict)
-        self.assertEqual(len(report['system_fingerprints'][0].keys()), 18)
+        self.assertEqual(
+            len(report["system_fingerprints"][0].keys()),
+            EXPECTED_NUMBER_OF_FINGERPRINTS,
+        )
 
         # Check the masked values
         fingerprints = report.get('system_fingerprints')

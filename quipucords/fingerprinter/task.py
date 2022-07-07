@@ -58,7 +58,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 from scanner.task import ScanTaskRunner
-from utils import default_getter
+from utils import deepget, default_getter
 
 # pylint: disable=too-many-lines
 
@@ -87,12 +87,15 @@ FINGERPRINT_GLOBAL_ID_KEY = 'FINGERPRINT_GLOBAL_ID'
 
 # keys are in reverse order of accuracy (last most accurate)
 # (date_key, date_pattern)
-RAW_DATE_KEYS = \
-    [('date_yum_history', ['%Y-%m-%d']),
-     ('date_filesystem_create', ['%Y-%m-%d']),
-     ('date_anaconda_log', ['%Y-%m-%d']),
-     ('registration_time', ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S %z']),
-     ('date_machine_id', ['%Y-%m-%d'])]
+RAW_DATE_KEYS = dict(
+    [
+        ("date_yum_history", ["%Y-%m-%d"]),
+        ("date_filesystem_create", ["%Y-%m-%d"]),
+        ("date_anaconda_log", ["%Y-%m-%d"]),
+        ("registration_time", ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"]),
+        ("date_machine_id", ["%Y-%m-%d"]),
+    ]
+)
 
 # Insights specific facts
 CANONICAL_FACTS = ['bios_uuid', 'etc_machine_id', 'insights_client_id',
@@ -689,22 +692,26 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         # keys are in reverse order of accuracy (last most accurate)
         system_creation_date = None
-        system_creation_date_metadata = None
-        for date_key, date_pattern in RAW_DATE_KEYS:
+        system_creation_date_metadata = {}
+        sys_creation_key = "system_creation_date"
+        for date_key, date_pattern in RAW_DATE_KEYS.items():
             date_value = fingerprint.pop(date_key, None)
+            date_metadata_dict = fingerprint[META_DATA_KEY].pop(date_key, None)
             if date_value is not None:
-                system_creation_date_metadata = fingerprint[META_DATA_KEY].pop(
-                    date_key, None)
+                system_creation_date_metadata = date_metadata_dict
                 system_creation_date = self._multi_format_dateparse(
                     system_creation_date_metadata,
                     date_key,
                     date_value,
                     date_pattern)
 
+        fingerprint[sys_creation_key] = system_creation_date
         if system_creation_date is not None:
-            fingerprint['system_creation_date'] = system_creation_date
-            fingerprint[META_DATA_KEY]['system_creation_date'] = \
-                system_creation_date_metadata
+            fingerprint[META_DATA_KEY][sys_creation_key] = system_creation_date_metadata
+        else:
+            raw_fact_key = "/".join(RAW_DATE_KEYS.keys())
+            system_creation_date_metadata["raw_fact_key"] = raw_fact_key
+            fingerprint[META_DATA_KEY][sys_creation_key] = system_creation_date_metadata
 
     def _process_source(self, source):
         """Process facts and convert to fingerprints.
@@ -992,10 +999,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # merge facts
         for fact_key in keys_to_add_list:
             to_merge_fact = to_merge_fingerprint.get(fact_key)
-            if to_merge_fact:
-                priority_fingerprint[META_DATA_KEY][fact_key] = \
-                    to_merge_fingerprint[META_DATA_KEY][fact_key]
-                priority_fingerprint[fact_key] = to_merge_fact
+            priority_fingerprint[META_DATA_KEY][fact_key] = to_merge_fingerprint[
+                META_DATA_KEY
+            ][fact_key]
+            priority_fingerprint[fact_key] = to_merge_fact
 
         # merge sources
         priority_sources = priority_fingerprint[SOURCES_KEY]
@@ -1070,10 +1077,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         # pylint: disable=too-many-arguments
         actual_fact_value = None
+        raw_fact_value = deepget(raw_fact, raw_fact_key)
         if fact_value is not None:
             actual_fact_value = fact_value
-        elif raw_fact.get(raw_fact_key) is not None:
-            actual_fact_value = raw_fact.get(raw_fact_key)
+        elif raw_fact_value is not None:
+            actual_fact_value = raw_fact_value
         if fingerprint_key == 'mac_addresses':
             if isinstance(actual_fact_value, list):
                 actual_fact_value = list(map(lambda x: x.lower(),
@@ -1089,15 +1097,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
         elif is_int(actual_fact_value):
             actual_fact_value = convert_to_int(actual_fact_value)
 
-        if actual_fact_value is not None:
-            fingerprint[fingerprint_key] = actual_fact_value
-            fingerprint[META_DATA_KEY][fingerprint_key] = {
-                'server_id': source['server_id'],
-                'source_name': source['source_name'],
-                'source_type': source['source_type'],
-                'raw_fact_key': raw_fact_key,
-                'has_sudo': raw_fact.get('user_has_sudo', False)
-            }
+        fingerprint[fingerprint_key] = actual_fact_value
+        fingerprint[META_DATA_KEY][fingerprint_key] = {
+            "server_id": source["server_id"],
+            "source_name": source["source_name"],
+            "source_type": source["source_type"],
+            "raw_fact_key": raw_fact_key,
+            "has_sudo": raw_fact.get("user_has_sudo", False),
+        }
 
     def _add_products_to_fingerprint(self, source,
                                      raw_fact,
@@ -1249,16 +1256,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'user_login_history',
                                       fact, 'user_login_history', fingerprint)
 
+        last_checkin = None
         if fact.get('connection_timestamp'):
             last_checkin = self._multi_format_dateparse(
                 source,
-                'connection_timestamp',
-                fact['connection_timestamp'],
-                ['%Y%m%d%H%M%S'])
-            self._add_fact_to_fingerprint(source, 'connection_timestamp',
-                                          fact, 'system_last_checkin_date',
-                                          fingerprint,
-                                          fact_value=last_checkin)
+                "connection_timestamp",
+                fact["connection_timestamp"],
+                ["%Y%m%d%H%M%S"],
+            )
+        self._add_fact_to_fingerprint(
+            source,
+            "connection_timestamp",
+            fact,
+            "system_last_checkin_date",
+            fingerprint,
+            fact_value=last_checkin,
+        )
 
         # Determine if running on VM or bare metal
         virt_what_type = fact.get('virt_what_type')
@@ -1285,52 +1298,45 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 fingerprint, fact_value=SystemFingerprint.UNKNOWN)
 
         # System purpose facts
-        system_purpose_json = fact.get('system_purpose_json', None)
-        if system_purpose_json:
-            self._add_fact_to_fingerprint(
-                source,
-                'system_purpose_json', fact,
-                'system_purpose', fingerprint,
-                fact_value=system_purpose_json
-            )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json",
+            fact,
+            "system_purpose",
+            fingerprint,
+        )
 
-            system_purpose_role = system_purpose_json.get('role', None)
-            if system_purpose_role:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_role', fingerprint,
-                    fact_value=system_purpose_role
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__role",
+            fact,
+            "system_role",
+            fingerprint,
+        )
 
-            system_addons = system_purpose_json.get('addons', None)
-            if system_addons:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_addons', fingerprint,
-                    fact_value=system_addons
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__addons",
+            fact,
+            "system_addons",
+            fingerprint,
+        )
 
-            system_service_level_agreement = system_purpose_json.get(
-                'service_level_agreement', None)
-            if system_service_level_agreement:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_service_level_agreement', fingerprint,
-                    fact_value=system_service_level_agreement
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__service_level_agreement",
+            fact,
+            "system_service_level_agreement",
+            fingerprint,
+        )
 
-            system_usage_type = system_purpose_json.get(
-                'usage_type', None)
-            if system_usage_type:
-                self._add_fact_to_fingerprint(
-                    source,
-                    'system_purpose_json', fact,
-                    'system_usage_type', fingerprint,
-                    fact_value=system_usage_type
-                )
+        self._add_fact_to_fingerprint(
+            source,
+            "system_purpose_json__usage_type",
+            fact,
+            "system_usage_type",
+            fingerprint,
+        )
 
         # Determine if VM facts
         self._add_fact_to_fingerprint(source, 'virt_type', fact,
@@ -1355,12 +1361,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Common facts
         # Set name
-        if fact.get('vm.dns_name'):
-            self._add_fact_to_fingerprint(
-                source, 'vm.dns_name', fact, 'name', fingerprint)
+        if fact.get("vm.dns_name"):
+            raw_fact = "vm.dns_name"
         else:
-            self._add_fact_to_fingerprint(
-                source, 'vm.name', fact, 'name', fingerprint)
+            raw_fact = "vm.name"
+
+        self._add_fact_to_fingerprint(source, raw_fact, fact, "name", fingerprint)
 
         self._add_fact_to_fingerprint(source, "vm.os", fact, "os_release", fingerprint)
         vcenter_os_release = default_getter(fact, "vm.os", "")
@@ -1392,15 +1398,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(source, 'vm.uuid', fact,
                                       'vm_uuid', fingerprint)
 
+        last_checkin = None
         if fact.get('vm.last_check_in'):
             last_checkin = self._multi_format_dateparse(
                 source, 'vm.last_check_in',
                 fact['vm.last_check_in'],
                 ['%Y-%m-%d %H:%M:%S'])
-            self._add_fact_to_fingerprint(source, 'vm.last_check_in',
-                                          fact, 'system_last_checkin_date',
-                                          fingerprint,
-                                          fact_value=last_checkin)
+        self._add_fact_to_fingerprint(
+            source,
+            "vm.last_check_in",
+            fact,
+            "system_last_checkin_date",
+            fingerprint,
+            fact_value=last_checkin,
+        )
 
         self._add_fact_to_fingerprint(source, 'vm.dns_name', fact,
                                       'vm_dns_name', fingerprint)
@@ -1517,10 +1528,14 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 name.endswith(tuple(['-' + str(num) for num in range(1, 10)])):
             infrastructure_type = SystemFingerprint.HYPERVISOR
             metadata_source = 'hostname'
-        if infrastructure_type:
-            self._add_fact_to_fingerprint(source, metadata_source, fact,
-                                          'infrastructure_type', fingerprint,
-                                          fact_value=infrastructure_type)
+        self._add_fact_to_fingerprint(
+            source,
+            metadata_source,
+            fact,
+            "infrastructure_type",
+            fingerprint,
+            fact_value=infrastructure_type,
+        )
         # Satellite specific facts
         self._add_fact_to_fingerprint(source, 'cores', fact,
                                       'cpu_core_count', fingerprint)
@@ -1531,23 +1546,32 @@ class FingerprintTaskRunner(ScanTaskRunner):
         reg_time = fact.get('registration_time')
         if reg_time:
             reg_time = strip_suffix(reg_time, ' UTC')
-            self._add_fact_to_fingerprint(source, 'registration_time', fact,
-                                          'registration_time', fingerprint,
-                                          fact_value=reg_time)
+        self._add_fact_to_fingerprint(
+            source,
+            "registration_time",
+            fact,
+            "registration_time",
+            fingerprint,
+            fact_value=reg_time,
+        )
 
-        last_checkin = fact.get('last_checkin_time')
-        if last_checkin:
-            last_checkin = \
-                self._multi_format_dateparse(source,
-                                             'last_checkin_time',
-                                             last_checkin,
-                                             ['%Y-%m-%d %H:%M:%S',
-                                              '%Y-%m-%d %H:%M:%S %z'])
+        last_checkin = None
+        if fact.get("last_checkin_time"):
+            last_checkin = self._multi_format_dateparse(
+                source,
+                "last_checkin_time",
+                last_checkin,
+                ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"],
+            )
 
-            self._add_fact_to_fingerprint(source, 'last_checkin_time',
-                                          fact, 'system_last_checkin_date',
-                                          fingerprint,
-                                          fact_value=last_checkin)
+        self._add_fact_to_fingerprint(
+            source,
+            "last_checkin_time",
+            fact,
+            "system_last_checkin_date",
+            fingerprint,
+            fact_value=last_checkin,
+        )
 
         self._add_entitlements_to_fingerprint(source, 'entitlements',
                                               fact, fingerprint)
