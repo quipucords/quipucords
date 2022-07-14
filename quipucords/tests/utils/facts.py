@@ -9,11 +9,26 @@
 
 """Helpers to handle facts."""
 
+import random
+import string
+
 
 def fact_expander(fact_name):
     """Expand a fact name to cover all "parent" facts."""
     vals = set(fact_name.split("/"))
     return {fact.split("__")[0] for fact in vals}
+
+
+def random_name(min_legth=5, max_length=15):
+    """Generate a random string."""
+    characters = string.ascii_letters + string.digits + "-."
+    return "".join(random.choices(characters, k=random.randint(min_legth, max_length)))
+
+
+def random_value():
+    """Generate a random value."""
+    values = [["foo", "bar"], {"foo": "bar"}, 42, None, True, "foo", 3.14]
+    return random.choice(values)
 
 
 class RawFactComparator:
