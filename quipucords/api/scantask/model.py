@@ -141,6 +141,7 @@ class ScanTask(models.Model):
 
         verbose_name_plural = _(messages.PLURAL_SCAN_TASKS_MSG)
         ordering = ('sequence_number',)
+        unique_together = ["job", "scan_type", "source"]
 
     # all task types
     def log_current_status(self,
