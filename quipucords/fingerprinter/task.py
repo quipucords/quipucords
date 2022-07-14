@@ -427,7 +427,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         'The fingerprint could not be saved. '
                         'Fingerprint: %s. Error: %s'
                         % (str(error).strip(), fingerprint_dict),
-                        log_level=logging.ERROR)
+                        log_level=logging.ERROR,
+                        exception=error,
+                    )
             else:
                 number_invalid += 1
                 self.scan_task.log_message(
