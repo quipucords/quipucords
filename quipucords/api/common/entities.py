@@ -11,7 +11,10 @@
 
 import uuid
 from dataclasses import dataclass, field
-from typing import List
+from functools import cached_property
+from typing import Dict, List
+
+from django.conf import settings
 
 from api.models import DeploymentsReport, SystemFingerprint
 
@@ -22,6 +25,7 @@ class ReportEntity:
 
     _deployment_report: DeploymentsReport
     hosts: List[SystemFingerprint] = field(repr=False)
+    slice_size_limit: int = settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
 
     @property
     def report_uuid(self) -> uuid.UUID:
@@ -60,3 +64,52 @@ class ReportEntity:
             raise SystemFingerprint.DoesNotExist(
                 f"Report with '{report_id=}' either doesn't exist or don't have hosts."
             ) from error
+
+    @cached_property
+    def slices(self) -> Dict[str, "ReportSlice"]:
+        """
+        Return a dict of ReportSlices mapped to its slice_id.
+
+        If the report_slices don't exist yet, it'll be generated on the spot.
+        """
+        return self._initialize_report_slices()
+
+    def _initialize_report_slices(self):
+        number_hosts = len(self.hosts)
+        report_slices_dict = {}
+
+        for slice_start in range(0, number_hosts, self.slice_size_limit):
+            slice_end = self._calc_slice_end(number_hosts, slice_start)
+            report_slice = ReportSlice(
+                parent_report=self,
+                slice_start=slice_start,
+                slice_end=slice_end,
+            )
+            report_slices_dict[report_slice.slice_id] = report_slice
+        return report_slices_dict
+
+    def _calc_slice_end(self, number_hosts, slice_start):
+        slice_end = slice_start + self.slice_size_limit
+        if slice_end > number_hosts:
+            return number_hosts
+        return slice_end
+
+
+@dataclass
+class ReportSlice:
+    """Subset of hosts from a parent_report."""
+
+    parent_report: ReportEntity
+    slice_start: int
+    slice_end: int
+    slice_id: uuid.UUID = field(default_factory=uuid.uuid4)
+
+    @property
+    def hosts(self) -> List[SystemFingerprint]:
+        """
+        Retrieve hosts from this slice.
+
+        Instead creating copies of a subset of hosts from parent_report this only points
+        to parent_report using the indexes.
+        """
+        return self.parent_report.hosts[self.slice_start : self.slice_end]
