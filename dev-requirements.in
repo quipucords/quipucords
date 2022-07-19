@@ -2,6 +2,7 @@
 coverage
 
 # Test runner/testing utils
+factory-boy
 pytest-cov
 pytest-django
 pytest-xdist
