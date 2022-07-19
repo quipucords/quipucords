@@ -41,6 +41,9 @@ known_first_party = [
     "utils",
 ]
 
+[tool.pylint.basic]
+good-names = ["db", "i", "j", "k", "ex", "Run", "_"]
+
 [tool.pylint.master]
 init-hook = "import sys; sys.path.append('./quipucords')"
 django-settings-module = "quipucords.settings"
