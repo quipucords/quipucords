@@ -24,6 +24,7 @@ from api import messages
 from api.connresult.model import TaskConnectionResult
 from api.details_report.model import DetailsReport
 from api.inspectresult.model import TaskInspectionResult
+from api.scantask.queryset import ScanTaskQuerySet
 from api.source.model import Source
 
 # Get an instance of a logger
@@ -94,6 +95,9 @@ class ScanTask(models.Model):
     details_report = models.ForeignKey(
         DetailsReport, null=True, on_delete=models.CASCADE)
 
+    # custom queryset / object manager
+    objects = ScanTaskQuerySet.as_manager()
+
     def __init__(self, *args, **kwargs):
         """Constructore for ScanTask."""
         super().__init__(*args, **kwargs)
@@ -137,6 +141,7 @@ class ScanTask(models.Model):
 
         verbose_name_plural = _(messages.PLURAL_SCAN_TASKS_MSG)
         ordering = ('sequence_number',)
+        unique_together = ["job", "scan_type", "source"]
 
     # all task types
     def log_current_status(self,
@@ -486,27 +491,12 @@ class ScanTask(models.Model):
         self.log_current_status(show_status_message=True,
                                 log_level=logging.ERROR)
 
-    # inspect task
     def get_facts(self):
         """Access inspection facts."""
-        # pylint: disable=too-many-nested-blocks
-        all_systems_facts = []
-        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            system_results = self.get_result()
-            if system_results:
-                # Process all results that were save to db
-                for system_result in system_results.systems.all():
-                    system_facts = {}
-                    for raw_fact in system_result.facts.all():
-                        if not raw_fact.value or raw_fact.value == '':
-                            continue
-                        # Load values as JSON
-                        value_to_use = json.loads(raw_fact.value)
-                        system_facts[raw_fact.name] = value_to_use
-                    if bool(system_facts):
-                        all_systems_facts.append(system_facts)
-
-        return all_systems_facts
+        if self.scan_type != ScanTask.SCAN_TYPE_INSPECT:
+            return []
+        raw_facts_queryset = self.__class__.objects.filter(id=self.id).raw_facts()
+        return list(raw_facts_queryset.raw_facts_per_system().values())
 
     # inspect task
     @transaction.atomic
