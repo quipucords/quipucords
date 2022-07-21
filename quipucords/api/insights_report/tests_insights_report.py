@@ -15,12 +15,12 @@ import uuid
 from unittest.mock import patch
 
 from django.core import management
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework import status
 
 from api.common.common_report import create_filename, create_report_version
-from api.insights_report.view import _create_report_slices
 from api.models import DeploymentsReport
+from tests.factories import DeploymentReportFactory
 
 
 class InsightsReportTest(TestCase):
@@ -109,32 +109,36 @@ class InsightsReportTest(TestCase):
             id=1, report_id=1, report_version=self.report_version,
             status=DeploymentsReport.STATUS_COMPLETE,
             cached_insights=None,
-            cached_fingerprints=json.dumps(self.fingerprints))
+            cached_fingerprints=json.dumps(self.fingerprints),
+        )
 
     def test_get_insights_report_200_exists(self):
         """Retrieve insights report."""
-        url = '/api/v1/reports/1/insights/'
-        expected_hosts = [{'unique_id': i} for i in range(10001)]
-        self.deployments_report.cached_insights = json.dumps(
-            expected_hosts)
-        self.deployments_report.save()
-        with patch('api.insights_report.view.get_object_or_404',
-                   return_value=self.deployments_report):
+        deployment_report = DeploymentReportFactory(
+            number_of_fingerprints=11,
+            status=DeploymentsReport.STATUS_COMPLETE,
+        )
+        url = f"/api/v1/reports/{deployment_report.id}/insights/"
+        # mock slice size so we can expect 2 slices on this test
+        with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
             response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, response.json())
         response_json = response.json()
 
-        self.assertIn(create_filename('metadata', 'json', 1),
-                      response_json.keys())
+        self.assertIn(
+            create_filename("metadata", "json", deployment_report.id),
+            response_json.keys(),
+        )
         report_slices = {}
+        metadata_filename = f"report_id_{deployment_report.id}/metadata.json"
         for key in response_json:
-            self.assertIn('report_id_1/', key)
-            if key != 'report_id_1/metadata.json':
+            self.assertIn(f"report_id_{deployment_report.id}/", key)
+            if key != metadata_filename:
                 report_slices[key] = response_json[key]
         # metadata slice number_hosts matches the actual
         # number of hosts in a slice
-        report_slices_in_metadata = \
-            response_json['report_id_1/metadata.json']['report_slices']
+        report_slices_in_metadata = response_json[metadata_filename]["report_slices"]
+        self.assertEqual(len(report_slices_in_metadata), 2)
         total_returned_hosts_num = 0
         for key_1, key_2 in zip(report_slices_in_metadata, report_slices):
             self.assertEqual(report_slices_in_metadata[key_1]['number_hosts'],
@@ -142,30 +146,35 @@ class InsightsReportTest(TestCase):
             # used later to check for the total size
             total_returned_hosts_num += len(report_slices[key_2]['hosts'])
         # no hosts lost
-        returned_host_ids = {host['unique_id'] for slice_key in report_slices
-                             for host in report_slices[slice_key]['hosts']}
-        expected_host_ids = {host['unique_id'] for host in expected_hosts}
-        self.assertSetEqual(returned_host_ids, expected_host_ids)
+        returned_host_names = {
+            host["bios_uuid"]
+            for slice_key in report_slices  # pylint: disable=consider-using-dict-items
+            for host in report_slices[slice_key]["hosts"]
+        }
+        expected_host_names = {
+            host.bios_uuid for host in deployment_report.system_fingerprints.all()
+        }
+        self.assertSetEqual(returned_host_names, expected_host_names)
         # sum of all hosts in a slice is equal to
         # the total number of host (before call)
-        self.assertEqual(total_returned_hosts_num, len(expected_hosts))
+        self.assertEqual(total_returned_hosts_num, len(expected_host_names))
 
     def test_get_insights_report_200_generate_exists(self):
         """Retrieve insights report."""
-        url = '/api/v1/reports/1/insights/'
-        self.deployments_report.cached_insights = json.dumps(
-            self.insights_hosts)
-        self.deployments_report.save()
-        with patch('api.insights_report.view.get_object_or_404',
-                   return_value=self.deployments_report):
-            response = self.client.get(url)
+        deployment_report = DeploymentReportFactory(
+            status=DeploymentsReport.STATUS_COMPLETE,
+        )
+        url = f"/api/v1/reports/{deployment_report.id}/insights/"
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
 
-        self.assertIn(create_filename('metadata', 'json', 1),
-                      response_json.keys())
+        self.assertIn(
+            create_filename("metadata", "json", deployment_report.id),
+            response_json.keys(),
+        )
         for key in response_json:
-            self.assertIn('report_id_1/', key)
+            self.assertIn(f"report_id_{deployment_report.id}/", key)
 
     def test_get_insights_report_404_no_canonical(self):
         """Retrieve insights report."""
@@ -252,11 +261,6 @@ class InsightsReportTest(TestCase):
         with patch('api.insights_report.view.get_object_or_404',
                    return_value=self.deployments_report):
             response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
-
-    def test_get_insights_report_no_hosts(self):
-        """Check that api returns 404 if there are no hosts."""
-        response = _create_report_slices(self.deployments_report, [])
         self.assertEqual(response.status_code, 404)
 
     def test_get_insights_report_bad_id(self):
