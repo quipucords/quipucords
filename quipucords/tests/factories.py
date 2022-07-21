@@ -31,6 +31,12 @@ class SystemFingerprintFactory(DjangoModelFactory):
 class DeploymentReportFactory(DjangoModelFactory):
     """DeploymentReport factory."""
 
+    details_report = factory.RelatedFactory(
+        "tests.factories.DetailsReportFactory",
+        factory_related_name="deployment_report",
+    )
+    report_version = "REPORT_VERSION"
+
     class Meta:
         """Factory options."""
 
@@ -61,3 +67,32 @@ class DeploymentReportFactory(DjangoModelFactory):
         instead of deferring this responsibility to the database.
         """
         obj.report_id = obj.report_id or obj.pk  # noqa: W0201
+
+
+class DetailsReportFactory(DjangoModelFactory):
+    """Factory for DetailsReport."""
+
+    deployment_report = factory.SubFactory(DeploymentReportFactory, details_report=None)
+    scanjob = factory.RelatedFactory(
+        "tests.factories.ScanJobFactory",
+        factory_related_name="details_report",
+    )
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.DetailsReport"
+
+
+class ScanJobFactory(DjangoModelFactory):
+    """Factory for ScanJob."""
+
+    start_time = factory.Faker("past_datetime")
+    end_time = factory.Faker("date_time_between", start_date="-15d")
+
+    details_report = factory.SubFactory(DetailsReportFactory, scanjob=None)
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.ScanJob"

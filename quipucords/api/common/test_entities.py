@@ -9,11 +9,13 @@
 
 """Test common entities."""
 
+from datetime import datetime
 from itertools import chain
 
 import pytest
 
 from api.common.entities import ReportEntity, ReportSlice
+from api.deployments_report.model import DeploymentsReport
 from api.models import SystemFingerprint
 from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
 
@@ -41,7 +43,7 @@ class TestReportEntity:
         # pick the id for one of the reports
         report_id = deployment_reports[0].id
 
-        with django_assert_max_num_queries(1):
+        with django_assert_max_num_queries(2):
             report = ReportEntity.from_report_id(report_id)
 
         assert isinstance(report, ReportEntity)
@@ -56,10 +58,7 @@ class TestReportEntity:
 
     def test_from_report_id_deployment_not_found(self):
         """Check if the proper error is raised."""
-        with pytest.raises(
-            SystemFingerprint.DoesNotExist,
-            match="Report with 'report_id=42' either doesn't exist or don't have hosts.",  # noqa: E501
-        ):
+        with pytest.raises(DeploymentsReport.DoesNotExist):
             ReportEntity.from_report_id(42)
 
     def test_from_report_id_fingerprint_not_fount(self):
@@ -67,6 +66,26 @@ class TestReportEntity:
         deployment_report = DeploymentReportFactory(number_of_fingerprints=0)
         with pytest.raises(SystemFingerprint.DoesNotExist):
             ReportEntity.from_report_id(deployment_report.id)
+
+    def test_last_discovered_built_from_factory(self, django_assert_num_queries):
+        """Test last_discovered property."""
+        report_id = DeploymentReportFactory().id
+        # query for deployment report to force only deployment report to be loaded
+        deployment_report = DeploymentsReport.objects.get(id=report_id)
+        report = ReportEntity.from_report_id(deployment_report.id)
+        with django_assert_num_queries(0):
+            assert isinstance(report.last_discovered, datetime)
+
+    def test_last_discovered_initialized(self, django_assert_num_queries):
+        """Test last_discovered property with ReportEntity initialized manually."""
+        report_id = DeploymentReportFactory().id
+        # query for deployment report to force only deployment report to be loaded
+        deployment_report = DeploymentsReport.objects.get(id=report_id)
+        report = ReportEntity(
+            deployment_report, hosts=deployment_report.system_fingerprints.all()
+        )
+        with django_assert_num_queries(2):
+            assert isinstance(report.last_discovered, datetime)
 
 
 class TestReportSlicing:
@@ -102,6 +121,7 @@ class TestReportSlicing:
         # override slice_size_limit
         report_entity.slice_size_limit = slice_size_limit
         assert [len(s.hosts) for s in report_entity.slices.values()] == slice_sizes
+        assert [s.number_of_hosts for s in report_entity.slices.values()] == slice_sizes
         hosts_from_slices = list(
             chain.from_iterable(s.hosts for s in report_entity.slices.values())
         )
