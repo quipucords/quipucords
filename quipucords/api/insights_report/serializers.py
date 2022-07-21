@@ -12,13 +12,43 @@
 from rest_framework import fields
 from rest_framework.serializers import Serializer, ValidationError
 
+from api.common.serializer import ForcedListSerializer, NotEmptyMixin
 from api.insights_report.constants import CANONICAL_FACTS
+from api.status import get_server_id
+from quipucords.environment import server_version
 
 default_kwargs = dict(required=False)
 
 # pylint: disable=abstract-method,fixme
 # Serializer has update/create as pseudo-abstract methods we don't need to implement
 # disable complaints about 'fixme' until DISCOVERY-130 is done
+
+
+class FactsSerializer(Serializer):
+    """Serializer for HBI facts."""
+
+    source_types = fields.ListField()
+    last_discovered = fields.DateTimeField()
+    qpc_server_version = fields.CharField(default=server_version)
+    qpc_server_id = fields.CharField(default=get_server_id)
+
+
+class FactsetSerializer(Serializer):
+    """Serializer for Host facts - it should be formatted as a list."""
+
+    namespace = fields.CharField(default="qpc")
+    facts = FactsSerializer(source="*")
+
+    def __init__(self, instance=None, **kwargs):
+        """Ininialize factset serializer."""
+        if instance is not None and not isinstance(instance, list):
+            instance = [instance]
+        super().__init__(instance, **kwargs)
+
+    class Meta:
+        """Serializer configuration."""
+
+        list_serializer_class = ForcedListSerializer
 
 
 class SystemProfileSerializer(NotEmptyMixin, Serializer):
@@ -63,6 +93,7 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
         **default_kwargs
     )  # TODO: not sure on this one https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L901-L907  # noqa: E501
     subscription_manager_id = fields.CharField(**default_kwargs)
+    facts = FactsetSerializer(source="*", many=True)
     system_profile = SystemProfileSerializer(source="*", **default_kwargs)
 
     def to_representation(self, instance):
