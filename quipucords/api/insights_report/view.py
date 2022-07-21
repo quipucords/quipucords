@@ -15,30 +15,29 @@ import logging
 import os
 import uuid
 
-import api.messages as messages
-from api.common.common_report import create_filename
-from api.common.util import is_int
-from api.insights_report.insights_gzip_renderer import (InsightsGzipRenderer)
-from api.models import (DeploymentsReport, ServerInformation)
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-
-from quipucords import settings
-from quipucords.environment import server_version
-
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication)
-from rest_framework.decorators import (api_view,
-                                       authentication_classes,
-                                       permission_classes,
-                                       renderer_classes)
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+    renderer_classes,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
+from api import messages
+from api.common.common_report import create_filename
+from api.common.util import is_int
+from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
+from api.models import DeploymentsReport, ServerInformation
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
+from quipucords import settings
+from quipucords.environment import server_version
 
 # pylint: disable=invalid-name
 # Get an instance of a logger

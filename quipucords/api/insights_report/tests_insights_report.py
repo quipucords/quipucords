@@ -14,15 +14,13 @@ import json
 import uuid
 from unittest.mock import patch
 
-from api.common.common_report import (create_filename,
-                                      create_report_version)
-from api.insights_report.view import _create_report_slices
-from api.models import DeploymentsReport
-
 from django.core import management
 from django.test import TestCase
-
 from rest_framework import status
+
+from api.common.common_report import create_filename, create_report_version
+from api.insights_report.view import _create_report_slices
+from api.models import DeploymentsReport
 
 
 class InsightsReportTest(TestCase):
