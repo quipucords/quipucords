@@ -13,12 +13,14 @@
 import json
 from collections import OrderedDict
 
-from api import messages
+from rest_framework.serializers import (
+    ChoiceField,
+    Field,
+    ModelSerializer,
+    ValidationError,
+)
 
-from rest_framework.serializers import (ChoiceField,
-                                        Field,
-                                        ModelSerializer,
-                                        ValidationError)
+from api import messages
 
 
 class ValidStringChoiceField(ChoiceField):
