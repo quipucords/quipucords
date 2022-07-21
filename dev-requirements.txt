@@ -275,6 +275,14 @@ execnet==1.9.0 \
     --hash=sha256:8f694f3ba9cc92cab508b152dcfe322153975c29bda272e2fd7f3f00f36e47c5 \
     --hash=sha256:a295f7cc774947aac58dde7fdc85f4aa00c42adf5d8f5468fc630c1acf30a142
     # via pytest-xdist
+factory-boy==3.2.1 \
+    --hash=sha256:a98d277b0c047c75eb6e4ab8508a7f81fb03d2cb21986f627913546ef7a2a55e \
+    --hash=sha256:eb02a7dd1b577ef606b75a253b9818e6f9eaf996d94449c9d5ebb124f90dc795
+    # via -r dev-requirements.in
+faker==13.15.0 \
+    --hash=sha256:8e94a749d2f3d9b367f61eb33be6a534f0a2d305c54e912ee6618370e3278db7 \
+    --hash=sha256:a126fa66f54e65a67f913dcc698c9d023def7277882536bde2968fcac701bfd5
+    # via factory-boy
 flake8==4.0.1 \
     --hash=sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d \
     --hash=sha256:806e034dda44114815e23c16ef92f95c91e4c71100ff52813adf7132a6ad870d
@@ -648,6 +656,10 @@ python-daemon==2.3.0 \
     --hash=sha256:191c7b67b8f7aac58849abf54e19fe1957ef7290c914210455673028ad454989 \
     --hash=sha256:bda993f1623b1197699716d68d983bb580043cf2b8a66a01274d9b8297b0aeaf
     # via ansible-runner
+python-dateutil==2.8.2 \
+    --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
+    --hash=sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
+    # via faker
 python-dotenv==0.20.0 \
     --hash=sha256:b7e3b04a59693c42c36f9ab1cc2acc46fa5df8c78e178fc33a8d4cd05c8d498f \
     --hash=sha256:d92a187be61fe482e4fd675b6d52200e7be63a12b724abbf931a40ce4fa92938
@@ -717,6 +729,7 @@ six==1.16.0 \
     #   dockerpty
     #   jsonschema
     #   paramiko
+    #   python-dateutil
     #   pyvmomi
     #   requests-mock
     #   websocket-client
