@@ -14,6 +14,8 @@ import pytest
 from api.common.entities import ReportEntity
 from api.insights_report.serializers import (
     FactsetSerializer,
+    YupanaMetadataSerializer,
+    YupanaPayloadSerializer,
 )
 from tests.factories import DeploymentReportFactory
 
@@ -34,3 +36,24 @@ def test_factset_serializer(db, report_entity):
     assert isinstance(serializer.data, list)
     assert isinstance(serializer.data[0]["facts"], dict)
 
+
+def test_metadata_serializer(db, report_entity):
+    """Test YupanaMetadataSerializer."""
+    serializer = YupanaMetadataSerializer(report_entity)
+    data = serializer.data
+    assert data["report_slices"] == {
+        str(report_slice_id): {"number_hosts": report_slice.number_of_hosts}
+        for report_slice_id, report_slice in report_entity.slices.items()
+    }
+
+
+def test_payload_serializer(db, report_entity: ReportEntity):
+    """Test YupanaPayloadSerializer."""
+    serializer = YupanaPayloadSerializer(report_entity)
+    data = serializer.data
+    metadata_key = f"report_id_{report_entity.report_id}/metadata.json"
+    metadata = data.pop(metadata_key)
+    assert metadata["report_slices"] == {
+        str(s.slice_id): {"number_hosts": len(s.hosts)}
+        for s in report_entity.slices.values()
+    }

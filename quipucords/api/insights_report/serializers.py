@@ -9,9 +9,12 @@
 
 """Insights report serializers."""
 
+from functools import partial
+
 from rest_framework import fields
 from rest_framework.serializers import Serializer, ValidationError
 
+from api.common.common_report import create_filename
 from api.common.serializer import ForcedListSerializer, NotEmptyMixin
 from api.insights_report.constants import CANONICAL_FACTS
 from api.status import get_server_id
@@ -134,3 +137,50 @@ class YupanaReportSliceSerializer(Serializer):
 
     report_slice_id = fields.UUIDField(source="slice_id")
     hosts = YupanaHostSerializer(many=True)
+
+
+class YupanaSourceSerializer(Serializer):
+    """Format source_metadata for yupana payload."""
+
+    report_platform_id = fields.UUIDField(source="report_uuid")
+    report_type = fields.CharField(default="insights")
+    report_version = fields.CharField()
+    qpc_server_report_id = fields.IntegerField(source="report_id")
+    qpc_server_version = fields.CharField(default=server_version)
+    qpc_server_id = fields.CharField(default=get_server_id)
+
+
+class ReportSliceSerializer(Serializer):
+    """Format report_slice for yupana payload."""
+
+    number_hosts = fields.IntegerField(source="number_of_hosts")
+
+
+class YupanaMetadataSerializer(Serializer):
+    """Serializer for yupana metadata."""
+
+    report_id = fields.UUIDField(source="report_uuid")
+    host_inventory_api_version = fields.CharField(default="1.0")
+    source = fields.CharField(default="qpc")
+    source_metadata = YupanaSourceSerializer(source="*")
+    report_slices = fields.DictField(source="slices", child=ReportSliceSerializer())
+
+
+class YupanaPayloadSerializer(Serializer):
+    """Serializer for yupana payload."""
+
+    metadata = YupanaMetadataSerializer(source="*")
+    slices = fields.DictField(child=YupanaReportSliceSerializer())
+
+    def to_representation(self, instance):
+        """Format ReportEntity and add filenames for tarball construction."""
+        data = super().to_representation(instance)
+        fname_fn = partial(
+            create_filename, file_ext="json", report_id=instance.report_id
+        )
+        output_data = {
+            fname_fn(slice_id): report_slice
+            for slice_id, report_slice in data["slices"].items()
+        }
+        output_data[fname_fn("metadata")] = data["metadata"]
+        return output_data

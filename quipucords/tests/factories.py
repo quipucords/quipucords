@@ -8,19 +8,46 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
 """factories to help testing Quipucords."""
+import json
 import random
 
 import factory
 from factory.django import DjangoModelFactory
+
+from api.status import get_server_id
+
+
+def format_sources(obj):
+    """Format fingerprint sources.
+
+    obj has access to params defined on SystemFingerprintFactory.Params
+    """
+    return json.dumps(
+        [
+            {
+                "server_id": get_server_id(),
+                "source_type": obj.source_type,
+                "source_name": "testlab",
+            }
+        ]
+    )
 
 
 class SystemFingerprintFactory(DjangoModelFactory):
     """SystemFingerprint factory."""
 
     name = factory.Faker("hostname")
-    os_name = "Red Hat Enterprise Linux"
-    ip_addresses = factory.List([factory.Faker("ipv4")])
+    bios_uuid = factory.Faker("uuid4")
+    os_release = "Red Hat Enterprise Linux release 8.5 (Ootpa)"
+    ip_addresses = factory.LazyAttribute(lambda o: json.dumps(o.ip_addresses_list))
     architecture = factory.Iterator(["x86_64", "ARM"])
+    sources = factory.LazyAttribute(format_sources)
+
+    class Params:
+        """Factory parameters."""
+
+        source_type = factory.Iterator(["network", "satellite", "vcenter"])
+        ip_addresses_list = factory.List([factory.Faker("ipv4")])
 
     class Meta:
         """Factory options."""
