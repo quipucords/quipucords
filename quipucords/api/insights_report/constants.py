@@ -7,14 +7,16 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Status module."""
+"""Insights report constants module."""
 
-from functools import lru_cache
-
-from .model import ServerInformation
-
-
-@lru_cache
-def get_server_id():
-    """Get server_id and cache it."""
-    return ServerInformation.create_or_retreive_server_id()
+CANONICAL_FACTS = (
+    "bios_uuid",
+    "fqdn",
+    "insights_id",
+    "ip_addresses",
+    "mac_addresses",
+    "provider_id",
+    "provider_type",
+    "satellite_id",
+    "subscription_manager_id",
+)

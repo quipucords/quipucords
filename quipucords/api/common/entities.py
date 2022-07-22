@@ -9,14 +9,63 @@
 
 """Common entities."""
 
+import json
 import uuid
+from contextlib import suppress
 from dataclasses import dataclass, field
+from datetime import datetime
 from functools import cached_property
 from typing import Dict, List
 
 from django.conf import settings
+from django.db.models import F
 
 from api.models import DeploymentsReport, SystemFingerprint
+
+
+@dataclass
+class HostEntity:
+    """A proxy over SystemFingerprint with some extra steps."""
+
+    _fingerprints: SystemFingerprint
+    last_discovered: datetime
+
+    def __getattr__(self, attr):
+        """
+        Retrieve attribute from HostEntity.
+
+        If an attribute doesn't exist in this class, search for it on associated
+        fingerprints.
+        """
+        with suppress(AttributeError):
+            return super().__getattribute__(attr)
+        return getattr(self._fingerprints, attr)
+
+    @property
+    def ip_addresses(self):
+        """Retrieve ip_addresses."""
+        with suppress(TypeError):
+            return json.loads(self._fingerprints.ip_addresses)
+
+    @property
+    def mac_addresses(self):
+        """Retrieve mac_addresses."""
+        with suppress(TypeError):
+            return json.loads(self._fingerprints.mac_addresses)
+
+    @property
+    def provider_type(self):
+        """Retrieve provider_type.
+
+        provider_type (cloud_provider here) don't necessarily match what HBI expects
+        - https://github.com/quipucords/quipucords/blob/8c89dfa6f3a4577d32b9c4314149d1ffcff38e79/quipucords/scanner/network/processing/cloud_provider.py#L14-L17  # noqa: E501
+        - https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L611-L619  # noqa: E501
+        """
+        valid_providers = {"alibaba", "aws", "azure", "gcp", "ibm"}
+        value = self._fingerprints.cloud_provider
+        if value and value.lower() in valid_providers:
+            return value
+        return None
 
 
 @dataclass
@@ -24,8 +73,10 @@ class ReportEntity:
     """An entity representing a Report."""
 
     _deployment_report: DeploymentsReport
-    hosts: List[SystemFingerprint] = field(repr=False)
-    slice_size_limit: int = settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
+    hosts: List[HostEntity] = field(repr=False, default_factory=list)
+    slice_size_limit: int = field(
+        default_factory=lambda: settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
+    )
 
     @property
     def report_uuid(self) -> uuid.UUID:
@@ -37,33 +88,50 @@ class ReportEntity:
         """Return systemwide report id."""
         return self._deployment_report.report_id
 
+    @property
+    def report_version(self):
+        """Deployment report version."""
+        return self._deployment_report.report_version
+
+    @property
+    def last_discovered(self) -> datetime:
+        """Last time the hosts in this report were discovered."""
+        try:
+            return self._deployment_report.last_discovered
+        except AttributeError:
+            # pylint: disable=no-member
+            return self._deployment_report.details_report.scanjob.end_time
+
     @classmethod
     def from_report_id(cls, report_id):
         """Create a Report from a report_id."""
-        deployment_report, hosts = cls._get_deployment_report(report_id)
+        deployment_report, fingerprints = cls._get_deployment_report(report_id)
+        hosts = [HostEntity(f, deployment_report.last_discovered) for f in fingerprints]
         return ReportEntity(deployment_report, hosts=hosts)
 
     @classmethod
     def _get_deployment_report(cls, report_id):
-        """Get deployment report and all related fingerprints.
+        """
+        Get deployment report and all related fingerprints.
 
         The query uses deployment_report id/pk instead of report_id because they SHOULD
         be the same and pk has the advantage of being an indexed column.
         """
-        fingerprints = list(
-            SystemFingerprint.objects.select_related("deployment_report")
-            .filter(deployment_report_id=report_id)
-            .all()
+        deployment_report = (
+            DeploymentsReport.objects.annotate(
+                last_discovered=F("details_report__scanjob__end_time")
+            )
+            .prefetch_related("system_fingerprints")
+            .filter(pk=report_id)
+            .get()
         )
-        try:
-            return fingerprints[0].deployment_report, fingerprints
-        except IndexError as error:
-            # querying from fingerprint to deployment report has the benefit of
-            # generating a single query - but it has the downside of the following
-            # ambiguity (which one doesn't exist?)
+
+        fingerprints = list(deployment_report.system_fingerprints.all())
+        if len(fingerprints) == 0:
             raise SystemFingerprint.DoesNotExist(
-                f"Report with '{report_id=}' either doesn't exist or don't have hosts."
-            ) from error
+                f"Report with '{report_id=}' don't have hosts."
+            )
+        return deployment_report, fingerprints
 
     @cached_property
     def slices(self) -> Dict[str, "ReportSlice"]:
@@ -105,7 +173,7 @@ class ReportSlice:
     slice_id: uuid.UUID = field(default_factory=uuid.uuid4)
 
     @property
-    def hosts(self) -> List[SystemFingerprint]:
+    def hosts(self) -> List[HostEntity]:
         """
         Retrieve hosts from this slice.
 
@@ -113,3 +181,8 @@ class ReportSlice:
         to parent_report using the indexes.
         """
         return self.parent_report.hosts[self.slice_start : self.slice_end]
+
+    @property
+    def number_of_hosts(self):
+        """Retrieve the number of hosts."""
+        return self.slice_end - self.slice_start

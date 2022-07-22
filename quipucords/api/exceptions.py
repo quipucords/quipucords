@@ -7,14 +7,13 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Status module."""
+"""Quipucords API exceptions."""
 
-from functools import lru_cache
+from rest_framework import status
+from rest_framework.exceptions import APIException
 
-from .model import ServerInformation
 
+class FailedDependencyError(APIException):
+    """Custom APIException using status code 424."""
 
-@lru_cache
-def get_server_id():
-    """Get server_id and cache it."""
-    return ServerInformation.create_or_retreive_server_id()
+    status_code = status.HTTP_424_FAILED_DEPENDENCY

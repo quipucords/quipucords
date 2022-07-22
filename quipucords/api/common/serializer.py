@@ -13,12 +13,15 @@
 import json
 from collections import OrderedDict
 
-from api import messages
+from rest_framework.serializers import (
+    ChoiceField,
+    Field,
+    ListSerializer,
+    ModelSerializer,
+    ValidationError,
+)
 
-from rest_framework.serializers import (ChoiceField,
-                                        Field,
-                                        ModelSerializer,
-                                        ValidationError)
+from api import messages
 
 
 class ValidStringChoiceField(ChoiceField):
@@ -39,11 +42,12 @@ class ValidStringChoiceField(ChoiceField):
         return data
 
 
-class NotEmptySerializer(ModelSerializer):
-    """Serializer for the NotEmptySerializer model.
+class NotEmptyMixin:
+    """Mixin to remove null values from Serialized data.
 
-    Serializer will remove keys with a value of null or None.
-    Additionally, it will remove empty lists or empty objects.
+    Serializers created with this mixin will remove keys with a
+    value of null or None. Additionally, it will remove empty
+    lists or empty objects.
 
     To allow keys to be empty, include
     the 'qpc_allow_empty_fields' attribute in the Meta class.
@@ -72,6 +76,22 @@ class NotEmptySerializer(ModelSerializer):
         return result
 
 
+class NotEmptySerializer(NotEmptyMixin, ModelSerializer):
+    """Serializer for the NotEmptySerializer model.
+
+    Serializer will remove keys with a value of null or None.
+    Additionally, it will remove empty lists or empty objects.
+
+    To allow keys to be empty, include
+    the 'qpc_allow_empty_fields' attribute in the Meta class.
+    For example, to exclude key1 and key2 from
+    pruning, add the following to the serializer subclass:
+
+    class Meta:
+        qpc_allow_empty_fields = ['key1','key2']
+    """
+
+
 class CustomJSONField(Field):
     """Serializer reading and writing JSON to CharField."""
 
@@ -84,3 +104,13 @@ class CustomJSONField(Field):
         if value == '':
             return value
         return json.loads(value)
+
+
+class ForcedListSerializer(ListSerializer):  # pylint: disable=abstract-method
+    """Serializer that forces data output as list."""
+
+    def to_representation(self, data):
+        """Force instance as list."""
+        if not isinstance(data, list):
+            data = [data]
+        return super().to_representation(data)
