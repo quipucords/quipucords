@@ -13,11 +13,10 @@
 
 import logging
 
-from api import messages
-
 import django.dispatch
 from django.utils.translation import gettext as _
 
+from api import messages
 from scanner import manager
 from scanner.job import ScanJobRunner
 

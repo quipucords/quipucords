@@ -14,28 +14,27 @@ import json
 import logging
 import os
 
-import api.messages as messages
-from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import is_int, validate_query_param_bool
-from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
-from api.models import (DeploymentsReport)
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
-
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication)
-from rest_framework.decorators import (api_view,
-                                       authentication_classes,
-                                       permission_classes,
-                                       renderer_classes)
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+    renderer_classes,
+)
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import (BrowsableAPIRenderer,
-                                      JSONRenderer)
+from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
+import api.messages as messages
+from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
+from api.common.util import is_int, validate_query_param_bool
+from api.deployments_report.csv_renderer import DeploymentCSVRenderer
+from api.models import DeploymentsReport
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 # pylint: disable=invalid-name
 # Get an instance of a logger

@@ -14,36 +14,34 @@
 import logging
 import os
 
-import api.messages as messages
-from api.common.common_report import create_report_version
-from api.common.report_json_gzip_renderer import (ReportJsonGzipRenderer)
-from api.common.util import is_int, validate_query_param_bool
-from api.details_report.csv_renderer import (DetailsCSVRenderer)
-from api.details_report.util import (create_details_report,
-                                     mask_details_facts,
-                                     validate_details_report_json)
-from api.models import (DetailsReport,
-                        ScanJob,
-                        ScanTask)
-from api.serializers import DetailsReportSerializer
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
-
 from rest_framework import mixins, status, viewsets
-from rest_framework.authentication import (SessionAuthentication)
-from rest_framework.decorators import (api_view,
-                                       authentication_classes,
-                                       permission_classes,
-                                       renderer_classes)
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+    renderer_classes,
+)
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import (BrowsableAPIRenderer,
-                                      JSONRenderer)
+from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-
+import api.messages as messages
+from api.common.common_report import create_report_version
+from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
+from api.common.util import is_int, validate_query_param_bool
+from api.details_report.csv_renderer import DetailsCSVRenderer
+from api.details_report.util import (
+    create_details_report,
+    mask_details_facts,
+    validate_details_report_json,
+)
+from api.models import DetailsReport, ScanJob, ScanTask
+from api.serializers import DetailsReportSerializer
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 from scanner.job import ScanJobRunner
 
 # Get an instance of a logger
