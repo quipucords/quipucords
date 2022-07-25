@@ -27,7 +27,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from django_filters.rest_framework import (CharFilter,
                                            DjangoFilterBackend,

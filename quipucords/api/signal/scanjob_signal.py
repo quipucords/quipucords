@@ -16,7 +16,7 @@ import logging
 from api import messages
 
 import django.dispatch
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from scanner import manager
 from scanner.job import ScanJobRunner

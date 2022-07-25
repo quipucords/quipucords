@@ -26,7 +26,7 @@ from api.signal.scanjob_signal import (start_scan)
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from rest_framework import status
 from rest_framework.authentication import (SessionAuthentication)

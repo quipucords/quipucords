@@ -15,7 +15,7 @@ from api.common.serializer import NotEmptySerializer
 from api.common.util import convert_to_int, is_int
 from api.models import ScanTask, Source
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from rest_framework.serializers import (CharField,
                                         ChoiceField,

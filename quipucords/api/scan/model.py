@@ -20,7 +20,7 @@ from api.scantask.model import ScanTask
 from api.source.model import Source
 
 from django.db import models
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 # Get an instance of a logger

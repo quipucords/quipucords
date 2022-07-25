@@ -18,7 +18,7 @@ import traceback
 from datetime import datetime
 
 from django.db import models, transaction
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import TaskConnectionResult

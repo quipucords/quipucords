@@ -22,7 +22,7 @@ from api.common.util import check_for_existing_name
 from api.models import Credential, Source, SourceOptions
 
 from django.db import transaction
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from rest_framework.serializers import (CharField,
                                         IntegerField,

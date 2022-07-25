@@ -21,7 +21,7 @@ from api.models import (Scan,
 from api.scan.serializer import ScanOptionsSerializer
 from api.scantask.serializer import ScanTaskSerializer, SourceField
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from rest_framework.serializers import (CharField,
                                         DateTimeField,

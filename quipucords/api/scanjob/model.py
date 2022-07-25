@@ -31,7 +31,7 @@ from api.source.model import Source
 
 from django.db import (models, transaction)
 from django.db.models import Q
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

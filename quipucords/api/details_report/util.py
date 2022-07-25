@@ -26,7 +26,7 @@ from api.models import (DetailsReport,
                         Source)
 from api.serializers import DetailsReportSerializer
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 
 ERRORS_KEY = 'errors'
