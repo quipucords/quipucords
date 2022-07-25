@@ -44,5 +44,5 @@ class VaultTest(TestCase):
         with open(temp_yaml, 'r') as temp_file:
             encrypted = temp_file.read()
             decrypted = vault.decrypt_data_as_unicode(encrypted)
-            obj = yaml.load(decrypted)
+            obj = yaml.load(decrypted, Loader=yaml.SafeLoader)
             self.assertEqual(obj, data)
