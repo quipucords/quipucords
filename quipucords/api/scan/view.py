@@ -192,7 +192,7 @@ class ScanViewSet(ModelViewSet):
     queryset = Scan.objects.all()
     serializer_class = ScanSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = ScanFilter
+    filterset_class = ScanFilter
     ordering_fields = ('id', 'name', 'scan_type',
                        'most_recent_scanjob__start_time',
                        'most_recent_scanjob__status')

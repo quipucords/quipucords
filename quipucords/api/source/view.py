@@ -119,7 +119,7 @@ class SourceViewSet(ModelViewSet):
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = SourceFilter
+    filterset_class = SourceFilter
     ordering_fields = ('name', 'source_type',
                        'most_recent_connect_scan__start_time')
     ordering = ('name',)

@@ -101,7 +101,7 @@ class CredentialViewSet(ModelViewSet):
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = CredentialFilter
+    filterset_class = CredentialFilter
     ordering_fields = ('name', 'cred_type')
     ordering = ('name',)
 

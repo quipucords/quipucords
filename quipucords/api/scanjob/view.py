@@ -114,7 +114,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = ScanJobFilter
+    filterset_class = ScanJobFilter
     ordering_fields = ('id', 'scan_type', 'status', 'start_time', 'end_time')
     ordering = ('id',)
 
