@@ -1557,8 +1557,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_value=reg_time,
         )
 
-        last_checkin = None
-        if fact.get("last_checkin_time"):
+        last_checkin = fact.get("last_checkin_time")
+        if last_checkin:
             last_checkin = self._multi_format_dateparse(
                 source,
                 "last_checkin_time",
