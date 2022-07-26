@@ -15,13 +15,12 @@ These models are used in the REST definitions.
 import json
 import logging
 
+from django.db import models
+from django.utils.translation import gettext as _
+
 from api import messages
 from api.scantask.model import ScanTask
 from api.source.model import Source
-
-from django.db import models
-from django.utils.translation import ugettext as _
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

@@ -15,19 +15,13 @@ import csv
 import logging
 from io import StringIO
 
+from django.utils.translation import gettext as _
+
 from api import messages
-from api.common.common_report import (CSVHelper,
-                                      create_report_version,
-                                      sanitize_row)
+from api.common.common_report import CSVHelper, create_report_version, sanitize_row
 from api.common.util import mask_data_general, validate_query_param_bool
-from api.models import (DetailsReport,
-                        ScanTask,
-                        ServerInformation,
-                        Source)
+from api.models import DetailsReport, ScanTask, ServerInformation, Source
 from api.serializers import DetailsReportSerializer
-
-from django.utils.translation import ugettext as _
-
 
 ERRORS_KEY = 'errors'
 INVALID_SOURCES_KEY = 'invalid_sources'

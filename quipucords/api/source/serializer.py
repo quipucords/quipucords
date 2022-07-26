@@ -14,21 +14,24 @@ import json
 import logging
 import re
 
+from django.db import transaction
+from django.utils.translation import gettext as _
+from rest_framework.serializers import (
+    BooleanField,
+    CharField,
+    IntegerField,
+    PrimaryKeyRelatedField,
+    ValidationError,
+)
+
 from api import messages
-from api.common.serializer import (CustomJSONField,
-                                   NotEmptySerializer,
-                                   ValidStringChoiceField)
+from api.common.serializer import (
+    CustomJSONField,
+    NotEmptySerializer,
+    ValidStringChoiceField,
+)
 from api.common.util import check_for_existing_name
 from api.models import Credential, Source, SourceOptions
-
-from django.db import transaction
-from django.utils.translation import ugettext as _
-
-from rest_framework.serializers import (CharField,
-                                        IntegerField,
-                                        NullBooleanField,
-                                        PrimaryKeyRelatedField,
-                                        ValidationError)
 
 
 class CredentialsField(PrimaryKeyRelatedField):
@@ -60,9 +63,9 @@ class SourceOptionsSerializer(NotEmptySerializer):
 
     ssl_protocol = ValidStringChoiceField(
         required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES)
-    ssl_cert_verify = NullBooleanField(required=False)
-    disable_ssl = NullBooleanField(required=False)
-    use_paramiko = NullBooleanField(required=False)
+    ssl_cert_verify = BooleanField(allow_null=True, required=False)
+    disable_ssl = BooleanField(allow_null=True, required=False)
+    use_paramiko = BooleanField(allow_null=True, required=False)
 
     class Meta:
         """Metadata for serializer."""

@@ -15,23 +15,22 @@ These models are used in the REST definitions.
 import logging
 from datetime import datetime
 
+from django.db import models, transaction
+from django.db.models import Q
+from django.utils.translation import gettext as _
+
 from api import messages
-from api.connresult.model import (JobConnectionResult,
-                                  TaskConnectionResult)
+from api.connresult.model import JobConnectionResult, TaskConnectionResult
 from api.details_report.model import DetailsReport
-from api.inspectresult.model import (JobInspectionResult,
-                                     TaskInspectionResult)
-from api.scan.model import (DisabledOptionalProductsOptions,
-                            ExtendedProductSearchOptions,
-                            Scan,
-                            ScanOptions)
+from api.inspectresult.model import JobInspectionResult, TaskInspectionResult
+from api.scan.model import (
+    DisabledOptionalProductsOptions,
+    ExtendedProductSearchOptions,
+    Scan,
+    ScanOptions,
+)
 from api.scantask.model import ScanTask
 from api.source.model import Source
-
-
-from django.db import (models, transaction)
-from django.db.models import Q
-from django.utils.translation import ugettext as _
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

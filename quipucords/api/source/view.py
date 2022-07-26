@@ -12,38 +12,32 @@
 
 import os
 
-from api import messages
-from api.common.util import (convert_to_boolean,
-                             expand_scanjob_with_times,
-                             is_boolean,
-                             is_int)
-from api.filters import ListFilter
-from api.models import (Scan,
-                        ScanJob,
-                        ScanTask,
-                        Source)
-from api.serializers import SourceSerializer
-from api.signal.scanjob_signal import start_scan
-from api.source.util import expand_credential
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
-
-from django_filters.rest_framework import (CharFilter,
-                                           DjangoFilterBackend,
-                                           FilterSet)
-
+from django.utils.translation import gettext as _
+from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication)
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
+from api import messages
+from api.common.util import (
+    convert_to_boolean,
+    expand_scanjob_with_times,
+    is_boolean,
+    is_int,
+)
+from api.filters import ListFilter
+from api.models import Scan, ScanJob, ScanTask, Source
+from api.serializers import SourceSerializer
+from api.signal.scanjob_signal import start_scan
+from api.source.util import expand_credential
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 IDENTIFIER_KEY = 'id'
 NAME_KEY = 'name'
@@ -125,7 +119,7 @@ class SourceViewSet(ModelViewSet):
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = SourceFilter
+    filterset_class = SourceFilter
     ordering_fields = ('name', 'source_type',
                        'most_recent_connect_scan__start_time')
     ordering = ('name',)

@@ -12,6 +12,7 @@
 """Serializer for system fingerprint models."""
 
 from rest_framework.serializers import (
+    BooleanField,
     CharField,
     ChoiceField,
     DateField,
@@ -19,7 +20,6 @@ from rest_framework.serializers import (
     IntegerField,
     JSONField,
     ModelSerializer,
-    NullBooleanField,
     PrimaryKeyRelatedField,
     UUIDField,
 )
@@ -91,7 +91,7 @@ class SystemFingerprintSerializer(ModelSerializer):
     cpu_socket_count = IntegerField(min_value=0, **default_args)
     cpu_core_count = FloatField(min_value=0, **default_args)
     cpu_core_per_socket = IntegerField(min_value=0, **default_args)
-    cpu_hyperthreading = NullBooleanField(required=False)
+    cpu_hyperthreading = BooleanField(**default_args)
 
     system_creation_date = DateField(**default_args)
     system_last_checkin_date = DateField(**default_args)
@@ -125,7 +125,7 @@ class SystemFingerprintSerializer(ModelSerializer):
     entitlements = EntitlementSerializer(many=True, **default_args)
 
     # Red Hat facts
-    is_redhat = NullBooleanField(required=False)
+    is_redhat = BooleanField(**default_args)
     redhat_certs = CharField(**default_args)
     # pylint: disable=invalid-name
     redhat_package_count = IntegerField(min_value=0, **default_args)

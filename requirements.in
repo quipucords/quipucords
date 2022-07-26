@@ -1,6 +1,6 @@
 ansible<4
-Django<3.2
-django-filter<22.1
+Django<4
+django-filter
 djangorestframework
 jmespath
 paramiko

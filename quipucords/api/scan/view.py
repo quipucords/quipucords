@@ -13,38 +13,34 @@
 import logging
 import os
 
-from api import messages
-from api.common.pagination import StandardResultsSetPagination
-from api.common.util import expand_scanjob_with_times, is_int
-from api.filters import ListFilter
-from api.models import (Scan, ScanJob, ScanTask, Source)
-from api.scanjob.serializer import expand_scanjob
-from api.serializers import (ScanJobSerializer, ScanSerializer)
-from api.signal.scanjob_signal import (cancel_scan, start_scan)
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.db import transaction
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
-
-from django_filters.rest_framework import (CharFilter,
-                                           DjangoFilterBackend,
-                                           FilterSet)
-
-
+from django.utils.translation import gettext as _
+from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication)
-from rest_framework.decorators import (api_view,
-                                       authentication_classes,
-                                       permission_classes)
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
+from api import messages
+from api.common.pagination import StandardResultsSetPagination
+from api.common.util import expand_scanjob_with_times, is_int
+from api.filters import ListFilter
+from api.models import Scan, ScanJob, ScanTask, Source
+from api.scanjob.serializer import expand_scanjob
+from api.serializers import ScanJobSerializer, ScanSerializer
+from api.signal.scanjob_signal import cancel_scan, start_scan
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -196,7 +192,7 @@ class ScanViewSet(ModelViewSet):
     queryset = Scan.objects.all()
     serializer_class = ScanSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filter_class = ScanFilter
+    filterset_class = ScanFilter
     ordering_fields = ('id', 'name', 'scan_type',
                        'most_recent_scanjob__start_time',
                        'most_recent_scanjob__status')

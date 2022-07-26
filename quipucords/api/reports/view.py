@@ -14,28 +14,28 @@
 import logging
 import os
 
-import api.messages as messages
-from api.common.util import is_int, validate_query_param_bool
-from api.deployments_report.view import (build_cached_json_report)
-from api.details_report.util import mask_details_facts
-from api.models import DeploymentsReport, DetailsReport
-from api.reports.reports_gzip_renderer import (ReportsGzipRenderer)
-from api.serializers import DetailsReportSerializer
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
-
+from django.utils.translation import gettext as _
 from rest_framework import status
-from rest_framework.authentication import (SessionAuthentication)
-from rest_framework.decorators import (api_view,
-                                       authentication_classes,
-                                       permission_classes,
-                                       renderer_classes)
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+    renderer_classes,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
+import api.messages as messages
+from api.common.util import is_int, validate_query_param_bool
+from api.deployments_report.view import build_cached_json_report
+from api.details_report.util import mask_details_facts
+from api.models import DeploymentsReport, DetailsReport
+from api.reports.reports_gzip_renderer import ReportsGzipRenderer
+from api.serializers import DetailsReportSerializer
+from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 # Get an instance of a logger
 # pylint: disable=invalid-name

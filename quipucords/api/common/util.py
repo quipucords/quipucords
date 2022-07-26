@@ -14,13 +14,11 @@
 import logging
 import os
 
-import api.messages as messages
-from api.scantask.model import ScanTask
-
-from django.utils.translation import ugettext as _
-
+from django.utils.translation import gettext as _
 from rest_framework.serializers import ValidationError
 
+from api import messages
+from api.scantask.model import ScanTask
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

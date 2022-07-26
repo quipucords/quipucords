@@ -12,11 +12,11 @@
 
 These models are used in the REST definitions
 """
+from django.db import models
+from django.utils.translation import gettext as _
+
 from api import messages
 from api.vault import encrypt_data_as_unicode
-
-from django.db import models
-from django.utils.translation import ugettext as _
 
 
 class Credential(models.Model):

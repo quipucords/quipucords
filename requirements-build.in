@@ -2,6 +2,7 @@ Cython
 flit_core<4,>=3.2.0
 pbr>=1.8
 pip
+poetry-core>=1.0.0
 setuptools
 setuptools-rust>=0.11.4
 setuptools_scm[toml]>=3.4.3
