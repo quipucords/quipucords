@@ -44,6 +44,7 @@ from api.models import (
     SystemFingerprint,
 )
 from api.serializers import SystemFingerprintSerializer
+from fingerprinter import formatters
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -1126,6 +1127,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         fingerprint_key,
         fingerprint,
         fact_value=None,
+        fact_formatter=None,
     ):
         """Create the fingerprint fact and metadata.
 
@@ -1137,17 +1139,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
         this fact.
         :param fact_value: Used when values are computed from
         raw facts instead of direct access.
+        :param fact_formatter: A function that will format the fact - it should expect
+        the raw fact in its signature.
         """
         # pylint: disable=too-many-arguments
         actual_fact_value = None
         raw_fact_value = deepget(raw_fact, raw_fact_key)
+        if fact_value is not None and fact_formatter is not None:
+            raise AssertionError(
+                "fact_value and fact_formatter can't be used together."
+            )
         if fact_value is not None:
             actual_fact_value = fact_value
+        elif fact_formatter is not None:
+            actual_fact_value = fact_formatter(raw_fact_value)
         elif raw_fact_value is not None:
             actual_fact_value = raw_fact_value
-        if fingerprint_key == "mac_addresses":
-            if isinstance(actual_fact_value, list):
-                actual_fact_value = list(map(lambda x: x.lower(), actual_fact_value))
 
         # Remove empty string values
         if isinstance(actual_fact_value, str) and not actual_fact_value:
@@ -1275,7 +1282,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Set mac address from either network or vcenter
         self._add_fact_to_fingerprint(
-            source, "ifconfig_mac_addresses", fact, "mac_addresses", fingerprint
+            source,
+            "ifconfig_mac_addresses",
+            fact,
+            "mac_addresses",
+            fingerprint,
+            fact_formatter=formatters.format_mac_addresses,
         )
 
         # Set CPU facts
@@ -1496,7 +1508,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_value="virtualized",
         )
         self._add_fact_to_fingerprint(
-            source, "vm.mac_addresses", fact, "mac_addresses", fingerprint
+            source,
+            "vm.mac_addresses",
+            fact,
+            "mac_addresses",
+            fingerprint,
+            fact_formatter=formatters.format_mac_addresses,
         )
         self._add_fact_to_fingerprint(
             source, "vm.ip_addresses", fact, "ip_addresses", fingerprint
@@ -1627,7 +1644,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
 
         self._add_fact_to_fingerprint(
-            source, "mac_addresses", fact, "mac_addresses", fingerprint
+            source,
+            "mac_addresses",
+            fact,
+            "mac_addresses",
+            fingerprint,
+            fact_formatter=formatters.format_mac_addresses,
         )
         self._add_fact_to_fingerprint(
             source, "ip_addresses", fact, "ip_addresses", fingerprint
