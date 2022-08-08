@@ -25,3 +25,10 @@ def is_redhat_from_vm_os(vcenter_os_release):
             if rhel_release in vcenter_os_release.lower():
                 return True
     return False
+
+
+def gigabytes_to_bytes(gigabytes):
+    """Convert gigabytes to bytes."""
+    if gigabytes is None:
+        return None
+    return gigabytes * (1024**3)

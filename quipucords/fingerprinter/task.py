@@ -59,6 +59,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 from scanner.task import ScanTaskRunner
+from scanner.vcenter.utils import VcenterRawFacts
 from utils import deepget, default_getter
 
 # pylint: disable=too-many-lines
@@ -1563,6 +1564,17 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         self._add_fact_to_fingerprint(
             source, "vm.cluster", fact, "vm_cluster", fingerprint
+        )
+
+        # VcenterRawFacts.MEMORY_SIZE is formatted in GB. lets convert it to mb
+        # https://github.com/quipucords/quipucords/blob/bf1f034b6596ba01c9c89f766088108dd3f421fc/quipucords/scanner/vcenter/inspect.py#L190-L191
+        self._add_fact_to_fingerprint(
+            source,
+            VcenterRawFacts.MEMORY_SIZE,
+            fact,
+            "system_memory_bytes",
+            fingerprint,
+            fact_formatter=formatters.gigabytes_to_bytes,
         )
 
         fingerprint[ENTITLEMENTS_KEY] = []

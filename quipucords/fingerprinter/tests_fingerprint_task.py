@@ -103,6 +103,7 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "name": "vm.name",
     "os_release": "vm.os",
     "system_last_checkin_date": "vm.last_check_in",
+    "system_memory_bytes": "vm.memory_size",
     "virtual_host_name": "vm.host.name",
     "virtual_host_uuid": "vm.host.uuid",
     "vm_cluster": "vm.cluster",
