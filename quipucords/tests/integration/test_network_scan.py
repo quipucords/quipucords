@@ -242,6 +242,7 @@ def unexpected_fingerprints():
         "virtual_host_name",
         "virtual_host_uuid",
         # vcenter exclusive
+        "system_memory_bytes",
         "vm_cluster",
         "vm_datacenter",
         "vm_dns_name",

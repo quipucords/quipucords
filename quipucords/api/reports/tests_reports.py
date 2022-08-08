@@ -157,12 +157,17 @@ class ReportsTest(TestCase):
         # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict()
         deployments_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID\r\n1,deployments,%s,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n,,,2,2,,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n,,,2,2,False,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n,,,2,2,False,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n\r\n"
-            % (
-                self.report_version,
-                reports_dict.get("deployments_json").get("report_platform_id"),
-            )
-        )  # noqa
+            "Report ID,Report Type,Report Version,Report Platform ID\r\n"
+            f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
+            "\r\n"
+            "\r\n"
+            "System Fingerprints:\r\n"
+            "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
+            ",,,2,2,,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,False,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,False,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            "\r\n"
+        )
 
         # pylint: disable=line-too-long
         details_csv = (
@@ -188,9 +193,9 @@ class ReportsTest(TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith("csv"):
                 if "details" in file_contents:
-                    self.assertEqual(file_contents, details_csv)
+                    assert file_contents == details_csv
                 elif "deployments" in file_contents:
-                    self.assertEqual(file_contents, deployments_csv)
+                    assert file_contents == deployments_csv
                 else:
                     sys.exit("Could not identify .csv return.")
             elif filenames[idx].endswith("json"):
@@ -221,11 +226,16 @@ class ReportsTest(TestCase):
         # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict(query_params="?mask=True")
         deployments_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID\r\n1,deployments,%s,%s\r\n\r\n\r\nSystem Fingerprints:\r\narchitecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n,,,2,2,,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n,,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n,,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,\r\n\r\n"
-            % (
-                self.report_version,
-                reports_dict.get("deployments_json").get("report_platform_id"),
-            )
+            "Report ID,Report Type,Report Version,Report Platform ID\r\n"
+            f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
+            "\r\n"
+            "\r\n"
+            "System Fingerprints:\r\n"
+            "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
+            ",,,2,2,,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            "\r\n"
         )  # noqa
         # pylint: disable=line-too-long
         details_csv = (
@@ -252,9 +262,9 @@ class ReportsTest(TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith("csv"):
                 if "details" in file_contents:
-                    self.assertEqual(file_contents, details_csv)
+                    assert file_contents == details_csv
                 elif "deployments" in file_contents:
-                    self.assertEqual(file_contents, deployments_csv)
+                    assert file_contents == deployments_csv
                 else:
                     sys.exit("Could not identify .csv return.")
             elif filenames[idx].endswith("json"):
