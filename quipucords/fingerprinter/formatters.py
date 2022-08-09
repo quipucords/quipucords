@@ -15,3 +15,13 @@ def format_mac_addresses(mac_addresses):
     if isinstance(mac_addresses, list):
         mac_addresses = list(map(lambda x: x.lower(), mac_addresses))
     return mac_addresses
+
+
+def is_redhat_from_vm_os(vcenter_os_release):
+    """Determine whether a system is rhel or not base on vcenter vm.os fact."""
+    if vcenter_os_release != "" and vcenter_os_release is not None:
+        rhel_os_releases = ["red hat enterprise linux", "rhel"]
+        for rhel_release in rhel_os_releases:
+            if rhel_release in vcenter_os_release.lower():
+                return True
+    return False

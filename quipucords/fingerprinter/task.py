@@ -1481,23 +1481,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Common facts
         # Set name
         if fact.get("vm.dns_name"):
-            raw_fact = "vm.dns_name"
+            raw_fact_key = "vm.dns_name"
         else:
-            raw_fact = "vm.name"
+            raw_fact_key = "vm.name"
 
-        self._add_fact_to_fingerprint(source, raw_fact, fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(source, raw_fact_key, fact, "name", fingerprint)
 
         self._add_fact_to_fingerprint(source, "vm.os", fact, "os_release", fingerprint)
-        vcenter_os_release = default_getter(fact, "vm.os", "")
-        is_redhat = False
-        if vcenter_os_release != "":
-            rhel_os_releases = ["red hat enterprise linux", "rhel"]
-            for rhel_release in rhel_os_releases:
-                if rhel_release in vcenter_os_release.lower():
-                    is_redhat = True
-                    break
         self._add_fact_to_fingerprint(
-            source, "vm.os", fact, "is_redhat", fingerprint, fact_value=is_redhat
+            source,
+            "vm.os",
+            fact,
+            "is_redhat",
+            fingerprint,
+            fact_formatter=formatters.is_redhat_from_vm_os,
         )
         self._add_fact_to_fingerprint(
             source,
