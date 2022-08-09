@@ -35,43 +35,40 @@ class ScanTask(models.Model):
     """The scan task captures a single source for a scan."""
 
     # pylint: disable=too-many-instance-attributes
-    SCAN_TYPE_CONNECT = 'connect'
-    SCAN_TYPE_INSPECT = 'inspect'
-    SCAN_TYPE_FINGERPRINT = 'fingerprint'
-    SCANTASK_TYPE_CHOICES = ((SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),
-                             (SCAN_TYPE_INSPECT, SCAN_TYPE_INSPECT),
-                             (SCAN_TYPE_FINGERPRINT, SCAN_TYPE_FINGERPRINT))
+    SCAN_TYPE_CONNECT = "connect"
+    SCAN_TYPE_INSPECT = "inspect"
+    SCAN_TYPE_FINGERPRINT = "fingerprint"
+    SCANTASK_TYPE_CHOICES = (
+        (SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),
+        (SCAN_TYPE_INSPECT, SCAN_TYPE_INSPECT),
+        (SCAN_TYPE_FINGERPRINT, SCAN_TYPE_FINGERPRINT),
+    )
 
-    CREATED = 'created'
-    PENDING = 'pending'
-    RUNNING = 'running'
-    PAUSED = 'paused'
-    CANCELED = 'canceled'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
-    STATUS_CHOICES = ((CREATED, CREATED),
-                      (PENDING, PENDING),
-                      (RUNNING, RUNNING),
-                      (PAUSED, PAUSED),
-                      (COMPLETED, COMPLETED),
-                      (CANCELED, CANCELED),
-                      (FAILED, FAILED))
+    CREATED = "created"
+    PENDING = "pending"
+    RUNNING = "running"
+    PAUSED = "paused"
+    CANCELED = "canceled"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    STATUS_CHOICES = (
+        (CREATED, CREATED),
+        (PENDING, PENDING),
+        (RUNNING, RUNNING),
+        (PAUSED, PAUSED),
+        (COMPLETED, COMPLETED),
+        (CANCELED, CANCELED),
+        (FAILED, FAILED),
+    )
 
     # All task fields
-    scan_type = models.CharField(
-        max_length=12,
-        choices=SCANTASK_TYPE_CHOICES
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=PENDING
-    )
+    scan_type = models.CharField(max_length=12, choices=SCANTASK_TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)
     status_message = models.TextField(
-        null=True, default=_(messages.ST_STATUS_MSG_PENDING))
-    prerequisites = models.ManyToManyField('ScanTask')
-    job = models.ForeignKey(
-        'api.ScanJob', models.CASCADE, related_name='tasks')
+        null=True, default=_(messages.ST_STATUS_MSG_PENDING)
+    )
+    prerequisites = models.ManyToManyField("ScanTask")
+    job = models.ForeignKey("api.ScanJob", models.CASCADE, related_name="tasks")
     systems_count = models.PositiveIntegerField(null=True)
     systems_scanned = models.PositiveIntegerField(null=True)
     systems_failed = models.PositiveIntegerField(null=True)
@@ -85,15 +82,18 @@ class ScanTask(models.Model):
 
     # Connect task field
     connection_result = models.OneToOneField(
-        TaskConnectionResult, null=True, on_delete=models.CASCADE)
+        TaskConnectionResult, null=True, on_delete=models.CASCADE
+    )
 
     # Inspect task field
     inspection_result = models.OneToOneField(
-        TaskInspectionResult, null=True, on_delete=models.CASCADE)
+        TaskInspectionResult, null=True, on_delete=models.CASCADE
+    )
 
     # Fingerprint task field
     details_report = models.ForeignKey(
-        DetailsReport, null=True, on_delete=models.CASCADE)
+        DetailsReport, null=True, on_delete=models.CASCADE
+    )
 
     # custom queryset / object manager
     objects = ScanTaskQuerySet.as_manager()
@@ -106,56 +106,58 @@ class ScanTask(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{' + 'id:{}, '\
-            'job:{}, '\
-            'scan_type:{}, '\
-            'status:{}, '\
-            'source:{}, '\
-            'sequence_number:{}, '\
-            'systems_count: {}, '\
-            'systems_scanned: {}, '\
-            'systems_failed: {}, '\
-            'systems_unreachable: {}, '\
-            'start_time: {} '\
-            'end_time: {}, '\
-            'connection_result: {}, '\
-            'inspection_result: {}, '\
-            'details_report: {}'.format(self.id,
-                                        self.job.id,
-                                        self.scan_type,
-                                        self.status,
-                                        self.source,
-                                        self.sequence_number,
-                                        self.systems_count,
-                                        self.systems_scanned,
-                                        self.systems_failed,
-                                        self.systems_unreachable,
-                                        self.start_time,
-                                        self.end_time,
-                                        self.connection_result,
-                                        self.inspection_result,
-                                        self.details_report) + '}'
+        return (
+            "{" + "id:{}, "
+            "job:{}, "
+            "scan_type:{}, "
+            "status:{}, "
+            "source:{}, "
+            "sequence_number:{}, "
+            "systems_count: {}, "
+            "systems_scanned: {}, "
+            "systems_failed: {}, "
+            "systems_unreachable: {}, "
+            "start_time: {} "
+            "end_time: {}, "
+            "connection_result: {}, "
+            "inspection_result: {}, "
+            "details_report: {}".format(
+                self.id,
+                self.job.id,
+                self.scan_type,
+                self.status,
+                self.source,
+                self.sequence_number,
+                self.systems_count,
+                self.systems_scanned,
+                self.systems_failed,
+                self.systems_unreachable,
+                self.start_time,
+                self.end_time,
+                self.connection_result,
+                self.inspection_result,
+                self.details_report,
+            )
+            + "}"
+        )
 
     class Meta:
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SCAN_TASKS_MSG)
-        ordering = ('sequence_number',)
+        ordering = ("sequence_number",)
         unique_together = ["job", "scan_type", "source"]
 
     # all task types
-    def log_current_status(self,
-                           show_status_message=False,
-                           log_level=logging.INFO):
+    def log_current_status(self, show_status_message=False, log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            message = 'STATE UPDATE (%s).  '\
-                'Additional status information: %s' %\
-                (self.status,
-                 self.status_message)
+            message = "STATE UPDATE (%s).  " "Additional status information: %s" % (
+                self.status,
+                self.status_message,
+            )
         else:
-            message = 'STATE UPDATE (%s)' %\
-                (self.status)
+            message = "STATE UPDATE (%s)" % (self.status)
         self.log_message(message, log_level=log_level)
 
     # fingerprint task type
@@ -181,13 +183,11 @@ class ScanTask(models.Model):
             sys_failed = 0
         if sys_unreachable is None:
             sys_unreachable = 0
-        message = '%s Stats: systems_count=%d,'\
-            ' systems_scanned=%d, systems_failed=%d, systems_unreachable=%d' %\
-            (prefix,
-             sys_count,
-             sys_scanned,
-             sys_failed,
-             sys_unreachable)
+        message = (
+            "%s Stats: systems_count=%d,"
+            " systems_scanned=%d, systems_failed=%d, systems_unreachable=%d"
+            % (prefix, sys_count, sys_scanned, sys_failed, sys_unreachable)
+        )
         self.log_message(message)
 
     def _log_fingerprint_stats(self, prefix):
@@ -198,12 +198,13 @@ class ScanTask(models.Model):
             # pylint: disable=using-constant-test
             if self.details_report.deployment_report:
                 # pylint: disable=no-member
-                system_fingerprint_count = \
-                    self.details_report.deployment_report.\
-                    system_fingerprints.count()
-        message = '%s Stats: system_fingerprint_count=%d,' %\
-            (prefix,
-             system_fingerprint_count)
+                system_fingerprint_count = (
+                    self.details_report.deployment_report.system_fingerprints.count()
+                )
+        message = "%s Stats: system_fingerprint_count=%d," % (
+            prefix,
+            system_fingerprint_count,
+        )
         self.log_message(message)
 
     # All task types
@@ -223,29 +224,33 @@ class ScanTask(models.Model):
             self._log_scan_message(message, log_level, static_options)
 
     # All scan task types
-    def _log_scan_message(self, message, log_level=logging.INFO,
-                          static_options=None):
+    def _log_scan_message(self, message, log_level=logging.INFO, static_options=None):
         """Log a message for this task."""
         # pylint: disable=no-member
         if static_options is not None:
-            actual_message = 'Job %d, Task %d of %d (%s, %s, %s) - ' % \
-                (static_options['job_id'],
-                 static_options['task_sequence_number'],
-                 self.scan_job_task_count,
-                 static_options['scan_type'],
-                 static_options['source_type'],
-                 static_options['source_name'])
+            actual_message = "Job %d, Task %d of %d (%s, %s, %s) - " % (
+                static_options["job_id"],
+                static_options["task_sequence_number"],
+                self.scan_job_task_count,
+                static_options["scan_type"],
+                static_options["source_type"],
+                static_options["source_name"],
+            )
         else:
             elapsed_time = self._compute_elapsed_time()
-            actual_message = 'Job %d, Task %d of %d '\
-                '(%s, %s, %s, elapsed_time: %ds) - ' % \
-                (self.job.id,
-                 self.sequence_number,
-                 self.scan_job_task_count,
-                 self.scan_type,
-                 self.source.source_type,
-                 self.source.name,
-                 elapsed_time)
+            actual_message = (
+                "Job %d, Task %d of %d "
+                "(%s, %s, %s, elapsed_time: %ds) - "
+                % (
+                    self.job.id,
+                    self.sequence_number,
+                    self.scan_job_task_count,
+                    self.scan_type,
+                    self.source.source_type,
+                    self.source.name,
+                    elapsed_time,
+                )
+            )
         actual_message += message.strip()
         logger.log(log_level, actual_message)
 
@@ -257,14 +262,18 @@ class ScanTask(models.Model):
         details_report_id = None
         if self.details_report:
             details_report_id = self.details_report.id
-        actual_message = 'Job %d, Task %d of %d '\
-            '(%s, details_report=%s, elapsed_time: %ds) - ' % \
-            (self.job.id,
-             self.sequence_number,
-             self.scan_job_task_count,
-             self.scan_type,
-             details_report_id,
-             elapsed_time)
+        actual_message = (
+            "Job %d, Task %d of %d "
+            "(%s, details_report=%s, elapsed_time: %ds) - "
+            % (
+                self.job.id,
+                self.sequence_number,
+                self.scan_job_task_count,
+                self.scan_type,
+                details_report_id,
+                elapsed_time,
+            )
+        )
         actual_message += message.strip()
         logger.log(log_level, actual_message)
 
@@ -273,18 +282,19 @@ class ScanTask(models.Model):
         if self.start_time is None:
             elapsed_time = 0
         else:
-            elapsed_time = (datetime.utcnow() -
-                            self.start_time).total_seconds()
+            elapsed_time = (datetime.utcnow() - self.start_time).total_seconds()
         return elapsed_time
 
     # All task types
     @transaction.atomic
-    def update_stats(self,
-                     description,
-                     sys_count=None,
-                     sys_scanned=None,
-                     sys_failed=None,
-                     sys_unreachable=None):
+    def update_stats(
+        self,
+        description,
+        sys_count=None,
+        sys_scanned=None,
+        sys_failed=None,
+        sys_unreachable=None,
+    ):
         """Update scan task stats.
 
         :param description: Description to be logged with stats.
@@ -305,8 +315,7 @@ class ScanTask(models.Model):
         if sys_failed is not None and sys_failed != self.systems_failed:
             self.systems_failed = sys_failed
             stats_changed = True
-        if sys_unreachable is not None and \
-                sys_unreachable != self.systems_unreachable:
+        if sys_unreachable is not None and sys_unreachable != self.systems_unreachable:
             self.systems_unreachable = sys_unreachable
             stats_changed = True
 
@@ -326,16 +335,19 @@ class ScanTask(models.Model):
         self.systems_unreachable = None
 
         self.save()
-        self._log_stats('INITIALIZING SYSTEM COUNTS - default all to 0')
+        self._log_stats("INITIALIZING SYSTEM COUNTS - default all to 0")
 
     # All task types
     @transaction.atomic
-    def increment_stats(self, name,
-                        increment_sys_count=False,
-                        increment_sys_scanned=False,
-                        increment_sys_failed=False,
-                        increment_sys_unreachable=False,
-                        prefix='PROCESSING'):
+    def increment_stats(
+        self,
+        name,
+        increment_sys_count=False,
+        increment_sys_scanned=False,
+        increment_sys_failed=False,
+        increment_sys_unreachable=False,
+        prefix="PROCESSING",
+    ):
         """Increment scan task stats.
 
         Helper method to increment and save values.  Log will be
@@ -376,12 +388,14 @@ class ScanTask(models.Model):
             else:
                 sys_unreachable = self.systems_unreachable
             sys_unreachable += 1
-        stat_string = '%s %s.' % (prefix, name)
-        self.update_stats(stat_string,
-                          sys_count=sys_count,
-                          sys_scanned=sys_scanned,
-                          sys_failed=sys_failed,
-                          sys_unreachable=sys_unreachable)
+        stat_string = "%s %s." % (prefix, name)
+        self.update_stats(
+            stat_string,
+            sys_count=sys_count,
+            sys_scanned=sys_scanned,
+            sys_failed=sys_failed,
+            sys_unreachable=sys_unreachable,
+        )
 
     # All task types
     def calculate_counts(self):
@@ -411,10 +425,7 @@ class ScanTask(models.Model):
                 systems_unreachable = 0
             systems_unreachable += self.systems_unreachable
 
-        return systems_count,\
-            systems_scanned,\
-            systems_failed,\
-            systems_unreachable
+        return systems_count, systems_scanned, systems_failed, systems_unreachable
 
     # All task types
     def start(self):
@@ -473,7 +484,7 @@ class ScanTask(models.Model):
             if self.systems_failed is None:
                 self.systems_failed = 0
         self.save()
-        self._log_stats('COMPLETION STATS.')
+        self._log_stats("COMPLETION STATS.")
         self.log_current_status()
 
     # All task types
@@ -487,9 +498,8 @@ class ScanTask(models.Model):
         self.status_message = message
         self.log_message(self.status_message, log_level=logging.ERROR)
         self.save()
-        self._log_stats('FAILURE STATS.')
-        self.log_current_status(show_status_message=True,
-                                log_level=logging.ERROR)
+        self._log_stats("FAILURE STATS.")
+        self.log_current_status(show_status_message=True, log_level=logging.ERROR)
 
     def get_facts(self):
         """Access inspection facts."""
@@ -514,7 +524,7 @@ class ScanTask(models.Model):
                 for system_result in system_results.systems.all():
                     fact = {}
                     for raw_fact in system_result.facts.all():
-                        if not raw_fact.value or raw_fact.value == '':
+                        if not raw_fact.value or raw_fact.value == "":
                             continue
                         # Load values as JSON
                         value_to_use = json.loads(raw_fact.value)

@@ -35,18 +35,17 @@ class TestProcessSystemPurpose(unittest.TestCase):
             """
 
         expected = {
-            '_version': '1',
-            'role': 'server',
-            'addons': [
-                'ibm'
-            ],
-            'service_level_agreement': 'self-support',
-            'usage_type': 'dev'
+            "_version": "1",
+            "role": "server",
+            "addons": ["ibm"],
+            "service_level_agreement": "self-support",
+            "usage_type": "dev",
         }
 
         self.assertEqual(
-            system_purpose.ProcessSystemPurpose.process(
-                ansible_result(input_data)), expected)
+            system_purpose.ProcessSystemPurpose.process(ansible_result(input_data)),
+            expected,
+        )
 
     def test_invalid_json_case(self):
         """Invalid system purpose json."""
@@ -64,5 +63,6 @@ class TestProcessSystemPurpose(unittest.TestCase):
         expected = None
 
         self.assertEqual(
-            system_purpose.ProcessSystemPurpose.process(
-                ansible_result(input_data)), expected)
+            system_purpose.ProcessSystemPurpose.process(ansible_result(input_data)),
+            expected,
+        )

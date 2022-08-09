@@ -25,46 +25,46 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ProcessDateDate(process.Processor):
     """Process the date fact."""
 
-    KEY = 'date_date'
+    KEY = "date_date"
 
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        return get_line(output['stdout_lines'])
+        return get_line(output["stdout_lines"])
 
 
 class ProcessDateFilesystemCreate(process.Processor):
     """Process the date filesystem create fact."""
 
-    KEY = 'date_filesystem_create'
+    KEY = "date_filesystem_create"
 
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        return get_line(output['stdout_lines'])
+        return get_line(output["stdout_lines"])
 
 
 class ProcessDateMachineId(process.Processor):
     """Process the date machine id fact."""
 
-    KEY = 'date_machine_id'
+    KEY = "date_machine_id"
 
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        return get_line(output['stdout_lines'])
+        return get_line(output["stdout_lines"])
 
 
 class ProcessDateYumHistory(process.Processor):
     """Process the date machine id fact."""
 
-    KEY = 'date_yum_history'
+    KEY = "date_yum_history"
     RETURN_CODE_ANY = True
 
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
-        result = output.get('stdout_lines')
+        result = output.get("stdout_lines")
         if isinstance(result, list):
             result = [line for line in result if line]
             if result:

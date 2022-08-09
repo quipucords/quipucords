@@ -44,7 +44,7 @@ class ProductSerializer(NotEmptySerializer):
         """Meta class for ProductSerializer."""
 
         model = Product
-        fields = ('name', 'version', 'presence', 'metadata')
+        fields = ("name", "version", "presence", "metadata")
 
 
 class EntitlementSerializer(NotEmptySerializer):
@@ -56,7 +56,7 @@ class EntitlementSerializer(NotEmptySerializer):
         """Meta class for EntitlementSerializer."""
 
         model = Entitlement
-        fields = ('name', 'entitlement_id', 'metadata')
+        fields = ("name", "entitlement_id", "metadata")
 
 
 default_args = dict(required=False, allow_null=True)
@@ -73,7 +73,8 @@ class SystemFingerprintSerializer(ModelSerializer):
     os_version = CharField(max_length=64, **default_args)
 
     infrastructure_type = ChoiceField(
-        required=False, choices=SystemFingerprint.INFRASTRUCTURE_TYPE)
+        required=False, choices=SystemFingerprint.INFRASTRUCTURE_TYPE
+    )
 
     cloud_provider = CharField(max_length=16, **default_args)
 
@@ -138,19 +139,17 @@ class SystemFingerprintSerializer(ModelSerializer):
         """Meta class for SystemFingerprintSerializer."""
 
         model = SystemFingerprint
-        fields = '__all__'
+        fields = "__all__"
 
     def create(self, validated_data):
         """Create a system fingerprint."""
-        products_data = validated_data.pop('products', [])
-        entitlements_data = validated_data.pop('entitlements', [])
+        products_data = validated_data.pop("products", [])
+        entitlements_data = validated_data.pop("entitlements", [])
         fingerprint = SystemFingerprint.objects.create(**validated_data)
         for product_data in products_data:
-            Product.objects.create(fingerprint=fingerprint,
-                                   **product_data)
+            Product.objects.create(fingerprint=fingerprint, **product_data)
         for entitlement_data in entitlements_data:
-            Entitlement.objects.create(fingerprint=fingerprint,
-                                       **entitlement_data)
+            Entitlement.objects.create(fingerprint=fingerprint, **entitlement_data)
         return fingerprint
 
 
@@ -169,10 +168,8 @@ class DeploymentReportSerializer(NotEmptySerializer):
     # Scan information
     report_type = CharField(read_only=True)
     report_version = CharField(max_length=64, read_only=True)
-    report_platform_id = UUIDField(format='hex_verbose',
-                                   read_only=True)
-    details_report = PrimaryKeyRelatedField(
-        queryset=DetailsReport.objects.all())
+    report_platform_id = UUIDField(format="hex_verbose", read_only=True)
+    details_report = PrimaryKeyRelatedField(queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
     cached_fingerprints = CustomJSONField(read_only=True)
     cached_masked_fingerprints = CustomJSONField(read_only=True)
@@ -180,12 +177,11 @@ class DeploymentReportSerializer(NotEmptySerializer):
     cached_masked_csv = CharField(read_only=True)
     cached_insights = CharField(read_only=True)
 
-    status = ChoiceField(
-        read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
+    status = ChoiceField(read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
     system_fingerprints = FingerprintField(many=True, read_only=True)
 
     class Meta:
         """Meta class for DeploymentReportSerializer."""
 
         model = DeploymentsReport
-        fields = '__all__'
+        fields = "__all__"

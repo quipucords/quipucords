@@ -62,7 +62,8 @@ class SourceOptionsSerializer(NotEmptySerializer):
     """Serializer for the SourceOptions model."""
 
     ssl_protocol = ValidStringChoiceField(
-        required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES)
+        required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES
+    )
     ssl_cert_verify = BooleanField(allow_null=True, required=False)
     disable_ssl = BooleanField(allow_null=True, required=False)
     use_paramiko = BooleanField(allow_null=True, required=False)
@@ -71,10 +72,7 @@ class SourceOptionsSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = SourceOptions
-        fields = ['ssl_protocol',
-                  'ssl_cert_verify',
-                  'disable_ssl',
-                  'use_paramiko']
+        fields = ["ssl_protocol", "ssl_cert_verify", "disable_ssl", "use_paramiko"]
 
 
 class SourceSerializer(NotEmptySerializer):
@@ -82,20 +80,19 @@ class SourceSerializer(NotEmptySerializer):
 
     name = CharField(required=True, max_length=64)
     source_type = ValidStringChoiceField(
-        required=False, choices=Source.SOURCE_TYPE_CHOICES)
+        required=False, choices=Source.SOURCE_TYPE_CHOICES
+    )
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = CustomJSONField(required=True)
     exclude_hosts = CustomJSONField(required=False)
     options = SourceOptionsSerializer(required=False, many=False)
-    credentials = CredentialsField(
-        many=True,
-        queryset=Credential.objects.all())
+    credentials = CredentialsField(many=True, queryset=Credential.objects.all())
 
     class Meta:
         """Metadata for the serializer."""
 
         model = Source
-        fields = '__all__'
+        fields = "__all__"
 
     @classmethod
     def validate_opts(cls, options, source_type):
@@ -104,41 +101,44 @@ class SourceSerializer(NotEmptySerializer):
         :param options: dictionary of source options
         :param source_type: string denoting source type
         """
-        valid_net_options = ['use_paramiko']
-        valid_vc_options = ['ssl_cert_verify', 'ssl_protocol', 'disable_ssl']
-        valid_sat_options = ['ssl_cert_verify', 'ssl_protocol', 'disable_ssl']
+        valid_net_options = ["use_paramiko"]
+        valid_vc_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
+        valid_sat_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
         if source_type == Source.SATELLITE_SOURCE_TYPE:
-            invalid_options = [opt for opt in options
-                               if opt not in valid_sat_options]
+            invalid_options = [opt for opt in options if opt not in valid_sat_options]
             if invalid_options:
                 error = {
-                    'options': [_(messages.SAT_INVALID_OPTIONS %
-                                  ', '.join(invalid_options))]
+                    "options": [
+                        _(messages.SAT_INVALID_OPTIONS % ", ".join(invalid_options))
+                    ]
                 }
                 raise ValidationError(error)
-            if options.get('ssl_cert_verify') is None:
-                options['ssl_cert_verify'] = True
+            if options.get("ssl_cert_verify") is None:
+                options["ssl_cert_verify"] = True
 
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            invalid_options = [opt for opt in options
-                               if opt not in valid_vc_options]
+            invalid_options = [opt for opt in options if opt not in valid_vc_options]
             if invalid_options:
                 error = {
-                    'options': [_(messages.VC_INVALID_OPTIONS %
-                                  ', '.join(invalid_options))]
+                    "options": [
+                        _(messages.VC_INVALID_OPTIONS % ", ".join(invalid_options))
+                    ]
                 }
                 raise ValidationError(error)
-            if options.get('ssl_cert_verify') is None:
-                options['ssl_cert_verify'] = True
+            if options.get("ssl_cert_verify") is None:
+                options["ssl_cert_verify"] = True
 
         elif source_type == Source.NETWORK_SOURCE_TYPE:
-            invalid_options = [opt for opt in options
-                               if opt not in valid_net_options]
+            invalid_options = [opt for opt in options if opt not in valid_net_options]
             if invalid_options:
                 error = {
-                    'options': [_(messages.NET_SSL_OPTIONS_NOT_ALLOWED %
-                                  ', '.join(invalid_options))]
+                    "options": [
+                        _(
+                            messages.NET_SSL_OPTIONS_NOT_ALLOWED
+                            % ", ".join(invalid_options)
+                        )
+                    ]
                 }
                 raise ValidationError(error)
 
@@ -146,86 +146,65 @@ class SourceSerializer(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a source."""
-        name = validated_data.get('name')
+        name = validated_data.get("name")
         check_for_existing_name(
-            Source.objects,
-            name,
-            _(messages.SOURCE_NAME_ALREADY_EXISTS % name))
+            Source.objects, name, _(messages.SOURCE_NAME_ALREADY_EXISTS % name)
+        )
 
-        if 'source_type' not in validated_data:
-            error = {
-                'source_type': [_(messages.SOURCE_TYPE_REQ)]
-            }
+        if "source_type" not in validated_data:
+            error = {"source_type": [_(messages.SOURCE_TYPE_REQ)]}
             raise ValidationError(error)
-        source_type = validated_data.get('source_type')
-        credentials = validated_data.pop('credentials')
-        hosts_list = validated_data.pop('hosts', None)
-        exclude_hosts_list = validated_data.pop('exclude_hosts', None)
+        source_type = validated_data.get("source_type")
+        credentials = validated_data.pop("credentials")
+        hosts_list = validated_data.pop("hosts", None)
+        exclude_hosts_list = validated_data.pop("exclude_hosts", None)
         port = None
-        if 'port' in validated_data:
-            port = validated_data['port']
+        if "port" in validated_data:
+            port = validated_data["port"]
 
-        options = validated_data.pop('options', None)
+        options = validated_data.pop("options", None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
             if credentials:
                 for cred in credentials:
                     SourceSerializer.check_credential_type(source_type, cred)
             if port is None:
-                validated_data['port'] = 22
+                validated_data["port"] = 22
 
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             if port is None:
-                validated_data['port'] = 443
+                validated_data["port"] = 443
             if hosts_list and len(hosts_list) != 1:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
+                error = {"hosts": [_(messages.VC_ONE_HOST)]}
                 raise ValidationError(error)
-            if hosts_list and '[' in hosts_list[0]:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
+            if hosts_list and "[" in hosts_list[0]:
+                error = {"hosts": [_(messages.VC_ONE_HOST)]}
                 raise ValidationError(error)
             if exclude_hosts_list is not None:
-                error = {
-                    'exclude_hosts': [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]
-                }
+                error = {"exclude_hosts": [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
-                error = {
-                    'credentials': [_(messages.VC_ONE_CRED)]
-                }
+                error = {"credentials": [_(messages.VC_ONE_CRED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type,
-                                                       credentials[0])
+                SourceSerializer.check_credential_type(source_type, credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             if port is None:
-                validated_data['port'] = 443
+                validated_data["port"] = 443
             if hosts_list and len(hosts_list) != 1:
-                error = {
-                    'hosts': [_(messages.SAT_ONE_HOST)]
-                }
+                error = {"hosts": [_(messages.SAT_ONE_HOST)]}
                 raise ValidationError(error)
-            if hosts_list and '[' in hosts_list[0]:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
+            if hosts_list and "[" in hosts_list[0]:
+                error = {"hosts": [_(messages.VC_ONE_HOST)]}
                 raise ValidationError(error)
             if exclude_hosts_list is not None:
-                error = {
-                    'exclude_hosts': [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]
-                }
+                error = {"exclude_hosts": [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
-                error = {
-                    'credentials': [_(messages.SAT_ONE_CRED)]
-                }
+                error = {"credentials": [_(messages.SAT_ONE_CRED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type,
-                                                       credentials[0])
+                SourceSerializer.check_credential_type(source_type, credentials[0])
 
         source = Source.objects.create(**validated_data)
 
@@ -261,23 +240,22 @@ class SourceSerializer(NotEmptySerializer):
         # If we ever add optional fields to Source, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        name = validated_data.get('name')
+        name = validated_data.get("name")
         check_for_existing_name(
             Source.objects,
             name,
             _(messages.SOURCE_NAME_ALREADY_EXISTS % name),
-            search_id=instance.id)
+            search_id=instance.id,
+        )
 
-        if 'source_type' in validated_data:
-            error = {
-                'source_type': [_(messages.SOURCE_TYPE_INV)]
-            }
+        if "source_type" in validated_data:
+            error = {"source_type": [_(messages.SOURCE_TYPE_INV)]}
             raise ValidationError(error)
         source_type = instance.source_type
-        credentials = validated_data.pop('credentials', None)
-        hosts_list = validated_data.pop('hosts', None)
-        exclude_hosts_list = validated_data.pop('exclude_hosts', None)
-        options = validated_data.pop('options', None)
+        credentials = validated_data.pop("credentials", None)
+        hosts_list = validated_data.pop("hosts", None)
+        exclude_hosts_list = validated_data.pop("exclude_hosts", None)
+        options = validated_data.pop("options", None)
 
         if source_type == Source.NETWORK_SOURCE_TYPE:
             if credentials:
@@ -285,52 +263,34 @@ class SourceSerializer(NotEmptySerializer):
                     SourceSerializer.check_credential_type(source_type, cred)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             if hosts_list and len(hosts_list) != 1:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
+                error = {"hosts": [_(messages.VC_ONE_HOST)]}
                 raise ValidationError(error)
-            if hosts_list and '[' in hosts_list[0]:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
+            if hosts_list and "[" in hosts_list[0]:
+                error = {"hosts": [_(messages.VC_ONE_HOST)]}
                 raise ValidationError(error)
             if exclude_hosts_list is not None:
-                error = {
-                    'exclude_hosts': [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]
-                }
+                error = {"exclude_hosts": [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
-                error = {
-                    'credentials': [_(messages.VC_ONE_CRED)]
-                }
+                error = {"credentials": [_(messages.VC_ONE_CRED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type,
-                                                       credentials[0])
+                SourceSerializer.check_credential_type(source_type, credentials[0])
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             if hosts_list and len(hosts_list) != 1:
-                error = {
-                    'hosts': [_(messages.SAT_ONE_HOST)]
-                }
+                error = {"hosts": [_(messages.SAT_ONE_HOST)]}
                 raise ValidationError(error)
-            if hosts_list and '[' in hosts_list[0]:
-                error = {
-                    'hosts': [_(messages.VC_ONE_HOST)]
-                }
+            if hosts_list and "[" in hosts_list[0]:
+                error = {"hosts": [_(messages.VC_ONE_HOST)]}
                 raise ValidationError(error)
             if exclude_hosts_list is not None:
-                error = {
-                    'exclude_hosts': [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]
-                }
+                error = {"exclude_hosts": [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) > 1:
-                error = {
-                    'credentials': [_(messages.SAT_ONE_CRED)]
-                }
+                error = {"credentials": [_(messages.SAT_ONE_CRED)]}
                 raise ValidationError(error)
             if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type,
-                                                       credentials[0])
+                SourceSerializer.check_credential_type(source_type, credentials[0])
 
         for name, value in validated_data.items():
             setattr(instance, name, value)
@@ -370,10 +330,10 @@ class SourceSerializer(NotEmptySerializer):
         :param options: the passed in options
         :param instance_options: the existing options
         """
-        ssl_protocol = options.pop('ssl_protocol', None)
-        ssl_cert_verify = options.pop('ssl_cert_verify', None)
-        disable_ssl = options.pop('disable_ssl', None)
-        use_paramiko = options.pop('use_paramiko', None)
+        ssl_protocol = options.pop("ssl_protocol", None)
+        ssl_cert_verify = options.pop("ssl_cert_verify", None)
+        disable_ssl = options.pop("disable_ssl", None)
+        use_paramiko = options.pop("use_paramiko", None)
         if ssl_protocol is not None:
             instance_options.ssl_protocol = ssl_protocol
         if ssl_cert_verify is not None:
@@ -392,9 +352,7 @@ class SourceSerializer(NotEmptySerializer):
         :param credential: The credential to obtain
         """
         if credential.cred_type != source_type:
-            error = {
-                'source_type': [_(messages.SOURCE_CRED_WRONG_TYPE)]
-            }
+            error = {"source_type": [_(messages.SOURCE_CRED_WRONG_TYPE)]}
             raise ValidationError(error)
 
     @staticmethod
@@ -421,31 +379,31 @@ class SourceSerializer(NotEmptySerializer):
 
         for host_value in ipaddr_list:
             if not isinstance(host_value, str):
-                raise ValidationError(
-                    _(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
+                raise ValidationError(_(messages.SOURCE_HOST_MUST_BE_JSON_ARRAY))
 
         # Regex for octet, CIDR bit range, and check
         # to see if it is like an IP/CIDR
-        octet_regex = r'(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])'
-        bit_range = r'(3[0-2]|[1-2][0-9]|[0-9])'
-        relaxed_ip_pattern = r'[0-9]*\.[0-9]*\.[0-9\[\]:]*\.[0-9\[\]:]*'
-        relaxed_cidr_pattern = r'[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\/[0-9]*'
-        greedy_subset = r'[0-9]*'
-        range_subset = r'[0-9]*-[0-9]*'
+        octet_regex = r"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])"
+        bit_range = r"(3[0-2]|[1-2][0-9]|[0-9])"
+        relaxed_ip_pattern = r"[0-9]*\.[0-9]*\.[0-9\[\]:]*\.[0-9\[\]:]*"
+        relaxed_cidr_pattern = r"[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\/[0-9]*"
+        greedy_subset = r"[0-9]*"
+        range_subset = r"[0-9]*-[0-9]*"
         relaxed_invalid_ip_range = [
-            r'{0}\.{0}\.{0}\.{0}-{0}\.{0}\.{0}\.{0}'.format(greedy_subset),
-            r'{0}\.{0}\.{0}\.{1}'.format(greedy_subset, range_subset),
-            r'{0}\.{0}\.{1}\.{0}'.format(greedy_subset, range_subset),
-            r'{0}\.{1}\.{0}\.{0}'.format(greedy_subset, range_subset),
-            r'{1}\.{0}\.{0}\.{0}'.format(greedy_subset, range_subset),
-            r'{1}\.{1}\.{0}\.{0}'.format(greedy_subset, range_subset),
-            r'{1}\.{0}\.{1}\.{0}'.format(greedy_subset, range_subset),
-            r'{1}\.{0}\.{0}\.{1}'.format(greedy_subset, range_subset),
-            r'{1}\.{1}\.{0}\.{1}'.format(greedy_subset, range_subset),
-            r'{1}\.{0}\.{1}\.{1}'.format(greedy_subset, range_subset),
-            r'{0}\.{0}\.{0}\.{0}'.format(range_subset),
-            r'{0}\.{1}\.{0}\.{1}'.format(greedy_subset, range_subset),
-            r'{0}\.{1}\.{1}\.{0}'.format(greedy_subset, range_subset)]
+            r"{0}\.{0}\.{0}\.{0}-{0}\.{0}\.{0}\.{0}".format(greedy_subset),
+            r"{0}\.{0}\.{0}\.{1}".format(greedy_subset, range_subset),
+            r"{0}\.{0}\.{1}\.{0}".format(greedy_subset, range_subset),
+            r"{0}\.{1}\.{0}\.{0}".format(greedy_subset, range_subset),
+            r"{1}\.{0}\.{0}\.{0}".format(greedy_subset, range_subset),
+            r"{1}\.{1}\.{0}\.{0}".format(greedy_subset, range_subset),
+            r"{1}\.{0}\.{1}\.{0}".format(greedy_subset, range_subset),
+            r"{1}\.{0}\.{0}\.{1}".format(greedy_subset, range_subset),
+            r"{1}\.{1}\.{0}\.{1}".format(greedy_subset, range_subset),
+            r"{1}\.{0}\.{1}\.{1}".format(greedy_subset, range_subset),
+            r"{0}\.{0}\.{0}\.{0}".format(range_subset),
+            r"{0}\.{1}\.{0}\.{1}".format(greedy_subset, range_subset),
+            r"{0}\.{1}\.{1}\.{0}".format(greedy_subset, range_subset),
+        ]
 
         # type IP:          192.168.0.1
         # type CIDR:        192.168.0.0/16
@@ -453,20 +411,21 @@ class SourceSerializer(NotEmptySerializer):
         # type RANGE 2:     192.168.[2:18].1
         # type RANGE 3:     192.168.[2:18].[4:46]
         ip_regex_list = [
-            r'^{0}\.{0}\.{0}\.{0}$'.format(octet_regex),
-            r'^{0}\.{0}\.{0}\.{0}\/{1}$'.format(octet_regex, bit_range),
-            r'^{0}\.{0}\.{0}\.\[{0}:{0}\]$'.format(octet_regex),
-            r'^{0}\.{0}\.\[{0}:{0}\]\.{0}$'.format(octet_regex),
-            r'^{0}\.{0}\.\[{0}:{0}\]\.\[{0}:{0}\]$'.format(octet_regex)
+            r"^{0}\.{0}\.{0}\.{0}$".format(octet_regex),
+            r"^{0}\.{0}\.{0}\.{0}\/{1}$".format(octet_regex, bit_range),
+            r"^{0}\.{0}\.{0}\.\[{0}:{0}\]$".format(octet_regex),
+            r"^{0}\.{0}\.\[{0}:{0}\]\.{0}$".format(octet_regex),
+            r"^{0}\.{0}\.\[{0}:{0}\]\.\[{0}:{0}\]$".format(octet_regex),
         ]
 
         # type HOST:                abcd
         # type HOST NUMERIC RANGE:  abcd[2:4].foo.com
         # type HOST ALPHA RANGE:    abcd[a:f].foo.com
         host_regex_list = [
-            r'[a-zA-Z0-9-_\.]+',
-            r'[a-zA-Z0-9-_\.]*\[[0-9]+:[0-9]+\]*[a-zA-Z0-9-_\.]*',
-            r'[a-zA-Z0-9-_\.]*\[[a-zA-Z]{1}:[a-zA-Z]{1}\][a-zA-Z0-9-_\.]*']
+            r"[a-zA-Z0-9-_\.]+",
+            r"[a-zA-Z0-9-_\.]*\[[0-9]+:[0-9]+\]*[a-zA-Z0-9-_\.]*",
+            r"[a-zA-Z0-9-_\.]*\[[a-zA-Z]{1}:[a-zA-Z]{1}\][a-zA-Z0-9-_\.]*",
+        ]
 
         normalized_hosts = []
         host_errors = []
@@ -474,17 +433,16 @@ class SourceSerializer(NotEmptySerializer):
             result = None
             ip_match = re.match(relaxed_ip_pattern, host_range)
             cidr_match = re.match(relaxed_cidr_pattern, host_range)
-            invalid_ip_range_match = [re.match(invalid_ip_range,
-                                               host_range)
-                                      for invalid_ip_range in
-                                      relaxed_invalid_ip_range]
+            invalid_ip_range_match = [
+                re.match(invalid_ip_range, host_range)
+                for invalid_ip_range in relaxed_invalid_ip_range
+            ]
             is_likely_ip = ip_match and ip_match.end() == len(host_range)
             is_likely_cidr = cidr_match and cidr_match.end() == len(host_range)
             is_likely_invalid_ip_range = any(invalid_ip_range_match)
 
             if is_likely_invalid_ip_range:
-                err_message = _(messages.NET_INVALID_RANGE_FORMAT %
-                                (host_range,))
+                err_message = _(messages.NET_INVALID_RANGE_FORMAT % (host_range,))
                 result = ValidationError(err_message)
 
             elif is_likely_ip or is_likely_cidr:
@@ -500,14 +458,14 @@ class SourceSerializer(NotEmptySerializer):
                     # Attempt to convert CIDR to ansible range
                     if is_likely_cidr:
                         try:
-                            normalized_cidr = SourceSerializer \
-                                .cidr_to_ansible(host_range)
+                            normalized_cidr = SourceSerializer.cidr_to_ansible(
+                                host_range
+                            )
                             result = normalized_cidr
                         except ValidationError as validate_error:
                             result = validate_error
                     else:
-                        err_message = _(messages.NET_INVALID_RANGE_CIDR %
-                                        (host_range,))
+                        err_message = _(messages.NET_INVALID_RANGE_CIDR % (host_range,))
                         result = ValidationError(err_message)
             else:
                 # Possibly a host_range addr
@@ -527,8 +485,9 @@ class SourceSerializer(NotEmptySerializer):
             else:
                 # This is an unexpected case. Allow/log for analysis
                 normalized_hosts.append(host_range)
-                logging.warning('%s did not match a pattern or produce error',
-                                host_range)
+                logging.warning(
+                    "%s did not match a pattern or produce error", host_range
+                )
         if not host_errors:
             return normalized_hosts
         error_message = [error.detail.pop() for error in host_errors]
@@ -560,14 +519,13 @@ class SourceSerializer(NotEmptySerializer):
         # use CIDR and we should give them a CIDR error message, and not
         # at all CIDR-like, in which case we tell the caller to parse it a
         # different way.
-        cidr_like = r'[0-9\.]*/[0-9]+'
+        cidr_like = r"[0-9\.]*/[0-9]+"
         if not re.match(cidr_like, ip_range):
-            err_msg = _(messages.NET_NO_CIDR_MATCH %
-                        (ip_range, str(cidr_like)))
+            err_msg = _(messages.NET_NO_CIDR_MATCH % (ip_range, str(cidr_like)))
             raise ValidationError(err_msg)
 
         try:
-            base_address, prefix_bits = ip_range.split('/')
+            base_address, prefix_bits = ip_range.split("/")
         except ValueError:
             err_msg = _(messages.NET_CIDR_INVALID % (ip_range,))
             raise ValidationError(err_msg)
@@ -575,11 +533,13 @@ class SourceSerializer(NotEmptySerializer):
         prefix_bits = int(prefix_bits)
 
         if prefix_bits < 0 or prefix_bits > 32:
-            err_msg = _(messages.NET_CIDR_BIT_MASK %
-                        {'ip_range': ip_range, 'prefix_bits': prefix_bits})
+            err_msg = _(
+                messages.NET_CIDR_BIT_MASK
+                % {"ip_range": ip_range, "prefix_bits": prefix_bits}
+            )
             raise ValidationError(err_msg)
 
-        octet_strings = base_address.split('.')
+        octet_strings = base_address.split(".")
         if len(octet_strings) != 4:
             err_msg = _(messages.NET_FOUR_OCTETS % (ip_range,))
             raise ValidationError(err_msg)
@@ -593,8 +553,9 @@ class SourceSerializer(NotEmptySerializer):
             val = int(octet_strings[i])
             if val < 0 or val > 255:
                 # pylint: disable=too-many-locals
-                err_msg = _(messages.NET_CIDR_RANGE %
-                            {'ip_range': ip_range, 'octet': val})
+                err_msg = _(
+                    messages.NET_CIDR_RANGE % {"ip_range": ip_range, "octet": val}
+                )
                 raise ValidationError(err_msg)
             octets[i] = val
 
@@ -606,7 +567,7 @@ class SourceSerializer(NotEmptySerializer):
             # the whole IP address, but mask_bits is just for this octet.
 
             if prefix_bits <= i * 8:
-                ansible_out[i] = '[0:255]'
+                ansible_out[i] = "[0:255]"
             elif prefix_bits >= (i + 1) * 8:
                 ansible_out[i] = str(octets[i])
             else:
@@ -620,10 +581,9 @@ class SourceSerializer(NotEmptySerializer):
 
                 lower_bound = octets[i] & mask
                 upper_bound = lower_bound + ~mask
-                ansible_out[i] = '[{0}:{1}]'.format(
-                    lower_bound, upper_bound)
+                ansible_out[i] = "[{0}:{1}]".format(lower_bound, upper_bound)
 
-        return '.'.join(ansible_out)
+        return ".".join(ansible_out)
 
     @staticmethod
     def validate_port(port):

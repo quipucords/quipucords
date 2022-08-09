@@ -13,7 +13,7 @@
 from api.models import ScanJob, ScanTask
 
 
-class ScanTaskRunner():
+class ScanTaskRunner:
     """ScanTaskRunner is a logical breakdown of work."""
 
     # pylint: disable=too-few-public-methods
@@ -44,9 +44,10 @@ class ScanTaskRunner():
                     if deployment_report:
                         # remove partial results
                         self.scan_task.log_message(
-                            'REMOVING PARTIAL RESULTS - deleting %d '
-                            'fingerprints from previous scan'
-                            % len(deployment_report.system_fingerprints.all()))
+                            "REMOVING PARTIAL RESULTS - deleting %d "
+                            "fingerprints from previous scan"
+                            % len(deployment_report.system_fingerprints.all())
+                        )
                         deployment_report.system_fingerprints.all().delete()
                         deployment_report.save()
                         details_report.deployment_report = None
@@ -69,22 +70,25 @@ class ScanTaskRunner():
         # Make sure job is not cancelled or paused
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan canceled'
+            error_message = "Scan canceled"
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.CANCELED
 
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = 'Scan paused'
+            error_message = "Scan paused"
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
 
-        return 'Task ran successfully', ScanTask.COMPLETED
+        return "Task ran successfully", ScanTask.COMPLETED
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'scan_job:{}, '\
-            'sequence_number: {}, '\
-            'scan_task: {}'.format(self.scan_job.id,
-                                   self.scan_task.sequence_number,
-                                   self.scan_task) + '}'
+        return (
+            "{" + "scan_job:{}, "
+            "sequence_number: {}, "
+            "scan_task: {}".format(
+                self.scan_job.id, self.scan_task.sequence_number, self.scan_task
+            )
+            + "}"
+        )

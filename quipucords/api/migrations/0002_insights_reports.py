@@ -7,38 +7,46 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0001_initial_postgres'),
+        ("api", "0001_initial_postgres"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deploymentsreport',
-            name='report_platform_id',
+            model_name="deploymentsreport",
+            name="report_platform_id",
             field=models.UUIDField(default=uuid.uuid4, editable=False),
         ),
         migrations.AddField(
-            model_name='detailsreport',
-            name='report_platform_id',
+            model_name="detailsreport",
+            name="report_platform_id",
             field=models.UUIDField(default=uuid.uuid4, editable=False),
         ),
         migrations.AddField(
-            model_name='systemfingerprint',
-            name='etc_machine_id',
+            model_name="systemfingerprint",
+            name="etc_machine_id",
             field=models.CharField(max_length=48, null=True),
         ),
         migrations.AddField(
-            model_name='systemfingerprint',
-            name='vm_host_core_count',
+            model_name="systemfingerprint",
+            name="vm_host_core_count",
             field=models.PositiveIntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='version',
+            model_name="product",
+            name="version",
             field=models.TextField(null=True),
         ),
         migrations.AlterField(
-            model_name='systemfingerprint',
-            name='infrastructure_type',
-            field=models.CharField(choices=[('bare_metal', 'Bare Metal'), ('virtualized', 'Virtualized'), ('hypervisor', 'Hypervisor'), ('unknown', 'Unknown')], max_length=12),
+            model_name="systemfingerprint",
+            name="infrastructure_type",
+            field=models.CharField(
+                choices=[
+                    ("bare_metal", "Bare Metal"),
+                    ("virtualized", "Virtualized"),
+                    ("hypervisor", "Hypervisor"),
+                    ("unknown", "Unknown"),
+                ],
+                max_length=12,
+            ),
         ),
     ]

@@ -15,24 +15,29 @@ import json
 from django.db import transaction
 from django.utils.translation import gettext as _
 
-from rest_framework.serializers import (BooleanField,
-                                        CharField,
-                                        IntegerField,
-                                        PrimaryKeyRelatedField,
-                                        ValidationError)
+from rest_framework.serializers import (
+    BooleanField,
+    CharField,
+    IntegerField,
+    PrimaryKeyRelatedField,
+    ValidationError,
+)
 
 
 from api import messages  # noqa
-from api.common.serializer import (CustomJSONField,
-                                   NotEmptySerializer,
-                                   ValidStringChoiceField)
-from api.common.util import (check_for_existing_name,
-                             check_path_validity)
-from api.models import (DisabledOptionalProductsOptions,
-                        ExtendedProductSearchOptions,
-                        Scan,
-                        ScanOptions,
-                        Source)
+from api.common.serializer import (
+    CustomJSONField,
+    NotEmptySerializer,
+    ValidStringChoiceField,
+)
+from api.common.util import check_for_existing_name, check_path_validity
+from api.models import (
+    DisabledOptionalProductsOptions,
+    ExtendedProductSearchOptions,
+    Scan,
+    ScanOptions,
+    Source,
+)
 from api.scantask.serializer import SourceField
 
 
@@ -56,11 +61,13 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ExtendedProductSearchOptions
-        fields = ['jboss_eap',
-                  'jboss_fuse',
-                  'jboss_brms',
-                  'jboss_ws',
-                  'search_directories']
+        fields = [
+            "jboss_eap",
+            "jboss_fuse",
+            "jboss_brms",
+            "jboss_ws",
+            "search_directories",
+        ]
 
     @staticmethod
     def validate_search_directories(search_directories):
@@ -69,18 +76,20 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
             search_directories_list = json.loads(search_directories)
             if not isinstance(search_directories_list, list):
                 raise ValidationError(
-                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                )
             for directory in search_directories_list:
                 if not isinstance(directory, str):
                     raise ValidationError(
-                        _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+                        _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                    )
             invalid_paths = check_path_validity(search_directories_list)
             if bool(invalid_paths):
                 raise ValidationError(
-                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                )
         except json_exception_class:
-            raise ValidationError(
-                _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+            raise ValidationError(_(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
         return search_directories
 
 
@@ -96,30 +105,34 @@ class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = DisabledOptionalProductsOptions
-        fields = ['jboss_eap',
-                  'jboss_fuse',
-                  'jboss_brms',
-                  'jboss_ws']
+        fields = ["jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws"]
 
 
 class ScanOptionsSerializer(NotEmptySerializer):
     """Serializer for the ScanOptions model."""
 
-    max_concurrency = IntegerField(required=False, min_value=1,
-                                   max_value=200,
-                                   default=ScanOptions.get_default_forks())
+    max_concurrency = IntegerField(
+        required=False,
+        min_value=1,
+        max_value=200,
+        default=ScanOptions.get_default_forks(),
+    )
     disabled_optional_products = DisableOptionalProductsOptionsSerializer(
-        required=False)
+        required=False
+    )
     enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
-        required=False)
+        required=False
+    )
 
     class Meta:
         """Metadata for serializer."""
 
         model = ScanOptions
-        fields = ['max_concurrency',
-                  'disabled_optional_products',
-                  'enabled_extended_product_search']
+        fields = [
+            "max_concurrency",
+            "disabled_optional_products",
+            "enabled_extended_product_search",
+        ]
 
 
 class JobField(PrimaryKeyRelatedField):
@@ -127,9 +140,9 @@ class JobField(PrimaryKeyRelatedField):
 
     def to_representation(self, value):
         """Create output representation."""
-        job = {'id': value.id}
+        job = {"id": value.id}
         if value.report_id is not None:
-            job['report_id'] = value.report_id
+            job["report_id"] = value.report_id
         return job
 
 
@@ -138,8 +151,7 @@ class ScanSerializer(NotEmptySerializer):
 
     name = CharField(required=True, read_only=False, max_length=64)
     sources = SourceField(many=True, queryset=Source.objects.all())
-    scan_type = ValidStringChoiceField(required=False,
-                                       choices=Scan.SCAN_TYPE_CHOICES)
+    scan_type = ValidStringChoiceField(required=False, choices=Scan.SCAN_TYPE_CHOICES)
     options = ScanOptionsSerializer(required=False, many=False)
     jobs = JobField(required=False, many=True, read_only=True)
 
@@ -147,39 +159,43 @@ class ScanSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = Scan
-        fields = ['id', 'name', 'sources', 'scan_type', 'options', 'jobs',
-                  'most_recent_scanjob']
-        read_only_fields = ['most_recent_scanjob']
+        fields = [
+            "id",
+            "name",
+            "sources",
+            "scan_type",
+            "options",
+            "jobs",
+            "most_recent_scanjob",
+        ]
+        read_only_fields = ["most_recent_scanjob"]
 
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
-        name = validated_data.get('name')
+        name = validated_data.get("name")
         check_for_existing_name(
-            Scan.objects,
-            name,
-            _(messages.SCAN_NAME_ALREADY_EXISTS % name))
+            Scan.objects, name, _(messages.SCAN_NAME_ALREADY_EXISTS % name)
+        )
 
-        options = validated_data.pop('options', None)
+        options = validated_data.pop("options", None)
         scan = super().create(validated_data)
 
         if options:
-            optional_products = options.pop(
-                'disabled_optional_products', None)
-            extended_search = options.pop(
-                'enabled_extended_product_search', None)
+            optional_products = options.pop("disabled_optional_products", None)
+            extended_search = options.pop("enabled_extended_product_search", None)
             options = ScanOptions.objects.create(**options)
             if optional_products:
-                optional_products = \
-                    DisabledOptionalProductsOptions.objects.create(
-                        **optional_products)
+                optional_products = DisabledOptionalProductsOptions.objects.create(
+                    **optional_products
+                )
                 optional_products.save()
                 options.disabled_optional_products = optional_products
 
             if extended_search:
-                extended_search = \
-                    ExtendedProductSearchOptions.objects.create(
-                        **extended_search)
+                extended_search = ExtendedProductSearchOptions.objects.create(
+                    **extended_search
+                )
                 extended_search.save()
                 options.enabled_extended_product_search = extended_search
             options.save()
@@ -194,12 +210,13 @@ class ScanSerializer(NotEmptySerializer):
         # If we ever add optional fields to Scan, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
-        name = validated_data.get('name')
+        name = validated_data.get("name")
         check_for_existing_name(
             Scan.objects,
             name,
             _(messages.HC_NAME_ALREADY_EXISTS % name),
-            search_id=instance.id)
+            search_id=instance.id,
+        )
 
         if not self.partial:
             return self._do_full_update(instance, validated_data)
@@ -208,10 +225,10 @@ class ScanSerializer(NotEmptySerializer):
     @staticmethod
     def _do_full_update(instance, validated_data):
         """Peform full update of scan."""
-        name = validated_data.pop('name', None)
-        scan_type = validated_data.pop('scan_type', None)
-        sources = validated_data.pop('sources', None)
-        options = validated_data.pop('options', None)
+        name = validated_data.pop("name", None)
+        scan_type = validated_data.pop("scan_type", None)
+        sources = validated_data.pop("sources", None)
+        options = validated_data.pop("options", None)
 
         instance.name = name
         instance.scan_type = scan_type
@@ -221,22 +238,20 @@ class ScanSerializer(NotEmptySerializer):
             instance.sources.add(source)
         instance.save()
         if options:
-            optional_products = options.pop(
-                'disabled_optional_products', None)
-            extended_search = options.pop(
-                'enabled_extended_product_search', None)
+            optional_products = options.pop("disabled_optional_products", None)
+            extended_search = options.pop("enabled_extended_product_search", None)
             options = ScanOptions.objects.create(**options)
             if optional_products:
-                optional_products = \
-                    DisabledOptionalProductsOptions.objects.create(
-                        **optional_products)
+                optional_products = DisabledOptionalProductsOptions.objects.create(
+                    **optional_products
+                )
                 optional_products.save()
                 options.disabled_optional_products = optional_products
 
             if extended_search:
-                extended_search = \
-                    ExtendedProductSearchOptions.objects.create(
-                        **extended_search)
+                extended_search = ExtendedProductSearchOptions.objects.create(
+                    **extended_search
+                )
                 extended_search.save()
                 options.enabled_extended_product_search = extended_search
             options.save()
@@ -249,9 +264,9 @@ class ScanSerializer(NotEmptySerializer):
     def _do_partial_update(instance, validated_data):
         """Peform partial update of a scan."""
         # pylint: disable=too-many-branches,too-many-statements
-        name = validated_data.pop('name', None)
-        scan_type = validated_data.pop('scan_type', None)
-        sources = validated_data.pop('sources', None)
+        name = validated_data.pop("name", None)
+        scan_type = validated_data.pop("scan_type", None)
+        sources = validated_data.pop("sources", None)
 
         # Update values that are not options
         if name is not None:
@@ -261,16 +276,14 @@ class ScanSerializer(NotEmptySerializer):
         if sources is not None:
             instance.sources.set(sources)
 
-        options = validated_data.pop('options', None)
+        options = validated_data.pop("options", None)
         if not options:
             instance.save()
             return instance
 
         # grab the new options
-        optional_products = options.pop(
-            'disabled_optional_products', None)
-        extended_search = options.pop(
-            'enabled_extended_product_search', None)
+        optional_products = options.pop("disabled_optional_products", None)
+        extended_search = options.pop("enabled_extended_product_search", None)
 
         # Update base options
         if options:
@@ -281,7 +294,7 @@ class ScanSerializer(NotEmptySerializer):
                 instance.options = options_instance
                 instance.save()
             else:
-                max_concurrency = options.pop('max_concurrency', None)
+                max_concurrency = options.pop("max_concurrency", None)
                 if max_concurrency is not None:
                     options_instance.max_concurrency = max_concurrency
                     options_instance.save()
@@ -291,81 +304,74 @@ class ScanSerializer(NotEmptySerializer):
                 return instance
         # Update disable optional products
         if optional_products:
-            optional_products_instance = \
-                instance.options.disabled_optional_products
+            optional_products_instance = instance.options.disabled_optional_products
             if not optional_products_instance:
                 # Need to create a new one
-                optional_products_instance = \
-                    DisabledOptionalProductsOptions.objects.create(
-                        **optional_products)
+                optional_products_instance = (
+                    DisabledOptionalProductsOptions.objects.create(**optional_products)
+                )
                 optional_products_instance.save()
-                instance.options.disabled_optional_products = \
-                    optional_products_instance
+                instance.options.disabled_optional_products = optional_products_instance
                 instance.options.save()
             else:
                 # Existing values so update
-                if optional_products.get(
-                        ScanOptions.JBOSS_EAP, None) is not None:
-                    optional_products_instance.jboss_eap = \
-                        optional_products.get(
-                            ScanOptions.JBOSS_EAP, None)
-                if optional_products.get(
-                        ScanOptions.JBOSS_FUSE, None) is not None:
-                    optional_products_instance.jboss_fuse = \
-                        optional_products.get(
-                            ScanOptions.JBOSS_FUSE, None)
-                if optional_products.get(
-                        ScanOptions.JBOSS_BRMS, None) is not None:
-                    optional_products_instance.jboss_brms = \
-                        optional_products.get(
-                            ScanOptions.JBOSS_BRMS, None)
-                if optional_products.get(
-                        ScanOptions.JBOSS_WS, None) is not None:
-                    optional_products_instance.jboss_ws = \
-                        optional_products.get(
-                            ScanOptions.JBOSS_WS, None)
+                if optional_products.get(ScanOptions.JBOSS_EAP, None) is not None:
+                    optional_products_instance.jboss_eap = optional_products.get(
+                        ScanOptions.JBOSS_EAP, None
+                    )
+                if optional_products.get(ScanOptions.JBOSS_FUSE, None) is not None:
+                    optional_products_instance.jboss_fuse = optional_products.get(
+                        ScanOptions.JBOSS_FUSE, None
+                    )
+                if optional_products.get(ScanOptions.JBOSS_BRMS, None) is not None:
+                    optional_products_instance.jboss_brms = optional_products.get(
+                        ScanOptions.JBOSS_BRMS, None
+                    )
+                if optional_products.get(ScanOptions.JBOSS_WS, None) is not None:
+                    optional_products_instance.jboss_ws = optional_products.get(
+                        ScanOptions.JBOSS_WS, None
+                    )
                 optional_products_instance.save()
 
         # Update extended product search
         if extended_search:
-            extended_search_instance = \
-                instance.options.enabled_extended_product_search
+            extended_search_instance = instance.options.enabled_extended_product_search
             if not extended_search_instance:
                 # Create a new one
-                extended_search_instance = \
-                    ExtendedProductSearchOptions.objects.create(
-                        **extended_search)
+                extended_search_instance = ExtendedProductSearchOptions.objects.create(
+                    **extended_search
+                )
                 extended_search_instance.save()
-                instance.options.enabled_extended_product_search = \
+                instance.options.enabled_extended_product_search = (
                     extended_search_instance
+                )
                 instance.options.save()
             else:
                 # Update existing instance
                 # Grab the new extended search options
-                if extended_search.get(
-                        ScanOptions.JBOSS_EAP, None) is not None:
+                if extended_search.get(ScanOptions.JBOSS_EAP, None) is not None:
                     extended_search_instance.jboss_eap = extended_search.get(
-                        ScanOptions.JBOSS_EAP, None)
+                        ScanOptions.JBOSS_EAP, None
+                    )
 
-                if extended_search.get(
-                        ScanOptions.JBOSS_FUSE, None) is not None:
+                if extended_search.get(ScanOptions.JBOSS_FUSE, None) is not None:
                     extended_search_instance.jboss_fuse = extended_search.get(
-                        ScanOptions.JBOSS_FUSE, None)
+                        ScanOptions.JBOSS_FUSE, None
+                    )
 
-                if extended_search.get(
-                        ScanOptions.JBOSS_BRMS, None) is not None:
+                if extended_search.get(ScanOptions.JBOSS_BRMS, None) is not None:
                     extended_search_instance.jboss_brms = extended_search.get(
-                        ScanOptions.JBOSS_BRMS, None)
+                        ScanOptions.JBOSS_BRMS, None
+                    )
 
-                if extended_search.get(
-                        ScanOptions.JBOSS_WS, None) is not None:
+                if extended_search.get(ScanOptions.JBOSS_WS, None) is not None:
                     extended_search_instance.jboss_ws = extended_search.get(
-                        ScanOptions.JBOSS_WS, None)
-                if extended_search.get(
-                        'search_directories', None) is not None:
-                    extended_search_instance.search_directories = \
-                        extended_search.get(
-                            'search_directories', None)
+                        ScanOptions.JBOSS_WS, None
+                    )
+                if extended_search.get("search_directories", None) is not None:
+                    extended_search_instance.search_directories = extended_search.get(
+                        "search_directories", None
+                    )
                 extended_search_instance.save()
 
         instance.save()

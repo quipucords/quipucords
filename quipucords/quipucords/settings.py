@@ -36,7 +36,7 @@ BASE_DIR = Path(__file__).absolute().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
-PRODUCTION = bool(os.environ.get('PRODUCTION', False))
+PRODUCTION = bool(os.environ.get("PRODUCTION", False))
 
 
 def is_int(value):
@@ -55,46 +55,57 @@ def is_int(value):
         return False
 
 
-QPC_SSH_CONNECT_TIMEOUT = os.environ.get('QPC_SSH_CONNECT_TIMEOUT', '60')
+QPC_SSH_CONNECT_TIMEOUT = os.environ.get("QPC_SSH_CONNECT_TIMEOUT", "60")
 if not is_int(QPC_SSH_CONNECT_TIMEOUT):
-    logger.error('QPC_SSH_CONNECT_TIMEOUT "%s" not an int.'
-                 'Setting to default of 60.', QPC_SSH_CONNECT_TIMEOUT)
-    QPC_SSH_CONNECT_TIMEOUT = '60'
+    logger.error(
+        'QPC_SSH_CONNECT_TIMEOUT "%s" not an int.' "Setting to default of 60.",
+        QPC_SSH_CONNECT_TIMEOUT,
+    )
+    QPC_SSH_CONNECT_TIMEOUT = "60"
 
-QPC_SSH_INSPECT_TIMEOUT = os.environ.get('QPC_SSH_INSPECT_TIMEOUT', '120')
+QPC_SSH_INSPECT_TIMEOUT = os.environ.get("QPC_SSH_INSPECT_TIMEOUT", "120")
 if not is_int(QPC_SSH_INSPECT_TIMEOUT):
-    logger.error('QPC_SSH_INSPECT_TIMEOUT "%s" not an int.'
-                 'Setting to default of 120.', QPC_SSH_INSPECT_TIMEOUT)
-    QPC_SSH_INSPECT_TIMEOUT = '120'
+    logger.error(
+        'QPC_SSH_INSPECT_TIMEOUT "%s" not an int.' "Setting to default of 120.",
+        QPC_SSH_INSPECT_TIMEOUT,
+    )
+    QPC_SSH_INSPECT_TIMEOUT = "120"
 
 # Timeout for individual tasks. Must match format in 'man timeout'
-QPC_SSH_CONNECT_TIMEOUT = '%ss' % (QPC_SSH_CONNECT_TIMEOUT)
-QPC_SSH_INSPECT_TIMEOUT = '%ss' % (QPC_SSH_INSPECT_TIMEOUT)
+QPC_SSH_CONNECT_TIMEOUT = "%ss" % (QPC_SSH_CONNECT_TIMEOUT)
+QPC_SSH_INSPECT_TIMEOUT = "%ss" % (QPC_SSH_INSPECT_TIMEOUT)
 
-NETWORK_INSPECT_JOB_TIMEOUT = os.getenv('NETWORK_INSPECT_JOB_TIMEOUT',
-                                        '10800')  # 3 hours
+NETWORK_INSPECT_JOB_TIMEOUT = os.getenv(
+    "NETWORK_INSPECT_JOB_TIMEOUT", "10800"
+)  # 3 hours
 if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
-    logger.error('NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.'
-                 'Setting to default of 10800.',
-                 NETWORK_INSPECT_JOB_TIMEOUT)
-    NETWORK_INSPECT_JOB_TIMEOUT = '10800'
+    logger.error(
+        'NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.' "Setting to default of 10800.",
+        NETWORK_INSPECT_JOB_TIMEOUT,
+    )
+    NETWORK_INSPECT_JOB_TIMEOUT = "10800"
 
-NETWORK_CONNECT_JOB_TIMEOUT = os.getenv('NETWORK_CONNECT_JOB_TIMEOUT',
-                                        '600')  # 10 minutes
+NETWORK_CONNECT_JOB_TIMEOUT = os.getenv(
+    "NETWORK_CONNECT_JOB_TIMEOUT", "600"
+)  # 10 minutes
 if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
-    logger.error('NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int.'
-                 'Setting to default of 600.',
-                 NETWORK_CONNECT_JOB_TIMEOUT)
-    NETWORK_CONNECT_JOB_TIMEOUT = '600'
+    logger.error(
+        'NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int.' "Setting to default of 600.",
+        NETWORK_CONNECT_JOB_TIMEOUT,
+    )
+    NETWORK_CONNECT_JOB_TIMEOUT = "600"
 
-ANSIBLE_LOG_LEVEL = os.getenv('ANSIBLE_LOG_LEVEL', '0')
+ANSIBLE_LOG_LEVEL = os.getenv("ANSIBLE_LOG_LEVEL", "0")
 if not is_int(ANSIBLE_LOG_LEVEL):
-    logger.error('ANSIBLE_LOG_LEVEL "%s" not an int.'
-                 'Setting to default of 0.', ANSIBLE_LOG_LEVEL)
-    ANSIBLE_LOG_LEVEL = '0'
+    logger.error(
+        'ANSIBLE_LOG_LEVEL "%s" not an int.' "Setting to default of 0.",
+        ANSIBLE_LOG_LEVEL,
+    )
+    ANSIBLE_LOG_LEVEL = "0"
 
-DJANGO_SECRET_PATH = os.environ.get('DJANGO_SECRET_PATH',
-                                    os.path.join(BASE_DIR, 'secret.txt'))
+DJANGO_SECRET_PATH = os.environ.get(
+    "DJANGO_SECRET_PATH", os.path.join(BASE_DIR, "secret.txt")
+)
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
@@ -102,106 +113,111 @@ if PRODUCTION:
     if not os.path.exists(DJANGO_SECRET_PATH):
         import random
         import string
-        SECRET_KEY = ''.join([random.SystemRandom().choice(
-            '{}{}{}'.format(string.ascii_letters,
-                            string.digits,
-                            string.punctuation)) for i in range(50)])
+
+        SECRET_KEY = "".join(
+            [
+                random.SystemRandom().choice(
+                    "{}{}{}".format(
+                        string.ascii_letters, string.digits, string.punctuation
+                    )
+                )
+                for i in range(50)
+            ]
+        )
 else:
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = '79vtvq2r0m20a4$%#iyzabn#*(7&!&%60aoga@m4(in3-*ys8)'
+    SECRET_KEY = "79vtvq2r0m20a4$%#iyzabn#*(7&!&%60aoga@m4(in3-*ys8)"
 
 if not os.path.exists(DJANGO_SECRET_PATH):
-    with open(DJANGO_SECRET_PATH, 'w') as secret_file:
+    with open(DJANGO_SECRET_PATH, "w") as secret_file:
         secret_file.write(SECRET_KEY)
 else:
-    with open(DJANGO_SECRET_PATH, 'r') as secret_file:
+    with open(DJANGO_SECRET_PATH, "r") as secret_file:
         SECRET_KEY = secret_file.read().splitlines()[0]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get('DJANGO_DEBUG', True))
+DEBUG = bool(os.environ.get("DJANGO_DEBUG", True))
 if isinstance(DEBUG, str):
-    DEBUG = DEBUG.lower() == 'true'
+    DEBUG = DEBUG.lower() == "true"
 
-ALLOWED_HOST_LIST = os.environ.get('DJANGO_ALLOWED_HOST_LIST', '*').split(',')
+ALLOWED_HOST_LIST = os.environ.get("DJANGO_ALLOWED_HOST_LIST", "*").split(",")
 ALLOWED_HOSTS = ALLOWED_HOST_LIST
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'django_filters',
-    'api',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "django_filters",
+    "api",
 ]
 
 if not PRODUCTION:
-    INSTALLED_APPS.append('coverage')
+    INSTALLED_APPS.append("coverage")
 
 
 MIDDLEWARE = [
-    'api.common.middleware.ServerVersionMiddle',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    "api.common.middleware.ServerVersionMiddle",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-ROOT_URLCONF = 'quipucords.urls'
+ROOT_URLCONF = "quipucords.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(os.path.dirname(__file__),
-                         'templates').replace('\\', '/'),
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            os.path.join(os.path.dirname(__file__), "templates").replace("\\", "/"),
         ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-LOGIN_REDIRECT_URL = '/client/'
+LOGIN_REDIRECT_URL = "/client/"
 
-WSGI_APPLICATION = 'quipucords.wsgi.application'
+WSGI_APPLICATION = "quipucords.wsgi.application"
 
-DEFAULT_PAGINATION_CLASS = 'api.common.pagination.StandardResultsSetPagination'
+DEFAULT_PAGINATION_CLASS = "api.common.pagination.StandardResultsSetPagination"
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS':
-        ('django_filters.rest_framework.DjangoFilterBackend',),
-    'DEFAULT_PAGINATION_CLASS': DEFAULT_PAGINATION_CLASS,
-    'DEFAULT_AUTHENTICATION_CLASSES':
-        ('api.user.authentication.QuipucordsExpiringTokenAuthentication',)
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_PAGINATION_CLASS": DEFAULT_PAGINATION_CLASS,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.user.authentication.QuipucordsExpiringTokenAuthentication",
+    ),
 }
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # Database Management System could be 'sqlite' or 'postgresql'
-QPC_DBMS = os.getenv('QPC_DBMS', 'postgres').lower()
+QPC_DBMS = os.getenv("QPC_DBMS", "postgres").lower()
 
-if QPC_DBMS == 'sqlite':
+if QPC_DBMS == "sqlite":
     # If user enters an invalid QPC_DBMS, use default postgresql
-    DEV_DB = os.path.join(BASE_DIR, 'db.sqlite3')
-    PROD_DB = os.path.join(os.environ.get('DJANGO_DB_PATH', BASE_DIR),
-                           'db.sqlite3')
+    DEV_DB = os.path.join(BASE_DIR, "db.sqlite3")
+    PROD_DB = os.path.join(os.environ.get("DJANGO_DB_PATH", BASE_DIR), "db.sqlite3")
     DB_PATH = PROD_DB if PRODUCTION else DEV_DB
     DATABASES = {
         "default": {
@@ -211,38 +227,42 @@ if QPC_DBMS == 'sqlite':
         }
     }
 else:
-    QPC_DBMS = 'postgres'
+    QPC_DBMS = "postgres"
     # The following variables are only relevant when using a postgres database:
-    QPC_DBMS_DATABASE = os.getenv('QPC_DBMS_DATABASE', 'postgres')
-    QPC_DBMS_USER = os.getenv('QPC_DBMS_USER', 'postgres')
-    QPC_DBMS_PASSWORD = os.getenv('QPC_DBMS_PASSWORD', 'password')
+    QPC_DBMS_DATABASE = os.getenv("QPC_DBMS_DATABASE", "postgres")
+    QPC_DBMS_USER = os.getenv("QPC_DBMS_USER", "postgres")
+    QPC_DBMS_PASSWORD = os.getenv("QPC_DBMS_PASSWORD", "password")
     # In the following env variable, :: means localhost but allows IPv4
     #  and IPv6 connections
     # pylint: disable=invalid-envvar-default
-    QPC_DBMS_HOST = os.getenv('QPC_DBMS_HOST', 'localhost' or '::')
-    QPC_DBMS_PORT = os.getenv('QPC_DBMS_PORT', 5432)
+    QPC_DBMS_HOST = os.getenv("QPC_DBMS_HOST", "localhost" or "::")
+    QPC_DBMS_PORT = os.getenv("QPC_DBMS_PORT", 5432)
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': QPC_DBMS_DATABASE,
-            'USER': QPC_DBMS_USER,
-            'PASSWORD': QPC_DBMS_PASSWORD,
-            'HOST': QPC_DBMS_HOST,
-            'PORT': QPC_DBMS_PORT,
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": QPC_DBMS_DATABASE,
+            "USER": QPC_DBMS_USER,
+            "PASSWORD": QPC_DBMS_PASSWORD,
+            "HOST": QPC_DBMS_HOST,
+            "PORT": QPC_DBMS_PORT,
         }
     }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-NAME = 'NAME'
-USER_ATTRIBUTE_SIMILARITY_VALIDATOR = \
-    'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'
-MINIMUM_LENGTH_VALIDATOR = \
-    'django.contrib.auth.password_validation.MinimumLengthValidator'
-COMMON_PASSWORD_VALIDATOR = \
-    'django.contrib.auth.password_validation.CommonPasswordValidator'
-NUMERIC_PASSWORD_VALIDATOR = \
-    'django.contrib.auth.password_validation.NumericPasswordValidator'
+NAME = "NAME"
+USER_ATTRIBUTE_SIMILARITY_VALIDATOR = (
+    "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+)
+MINIMUM_LENGTH_VALIDATOR = (
+    "django.contrib.auth.password_validation.MinimumLengthValidator"
+)
+COMMON_PASSWORD_VALIDATOR = (
+    "django.contrib.auth.password_validation.CommonPasswordValidator"
+)
+NUMERIC_PASSWORD_VALIDATOR = (
+    "django.contrib.auth.password_validation.NumericPasswordValidator"
+)
 AUTH_PASSWORD_VALIDATORS = [
     {
         NAME: USER_ATTRIBUTE_SIMILARITY_VALIDATOR,
@@ -262,9 +282,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -276,22 +296,23 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-STATIC_URL = '/client/'
+STATIC_URL = "/client/"
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'client'),
+    os.path.join(BASE_DIR, "client"),
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-LOGGING_FORMATTER = os.getenv('DJANGO_LOG_FORMATTER', 'simple')
-DJANGO_LOGGING_LEVEL = os.getenv('DJANGO_LOG_LEVEL', 'INFO')
-QUIPUCORDS_LOGGING_LEVEL = os.getenv('QUIPUCORDS_LOG_LEVEL', 'INFO')
-LOGGING_HANDLERS = os.getenv('DJANGO_LOG_HANDLERS', 'console').split(',')
-VERBOSE_FORMATTING = '%(levelname)s %(asctime)s %(module)s ' \
-    '%(process)d %(thread)d %(message)s'
+LOGGING_FORMATTER = os.getenv("DJANGO_LOG_FORMATTER", "simple")
+DJANGO_LOGGING_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+QUIPUCORDS_LOGGING_LEVEL = os.getenv("QUIPUCORDS_LOG_LEVEL", "INFO")
+LOGGING_HANDLERS = os.getenv("DJANGO_LOG_HANDLERS", "console").split(",")
+VERBOSE_FORMATTING = (
+    "%(levelname)s %(asctime)s %(module)s " "%(process)d %(thread)d %(message)s"
+)
 
 # pylint: disable=invalid-envvar-default
 LOG_DIRECTORY = Path(os.getenv("LOG_DIRECTORY", BASE_DIR))
@@ -300,114 +321,106 @@ LOGGING_FILE = Path(os.getenv("DJANGO_LOG_FILE", DEFAULT_LOG_FILE))
 # pylint: enable=invalid-envvar-default
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': VERBOSE_FORMATTING
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {"format": VERBOSE_FORMATTING},
+        "simple": {"format": "%(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": LOGGING_FORMATTER},
+        "file": {
+            "level": QUIPUCORDS_LOGGING_LEVEL,
+            "class": "logging.FileHandler",
+            "filename": LOGGING_FILE,
+            "formatter": LOGGING_FORMATTER,
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': LOGGING_FORMATTER
+    "loggers": {
+        "django": {
+            "handlers": LOGGING_HANDLERS,
+            "level": DJANGO_LOGGING_LEVEL,
         },
-        'file': {
-            'level': QUIPUCORDS_LOGGING_LEVEL,
-            'class': 'logging.FileHandler',
-            'filename': LOGGING_FILE,
-            'formatter': LOGGING_FORMATTER
+        "api.details_report": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-    },
-    'loggers': {
-        'django': {
-            'handlers': LOGGING_HANDLERS,
-            'level': DJANGO_LOGGING_LEVEL,
+        "api.deployments_report": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.details_report': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "api.scan": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.deployments_report': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "api.scantask": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.scan': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "api.scanjob": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.scantask': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "api.status": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.scanjob': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "fingerprinter": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.status': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "api.signal.scanjob_signal": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'fingerprinter': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.callback": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'api.signal.scanjob_signal': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.manager": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'scanner.callback': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.job": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'scanner.manager': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.task": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'scanner.job': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.network": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'scanner.task': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.vcenter": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'scanner.network': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "scanner.satellite": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        'scanner.vcenter': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
-        },
-        'scanner.satellite': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
-        },
-        'quipucords.environment': {
-            'handlers': LOGGING_HANDLERS,
-            'level': QUIPUCORDS_LOGGING_LEVEL,
+        "quipucords.environment": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
         },
     },
 }
 
 # Reverse default behavior to avoid host key checking
-os.environ.setdefault('ANSIBLE_HOST_KEY_CHECKING', 'False')
+os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
 
 
-QPC_EXCLUDE_INTERNAL_FACTS = os.getenv('QPC_EXCLUDE_INTERNAL_FACTS', 'True')
+QPC_EXCLUDE_INTERNAL_FACTS = os.getenv("QPC_EXCLUDE_INTERNAL_FACTS", "True")
 if isinstance(QPC_EXCLUDE_INTERNAL_FACTS, str):
-    QPC_EXCLUDE_INTERNAL_FACTS = QPC_EXCLUDE_INTERNAL_FACTS.lower() == 'true'
+    QPC_EXCLUDE_INTERNAL_FACTS = QPC_EXCLUDE_INTERNAL_FACTS.lower() == "true"
 
-QPC_TOKEN_EXPIRE_HOURS = os.getenv('QPC_TOKEN_EXPIRE_HOURS', '24')
+QPC_TOKEN_EXPIRE_HOURS = os.getenv("QPC_TOKEN_EXPIRE_HOURS", "24")
 if is_int(QPC_TOKEN_EXPIRE_HOURS):
     QPC_TOKEN_EXPIRE_HOURS = int(QPC_TOKEN_EXPIRE_HOURS)
 
-QPC_INSIGHTS_REPORT_SLICE_SIZE = os.getenv(
-    'QPC_INSIGHTS_REPORT_SLICE_SIZE', '10000')
+QPC_INSIGHTS_REPORT_SLICE_SIZE = os.getenv("QPC_INSIGHTS_REPORT_SLICE_SIZE", "10000")
 if is_int(QPC_INSIGHTS_REPORT_SLICE_SIZE):
     QPC_INSIGHTS_REPORT_SLICE_SIZE = int(QPC_INSIGHTS_REPORT_SLICE_SIZE)
 

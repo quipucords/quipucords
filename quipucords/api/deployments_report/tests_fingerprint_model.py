@@ -22,7 +22,8 @@ class FingerprintModelTest(TestCase):
     def setUp(self):
         """Create test case setup."""
         self.deployment_report = DeploymentsReport(
-            report_version=create_report_version())
+            report_version=create_report_version()
+        )
         self.deployment_report.save()
 
     ################################################################
@@ -30,9 +31,11 @@ class FingerprintModelTest(TestCase):
     ################################################################
     def test_empty_fingerprint(self):
         """Create an empty fingerprint."""
-        fingerprint_dict = {'deployment_report': self.deployment_report.id,
-                            'metadata': {},
-                            'sources': []}
+        fingerprint_dict = {
+            "deployment_report": self.deployment_report.id,
+            "metadata": {},
+            "sources": [],
+        }
 
         serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
@@ -44,14 +47,18 @@ class FingerprintModelTest(TestCase):
     # pylint: disable=invalid-name
     def test_product_with_version_fingerprint(self):
         """Create a fingerprint with products."""
-        product_dict = {'name': 'product1',
-                        'presence': 'unknown',
-                        'version': ['1', '2'],
-                        'metadata': {}}
-        fingerprint_dict = {'deployment_report': self.deployment_report.id,
-                            'metadata': {},
-                            'products': [product_dict],
-                            'sources': []}
+        product_dict = {
+            "name": "product1",
+            "presence": "unknown",
+            "version": ["1", "2"],
+            "metadata": {},
+        }
+        fingerprint_dict = {
+            "deployment_report": self.deployment_report.id,
+            "metadata": {},
+            "products": [product_dict],
+            "sources": [],
+        }
 
         serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
@@ -62,13 +69,13 @@ class FingerprintModelTest(TestCase):
 
     def test_product_fingerprint(self):
         """Create a fingerprint with products."""
-        product_dict = {'name': 'product1',
-                        'presence': 'unknown',
-                        'metadata': {}}
-        fingerprint_dict = {'deployment_report': self.deployment_report.id,
-                            'metadata': {},
-                            'products': [product_dict],
-                            'sources': []}
+        product_dict = {"name": "product1", "presence": "unknown", "metadata": {}}
+        fingerprint_dict = {
+            "deployment_report": self.deployment_report.id,
+            "metadata": {},
+            "products": [product_dict],
+            "sources": [],
+        }
 
         serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()
@@ -79,13 +86,17 @@ class FingerprintModelTest(TestCase):
 
     def test_entitlement_fingerprint(self):
         """Create a fingerprint with entitlements."""
-        entitlement_dict = {'name': 'RHEL Server',
-                            'entitlement_id': '69',
-                            'metadata': {}}
-        fingerprint_dict = {'deployment_report': self.deployment_report.id,
-                            'metadata': {},
-                            'entitlements': [entitlement_dict],
-                            'sources': []}
+        entitlement_dict = {
+            "name": "RHEL Server",
+            "entitlement_id": "69",
+            "metadata": {},
+        }
+        fingerprint_dict = {
+            "deployment_report": self.deployment_report.id,
+            "metadata": {},
+            "entitlements": [entitlement_dict],
+            "sources": [],
+        }
 
         serializer = SystemFingerprintSerializer(data=fingerprint_dict)
         is_valid = serializer.is_valid()

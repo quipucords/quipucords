@@ -23,10 +23,12 @@ from quipucords.environment import server_version
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-REPORT_TYPE_DETAILS = 'details'
-REPORT_TYPE_DEPLOYMENT = 'deployments'
-REPORT_TYPE_CHOICES = ((REPORT_TYPE_DETAILS, REPORT_TYPE_DETAILS),
-                       (REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DEPLOYMENT))
+REPORT_TYPE_DETAILS = "details"
+REPORT_TYPE_DEPLOYMENT = "deployments"
+REPORT_TYPE_CHOICES = (
+    (REPORT_TYPE_DETAILS, REPORT_TYPE_DETAILS),
+    (REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DEPLOYMENT),
+)
 
 
 def create_report_version():
@@ -36,12 +38,15 @@ def create_report_version():
 
 def sanitize_row(row):
     """Replace commas in fact values to prevent false csv parsing."""
-    new_row = [fact.replace(',', ';')
-               if isinstance(fact, str) else fact for fact in row]
-    new_row = [fact.replace('\r', ';')
-               if isinstance(fact, str) else fact for fact in new_row]
-    new_row = [fact.replace('\n', ';')
-               if isinstance(fact, str) else fact for fact in new_row]
+    new_row = [
+        fact.replace(",", ";") if isinstance(fact, str) else fact for fact in row
+    ]
+    new_row = [
+        fact.replace("\r", ";") if isinstance(fact, str) else fact for fact in new_row
+    ]
+    new_row = [
+        fact.replace("\n", ";") if isinstance(fact, str) else fact for fact in new_row
+    ]
     return new_row
 
 
@@ -56,8 +61,8 @@ def extract_tar_gz(file_like_obj):
     else:
         if not isinstance(file_like_obj, (bytes, bytearray)):
             return None
-        tar_name = '/tmp/api_tmp_%s.tar.gz' % time.strftime('%Y%m%d_%H%M%S')
-        with open(tar_name, 'wb') as out_file:
+        tar_name = "/tmp/api_tmp_%s.tar.gz" % time.strftime("%Y%m%d_%H%M%S")
+        with open(tar_name, "wb") as out_file:
             out_file.write(file_like_obj)
         tar = tarfile.open(tar_name)
         os.remove(tar_name)
@@ -66,8 +71,8 @@ def extract_tar_gz(file_like_obj):
     files = tar.getmembers()
     for file in files:
         tarfile_obj = tar.extractfile(file)
-        file_data = tarfile_obj.read().decode('utf-8')
-        if '.json' in file.name:
+        file_data = tarfile_obj.read().decode("utf-8")
+        if ".json" in file.name:
             try:
                 file_data = json.loads(file_data)
             except ValueError:
@@ -78,10 +83,9 @@ def extract_tar_gz(file_like_obj):
 
 def create_filename(file_name, file_ext, report_id):
     """Create the filename."""
-    file_name = 'report_id_%s/%s' % (report_id,
-                                     file_name)
+    file_name = "report_id_%s/%s" % (report_id, file_name)
     if file_ext:
-        file_name += '.%s' % file_ext
+        file_name += ".%s" % file_ext
     return file_name
 
 
@@ -97,15 +101,14 @@ def create_tar_buffer(files_data):
     if not all(isinstance(v, (str, dict)) for v in files_data.values()):
         return None
     tar_buffer = io.BytesIO()
-    with tarfile.open(fileobj=tar_buffer, mode='w:gz') as tar_file:
+    with tarfile.open(fileobj=tar_buffer, mode="w:gz") as tar_file:
         for file_name, file_content in files_data.items():
-            if file_name.endswith('json'):
-                file_buffer = \
-                    io.BytesIO(json.dumps(file_content).encode('utf-8'))
-            elif file_name.endswith('csv'):
-                file_buffer = io.BytesIO(file_content.encode('utf-8'))
-            elif 'SHA256SUM' in file_name:
-                file_buffer = io.BytesIO(str(file_content).encode('utf-8'))
+            if file_name.endswith("json"):
+                file_buffer = io.BytesIO(json.dumps(file_content).encode("utf-8"))
+            elif file_name.endswith("csv"):
+                file_buffer = io.BytesIO(file_content.encode("utf-8"))
+            elif "SHA256SUM" in file_name:
+                file_buffer = io.BytesIO(str(file_content).encode("utf-8"))
             else:
                 return None
             info = tarfile.TarInfo(name=file_name)
@@ -118,7 +121,7 @@ def create_tar_buffer(files_data):
 class CSVHelper:
     """Helper for CSV serialization of list/dict values."""
 
-    ANSIBLE_ERROR_MESSAGE = 'Error. See logs.'
+    ANSIBLE_ERROR_MESSAGE = "Error. See logs."
 
     def serialize_value(self, header, fact_value):
         """Serialize a fact value to a CSV value."""
@@ -133,10 +136,10 @@ class CSVHelper:
         """Serialize a list to a CSV value."""
         # Return empty string for empty list
         if not bool(fact_list):
-            return ''
+            return ""
 
-        result = '['
-        value_string = '%s;'
+        result = "["
+        value_string = "%s;"
         for item in fact_list:
             if isinstance(item, list):
                 result += value_string % self.serialize_list(header, item)
@@ -144,32 +147,30 @@ class CSVHelper:
                 result += value_string % self.serialize_dict(header, item)
             else:
                 result += value_string % item
-        result = result[:-1] + ']'
+        result = result[:-1] + "]"
         return result
 
     def serialize_dict(self, header, fact_dict):
         """Serialize a dict to a CSV value."""
         # Return empty string for empty dict
         if not bool(fact_dict):
-            return ''
-        if fact_dict.get('rc') is not None:
+            return ""
+        if fact_dict.get("rc") is not None:
             logger.error(
-                'Fact appears to be raw ansible output. %s=%s',
-                header, fact_dict)
+                "Fact appears to be raw ansible output. %s=%s", header, fact_dict
+            )
             return self.ANSIBLE_ERROR_MESSAGE
 
-        result = '{'
-        value_string = '%s:%s;'
+        result = "{"
+        value_string = "%s:%s;"
         for key, value in fact_dict.items():
             if isinstance(value, list):
-                result += value_string % (key,
-                                          self.serialize_list(header, value))
+                result += value_string % (key, self.serialize_list(header, value))
             elif isinstance(value, dict):
-                result += value_string % (key,
-                                          self.serialize_dict(header, value))
+                result += value_string % (key, self.serialize_dict(header, value))
             else:
                 result += value_string % (key, value)
-        result = result[:-1] + '}'
+        result = result[:-1] + "}"
         return result
 
     @staticmethod
@@ -180,16 +181,15 @@ class CSVHelper:
         for fact in fact_list:
             fact_addon = {}
             for fact_key in fact.keys():
-                if fact_key == 'products':
+                if fact_key == "products":
                     prods = fact.get(fact_key, [])
                     if prods:
                         for prod in prods:
-                            prod_name = prod.get('name')
+                            prod_name = prod.get("name")
                             if prod_name:
                                 prod_name = prod_name.lower()
                                 headers.add(prod_name)
-                                fact_addon[prod_name] = prod.get('presence',
-                                                                 'unknown')
+                                fact_addon[prod_name] = prod.get("presence", "unknown")
                 else:
                     headers.add(fact_key)
             fact.update(fact_addon)

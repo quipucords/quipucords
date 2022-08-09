@@ -40,57 +40,54 @@ from api.user.authentication import QuipucordsExpiringTokenAuthentication
 # Get an instance of a logger
 # pylint: disable=invalid-name
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
 
 if authentication_enabled:
-    auth_classes = (QuipucordsExpiringTokenAuthentication,
-                    SessionAuthentication)
+    auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
     auth_classes = ()
     perm_classes = ()
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((ReportsGzipRenderer,))
 def reports(request, pk=None):
     """Lookup and return reports."""
     reports_dict = dict()
-    mask_report = request.query_params.get('mask', False)
+    mask_report = request.query_params.get("mask", False)
     if pk is not None:
         if not is_int(pk):
-            error = {
-                'report_id': [_(messages.COMMON_ID_INV)]
-            }
+            error = {"report_id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
-    reports_dict['report_id'] = pk
+    reports_dict["report_id"] = pk
     # details
     details_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
     serializer = DetailsReportSerializer(details_data)
     json_details = serializer.data
     if validate_query_param_bool(mask_report):
         json_details = mask_details_facts(json_details)
-    json_details.pop('cached_csv', None)
-    reports_dict['details_json'] = json_details
+    json_details.pop("cached_csv", None)
+    reports_dict["details_json"] = json_details
     # deployments
-    deployments_data = get_object_or_404(DeploymentsReport.objects.all(),
-                                         report_id=pk)
+    deployments_data = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
     if deployments_data.status != DeploymentsReport.STATUS_COMPLETE:
         deployments_id = deployments_data.details_report.id
-        return Response({'detail':
-                         'Deployment report %s could not be created.'
-                         '  See server logs.' % deployments_id},
-                        status=status.HTTP_424_FAILED_DEPENDENCY)
-    deployments_report = build_cached_json_report(
-        deployments_data, mask_report)
+        return Response(
+            {
+                "detail": "Deployment report %s could not be created."
+                "  See server logs." % deployments_id
+            },
+            status=status.HTTP_424_FAILED_DEPENDENCY,
+        )
+    deployments_report = build_cached_json_report(deployments_data, mask_report)
     if deployments_report:
-        reports_dict['deployments_json'] = deployments_report
+        reports_dict["deployments_json"] = deployments_report
         return Response(reports_dict)
-    error = {'detail':
-             'Deployments report %s could not be masked. '
-             'Rerun the scan to generate a masked deployments report.'
-             % (pk)}
-    return(Response(error,
-                    status=status.HTTP_428_PRECONDITION_REQUIRED))
+    error = {
+        "detail": "Deployments report %s could not be masked. "
+        "Rerun the scan to generate a masked deployments report." % (pk)
+    }
+    return Response(error, status=status.HTTP_428_PRECONDITION_REQUIRED)

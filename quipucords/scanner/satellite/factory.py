@@ -12,7 +12,7 @@
 """Factory for Satellite Interface."""
 from scanner.satellite.api import SATELLITE_VERSION_5
 from scanner.satellite.five import SatelliteFive
-from scanner.satellite.six import (SatelliteSixV1, SatelliteSixV2)
+from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
 
 
 def create(satellite_version, api_version, scan_job, scan_task):

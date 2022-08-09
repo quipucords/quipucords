@@ -13,7 +13,7 @@
 import logging
 import time
 
-from api.common.common_report import (create_filename, create_tar_buffer)
+from api.common.common_report import create_filename, create_tar_buffer
 
 from rest_framework import renderers
 
@@ -25,27 +25,24 @@ class ReportJsonGzipRenderer(renderers.BaseRenderer):
     """Class to render reports as tar.gz containing a json file."""
 
     # pylint: disable=too-few-public-methods
-    media_type = 'application/json+gzip'
-    format = 'tar.gz'
-    render_style = 'binary'
+    media_type = "application/json+gzip"
+    format = "tar.gz"
+    render_style = "binary"
 
-    def render(self,
-               data,
-               accepted_media_type=None,
-               renderer_context=None):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render report as json gzip."""
         report_dict = data
         if not bool(report_dict):
             return None
 
-        report_id = report_dict.get('report_id')
-        report_type = report_dict.get('report_type')
+        report_id = report_dict.get("report_id")
+        report_type = report_dict.get("report_type")
         if report_id is None:
             return None
         if report_type is None:
-            file_name = '%s.json' % time.strftime('%Y%m%d%H%M%S')
+            file_name = "%s.json" % time.strftime("%Y%m%d%H%M%S")
         else:
-            file_name = create_filename(report_type, 'json', report_id)
+            file_name = create_filename(report_type, "json", report_id)
         file_data = {file_name: report_dict}
         tar_buffer = create_tar_buffer(file_data)
         return tar_buffer

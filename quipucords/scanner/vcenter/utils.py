@@ -44,11 +44,9 @@ def vcenter_connect(scan_task):
         ssl_protocol = options.get_ssl_protocol()
 
     if disable_ssl:
-        vcenter = SmartConnectNoSSL(host=host, user=user,
-                                    pwd=password, port=port)
+        vcenter = SmartConnectNoSSL(host=host, user=user, pwd=password, port=port)
     elif ssl_protocol is None and ssl_cert_verify is None:
-        vcenter = SmartConnect(host=host, user=user,
-                               pwd=password, port=port)
+        vcenter = SmartConnect(host=host, user=user, pwd=password, port=port)
     else:
         ssl_context = None
         if ssl_protocol is None:
@@ -57,9 +55,9 @@ def vcenter_connect(scan_task):
             ssl_context = ssl.SSLContext(protocol=ssl_protocol)
         if ssl_cert_verify is False:
             ssl_context.verify_mode = ssl.CERT_NONE
-        vcenter = SmartConnect(host=host, user=user,
-                               pwd=password, port=port,
-                               sslContext=ssl_context)
+        vcenter = SmartConnect(
+            host=host, user=user, pwd=password, port=port, sslContext=ssl_context
+        )
 
     atexit.register(Disconnect, vcenter)
 
@@ -74,13 +72,12 @@ def retrieve_properties(content, filter_spec_set, max_objects=None):
                         in a single page
     :returns: Array of Object Content
     """
-    options = vmodl.query.PropertyCollector.RetrieveOptions(
-        maxObjects=max_objects
-    )
+    options = vmodl.query.PropertyCollector.RetrieveOptions(maxObjects=max_objects)
 
     retrieve_properties_ex = content.propertyCollector.RetrievePropertiesEx
-    continue_retrieve_properties_ex = \
+    continue_retrieve_properties_ex = (
         content.propertyCollector.ContinueRetrievePropertiesEx
+    )
 
     objects = []
 

@@ -13,11 +13,7 @@
 from datetime import datetime
 
 from api import messages
-from api.models import (Credential,
-                        Scan,
-                        ScanJob,
-                        ScanTask,
-                        Source)
+from api.models import Credential, Scan, ScanJob, ScanTask, Source
 from api.serializers import ScanTaskSerializer
 
 from django.core import management
@@ -35,25 +31,22 @@ class ScanTaskTest(TestCase):
 
     def setUp(self):
         """Create test setup."""
-        management.call_command('flush', '--no-input')
+        management.call_command("flush", "--no-input")
         self.cred = Credential.objects.create(
-            name='cred1',
-            username='username',
-            password='password',
+            name="cred1",
+            username="username",
+            password="password",
             become_password=None,
-            ssh_keyfile=None)
+            ssh_keyfile=None,
+        )
         self.cred_for_upload = self.cred.id
 
-        self.source = Source(
-            name='source1',
-            source_type='network',
-            port=22)
+        self.source = Source(name="source1", source_type="network", port=22)
         self.source.save()
         self.source.credentials.add(self.cred)
 
         # Create scan configuration
-        scan = Scan(name='scan_name',
-                    scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        scan = Scan(name="scan_name", scan_type=ScanTask.SCAN_TYPE_CONNECT)
         scan.save()
 
         # Add source to scan
@@ -69,16 +62,20 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         serializer = ScanTaskSerializer(task)
         json_task = serializer.data
         self.assertEqual(
-            {'sequence_number': 0,
-             'source': 1,
-             'scan_type': ScanTask.SCAN_TYPE_CONNECT,
-             'status': 'pending',
-             'status_message': messages.ST_STATUS_MSG_PENDING},
-            json_task)
+            {
+                "sequence_number": 0,
+                "source": 1,
+                "scan_type": ScanTask.SCAN_TYPE_CONNECT,
+                "status": "pending",
+                "status_message": messages.ST_STATUS_MSG_PENDING,
+            },
+            json_task,
+        )
 
     def test_successful_start(self):
         """Create a scan task and start it."""
@@ -86,15 +83,16 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         start_time = datetime.utcnow()
         task.start()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_RUNNING,
-                         task.status_message)
+        self.assertEqual(messages.ST_STATUS_MSG_RUNNING, task.status_message)
         self.assertEqual(task.status, ScanTask.RUNNING)
-        self.assertEqual(start_time.replace(microsecond=0),
-                         task.start_time.replace(microsecond=0))
+        self.assertEqual(
+            start_time.replace(microsecond=0), task.start_time.replace(microsecond=0)
+        )
 
     def test_successful_restart(self):
         """Create a scan task and restart it."""
@@ -102,11 +100,11 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         task.restart()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_RESTARTED,
-                         task.status_message)
+        self.assertEqual(messages.ST_STATUS_MSG_RESTARTED, task.status_message)
         self.assertEqual(task.status, ScanTask.PENDING)
 
     def test_successful_pause(self):
@@ -115,11 +113,11 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         task.pause()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_PAUSED,
-                         task.status_message)
+        self.assertEqual(messages.ST_STATUS_MSG_PAUSED, task.status_message)
         self.assertEqual(task.status, ScanTask.PAUSED)
 
     def test_successful_cancel(self):
@@ -128,15 +126,16 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         end_time = datetime.utcnow()
         task.cancel()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_CANCELED,
-                         task.status_message)
+        self.assertEqual(messages.ST_STATUS_MSG_CANCELED, task.status_message)
         self.assertEqual(task.status, ScanTask.CANCELED)
-        self.assertEqual(end_time.replace(microsecond=0),
-                         task.end_time.replace(microsecond=0))
+        self.assertEqual(
+            end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
+        )
 
     def test_successful_complete(self):
         """Create a scan task and complete it."""
@@ -144,15 +143,16 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         end_time = datetime.utcnow()
-        task.complete('great')
+        task.complete("great")
         task.save()
-        self.assertEqual('great',
-                         task.status_message)
+        self.assertEqual("great", task.status_message)
         self.assertEqual(task.status, ScanTask.COMPLETED)
-        self.assertEqual(end_time.replace(microsecond=0),
-                         task.end_time.replace(microsecond=0))
+        self.assertEqual(
+            end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
+        )
 
     def test_scantask_fail(self):
         """Create a scan task and fail it."""
@@ -160,17 +160,18 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         # pylint: disable=invalid-name
-        MSG = 'Test Fail.'
+        MSG = "Test Fail."
         end_time = datetime.utcnow()
         task.fail(MSG)
         task.save()
-        self.assertEqual(MSG,
-                         task.status_message)
+        self.assertEqual(MSG, task.status_message)
         self.assertEqual(task.status, ScanTask.FAILED)
-        self.assertEqual(end_time.replace(microsecond=0),
-                         task.end_time.replace(microsecond=0))
+        self.assertEqual(
+            end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
+        )
 
     def test_scantask_increment(self):
         """Test scan task increment feature."""
@@ -178,21 +179,28 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         # pylint: disable=invalid-name
         task.save()
-        task.increment_stats('foo', increment_sys_count=True,
-                             increment_sys_scanned=True,
-                             increment_sys_failed=True,
-                             increment_sys_unreachable=True)
+        task.increment_stats(
+            "foo",
+            increment_sys_count=True,
+            increment_sys_scanned=True,
+            increment_sys_failed=True,
+            increment_sys_unreachable=True,
+        )
         self.assertEqual(1, task.systems_count)
         self.assertEqual(1, task.systems_scanned)
         self.assertEqual(1, task.systems_failed)
         self.assertEqual(1, task.systems_unreachable)
-        task.increment_stats('foo', increment_sys_count=True,
-                             increment_sys_scanned=True,
-                             increment_sys_failed=True,
-                             increment_sys_unreachable=True)
+        task.increment_stats(
+            "foo",
+            increment_sys_count=True,
+            increment_sys_scanned=True,
+            increment_sys_failed=True,
+            increment_sys_unreachable=True,
+        )
         self.assertEqual(2, task.systems_count)
         self.assertEqual(2, task.systems_scanned)
         self.assertEqual(2, task.systems_failed)
@@ -204,13 +212,17 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         # pylint: disable=invalid-name
         task.save()
-        task.increment_stats('foo', increment_sys_count=True,
-                             increment_sys_scanned=True,
-                             increment_sys_failed=True,
-                             increment_sys_unreachable=True)
+        task.increment_stats(
+            "foo",
+            increment_sys_count=True,
+            increment_sys_scanned=True,
+            increment_sys_failed=True,
+            increment_sys_unreachable=True,
+        )
         self.assertEqual(1, task.systems_count)
         self.assertEqual(1, task.systems_scanned)
         self.assertEqual(1, task.systems_failed)
@@ -221,10 +233,12 @@ class ScanTaskTest(TestCase):
         self.assertEqual(None, task.systems_failed)
         self.assertEqual(None, task.systems_unreachable)
 
-        systems_count,\
-            systems_scanned,\
-            systems_failed,\
-            systems_unreachable = task.calculate_counts()
+        (
+            systems_count,
+            systems_scanned,
+            systems_failed,
+            systems_unreachable,
+        ) = task.calculate_counts()
 
         self.assertEqual(systems_count, 0)
         self.assertEqual(systems_scanned, 0)
@@ -237,17 +251,23 @@ class ScanTaskTest(TestCase):
             job=self.scan_job,
             source=self.source,
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING)
+            status=ScanTask.PENDING,
+        )
         # pylint: disable=invalid-name
         task.save()
-        task.increment_stats('foo', increment_sys_count=True,
-                             increment_sys_scanned=True,
-                             increment_sys_failed=True,
-                             increment_sys_unreachable=True)
-        systems_count,\
-            systems_scanned,\
-            systems_failed,\
-            systems_unreachable = task.calculate_counts()
+        task.increment_stats(
+            "foo",
+            increment_sys_count=True,
+            increment_sys_scanned=True,
+            increment_sys_failed=True,
+            increment_sys_unreachable=True,
+        )
+        (
+            systems_count,
+            systems_scanned,
+            systems_failed,
+            systems_unreachable,
+        ) = task.calculate_counts()
         self.assertEqual(systems_count, 1)
         self.assertEqual(systems_scanned, 1)
         self.assertEqual(systems_failed, 1)

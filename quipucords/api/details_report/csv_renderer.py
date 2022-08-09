@@ -19,12 +19,9 @@ class DetailsCSVRenderer(renderers.BaseRenderer):
     """Class to render report as CSV."""
 
     # pylint: disable=too-few-public-methods
-    media_type = 'text/csv'
-    format = 'csv'
+    media_type = "text/csv"
+    format = "csv"
 
-    def render(self,
-               data,
-               accepted_media_type=None,
-               renderer_context=None):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render report as CSV."""
-        return create_details_csv(data, renderer_context.get('request'))
+        return create_details_csv(data, renderer_context.get("request"))

@@ -13,20 +13,19 @@
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
-from api.models import (Credential,
-                        ScanJob,
-                        ScanTask,
-                        Source)
+from api.models import Credential, ScanJob, ScanTask, Source
 
 from django.test import TestCase
 
 from requests import exceptions
 
 
-from scanner.satellite.api import (SATELLITE_VERSION_5,
-                                   SATELLITE_VERSION_6,
-                                   SatelliteAuthException,
-                                   SatelliteException)
+from scanner.satellite.api import (
+    SATELLITE_VERSION_5,
+    SATELLITE_VERSION_6,
+    SatelliteAuthException,
+    SatelliteException,
+)
 from scanner.satellite.inspect import InspectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
 from scanner.test_util import create_scan_job
@@ -64,16 +63,14 @@ class InspectTaskRunnerTest(TestCase):
     def setUp(self):
         """Create test case setup."""
         self.cred = Credential(
-            name='cred1',
+            name="cred1",
             cred_type=Credential.SATELLITE_CRED_TYPE,
-            username='username',
-            password='password')
+            username="username",
+            password="password",
+        )
         self.cred.save()
 
-        self.source = Source(
-            name='source1',
-            port=443,
-            hosts='["1.2.3.4"]')
+        self.source = Source(name="source1", port=443, hosts='["1.2.3.4"]')
 
         self.source.save()
         self.source.credentials.add(self.cred)
@@ -85,9 +82,10 @@ class InspectTaskRunnerTest(TestCase):
     def create_scan_job(self):
         """Create scan job for tests."""
         scan_job, inspect_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT)
+            self.source, ScanTask.SCAN_TYPE_INSPECT
+        )
 
-        inspect_task.update_stats('TEST_SAT.', sys_scanned=0)
+        inspect_task.update_stats("TEST_SAT.", sys_scanned=0)
         return scan_job, inspect_task
 
     def test_run_failed_prereq(self):
@@ -97,7 +95,7 @@ class InspectTaskRunnerTest(TestCase):
         connect_task.status = ScanTask.FAILED
         connect_task.save()
         task = InspectTaskRunner(scan_job, inspect_task)
-        status = task.run(Value('i', ScanJob.JOB_RUN))
+        status = task.run(Value("i", ScanJob.JOB_RUN))
 
         self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -105,11 +103,10 @@ class InspectTaskRunnerTest(TestCase):
         """Test running the inspect scan for unknown sat."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
-        with patch('scanner.satellite.connect.utils.status',
-                   return_value=(None,
-                                 None,
-                                 None)) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status", return_value=(None, None, None)
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -117,11 +114,11 @@ class InspectTaskRunnerTest(TestCase):
         """Test the running inspect task for Satellite 5."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
-        with patch('scanner.satellite.connect.utils.status',
-                   return_value=(401,
-                                 None,
-                                 SATELLITE_VERSION_5)) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status",
+            return_value=(401, None, SATELLITE_VERSION_5),
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -130,11 +127,11 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   return_value=(401,
-                                 None,
-                                 SATELLITE_VERSION_6)) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status",
+            return_value=(401, None, SATELLITE_VERSION_6),
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -143,11 +140,11 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   return_value=(200,
-                                 3,
-                                 SATELLITE_VERSION_6)) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status",
+            return_value=(200, 3, SATELLITE_VERSION_6),
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -156,9 +153,10 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   side_effect=mock_conn_exception) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status", side_effect=mock_conn_exception
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -167,9 +165,11 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   side_effect=mock_sat_auth_exception) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status",
+            side_effect=mock_sat_auth_exception,
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -178,9 +178,10 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   side_effect=mock_sat_exception) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status", side_effect=mock_sat_exception
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -189,9 +190,10 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   side_effect=mock_timeout_error) as mock_sat_status:
-            status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status", side_effect=mock_timeout_error
+        ) as mock_sat_status:
+            status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
             self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -200,10 +202,11 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   side_effect=mock_exception) as mock_sat_status:
+        with patch(
+            "scanner.satellite.connect.utils.status", side_effect=mock_exception
+        ) as mock_sat_status:
             with self.assertRaises(Exception):
-                status = task.run(Value('i', ScanJob.JOB_RUN))
+                status = task.run(Value("i", ScanJob.JOB_RUN))
                 mock_sat_status.assert_called_once_with(ANY)
                 self.assertEqual(status[1], ScanTask.FAILED)
 
@@ -212,12 +215,12 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch('scanner.satellite.connect.utils.status',
-                   return_value=(200,
-                                 2,
-                                 SATELLITE_VERSION_6)) as mock_sat_status:
-            with patch.object(SatelliteSixV2, 'hosts_facts') as mock_facts:
-                status = task.run(Value('i', ScanJob.JOB_RUN))
+        with patch(
+            "scanner.satellite.connect.utils.status",
+            return_value=(200, 2, SATELLITE_VERSION_6),
+        ) as mock_sat_status:
+            with patch.object(SatelliteSixV2, "hosts_facts") as mock_facts:
+                status = task.run(Value("i", ScanJob.JOB_RUN))
                 mock_sat_status.assert_called_once_with(ANY)
                 mock_facts.assert_called_once_with(ANY)
                 self.assertEqual(status[1], ScanTask.COMPLETED)
@@ -227,7 +230,7 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        status = task.run(Value('i', ScanJob.JOB_TERMINATE_CANCEL))
+        status = task.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
         self.assertEqual(status[1], ScanTask.CANCELED)
 
     def test_run_with_sat_pause(self):
@@ -235,5 +238,5 @@ class InspectTaskRunnerTest(TestCase):
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        status = task.run(Value('i', ScanJob.JOB_TERMINATE_PAUSE))
+        status = task.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
         self.assertEqual(status[1], ScanTask.PAUSED)

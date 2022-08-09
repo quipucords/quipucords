@@ -13,20 +13,31 @@
 # flake8: noqa
 # pylint: disable=unused-import
 from api.details_report.model import DetailsReport
-from api.deployments_report.model import (DeploymentsReport,
-                                          SystemFingerprint,
-                                          Product,
-                                          Entitlement)
+from api.deployments_report.model import (
+    DeploymentsReport,
+    SystemFingerprint,
+    Product,
+    Entitlement,
+)
 from api.credential.model import Credential
 from api.source.model import Source, SourceOptions
-from api.scan.model import (Scan,
-                            ScanOptions,
-                            ExtendedProductSearchOptions,
-                            DisabledOptionalProductsOptions)
+from api.scan.model import (
+    Scan,
+    ScanOptions,
+    ExtendedProductSearchOptions,
+    DisabledOptionalProductsOptions,
+)
 from api.scanjob.model import ScanJob
-from api.connresult.model import (JobConnectionResult, TaskConnectionResult,
-                                  SystemConnectionResult)
-from api.inspectresult.model import (JobInspectionResult, TaskInspectionResult,
-                                     SystemInspectionResult, RawFact)
+from api.connresult.model import (
+    JobConnectionResult,
+    TaskConnectionResult,
+    SystemConnectionResult,
+)
+from api.inspectresult.model import (
+    JobInspectionResult,
+    TaskInspectionResult,
+    SystemInspectionResult,
+    RawFact,
+)
 from api.scantask.model import ScanTask
 from api.status.model import ServerInformation

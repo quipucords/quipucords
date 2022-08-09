@@ -23,49 +23,47 @@ from . import environment, release
 class EnvironmentTest(TestCase):
     """Tests against the environment functions."""
 
-    @patch('os.environ')
+    @patch("os.environ")
     def test_commit_with_env(self, mock_os):
         """Test the commit method via environment."""
-        expected = 'buildnum'
+        expected = "buildnum"
         mock_os.get.return_value = expected
         result = environment.commit()
         self.assertEqual(result, expected)
 
-    @patch('subprocess.check_output')
+    @patch("subprocess.check_output")
     def test_commit_with_subprocess(self, mock_subprocess):
         """Test the commit method via subprocess."""
-        expected = 'buildnum'
+        expected = "buildnum"
         mock_subprocess.return_value = expected
         result = environment.commit()
         self.assertEqual(result, expected)
 
-    @patch('platform.uname')
+    @patch("platform.uname")
     def test_platform_info(self, mock_platform):
         """Test the platform_info method."""
-        platform_record = namedtuple('Platform', ['os', 'version'])
-        a_plat = platform_record('Red Hat', '7.4')
+        platform_record = namedtuple("Platform", ["os", "version"])
+        a_plat = platform_record("Red Hat", "7.4")
         mock_platform.return_value = a_plat
         result = environment.platform_info()
-        self.assertEqual(result['os'], 'Red Hat')
-        self.assertEqual(result['version'], '7.4')
+        self.assertEqual(result["os"], "Red Hat")
+        self.assertEqual(result["version"], "7.4")
 
-    @patch('sys.version')
+    @patch("sys.version")
     def test_python_version(self, mock_sys_ver):
         """Test the python_version method."""
-        expected = 'Python 3.6'
+        expected = "Python 3.6"
         mock_sys_ver.replace.return_value = expected
         result = environment.python_version()
         self.assertEqual(result, expected)
 
-    @patch('sys.modules')
+    @patch("sys.modules")
     def test_modules(self, mock_modules):
         """Test the modules method."""
-        expected = {'module1': 'version1',
-                    'module2': 'version2'}
-        mod1 = Mock(__version__='version1')
-        mod2 = Mock(__version__='version2')
-        mock_modules.items.return_value = (('module1', mod1),
-                                           ('module2', mod2))
+        expected = {"module1": "version1", "module2": "version2"}
+        mod1 = Mock(__version__="version1")
+        mod2 = Mock(__version__="version2")
+        mock_modules.items.return_value = (("module1", mod1), ("module2", mod2))
         result = environment.modules()
         self.assertEqual(result, expected)
 

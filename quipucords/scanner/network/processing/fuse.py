@@ -23,16 +23,16 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ProcessFindJbossActiveMQJar(util.FindJar):
     """Process the results of a find jar command."""
 
-    KEY = 'jboss_activemq_ver'
+    KEY = "jboss_activemq_ver"
 
 
 class ProcessFindJbossCamelJar(util.FindJar):
     """Process the results of a find jar command."""
 
-    KEY = 'jboss_camel_ver'
+    KEY = "jboss_camel_ver"
 
 
 class ProcessFindJbossCXFJar(util.FindJar):
     """Process the results of a find jar command."""
 
-    KEY = 'jboss_cxf_ver'
+    KEY = "jboss_cxf_ver"

@@ -10,15 +10,12 @@
 #
 """Test util for the scan features."""
 
-from api.models import (Scan,
-                        ScanJob,
-                        ScanTask)
+from api.models import Scan, ScanJob, ScanTask
 
 
-def create_scan_job(source,
-                    scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                    scan_name='test',
-                    scan_options=None):
+def create_scan_job(
+    source, scan_type=ScanTask.SCAN_TYPE_CONNECT, scan_name="test", scan_options=None
+):
     """Create a new scan job.
 
     :param source: the source for the scan job
@@ -27,8 +24,7 @@ def create_scan_job(source,
     :return: the scan job and task
     """
     # Create scan configuration
-    scan = Scan(name=scan_name,
-                scan_type=scan_type)
+    scan = Scan(name=scan_name, scan_type=scan_type)
     scan.save()
 
     # Add source to scan
@@ -50,17 +46,18 @@ def create_scan_job(source,
     scan_task = scan_job.tasks.first()
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         scan_task.complete()
-        scan_task = scan_job.tasks.filter(
-            scan_type=ScanTask.SCAN_TYPE_INSPECT).first()
+        scan_task = scan_job.tasks.filter(scan_type=ScanTask.SCAN_TYPE_INSPECT).first()
 
     return scan_job, scan_task
 
 
-def create_scan_job_two_tasks(source,
-                              source2,
-                              scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                              scan_name='test',
-                              scan_options=None):
+def create_scan_job_two_tasks(
+    source,
+    source2,
+    scan_type=ScanTask.SCAN_TYPE_CONNECT,
+    scan_name="test",
+    scan_options=None,
+):
     """Create a new scan job with two sources.
 
     :param source: the source for the scan job
@@ -70,8 +67,7 @@ def create_scan_job_two_tasks(source,
     :return: the scan job and task
     """
     # Create scan configuration
-    scan = Scan(name=scan_name,
-                scan_type=scan_type)
+    scan = Scan(name=scan_name, scan_type=scan_type)
     scan.save()
 
     # Add source to scan
@@ -92,7 +88,7 @@ def create_scan_job_two_tasks(source,
     scan_job.queue()
 
     # grab the scan tasks
-    scan_tasks = scan_job.tasks.all().order_by('sequence_number')
+    scan_tasks = scan_job.tasks.all().order_by("sequence_number")
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         for task in scan_tasks:
             task.complete()

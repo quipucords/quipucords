@@ -25,5 +25,5 @@ class ServerVersionMiddle:
     def __call__(self, request):
         """Add server version header to response."""
         response = self.get_response(request)
-        response['X-Server-Version'] = server_version()
+        response["X-Server-Version"] = server_version()
         return response

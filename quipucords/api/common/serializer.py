@@ -30,15 +30,13 @@ class ValidStringChoiceField(ChoiceField):
     def to_internal_value(self, data):
         """Create internal value."""
         valid_values = self.choices.keys()
-        values_str = ','.join(valid_values)
+        values_str = ",".join(valid_values)
         if not isinstance(data, str):
-            raise ValidationError(messages.COMMON_CHOICE_STR %
-                                  (values_str))
-        if data == '':
+            raise ValidationError(messages.COMMON_CHOICE_STR % (values_str))
+        if data == "":
             raise ValidationError(messages.COMMON_CHOICE_BLANK % (values_str))
         if data not in valid_values:
-            raise ValidationError(messages.COMMON_CHOICE_INV %
-                                  (data, values_str))
+            raise ValidationError(messages.COMMON_CHOICE_INV % (data, values_str))
         return data
 
 
@@ -61,18 +59,21 @@ class NotEmptyMixin:
     def __init__(self, *args, **kwargs):
         """Initialize required meta-data."""
         super().__init__(*args, **kwargs)
-        meta = getattr(self.__class__, 'Meta', None)
-        self.qpc_allow_empty_fields = getattr(
-            meta, 'qpc_allow_empty_fields', [])
+        meta = getattr(self.__class__, "Meta", None)
+        self.qpc_allow_empty_fields = getattr(meta, "qpc_allow_empty_fields", [])
 
     def to_representation(self, instance):
         """Override super to remove null or empty values."""
         result = super().to_representation(instance)
-        result = OrderedDict([(key, result[key])
-                              for key in result
-                              if key in self.qpc_allow_empty_fields or
-                              isinstance(result[key], (bool, int)) or
-                              bool(result[key])])
+        result = OrderedDict(
+            [
+                (key, result[key])
+                for key in result
+                if key in self.qpc_allow_empty_fields
+                or isinstance(result[key], (bool, int))
+                or bool(result[key])
+            ]
+        )
         return result
 
 
@@ -101,7 +102,7 @@ class CustomJSONField(Field):
 
     def to_representation(self, value):
         """Transform JSON str to python object."""
-        if value == '':
+        if value == "":
             return value
         return json.loads(value)
 

@@ -7,33 +7,33 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0002_insights_reports'),
+        ("api", "0002_insights_reports"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='deploymentsreport',
-            old_name='cached_json',
-            new_name='cached_fingerprints',
+            model_name="deploymentsreport",
+            old_name="cached_json",
+            new_name="cached_fingerprints",
         ),
         migrations.AddField(
-            model_name='deploymentsreport',
-            name='cached_insights',
+            model_name="deploymentsreport",
+            name="cached_insights",
             field=models.TextField(null=True),
         ),
         migrations.AddField(
-            model_name='systemfingerprint',
-            name='system_platform_id',
+            model_name="systemfingerprint",
+            name="system_platform_id",
             field=models.UUIDField(default=uuid.uuid4, editable=False),
         ),
         migrations.AddField(
-            model_name='systemfingerprint',
-            name='cpu_core_per_socket',
+            model_name="systemfingerprint",
+            name="cpu_core_per_socket",
             field=models.PositiveIntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='scanoptions',
-            name='max_concurrency',
+            model_name="scanoptions",
+            name="max_concurrency",
             field=models.PositiveIntegerField(default=25),
         ),
     ]

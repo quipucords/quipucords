@@ -42,18 +42,23 @@ class ExtendedProductSearchOptions(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'id:{}, '\
-            'jboss_eap: {}, '\
-            'jboss_fuse: {}, '\
-            'jboss_brms: {}, '\
-            'jboss_ws: {}, '\
-            'search_directories:' \
-                     ' {}'.format(self.id,
-                                  self.jboss_eap,
-                                  self.jboss_fuse,
-                                  self.jboss_brms,
-                                  self.jboss_ws,
-                                  self.get_search_directories()) + '}'
+        return (
+            "{" + "id:{}, "
+            "jboss_eap: {}, "
+            "jboss_fuse: {}, "
+            "jboss_brms: {}, "
+            "jboss_ws: {}, "
+            "search_directories:"
+            " {}".format(
+                self.id,
+                self.jboss_eap,
+                self.jboss_fuse,
+                self.jboss_brms,
+                self.jboss_ws,
+                self.get_search_directories(),
+            )
+            + "}"
+        )
 
     def get_search_directories(self):
         """Load JSON search directory."""
@@ -78,65 +83,64 @@ class DisabledOptionalProductsOptions(models.Model):
     MODEL_OPT_JBOSS_WS = False
     EXTRA_VAR_OPT_JBOSS_WS = not MODEL_OPT_JBOSS_WS
 
-    jboss_eap = models.BooleanField(
-        null=False, default=MODEL_OPT_JBOSS_EAP)
-    jboss_fuse = models.BooleanField(
-        null=False, default=MODEL_OPT_JBOSS_FUSE)
-    jboss_brms = models.BooleanField(
-        null=False, default=MODEL_OPT_JBOSS_BRMS)
-    jboss_ws = models.BooleanField(
-        null=False, default=MODEL_OPT_JBOSS_WS)
+    jboss_eap = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_EAP)
+    jboss_fuse = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_FUSE)
+    jboss_brms = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_BRMS)
+    jboss_ws = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_WS)
 
     # pylint: disable=too-many-format-args
     def __str__(self):
         """Convert to string."""
-        return '{' + 'id:{}, '\
-            'jboss_eap: {}, '\
-            'jboss_fuse: {}, '\
-            'jboss_brms: {}' \
-            'jboss_ws:' \
-                     ' {}'.format(self.id,
-                                  self.jboss_eap,
-                                  self.jboss_fuse,
-                                  self.jboss_brms,
-                                  self.jboss_ws) + '}'
+        return (
+            "{" + "id:{}, "
+            "jboss_eap: {}, "
+            "jboss_fuse: {}, "
+            "jboss_brms: {}"
+            "jboss_ws:"
+            " {}".format(
+                self.id, self.jboss_eap, self.jboss_fuse, self.jboss_brms, self.jboss_ws
+            )
+            + "}"
+        )
 
 
 class ScanOptions(models.Model):
     """The scan options allows configuration of a scan."""
 
-    JBOSS_EAP = 'jboss_eap'
-    JBOSS_FUSE = 'jboss_fuse'
-    JBOSS_BRMS = 'jboss_brms'
-    JBOSS_WS = 'jboss_ws'
+    JBOSS_EAP = "jboss_eap"
+    JBOSS_FUSE = "jboss_fuse"
+    JBOSS_BRMS = "jboss_brms"
+    JBOSS_WS = "jboss_ws"
 
-    EXT_PRODUCT_SEARCH_DIRS = 'search_directories'
-    JBOSS_EAP_EXT = 'jboss_eap_ext'
-    JBOSS_FUSE_EXT = 'jboss_fuse_ext'
-    JBOSS_BRMS_EXT = 'jboss_brms_ext'
-    JBOSS_WS_EXT = 'jboss_ws_ext'
+    EXT_PRODUCT_SEARCH_DIRS = "search_directories"
+    JBOSS_EAP_EXT = "jboss_eap_ext"
+    JBOSS_FUSE_EXT = "jboss_fuse_ext"
+    JBOSS_BRMS_EXT = "jboss_brms_ext"
+    JBOSS_WS_EXT = "jboss_ws_ext"
 
-    max_concurrency = models.PositiveIntegerField(
-        default=DEFAULT_MAX_CONCURRENCY)
-    disabled_optional_products = \
-        models.OneToOneField(DisabledOptionalProductsOptions,
-                             on_delete=models.CASCADE,
-                             null=True)
-    enabled_extended_product_search = \
-        models.OneToOneField(ExtendedProductSearchOptions,
-                             on_delete=models.CASCADE, null=True)
+    max_concurrency = models.PositiveIntegerField(default=DEFAULT_MAX_CONCURRENCY)
+    disabled_optional_products = models.OneToOneField(
+        DisabledOptionalProductsOptions, on_delete=models.CASCADE, null=True
+    )
+    enabled_extended_product_search = models.OneToOneField(
+        ExtendedProductSearchOptions, on_delete=models.CASCADE, null=True
+    )
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'id:{}, '\
-            'max_concurrency: {}, '\
-            'disabled_optional_products: {}, ' \
-            'enabled_extended_product_search:' \
-                     ' {}'.format(self.id,
-                                  self.max_concurrency,
-                                  self.disabled_optional_products,
-                                  self.enabled_extended_product_search)\
-            + '}'
+        return (
+            "{" + "id:{}, "
+            "max_concurrency: {}, "
+            "disabled_optional_products: {}, "
+            "enabled_extended_product_search:"
+            " {}".format(
+                self.id,
+                self.max_concurrency,
+                self.disabled_optional_products,
+                self.enabled_extended_product_search,
+            )
+            + "}"
+        )
 
     @staticmethod
     def get_default_forks():
@@ -149,23 +153,16 @@ class ScanOptions(models.Model):
 
         :returns: a dictionary representing extra vars
         """
-        defaults = \
-            {ScanOptions.JBOSS_EAP:
-             DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_EAP,
-             ScanOptions.JBOSS_FUSE:
-             DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_FUSE,
-             ScanOptions.JBOSS_BRMS:
-             DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_BRMS,
-             ScanOptions.JBOSS_WS:
-             DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_WS,
-             ScanOptions.JBOSS_EAP_EXT:
-             ExtendedProductSearchOptions.EXT_JBOSS_EAP,
-             ScanOptions.JBOSS_FUSE_EXT:
-             ExtendedProductSearchOptions.EXT_JBOSS_FUSE,
-             ScanOptions.JBOSS_BRMS_EXT:
-             ExtendedProductSearchOptions.EXT_JBOSS_BRMS,
-             ScanOptions.JBOSS_WS_EXT:
-             ExtendedProductSearchOptions.EXT_JBOSS_WS}
+        defaults = {
+            ScanOptions.JBOSS_EAP: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_EAP,
+            ScanOptions.JBOSS_FUSE: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_FUSE,
+            ScanOptions.JBOSS_BRMS: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_BRMS,
+            ScanOptions.JBOSS_WS: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_WS,
+            ScanOptions.JBOSS_EAP_EXT: ExtendedProductSearchOptions.EXT_JBOSS_EAP,
+            ScanOptions.JBOSS_FUSE_EXT: ExtendedProductSearchOptions.EXT_JBOSS_FUSE,
+            ScanOptions.JBOSS_BRMS_EXT: ExtendedProductSearchOptions.EXT_JBOSS_BRMS,
+            ScanOptions.JBOSS_WS_EXT: ExtendedProductSearchOptions.EXT_JBOSS_WS,
+        }
         return defaults
 
     def get_extra_vars(self):
@@ -185,11 +182,12 @@ class ScanOptions(models.Model):
         # therefore, we must flip the values from the user to format
         # the extra vars correctly for the role
         if disable_products is not None:
-            extra_vars[self.JBOSS_EAP] = \
-                not(disable_products.jboss_brms and
-                    disable_products.jboss_fuse and
-                    disable_products.jboss_eap and
-                    disable_products.jboss_ws)
+            extra_vars[self.JBOSS_EAP] = not (
+                disable_products.jboss_brms
+                and disable_products.jboss_fuse
+                and disable_products.jboss_eap
+                and disable_products.jboss_ws
+            )
             extra_vars[self.JBOSS_FUSE] = not disable_products.jboss_fuse
             extra_vars[self.JBOSS_BRMS] = not disable_products.jboss_brms
             extra_vars[self.JBOSS_WS] = not disable_products.jboss_ws
@@ -204,13 +202,10 @@ class ScanOptions(models.Model):
 
             # Add search directories if it is not None, not empty
             if extended_search.search_directories is not None:
-                search_directories = json.loads(
-                    extended_search.search_directories)
-                if search_directories and \
-                        isinstance(search_directories, list):
-                    search_directories = ' '.join(search_directories)
-                    extra_vars[self.EXT_PRODUCT_SEARCH_DIRS] = \
-                        search_directories
+                search_directories = json.loads(extended_search.search_directories)
+                if search_directories and isinstance(search_directories, list):
+                    search_directories = " ".join(search_directories)
+                    extra_vars[self.EXT_PRODUCT_SEARCH_DIRS] = search_directories
 
         return extra_vars
 
@@ -220,7 +215,8 @@ class Scan(models.Model):
 
     SCAN_TYPE_CHOICES = (
         (ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_CONNECT),
-        (ScanTask.SCAN_TYPE_INSPECT, ScanTask.SCAN_TYPE_INSPECT))
+        (ScanTask.SCAN_TYPE_INSPECT, ScanTask.SCAN_TYPE_INSPECT),
+    )
 
     name = models.CharField(max_length=64, unique=True)
     sources = models.ManyToManyField(Source)
@@ -229,23 +225,24 @@ class Scan(models.Model):
         choices=SCAN_TYPE_CHOICES,
         default=ScanTask.SCAN_TYPE_INSPECT,
     )
-    options = models.OneToOneField(
-        ScanOptions, null=True, on_delete=models.CASCADE)
+    options = models.OneToOneField(ScanOptions, null=True, on_delete=models.CASCADE)
 
     most_recent_scanjob = models.ForeignKey(
-        'api.ScanJob', null=True, on_delete=models.SET_NULL, related_name='+')
+        "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'id:{}, '\
-            'name:{}, '\
-            'sources:{}, '\
-            'scan_type:{}, '\
-            'options: {}'.format(self.id,
-                                 self.name,
-                                 self.sources,
-                                 self.scan_type,
-                                 self.options) + '}'
+        return (
+            "{" + "id:{}, "
+            "name:{}, "
+            "sources:{}, "
+            "scan_type:{}, "
+            "options: {}".format(
+                self.id, self.name, self.sources, self.scan_type, self.options
+            )
+            + "}"
+        )
 
     class Meta:
         """Metadata for model."""

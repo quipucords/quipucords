@@ -10,15 +10,17 @@
 #
 """Admin module for Django server application."""
 
-from api.models import (Credential,
-                        DetailsReport,
-                        JobConnectionResult,
-                        JobInspectionResult,
-                        Scan,
-                        ScanJob,
-                        ServerInformation,
-                        Source,
-                        SystemFingerprint)
+from api.models import (
+    Credential,
+    DetailsReport,
+    JobConnectionResult,
+    JobInspectionResult,
+    Scan,
+    ScanJob,
+    ServerInformation,
+    Source,
+    SystemFingerprint,
+)
 
 from django.contrib import admin
 

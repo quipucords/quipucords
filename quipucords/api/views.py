@@ -18,8 +18,7 @@ from api.source.view import SourceViewSet
 from api.deployments_report.view import deployments
 from api.details_report.view import details
 from api.insights_report.view import insights
-from api.merge_report.view import (async_merge_reports,
-                                   sync_merge_reports)
+from api.merge_report.view import async_merge_reports, sync_merge_reports
 from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSet
 from api.user.view import UserViewSet

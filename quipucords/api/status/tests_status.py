@@ -21,9 +21,9 @@ class StatusTest(TestCase):
 
     def test_status_endpoint(self):
         """Test the status endpoint."""
-        url = reverse('server-status')
+        url = reverse("server-status")
         response = self.client.get(url)
-        self.assertTrue(response.has_header('X-Server-Version'))
-        self.assertEqual(response['X-Server-Version'], server_version())
+        self.assertTrue(response.has_header("X-Server-Version"))
+        self.assertEqual(response["X-Server-Version"], server_version())
         json_result = response.json()
-        self.assertEqual(json_result['api_version'], 1)
+        self.assertEqual(json_result["api_version"], 1)

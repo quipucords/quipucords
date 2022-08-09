@@ -13,7 +13,7 @@
 
 from collections import OrderedDict
 
-NAME = 'name'
+NAME = "name"
 
 
 def product_entitlement_found(entitlements, product_name):
@@ -26,7 +26,7 @@ def product_entitlement_found(entitlements, product_name):
     if not entitlements:
         return False
     for entitlement in entitlements:
-        name = entitlement.get(NAME, '')
+        name = entitlement.get(NAME, "")
         if product_name in name:
             return True
     return False
@@ -40,7 +40,7 @@ def strip_prefix(string, prefix):
     :returns: string without prefix, if prefix was present.
     """
     if string.startswith(prefix):
-        return string[len(prefix):]
+        return string[len(prefix) :]
 
     return string
 
@@ -53,7 +53,7 @@ def strip_suffix(string, suffix):
     :returns: string without suffix, if suffix was present.
     """
     if string.endswith(suffix):
-        return string[:-len(suffix)]
+        return string[: -len(suffix)]
 
     return string
 
@@ -66,11 +66,10 @@ def generate_raw_fact_members(raw_facts_dict):
     """
     raw_facts = None
     raw_fact_list = []
-    ordered_facts = OrderedDict(sorted(raw_facts_dict.items(),
-                                       key=lambda t: t[0]))
+    ordered_facts = OrderedDict(sorted(raw_facts_dict.items(), key=lambda t: t[0]))
     for key, value in ordered_facts.items():
         if value:
             raw_fact_list.append(key)
     if raw_fact_list:
-        raw_facts = '/'.join(raw_fact_list)
+        raw_facts = "/".join(raw_fact_list)
     return raw_facts

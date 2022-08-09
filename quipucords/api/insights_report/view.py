@@ -36,18 +36,17 @@ from api.user.authentication import QuipucordsExpiringTokenAuthentication
 # pylint: disable=invalid-name
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
 
 if authentication_enabled:
-    auth_classes = (QuipucordsExpiringTokenAuthentication,
-                    SessionAuthentication)
+    auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
     auth_classes = ()
     perm_classes = ()
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, InsightsGzipRenderer, BrowsableAPIRenderer))

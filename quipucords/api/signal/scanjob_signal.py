@@ -23,9 +23,9 @@ from scanner.job import ScanJobRunner
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-PAUSE = 'pause'
-CANCEL = 'cancel'
-RESTART = 'restart'
+PAUSE = "pause"
+CANCEL = "cancel"
+RESTART = "restart"
 
 # pylint: disable=W0613
 
@@ -38,17 +38,21 @@ def handle_scan(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('START'))
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("START"))
     scanner = ScanJobRunner(instance)
     instance.queue()
     if not manager.SCAN_MANAGER.is_alive():
-        logger.error('%s: %s',
-                     manager.SCAN_MANAGER_LOG_PREFIX,
-                     _(messages.SIGNAL_SCAN_MANAGER_CRASH))
+        logger.error(
+            "%s: %s",
+            manager.SCAN_MANAGER_LOG_PREFIX,
+            _(messages.SIGNAL_SCAN_MANAGER_CRASH),
+        )
         manager.SCAN_MANAGER = manager.Manager()
-        logger.error('%s: %s',
-                     manager.SCAN_MANAGER_LOG_PREFIX,
-                     _(messages.SIGNAL_SCAN_MANAGER_RESTART))
+        logger.error(
+            "%s: %s",
+            manager.SCAN_MANAGER_LOG_PREFIX,
+            _(messages.SIGNAL_SCAN_MANAGER_RESTART),
+        )
         manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
@@ -77,7 +81,7 @@ def scan_pause(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('PAUSE'))
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("PAUSE"))
     scan_action(sender, instance, PAUSE, **kwargs)
 
 
@@ -89,7 +93,7 @@ def scan_cancel(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('CANCEL'))
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("CANCEL"))
     scan_action(sender, instance, CANCEL, **kwargs)
 
 
@@ -101,17 +105,21 @@ def scan_restart(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ('RESTART'))
+    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("RESTART"))
     scanner = ScanJobRunner(instance)
 
     if not manager.SCAN_MANAGER.is_alive():
-        logger.error('%s: %s',
-                     manager.SCAN_MANAGER_LOG_PREFIX,
-                     _(messages.SIGNAL_SCAN_MANAGER_CRASH))
+        logger.error(
+            "%s: %s",
+            manager.SCAN_MANAGER_LOG_PREFIX,
+            _(messages.SIGNAL_SCAN_MANAGER_CRASH),
+        )
         manager.SCAN_MANAGER = manager.Manager()
-        logger.error('%s: %s',
-                     manager.SCAN_MANAGER_LOG_PREFIX,
-                     _(messages.SIGNAL_SCAN_MANAGER_RESTART))
+        logger.error(
+            "%s: %s",
+            manager.SCAN_MANAGER_LOG_PREFIX,
+            _(messages.SIGNAL_SCAN_MANAGER_RESTART),
+        )
         manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
         # by the manager startup, looking for pending/running scans.
@@ -120,10 +128,10 @@ def scan_restart(sender, instance, **kwargs):
 
 
 # pylint: disable=C0103
-start_scan = django.dispatch.Signal(providing_args=['instance'])
-pause_scan = django.dispatch.Signal(providing_args=['instance'])
-cancel_scan = django.dispatch.Signal(providing_args=['instance'])
-restart_scan = django.dispatch.Signal(providing_args=['instance'])
+start_scan = django.dispatch.Signal(providing_args=["instance"])
+pause_scan = django.dispatch.Signal(providing_args=["instance"])
+cancel_scan = django.dispatch.Signal(providing_args=["instance"])
+restart_scan = django.dispatch.Signal(providing_args=["instance"])
 
 start_scan.connect(handle_scan)
 pause_scan.connect(scan_pause)

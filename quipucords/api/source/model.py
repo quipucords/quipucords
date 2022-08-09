@@ -24,24 +24,26 @@ from django.db import models
 class SourceOptions(models.Model):
     """The source options allows configuration of a sources."""
 
-    SSL_PROTOCOL_SSLv23 = 'SSLv23'
-    SSL_PROTOCOL_TLSv1 = 'TLSv1'
-    SSL_PROTOCOL_TLSv1_1 = 'TLSv1_1'
-    SSL_PROTOCOL_TLSv1_2 = 'TLSv1_2'
-    SSL_PROTOCOL_CHOICES = ((SSL_PROTOCOL_SSLv23, SSL_PROTOCOL_SSLv23),
-                            (SSL_PROTOCOL_TLSv1, SSL_PROTOCOL_TLSv1),
-                            (SSL_PROTOCOL_TLSv1_1, SSL_PROTOCOL_TLSv1_1),
-                            (SSL_PROTOCOL_TLSv1_2, SSL_PROTOCOL_TLSv1_2))
+    SSL_PROTOCOL_SSLv23 = "SSLv23"
+    SSL_PROTOCOL_TLSv1 = "TLSv1"
+    SSL_PROTOCOL_TLSv1_1 = "TLSv1_1"
+    SSL_PROTOCOL_TLSv1_2 = "TLSv1_2"
+    SSL_PROTOCOL_CHOICES = (
+        (SSL_PROTOCOL_SSLv23, SSL_PROTOCOL_SSLv23),
+        (SSL_PROTOCOL_TLSv1, SSL_PROTOCOL_TLSv1),
+        (SSL_PROTOCOL_TLSv1_1, SSL_PROTOCOL_TLSv1_1),
+        (SSL_PROTOCOL_TLSv1_2, SSL_PROTOCOL_TLSv1_2),
+    )
 
-    SSL_PROTOCOL_MAPPING = {SSL_PROTOCOL_SSLv23: ssl.PROTOCOL_SSLv23,
-                            SSL_PROTOCOL_TLSv1: ssl.PROTOCOL_TLSv1,
-                            SSL_PROTOCOL_TLSv1_1: ssl.PROTOCOL_TLSv1_1,
-                            SSL_PROTOCOL_TLSv1_2: ssl.PROTOCOL_TLSv1_2}
+    SSL_PROTOCOL_MAPPING = {
+        SSL_PROTOCOL_SSLv23: ssl.PROTOCOL_SSLv23,
+        SSL_PROTOCOL_TLSv1: ssl.PROTOCOL_TLSv1,
+        SSL_PROTOCOL_TLSv1_1: ssl.PROTOCOL_TLSv1_1,
+        SSL_PROTOCOL_TLSv1_2: ssl.PROTOCOL_TLSv1_2,
+    }
 
     ssl_protocol = models.CharField(
-        max_length=10,
-        choices=SSL_PROTOCOL_CHOICES,
-        null=True
+        max_length=10, choices=SSL_PROTOCOL_CHOICES, null=True
     )
 
     ssl_cert_verify = models.NullBooleanField()
@@ -57,50 +59,54 @@ class SourceOptions(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, ssl_protocol:%s, ssl_cert_verify:%s,' \
-               'disable_ssl:%s, use_paramiko:%s}' %\
-               (self.id, self.ssl_protocol, self.ssl_cert_verify,
-                self.disable_ssl, self.use_paramiko)
+        return (
+            "{ id:%s, ssl_protocol:%s, ssl_cert_verify:%s,"
+            "disable_ssl:%s, use_paramiko:%s}"
+            % (
+                self.id,
+                self.ssl_protocol,
+                self.ssl_cert_verify,
+                self.disable_ssl,
+                self.use_paramiko,
+            )
+        )
 
 
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""
 
-    NETWORK_SOURCE_TYPE = 'network'
-    VCENTER_SOURCE_TYPE = 'vcenter'
-    SATELLITE_SOURCE_TYPE = 'satellite'
-    SOURCE_TYPE_CHOICES = ((NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
-                           (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE),
-                           (SATELLITE_SOURCE_TYPE, SATELLITE_SOURCE_TYPE))
+    NETWORK_SOURCE_TYPE = "network"
+    VCENTER_SOURCE_TYPE = "vcenter"
+    SATELLITE_SOURCE_TYPE = "satellite"
+    SOURCE_TYPE_CHOICES = (
+        (NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
+        (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE),
+        (SATELLITE_SOURCE_TYPE, SATELLITE_SOURCE_TYPE),
+    )
 
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
-        max_length=12,
-        choices=SOURCE_TYPE_CHOICES,
-        null=False
+        max_length=12, choices=SOURCE_TYPE_CHOICES, null=False
     )
     port = models.IntegerField(null=True)
-    options = models.OneToOneField(
-        SourceOptions, null=True, on_delete=models.CASCADE)
+    options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
     hosts = models.TextField(unique=False, null=False)
     exclude_hosts = models.TextField(unique=False, null=True)
 
     most_recent_connect_scan = models.ForeignKey(
-        'api.ScanJob', null=True, on_delete=models.SET_NULL, related_name='+')
+        "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, '\
-            'name:%s, '\
-            'type:%s, '\
-            'options:%s, '\
-            'port:%s}' %\
-            (self.id,
-             self.name,
-             self.source_type,
-             self.options,
-             self.port)
+        return (
+            "{ id:%s, "
+            "name:%s, "
+            "type:%s, "
+            "options:%s, "
+            "port:%s}" % (self.id, self.name, self.source_type, self.options, self.port)
+        )
 
     def get_hosts(self):
         """Access hosts as python list instead of str.

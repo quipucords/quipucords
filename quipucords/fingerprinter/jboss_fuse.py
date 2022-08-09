@@ -20,36 +20,36 @@ from utils import default_getter
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-PRODUCT = 'JBoss Fuse'
-VERSION_KEY = 'version'
-RAW_FACT_KEY = 'raw_fact_key'
-EAP_HOME_BIN = 'eap_home_bin'
-KARAF_HOME_BIN_FUSE = 'karaf_home_bin_fuse'
-JBOSS_FUSE_SYSTEMCTL_FILES = 'jboss_fuse_systemctl_unit_files'
-JBOSS_FUSE_CHKCONFIG = 'jboss_fuse_chkconfig'
-SUBMAN_CONSUMED = 'subman_consumed'
-ENTITLEMENTS = 'entitlements'
+PRODUCT = "JBoss Fuse"
+VERSION_KEY = "version"
+RAW_FACT_KEY = "raw_fact_key"
+EAP_HOME_BIN = "eap_home_bin"
+KARAF_HOME_BIN_FUSE = "karaf_home_bin_fuse"
+JBOSS_FUSE_SYSTEMCTL_FILES = "jboss_fuse_systemctl_unit_files"
+JBOSS_FUSE_CHKCONFIG = "jboss_fuse_chkconfig"
+SUBMAN_CONSUMED = "subman_consumed"
+ENTITLEMENTS = "entitlements"
 # versions from fuse on eap or karaf
-FUSE_ACTIVEMQ_VERSION = 'fuse_activemq_version'
-FUSE_CAMEL_VERSION = 'fuse_camel_version'
-FUSE_CXF_VERSION = 'fuse_cxf_version'
+FUSE_ACTIVEMQ_VERSION = "fuse_activemq_version"
+FUSE_CAMEL_VERSION = "fuse_camel_version"
+FUSE_CXF_VERSION = "fuse_cxf_version"
 # versions from fuse on eap
-JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER = 'jboss_fuse_on_eap_activemq_ver'
-JBOSS_FUSE_ON_EAP_CAMEL_VER = 'jboss_fuse_on_eap_camel_ver'
-JBOSS_FUSE_ON_EAP_CXF_VER = 'jboss_fuse_on_eap_cxf_ver'
+JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER = "jboss_fuse_on_eap_activemq_ver"
+JBOSS_FUSE_ON_EAP_CAMEL_VER = "jboss_fuse_on_eap_camel_ver"
+JBOSS_FUSE_ON_EAP_CXF_VER = "jboss_fuse_on_eap_cxf_ver"
 # versions from extended-products scan
-JBOSS_ACTIVEMQ_VER = 'jboss_activemq_ver'
-JBOSS_CAMEL_VER = 'jboss_camel_ver'
-JBOSS_CXF_VER = 'jboss_cxf_ver'
+JBOSS_ACTIVEMQ_VER = "jboss_activemq_ver"
+JBOSS_CAMEL_VER = "jboss_camel_ver"
+JBOSS_CXF_VER = "jboss_cxf_ver"
 
 
 FUSE_CLASSIFICATIONS = {
-    'redhat-630187': 'Fuse-6.3.0',
-    'redhat-621084': 'Fuse-6.2.1',
-    'redhat-620133': 'Fuse-6.2.0',
-    'redhat-611412': 'Fuse-6.1.1',
-    'redhat-610379': 'Fuse-6.1.0',
-    'redhat-60024': 'Fuse-6.0.0',
+    "redhat-630187": "Fuse-6.3.0",
+    "redhat-621084": "Fuse-6.2.1",
+    "redhat-620133": "Fuse-6.2.0",
+    "redhat-611412": "Fuse-6.1.1",
+    "redhat-610379": "Fuse-6.1.0",
+    "redhat-60024": "Fuse-6.0.0",
 }
 
 
@@ -62,7 +62,7 @@ def get_version(eap_version):
     """
     new_versions = []
     for dictionary in eap_version:
-        new_versions.append(dictionary['version'])
+        new_versions.append(dictionary["version"])
     # at this point we have a nested list of versions and we want it
     # to be a flat list
     new_versions = [item for items in new_versions for item in items]
@@ -104,48 +104,62 @@ def detect_jboss_fuse(source, facts):
     fuse_versions = []
 
     metadata = {
-        'server_id': source['server_id'],
-        'source_name': source['source_name'],
-        'source_type': source['source_type'],
+        "server_id": source["server_id"],
+        "source_name": source["source_name"],
+        "source_type": source["source_type"],
     }
-    product_dict = {'name': PRODUCT}
+    product_dict = {"name": PRODUCT}
     raw_facts = None
 
-    is_fuse_on_eap = (eap_home_bin and any(eap_home_bin.values()))
-    is_fuse_on_karaf = (karaf_home_bin_fuse and
-                        any(karaf_home_bin_fuse.values()))
-    if (activemq_list and camel_list and cxf_list) or is_fuse_on_eap or \
-            is_fuse_on_karaf:
+    is_fuse_on_eap = eap_home_bin and any(eap_home_bin.values())
+    is_fuse_on_karaf = karaf_home_bin_fuse and any(karaf_home_bin_fuse.values())
+    if (
+        (activemq_list and camel_list and cxf_list)
+        or is_fuse_on_eap
+        or is_fuse_on_karaf
+    ):
         # Set versions from extended-products scan & regular scan
-        fuse_versions = list(set(fuse_activemq + eap_activemq +
-                                 ext_fuse_activemq + fuse_camel +
-                                 eap_camel + ext_fuse_camel +
-                                 fuse_cxf + eap_cxf + ext_fuse_cxf))
+        fuse_versions = list(
+            set(
+                fuse_activemq
+                + eap_activemq
+                + ext_fuse_activemq
+                + fuse_camel
+                + eap_camel
+                + ext_fuse_camel
+                + fuse_cxf
+                + eap_cxf
+                + ext_fuse_cxf
+            )
+        )
     if is_fuse_on_eap or is_fuse_on_karaf or fuse_versions:
-        raw_facts_dict = {EAP_HOME_BIN: is_fuse_on_eap,
-                          KARAF_HOME_BIN_FUSE: is_fuse_on_karaf,
-                          JBOSS_ACTIVEMQ_VER: ext_fuse_activemq,
-                          JBOSS_CAMEL_VER: ext_fuse_camel,
-                          JBOSS_CXF_VER: ext_fuse_cxf,
-                          FUSE_ACTIVEMQ_VERSION: fuse_activemq,
-                          FUSE_CAMEL_VERSION: fuse_camel,
-                          FUSE_CXF_VERSION: fuse_cxf,
-                          JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER: eap_activemq,
-                          JBOSS_FUSE_ON_EAP_CAMEL_VER: eap_camel,
-                          JBOSS_FUSE_ON_EAP_CXF_VER: eap_cxf}
+        raw_facts_dict = {
+            EAP_HOME_BIN: is_fuse_on_eap,
+            KARAF_HOME_BIN_FUSE: is_fuse_on_karaf,
+            JBOSS_ACTIVEMQ_VER: ext_fuse_activemq,
+            JBOSS_CAMEL_VER: ext_fuse_camel,
+            JBOSS_CXF_VER: ext_fuse_cxf,
+            FUSE_ACTIVEMQ_VERSION: fuse_activemq,
+            FUSE_CAMEL_VERSION: fuse_camel,
+            FUSE_CXF_VERSION: fuse_cxf,
+            JBOSS_FUSE_ON_EAP_ACTIVEMQ_VER: eap_activemq,
+            JBOSS_FUSE_ON_EAP_CAMEL_VER: eap_camel,
+            JBOSS_FUSE_ON_EAP_CXF_VER: eap_cxf,
+        }
         raw_facts = generate_raw_fact_members(raw_facts_dict)
         product_dict[PRESENCE_KEY] = Product.PRESENT
         versions = []
         if fuse_versions:
             for version_data in fuse_versions:
-                unknown_release = 'Unknown-Release: ' + version_data
-                versions.append(FUSE_CLASSIFICATIONS.get(version_data,
-                                                         unknown_release))
+                unknown_release = "Unknown-Release: " + version_data
+                versions.append(FUSE_CLASSIFICATIONS.get(version_data, unknown_release))
             if versions:
                 product_dict[VERSION_KEY] = versions
     elif systemctl_files or chkconfig:
-        raw_facts_dict = {JBOSS_FUSE_SYSTEMCTL_FILES: systemctl_files,
-                          JBOSS_FUSE_CHKCONFIG: chkconfig}
+        raw_facts_dict = {
+            JBOSS_FUSE_SYSTEMCTL_FILES: systemctl_files,
+            JBOSS_FUSE_CHKCONFIG: chkconfig,
+        }
         raw_facts = generate_raw_fact_members(raw_facts_dict)
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
     elif product_entitlement_found(subman_consumed, PRODUCT):

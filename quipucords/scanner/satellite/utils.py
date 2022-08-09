@@ -65,11 +65,11 @@ def get_sat5_client(scan_task, options=None):
     :returns: A tuple of (client, user, password)
     """
     if options:
-        ssl_verify = options.get('ssl_cert_verify')
-        host = options.get('host')
-        port = options.get('port')
-        user = options.get('user')
-        password = options.get('password')
+        ssl_verify = options.get("ssl_cert_verify")
+        host = options.get("host")
+        port = options.get("port")
+        user = options.get("user")
+        password = options.get("password")
     else:
         ssl_verify = True
         source_options = scan_task.source.options
@@ -81,17 +81,19 @@ def get_sat5_client(scan_task, options=None):
     if ssl_verify is False:
         ssl_context.verify_mode = ssl.CERT_NONE
 
-    rpc_url_template = 'https://{sat_host}:{port}/rpc/api'
+    rpc_url_template = "https://{sat_host}:{port}/rpc/api"
     rpc_url = construct_url(rpc_url_template, sat_host=host, port=port)
-    client = xmlrpc.client.ServerProxy(uri=rpc_url,
-                                       context=ssl_context,
-                                       use_builtin_types=True,
-                                       allow_none=True,
-                                       use_datetime=True)
+    client = xmlrpc.client.ServerProxy(
+        uri=rpc_url,
+        context=ssl_context,
+        use_builtin_types=True,
+        allow_none=True,
+        use_datetime=True,
+    )
     return (client, user, password)
 
 
-def construct_url(url, sat_host, port='443', org_id=None, host_id=None):
+def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
     """Create a formatted url with the given parameters.
 
     :param url: A url string with placeholders for parameters
@@ -101,13 +103,13 @@ def construct_url(url, sat_host, port='443', org_id=None, host_id=None):
     :param host_id: The identifier of a satellite host
     :returns: A formatted url strings
     """
-    return url.format(sat_host=sat_host, port=port,
-                      org_id=org_id, host_id=host_id)
+    return url.format(sat_host=sat_host, port=port, org_id=org_id, host_id=host_id)
 
 
 # pylint: disable=too-many-arguments
-def execute_request(scan_task, url, org_id=None, host_id=None,
-                    query_params=None, options=None):
+def execute_request(
+    scan_task, url, org_id=None, host_id=None, query_params=None, options=None
+):
     """Execute a request to the Satellite server.
 
     :param scan_task: The scan task
@@ -121,11 +123,11 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     :throws: Timeout
     """
     if options:
-        ssl_verify = options.get('ssl_cert_verify')
-        host = options.get('host')
-        port = options.get('port')
-        user = options.get('user')
-        password = options.get('password')
+        ssl_verify = options.get("ssl_cert_verify")
+        host = options.get("host")
+        port = options.get("port")
+        user = options.get("user")
+        password = options.get("password")
     else:
         ssl_verify = True
         source_options = scan_task.source.options
@@ -138,9 +140,13 @@ def execute_request(scan_task, url, org_id=None, host_id=None,
     connect_timeout = int(settings.QPC_SSH_CONNECT_TIMEOUT[:-1])
     inspect_timeout = int(settings.QPC_SSH_INSPECT_TIMEOUT[:-1])
 
-    response = requests.get(url, auth=(user, password),
-                            timeout=(connect_timeout, inspect_timeout),
-                            params=query_params, verify=ssl_verify)
+    response = requests.get(
+        url,
+        auth=(user, password),
+        timeout=(connect_timeout, inspect_timeout),
+        params=query_params,
+        verify=ssl_verify,
+    )
     return response, url
 
 
@@ -164,7 +170,7 @@ def status(scan_task):
         message = f'Satellite 5 status check failed with error: "{error}".'
         scan_task.log_message(message, log_level=logging.ERROR)
     except xmlrpc.client.ProtocolError:
-        message = 'Satellite 5 status check endpoint not found. '
+        message = "Satellite 5 status check endpoint not found. "
         scan_task.log_message(message)
 
     return None, None, None
@@ -181,7 +187,7 @@ def _status5(scan_task):
         key = client.auth.login(user, password)
         client.auth.logout(key)
     except xmlrpc.client.Fault as xml_error:
-        invalid_auth = 'Either the password or username is incorrect.'
+        invalid_auth = "Either the password or username is incorrect."
         if invalid_auth in str(xml_error):
             raise SatelliteAuthException(str(xml_error))
         raise SatelliteException(str(xml_error))
@@ -201,21 +207,22 @@ def _status6(scan_task):
     :param scan_task: The scan task
     :returns: tuple (status_code, api_version or None)
     """
-    status_url = 'https://{sat_host}:{port}/api/status'
+    status_url = "https://{sat_host}:{port}/api/status"
     response, url = execute_request(scan_task, status_url)
     status_code = response.status_code
     api_version = None
 
     if status_code == codes.HTTP_200_OK:
         status_data = response.json()
-        api_version = status_data.get('api_version')
+        api_version = status_data.get("api_version")
     elif status_code == codes.HTTP_401_UNAUTHORIZED:
-        err_msg = 'Unable to authenticate against ' + url
+        err_msg = "Unable to authenticate against " + url
         raise SatelliteAuthException(err_msg)
     else:
-        err_msg = 'Failure while attempting Satellite 6'
-        ' status check at {} for task {} with status code {}.'.format(
-            url, scan_task.id, status_code)
+        err_msg = "Failure while attempting Satellite 6"
+        " status check at {} for task {} with status code {}.".format(
+            url, scan_task.id, status_code
+        )
         raise SatelliteException(err_msg)
     return (status_code, api_version, SATELLITE_VERSION_6)
 
@@ -246,16 +253,14 @@ def validate_task_stats(task):
         systems_failed,
         systems_unreachable,
     ) = task.calculate_counts()
-    totals = + systems_scanned + systems_failed + systems_unreachable
+    totals = +systems_scanned + systems_failed + systems_unreachable
     if totals != systems_count:
         missing_sys = systems_count - totals
-        error = 'Scan failed to inspect %d systems.' % missing_sys
+        error = "Scan failed to inspect %d systems." % missing_sys
         task.log_message(error, log_level=logging.ERROR)
         new_failed = missing_sys + systems_failed
-        task.update_stats(
-            'Missed failed systems', sys_failed=new_failed)
-        raise SatelliteException(
-            'hosts_facts could not scan all systems')
+        task.update_stats("Missed failed systems", sys_failed=new_failed)
+        raise SatelliteException("hosts_facts could not scan all systems")
 
 
 def raw_facts_template():

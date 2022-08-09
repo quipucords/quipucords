@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0004_virtual_host_name'),
+        ("api", "0004_virtual_host_name"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='systemfingerprint',
-            name='system_platform_id',
+            model_name="systemfingerprint",
+            name="system_platform_id",
         ),
     ]

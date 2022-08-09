@@ -16,12 +16,10 @@ import uuid
 
 from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
-from api.deployments_report.csv_renderer import (DeploymentCSVRenderer)
-from api.deployments_report.util import (sanitize_row)
+from api.deployments_report.csv_renderer import DeploymentCSVRenderer
+from api.deployments_report.util import sanitize_row
 from api.details_report.tests_details_report import MockRequest
-from api.models import (Credential,
-                        ServerInformation,
-                        Source)
+from api.models import Credential, ServerInformation, Source
 
 from django.core import management
 from django.test import TestCase
@@ -39,17 +37,19 @@ class DeploymentReportTest(TestCase):
     # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
-        management.call_command('flush', '--no-input')
+        management.call_command("flush", "--no-input")
         self.net_source = Source.objects.create(
-            name='test_source', source_type=Source.NETWORK_SOURCE_TYPE)
+            name="test_source", source_type=Source.NETWORK_SOURCE_TYPE
+        )
 
         self.net_cred = Credential.objects.create(
-            name='net_cred1',
+            name="net_cred1",
             cred_type=Credential.NETWORK_CRED_TYPE,
-            username='username',
-            password='password',
+            username="username",
+            password="password",
             become_password=None,
-            ssh_keyfile=None)
+            ssh_keyfile=None,
+        )
         self.net_source.credentials.add(self.net_cred)
 
         self.net_source.hosts = '["1.2.3.4"]'
@@ -57,20 +57,18 @@ class DeploymentReportTest(TestCase):
         self.server_id = ServerInformation.create_or_retreive_server_id()
         self.report_version = create_report_version()
         self.mock_request = MockRequest()
-        self.mock_renderer_context = {'request': self.mock_request}
+        self.mock_renderer_context = {"request": self.mock_request}
 
     def create_details_report(self, data):
         """Call the create endpoint."""
-        url = reverse('reports-list')
-        return self.client.post(url,
-                                json.dumps(data),
-                                'application/json')
+        url = reverse("reports-list")
+        return self.client.post(url, json.dumps(data), "application/json")
 
     def create_details_report_expect_201(self, data):
         """Create a source, return the response as a dict."""
         response = self.create_details_report(data)
         if response.status_code != status.HTTP_201_CREATED:
-            print('Failure cause: ')
+            print("Failure cause: ")
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
@@ -79,50 +77,53 @@ class DeploymentReportTest(TestCase):
         """Create a source, return the response as a dict."""
         response = self.create_details_report(data)
         if response.status_code != status.HTTP_400_BAD_REQUEST:
-            print('Failure cause: ')
+            print("Failure cause: ")
             print(response.json())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         return response.json()
 
-    def generate_fingerprints(self,
-                              os_name='RHEL',
-                              os_versions=None):
+    def generate_fingerprints(self, os_name="RHEL", os_versions=None):
         """Create a DetailsReport for test."""
         facts = []
-        fc_json = {'report_type': 'details',
-                   'sources': [{'server_id': self.server_id,
-                                'report_version': create_report_version(),
-                                'source_name': self.net_source.name,
-                                'source_type': self.net_source.source_type,
-                                'facts': facts}]}
+        fc_json = {
+            "report_type": "details",
+            "sources": [
+                {
+                    "server_id": self.server_id,
+                    "report_version": create_report_version(),
+                    "source_name": self.net_source.name,
+                    "source_type": self.net_source.source_type,
+                    "facts": facts,
+                }
+            ],
+        }
 
         if os_versions is None:
-            os_versions = ['7.3', '7.4']
+            os_versions = ["7.3", "7.4"]
 
         for version in os_versions:
-            release = '{} {}'.format(os_name, version)
+            release = "{} {}".format(os_name, version)
             fact_json = {
-                'connection_host': '1.2.3.4',
-                'connection_port': 22,
-                'connection_uuid': str(
-                    uuid.uuid4()),
-                'cpu_count': 2,
-                'cpu_core_per_socket': 1,
-                'cpu_siblings': 1,
-                'cpu_hyperthreading': False,
-                'cpu_socket_count': 2,
-                'cpu_core_count': 2,
-                'date_anaconda_log': '2017-07-18',
-                'date_yum_history': '2017-07-18',
-                'etc_release_name': os_name,
-                'etc_release_version': version,
-                'etc_release_release': release,
-                'uname_hostname': '1.2.3.4',
-                'virt_virt': 'virt-guest',
-                'virt_type': 'vmware',
-                'virt_num_guests': 1,
-                'virt_num_running_guests': 1,
-                'virt_what_type': 'vt'
+                "connection_host": "1.2.3.4",
+                "connection_port": 22,
+                "connection_uuid": str(uuid.uuid4()),
+                "cpu_count": 2,
+                "cpu_core_per_socket": 1,
+                "cpu_siblings": 1,
+                "cpu_hyperthreading": False,
+                "cpu_socket_count": 2,
+                "cpu_core_count": 2,
+                "date_anaconda_log": "2017-07-18",
+                "date_yum_history": "2017-07-18",
+                "etc_release_name": os_name,
+                "etc_release_version": version,
+                "etc_release_release": release,
+                "uname_hostname": "1.2.3.4",
+                "virt_virt": "virt-guest",
+                "virt_type": "vmware",
+                "virt_num_guests": 1,
+                "virt_num_running_guests": 1,
+                "virt_what_type": "vt",
             }
             facts.append(fact_json)
         details_report = self.create_details_report_expect_201(fc_json)
@@ -130,11 +131,10 @@ class DeploymentReportTest(TestCase):
 
     def test_get_details_report_group_report(self):
         """Get a specific group count report."""
-        url = '/api/v1/reports/1/deployments/'
+        url = "/api/v1/reports/1/deployments/"
 
         # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
+        self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
 
         # Query API
         response = self.client.get(url)
@@ -148,7 +148,7 @@ class DeploymentReportTest(TestCase):
 
     def test_get_deployments_report_masked(self):
         """Get a specific group count report masking sensitive info."""
-        url = '/api/v1/reports/1/deployments/?mask=True'
+        url = "/api/v1/reports/1/deployments/?mask=True"
         # Query API
         self.generate_fingerprints()
         response = self.client.get(url)
@@ -161,13 +161,13 @@ class DeploymentReportTest(TestCase):
         )
 
         # Check the masked values
-        fingerprints = report.get('system_fingerprints')
+        fingerprints = report.get("system_fingerprints")
         for source in fingerprints:
-            self.assertEqual(source.get('name'), str(hash('1.2.3.4')))
+            self.assertEqual(source.get("name"), str(hash("1.2.3.4")))
 
     def test_get_deployments_report_bad_param(self):
         """Test a bad query param returns a 400."""
-        url = '/api/v1/reports/1/deployments/?mask=foo'
+        url = "/api/v1/reports/1/deployments/?mask=foo"
         # Query API
         self.generate_fingerprints()
         response = self.client.get(url)
@@ -175,11 +175,10 @@ class DeploymentReportTest(TestCase):
 
     def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""
-        url = '/api/v1/reports/2/deployments/'
+        url = "/api/v1/reports/2/deployments/"
 
         # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
+        self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
 
         # Query API
         response = self.client.get(url)
@@ -187,36 +186,40 @@ class DeploymentReportTest(TestCase):
 
     def test_get_bad_deployment_report(self):
         """Test case where DetailsReport exists but no fingerprint."""
-        url = '/api/v1/reports/1/deployments/'
+        url = "/api/v1/reports/1/deployments/"
 
         # Create a system fingerprint via collection receiver
         facts = []
-        fc_json = {'report_type': 'details',
-                   'sources': [{'server_id': self.server_id,
-                                'report_version': create_report_version(),
-                                'source_name': self.net_source.name,
-                                'source_type': self.net_source.source_type,
-                                'facts': facts}]}
+        fc_json = {
+            "report_type": "details",
+            "sources": [
+                {
+                    "server_id": self.server_id,
+                    "report_version": create_report_version(),
+                    "source_name": self.net_source.name,
+                    "source_type": self.net_source.source_type,
+                    "facts": facts,
+                }
+            ],
+        }
 
         fact_json = {
-            'cpu_core_count': 'cat',
+            "cpu_core_count": "cat",
         }
         facts.append(fact_json)
         self.create_details_report_expect_400(fc_json)
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code,
-                         status.HTTP_424_FAILED_DEPENDENCY)
+        self.assertEqual(response.status_code, status.HTTP_424_FAILED_DEPENDENCY)
 
     def test_get_details_report_bad_id(self):
         """Fail to get a report for missing collection."""
-        url = '/api/v1/reports/string/deployments/'
+        url = "/api/v1/reports/string/deployments/"
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code,
-                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     ##############################################################
     # Test CSV Renderer
@@ -224,59 +227,60 @@ class DeploymentReportTest(TestCase):
 
     def test_sanitize_row(self):
         """Test sanitize_row function."""
-        self.assertEqual(sanitize_row(['data', None, 'data,data']),
-                         ['data', None, 'data;data'])
+        self.assertEqual(
+            sanitize_row(["data", None, "data,data"]), ["data", None, "data;data"]
+        )
 
     def test_csv_renderer(self):
         """Test DeploymentCSVRenderer."""
         renderer = DeploymentCSVRenderer()
         # Test no FC id
         test_json = {}
-        value = renderer.render(test_json,
-                                renderer_context=self.mock_renderer_context)
+        value = renderer.render(test_json, renderer_context=self.mock_renderer_context)
         self.assertIsNone(value)
 
         # Test doesn't exist
-        test_json = {'id': 42}
-        value = renderer.render(test_json,
-                                renderer_context=self.mock_renderer_context)
+        test_json = {"id": 42}
+        value = renderer.render(test_json, renderer_context=self.mock_renderer_context)
         self.assertIsNone(value)
 
         # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-        url = '/api/v1/reports/1/deployments/'
+        self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
+        url = "/api/v1/reports/1/deployments/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
         csv_result = renderer.render(
-            report, renderer_context=self.mock_renderer_context)
+            report, renderer_context=self.mock_renderer_context
+        )
         # pylint: disable=line-too-long
-        data_rows = ['architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid',  # noqa
-                     ',,,2,2,,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
-                     ',,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
-                     ',,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,']  # noqa
+        data_rows = [
+            "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid",  # noqa
+            ",,,2,2,,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,",  # noqa
+            ",,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,",  # noqa
+            ",,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,",
+        ]  # noqa
         for row in data_rows:
             self.assertIn(row, csv_result)
         # test the masked deployments report
-        url = '/api/v1/reports/1/deployments/?mask=True'
+        url = "/api/v1/reports/1/deployments/?mask=True"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report = response.json()
 
         new_mock_req = MockRequest(mask_rep=True)
-        new_mock_renderer = {'request': new_mock_req}
+        new_mock_renderer = {"request": new_mock_req}
 
-        csv_result = renderer.render(
-            report, renderer_context=new_mock_renderer)
+        csv_result = renderer.render(report, renderer_context=new_mock_renderer)
 
         # pylint: disable=line-too-long
-        data_rows = ['architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid',  # noqa
-                     ',,,2,2,,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
-                     ',,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,',  # noqa
-                     ',,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,'  # noqa
-                     ]
+        data_rows = [
+            "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid",  # noqa
+            ",,,2,2,,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,",  # noqa
+            ",,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,",  # noqa
+            ",,,2,2,False,2,True,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,vmware,,,,,,,",  # noqa
+        ]
         for row in data_rows:
             self.assertIn(row, csv_result)
 
@@ -292,14 +296,13 @@ class DeploymentReportTest(TestCase):
         self.assertIsNone(value)
 
         # Test doesn't exist
-        test_json = {'id': 42}
+        test_json = {"id": 42}
         value = renderer.render(test_json)
         self.assertIsNone(value)
 
         # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(
-            os_versions=['7.4', '7.4', '7.5'])
-        url = '/api/v1/reports/1/deployments/'
+        self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
+        url = "/api/v1/reports/1/deployments/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         report_dict = response.json()

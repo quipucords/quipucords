@@ -9,12 +9,13 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Module for serializing all model object for database storage."""
-from api.common.serializer import (CustomJSONField,
-                                   NotEmptySerializer)
-from api.models import (JobInspectionResult,
-                        RawFact,
-                        SystemInspectionResult,
-                        TaskInspectionResult)
+from api.common.serializer import CustomJSONField, NotEmptySerializer
+from api.models import (
+    JobInspectionResult,
+    RawFact,
+    SystemInspectionResult,
+    TaskInspectionResult,
+)
 
 from rest_framework.serializers import CharField, ChoiceField
 
@@ -29,7 +30,7 @@ class RawFactSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = RawFact
-        fields = ['name', 'value']
+        fields = ["name", "value"]
         qpc_allow_empty_fields = []
 
 
@@ -38,14 +39,15 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
 
     name = CharField(required=True, max_length=1024)
     status = ChoiceField(
-        required=True, choices=SystemInspectionResult.CONN_STATUS_CHOICES)
+        required=True, choices=SystemInspectionResult.CONN_STATUS_CHOICES
+    )
 
     class Meta:
         """Metadata for serialzer."""
 
         model = SystemInspectionResult
-        fields = ['name', 'status', 'source', 'facts']
-        qpc_allow_empty_fields = ['facts', 'source']
+        fields = ["name", "status", "source", "facts"]
+        qpc_allow_empty_fields = ["facts", "source"]
 
 
 class TaskInspectionResultSerializer(NotEmptySerializer):
@@ -55,8 +57,8 @@ class TaskInspectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = TaskInspectionResult
-        fields = ['source', 'systems']
-        qpc_allow_empty_fields = ['source', 'systems']
+        fields = ["source", "systems"]
+        qpc_allow_empty_fields = ["source", "systems"]
 
 
 class JobInspectionResultSerializer(NotEmptySerializer):
@@ -66,5 +68,5 @@ class JobInspectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = JobInspectionResult
-        fields = ['task_results']
-        qpc_allow_empty_fields = ['task_results']
+        fields = ["task_results"]
+        qpc_allow_empty_fields = ["task_results"]

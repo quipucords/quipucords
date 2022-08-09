@@ -26,14 +26,14 @@ from api.models import Scan, ScanJob, ScanTask, Source
 from api.scan.serializer import ScanOptionsSerializer
 from api.scantask.serializer import ScanTaskSerializer, SourceField
 
-SCAN_KEY = 'scan'
-SOURCES_KEY = 'sources'
-TASKS_KEY = 'tasks'
-SYSTEMS_COUNT_KEY = 'systems_count'
-SYSTEMS_SCANNED_KEY = 'systems_scanned'
-SYSTEMS_FAILED_KEY = 'systems_failed'
-SYSTEMS_UNREACHABLE_KEY = 'systems_unreachable'
-SYSTEM_FINGERPRINTS_KEY = 'system_fingerprint_count'
+SCAN_KEY = "scan"
+SOURCES_KEY = "sources"
+TASKS_KEY = "tasks"
+SYSTEMS_COUNT_KEY = "systems_count"
+SYSTEMS_SCANNED_KEY = "systems_scanned"
+SYSTEMS_FAILED_KEY = "systems_failed"
+SYSTEMS_UNREACHABLE_KEY = "systems_unreachable"
+SYSTEM_FINGERPRINTS_KEY = "system_fingerprint_count"
 
 
 def expand_scanjob(json_scan):
@@ -45,22 +45,25 @@ def expand_scanjob(json_scan):
     systems_failed values from tasks.
     """
     source_ids = json_scan.get(SOURCES_KEY, [])
-    slim_sources = Source.objects.filter(
-        pk__in=source_ids).values('id', 'name', 'source_type')
+    slim_sources = Source.objects.filter(pk__in=source_ids).values(
+        "id", "name", "source_type"
+    )
     if slim_sources:
         json_scan[SOURCES_KEY] = slim_sources
 
     scan_id = json_scan.get(SCAN_KEY)
-    slim_scan = Scan.objects.filter(pk=scan_id).values('id', 'name').first()
+    slim_scan = Scan.objects.filter(pk=scan_id).values("id", "name").first()
     json_scan[SCAN_KEY] = slim_scan
 
     if json_scan.get(TASKS_KEY):
-        scan_job = ScanJob.objects.get(pk=json_scan.get('id'))
-        systems_count,\
-            systems_scanned,\
-            systems_failed,\
-            systems_unreachable,\
-            system_fingerprint_count = scan_job.calculate_counts()
+        scan_job = ScanJob.objects.get(pk=json_scan.get("id"))
+        (
+            systems_count,
+            systems_scanned,
+            systems_failed,
+            systems_unreachable,
+            system_fingerprint_count,
+        ) = scan_job.calculate_counts()
 
         json_scan[SYSTEMS_COUNT_KEY] = systems_count
         json_scan[SYSTEMS_SCANNED_KEY] = systems_scanned
@@ -69,7 +72,7 @@ def expand_scanjob(json_scan):
 
         json_scan[SYSTEM_FINGERPRINTS_KEY] = system_fingerprint_count
         for task_json in json_scan[TASKS_KEY]:
-            if task_json['scan_type'] == ScanTask.SCAN_TYPE_FINGERPRINT:
+            if task_json["scan_type"] == ScanTask.SCAN_TYPE_FINGERPRINT:
                 task_json[SYSTEM_FINGERPRINTS_KEY] = system_fingerprint_count
     return json_scan
 
@@ -84,15 +87,14 @@ class ScanField(PrimaryKeyRelatedField):
         int_data = convert_to_int(data)
         actual_scan = Scan.objects.filter(id=int_data).first()
         if actual_scan is None:
-            raise ValidationError(
-                _(messages.SJ_SCAN_DO_NOT_EXIST % int_data))
+            raise ValidationError(_(messages.SJ_SCAN_DO_NOT_EXIST % int_data))
         return actual_scan
 
     def display_value(self, instance):
         """Create display value."""
         display = instance
         if isinstance(instance, Scan):
-            display = 'Scan: %s' % instance.name
+            display = "Scan: %s" % instance.name
         return display
 
 
@@ -110,10 +112,10 @@ class ScanJobSerializer(NotEmptySerializer):
 
     scan = ScanField(required=True, many=False, queryset=Scan.objects.all())
     sources = SourceField(many=True, read_only=True)
-    scan_type = ValidStringChoiceField(read_only=True,
-                                       choices=ScanTask.SCANTASK_TYPE_CHOICES)
-    status = ValidStringChoiceField(read_only=True,
-                                    choices=ScanTask.STATUS_CHOICES)
+    scan_type = ValidStringChoiceField(
+        read_only=True, choices=ScanTask.SCANTASK_TYPE_CHOICES
+    )
+    status = ValidStringChoiceField(read_only=True, choices=ScanTask.STATUS_CHOICES)
     status_message = CharField(read_only=True)
     tasks = TaskField(many=True, read_only=True)
     options = ScanOptionsSerializer(read_only=True, many=False)
@@ -125,17 +127,19 @@ class ScanJobSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ScanJob
-        fields = ['id',
-                  'scan',
-                  'sources',
-                  'scan_type',
-                  'status',
-                  'status_message',
-                  'tasks',
-                  'options',
-                  'report_id',
-                  'start_time',
-                  'end_time']
+        fields = [
+            "id",
+            "scan",
+            "sources",
+            "scan_type",
+            "status",
+            "status_message",
+            "tasks",
+            "options",
+            "report_id",
+            "start_time",
+            "end_time",
+        ]
 
     @staticmethod
     def validate_sources(sources):

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0005_remove_systemfingerprint_system_platform_id'),
+        ("api", "0005_remove_systemfingerprint_system_platform_id"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='systemfingerprint',
-            name='virtual_host_uuid',
+            model_name="systemfingerprint",
+            name="virtual_host_uuid",
             field=models.CharField(max_length=36, null=True),
         ),
     ]

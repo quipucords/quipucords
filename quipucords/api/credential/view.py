@@ -32,13 +32,13 @@ from api.models import Credential, Source
 from api.serializers import CredentialSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-IDENTIFIER_KEY = 'id'
-NAME_KEY = 'name'
-SOURCES_KEY = 'sources'
-PASSWORD_KEY = 'password'
-BECOME_PASSWORD_KEY = 'become_password'
-SSH_PASSPHRASE_KEY = 'ssh_passphrase'
-PASSWORD_MASK = '********'
+IDENTIFIER_KEY = "id"
+NAME_KEY = "name"
+SOURCES_KEY = "sources"
+PASSWORD_KEY = "password"
+BECOME_PASSWORD_KEY = "become_password"
+SSH_PASSPHRASE_KEY = "ssh_passphrase"
+PASSWORD_MASK = "********"
 
 
 def mask_credential(cred):
@@ -65,8 +65,9 @@ def format_credential(cred):
     """
     identifier = cred.get(IDENTIFIER_KEY)
     if identifier:
-        slim_sources = Source.objects.filter(
-            credentials__pk=identifier).values(IDENTIFIER_KEY, NAME_KEY)
+        slim_sources = Source.objects.filter(credentials__pk=identifier).values(
+            IDENTIFIER_KEY, NAME_KEY
+        )
         if slim_sources:
             cred[SOURCES_KEY] = slim_sources
 
@@ -76,34 +77,36 @@ def format_credential(cred):
 class CredentialFilter(FilterSet):
     """Filter for host credentials by name."""
 
-    name = ListFilter(field_name='name')
-    search_by_name = CharFilter(field_name='name',
-                                lookup_expr='contains',
-                                distinct=True)
+    name = ListFilter(field_name="name")
+    search_by_name = CharFilter(
+        field_name="name", lookup_expr="contains", distinct=True
+    )
 
     class Meta:
         """Metadata for filterset."""
 
         model = Credential
-        fields = ['name', 'cred_type', 'search_by_name']
+        fields = ["name", "cred_type", "search_by_name"]
 
 
 # pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model."""
 
-    authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
     if authentication_enabled:
-        authentication_classes = (QuipucordsExpiringTokenAuthentication,
-                                  SessionAuthentication)
+        authentication_classes = (
+            QuipucordsExpiringTokenAuthentication,
+            SessionAuthentication,
+        )
         permission_classes = (IsAuthenticated,)
 
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = CredentialFilter
-    ordering_fields = ('name', 'cred_type')
-    ordering = ('name',)
+    ordering_fields = ("name", "cred_type")
+    ordering = ("name",)
 
     # pylint: disable=unused-argument,arguments-differ
     def list(self, request):
@@ -128,16 +131,13 @@ class CredentialViewSet(ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         cred = format_credential(serializer.data)
-        return Response(cred, status=status.HTTP_201_CREATED,
-                        headers=headers)
+        return Response(cred, status=status.HTTP_201_CREATED, headers=headers)
 
     # pylint: disable=unused-argument,arguments-differ
     def retrieve(self, request, pk=None):
         """Get a host credential."""
         if not pk or (pk and not is_int(pk)):
-            error = {
-                'id': [_(messages.COMMON_ID_INV)]
-            }
+            error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
 
         host_cred = get_object_or_404(self.queryset, pk=pk)
@@ -148,10 +148,9 @@ class CredentialViewSet(ModelViewSet):
     # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):
         """Update a host credential."""
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data,
-                                         partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         cred = format_credential(serializer.data)
@@ -159,10 +158,9 @@ class CredentialViewSet(ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         """Update (partially) a host credential."""
-        partial = kwargs.pop('partial', True)
+        partial = kwargs.pop("partial", True)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data,
-                                         partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         cred = format_credential(serializer.data)
@@ -173,15 +171,16 @@ class CredentialViewSet(ModelViewSet):
         """Delete a cred."""
         try:
             cred = Credential.objects.get(pk=pk)
-            sources = Source.objects.filter(
-                credentials__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
+            sources = Source.objects.filter(credentials__pk=pk).values(
+                IDENTIFIER_KEY, NAME_KEY
+            )
             if sources:
                 message = messages.CRED_DELETE_NOT_VALID_W_SOURCES
-                error = {'detail': message}
+                error = {"detail": message}
                 slim_sources = []
                 for source in sources:
                     slim_sources.append(source)
-                error['sources'] = slim_sources
+                error["sources"] = slim_sources
                 raise ValidationError(error)
             cred.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
