@@ -11,7 +11,6 @@
 
 from scanner.network.processing import process
 
-
 INET_PREFIXES = ["inet addr:", "inet "]
 
 # pylint: disable=too-few-public-methods

@@ -12,10 +12,11 @@
 """View for server status."""
 import os
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from api import API_VERSION
 from api.status.model import ServerInformation
-
 from quipucords.environment import (
     commit,
     modules,
@@ -23,9 +24,6 @@ from quipucords.environment import (
     python_version,
     server_version,
 )
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
 
 @api_view(["GET"])

@@ -9,10 +9,9 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite inspection task."""
-from api.models import ScanJob, ScanTask
-
 from requests import exceptions
 
+from api.models import ScanJob, ScanTask
 from scanner.satellite import utils
 from scanner.satellite.api import (
     SatelliteAuthException,

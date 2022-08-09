@@ -16,13 +16,11 @@ from multiprocessing import Value
 from unittest.mock import Mock, patch
 
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.test import TestCase
 
 from api.connresult.model import SystemConnectionResult
 from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source, SourceOptions
 from api.serializers import CredentialSerializer, SourceSerializer
-
-from django.test import TestCase
-
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import (
     ConnectResultStore,

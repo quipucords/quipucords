@@ -10,15 +10,14 @@
 #
 """Test the API application."""
 
-from api.views import UserViewSet
-
 # pylint: disable=imported-auth-user
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, force_authenticate
+
+from api.views import UserViewSet
 
 
 class UserTest(TestCase):

@@ -15,6 +15,11 @@
 import json
 from unittest.mock import patch
 
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+
 from api import messages
 from api.models import (
     Credential,
@@ -33,13 +38,6 @@ from api.models import (
 from api.scan.serializer import ExtendedProductSearchOptionsSerializer
 from api.scanjob.serializer import ScanJobSerializer
 from api.scanjob.view import expand_scanjob
-
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
-
 from scanner.test_util import create_scan_job, create_scan_job_two_tasks
 
 

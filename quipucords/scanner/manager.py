@@ -16,12 +16,10 @@ import os
 from threading import Thread, Timer
 from time import sleep
 
-from api.models import ScanJob, ScanTask
-
 from django.db.models import Q
 
+from api.models import ScanJob, ScanTask
 from scanner.job import ScanJobRunner
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

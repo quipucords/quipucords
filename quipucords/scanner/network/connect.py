@@ -13,8 +13,11 @@ import logging
 import os.path
 
 import ansible_runner
+import pexpect
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.db import transaction
 
+import log_messages
 from api.models import (
     Credential,
     ScanJob,
@@ -24,15 +27,7 @@ from api.models import (
 )
 from api.serializers import CredentialSerializer, SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
-
-from django.db import transaction
-
-import log_messages
-
-import pexpect
-
 from quipucords import settings
-
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.utils import (

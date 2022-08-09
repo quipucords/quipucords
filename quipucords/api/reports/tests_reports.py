@@ -14,17 +14,16 @@ import json
 import sys
 import tarfile
 
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.serializers import ValidationError
+
 from api.common.common_report import create_report_version
 from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer, create_hash
-
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
-from rest_framework.serializers import ValidationError
 
 
 class ReportsTest(TestCase):

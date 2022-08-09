@@ -14,16 +14,15 @@ import copy
 import json
 import tarfile
 
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+
 from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.models import Credential, DetailsReport, ServerInformation, Source
-
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
 
 
 class MockRequest:

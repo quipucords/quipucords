@@ -12,6 +12,8 @@
 import json
 import logging
 
+from django.db import transaction
+
 from api.models import (
     RawFact,
     ScanOptions,
@@ -19,8 +21,6 @@ from api.models import (
     SystemConnectionResult,
     SystemInspectionResult,
 )
-
-from django.db import transaction
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

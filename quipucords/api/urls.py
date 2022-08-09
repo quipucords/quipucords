@@ -10,6 +10,9 @@
 #
 """Describes the urls and patterns for the API application."""
 
+from django.urls import path
+from rest_framework.routers import SimpleRouter
+
 from api.views import (
     CredentialViewSet,
     DetailsReportsViewSet,
@@ -27,10 +30,6 @@ from api.views import (
     status,
     sync_merge_reports,
 )
-
-from django.urls import path
-
-from rest_framework.routers import SimpleRouter
 
 ROUTER = SimpleRouter()
 

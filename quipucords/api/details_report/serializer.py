@@ -11,10 +11,10 @@
 
 """Serializer for system facts models."""
 
+from rest_framework.serializers import CharField, IntegerField, UUIDField
+
 from api.common.serializer import CustomJSONField, NotEmptySerializer
 from api.models import DetailsReport
-
-from rest_framework.serializers import CharField, IntegerField, UUIDField
 
 
 class DetailsReportSerializer(NotEmptySerializer):

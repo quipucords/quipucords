@@ -12,10 +12,9 @@
 
 from unittest.mock import ANY, Mock, patch
 
-from api.models import Credential, ScanTask, Source, SourceOptions
-
 from django.test import TestCase
 
+from api.models import Credential, ScanTask, Source, SourceOptions
 from scanner.test_util import create_scan_job
 from scanner.vcenter.utils import vcenter_connect
 

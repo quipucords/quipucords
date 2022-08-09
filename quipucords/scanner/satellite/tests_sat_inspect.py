@@ -13,13 +13,10 @@
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
-from api.models import Credential, ScanJob, ScanTask, Source
-
 from django.test import TestCase
-
 from requests import exceptions
 
-
+from api.models import Credential, ScanJob, ScanTask, Source
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,

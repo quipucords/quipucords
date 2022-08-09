@@ -13,10 +13,8 @@
 import logging
 import traceback
 
-from api.connresult.model import SystemConnectionResult
-
 import log_messages
-
+from api.connresult.model import SystemConnectionResult
 from scanner.network.utils import STOP_STATES
 
 # Get an instance of a logger

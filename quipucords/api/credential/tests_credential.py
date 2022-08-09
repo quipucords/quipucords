@@ -12,15 +12,14 @@
 
 import json
 
-from api import messages
-from api.models import Credential, Source
-from api.vault import decrypt_data_as_unicode
-
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework import status
+
+from api import messages
+from api.models import Credential, Source
+from api.vault import decrypt_data_as_unicode
 
 
 class CredentialTest(TestCase):

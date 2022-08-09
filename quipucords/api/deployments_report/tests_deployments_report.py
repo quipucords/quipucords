@@ -14,19 +14,17 @@ import json
 import tarfile
 import uuid
 
+from django.core import management
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+
 from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.deployments_report.csv_renderer import DeploymentCSVRenderer
 from api.deployments_report.util import sanitize_row
 from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
-
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
-
 
 EXPECTED_NUMBER_OF_FINGERPRINTS = 37
 

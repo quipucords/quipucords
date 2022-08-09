@@ -12,14 +12,13 @@
 
 import json
 
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+
 from api import messages
 from api.common.common_report import create_report_version
 from api.models import Credential, DetailsReport, ServerInformation, Source
-
-from django.test import TestCase
-from django.urls import reverse
-
-from rest_framework import status
 
 
 class DetailsReportTest(TestCase):

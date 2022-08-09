@@ -10,6 +10,8 @@
 #
 """Admin module for Django server application."""
 
+from django.contrib import admin
+
 from api.models import (
     Credential,
     DetailsReport,
@@ -21,8 +23,6 @@ from api.models import (
     Source,
     SystemFingerprint,
 )
-
-from django.contrib import admin
 
 admin.site.register(ServerInformation)
 admin.site.register(DetailsReport)

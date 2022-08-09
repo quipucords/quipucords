@@ -12,16 +12,14 @@
 
 import json
 
-from api.models import Credential, Scan, ScanJob, ScanOptions, ScanTask, Source
-from api.scan.serializer import ScanSerializer
-from api.scan.view import expand_scan
-
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework import status
 
+from api.models import Credential, Scan, ScanJob, ScanOptions, ScanTask, Source
+from api.scan.serializer import ScanSerializer
+from api.scan.view import expand_scan
 from scanner.test_util import create_scan_job
 
 # pylint: disable=unused-argument,invalid-name

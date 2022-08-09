@@ -12,15 +12,14 @@
 
 import json
 
-from api import messages
-from api.common.common_report import create_report_version
-from api.models import Credential, ServerInformation, Source
-
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework import status
+
+from api import messages
+from api.common.common_report import create_report_version
+from api.models import Credential, ServerInformation, Source
 
 
 class SyncMergeReports(TestCase):

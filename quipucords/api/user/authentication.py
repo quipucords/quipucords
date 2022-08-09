@@ -15,7 +15,6 @@ import datetime
 import os
 
 from django.conf import settings
-
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
 

@@ -12,15 +12,13 @@
 
 import tempfile
 
+import yaml
+
 # ANSIBLE API DEPENDENCY
 from ansible.module_utils._text import to_bytes
-from ansible.parsing.vault import VaultLib
-from ansible.parsing.vault import VaultSecret
+from ansible.parsing.vault import VaultLib, VaultSecret
 from ansible.parsing.yaml.dumper import AnsibleDumper
-
 from django.conf import settings
-
-import yaml
 
 
 def represent_none(self, _):

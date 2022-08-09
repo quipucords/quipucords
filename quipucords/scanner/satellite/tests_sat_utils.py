@@ -12,13 +12,10 @@
 import xmlrpc.client
 from unittest.mock import ANY, patch
 
-from api.models import Credential, ScanTask, Source, SourceOptions
-
+import requests_mock
 from django.test import TestCase
 
-import requests_mock
-
-
+from api.models import Credential, ScanTask, Source, SourceOptions
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,

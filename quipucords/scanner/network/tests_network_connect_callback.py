@@ -13,10 +13,9 @@
 # pylint: disable=ungrouped-imports
 from unittest.mock import Mock
 
-from api.models import Credential, ScanJob, ScanTask, Source
-
 from django.test import TestCase
 
+from api.models import Credential, ScanJob, ScanTask, Source
 from scanner.network.connect import ConnectResultStore
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import STOP_STATES

@@ -9,11 +9,11 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Test the fingerprint model."""
+from django.test import TestCase
+
 from api.common.common_report import create_report_version
 from api.models import DeploymentsReport
 from api.serializers import SystemFingerprintSerializer
-
-from django.test import TestCase
 
 
 class FingerprintModelTest(TestCase):

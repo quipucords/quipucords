@@ -15,7 +15,10 @@ import os.path
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
+import requests_mock
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.test import TestCase
+from django.urls import reverse
 
 from api.models import (
     Credential,
@@ -28,12 +31,6 @@ from api.models import (
     SystemConnectionResult,
 )
 from api.serializers import CredentialSerializer, SourceSerializer
-
-from django.test import TestCase
-from django.urls import reverse
-
-import requests_mock
-
 from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.inspect import _construct_scan_inventory

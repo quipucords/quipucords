@@ -10,9 +10,9 @@
 #
 """CSV renderer for reports."""
 
-from api.details_report.util import create_details_csv
-
 from rest_framework import renderers
+
+from api.details_report.util import create_details_csv
 
 
 class DetailsCSVRenderer(renderers.BaseRenderer):

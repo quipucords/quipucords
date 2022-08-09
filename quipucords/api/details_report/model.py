@@ -14,9 +14,9 @@
 import json
 import uuid
 
-from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DETAILS
-
 from django.db import models
+
+from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DETAILS
 
 
 class DetailsReport(models.Model):

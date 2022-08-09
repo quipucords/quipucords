@@ -10,9 +10,8 @@
 #
 """Test the API application."""
 
-from django.test import TestCase
-
 import yaml
+from django.test import TestCase
 
 from . import vault
 

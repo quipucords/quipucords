@@ -9,6 +9,8 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Module for serializing all model object for database storage."""
+from rest_framework.serializers import CharField, ChoiceField
+
 from api.common.serializer import CustomJSONField, NotEmptySerializer
 from api.models import (
     JobInspectionResult,
@@ -16,8 +18,6 @@ from api.models import (
     SystemInspectionResult,
     TaskInspectionResult,
 )
-
-from rest_framework.serializers import CharField, ChoiceField
 
 
 class RawFactSerializer(NotEmptySerializer):

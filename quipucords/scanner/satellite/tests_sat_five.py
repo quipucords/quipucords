@@ -14,6 +14,7 @@ import xmlrpc.client
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
+from django.test import TestCase
 
 from api.models import (
     Credential,
@@ -25,9 +26,6 @@ from api.models import (
     SystemInspectionResult,
     TaskConnectionResult,
 )
-
-from django.test import TestCase
-
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.five import SatelliteFive, request_host_details
 from scanner.test_util import create_scan_job

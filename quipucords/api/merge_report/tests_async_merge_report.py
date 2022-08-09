@@ -13,16 +13,14 @@
 import json
 from unittest.mock import patch
 
-from api import messages
-from api.common.common_report import create_report_version
-from api.models import Credential, ScanTask, ServerInformation, Source
-
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework import status
 
+from api import messages
+from api.common.common_report import create_report_version
+from api.models import Credential, ScanTask, ServerInformation, Source
 from scanner.test_util import create_scan_job
 
 

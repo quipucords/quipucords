@@ -16,9 +16,9 @@ These models are used in the REST definitions
 import json
 import ssl
 
-from api.credential.model import Credential
-
 from django.db import models
+
+from api.credential.model import Credential
 
 
 class SourceOptions(models.Model):
