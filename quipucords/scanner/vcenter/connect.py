@@ -12,11 +12,9 @@
 import logging
 from socket import gaierror
 
-from api.models import (ScanTask,
-                        SystemConnectionResult)
-
 from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
+from api.models import ScanTask, SystemConnectionResult
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import retrieve_properties, vcenter_connect
 
@@ -33,18 +31,22 @@ def get_vm_names(content):
     vm_names = []
 
     visit_folders = vmodl.query.PropertyCollector.TraversalSpec(
-        name='visitFolders', type=vim.Folder, path='childEntity', skip=False)
+        name="visitFolders", type=vim.Folder, path="childEntity", skip=False
+    )
 
-    visit_folders.selectSet.extend([
-        vmodl.query.PropertyCollector.SelectionSpec(name='visitFolders'),
-        vmodl.query.PropertyCollector.SelectionSpec(name='dcToVmFolder'),
-    ])
+    visit_folders.selectSet.extend(
+        [
+            vmodl.query.PropertyCollector.SelectionSpec(name="visitFolders"),
+            vmodl.query.PropertyCollector.SelectionSpec(name="dcToVmFolder"),
+        ]
+    )
 
     dc_to_vm_folder = vmodl.query.PropertyCollector.TraversalSpec(
-        name='dcToVmFolder', type=vim.Datacenter, path='vmFolder', skip=False)
-    dc_to_vm_folder.selectSet.extend([
-        vmodl.query.PropertyCollector.SelectionSpec(name='visitFolders')
-    ])
+        name="dcToVmFolder", type=vim.Datacenter, path="vmFolder", skip=False
+    )
+    dc_to_vm_folder.selectSet.extend(
+        [vmodl.query.PropertyCollector.SelectionSpec(name="visitFolders")]
+    )
 
     filter_spec = vmodl.query.PropertyCollector.FilterSpec(
         objectSet=[
@@ -58,7 +60,7 @@ def get_vm_names(content):
             vmodl.query.PropertyCollector.PropertySpec(
                 all=False,
                 type=vim.VirtualMachine,
-                pathSet=['name'],
+                pathSet=["name"],
             ),
         ],
     )
@@ -80,16 +82,19 @@ class ConnectTaskRunner(ScanTaskRunner):
     def _store_connect_data(self, connected, credential, source):
         # Update the scan counts
         self.scan_task.update_stats(
-            'INITIAL VCENTER CONNECT STATS.', sys_count=len(connected))
+            "INITIAL VCENTER CONNECT STATS.", sys_count=len(connected)
+        )
 
         for system in connected:
             sys_result = SystemConnectionResult(
-                name=system, status=SystemConnectionResult.SUCCESS,
-                credential=credential, source=source,
-                task_connection_result=self.scan_task.connection_result)
+                name=system,
+                status=SystemConnectionResult.SUCCESS,
+                credential=credential,
+                source=source,
+                task_connection_result=self.scan_task.connection_result,
+            )
             sys_result.save()
-            self.scan_task.increment_stats(
-                sys_result.name, increment_sys_scanned=True)
+            self.scan_task.increment_stats(sys_result.name, increment_sys_scanned=True)
 
         self.scan_task.connection_result.save()
 
@@ -105,16 +110,18 @@ class ConnectTaskRunner(ScanTaskRunner):
             connected = self.connect()
             self._store_connect_data(connected, credential, source)
         except vim.fault.InvalidLogin as vm_error:
-            error_message = 'Unable to connect to VCenter source, %s,'\
-                ' with supplied credential, %s.\n' % \
-                (source.name, credential.name)
-            error_message += 'Connect scan failed for %s. %s' %\
-                (self.scan_task, vm_error)
+            error_message = (
+                "Unable to connect to VCenter source, %s,"
+                " with supplied credential, %s.\n" % (source.name, credential.name)
+            )
+            error_message += "Connect scan failed for %s. %s" % (
+                self.scan_task,
+                vm_error,
+            )
             return error_message, ScanTask.FAILED
         except gaierror as error:
-            error_message = 'Unable to connect to VCenter source %s.\n' %\
-                source.name
-            error_message += 'Reason for failure: %s' % error
+            error_message = "Unable to connect to VCenter source %s.\n" % source.name
+            error_message += "Reason for failure: %s" % error
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

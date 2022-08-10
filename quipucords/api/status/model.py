@@ -22,16 +22,15 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ServerInformation(models.Model):
     """A server's information."""
 
-    global_identifier = models.CharField(
-        max_length=36,
-        null=False
-    )
+    global_identifier = models.CharField(max_length=36, null=False)
 
     def __str__(self):
         """Convert to string."""
-        return '{' +\
-            'id:{}, global_identifier:{}'.format(self.id,
-                                                 self.global_identifier) + '}'
+        return (
+            "{"
+            + "id:{}, global_identifier:{}".format(self.id, self.global_identifier)
+            + "}"
+        )
 
     @staticmethod
     @transaction.atomic
@@ -39,11 +38,11 @@ class ServerInformation(models.Model):
         """Create or retreive server's global identifier."""
         server_info = ServerInformation.objects.first()
         if server_info is None:
-            server_info = ServerInformation(
-                global_identifier=str(uuid.uuid4()))
+            server_info = ServerInformation(global_identifier=str(uuid.uuid4()))
             server_info.save()
             logger.info(
-                'Server identification not found.  '
-                'Initializing server identifier to %s.',
-                server_info.global_identifier)
+                "Server identification not found.  "
+                "Initializing server identifier to %s.",
+                server_info.global_identifier,
+            )
         return server_info.global_identifier

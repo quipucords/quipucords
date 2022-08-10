@@ -29,84 +29,72 @@ class InsightsReportTest(TestCase):
     # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
-        management.call_command('flush', '--no-input')
+        management.call_command("flush", "--no-input")
         self.report_version = create_report_version()
         self.connection_uuid = str(uuid.uuid4())
-        self.fingerprints = \
-            [{
-                'connection_host': '1.2.3.4',
-                'connection_port': 22,
-                'connection_uuid': self.connection_uuid,
-                'cpu_count': 2,
-                'cpu_core_per_socket': 1,
-                'cpu_siblings': 1,
-                'cpu_hyperthreading': False,
-                'cpu_socket_count': 2,
-                'cpu_core_count': 2,
-                'date_anaconda_log': '2017-07-18',
-                'date_yum_history': '2017-07-18',
-                'etc_release_name': '',
-                'etc_release_version': '',
-                'etc_release_release': '',
-                'uname_hostname': '1.2.3.4',
-                'virt_virt': 'virt-guest',
-                'virt_type': 'vmware',
-                'virt_num_guests': 1,
-                'virt_num_running_guests': 1,
-                'virt_what_type': 'vt',
-                'ip_addresses': ['1.2.3.4']}]
+        self.fingerprints = [
+            {
+                "connection_host": "1.2.3.4",
+                "connection_port": 22,
+                "connection_uuid": self.connection_uuid,
+                "cpu_count": 2,
+                "cpu_core_per_socket": 1,
+                "cpu_siblings": 1,
+                "cpu_hyperthreading": False,
+                "cpu_socket_count": 2,
+                "cpu_core_count": 2,
+                "date_anaconda_log": "2017-07-18",
+                "date_yum_history": "2017-07-18",
+                "etc_release_name": "",
+                "etc_release_version": "",
+                "etc_release_release": "",
+                "uname_hostname": "1.2.3.4",
+                "virt_virt": "virt-guest",
+                "virt_type": "vmware",
+                "virt_num_guests": 1,
+                "virt_num_running_guests": 1,
+                "virt_what_type": "vt",
+                "ip_addresses": ["1.2.3.4"],
+            }
+        ]
         self.insights_hosts = [
             {
-                'display_name': 'dhcp181-116.gsslab.rdu2.redhat.com',
-                'fqdn': 'dhcp181-116.gsslab.rdu2.redhat.com',
-                'bios_uuid': 'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
-                'ip_addresses': [
-                    '10.10.181.116'
-                ],
-                'mac_addresses': [
-                    '00:50:56:9e:7b:19'
-                ],
-                'subscription_manager_id':
-                    'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
-                'facts': [
+                "display_name": "dhcp181-116.gsslab.rdu2.redhat.com",
+                "fqdn": "dhcp181-116.gsslab.rdu2.redhat.com",
+                "bios_uuid": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
+                "ip_addresses": ["10.10.181.116"],
+                "mac_addresses": ["00:50:56:9e:7b:19"],
+                "subscription_manager_id": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
+                "facts": [
                     {
-                        'namespace': 'qpc',
-                        'facts': {
-                            'bios_uuid':
-                                'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
-                            'ip_addresses': [
-                                '10.10.181.116'
-                            ],
-                            'mac_addresses': [
-                                '00:50:56:9e:7b:19'
-                            ],
-                            'subscription_manager_id':
-                                'F1011E42-F121-ED73-0BB8-9CF9E721FC0A',
-                            'name': 'dhcp181-116.gsslab.rdu2.redhat.com',
-                            'os_release':
-                                'Red Hat Enterprise Linux \
-                                Server release 5.9 (Tikanga)',
-                            'os_version': '5.9 (Tikanga)',
-                            'infrastructure_type': 'virtualized',
-                            'cpu_count': 1,
-                            'architecture': 'x86_64',
-                            'is_redhat': True,
-                            'redhat_certs': '69.pem',
-                            'cpu_socket_count': 1,
-                            'cpu_core_count': 1
+                        "namespace": "qpc",
+                        "facts": {
+                            "bios_uuid": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
+                            "ip_addresses": ["10.10.181.116"],
+                            "mac_addresses": ["00:50:56:9e:7b:19"],
+                            "subscription_manager_id": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
+                            "name": "dhcp181-116.gsslab.rdu2.redhat.com",
+                            "os_release": "Red Hat Enterprise Linux \
+                                Server release 5.9 (Tikanga)",
+                            "os_version": "5.9 (Tikanga)",
+                            "infrastructure_type": "virtualized",
+                            "cpu_count": 1,
+                            "architecture": "x86_64",
+                            "is_redhat": True,
+                            "redhat_certs": "69.pem",
+                            "cpu_socket_count": 1,
+                            "cpu_core_count": 1,
                         },
-                        'rh_product_certs': [],
-                        'rh_products_installed': [
-                            'RHEL',
-                            'EAP',
-                            'FUSE'
-                        ]
+                        "rh_product_certs": [],
+                        "rh_products_installed": ["RHEL", "EAP", "FUSE"],
                     }
-                ]
+                ],
             }
         ]
         self.deployments_report = DeploymentsReport(
-            id=1, report_id=1, report_version=self.report_version,
+            id=1,
+            report_id=1,
+            report_version=self.report_version,
             status=DeploymentsReport.STATUS_COMPLETE,
             cached_insights=None,
             cached_fingerprints=json.dumps(self.fingerprints),
@@ -141,10 +129,12 @@ class InsightsReportTest(TestCase):
         self.assertEqual(len(report_slices_in_metadata), 2)
         total_returned_hosts_num = 0
         for key_1, key_2 in zip(report_slices_in_metadata, report_slices):
-            self.assertEqual(report_slices_in_metadata[key_1]['number_hosts'],
-                             len(report_slices[key_2]['hosts']))
+            self.assertEqual(
+                report_slices_in_metadata[key_1]["number_hosts"],
+                len(report_slices[key_2]["hosts"]),
+            )
             # used later to check for the total size
-            total_returned_hosts_num += len(report_slices[key_2]['hosts'])
+            total_returned_hosts_num += len(report_slices[key_2]["hosts"])
         # no hosts lost
         returned_host_names = {
             host["bios_uuid"]
@@ -178,105 +168,115 @@ class InsightsReportTest(TestCase):
 
     def test_get_insights_report_404_no_canonical(self):
         """Retrieve insights report."""
-        url = '/api/v1/reports/1/insights/'
-        no_canonical = [{
-            'connection_host': '1.2.3.4',
-            'connection_port': 22,
-            'connection_uuid': self.connection_uuid,
-            'cpu_count': 2,
-            'cpu_core_per_socket': 1,
-            'cpu_siblings': 1,
-            'cpu_hyperthreading': False,
-            'cpu_socket_count': 2,
-            'cpu_core_count': 2,
-            'date_anaconda_log': '2017-07-18',
-            'date_yum_history': '2017-07-18',
-            'etc_release_name': '',
-            'etc_release_version': '',
-            'etc_release_release': '',
-            'uname_hostname': '1.2.3.4',
-            'virt_virt': 'virt-guest',
-            'virt_type': 'vmware',
-            'virt_num_guests': 1,
-            'virt_num_running_guests': 1,
-            'virt_what_type': 'vt'
-        }]
+        url = "/api/v1/reports/1/insights/"
+        no_canonical = [
+            {
+                "connection_host": "1.2.3.4",
+                "connection_port": 22,
+                "connection_uuid": self.connection_uuid,
+                "cpu_count": 2,
+                "cpu_core_per_socket": 1,
+                "cpu_siblings": 1,
+                "cpu_hyperthreading": False,
+                "cpu_socket_count": 2,
+                "cpu_core_count": 2,
+                "date_anaconda_log": "2017-07-18",
+                "date_yum_history": "2017-07-18",
+                "etc_release_name": "",
+                "etc_release_version": "",
+                "etc_release_release": "",
+                "uname_hostname": "1.2.3.4",
+                "virt_virt": "virt-guest",
+                "virt_type": "vmware",
+                "virt_num_guests": 1,
+                "virt_num_running_guests": 1,
+                "virt_what_type": "vt",
+            }
+        ]
         self.deployments_report.cached_insights = None
         self.deployments_report.cached_fingerprints = json.dumps(no_canonical)
         self.deployments_report.save()
-        with patch('api.insights_report.view.get_object_or_404',
-                   return_value=self.deployments_report):
+        with patch(
+            "api.insights_report.view.get_object_or_404",
+            return_value=self.deployments_report,
+        ):
             response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_insights_report_404_missing(self):
         """Check that legacy report without insights returns 404."""
-        url = '/api/v1/reports/1/insights/'
-        fingerprints = [{'connection_host': '1.2.3.4',
-                         'connection_port': 22,
-                         'connection_uuid': self.connection_uuid,
-                         'cpu_count': 2,
-                         'cpu_core_per_socket': 1,
-                         'cpu_siblings': 1,
-                         'cpu_hyperthreading': False,
-                         'cpu_socket_count': 2,
-                         'cpu_core_count': 2,
-                         'date_anaconda_log': '2017-07-18',
-                         'date_yum_history': '2017-07-18',
-                         'etc_release_name': '',
-                         'etc_release_version': '',
-                         'etc_release_release': '',
-                         'uname_hostname': '1.2.3.4',
-                         'virt_virt': 'virt-guest',
-                         'virt_type': 'vmware',
-                         'virt_num_guests': 1,
-                         'virt_num_running_guests': 1,
-                         'virt_what_type': 'vt',
-                         'mac_addresses': ['1.2.3.4']},
-                        {'connection_host': '1.2.3.4',
-                         'connection_port': 22,
-                         'connection_uuid': self.connection_uuid,
-                         'cpu_count': 2,
-                         'cpu_core_per_socket': 1,
-                         'cpu_siblings': 1,
-                         'cpu_hyperthreading': False,
-                         'cpu_socket_count': 2,
-                         'cpu_core_count': 2,
-                         'date_anaconda_log': '2017-07-18',
-                         'date_yum_history': '2017-07-18',
-                         'etc_release_name': '',
-                         'etc_release_version': '',
-                         'etc_release_release': '',
-                         'uname_hostname': '1.2.3.4',
-                         'virt_virt': 'virt-guest',
-                         'virt_type': 'vmware',
-                         'virt_num_guests': 1,
-                         'virt_num_running_guests': 1,
-                         'virt_what_type': 'vt',
-                         'mac_addresses': ['1.2.3.4']}]
+        url = "/api/v1/reports/1/insights/"
+        fingerprints = [
+            {
+                "connection_host": "1.2.3.4",
+                "connection_port": 22,
+                "connection_uuid": self.connection_uuid,
+                "cpu_count": 2,
+                "cpu_core_per_socket": 1,
+                "cpu_siblings": 1,
+                "cpu_hyperthreading": False,
+                "cpu_socket_count": 2,
+                "cpu_core_count": 2,
+                "date_anaconda_log": "2017-07-18",
+                "date_yum_history": "2017-07-18",
+                "etc_release_name": "",
+                "etc_release_version": "",
+                "etc_release_release": "",
+                "uname_hostname": "1.2.3.4",
+                "virt_virt": "virt-guest",
+                "virt_type": "vmware",
+                "virt_num_guests": 1,
+                "virt_num_running_guests": 1,
+                "virt_what_type": "vt",
+                "mac_addresses": ["1.2.3.4"],
+            },
+            {
+                "connection_host": "1.2.3.4",
+                "connection_port": 22,
+                "connection_uuid": self.connection_uuid,
+                "cpu_count": 2,
+                "cpu_core_per_socket": 1,
+                "cpu_siblings": 1,
+                "cpu_hyperthreading": False,
+                "cpu_socket_count": 2,
+                "cpu_core_count": 2,
+                "date_anaconda_log": "2017-07-18",
+                "date_yum_history": "2017-07-18",
+                "etc_release_name": "",
+                "etc_release_version": "",
+                "etc_release_release": "",
+                "uname_hostname": "1.2.3.4",
+                "virt_virt": "virt-guest",
+                "virt_type": "vmware",
+                "virt_num_guests": 1,
+                "virt_num_running_guests": 1,
+                "virt_what_type": "vt",
+                "mac_addresses": ["1.2.3.4"],
+            },
+        ]
 
         self.deployments_report.cached_insights = None
         self.deployments_report.cached_fingerprints = json.dumps(fingerprints)
         self.deployments_report.save()
-        with patch('api.insights_report.view.get_object_or_404',
-                   return_value=self.deployments_report):
+        with patch(
+            "api.insights_report.view.get_object_or_404",
+            return_value=self.deployments_report,
+        ):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
     def test_get_insights_report_bad_id(self):
         """Fail to get a report for bad id."""
-        url = '/api/v1/reports/string/insights/'
+        url = "/api/v1/reports/string/insights/"
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code,
-                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_insights_nonexistent(self):
         """Fail to get a report for report id that doesn't exist."""
-        url = '/api/v1/reports/2/insights/'
+        url = "/api/v1/reports/2/insights/"
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code,
-                         status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

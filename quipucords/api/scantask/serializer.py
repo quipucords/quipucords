@@ -36,15 +36,14 @@ class SourceField(PrimaryKeyRelatedField):
         int_data = convert_to_int(data)
         actual_source = Source.objects.filter(id=int_data).first()
         if actual_source is None:
-            raise ValidationError(
-                _(messages.SJ_SOURCE_DO_NOT_EXIST % int_data))
+            raise ValidationError(_(messages.SJ_SOURCE_DO_NOT_EXIST % int_data))
         return actual_source
 
     def display_value(self, instance):
         """Create display value."""
         display = instance
         if isinstance(instance, Source):
-            display = 'Source: %s' % instance.name
+            display = "Source: %s" % instance.name
         return display
 
 
@@ -53,16 +52,15 @@ class ScanTaskSerializer(NotEmptySerializer):
 
     sequence_number = IntegerField(required=False, min_value=0, read_only=True)
     source = SourceField(queryset=Source.objects.all())
-    scan_type = ChoiceField(
-        required=False, choices=ScanTask.SCANTASK_TYPE_CHOICES)
-    status = ChoiceField(required=False, read_only=True,
-                         choices=ScanTask.STATUS_CHOICES)
+    scan_type = ChoiceField(required=False, choices=ScanTask.SCANTASK_TYPE_CHOICES)
+    status = ChoiceField(
+        required=False, read_only=True, choices=ScanTask.STATUS_CHOICES
+    )
     status_message = CharField(required=False)
     systems_count = IntegerField(required=False, min_value=0, read_only=True)
     systems_scanned = IntegerField(required=False, min_value=0, read_only=True)
     systems_failed = IntegerField(required=False, min_value=0, read_only=True)
-    systems_unreachable = IntegerField(
-        required=False, min_value=0, read_only=True)
+    systems_unreachable = IntegerField(required=False, min_value=0, read_only=True)
     start_time = DateTimeField(required=False, read_only=True)
     end_time = DateTimeField(required=False, read_only=True)
 
@@ -70,17 +68,19 @@ class ScanTaskSerializer(NotEmptySerializer):
         """Metadata for serializer."""
 
         model = ScanTask
-        fields = ['sequence_number',
-                  'source',
-                  'scan_type',
-                  'status',
-                  'status_message',
-                  'systems_count',
-                  'systems_scanned',
-                  'systems_failed',
-                  'systems_unreachable',
-                  'start_time',
-                  'end_time']
+        fields = [
+            "sequence_number",
+            "source",
+            "scan_type",
+            "status",
+            "status_message",
+            "systems_count",
+            "systems_scanned",
+            "systems_failed",
+            "systems_unreachable",
+            "start_time",
+            "end_time",
+        ]
 
     @staticmethod
     def validate_source(source):

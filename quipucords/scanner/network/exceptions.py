@@ -27,11 +27,11 @@ class NetworkPauseException(Exception):
 class ScannerException(Exception):
     """Exception for issues detected during scans."""
 
-    def __init__(self, message=''):
+    def __init__(self, message=""):
         """Exception for issues detected during scans.
 
         :param message: An error message describing the problem encountered
         during scan.
         """
-        self.message = 'Scan task failed.  Error: {}'.format(message)
+        self.message = "Scan task failed.  Error: {}".format(message)
         super().__init__(self.message)

@@ -36,7 +36,7 @@ class ScanJobRunner(Process):
         Process.__init__(self)
         self.scan_job = scan_job
         self.identifier = scan_job.id
-        self.manager_interrupt = Value('i', ScanJob.JOB_RUN)
+        self.manager_interrupt = Value("i", ScanJob.JOB_RUN)
 
     def run(self):
         """Trigger thread execution."""
@@ -58,8 +58,9 @@ class ScanJobRunner(Process):
         # Job is not running so start
         self.scan_job.start()
         if self.scan_job.status != ScanTask.RUNNING:
-            error_message = 'Job could not transition to running state.'\
-                '  See error logs.'
+            error_message = (
+                "Job could not transition to running state." "  See error logs."
+            )
             self.scan_job.fail(error_message)
             return ScanTask.FAILED
 
@@ -68,13 +69,15 @@ class ScanJobRunner(Process):
 
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
-        ).order_by('sequence_number')
+        ).order_by("sequence_number")
         fingerprint_task_runner = None
         for scan_task in incomplete_scan_tasks:
             runner = self._create_task_runner(scan_task)
             if not runner:
-                error_message = 'Scan task does not  have recognized '\
-                    'type/source combination: %s' % scan_task
+                error_message = (
+                    "Scan task does not  have recognized "
+                    "type/source combination: %s" % scan_task
+                )
 
                 scan_task.fail(error_message)
                 self.scan_job.fail(error_message)
@@ -86,7 +89,8 @@ class ScanJobRunner(Process):
                 task_runners.append(runner)
 
         self.scan_job.log_message(
-            'Job has %d remaining tasks' % len(incomplete_scan_tasks))
+            "Job has %d remaining tasks" % len(incomplete_scan_tasks)
+        )
 
         failed_tasks = []
         for runner in task_runners:
@@ -101,8 +105,10 @@ class ScanJobRunner(Process):
                 # something went wrong or cancel/pause
                 return task_status
 
-        if self.scan_job.scan_type in [ScanTask.SCAN_TYPE_INSPECT,
-                                       ScanTask.SCAN_TYPE_FINGERPRINT]:
+        if self.scan_job.scan_type in [
+            ScanTask.SCAN_TYPE_INSPECT,
+            ScanTask.SCAN_TYPE_FINGERPRINT,
+        ]:
             details_report = fingerprint_task_runner.scan_task.details_report
 
             if not details_report:
@@ -112,7 +118,7 @@ class ScanJobRunner(Process):
                     return ScanTask.FAILED
 
             if not details_report:
-                self.scan_job.fail('No facts gathered from scan.')
+                self.scan_job.fail("No facts gathered from scan.")
                 return ScanTask.FAILED
 
             # Associate details report with scan job
@@ -126,9 +132,9 @@ class ScanJobRunner(Process):
                 task_status = self._run_task(fingerprint_task_runner)
             except Exception as error:
                 fingerprint_task_runner.scan_task.log_message(
-                    'DETAILS REPORT - '
-                    'The following details report failed to generate a'
-                    ' deployments report: %s' % details_report,
+                    "DETAILS REPORT - "
+                    "The following details report failed to generate a"
+                    " deployments report: %s" % details_report,
                     log_level=logging.ERROR,
                     exception=error,
                 )
@@ -139,26 +145,29 @@ class ScanJobRunner(Process):
                 # Task did not complete successfully
                 failed_tasks.append(fingerprint_task_runner.scan_task)
                 fingerprint_task_runner.scan_task.log_message(
-                    'Task %s failed.' % (
-                        fingerprint_task_runner.scan_task.sequence_number),
-                    log_level=logging.ERROR)
+                    "Task %s failed."
+                    % (fingerprint_task_runner.scan_task.sequence_number),
+                    log_level=logging.ERROR,
+                )
                 fingerprint_task_runner.scan_task.log_message(
-                    'DETAILS REPORT - '
-                    'The following details report failed to generate a'
-                    ' deployments report: %s' % details_report,
-                    log_level=logging.ERROR
+                    "DETAILS REPORT - "
+                    "The following details report failed to generate a"
+                    " deployments report: %s" % details_report,
+                    log_level=logging.ERROR,
                 )
             else:
                 # Record results for successful tasks
                 self.scan_job.report_id = details_report.deployment_report.id
                 self.scan_job.save()
-                self.scan_job.log_message('Report %d created.' %
-                                          self.scan_job.report_id)
+                self.scan_job.log_message(
+                    "Report %d created." % self.scan_job.report_id
+                )
 
         if failed_tasks:
-            failed_task_ids = ', '.join([str(task.sequence_number)
-                                         for task in failed_tasks])
-            error_message = 'The following tasks failed: %s' % failed_task_ids
+            failed_task_ids = ", ".join(
+                [str(task.sequence_number) for task in failed_tasks]
+            )
+            error_message = "The following tasks failed: %s" % failed_task_ids
             self.scan_job.fail(error_message)
             return ScanTask.FAILED
 
@@ -190,22 +199,20 @@ class ScanJobRunner(Process):
         runner.scan_task.start()
         # run runner
         try:
-            status_message, task_status = runner.run(
-                self.manager_interrupt)
+            status_message, task_status = runner.run(self.manager_interrupt)
         except Exception as error:
             failed_task = runner.scan_task
-            context_message = 'Unexpected failure occurred.'
-            context_message += 'See context below.\n'
-            context_message += 'SCAN JOB: %s\n' % self.scan_job
-            context_message += 'TASK: %s\n' % failed_task
+            context_message = "Unexpected failure occurred."
+            context_message += "See context below.\n"
+            context_message += "SCAN JOB: %s\n" % self.scan_job
+            context_message += "TASK: %s\n" % failed_task
             if failed_task.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
-                context_message += 'SOURCE: %s\n' % failed_task.source
-                creds = [str(cred)
-                         for cred in failed_task.source.credentials.all()]
-                context_message += 'CREDENTIALS: [%s]' % creds
+                context_message += "SOURCE: %s\n" % failed_task.source
+                creds = [str(cred) for cred in failed_task.source.credentials.all()]
+                context_message += "CREDENTIALS: [%s]" % creds
             failed_task.fail(context_message)
 
-            message = 'FATAL ERROR. %s' % str(error)
+            message = "FATAL ERROR. %s" % str(error)
             self.scan_job.fail(message)
             raise error
 
@@ -221,10 +228,12 @@ class ScanJobRunner(Process):
         elif task_status == ScanTask.FAILED:
             runner.scan_task.fail(status_message)
         else:
-            error_message = 'ScanTask %d failed.  Scan task must return '\
-                'ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned ' \
-                '"%s" and the following status message: %s' %\
-                (runner.scan_task.sequence_number, task_status, status_message)
+            error_message = (
+                "ScanTask %d failed.  Scan task must return "
+                "ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned "
+                '"%s" and the following status message: %s'
+                % (runner.scan_task.sequence_number, task_status, status_message)
+            )
             runner.scan_task.fail(error_message)
             task_status = ScanTask.FAILED
         return task_status
@@ -234,14 +243,11 @@ class ScanJobRunner(Process):
         source_type = scan_task.source.source_type
         runner = None
         if source_type == Source.NETWORK_SOURCE_TYPE:
-            runner = network.ConnectTaskRunner(
-                self.scan_job, scan_task)
+            runner = network.ConnectTaskRunner(self.scan_job, scan_task)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            runner = vcenter.ConnectTaskRunner(
-                self.scan_job, scan_task)
+            runner = vcenter.ConnectTaskRunner(self.scan_job, scan_task)
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            runner = satellite.ConnectTaskRunner(
-                self.scan_job, scan_task)
+            runner = satellite.ConnectTaskRunner(self.scan_job, scan_task)
         return runner
 
     def _create_inspect_task_runner(self, scan_task):
@@ -249,14 +255,11 @@ class ScanJobRunner(Process):
         source_type = scan_task.source.source_type
         runner = None
         if source_type == Source.NETWORK_SOURCE_TYPE:
-            runner = network.InspectTaskRunner(
-                self.scan_job, scan_task)
+            runner = network.InspectTaskRunner(self.scan_job, scan_task)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            runner = vcenter.InspectTaskRunner(
-                self.scan_job, scan_task)
+            runner = vcenter.InspectTaskRunner(self.scan_job, scan_task)
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            runner = satellite.InspectTaskRunner(
-                self.scan_job, scan_task)
+            runner = satellite.InspectTaskRunner(self.scan_job, scan_task)
         return runner
 
     def _create_details_report(self):
@@ -266,30 +269,37 @@ class ScanJobRunner(Process):
         :returns: bool indicating if there are errors and dict with result.
         """
         inspect_tasks = self.scan_job.tasks.filter(
-            scan_type=ScanTask.SCAN_TYPE_INSPECT).order_by('sequence_number')
+            scan_type=ScanTask.SCAN_TYPE_INSPECT
+        ).order_by("sequence_number")
         sources = build_sources_from_tasks(
-            inspect_tasks.filter(status=ScanTask.COMPLETED))
+            inspect_tasks.filter(status=ScanTask.COMPLETED)
+        )
         if bool(sources):
-            details_report_json = {'sources': sources,
-                                   'report_type': 'details',
-                                   'report_version': create_report_version()}
+            details_report_json = {
+                "sources": sources,
+                "report_type": "details",
+                "report_version": create_report_version(),
+            }
             has_errors, validation_result = validate_details_report_json(
-                details_report_json, False)
+                details_report_json, False
+            )
 
             if has_errors:
-                message = 'Scan produced invalid details report JSON: %s' % \
-                    validation_result
+                message = (
+                    "Scan produced invalid details report JSON: %s" % validation_result
+                )
                 self.scan_job.fail(message)
                 return True, {}
 
             # Create FC model and save data to JSON file
-            details_report = create_details_report(create_report_version(),
-                                                   details_report_json)
+            details_report = create_details_report(
+                create_report_version(), details_report_json
+            )
             return False, details_report
-        message = 'No connection results found.'
+        message = "No connection results found."
         self.scan_job.fail(message)
         return True, {}
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'scan_job:{}, '.format(self.scan_job.id) + '}'
+        return "{" + "scan_job:{}, ".format(self.scan_job.id) + "}"

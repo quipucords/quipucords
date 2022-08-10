@@ -11,13 +11,10 @@
 
 """Serializer for system facts models."""
 
-from api.common.serializer import (CustomJSONField,
-                                   NotEmptySerializer)
-from api.models import DetailsReport
+from rest_framework.serializers import CharField, IntegerField, UUIDField
 
-from rest_framework.serializers import (CharField,
-                                        IntegerField,
-                                        UUIDField)
+from api.common.serializer import CustomJSONField, NotEmptySerializer
+from api.models import DetailsReport
 
 
 class DetailsReportSerializer(NotEmptySerializer):
@@ -28,8 +25,7 @@ class DetailsReportSerializer(NotEmptySerializer):
 
     sources = CustomJSONField(required=True)
     report_id = IntegerField(read_only=True)
-    report_platform_id = UUIDField(format='hex_verbose',
-                                   read_only=True)
+    report_platform_id = UUIDField(format="hex_verbose", read_only=True)
     cached_csv = CharField(required=False, read_only=True)
     cached_masked_csv = CharField(required=False, read_only=True)
 
@@ -37,4 +33,4 @@ class DetailsReportSerializer(NotEmptySerializer):
         """Meta class for DetailsReportSerializer."""
 
         model = DetailsReport
-        exclude = ('id', 'deployment_report')
+        exclude = ("id", "deployment_report")

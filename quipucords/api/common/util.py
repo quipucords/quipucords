@@ -96,7 +96,7 @@ def is_boolean(value):
         return True
     if not isinstance(value, str):
         return False
-    return value.lower() in ('true', 'false')
+    return value.lower() in ("true", "false")
 
 
 def convert_to_boolean(value):
@@ -108,11 +108,11 @@ def convert_to_boolean(value):
     if isinstance(value, bool):
         return value
     if is_boolean(value):
-        return value.lower() == 'true'
+        return value.lower() == "true"
     return False
 
 
-def validate_query_param_bool(param, param_name='mask'):
+def validate_query_param_bool(param, param_name="mask"):
     """Validate that the query param is a boolean return the bool.
 
     :param: param: The query param to evaluate
@@ -122,9 +122,12 @@ def validate_query_param_bool(param, param_name='mask'):
     if is_boolean(param):
         return convert_to_boolean(param)
     error = {
-        param_name: [_(
-            messages.QUERY_PARAM_INVALID %
-            (param_name, [True, False, 'true', 'false', 'True', 'False']))]
+        param_name: [
+            _(
+                messages.QUERY_PARAM_INVALID
+                % (param_name, [True, False, "true", "false", "True", "False"])
+            )
+        ]
     }
     raise ValidationError(error)
 
@@ -142,12 +145,9 @@ def check_for_existing_name(queryset, name, error_message, search_id=None):
         existing = queryset.filter(name=name).first()
     else:
         # Look for existing.  Same name, different id (update)
-        existing = queryset.filter(
-            name=name).exclude(id=search_id).first()
+        existing = queryset.filter(name=name).exclude(id=search_id).first()
     if existing is not None:
-        error = {
-            'name': [error_message]
-        }
+        error = {"name": [error_message]}
         raise ValidationError(error)
 
 
@@ -174,11 +174,13 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
     :returns: a JSON dict with some of the ScanJob's fields.
     """
     # pylint: disable=too-many-locals,too-many-branches
-    systems_count, \
-        systems_scanned, \
-        systems_failed, \
-        systems_unreachable,\
-        system_fingerprint_count = scanjob.calculate_counts(connect_only)
+    (
+        systems_count,
+        systems_scanned,
+        systems_failed,
+        systems_unreachable,
+        system_fingerprint_count,
+    ) = scanjob.calculate_counts(connect_only)
     report_id = scanjob.report_id
     start_time = scanjob.start_time
     end_time = scanjob.end_time
@@ -188,38 +190,36 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
     job_status_message = scanjob.status_message
 
     job_json = {
-        'id': scanjob.id,
+        "id": scanjob.id,
     }
 
     if report_id is not None:
-        job_json['report_id'] = report_id
+        job_json["report_id"] = report_id
     if start_time is not None:
-        job_json['start_time'] = start_time
+        job_json["start_time"] = start_time
     if end_time is not None:
-        job_json['end_time'] = end_time
+        job_json["end_time"] = end_time
     if systems_count is not None:
-        job_json['systems_count'] = systems_count
+        job_json["systems_count"] = systems_count
     if systems_scanned is not None:
-        job_json['systems_scanned'] = systems_scanned
+        job_json["systems_scanned"] = systems_scanned
     if systems_failed is not None:
-        job_json['systems_failed'] = systems_failed
+        job_json["systems_failed"] = systems_failed
     if systems_unreachable is not None:
-        job_json['systems_unreachable'] = systems_unreachable
+        job_json["systems_unreachable"] = systems_unreachable
     if system_fingerprint_count is not None:
-        job_json['system_fingerprint_count'] = system_fingerprint_count
+        job_json["system_fingerprint_count"] = system_fingerprint_count
     if not connect_only and scan_type is not None:
-        job_json['scan_type'] = scan_type
+        job_json["scan_type"] = scan_type
     if job_status_message is not None:
-        job_json['status_details'] = {
-            'job_status_message': job_status_message}
+        job_json["status_details"] = {"job_status_message": job_status_message}
     if job_status is not None:
-        job_json['status'] = job_status
+        job_json["status"] = job_status
         if job_status == ScanTask.FAILED:
-            failed_tasks = scanjob.tasks.all().order_by(
-                'sequence_number')
-            status_details = job_json['status_details']
+            failed_tasks = scanjob.tasks.all().order_by("sequence_number")
+            status_details = job_json["status_details"]
             for task in failed_tasks:
-                task_key = 'task_%s_status_message' % task.id
+                task_key = "task_%s_status_message" % task.id
                 status_details[task_key] = task.status_message
 
     return job_json

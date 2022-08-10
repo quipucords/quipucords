@@ -25,7 +25,7 @@ class JobInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
+        return "{ id:%s, task_results:%s }" % (self.id, self.task_results)
 
     class Meta:
         """Metadata for model."""
@@ -36,17 +36,14 @@ class JobInspectionResult(models.Model):
 class TaskInspectionResult(models.Model):
     """The captured inspection results from a scan."""
 
-    job_inspection_result = models.ForeignKey(JobInspectionResult,
-                                              on_delete=models.CASCADE,
-                                              related_name='task_results')
+    job_inspection_result = models.ForeignKey(
+        JobInspectionResult, on_delete=models.CASCADE, related_name="task_results"
+    )
 
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{ ' + 'id:{}, '\
-            'systems:{}, '\
-            .format(self.id,
-                    self.systems) + ' }'
+        return "{ " + "id:{}, " "systems:{}, ".format(self.id, self.systems) + " }"
 
     class Meta:
         """Metadata for model."""
@@ -57,26 +54,32 @@ class TaskInspectionResult(models.Model):
 class SystemInspectionResult(models.Model):
     """A model the of captured system data."""
 
-    SUCCESS = 'success'
-    FAILED = 'failed'
-    UNREACHABLE = 'unreachable'
-    CONN_STATUS_CHOICES = ((SUCCESS, SUCCESS), (FAILED, FAILED),
-                           (UNREACHABLE, UNREACHABLE))
+    SUCCESS = "success"
+    FAILED = "failed"
+    UNREACHABLE = "unreachable"
+    CONN_STATUS_CHOICES = (
+        (SUCCESS, SUCCESS),
+        (FAILED, FAILED),
+        (UNREACHABLE, UNREACHABLE),
+    )
 
     name = models.CharField(max_length=1024)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
-    source = models.ForeignKey(Source,
-                               on_delete=models.SET_NULL,
-                               null=True)
-    task_inspection_result = models.ForeignKey(TaskInspectionResult,
-                                               on_delete=models.CASCADE,
-                                               related_name='systems')
+    source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True)
+    task_inspection_result = models.ForeignKey(
+        TaskInspectionResult, on_delete=models.CASCADE, related_name="systems"
+    )
 
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{ id:%s, name:%s, status:%s, facts:%s, source:%s }' % \
-            (self.id, self.name, self.status, self.facts, self.source)
+        return "{ id:%s, name:%s, status:%s, facts:%s, source:%s }" % (
+            self.id,
+            self.name,
+            self.status,
+            self.facts,
+            self.source,
+        )
 
     class Meta:
         """Metadata for model."""
@@ -89,15 +92,14 @@ class RawFact(models.Model):
 
     name = models.CharField(max_length=1024)
     value = models.TextField()
-    system_inspection_result = models.ForeignKey(SystemInspectionResult,
-                                                 on_delete=models.CASCADE,
-                                                 related_name='facts')
+    system_inspection_result = models.ForeignKey(
+        SystemInspectionResult, on_delete=models.CASCADE, related_name="facts"
+    )
 
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{ id:%s, name:%s, value:%s }' % \
-            (self.id, self.name, self.value)
+        return "{ id:%s, name:%s, value:%s }" % (self.id, self.name, self.value)
 
     class Meta:
         """Metadata for model."""

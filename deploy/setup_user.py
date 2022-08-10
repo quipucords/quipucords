@@ -15,19 +15,16 @@ import os
 
 from django.contrib.auth.models import User
 
-QPC_SERVER_USERNAME = os.environ.get('QPC_SERVER_USERNAME', 'admin')
-QPC_SERVER_USER_EMAIL = os.environ.get(
-    'QPC_SERVER_USER_EMAIL', 'admin@example.com')
-QPC_SERVER_PASSWORD = os.environ.get('QPC_SERVER_PASSWORD', 'qpcpassw0rd')
+QPC_SERVER_USERNAME = os.environ.get("QPC_SERVER_USERNAME", "admin")
+QPC_SERVER_USER_EMAIL = os.environ.get("QPC_SERVER_USER_EMAIL", "admin@example.com")
+QPC_SERVER_PASSWORD = os.environ.get("QPC_SERVER_PASSWORD", "qpcpassw0rd")
 
-ADMIN_NOT_PRESENT = User.objects.filter(
-    username=QPC_SERVER_USERNAME).count() == 0
+ADMIN_NOT_PRESENT = User.objects.filter(username=QPC_SERVER_USERNAME).count() == 0
 
 if ADMIN_NOT_PRESENT:
     User.objects.create_superuser(
-        QPC_SERVER_USERNAME,
-        QPC_SERVER_USER_EMAIL,
-        QPC_SERVER_PASSWORD)
-    print('Created user %s' % QPC_SERVER_USERNAME)
+        QPC_SERVER_USERNAME, QPC_SERVER_USER_EMAIL, QPC_SERVER_PASSWORD
+    )
+    print("Created user %s" % QPC_SERVER_USERNAME)
 else:
-    print('User %s already exists' % QPC_SERVER_USERNAME)
+    print("User %s already exists" % QPC_SERVER_USERNAME)

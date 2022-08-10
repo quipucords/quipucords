@@ -10,20 +10,22 @@
 """Initial processing for facts coming from Ansible."""
 
 # flake8: noqa
-from . import eap
-from . import eap5
-from . import brms
-from . import fuse
-from . import jws
-from . import karaf
-from . import cpu
-from . import ifconfig
-from . import date
-from . import subman
-from . import system_purpose
-from . import yum
-from . import virt
-from . import redhat_packages
-from . import dmi
-from . import cloud_provider
-from . import user_data
+from . import (
+    brms,
+    cloud_provider,
+    cpu,
+    date,
+    dmi,
+    eap,
+    eap5,
+    fuse,
+    ifconfig,
+    jws,
+    karaf,
+    redhat_packages,
+    subman,
+    system_purpose,
+    user_data,
+    virt,
+    yum,
+)

@@ -22,67 +22,71 @@ from api.vault import encrypt_data_as_unicode
 class Credential(models.Model):
     """The credential for connecting to systems."""
 
-    NETWORK_CRED_TYPE = 'network'
-    VCENTER_CRED_TYPE = 'vcenter'
-    SATELLITE_CRED_TYPE = 'satellite'
-    CRED_TYPE_CHOICES = ((NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
-                         (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
-                         (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE))
-    BECOME_USER_DEFAULT = 'root'
-    BECOME_SUDO = 'sudo'
-    BECOME_SU = 'su'
-    BECOME_PBRUN = 'pbrun'
-    BECOME_PFEXEC = 'pfexec'
-    BECOME_DOAS = 'doas'
-    BECOME_DZDO = 'dzdo'
-    BECOME_KSU = 'ksu'
-    BECOME_RUNAS = 'runas'
-    BECOME_METHOD_CHOICES = ((BECOME_SUDO, BECOME_SUDO),
-                             (BECOME_SU, BECOME_SU),
-                             (BECOME_PBRUN, BECOME_PBRUN),
-                             (BECOME_PFEXEC, BECOME_PFEXEC),
-                             (BECOME_DOAS, BECOME_DOAS),
-                             (BECOME_DZDO, BECOME_DZDO),
-                             (BECOME_KSU, BECOME_KSU),
-                             (BECOME_RUNAS, BECOME_RUNAS))
+    NETWORK_CRED_TYPE = "network"
+    VCENTER_CRED_TYPE = "vcenter"
+    SATELLITE_CRED_TYPE = "satellite"
+    CRED_TYPE_CHOICES = (
+        (NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
+        (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
+        (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE),
+    )
+    BECOME_USER_DEFAULT = "root"
+    BECOME_SUDO = "sudo"
+    BECOME_SU = "su"
+    BECOME_PBRUN = "pbrun"
+    BECOME_PFEXEC = "pfexec"
+    BECOME_DOAS = "doas"
+    BECOME_DZDO = "dzdo"
+    BECOME_KSU = "ksu"
+    BECOME_RUNAS = "runas"
+    BECOME_METHOD_CHOICES = (
+        (BECOME_SUDO, BECOME_SUDO),
+        (BECOME_SU, BECOME_SU),
+        (BECOME_PBRUN, BECOME_PBRUN),
+        (BECOME_PFEXEC, BECOME_PFEXEC),
+        (BECOME_DOAS, BECOME_DOAS),
+        (BECOME_DZDO, BECOME_DZDO),
+        (BECOME_KSU, BECOME_KSU),
+        (BECOME_RUNAS, BECOME_RUNAS),
+    )
 
     name = models.CharField(max_length=64, unique=True)
-    cred_type = models.CharField(
-        max_length=9,
-        choices=CRED_TYPE_CHOICES,
-        null=False
-    )
+    cred_type = models.CharField(max_length=9, choices=CRED_TYPE_CHOICES, null=False)
     username = models.CharField(max_length=64)
     password = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True)
-    become_method = models.CharField(max_length=6,
-                                     choices=BECOME_METHOD_CHOICES,
-                                     null=True)
+    become_method = models.CharField(
+        max_length=6, choices=BECOME_METHOD_CHOICES, null=True
+    )
     become_user = models.CharField(max_length=64, null=True)
     become_password = models.CharField(max_length=1024, null=True)
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s,'\
-            'name:%s, '\
-            'type:%s, '\
-            'username:%s, '\
-            'ssh_keyfile:%s, '\
-            'become_method:%s, '\
-            'become_user:%s}' %\
-            (self.id,
-             self.name,
-             self.cred_type,
-             self.username,
-             self.ssh_keyfile,
-             self.become_method,
-             self.become_user)
+        return (
+            "{ id:%s,"
+            "name:%s, "
+            "type:%s, "
+            "username:%s, "
+            "ssh_keyfile:%s, "
+            "become_method:%s, "
+            "become_user:%s}"
+            % (
+                self.id,
+                self.name,
+                self.cred_type,
+                self.username,
+                self.ssh_keyfile,
+                self.become_method,
+                self.become_user,
+            )
+        )
 
     @staticmethod
     def is_encrypted(field):
         """Check to see if the password is already encrypted."""
-        if '$ANSIBLE_VAULT' in field:
+        if "$ANSIBLE_VAULT" in field:
             return True
         return False
 
@@ -96,10 +100,8 @@ class Credential(models.Model):
             self.password = encrypt_data_as_unicode(self.password)
         if self.ssh_passphrase and not self.is_encrypted(self.ssh_passphrase):
             self.ssh_passphrase = encrypt_data_as_unicode(self.ssh_passphrase)
-        if self.become_password and not \
-                self.is_encrypted(self.become_password):
-            self.become_password = \
-                encrypt_data_as_unicode(self.become_password)
+        if self.become_password and not self.is_encrypted(self.become_password):
+            self.become_password = encrypt_data_as_unicode(self.become_password)
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):

@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0003_system_platform_id'),
+        ("api", "0003_system_platform_id"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='systemfingerprint',
-            old_name='vm_host',
-            new_name='virtual_host_name',
+            model_name="systemfingerprint",
+            old_name="vm_host",
+            new_name="virtual_host_name",
         ),
     ]

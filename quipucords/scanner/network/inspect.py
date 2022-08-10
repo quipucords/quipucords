@@ -42,8 +42,8 @@ from scanner.task import ScanTaskRunner
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-DEFAULT_SCAN_DIRS = ['/', '/opt', '/app', '/home', '/usr']
-NETWORK_SCAN_IDENTITY_KEY = 'connection_host'
+DEFAULT_SCAN_DIRS = ["/", "/opt", "/app", "/home", "/usr"]
+NETWORK_SCAN_IDENTITY_KEY = "connection_host"
 
 
 class InspectTaskRunner(ScanTaskRunner):
@@ -93,21 +93,24 @@ class InspectTaskRunner(ScanTaskRunner):
             num_total = len(connected) + len(processed_hosts)
 
             if num_total == 0:
-                msg = 'Inventory provided no reachable hosts.'
+                msg = "Inventory provided no reachable hosts."
                 raise ScannerException(msg)
 
-            self.scan_task.update_stats('INITIAL NETWORK INSPECT STATS',
-                                        sys_count=len(connected),
-                                        sys_scanned=len(completed),
-                                        sys_failed=len(failed),
-                                        sys_unreachable=len(unreachable))
+            self.scan_task.update_stats(
+                "INITIAL NETWORK INSPECT STATS",
+                sys_count=len(connected),
+                sys_scanned=len(completed),
+                sys_failed=len(failed),
+                sys_unreachable=len(unreachable),
+            )
 
             # remove completed hosts
             remaining = [
-                unprocessed for unprocessed in connected
-                if unprocessed[0] not in processed_hosts]
-            scan_message, scan_result = self._inspect_scan(
-                manager_interrupt, remaining)
+                unprocessed
+                for unprocessed in connected
+                if unprocessed[0] not in processed_hosts
+            ]
+            scan_message, scan_result = self._inspect_scan(manager_interrupt, remaining)
 
             self.scan_task.cleanup_facts(NETWORK_SCAN_IDENTITY_KEY)
             temp_facts = self.scan_task.get_facts()
@@ -127,13 +130,11 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message = f"Scan task encountered error: {assertion_error}"
             return error_message, ScanTask.FAILED
         except NetworkCancelException:
-            error_message = 'Inspect scan cancel for %s.' % (
-                self.scan_task.source.name)
+            error_message = "Inspect scan cancel for %s." % (self.scan_task.source.name)
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.CANCELED
         except NetworkPauseException:
-            error_message = 'Inspect scan pause for %s.' % (
-                self.scan_task.source.name)
+            error_message = "Inspect scan pause for %s." % (self.scan_task.source.name)
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
         except ScannerException as scan_error:
@@ -145,8 +146,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 f"{self.scan_task.systems_failed} systems could not be scanned."
             )
             scan_result = ScanTask.COMPLETED
-            self.scan_task.log_message(
-                scan_message, log_level=logging.WARNING)
+            self.scan_task.log_message(scan_message, log_level=logging.WARNING)
         return scan_message, scan_result
 
     def _add_unreachable_hosts(self, systems_list):
@@ -154,14 +154,14 @@ class InspectTaskRunner(ScanTaskRunner):
 
         :param systems_list: Current list of system results.
         """
-        connected_hosts = \
-            self.connect_scan_task.connection_result.systems.filter(
-                status=SystemConnectionResult.SUCCESS).values('name')
+        connected_hosts = self.connect_scan_task.connection_result.systems.filter(
+            status=SystemConnectionResult.SUCCESS
+        ).values("name")
         # pylint: disable=consider-using-set-comprehension
-        connected_hosts = set([system.get('name')
-                               for system in connected_hosts])
-        scanned_hosts = set([system.get(NETWORK_SCAN_IDENTITY_KEY)
-                             for system in systems_list])
+        connected_hosts = set([system.get("name") for system in connected_hosts])
+        scanned_hosts = set(
+            [system.get(NETWORK_SCAN_IDENTITY_KEY) for system in systems_list]
+        )
         unreachable_hosts = connected_hosts - scanned_hosts
 
         for host in unreachable_hosts:
@@ -169,12 +169,13 @@ class InspectTaskRunner(ScanTaskRunner):
                 name=host,
                 status=SystemInspectionResult.UNREACHABLE,
                 source=self.scan_task.source,
-                task_inspection_result=self.scan_task.inspection_result)
+                task_inspection_result=self.scan_task.inspection_result,
+            )
             sys_result.save()
 
-    def _inspect_scan(self, manager_interrupt, connected,
-                      base_ssh_executable=None,
-                      ssh_timeout=None):
+    def _inspect_scan(
+        self, manager_interrupt, connected, base_ssh_executable=None, ssh_timeout=None
+    ):
         """Execute the host scan with the initialized source.
 
         :param manager_interrupt: Signal used to communicate termination
@@ -208,16 +209,17 @@ class InspectTaskRunner(ScanTaskRunner):
             extra_vars = ScanOptions.get_default_extra_vars()
 
         if extra_vars.get(ScanOptions.EXT_PRODUCT_SEARCH_DIRS) is None:
-            extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = \
-                ' '.join(DEFAULT_SCAN_DIRS)
+            extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = " ".join(
+                DEFAULT_SCAN_DIRS
+            )
 
         extra_vars["QPC_FEATURE_FLAGS"] = settings.QPC_FEATURE_FLAGS.as_dict()
 
         ssh_executable = os.path.abspath(
-            os.path.join(os.path.dirname(__file__),
-                         '../../../bin/timeout_ssh'))
+            os.path.join(os.path.dirname(__file__), "../../../bin/timeout_ssh")
+        )
 
-        base_ssh_executable = base_ssh_executable or 'ssh'
+        base_ssh_executable = base_ssh_executable or "ssh"
         ssh_timeout = ssh_timeout or settings.QPC_SSH_INSPECT_TIMEOUT
         # pylint: disable=line-too-long
         # the ssh arg is required for become-pass because
@@ -225,14 +227,19 @@ class InspectTaskRunner(ScanTaskRunner):
         # anywhere in the command array
         # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
         # timeout_ssh will remove the ssh argument before running the command
-        ssh_args = ['--executable=' + base_ssh_executable,
-                    '--timeout=' + ssh_timeout,
-                    'ssh']
+        ssh_args = [
+            "--executable=" + base_ssh_executable,
+            "--timeout=" + ssh_timeout,
+            "ssh",
+        ]
 
         group_names, inventory = _construct_scan_inventory(
-            connected, connection_port, forks,
+            connected,
+            connection_port,
+            forks,
             ssh_executable=ssh_executable,
-            ssh_args=ssh_args)
+            ssh_args=ssh_args,
+        )
         inventory_file = write_to_yaml(inventory)
 
         error_msg = None
@@ -247,30 +254,31 @@ class InspectTaskRunner(ScanTaskRunner):
         # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
             check_manager_interrupt(manager_interrupt.value)
-            log_message = 'START INSPECT PROCESSING GROUP %d of %d' % (
-                (idx + 1), len(group_names))
+            log_message = "START INSPECT PROCESSING GROUP %d of %d" % (
+                (idx + 1),
+                len(group_names),
+            )
             self.scan_task.log_message(log_message)
-            call = InspectResultCallback(self.scan_task,
-                                         manager_interrupt)
+            call = InspectResultCallback(self.scan_task, manager_interrupt)
 
             # Build Ansible Runner Parameters
             runner_settings = {
-                'idle_timeout': int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
-                'job_timeout': int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
-                'pexpect_timeout': 5
+                "idle_timeout": int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
+                "job_timeout": int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
+                "pexpect_timeout": 5,
             }
-            playbook_path = os.path.join(settings.BASE_DIR,
-                                         'scanner/network/runner/inspect.yml')
-            extra_vars['variable_host'] = group_name
+            playbook_path = os.path.join(
+                settings.BASE_DIR, "scanner/network/runner/inspect.yml"
+            )
+            extra_vars["variable_host"] = group_name
             cmdline_list = []
-            vault_file_path = '--vault-password-file=%s' % (
-                settings.DJANGO_SECRET_PATH)
+            vault_file_path = "--vault-password-file=%s" % (settings.DJANGO_SECRET_PATH)
             cmdline_list.append(vault_file_path)
-            forks_cmd = '--forks=%s' % (forks)
+            forks_cmd = "--forks=%s" % (forks)
             cmdline_list.append(forks_cmd)
             if use_paramiko:
-                cmdline_list.append('--connection=paramiko')
-            all_commands = ' '.join(cmdline_list)
+                cmdline_list.append("--connection=paramiko")
+            all_commands = " ".join(cmdline_list)
 
             if int(settings.ANSIBLE_LOG_LEVEL) == 0:
                 quiet_bool = True
@@ -289,25 +297,30 @@ class InspectTaskRunner(ScanTaskRunner):
                     cancel_callback=call.cancel_callback,
                     playbook=playbook_path,
                     cmdline=all_commands,
-                    verbosity=verbosity_lvl)
+                    verbosity=verbosity_lvl,
+                )
             except Exception as error:
                 error_msg = error
                 raise AnsibleRunnerException(error_msg)
 
             final_status = runner_obj.status
-            if final_status != 'successful':
-                if final_status == 'canceled':
+            if final_status != "successful":
+                if final_status == "canceled":
                     interrupt = manager_interrupt.value
                     if interrupt == ScanJob.JOB_TERMINATE_CANCEL:
                         msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                            'INSPECT', 'canceled')
+                            "INSPECT",
+                            "canceled",
+                        )
                     else:
                         msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                            'INSPECT', 'paused')
+                            "INSPECT",
+                            "paused",
+                        )
                     self.scan_task.log_message(msg)
                     check_manager_interrupt(interrupt)
-                if final_status not in ['unreachable', 'failed']:
-                    if final_status == 'timeout':
+                if final_status not in ["unreachable", "failed"]:
+                    if final_status == "timeout":
                         error_msg = log_messages.NETWORK_TIMEOUT_ERR
                     else:
                         error_msg = log_messages.NETWORK_UNKNOWN_ERR
@@ -345,17 +358,18 @@ class InspectTaskRunner(ScanTaskRunner):
                 nostatus.append(result.name)
 
         if bool(nostatus):
-            invalid_state_msg = 'Results without a validate state: %s' % (
-                ', '.join(nostatus))
-            self.scan_task.log_message(
-                invalid_state_msg, log_level=logging.ERROR)
+            invalid_state_msg = "Results without a validate state: %s" % (
+                ", ".join(nostatus)
+            )
+            self.scan_task.log_message(invalid_state_msg, log_level=logging.ERROR)
 
         return connected, completed, failed, unreachable
 
 
 # pylint: disable=too-many-locals
-def _construct_scan_inventory(hosts, connection_port, concurrency_count,
-                              ssh_executable=None, ssh_args=None):
+def _construct_scan_inventory(
+    hosts, connection_port, concurrency_count, ssh_executable=None, ssh_args=None
+):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts/credential tuples
@@ -367,29 +381,31 @@ def _construct_scan_inventory(hosts, connection_port, concurrency_count,
     ansible inventory
     """
     concurreny_groups = list(
-        [hosts[i:i + concurrency_count] for i in range(0,
-                                                       len(hosts),
-                                                       concurrency_count)])
+        [
+            hosts[i : i + concurrency_count]
+            for i in range(0, len(hosts), concurrency_count)
+        ]
+    )
 
     vars_dict = _construct_vars(connection_port)
     children = {}
-    inventory = {'all': {'children': children, 'vars': vars_dict}}
+    inventory = {"all": {"children": children, "vars": vars_dict}}
     i = 0
     group_names = []
     for concurreny_group in concurreny_groups:
         hosts_dict = {}
         for host in concurreny_group:
             host_vars = _credential_vars(host[1])
-            host_vars['ansible_host'] = host[0]
+            host_vars["ansible_host"] = host[0]
             if ssh_executable:
-                host_vars['ansible_ssh_executable'] = ssh_executable
+                host_vars["ansible_ssh_executable"] = ssh_executable
             if ssh_args:
-                host_vars['ansible_ssh_common_args'] = ' '.join(ssh_args)
+                host_vars["ansible_ssh_common_args"] = " ".join(ssh_args)
             hosts_dict[host[0]] = host_vars
 
-        group_name = 'group_{}'.format(i)
+        group_name = "group_{}".format(i)
         i += 1
         group_names.append(group_name)
-        children[group_name] = {'hosts': hosts_dict}
+        children[group_name] = {"hosts": hosts_dict}
 
     return group_names, inventory

@@ -13,7 +13,6 @@ import logging
 
 from scanner.network.processing import process
 
-
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -48,16 +47,16 @@ class InitLineFinder(process.Processor):
         """Find lines where the first element contains a keyword."""
         matches = []
 
-        for line in output['stdout_lines']:
+        for line in output["stdout_lines"]:
             if not line:
                 continue
 
             start = line.split()[0]
             # pylint: disable=not-an-iterable
             if any((keyword in start for keyword in cls.KEYWORDS)):
-                if (cls.IGNORE_WORDS and
-                        not any((ignore in start
-                                 for ignore in cls.IGNORE_WORDS))):
+                if cls.IGNORE_WORDS and not any(
+                    (ignore in start for ignore in cls.IGNORE_WORDS)
+                ):
                     matches.append(line.strip())
                 elif cls.IGNORE_WORDS is None:
                     matches.append(line.strip())
@@ -74,13 +73,13 @@ class FindJarVer(process.Processor):
     def process(output, dependencies=None):
         """Return the command's output."""
         versions = []
-        for line in output['stdout_lines']:
-            if line == '':
+        for line in output["stdout_lines"]:
+            if line == "":
                 continue
-            line_data = line.split('; ')
+            line_data = line.split("; ")
             for version_stamp in line_data:
-                jar, date = version_stamp.split('**')
-                version = {'version': jar, 'date': date}
+                jar, date = version_stamp.split("**")
+                version = {"version": jar, "date": date}
                 versions.append(version)
         return versions
 
@@ -94,10 +93,10 @@ class FindJar(process.Processor):
     def process(output, dependencies=None):
         """Return the command's output."""
         versions = []
-        for line in output['stdout_lines']:
-            if line.strip() == '':
+        for line in output["stdout_lines"]:
+            if line.strip() == "":
                 continue
-            line_data = line.split('; ')
+            line_data = line.split("; ")
             versions += line_data
         return versions
 
@@ -121,14 +120,13 @@ class PerItemProcessor(process.Processor):
     def process(cls, output, dependencies=None):
         """Process the output of an Ansible with-items task."""
         result = {}
-        for item in output['results']:
-            item_name = item['item']
+        for item in output["results"]:
+            item_name = item["item"]
             if item_name:
                 try:
                     val = cls.process_item(item)
                 except Exception as ex:  # pylint: disable=broad-except
-                    logger.debug('Processor for %s hit error on %s',
-                                 cls.KEY, item)
+                    logger.debug("Processor for %s hit error on %s", cls.KEY, item)
                     logger.exception(ex)
                     val = None
                 if val is not None:
@@ -158,13 +156,14 @@ class IndicatorFileFinder(PerItemProcessor):
     @classmethod
     def process_item(cls, item):
         """Look for indicator files in item's stdout lines."""
-        if item.get('rc', True):
+        if item.get("rc", True):
             return []
 
-        files = item['stdout_lines']
+        files = item["stdout_lines"]
         # pylint: disable=no-member
-        found_in_dir = [filename for filename in cls.INDICATOR_FILES
-                        if filename in files]
+        found_in_dir = [
+            filename for filename in cls.INDICATOR_FILES if filename in files
+        ]
         if found_in_dir:
             return found_in_dir
 
@@ -184,10 +183,10 @@ class StdoutSearchProcessor(PerItemProcessor):
     @classmethod
     def process_item(cls, item):
         """Search stdout for the SEARCH_STRING."""
-        if item.get('rc', True):
+        if item.get("rc", True):
             return False
 
-        return cls.SEARCH_STRING in item['stdout']
+        return cls.SEARCH_STRING in item["stdout"]
 
 
 class StdoutPassthroughProcessor(PerItemProcessor):
@@ -202,4 +201,4 @@ class StdoutPassthroughProcessor(PerItemProcessor):
     @staticmethod
     def process_item(item):
         """Make sure item succeeded and pass stdout through."""
-        return item['rc'] == 0 and item['stdout'].strip()
+        return item["rc"] == 0 and item["stdout"].strip()

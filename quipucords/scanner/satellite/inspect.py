@@ -9,15 +9,16 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite inspection task."""
-from api.models import ScanJob, ScanTask
-
 from requests import exceptions
 
+from api.models import ScanJob, ScanTask
 from scanner.satellite import utils
-from scanner.satellite.api import (SatelliteAuthException,
-                                   SatelliteCancelException,
-                                   SatelliteException,
-                                   SatellitePauseException)
+from scanner.satellite.api import (
+    SatelliteAuthException,
+    SatelliteCancelException,
+    SatelliteException,
+    SatellitePauseException,
+)
 from scanner.satellite.factory import create
 from scanner.task import ScanTaskRunner
 
@@ -51,63 +52,60 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = 'Prerequisites scan task %d failed.' %\
-                (self.connect_scan_task.sequence_number)
+            error_message = "Prerequisites scan task %d failed." % (
+                self.connect_scan_task.sequence_number
+            )
             return error_message, ScanTask.FAILED
 
         try:
-            status_code, api_version, satellite_version = \
-                utils.status(self.scan_task)
+            status_code, api_version, satellite_version = utils.status(self.scan_task)
             if status_code is None:
-                error_message = 'Unknown satellite version is not ' \
-                                'supported. '
-                error_message += 'Inspect scan failed for source %s.' % \
-                                 (self.source.name)
+                error_message = "Unknown satellite version is not " "supported. "
+                error_message += "Inspect scan failed for source %s." % (
+                    self.source.name
+                )
                 return error_message, ScanTask.FAILED
             if status_code == 200:
-                api = create(satellite_version, api_version,
-                             self.scan_job, self.scan_task)
+                api = create(
+                    satellite_version, api_version, self.scan_job, self.scan_task
+                )
                 if not api:
-                    error_message = 'Satellite version %s with '\
-                        'api version %s is not supported. ' %\
-                        (satellite_version, api_version)
-                    error_message += 'Inspect scan failed for source %s.' % \
-                        (self.source.name)
+                    error_message = (
+                        "Satellite version %s with "
+                        "api version %s is not supported. "
+                        % (satellite_version, api_version)
+                    )
+                    error_message += "Inspect scan failed for source %s." % (
+                        self.source.name
+                    )
                     return error_message, ScanTask.FAILED
                 api.hosts_facts(manager_interrupt)
             else:
-                error_message = 'Inspect scan failed for source %s.' \
-                    % self.source.name
+                error_message = "Inspect scan failed for source %s." % self.source.name
                 return error_message, ScanTask.FAILED
         except SatelliteAuthException as auth_error:
-            error_message = 'Satellite auth error encountered: %s. ' % \
-                auth_error
-            error_message += 'Inspect scan failed for source %s.' \
-                % self.source.name
+            error_message = "Satellite auth error encountered: %s. " % auth_error
+            error_message += "Inspect scan failed for source %s." % self.source.name
             return error_message, ScanTask.FAILED
         except SatelliteException as sat_error:
-            error_message = 'Satellite unknown error encountered: %s. ' % \
-                sat_error
-            error_message += 'Inspect scan failed for source %s.' \
-                % self.source.name
+            error_message = "Satellite unknown error encountered: %s. " % sat_error
+            error_message += "Inspect scan failed for source %s." % self.source.name
             return error_message, ScanTask.FAILED
         except SatelliteCancelException:
-            error_message = 'Inspect scan cancel for %s.' % self.source.name
+            error_message = "Inspect scan cancel for %s." % self.source.name
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.CANCELED
         except SatellitePauseException:
-            error_message = 'Inspect scan pause for %s.' % self.source.name
+            error_message = "Inspect scan pause for %s." % self.source.name
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
         except exceptions.ConnectionError as conn_error:
-            error_message = 'Satellite connection error encountered: %s. ' % \
-                conn_error
-            error_message += 'Inspect scan failed for %s.' % self.source.name
+            error_message = "Satellite connection error encountered: %s. " % conn_error
+            error_message += "Inspect scan failed for %s." % self.source.name
             return error_message, ScanTask.FAILED
         except TimeoutError as timeout_error:
-            error_message = 'Satellite timeout error encountered: %s. ' % \
-                timeout_error
-            error_message += 'Inspect scan failed for %s.' % self.source.name
+            error_message = "Satellite timeout error encountered: %s. " % timeout_error
+            error_message += "Inspect scan failed for %s." % self.source.name
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

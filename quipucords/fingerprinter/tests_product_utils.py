@@ -13,7 +13,7 @@
 
 from django.test import TestCase
 
-from fingerprinter.utils import (strip_prefix, strip_suffix)
+from fingerprinter.utils import strip_prefix, strip_suffix
 
 
 class ProductUtilsTest(TestCase):
@@ -21,28 +21,28 @@ class ProductUtilsTest(TestCase):
 
     def test_strip_prefix(self):
         """Test the strip_prefix method."""
-        string = '/opt/eap/modules.jar'
-        prefix = '/opt/eap/'
+        string = "/opt/eap/modules.jar"
+        prefix = "/opt/eap/"
         stripped = strip_prefix(string, prefix)
-        self.assertEqual(stripped, 'modules.jar')
+        self.assertEqual(stripped, "modules.jar")
 
     def test_strip_prefix_no_prefix(self):
         """Test the strip_prefix method."""
-        string = '/opt/eap/modules.jar'
-        prefix = '/opt/fuse/'
+        string = "/opt/eap/modules.jar"
+        prefix = "/opt/fuse/"
         stripped = strip_prefix(string, prefix)
         self.assertEqual(stripped, string)
 
     def test_strip_suffix_no_suffix(self):
         """Test the strip_suffix method."""
-        string = 'modules.jar'
-        suffix = '.csv'
+        string = "modules.jar"
+        suffix = ".csv"
         stripped = strip_suffix(string, suffix)
         self.assertEqual(stripped, string)
 
     def test_strip_suffix(self):
         """Test the strip_suffix method."""
-        string = 'modules.jar'
-        suffix = '.jar'
+        string = "modules.jar"
+        suffix = ".jar"
         stripped = strip_suffix(string, suffix)
-        self.assertEqual(stripped, 'modules')
+        self.assertEqual(stripped, "modules")

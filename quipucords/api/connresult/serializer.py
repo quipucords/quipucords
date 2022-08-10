@@ -15,9 +15,7 @@ from rest_framework.serializers import CharField, ChoiceField
 
 # pylint: disable=wrong-import-order
 from api.common.serializer import NotEmptySerializer  # noqa
-from api.models import (JobConnectionResult,
-                        SystemConnectionResult,
-                        TaskConnectionResult)
+from api.models import JobConnectionResult, SystemConnectionResult, TaskConnectionResult
 
 
 class SystemConnectionResultSerializer(NotEmptySerializer):
@@ -25,14 +23,15 @@ class SystemConnectionResultSerializer(NotEmptySerializer):
 
     name = CharField(required=True)
     status = ChoiceField(
-        required=True, choices=SystemConnectionResult.CONN_STATUS_CHOICES)
+        required=True, choices=SystemConnectionResult.CONN_STATUS_CHOICES
+    )
 
     class Meta:
         """Metadata for serialzer."""
 
         model = SystemConnectionResult
-        fields = ['name', 'status', 'source', 'credential']
-        qpc_allow_empty_fields = ['value', 'source']
+        fields = ["name", "status", "source", "credential"]
+        qpc_allow_empty_fields = ["value", "source"]
 
 
 class TaskConnectionResultSerializer(NotEmptySerializer):
@@ -42,8 +41,8 @@ class TaskConnectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = TaskConnectionResult
-        fields = ['source', 'systems']
-        qpc_allow_empty_fields = ['source', 'systems']
+        fields = ["source", "systems"]
+        qpc_allow_empty_fields = ["source", "systems"]
 
 
 class JobConnectionResultSerializer(NotEmptySerializer):
@@ -53,5 +52,5 @@ class JobConnectionResultSerializer(NotEmptySerializer):
         """Metadata for serialzer."""
 
         model = JobConnectionResult
-        fields = ['task_results']
-        qpc_allow_empty_fields = ['task_results']
+        fields = ["task_results"]
+        qpc_allow_empty_fields = ["task_results"]

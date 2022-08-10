@@ -44,7 +44,7 @@ def get_nics(guest_net):
                 mac_addresses.append(nic.macAddress)
                 ipconf = nic.ipConfig.ipAddress
                 for ip_addr in ipconf:
-                    if ':' not in ip_addr.ipAddress:  # Only grab ipv4 addrs
+                    if ":" not in ip_addr.ipAddress:  # Only grab ipv4 addrs
                         ip_addresses.append(ip_addr.ipAddress)
     return mac_addresses, ip_addresses
 
@@ -104,13 +104,13 @@ class InspectTaskRunner(ScanTaskRunner):
         :param props: Array of Dynamic Properties
         """
         facts = {}
-        facts['type'] = obj.__class__.__name__
+        facts["type"] = obj.__class__.__name__
         for prop in props:
-            if prop.name == 'name':
-                facts['name'] = prop.val
-            elif prop.name == 'parent':
+            if prop.name == "name":
+                facts["name"] = prop.val
+            elif prop.name == "parent":
                 if prop.val is not None:
-                    facts['parent'] = str(prop.val)
+                    facts["parent"] = str(prop.val)
         return facts
 
     def parse_cluster_props(self, props, parents_dict):
@@ -121,9 +121,9 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         facts = {}
         for prop in props:
-            if prop.name == 'name':
+            if prop.name == "name":
                 facts[ClusterRawFacts.NAME] = prop.val
-            elif prop.name == 'parent':
+            elif prop.name == "parent":
                 parent = parents_dict.get(str(prop.val))
                 while parent and parent.get("type") != "vim.Datacenter":
                     parent = parents_dict.get(parent.get("parent"))
@@ -140,7 +140,7 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         facts = {}
         for prop in props:
-            if prop.name == 'parent':
+            if prop.name == "parent":
                 cluster_info = cluster_dict.get(str(prop.val), {})
                 facts[HostRawFacts.CLUSTER] = cluster_info.get(ClusterRawFacts.NAME)
                 facts[HostRawFacts.DATACENTER] = cluster_info.get(
@@ -148,13 +148,13 @@ class InspectTaskRunner(ScanTaskRunner):
                 )
             elif prop.name == "summary.config.name":
                 facts[HostRawFacts.NAME] = prop.val
-            elif prop.name == 'hardware.systemInfo.uuid':
+            elif prop.name == "hardware.systemInfo.uuid":
                 facts[HostRawFacts.UUID] = prop.val
-            elif prop.name == 'summary.hardware.numCpuCores':
+            elif prop.name == "summary.hardware.numCpuCores":
                 facts[HostRawFacts.CPU_CORES] = prop.val
-            elif prop.name == 'summary.hardware.numCpuPkgs':
+            elif prop.name == "summary.hardware.numCpuPkgs":
                 facts[HostRawFacts.CPU_COUNT] = prop.val
-            elif prop.name == 'summary.hardware.numCpuThreads':
+            elif prop.name == "summary.hardware.numCpuThreads":
                 facts[HostRawFacts.CPU_THREADS] = prop.val
 
         return facts
@@ -167,33 +167,33 @@ class InspectTaskRunner(ScanTaskRunner):
         :param props: Array of Dynamic Properties
         :param host_dict: Dictionary of host properties
         """
-        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
         facts = raw_facts_template()
         for prop in props:
-            if prop.name == 'name':
+            if prop.name == "name":
                 facts[VcenterRawFacts.NAME] = prop.val
-            if prop.name == 'guest.net':
+            if prop.name == "guest.net":
                 mac_addresses, ip_addresses = get_nics(prop.val)
                 facts[VcenterRawFacts.MAC_ADDRESSES] = mac_addresses
                 facts[VcenterRawFacts.IP_ADDRESSES] = ip_addresses
-            elif prop.name == 'summary.runtime.powerState':
+            elif prop.name == "summary.runtime.powerState":
                 facts[VcenterRawFacts.STATE] = prop.val
                 if facts[VcenterRawFacts.STATE] == "poweredOn":
                     facts[VcenterRawFacts.LAST_CHECK_IN] = now
-            elif prop.name == 'summary.guest.hostName':
+            elif prop.name == "summary.guest.hostName":
                 facts[VcenterRawFacts.DNS_NAME] = prop.val
             elif prop.name == "config.template":
                 facts[VcenterRawFacts.TEMPLATE] = prop.val
-            elif prop.name == 'summary.config.guestFullName':
+            elif prop.name == "summary.config.guestFullName":
                 facts[VcenterRawFacts.OS] = prop.val
-            elif prop.name == 'summary.config.memorySizeMB':
+            elif prop.name == "summary.config.memorySizeMB":
                 facts[VcenterRawFacts.MEMORY_SIZE] = int(prop.val / 1024)
-            elif prop.name == 'summary.config.numCpu':
+            elif prop.name == "summary.config.numCpu":
                 facts[VcenterRawFacts.CPU_COUNT] = prop.val
-            elif prop.name == 'summary.config.uuid':
+            elif prop.name == "summary.config.uuid":
                 facts[VcenterRawFacts.UUID] = prop.val
-            elif prop.name == 'runtime.host':
+            elif prop.name == "runtime.host":
                 host_facts = host_dict.get(str(prop.val))
                 if host_facts:
                     facts[VcenterRawFacts.HOST_NAME] = host_facts.get(HostRawFacts.NAME)
@@ -216,21 +216,22 @@ class InspectTaskRunner(ScanTaskRunner):
 
         vm_name = facts[VcenterRawFacts.NAME]
 
-        logger.debug('system %s facts=%s', vm_name, facts)
+        logger.debug("system %s facts=%s", vm_name, facts)
 
         sys_result = SystemInspectionResult(
-            name=vm_name, status=SystemInspectionResult.SUCCESS,
+            name=vm_name,
+            status=SystemInspectionResult.SUCCESS,
             source=self.scan_task.source,
-            task_inspection_result=self.scan_task.inspection_result)
+            task_inspection_result=self.scan_task.inspection_result,
+        )
         sys_result.save()
 
         for key, val in facts.items():
             if val is not None:
                 final_value = json.dumps(val)
                 stored_fact = RawFact(
-                    name=key,
-                    value=final_value,
-                    system_inspection_result=sys_result)
+                    name=key, value=final_value, system_inspection_result=sys_result
+                )
                 stored_fact.save()
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
@@ -244,8 +245,7 @@ class InspectTaskRunner(ScanTaskRunner):
         options = vmodl.query.PropertyCollector.RetrieveOptions()
 
         result = content.propertyCollector.RetrievePropertiesEx(
-            specSet=spec_set,
-            options=options
+            specSet=spec_set, options=options
         )
 
         objects = []
@@ -257,9 +257,7 @@ class InspectTaskRunner(ScanTaskRunner):
             if token is None:
                 break
 
-            result = content.propertyCollector.ContinueRetrievePropertiesEx(
-                token
-            )
+            result = content.propertyCollector.ContinueRetrievePropertiesEx(token)
 
         parents_dict = {}
         for object_content in objects:
@@ -274,16 +272,14 @@ class InspectTaskRunner(ScanTaskRunner):
 
             if isinstance(obj, vim.ComputeResource):
                 props = object_content.propSet
-                cluster_dict[str(obj)] = \
-                    self.parse_cluster_props(props, parents_dict)
+                cluster_dict[str(obj)] = self.parse_cluster_props(props, parents_dict)
 
         host_dict = {}
         for object_content in objects:
             obj = object_content.obj
             if isinstance(obj, vim.HostSystem):
                 props = object_content.propSet
-                host_dict[str(obj)] = self.parse_host_props(
-                    props, cluster_dict)
+                host_dict[str(obj)] = self.parse_host_props(props, cluster_dict)
 
         for object_content in objects:
             obj = object_content.obj
@@ -295,39 +291,40 @@ class InspectTaskRunner(ScanTaskRunner):
         """Initialize the scan_task stats."""
         # Save counts
         self.scan_task.update_stats(
-            'INITIAL VCENTER CONNECT STATS.',
-            sys_count=self.connect_scan_task.systems_count)
+            "INITIAL VCENTER CONNECT STATS.",
+            sys_count=self.connect_scan_task.systems_count,
+        )
 
     def _property_set(self):
         """Define set of properties for _filter_set."""
         cluster_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.ComputeResource,
-            pathSet=['name', 'parent'],
+            pathSet=["name", "parent"],
         )
 
         dc_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.Datacenter,
-            pathSet=['name', 'parent'],
+            pathSet=["name", "parent"],
         )
 
         folder_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.Folder,
-            pathSet=['name', 'parent'],
+            pathSet=["name", "parent"],
         )
 
         host_property_spec = vmodl.query.PropertyCollector.PropertySpec(
             all=False,
             type=vim.HostSystem,
             pathSet=[
-                'parent',
-                'hardware.systemInfo.uuid',
-                'summary.config.name',
-                'summary.hardware.numCpuCores',
-                'summary.hardware.numCpuPkgs',
-                'summary.hardware.numCpuThreads',
+                "parent",
+                "hardware.systemInfo.uuid",
+                "summary.config.name",
+                "summary.hardware.numCpuCores",
+                "summary.hardware.numCpuPkgs",
+                "summary.hardware.numCpuThreads",
             ],
         )
 
@@ -353,7 +350,7 @@ class InspectTaskRunner(ScanTaskRunner):
             dc_property_spec,
             folder_property_spec,
             host_property_spec,
-            vm_property_spec
+            vm_property_spec,
         ]
 
         return property_set
@@ -365,47 +362,35 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         # Create traversal set
         folder_to_child_entity = vmodl.query.PropertyCollector.TraversalSpec(
-            name='folderToChildEntity',
-            type=vim.Folder,
-            path='childEntity',
-            skip=False)
+            name="folderToChildEntity", type=vim.Folder, path="childEntity", skip=False
+        )
 
-        folder_to_child_entity.selectSet.extend([
-            vmodl.query.PropertyCollector.SelectionSpec(
-                name='folderToChildEntity'),
-            vmodl.query.PropertyCollector.SelectionSpec(
-                name='dcToVmFolder'),
-            vmodl.query.PropertyCollector.SelectionSpec(
-                name='dcToHostFolder'),
-            vmodl.query.PropertyCollector.SelectionSpec(
-                name='crToHost'),
-        ])
+        folder_to_child_entity.selectSet.extend(
+            [
+                vmodl.query.PropertyCollector.SelectionSpec(name="folderToChildEntity"),
+                vmodl.query.PropertyCollector.SelectionSpec(name="dcToVmFolder"),
+                vmodl.query.PropertyCollector.SelectionSpec(name="dcToHostFolder"),
+                vmodl.query.PropertyCollector.SelectionSpec(name="crToHost"),
+            ]
+        )
 
         dc_to_vm_folder = vmodl.query.PropertyCollector.TraversalSpec(
-            name='dcToVmFolder',
-            type=vim.Datacenter,
-            path='vmFolder',
-            skip=False)
-        dc_to_vm_folder.selectSet.extend([
-            vmodl.query.PropertyCollector.SelectionSpec(
-                name='folderToChildEntity')
-        ])
+            name="dcToVmFolder", type=vim.Datacenter, path="vmFolder", skip=False
+        )
+        dc_to_vm_folder.selectSet.extend(
+            [vmodl.query.PropertyCollector.SelectionSpec(name="folderToChildEntity")]
+        )
 
         dc_to_host_folder = vmodl.query.PropertyCollector.TraversalSpec(
-            name='dcToHostFolder',
-            type=vim.Datacenter,
-            path='hostFolder',
-            skip=False)
-        dc_to_host_folder.selectSet.extend([
-            vmodl.query.PropertyCollector.SelectionSpec(
-                name='folderToChildEntity')
-        ])
+            name="dcToHostFolder", type=vim.Datacenter, path="hostFolder", skip=False
+        )
+        dc_to_host_folder.selectSet.extend(
+            [vmodl.query.PropertyCollector.SelectionSpec(name="folderToChildEntity")]
+        )
 
         cr_to_host = vmodl.query.PropertyCollector.TraversalSpec(
-            name='crToHost',
-            type=vim.ComputeResource,
-            path='host',
-            skip=False)
+            name="crToHost", type=vim.ComputeResource, path="host", skip=False
+        )
 
         traversal_set = [
             folder_to_child_entity,
@@ -415,12 +400,18 @@ class InspectTaskRunner(ScanTaskRunner):
         ]
 
         # Create object set
-        object_set = [vmodl.query.PropertyCollector.ObjectSpec(
-            obj=root_folder, skip=False, selectSet=traversal_set)]
+        object_set = [
+            vmodl.query.PropertyCollector.ObjectSpec(
+                obj=root_folder, skip=False, selectSet=traversal_set
+            )
+        ]
 
         # Create filter set
-        filter_spec = [vmodl.query.PropertyCollector.FilterSpec(
-            objectSet=object_set, propSet=self._property_set())]
+        filter_spec = [
+            vmodl.query.PropertyCollector.FilterSpec(
+                objectSet=object_set, propSet=self._property_set()
+            )
+        ]
 
         return filter_spec
 

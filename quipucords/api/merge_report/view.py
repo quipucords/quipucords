@@ -38,42 +38,41 @@ from scanner.job import ScanJobRunner
 # pylint: disable=invalid-name
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
 
 if authentication_enabled:
-    auth_classes = (QuipucordsExpiringTokenAuthentication,
-                    SessionAuthentication)
+    auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
     perm_classes = (IsAuthenticated,)
 else:
     auth_classes = ()
     perm_classes = ()
 
 
-@api_view(['PUT'])
+@api_view(["PUT"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 def sync_merge_reports(request):
     """Merge reports synchronously."""
     # pylint: disable=too-many-locals
-    error = {
-        'reports': []
-    }
+    error = {"reports": []}
 
     details_report_json = _convert_ids_to_json(request.data)
 
     has_errors, validation_result = validate_details_report_json(
-        details_report_json, True)
+        details_report_json, True
+    )
     if has_errors:
         message = _(messages.REPORT_MERGE_NO_RESULTS % validation_result)
-        error.get('reports').append(message)
+        error.get("reports").append(message)
         raise ValidationError(error)
 
     # Create FC model and save data
     details_report_json = _reconcile_source_versions(details_report_json)
-    report_version = details_report_json.get('report_version', None)
+    report_version = details_report_json.get("report_version", None)
     details_report = create_details_report(report_version, details_report_json)
-    merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                        details_report=details_report)
+    merge_job = ScanJob(
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
+    )
     merge_job.save()
     merge_job.queue()
     runner = ScanJobRunner(merge_job)
@@ -91,20 +90,20 @@ def sync_merge_reports(request):
     return Response(result, status=status.HTTP_201_CREATED)
 
 
-@api_view(['get', 'put', 'post'])
+@api_view(["get", "put", "post"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 def async_merge_reports(request, pk=None):
     """Merge reports asynchronously."""
     # pylint: disable=invalid-name
-    if request.method == 'GET':
+    if request.method == "GET":
         return _get_async_merge_report_status(pk)
 
     # is POST
     if pk is not None:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    if request.method == 'PUT':
+    if request.method == "PUT":
         details_report_json = _convert_ids_to_json(request.data)
         return _create_async_merge_report_job(details_report_json)
 
@@ -125,15 +124,13 @@ def _convert_ids_to_json(report_request_json):
 
     for report in reports:
         sources = sources + report.get_sources()
-        if not report_version and \
-                report.report_version and \
-                report.report_type:
+        if not report_version and report.report_version and report.report_type:
             report_version = report.report_version
             report_type = report.report_type
-    details_report_json = {'sources': sources}
+    details_report_json = {"sources": sources}
     if report_version:
-        details_report_json['report_version'] = report_version
-        details_report_json['report_type'] = report_type
+        details_report_json["report_version"] = report_version
+        details_report_json["report_type"] = report_type
     return details_report_json
 
 
@@ -158,21 +155,22 @@ def _create_async_merge_report_job(details_report_data):
     :returns: Response for http request
     """
     has_errors, validation_result = validate_details_report_json(
-        details_report_data, True)
+        details_report_data, True
+    )
     if has_errors:
-        return Response(validation_result,
-                        status=status.HTTP_400_BAD_REQUEST)
+        return Response(validation_result, status=status.HTTP_400_BAD_REQUEST)
 
     details_report_data = _reconcile_source_versions(details_report_data)
 
     # Create FC model and save data
-    report_version = details_report_data.get('report_version', None)
+    report_version = details_report_data.get("report_version", None)
     details_report = create_details_report(report_version, details_report_data)
 
     # Create new job to run
 
-    merge_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                        details_report=details_report)
+    merge_job = ScanJob(
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
+    )
     merge_job.save()
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
@@ -196,8 +194,8 @@ def _reconcile_source_versions(details_report_data):
         will be done.  All sources will be the same version.  Report
         also will have a version.
     """
-    source_version = details_report_data['sources'][0]['report_version']
-    details_report_data['report_version'] = source_version
+    source_version = details_report_data["sources"][0]["report_version"]
+    details_report_data["report_version"] = source_version
     return details_report_data
 
 
@@ -207,42 +205,41 @@ def _validate_merge_report(data):
     :param data: dict with list of report ids
     :returns QuerySet DetailsReport
     """
-    error = {
-        'reports': []
-    }
-    if not isinstance(data, dict) or \
-            data.get('reports') is None:
-        error.get('reports').append(_(messages.REPORT_MERGE_REQUIRED))
+    error = {"reports": []}
+    if not isinstance(data, dict) or data.get("reports") is None:
+        error.get("reports").append(_(messages.REPORT_MERGE_REQUIRED))
         raise ValidationError(error)
-    report_ids = data.get('reports')
+    report_ids = data.get("reports")
     if not isinstance(report_ids, list):
-        error.get('reports').append(_(messages.REPORT_MERGE_NOT_LIST))
+        error.get("reports").append(_(messages.REPORT_MERGE_NOT_LIST))
         raise ValidationError(error)
 
     report_id_count = len(report_ids)
     if report_id_count < 2:
-        error.get('reports').append(_(messages.REPORT_MERGE_TOO_SHORT))
+        error.get("reports").append(_(messages.REPORT_MERGE_TOO_SHORT))
         raise ValidationError(error)
 
     non_integer_values = [
-        report_id for report_id in report_ids if not is_int(report_id)]
+        report_id for report_id in report_ids if not is_int(report_id)
+    ]
     if bool(non_integer_values):
-        error.get('reports').append(_(messages.REPORT_MERGE_NOT_INT))
+        error.get("reports").append(_(messages.REPORT_MERGE_NOT_INT))
         raise ValidationError(error)
 
     report_ids = [int(report_id) for report_id in report_ids]
     unique_id_count = len(set(report_ids))
     if unique_id_count != report_id_count:
-        error.get('reports').append(_(messages.REPORT_MERGE_NOT_UNIQUE))
+        error.get("reports").append(_(messages.REPORT_MERGE_NOT_UNIQUE))
         raise ValidationError(error)
 
-    reports = DetailsReport.objects.filter(pk__in=report_ids).order_by('-id')
+    reports = DetailsReport.objects.filter(pk__in=report_ids).order_by("-id")
     actual_report_ids = [report.id for report in reports]
     missing_reports = set(report_ids) - set(actual_report_ids)
     if bool(missing_reports):
         message = _(messages.REPORT_MERGE_NOT_FOUND) % (
-            ', '.join([str(i) for i in missing_reports]))
-        error.get('reports').append(message)
+            ", ".join([str(i) for i in missing_reports])
+        )
+        error.get("reports").append(message)
         raise ValidationError(error)
 
     return reports

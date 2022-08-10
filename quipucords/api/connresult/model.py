@@ -27,7 +27,7 @@ class JobConnectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{ id:%s, task_results:%s }' % (self.id, self.task_results)
+        return "{ id:%s, task_results:%s }" % (self.id, self.task_results)
 
     class Meta:
         """Metadata for model."""
@@ -38,16 +38,14 @@ class JobConnectionResult(models.Model):
 class TaskConnectionResult(models.Model):
     """The captured connection results from a scan."""
 
-    job_connection_result = models.ForeignKey(JobConnectionResult,
-                                              on_delete=models.CASCADE,
-                                              related_name='task_results')
+    job_connection_result = models.ForeignKey(
+        JobConnectionResult, on_delete=models.CASCADE, related_name="task_results"
+    )
 
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return '{ ' + 'id:{}, '\
-            'sytems:{}'.format(self.id,
-                               self.systems) + ' }'
+        return "{ " + "id:{}, " "sytems:{}".format(self.id, self.systems) + " }"
 
     class Meta:
         """Metadata for model."""
@@ -58,28 +56,32 @@ class TaskConnectionResult(models.Model):
 class SystemConnectionResult(models.Model):
     """A key value pair of captured data."""
 
-    SUCCESS = 'success'
-    FAILED = 'failed'
-    UNREACHABLE = 'unreachable'
-    CONN_STATUS_CHOICES = ((SUCCESS, SUCCESS), (FAILED, FAILED),
-                           (UNREACHABLE, UNREACHABLE))
+    SUCCESS = "success"
+    FAILED = "failed"
+    UNREACHABLE = "unreachable"
+    CONN_STATUS_CHOICES = (
+        (SUCCESS, SUCCESS),
+        (FAILED, FAILED),
+        (UNREACHABLE, UNREACHABLE),
+    )
 
     name = models.TextField()
-    credential = models.ForeignKey(Credential,
-                                   on_delete=models.SET_NULL,
-                                   null=True)
-    source = models.ForeignKey(Source,
-                               on_delete=models.SET_NULL,
-                               null=True)
+    credential = models.ForeignKey(Credential, on_delete=models.SET_NULL, null=True)
+    source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
-    task_connection_result = models.ForeignKey(TaskConnectionResult,
-                                               on_delete=models.CASCADE,
-                                               related_name='systems')
+    task_connection_result = models.ForeignKey(
+        TaskConnectionResult, on_delete=models.CASCADE, related_name="systems"
+    )
 
     def __str__(self):
         """Convert to string."""
-        return '{ id:%s, name:%s, status:%s, source:%s, credential:%s }' % \
-            (self.id, self.name, self.status, self.source, self.credential)
+        return "{ id:%s, name:%s, status:%s, source:%s, credential:%s }" % (
+            self.id,
+            self.name,
+            self.status,
+            self.source,
+            self.credential,
+        )
 
     class Meta:
         """Metadata for model."""

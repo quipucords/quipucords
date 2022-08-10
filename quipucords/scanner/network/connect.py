@@ -13,30 +13,28 @@ import logging
 import os.path
 
 import ansible_runner
+import pexpect
 from ansible_runner.exceptions import AnsibleRunnerException
-
-from api.models import (Credential,
-                        ScanJob,
-                        ScanOptions,
-                        ScanTask,
-                        SystemConnectionResult)
-from api.serializers import CredentialSerializer, SourceSerializer
-from api.vault import decrypt_data_as_unicode, write_to_yaml
-
 from django.db import transaction
 
 import log_messages
-
-import pexpect
-
+from api.models import (
+    Credential,
+    ScanJob,
+    ScanOptions,
+    ScanTask,
+    SystemConnectionResult,
+)
+from api.serializers import CredentialSerializer, SourceSerializer
+from api.vault import decrypt_data_as_unicode, write_to_yaml
 from quipucords import settings
-
 from scanner.network.connect_callback import ConnectResultCallback
-from scanner.network.exceptions import (NetworkCancelException,
-                                        NetworkPauseException)
-from scanner.network.utils import (_construct_vars,
-                                   check_manager_interrupt,
-                                   expand_hostpattern)
+from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
+from scanner.network.utils import (
+    _construct_vars,
+    check_manager_interrupt,
+    expand_hostpattern,
+)
 from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
@@ -46,7 +44,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 # The ConnectTaskRunner creates a new ConnectResultCallback for each
 # credential it tries to connect with, and the ConnectResultCallbacks
 # all forward their information to a single ConnectResultStore.
-class ConnectResultStore():
+class ConnectResultStore:
     """This object knows how to record and retrieve connection results."""
 
     def __init__(self, scan_task):
@@ -74,10 +72,13 @@ class ConnectResultStore():
 
         self._remaining_hosts = set(hosts)
 
-        scan_task.update_stats('INITIAL NETWORK CONNECT STATS.',
-                               sys_count=len(hosts), sys_scanned=0,
-                               sys_failed=0,
-                               sys_unreachable=0)
+        scan_task.update_stats(
+            "INITIAL NETWORK CONNECT STATS.",
+            sys_count=len(hosts),
+            sys_scanned=0,
+            sys_failed=0,
+            sys_unreachable=0,
+        )
 
     @transaction.atomic
     def record_result(self, name, source, credential, status):
@@ -87,29 +88,29 @@ class ConnectResultStore():
             source=source,
             credential=credential,
             status=status,
-            task_connection_result=self.scan_task.connection_result)
+            task_connection_result=self.scan_task.connection_result,
+        )
         sys_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
-            message = '%s with %s' % (name, credential.name)
-            self.scan_task.increment_stats(message,
-                                           increment_sys_scanned=True,
-                                           prefix='CONNECTED')
-        elif status == SystemConnectionResult.UNREACHABLE:
-            message = '%s is UNREACHABLE' % (name)
+            message = "%s with %s" % (name, credential.name)
             self.scan_task.increment_stats(
-                message,
-                increment_sys_unreachable=True,
-                prefix='FAILED')
+                message, increment_sys_scanned=True, prefix="CONNECTED"
+            )
+        elif status == SystemConnectionResult.UNREACHABLE:
+            message = "%s is UNREACHABLE" % (name)
+            self.scan_task.increment_stats(
+                message, increment_sys_unreachable=True, prefix="FAILED"
+            )
         else:
             if credential is not None:
-                message = '%s with %s' % (name, credential.name)
+                message = "%s with %s" % (name, credential.name)
             else:
-                message = '%s has no valid credentials' % name
+                message = "%s has no valid credentials" % name
 
-            self.scan_task.increment_stats(message,
-                                           increment_sys_failed=True,
-                                           prefix='FAILED')
+            self.scan_task.increment_stats(
+                message, increment_sys_failed=True, prefix="FAILED"
+            )
 
         self._remaining_hosts.remove(name)
 
@@ -149,18 +150,18 @@ class ConnectTaskRunner(ScanTaskRunner):
         result_store = ConnectResultStore(self.scan_task)
         try:
             scan_message, scan_result = self.run_with_result_store(
-                manager_interrupt, result_store)
+                manager_interrupt, result_store
+            )
         except NetworkCancelException:
-            error_message = 'Connect scan cancel for %s.' % (
-                self.scan_task.source.name)
+            error_message = "Connect scan cancel for %s." % (self.scan_task.source.name)
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.CANCELED
         except NetworkPauseException:
-            error_message = 'Connect scan pause for %s.' % (
-                self.scan_task.source.name)
+            error_message = "Connect scan pause for %s." % (self.scan_task.source.name)
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             return error_message, ScanTask.PAUSED
         return scan_message, scan_result
+
     # pylint: disable=too-many-locals
 
     def run_with_result_store(self, manager_interrupt, result_store):
@@ -178,8 +179,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         else:
             use_paramiko = False
 
-        connection_port = source['port']
-        credentials = source['credentials']
+        connection_port = source["port"]
+        credentials = source["credentials"]
 
         remaining_hosts = result_store.remaining_hosts()
 
@@ -187,58 +188,66 @@ class ConnectTaskRunner(ScanTaskRunner):
             check_manager_interrupt(manager_interrupt.value)
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
-                message = 'Skipping credential %s.  No remaining hosts.' % \
-                    credential.name
+                message = (
+                    "Skipping credential %s.  No remaining hosts." % credential.name
+                )
                 self.scan_task.log_message(message)
                 break
 
-            message = 'Attempting credential %s.' % credential.name
+            message = "Attempting credential %s." % credential.name
             self.scan_task.log_message(message)
 
             try:
-                scan_message, scan_result = _connect(manager_interrupt,
-                                                     self.scan_task,
-                                                     remaining_hosts,
-                                                     result_store,
-                                                     credential,
-                                                     connection_port,
-                                                     forks,
-                                                     use_paramiko)
+                scan_message, scan_result = _connect(
+                    manager_interrupt,
+                    self.scan_task,
+                    remaining_hosts,
+                    result_store,
+                    credential,
+                    connection_port,
+                    forks,
+                    use_paramiko,
+                )
                 if scan_result != ScanTask.COMPLETED:
                     return scan_message, scan_result
             except AnsibleRunnerException as ansible_error:
-                remaining_hosts_str = ', '.join(result_store.remaining_hosts())
-                error_message = 'Connect scan task failed with credential %s.'\
-                    ' Error: %s Hosts: %s' %\
-                    (credential.name, ansible_error, remaining_hosts_str)
+                remaining_hosts_str = ", ".join(result_store.remaining_hosts())
+                error_message = (
+                    "Connect scan task failed with credential %s."
+                    " Error: %s Hosts: %s"
+                    % (credential.name, ansible_error, remaining_hosts_str)
+                )
                 return error_message, ScanTask.FAILED
 
             remaining_hosts = result_store.remaining_hosts()
 
-            logger.debug('Failed systems: %s', remaining_hosts)
+            logger.debug("Failed systems: %s", remaining_hosts)
 
         for host in remaining_hosts:
             # We haven't connected to these hosts with any
             # credentials, so they have failed.
-            result_store.record_result(host, self.scan_task.source,
-                                       None, SystemConnectionResult.FAILED)
+            result_store.record_result(
+                host, self.scan_task.source, None, SystemConnectionResult.FAILED
+            )
 
         return None, ScanTask.COMPLETED
 
 
 # pylint: disable=too-many-arguments, too-many-locals,
 # pylint: disable=too-many-statements, too-many-branches
-def _connect(manager_interrupt,
-             scan_task,
-             hosts,
-             result_store,
-             credential,
-             connection_port,
-             forks,
-             use_paramiko=False,
-             exclude_hosts=None,
-             base_ssh_executable=None,
-             ssh_timeout=None):
+def _connect(
+    manager_interrupt,
+    scan_task,
+    hosts,
+    result_store,
+    credential,
+    connection_port,
+    forks,
+    use_paramiko=False,
+    exclude_hosts=None,
+    base_ssh_executable=None,
+    ssh_timeout=None,
+):
     """Attempt to connect to hosts using the given credential.
 
     :param manager_interrupt: Signal used to communicate termination of scan
@@ -261,10 +270,10 @@ def _connect(manager_interrupt,
     cred_data = CredentialSerializer(credential).data
 
     ssh_executable = os.path.abspath(
-        os.path.join(os.path.dirname(__file__),
-                     '../../../bin/timeout_ssh'))
+        os.path.join(os.path.dirname(__file__), "../../../bin/timeout_ssh")
+    )
 
-    base_ssh_executable = base_ssh_executable or 'ssh'
+    base_ssh_executable = base_ssh_executable or "ssh"
     ssh_timeout = ssh_timeout or settings.QPC_SSH_CONNECT_TIMEOUT
 
     # pylint: disable=line-too-long
@@ -273,50 +282,59 @@ def _connect(manager_interrupt,
     # anywhere in the command array
     # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
     # timeout_ssh will remove the ssh argument before running the command
-    ssh_args = ['--executable=' + base_ssh_executable,
-                '--timeout=' + ssh_timeout,
-                'ssh']
-    group_names, inventory = _construct_connect_inventory(hosts,
-                                                          cred_data,
-                                                          connection_port,
-                                                          forks,
-                                                          exclude_hosts,
-                                                          ssh_executable,
-                                                          ssh_args)
+    ssh_args = [
+        "--executable=" + base_ssh_executable,
+        "--timeout=" + ssh_timeout,
+        "ssh",
+    ]
+    group_names, inventory = _construct_connect_inventory(
+        hosts,
+        cred_data,
+        connection_port,
+        forks,
+        exclude_hosts,
+        ssh_executable,
+        ssh_args,
+    )
     inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)
 
-    log_message = 'START CONNECT PROCESSING GROUPS'\
-        ' with use_paramiko: %s and %d forks' % (use_paramiko, forks)
+    log_message = (
+        "START CONNECT PROCESSING GROUPS"
+        " with use_paramiko: %s and %d forks" % (use_paramiko, forks)
+    )
     scan_task.log_message(log_message)
     for idx, group_name in enumerate(group_names):
         check_manager_interrupt(manager_interrupt.value)
-        group_ips = inventory.get('all').get(
-            'children').get(group_name).get('hosts').keys()
+        group_ips = (
+            inventory.get("all").get("children").get(group_name).get("hosts").keys()
+        )
         group_ips = ["'%s'" % ip for ip in group_ips]
-        group_ip_string = ', '.join(group_ips)
-        log_message = 'START CONNECT PROCESSING GROUP %d of %d. '\
-            'About to connect to hosts [%s]' % (
-                (idx + 1), len(group_names), group_ip_string)
+        group_ip_string = ", ".join(group_ips)
+        log_message = (
+            "START CONNECT PROCESSING GROUP %d of %d. "
+            "About to connect to hosts [%s]"
+            % ((idx + 1), len(group_names), group_ip_string)
+        )
         scan_task.log_message(log_message)
-        call = ConnectResultCallback(result_store, credential,
-                                     scan_task.source, manager_interrupt)
+        call = ConnectResultCallback(
+            result_store, credential, scan_task.source, manager_interrupt
+        )
 
         # Create parameters for ansible runner
-        runner_settings = {'job_timeout':
-                           int(settings.NETWORK_CONNECT_JOB_TIMEOUT)}
-        extra_vars_dict = {'variable_host': group_name}
-        playbook_path = os.path.join(settings.BASE_DIR,
-                                     'scanner/network/runner/connect.yml')
+        runner_settings = {"job_timeout": int(settings.NETWORK_CONNECT_JOB_TIMEOUT)}
+        extra_vars_dict = {"variable_host": group_name}
+        playbook_path = os.path.join(
+            settings.BASE_DIR, "scanner/network/runner/connect.yml"
+        )
         cmdline_list = []
-        vault_file_path = '--vault-password-file=%s' % (
-            settings.DJANGO_SECRET_PATH)
+        vault_file_path = "--vault-password-file=%s" % (settings.DJANGO_SECRET_PATH)
         cmdline_list.append(vault_file_path)
-        forks_cmd = '--forks=%s' % (forks)
+        forks_cmd = "--forks=%s" % (forks)
         cmdline_list.append(forks_cmd)
         if use_paramiko:
-            cmdline_list.append('--connection=paramiko')  # paramiko conn
-        all_commands = ' '.join(cmdline_list)
+            cmdline_list.append("--connection=paramiko")  # paramiko conn
+        all_commands = " ".join(cmdline_list)
         if int(settings.ANSIBLE_LOG_LEVEL) == 0:
             quiet_bool = True
             verbosity_lvl = 0
@@ -333,22 +351,24 @@ def _connect(manager_interrupt,
                 cancel_callback=call.cancel_callback,
                 playbook=playbook_path,
                 cmdline=all_commands,
-                verbosity=verbosity_lvl)
+                verbosity=verbosity_lvl,
+            )
         except Exception as err_msg:
             raise AnsibleRunnerException(err_msg)
 
         final_status = runner_obj.status
-        if final_status != 'successful':
-            if final_status == 'canceled':
+        if final_status != "successful":
+            if final_status == "canceled":
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                        'CONNECT', 'canceled')
+                        "CONNECT",
+                        "canceled",
+                    )
                     return msg, scan_task.CANCELED
-                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                    'CONNECT', 'paused')
+                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % ("CONNECT", "paused")
                 return msg, scan_task.PAUSED
-            if final_status not in ['unreachable', 'failed', 'canceled']:
-                if final_status == 'timeout':
+            if final_status not in ["unreachable", "failed", "canceled"]:
+                if final_status == "timeout":
                     error = log_messages.NETWORK_TIMEOUT_ERR
                 else:
                     error = log_messages.NETWORK_UNKNOWN_ERR
@@ -356,11 +376,11 @@ def _connect(manager_interrupt,
                     msg = log_messages.NETWORK_CONNECT_CONTINUE % (
                         final_status,
                         str(scan_task.systems_scanned),
-                        error)
+                        error,
+                    )
                     scan_task.log_message(msg, log_level=logging.ERROR)
                 else:
-                    msg = log_messages.NETWORK_CONNECT_FAIL % (final_status,
-                                                               error)
+                    msg = log_messages.NETWORK_CONNECT_FAIL % (final_status, error)
                     return msg, scan_task.FAILED
     return None, scan_task.COMPLETED
 
@@ -370,16 +390,17 @@ def _handle_ssh_passphrase(credential):
 
     :param credential: The credential used for connections
     """
-    if (credential.get('ssh_keyfile') is not None and
-            credential.get('ssh_passphrase') is not None):
-        keyfile = credential.get('ssh_keyfile')
-        passphrase = \
-            decrypt_data_as_unicode(credential['ssh_passphrase'])
-        cmd_string = 'ssh-add {}'.format(keyfile)
+    if (
+        credential.get("ssh_keyfile") is not None
+        and credential.get("ssh_passphrase") is not None
+    ):
+        keyfile = credential.get("ssh_keyfile")
+        passphrase = decrypt_data_as_unicode(credential["ssh_passphrase"])
+        cmd_string = "ssh-add {}".format(keyfile)
 
         try:
             child = pexpect.spawn(cmd_string, timeout=12)
-            phrase = [pexpect.EOF, 'Enter passphrase for .*:']
+            phrase = [pexpect.EOF, "Enter passphrase for .*:"]
             i = child.expect(phrase)
             while i:
                 child.sendline(passphrase)
@@ -388,13 +409,15 @@ def _handle_ssh_passphrase(credential):
             pass
 
 
-def _construct_connect_inventory(hosts,
-                                 credential,
-                                 connection_port,
-                                 concurrency_count,
-                                 exclude_hosts=None,
-                                 ssh_executable=None,
-                                 ssh_args=None):
+def _construct_connect_inventory(
+    hosts,
+    credential,
+    connection_port,
+    concurrency_count,
+    exclude_hosts=None,
+    ssh_executable=None,
+    ssh_args=None,
+):
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts to test connections
@@ -409,32 +432,32 @@ def _construct_connect_inventory(hosts,
     if exclude_hosts is not None:
         hosts = list(set(hosts) - set(exclude_hosts))
 
-    concurreny_groups = \
-        list(
-            [hosts[i:i + concurrency_count]
-             for i in range(0,
-                            len(hosts),
-                            concurrency_count)])
+    concurreny_groups = list(
+        [
+            hosts[i : i + concurrency_count]
+            for i in range(0, len(hosts), concurrency_count)
+        ]
+    )
 
     vars_dict = _construct_vars(connection_port, credential)
     children = {}
-    inventory = {'all': {'children': children, 'vars': vars_dict}}
+    inventory = {"all": {"children": children, "vars": vars_dict}}
     i = 0
     group_names = []
     for concurreny_group in concurreny_groups:
         hosts_dict = {}
         for host in concurreny_group:
             host_vars = {}
-            host_vars['ansible_host'] = host
+            host_vars["ansible_host"] = host
             if ssh_executable:
-                host_vars['ansible_ssh_executable'] = ssh_executable
+                host_vars["ansible_ssh_executable"] = ssh_executable
             if ssh_args:
-                host_vars['ansible_ssh_common_args'] = ' '.join(ssh_args)
+                host_vars["ansible_ssh_common_args"] = " ".join(ssh_args)
             hosts_dict[host] = host_vars
 
-        group_name = 'group_{}'.format(i)
+        group_name = "group_{}".format(i)
         i += 1
         group_names.append(group_name)
-        children[group_name] = {'hosts': hosts_dict}
+        children[group_name] = {"hosts": hosts_dict}
 
     return group_names, inventory

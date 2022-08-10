@@ -42,21 +42,21 @@ from api.user.authentication import QuipucordsExpiringTokenAuthentication
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-RESULTS_KEY = 'task_results'
+RESULTS_KEY = "task_results"
 
 
 def expand_source(system):
     """Expand the json source."""
-    if 'source' in system.keys():
-        source_id = system['source']
+    if "source" in system.keys():
+        source_id = system["source"]
         if source_id is None:
-            system['source'] = 'deleted'
+            system["source"] = "deleted"
         else:
-            system['source'] = \
-                Source.objects.filter(
-                    id=source_id).values('id',
-                                         'name',
-                                         'source_type').first()
+            system["source"] = (
+                Source.objects.filter(id=source_id)
+                .values("id", "name", "source_type")
+                .first()
+            )
 
 
 def expand_system_connection(system):
@@ -65,11 +65,11 @@ def expand_system_connection(system):
     :param system: A dictionary for a conn system result.
     """
     expand_source(system)
-    if 'credential' in system.keys():
-        cred_id = system['credential']
-        system['credential'] = \
-            Credential.objects.filter(id=cred_id).values('id',
-                                                         'name').first()
+    if "credential" in system.keys():
+        cred_id = system["credential"]
+        system["credential"] = (
+            Credential.objects.filter(id=cred_id).values("id", "name").first()
+        )
 
 
 def expand_system_inspection(system):
@@ -78,16 +78,17 @@ def expand_system_inspection(system):
     :param system: A dictionary for a inspection system result.
     """
     expand_source(system)
-    if 'facts' in system.keys():
+    if "facts" in system.keys():
         facts = []
-        fact_ids = system['facts']
+        fact_ids = system["facts"]
         for fact_id in fact_ids:
-            raw_fact = RawFact.objects.filter(
-                id=fact_id).values('name', 'value').first()
-            if raw_fact.get('value') is not None:
-                raw_fact['value'] = json.loads(raw_fact['value'])
+            raw_fact = (
+                RawFact.objects.filter(id=fact_id).values("name", "value").first()
+            )
+            if raw_fact.get("value") is not None:
+                raw_fact["value"] = json.loads(raw_fact["value"])
             facts.append(raw_fact)
-        system['facts'] = facts
+        system["facts"] = facts
 
 
 class ScanJobFilter(FilterSet):
@@ -97,34 +98,33 @@ class ScanJobFilter(FilterSet):
         """Metadata for filterset."""
 
         model = ScanJob
-        fields = ['status', 'scan_type']
+        fields = ["status", "scan_type"]
 
 
 # pylint: disable=too-many-ancestors
-class ScanJobViewSet(mixins.RetrieveModelMixin,
-                     viewsets.GenericViewSet):
+class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
-    authentication_enabled = os.getenv('QPC_DISABLE_AUTHENTICATION') != 'True'
+    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
     if authentication_enabled:
-        authentication_classes = (QuipucordsExpiringTokenAuthentication,
-                                  SessionAuthentication)
+        authentication_classes = (
+            QuipucordsExpiringTokenAuthentication,
+            SessionAuthentication,
+        )
         permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = ScanJobFilter
-    ordering_fields = ('id', 'scan_type', 'status', 'start_time', 'end_time')
-    ordering = ('id',)
+    ordering_fields = ("id", "scan_type", "status", "start_time", "end_time")
+    ordering = ("id",)
 
     # pylint: disable=unused-argument, arguments-differ,invalid-name
     def retrieve(self, request, pk=None):
         """Get a scan job."""
         if not pk or (pk and not is_int(pk)):
-            error = {
-                'id': [_(messages.COMMON_ID_INV)]
-            }
+            error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
 
         scan = get_object_or_404(self.queryset, pk=pk)
@@ -141,50 +141,43 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         @returns: A tuple of ordering filter, status filter,
             and source_id filter
         """
-        valid_orderging_filters = ['name', 'status', '-name', '-status']
-        valid_status_filters = ['success', 'failed', 'unreachable']
-        ordering_param = 'ordering'
-        default_ordering = 'status'
-        status_param = 'status'
-        source_id_param = 'source_id'
-        ordering_filter = request.query_params.get(ordering_param,
-                                                   default_ordering)
+        valid_orderging_filters = ["name", "status", "-name", "-status"]
+        valid_status_filters = ["success", "failed", "unreachable"]
+        ordering_param = "ordering"
+        default_ordering = "status"
+        status_param = "status"
+        source_id_param = "source_id"
+        ordering_filter = request.query_params.get(ordering_param, default_ordering)
         status_filter = request.query_params.get(status_param, None)
         source_id_filter = request.query_params.get(source_id_param, None)
 
         # validate query params
         if ordering_filter and ordering_filter not in valid_orderging_filters:
-            valid_list = ', '.join(valid_orderging_filters)
-            message = _(messages.QUERY_PARAM_INVALID %
-                        (ordering_param, valid_list))
-            error = {
-                'detail': [message]
-            }
+            valid_list = ", ".join(valid_orderging_filters)
+            message = _(messages.QUERY_PARAM_INVALID % (ordering_param, valid_list))
+            error = {"detail": [message]}
             raise ValidationError(error)
         if status_filter and status_filter not in valid_status_filters:
-            valid_list = ', '.join(valid_status_filters)
-            message = _(messages.QUERY_PARAM_INVALID %
-                        (status_param, valid_list))
-            error = {
-                'detail': [message]
-            }
+            valid_list = ", ".join(valid_status_filters)
+            message = _(messages.QUERY_PARAM_INVALID % (status_param, valid_list))
+            error = {"detail": [message]}
             raise ValidationError(error)
         if source_id_filter and not is_int(source_id_filter):
-            message = _(messages.QUERY_PARAM_INVALID %
-                        (source_id_param, 'source identifiers'))
-            error = {
-                'detail': [message]
-            }
+            message = _(
+                messages.QUERY_PARAM_INVALID % (source_id_param, "source identifiers")
+            )
+            error = {"detail": [message]}
             raise ValidationError(error)
 
         return (ordering_filter, status_filter, source_id_filter)
 
     # pylint: disable=too-many-locals
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
-        ordering_filter, status_filter, source_id_filter = \
-            self.handle_result_filters(request)
+        ordering_filter, status_filter, source_id_filter = self.handle_result_filters(
+            request
+        )
 
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
@@ -197,15 +190,15 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             if system_result_queryset is None:
                 system_result_queryset = task_result.systems.all()
             else:
-                system_result_queryset = \
+                system_result_queryset = (
                     system_result_queryset | task_result.systems.all()
+                )
         # create ordered queryset and assign the paginator
         ordered_query_set = system_result_queryset.order_by(ordering_filter)
         if status_filter:
             ordered_query_set = ordered_query_set.filter(status=status_filter)
         if source_id_filter:
-            ordered_query_set = \
-                ordered_query_set.filter(source__id=source_id_filter)
+            ordered_query_set = ordered_query_set.filter(source__id=source_id_filter)
 
         paginator = StandardResultsSetPagination()
         page = paginator.paginate_queryset(ordered_query_set, request)
@@ -218,11 +211,12 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         return Response(status=404)
 
     # pylint: disable=too-many-locals
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def inspection(self, request, pk=None):
         """Get the inspection results of a scan job."""
-        ordering_filter, status_filter, source_id_filter = \
-            self.handle_result_filters(request)
+        ordering_filter, status_filter, source_id_filter = self.handle_result_filters(
+            request
+        )
 
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
@@ -234,16 +228,16 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             if system_result_queryset is None:
                 system_result_queryset = task_result.systems.all()
             else:
-                system_result_queryset = \
+                system_result_queryset = (
                     system_result_queryset | task_result.systems.all()
+                )
         # create ordered queryset and assign the paginator
         paginator = StandardResultsSetPagination()
         ordered_query_set = system_result_queryset.order_by(ordering_filter)
         if status_filter:
             ordered_query_set = ordered_query_set.filter(status=status_filter)
         if source_id_filter:
-            ordered_query_set = \
-                ordered_query_set.filter(source__id=source_id_filter)
+            ordered_query_set = ordered_query_set.filter(source__id=source_id_filter)
 
         page = paginator.paginate_queryset(ordered_query_set, request)
 
@@ -254,13 +248,11 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 
-    @action(detail=True, methods=['put'])
+    @action(detail=True, methods=["put"])
     def pause(self, request, pk=None):
         """Pause the running scan."""
         if not pk or (pk and not is_int(pk)):
-            error = {
-                'id': [_(messages.COMMON_ID_INV)]
-            }
+            error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
         # pylint: disable=no-else-return
@@ -274,25 +266,25 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
             return Response(json_scan, status=200)
         elif scan.status == ScanTask.PAUSED:
             err_msg = _(messages.ALREADY_PAUSED)
-            return JsonResponse({'non_field_errors': [err_msg]}, status=400)
+            return JsonResponse({"non_field_errors": [err_msg]}, status=400)
 
         err_msg = _(messages.NO_PAUSE)
-        return JsonResponse({'non_field_errors': [err_msg]}, status=400)
+        return JsonResponse({"non_field_errors": [err_msg]}, status=400)
 
-    @action(detail=True, methods=['put'])
+    @action(detail=True, methods=["put"])
     def cancel(self, request, pk=None):
         """Cancel the running scan."""
         if not pk or (pk and not is_int(pk)):
-            error = {
-                'id': [_(messages.COMMON_ID_INV)]
-            }
+            error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
-        if (scan.status == ScanTask.COMPLETED or
-                scan.status == ScanTask.FAILED or
-                scan.status == ScanTask.CANCELED):
+        if (
+            scan.status == ScanTask.COMPLETED
+            or scan.status == ScanTask.FAILED
+            or scan.status == ScanTask.CANCELED
+        ):
             err_msg = _(messages.NO_CANCEL)
-            return JsonResponse({'non_field_errors': [err_msg]}, status=400)
+            return JsonResponse({"non_field_errors": [err_msg]}, status=400)
 
         # Kill job before changing job state
         cancel_scan.send(sender=self.__class__, instance=scan)
@@ -302,28 +294,25 @@ class ScanJobViewSet(mixins.RetrieveModelMixin,
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan, status=200)
 
-    @action(detail=True, methods=['put'])
+    @action(detail=True, methods=["put"])
     def restart(self, request, pk=None):
         """Restart a paused scan."""
         if not pk or (pk and not is_int(pk)):
-            error = {
-                'id': [_(messages.COMMON_ID_INV)]
-            }
+            error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
         # pylint: disable=no-else-return
         if scan.status == ScanTask.PAUSED:
             # Update job state before starting job
             scan.restart()
-            restart_scan.send(sender=self.__class__,
-                              instance=scan)
+            restart_scan.send(sender=self.__class__, instance=scan)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             json_scan = expand_scanjob(json_scan)
             return Response(json_scan, status=200)
         elif scan.status == ScanTask.RUNNING:
             err_msg = _(messages.ALREADY_RUNNING)
-            return JsonResponse({'non_field_errors': [err_msg]}, status=400)
+            return JsonResponse({"non_field_errors": [err_msg]}, status=400)
 
         err_msg = _(messages.NO_RESTART)
-        return JsonResponse({'non_field_errors': [err_msg]}, status=400)
+        return JsonResponse({"non_field_errors": [err_msg]}, status=400)

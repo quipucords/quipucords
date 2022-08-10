@@ -10,7 +10,7 @@
 
 from api.models import Credential
 
-CREDENTIALS_KEY = 'credentials'
+CREDENTIALS_KEY = "credentials"
 
 
 def expand_credential(json_source):
@@ -20,9 +20,8 @@ def expand_credential(json_source):
     create slim dictionary version of the host credential with name an value
     to return to user.
     """
-    cred_ids = json_source.get('credentials', [])
-    slim_cred = list(
-        Credential.objects.filter(pk__in=cred_ids).values('id', 'name'))
+    cred_ids = json_source.get("credentials", [])
+    slim_cred = list(Credential.objects.filter(pk__in=cred_ids).values("id", "name"))
     # Update source JSON with cred JSON
     if slim_cred:
         json_source[CREDENTIALS_KEY] = slim_cred

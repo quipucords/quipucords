@@ -11,8 +11,7 @@
 
 from scanner.network.processing import process
 
-
-INET_PREFIXES = ['inet addr:', 'inet ']
+INET_PREFIXES = ["inet addr:", "inet "]
 
 # pylint: disable=too-few-public-methods
 
@@ -20,18 +19,18 @@ INET_PREFIXES = ['inet addr:', 'inet ']
 class ProcessIPAddresses(process.Processor):
     """Process the ip addresses from ifconfig."""
 
-    KEY = 'ifconfig_ip_addresses'
+    KEY = "ifconfig_ip_addresses"
 
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
         result = []
-        lines = [line.strip() for line in output['stdout_lines']]
+        lines = [line.strip() for line in output["stdout_lines"]]
         for line in lines:
             for prefix in INET_PREFIXES:
                 if line.startswith(prefix):
-                    ip_line = line[len(prefix):].split()[0]
-                    if ip_line != '127.0.0.1':
+                    ip_line = line[len(prefix) :].split()[0]
+                    if ip_line != "127.0.0.1":
                         result.append(ip_line)
                     break
         return list(set(result))
@@ -40,13 +39,13 @@ class ProcessIPAddresses(process.Processor):
 class ProcessMacAddresses(process.Processor):
     """Process the mac addresses from ifconfig."""
 
-    KEY = 'ifconfig_mac_addresses'
+    KEY = "ifconfig_mac_addresses"
 
     @staticmethod
     def process(output, dependencies=None):
         """Pass the output back through."""
         result = []
-        addresses = output.get('stdout_lines', [])
+        addresses = output.get("stdout_lines", [])
         for address in addresses:
             if address:
                 result.append(address)

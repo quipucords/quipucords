@@ -48,22 +48,22 @@ def normalize_path(path):
     return pathlib.PurePath(path).as_posix()
 
 
-IMPLEMENTATION_VERSION_RE = re.compile(r'Implementation-Version:\s*(.*)\s*')
+IMPLEMENTATION_VERSION_RE = re.compile(r"Implementation-Version:\s*(.*)\s*")
 
 
 class ProcessJbossBRMSManifestMF(process.Processor):
     """Get the Implementation-Version from a MANIFEST.MF file."""
 
-    KEY = 'jboss_brms_manifest_mf'
+    KEY = "jboss_brms_manifest_mf"
 
     @staticmethod
     def process_item(item):
         """Get the implementation version from a MANIFEST.MF file."""
-        if item.get('rc', True):
+        if item.get("rc", True):
             return None
 
-        directory = normalize_path(item.get('item'))
-        for line in item.get('stdout_lines', []):
+        directory = normalize_path(item.get("item"))
+        for line in item.get("stdout_lines", []):
             if line.strip():
                 match = IMPLEMENTATION_VERSION_RE.match(line)
                 if match:
@@ -75,7 +75,7 @@ class ProcessJbossBRMSManifestMF(process.Processor):
     def process(output, dependencies=None):
         """Return a set of (directory, version string) pairs."""
         results = set()
-        for item in output['results']:
+        for item in output["results"]:
             val = ProcessJbossBRMSManifestMF.process_item(item)
             if val:
                 results.add(val)
@@ -95,30 +95,29 @@ def enclosing_war_archive(path):
     parts = pathlib.PurePath(path).parts
 
     for i in range(len(parts) - 1, -1, -1):
-        if parts[i].startswith('kie-server') or \
-           parts[i].startswith('business-central'):
-            return pathlib.PurePath(*parts[:i + 1]).as_posix()
+        if parts[i].startswith("kie-server") or parts[i].startswith("business-central"):
+            return pathlib.PurePath(*parts[: i + 1]).as_posix()
 
 
-KIE_FILENAME_RE = re.compile(r'kie-api-(.*)\.jar.*')
-JAR_SUFFIX_RE = re.compile(r'(.*)\.jar.*')
+KIE_FILENAME_RE = re.compile(r"kie-api-(.*)\.jar.*")
+JAR_SUFFIX_RE = re.compile(r"(.*)\.jar.*")
 
 
 class ProcessJbossBRMSKieBusinessCentral(process.Processor):
     """Return filenames and their enclosing BRMS war archive."""
 
-    KEY = 'jboss_brms_kie_in_business_central'
+    KEY = "jboss_brms_kie_in_business_central"
 
     @staticmethod
     def process(output, dependencies=None):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
-        for item in output['results']:
-            if item.get('rc', True):
+        for item in output["results"]:
+            if item.get("rc", True):
                 continue
 
-            directory = normalize_path(item['item'])
-            for line in item.get('stdout_lines', []):
+            directory = normalize_path(item["item"])
+            for line in item.get("stdout_lines", []):
                 if line.strip():
                     filename = posixpath.basename(line)
                     match = KIE_FILENAME_RE.match(filename)
@@ -132,7 +131,7 @@ class ProcessJbossBRMSKieBusinessCentral(process.Processor):
 # If the user installs Drools directly from the zip, they'll get files
 # with the version string plus '-sources' appended. Remove the
 # '-sources' to dedup those with the plain version strings.
-SOURCES = '-sources'
+SOURCES = "-sources"
 
 
 class EnclosingWarJarProcessor(process.Processor):
@@ -151,7 +150,7 @@ class EnclosingWarJarProcessor(process.Processor):
     def process(cls, output, dependencies=None):
         """Return a list of (base war archive, version string) pairs."""
         results = set()
-        for line in output.get('stdout_lines', []):
+        for line in output.get("stdout_lines", []):
             if line.strip():
                 filename = posixpath.basename(line)
                 directory = enclosing_war_archive(line)
@@ -160,10 +159,10 @@ class EnclosingWarJarProcessor(process.Processor):
                     continue
                 without_suffix = match.group(1)
                 if without_suffix.endswith(SOURCES):
-                    without_suffix = without_suffix[:-len(SOURCES)]
+                    without_suffix = without_suffix[: -len(SOURCES)]
                 if not without_suffix.startswith(cls.REMOVE_PREFIX):
                     continue
-                version_string = without_suffix[len(cls.REMOVE_PREFIX):]
+                version_string = without_suffix[len(cls.REMOVE_PREFIX) :]
                 results.add((directory, version_string))
 
         return list(results)
@@ -172,24 +171,24 @@ class EnclosingWarJarProcessor(process.Processor):
 class ProcessLocateKieApiFiles(EnclosingWarJarProcessor):
     """Process locate results for kie-api files."""
 
-    KEY = 'jboss_brms_locate_kie_api'
-    DEPS = ['internal_have_locate']
-    REMOVE_PREFIX = 'kie-api-'
+    KEY = "jboss_brms_locate_kie_api"
+    DEPS = ["internal_have_locate"]
+    REMOVE_PREFIX = "kie-api-"
     RETURN_CODE_ANY = True
 
 
 class ProcessFindBRMSKieApiVer(EnclosingWarJarProcessor):
     """Process a list of kie-api* files."""
 
-    KEY = 'jboss_brms_kie_api_ver'
-    REMOVE_PREFIX = 'kie-api-'
+    KEY = "jboss_brms_kie_api_ver"
+    REMOVE_PREFIX = "kie-api-"
 
 
 class ProcessFindBRMSDroolsCoreVer(EnclosingWarJarProcessor):
     """Process a list of drools-core* files."""
 
-    KEY = 'jboss_brms_drools_core_ver'
-    REMOVE_PREFIX = 'drools-core-'
+    KEY = "jboss_brms_drools_core_ver"
+    REMOVE_PREFIX = "drools-core-"
 
 
 class ProcessFindBRMSKieWarVer(process.Processor):
@@ -201,34 +200,33 @@ class ProcessFindBRMSKieWarVer(process.Processor):
     # to mess with the output until I have a way to verify that the
     # changes work, so just pass this through for now.
 
-    KEY = 'jboss_brms_kie_war_ver'
+    KEY = "jboss_brms_kie_war_ver"
 
     @staticmethod
     def process(output, dependencies=None):
         """Return the command's output."""
-        result = [line for line in output.get(
-            'stdout_lines', []) if line.strip()]
+        result = [line for line in output.get("stdout_lines", []) if line.strip()]
         return result
 
 
 class ProcessJbossBRMSBusinessCentralCandidates(process.Processor):
     """Process the results of a locate command."""
 
-    KEY = 'jboss_brms_business_central_candidates'
-    DEPS = ['internal_jboss_brms_business_central_candidates']
+    KEY = "jboss_brms_business_central_candidates"
+    DEPS = ["internal_jboss_brms_business_central_candidates"]
     REQUIRE_DEPS = False
 
     @staticmethod
     def process(output, dependencies):
         """Return the command's output."""
-        internal_dep = \
-            dependencies.get(
-                'internal_jboss_brms_business_central_candidates')
+        internal_dep = dependencies.get(
+            "internal_jboss_brms_business_central_candidates"
+        )
         result = []
         if internal_dep:
-            result = \
-                [line for line in internal_dep.get(
-                    'stdout_lines', []) if line.strip()]
+            result = [
+                line for line in internal_dep.get("stdout_lines", []) if line.strip()
+            ]
 
         return result
 
@@ -236,21 +234,21 @@ class ProcessJbossBRMSBusinessCentralCandidates(process.Processor):
 class ProcessJbossBRMSDecisionCentralCandidates(process.Processor):
     """Process the results of a locate command."""
 
-    KEY = 'jboss_brms_decision_central_candidates'
-    DEPS = ['jboss_brms_decision_central_candidates']
+    KEY = "jboss_brms_decision_central_candidates"
+    DEPS = ["jboss_brms_decision_central_candidates"]
     REQUIRE_DEPS = False
 
     @staticmethod
     def process(output, dependencies):
         """Return the command's output."""
-        internal_dep = \
-            dependencies.get(
-                'internal_jboss_brms_decision_central_candidates')
+        internal_dep = dependencies.get(
+            "internal_jboss_brms_decision_central_candidates"
+        )
         result = []
         if internal_dep:
-            result = \
-                [line for line in internal_dep.get(
-                    'stdout_lines', []) if line.strip()]
+            result = [
+                line for line in internal_dep.get("stdout_lines", []) if line.strip()
+            ]
 
         return result
 
@@ -258,21 +256,19 @@ class ProcessJbossBRMSDecisionCentralCandidates(process.Processor):
 class ProcessJbossBRMSKieCentralCandidates(process.Processor):
     """Process the results of a locate command."""
 
-    KEY = 'jboss_brms_kie_server_candidates'
-    DEPS = ['internal_jboss_brms_kie_server_candidates']
+    KEY = "jboss_brms_kie_server_candidates"
+    DEPS = ["internal_jboss_brms_kie_server_candidates"]
     REQUIRE_DEPS = False
 
     @staticmethod
     def process(output, dependencies):
         """Return the command's output."""
-        internal_dep = \
-            dependencies.get(
-                'internal_jboss_brms_kie_server_candidates')
+        internal_dep = dependencies.get("internal_jboss_brms_kie_server_candidates")
         result = []
         if internal_dep:
-            result = \
-                [line for line in internal_dep.get(
-                    'stdout_lines', []) if line.strip()]
+            result = [
+                line for line in internal_dep.get("stdout_lines", []) if line.strip()
+            ]
 
         return result
 
@@ -280,20 +276,18 @@ class ProcessJbossBRMSKieCentralCandidates(process.Processor):
 class ProcessKieSearchCandidates(process.Processor):
     """Process the results of a locate command."""
 
-    KEY = 'kie_search_candidates'
-    DEPS = ['internal_jboss_brms_kie_search_candidate']
+    KEY = "kie_search_candidates"
+    DEPS = ["internal_jboss_brms_kie_search_candidate"]
     REQUIRE_DEPS = False
 
     @staticmethod
     def process(output, dependencies):
         """Return the command's output."""
-        internal_dep = \
-            dependencies.get(
-                'internal_jboss_brms_kie_server_candidates')
+        internal_dep = dependencies.get("internal_jboss_brms_kie_server_candidates")
         result = []
         if internal_dep:
-            result = \
-                [line for line in internal_dep.get(
-                    'stdout_lines', []) if line.strip()]
+            result = [
+                line for line in internal_dep.get("stdout_lines", []) if line.strip()
+            ]
 
         return result

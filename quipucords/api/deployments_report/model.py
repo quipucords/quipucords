@@ -29,26 +29,22 @@ class DeploymentsReport(models.Model):
     """Represents deployment report."""
 
     report_type = models.CharField(
-        max_length=11,
-        choices=REPORT_TYPE_CHOICES,
-        default=REPORT_TYPE_DEPLOYMENT
+        max_length=11, choices=REPORT_TYPE_CHOICES, default=REPORT_TYPE_DEPLOYMENT
     )
-    report_version = models.CharField(max_length=64,
-                                      null=False)
-    report_platform_id = models.UUIDField(
-        default=uuid.uuid4, editable=False)
+    report_version = models.CharField(max_length=64, null=False)
+    report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
 
-    STATUS_PENDING = 'pending'
-    STATUS_FAILED = 'failed'
-    STATUS_COMPLETE = 'completed'
-    STATUS_CHOICES = ((STATUS_PENDING, STATUS_PENDING),
-                      (STATUS_FAILED, STATUS_FAILED),
-                      (STATUS_COMPLETE, STATUS_COMPLETE))
+    STATUS_PENDING = "pending"
+    STATUS_FAILED = "failed"
+    STATUS_COMPLETE = "completed"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, STATUS_PENDING),
+        (STATUS_FAILED, STATUS_FAILED),
+        (STATUS_COMPLETE, STATUS_COMPLETE),
+    )
 
     status = models.CharField(
-        max_length=16,
-        choices=STATUS_CHOICES,
-        default=STATUS_PENDING
+        max_length=16, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
     report_id = models.IntegerField(null=True)
     cached_fingerprints = models.TextField(null=True)
@@ -59,41 +55,39 @@ class DeploymentsReport(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{' +\
-            'id:{}, report_id: {}, status:{}'.format(
-                self.id,
-                self.report_id,
-                self.status) + '}'
+        return (
+            "{"
+            + "id:{}, report_id: {}, status:{}".format(
+                self.id, self.report_id, self.status
+            )
+            + "}"
+        )
 
 
 class SystemFingerprint(models.Model):
     """Represents system fingerprint."""
 
     # Important: If you add a DATE field, add it to list
-    DATE_FIELDS = ['system_last_checkin_date',
-                   'system_creation_date']
+    DATE_FIELDS = ["system_last_checkin_date", "system_creation_date"]
 
-    BARE_METAL = 'bare_metal'
-    UNKNOWN = 'unknown'
-    VIRTUALIZED = 'virtualized'
-    HYPERVISOR = 'hypervisor'
+    BARE_METAL = "bare_metal"
+    UNKNOWN = "unknown"
+    VIRTUALIZED = "virtualized"
+    HYPERVISOR = "hypervisor"
 
-    SOURCE_TYPE = (
-        ('network', 'Ansible'),
-        ('vcenter', 'VCenter'),
-        (UNKNOWN, 'Unknown')
-    )
+    SOURCE_TYPE = (("network", "Ansible"), ("vcenter", "VCenter"), (UNKNOWN, "Unknown"))
 
     INFRASTRUCTURE_TYPE = (
-        (BARE_METAL, 'Bare Metal'),
-        (VIRTUALIZED, 'Virtualized'),
-        (HYPERVISOR, 'Hypervisor'),
-        (UNKNOWN, 'Unknown')
+        (BARE_METAL, "Bare Metal"),
+        (VIRTUALIZED, "Virtualized"),
+        (HYPERVISOR, "Hypervisor"),
+        (UNKNOWN, "Unknown"),
     )
 
     # Scan information
     deployment_report = models.ForeignKey(
-        DeploymentsReport, models.CASCADE, related_name='system_fingerprints')
+        DeploymentsReport, models.CASCADE, related_name="system_fingerprints"
+    )
 
     # Common facts
     name = models.CharField(max_length=256, unique=False, blank=True, null=True)
@@ -213,48 +207,52 @@ class SystemFingerprint(models.Model):
 class Product(models.Model):
     """Represents a product."""
 
-    PRESENT = 'present'
-    ABSENT = 'absent'
-    POTENTIAL = 'potential'
-    UNKNOWN = 'unknown'
+    PRESENT = "present"
+    ABSENT = "absent"
+    POTENTIAL = "potential"
+    UNKNOWN = "unknown"
     PRESENCE_TYPE = (
-        (PRESENT, 'Present'),
-        (ABSENT, 'Absent'),
-        (POTENTIAL, 'Potential'),
-        (UNKNOWN, 'Unknown')
+        (PRESENT, "Present"),
+        (ABSENT, "Absent"),
+        (POTENTIAL, "Potential"),
+        (UNKNOWN, "Unknown"),
     )
 
-    fingerprint = models.ForeignKey(SystemFingerprint,
-                                    models.CASCADE,
-                                    related_name='products')
+    fingerprint = models.ForeignKey(
+        SystemFingerprint, models.CASCADE, related_name="products"
+    )
     name = models.CharField(max_length=256, unique=False, null=False)
     version = models.TextField(unique=False, null=True)
-    presence = models.CharField(
-        max_length=10, choices=PRESENCE_TYPE)
+    presence = models.CharField(max_length=10, choices=PRESENCE_TYPE)
 
     metadata = models.TextField(unique=False, null=False)
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'id:{}, '\
-            'fingerprint:{}, ' \
-            'name:{}, '\
-            'version:{}, '\
-            'presence:{}, '\
-            'metadata:{} '.format(self.id,
-                                  self.fingerprint.id,
-                                  self.name,
-                                  self.version,
-                                  self.presence,
-                                  self.metadata) + '}'
+        return (
+            "{" + "id:{}, "
+            "fingerprint:{}, "
+            "name:{}, "
+            "version:{}, "
+            "presence:{}, "
+            "metadata:{} ".format(
+                self.id,
+                self.fingerprint.id,
+                self.name,
+                self.version,
+                self.presence,
+                self.metadata,
+            )
+            + "}"
+        )
 
 
 class Entitlement(models.Model):
     """Represents a Entitlement."""
 
-    fingerprint = models.ForeignKey(SystemFingerprint,
-                                    models.CASCADE,
-                                    related_name='entitlements')
+    fingerprint = models.ForeignKey(
+        SystemFingerprint, models.CASCADE, related_name="entitlements"
+    )
     name = models.CharField(max_length=256, unique=False, null=True)
     entitlement_id = models.CharField(max_length=256, unique=False, null=True)
 
@@ -262,12 +260,17 @@ class Entitlement(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return '{' + 'id:{}, '\
-            'fingerprint:{}, ' \
-            'name:{}, '\
-            'entitlement_id:{}, '\
-            'metadata:{} '.format(self.id,
-                                  self.fingerprint.id,
-                                  self.name,
-                                  self.entitlement_id,
-                                  self.metadata) + '}'
+        return (
+            "{" + "id:{}, "
+            "fingerprint:{}, "
+            "name:{}, "
+            "entitlement_id:{}, "
+            "metadata:{} ".format(
+                self.id,
+                self.fingerprint.id,
+                self.name,
+                self.entitlement_id,
+                self.metadata,
+            )
+            + "}"
+        )

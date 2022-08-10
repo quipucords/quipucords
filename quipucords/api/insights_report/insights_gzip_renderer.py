@@ -12,9 +12,9 @@
 
 import logging
 
-from api.common.common_report import (create_tar_buffer)
-
 from rest_framework import renderers
+
+from api.common.common_report import create_tar_buffer
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -24,14 +24,11 @@ class InsightsGzipRenderer(renderers.BaseRenderer):
     """Class to render insights reports as tar.gz."""
 
     # pylint: disable=too-few-public-methods
-    media_type = 'application/gzip'
-    format = 'tar.gz'
-    render_style = 'binary'
+    media_type = "application/gzip"
+    format = "tar.gz"
+    render_style = "binary"
 
-    def render(self,
-               data,
-               accepted_media_type=None,
-               renderer_context=None):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render all reports as gzip."""
         insights_dict = data
         if not insights_dict:

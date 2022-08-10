@@ -32,33 +32,32 @@ from django.views.generic import RedirectView
 from django.views.generic.base import TemplateView
 
 urlpatterns = [
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-
-    path('admin/', admin.site.urls),
-    path('api/v1/', include('api.urls')),
-
-    path('', RedirectView.as_view(url='/login', permanent=False),
-         name='home'),
-
+    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("admin/", admin.site.urls),
+    path("api/v1/", include("api.urls")),
+    path("", RedirectView.as_view(url="/login", permanent=False), name="home"),
     # ui routing
-    re_path(r'^(client/(sources|scans|credentials|)(/|)(index.html|))$',
-            TemplateView.as_view(template_name='client/index.html'),
-            name='client'),
-
+    re_path(
+        r"^(client/(sources|scans|credentials|)(/|)(index.html|))$",
+        TemplateView.as_view(template_name="client/index.html"),
+        name="client",
+    ),
     # docs files
     re_path(
-        r'^client/docs(/|)(index.html|use.html|)$',
-        RedirectView.as_view(url='/client/docs/use.html', permanent=False),
-        name='docs'),
-
+        r"^client/docs(/|)(index.html|use.html|)$",
+        RedirectView.as_view(url="/client/docs/use.html", permanent=False),
+        name="docs",
+    ),
     re_path(
-        r'^client/docs(/|)(install.html|)$',
-        RedirectView.as_view(url='/client/docs/install.html', permanent=False),
-        name='docs'),
-
+        r"^client/docs(/|)(install.html|)$",
+        RedirectView.as_view(url="/client/docs/install.html", permanent=False),
+        name="docs",
+    ),
     # static files (*.css, *.js, *.jpg etc.)
-    re_path(r'^(?!/?client/)(?P<path>.*\..*)$',
-            RedirectView.as_view(url='/client/%(path)s', permanent=False),
-            name='client'),
+    re_path(
+        r"^(?!/?client/)(?P<path>.*\..*)$",
+        RedirectView.as_view(url="/client/%(path)s", permanent=False),
+        name="client",
+    ),
 ]

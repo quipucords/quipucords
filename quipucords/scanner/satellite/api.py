@@ -12,19 +12,21 @@
 import json
 import logging
 
-from api.models import (RawFact,
-                        ScanOptions,
-                        ScanTask,
-                        SystemConnectionResult,
-                        SystemInspectionResult)
-
 from django.db import transaction
+
+from api.models import (
+    RawFact,
+    ScanOptions,
+    ScanTask,
+    SystemConnectionResult,
+    SystemInspectionResult,
+)
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-SATELLITE_VERSION_5 = '5'
-SATELLITE_VERSION_6 = '6'
+SATELLITE_VERSION_5 = "5"
+SATELLITE_VERSION_6 = "6"
 
 
 class SatelliteAuthException(Exception):
@@ -51,7 +53,7 @@ class SatellitePauseException(Exception):
     pass
 
 
-class SatelliteInterface():
+class SatelliteInterface:
     """Generic interface for dealing with Satellite."""
 
     def __init__(self, scan_job, scan_task):
@@ -82,15 +84,14 @@ class SatelliteInterface():
             source=self.source,
             credential=credential,
             status=SystemConnectionResult.SUCCESS,
-            task_connection_result=self.connect_scan_task.connection_result)
+            task_connection_result=self.connect_scan_task.connection_result,
+        )
         sys_result.save()
 
-        self.connect_scan_task.increment_stats(
-            name, increment_sys_scanned=True)
+        self.connect_scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @transaction.atomic
-    def record_inspect_result(self, name, facts,
-                              status=SystemInspectionResult.SUCCESS):
+    def record_inspect_result(self, name, facts, status=SystemInspectionResult.SUCCESS):
         """Record a new result.
 
         :param name: The host name
@@ -101,7 +102,8 @@ class SatelliteInterface():
             name=name,
             source=self.source,
             status=status,
-            task_inspection_result=self.inspect_scan_task.inspection_result)
+            task_inspection_result=self.inspect_scan_task.inspection_result,
+        )
         sys_result.save()
 
         if status == SystemInspectionResult.SUCCESS:
@@ -109,20 +111,16 @@ class SatelliteInterface():
                 if val is not None:
                     final_value = json.dumps(val)
                     stored_fact = RawFact(
-                        name=key,
-                        value=final_value,
-                        system_inspection_result=sys_result)
+                        name=key, value=final_value, system_inspection_result=sys_result
+                    )
                     stored_fact.save()
 
         if status == SystemInspectionResult.SUCCESS:
-            self.inspect_scan_task.increment_stats(
-                name, increment_sys_scanned=True)
+            self.inspect_scan_task.increment_stats(name, increment_sys_scanned=True)
         elif status == SystemInspectionResult.UNREACHABLE:
-            self.inspect_scan_task.increment_stats(
-                name, increment_sys_unreachable=True)
+            self.inspect_scan_task.increment_stats(name, increment_sys_unreachable=True)
         else:
-            self.inspect_scan_task.increment_stats(
-                name, increment_sys_failed=True)
+            self.inspect_scan_task.increment_stats(name, increment_sys_failed=True)
 
     def host_count(self):
         """Obtain the count of managed hosts."""

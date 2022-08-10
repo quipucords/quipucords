@@ -10,21 +10,27 @@
 #
 
 """API serializers for import organization."""
+
 # flake8: noqa
 # pylint: disable=unused-import
-from api.details_report.serializer import DetailsReportSerializer
-from api.deployments_report.serializer import (DeploymentReportSerializer,
-                                               SystemFingerprintSerializer)
+from api.connresult.serializer import (
+    JobConnectionResultSerializer,
+    SystemConnectionResultSerializer,
+    TaskConnectionResultSerializer,
+)
 from api.credential.serializer import CredentialSerializer
-from api.source.serializer import (CredentialsField,
-                                   SourceSerializer)
+from api.deployments_report.serializer import (
+    DeploymentReportSerializer,
+    SystemFingerprintSerializer,
+)
+from api.details_report.serializer import DetailsReportSerializer
+from api.inspectresult.serializer import (
+    JobInspectionResultSerializer,
+    RawFactSerializer,
+    SystemInspectionResultSerializer,
+    TaskInspectionResultSerializer,
+)
 from api.scan.serializer import ScanSerializer
-from api.scanjob.serializer import SourceField, ScanJobSerializer
+from api.scanjob.serializer import ScanJobSerializer, SourceField
 from api.scantask.serializer import ScanTaskSerializer
-from api.connresult.serializer import (JobConnectionResultSerializer,
-                                       TaskConnectionResultSerializer,
-                                       SystemConnectionResultSerializer)
-from api.inspectresult.serializer import(JobInspectionResultSerializer,
-                                         TaskInspectionResultSerializer,
-                                         SystemInspectionResultSerializer,
-                                         RawFactSerializer)
+from api.source.serializer import CredentialsField, SourceSerializer
