@@ -44,6 +44,7 @@ from api.models import (
     SystemFingerprint,
 )
 from api.serializers import SystemFingerprintSerializer
+from fingerprinter import formatters
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -58,6 +59,7 @@ from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
 from scanner.task import ScanTaskRunner
+from scanner.vcenter.utils import VcenterRawFacts
 from utils import deepget, default_getter
 
 # pylint: disable=too-many-lines
@@ -1126,6 +1128,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         fingerprint_key,
         fingerprint,
         fact_value=None,
+        fact_formatter=None,
     ):
         """Create the fingerprint fact and metadata.
 
@@ -1137,17 +1140,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
         this fact.
         :param fact_value: Used when values are computed from
         raw facts instead of direct access.
+        :param fact_formatter: A function that will format the fact - it should expect
+        the raw fact in its signature.
         """
         # pylint: disable=too-many-arguments
         actual_fact_value = None
         raw_fact_value = deepget(raw_fact, raw_fact_key)
+        if fact_value is not None and fact_formatter is not None:
+            raise AssertionError(
+                "fact_value and fact_formatter can't be used together."
+            )
         if fact_value is not None:
             actual_fact_value = fact_value
+        elif fact_formatter is not None:
+            actual_fact_value = fact_formatter(raw_fact_value)
         elif raw_fact_value is not None:
             actual_fact_value = raw_fact_value
-        if fingerprint_key == "mac_addresses":
-            if isinstance(actual_fact_value, list):
-                actual_fact_value = list(map(lambda x: x.lower(), actual_fact_value))
 
         # Remove empty string values
         if isinstance(actual_fact_value, str) and not actual_fact_value:
@@ -1275,7 +1283,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Set mac address from either network or vcenter
         self._add_fact_to_fingerprint(
-            source, "ifconfig_mac_addresses", fact, "mac_addresses", fingerprint
+            source,
+            "ifconfig_mac_addresses",
+            fact,
+            "mac_addresses",
+            fingerprint,
+            fact_formatter=formatters.format_mac_addresses,
         )
 
         # Set CPU facts
@@ -1469,23 +1482,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Common facts
         # Set name
         if fact.get("vm.dns_name"):
-            raw_fact = "vm.dns_name"
+            raw_fact_key = "vm.dns_name"
         else:
-            raw_fact = "vm.name"
+            raw_fact_key = "vm.name"
 
-        self._add_fact_to_fingerprint(source, raw_fact, fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(source, raw_fact_key, fact, "name", fingerprint)
 
         self._add_fact_to_fingerprint(source, "vm.os", fact, "os_release", fingerprint)
-        vcenter_os_release = default_getter(fact, "vm.os", "")
-        is_redhat = False
-        if vcenter_os_release != "":
-            rhel_os_releases = ["red hat enterprise linux", "rhel"]
-            for rhel_release in rhel_os_releases:
-                if rhel_release in vcenter_os_release.lower():
-                    is_redhat = True
-                    break
         self._add_fact_to_fingerprint(
-            source, "vm.os", fact, "is_redhat", fingerprint, fact_value=is_redhat
+            source,
+            "vm.os",
+            fact,
+            "is_redhat",
+            fingerprint,
+            fact_formatter=formatters.is_redhat_from_vm_os,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1496,7 +1506,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_value="virtualized",
         )
         self._add_fact_to_fingerprint(
-            source, "vm.mac_addresses", fact, "mac_addresses", fingerprint
+            source,
+            "vm.mac_addresses",
+            fact,
+            "mac_addresses",
+            fingerprint,
+            fact_formatter=formatters.format_mac_addresses,
         )
         self._add_fact_to_fingerprint(
             source, "vm.ip_addresses", fact, "ip_addresses", fingerprint
@@ -1549,6 +1564,17 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         self._add_fact_to_fingerprint(
             source, "vm.cluster", fact, "vm_cluster", fingerprint
+        )
+
+        # VcenterRawFacts.MEMORY_SIZE is formatted in GB. lets convert it to mb
+        # https://github.com/quipucords/quipucords/blob/bf1f034b6596ba01c9c89f766088108dd3f421fc/quipucords/scanner/vcenter/inspect.py#L190-L191
+        self._add_fact_to_fingerprint(
+            source,
+            VcenterRawFacts.MEMORY_SIZE,
+            fact,
+            "system_memory_bytes",
+            fingerprint,
+            fact_formatter=formatters.gigabytes_to_bytes,
         )
 
         fingerprint[ENTITLEMENTS_KEY] = []
@@ -1627,7 +1653,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
 
         self._add_fact_to_fingerprint(
-            source, "mac_addresses", fact, "mac_addresses", fingerprint
+            source,
+            "mac_addresses",
+            fact,
+            "mac_addresses",
+            fingerprint,
+            fact_formatter=formatters.format_mac_addresses,
         )
         self._add_fact_to_fingerprint(
             source, "ip_addresses", fact, "ip_addresses", fingerprint

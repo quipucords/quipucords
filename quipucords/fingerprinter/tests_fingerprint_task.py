@@ -103,6 +103,7 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "name": "vm.name",
     "os_release": "vm.os",
     "system_last_checkin_date": "vm.last_check_in",
+    "system_memory_bytes": "vm.memory_size",
     "virtual_host_name": "vm.host.name",
     "virtual_host_uuid": "vm.host.uuid",
     "vm_cluster": "vm.cluster",
@@ -1220,19 +1221,17 @@ class EngineTest(TestCase):
         self.assertEqual(
             set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
         )
-        self.assertDictEqual(
-            {
-                fingerprint_name: {
-                    "server_id": self.server_id,
-                    "source_name": self.source.name,
-                    "source_type": self.source.source_type,
-                    "has_sudo": None,
-                    "raw_fact_key": fact_name,
-                }
-                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_NETWORK.items()  # noqa: E501
-            },
-            metadata_dict,
-        )
+        assert {
+            fingerprint_name: {
+                "server_id": self.server_id,
+                "source_name": self.source.name,
+                "source_type": self.source.source_type,
+                "has_sudo": None,
+                "raw_fact_key": fact_name,
+            }
+            for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_NETWORK.items()
+        } == metadata_dict
+
         expected_fingerprints = {
             fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_NETWORK
@@ -1255,19 +1254,17 @@ class EngineTest(TestCase):
         self.assertEqual(
             set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_VCENTER.keys())
         )
-        self.assertDictEqual(
-            {
-                fingerprint_name: {
-                    "server_id": self.server_id,
-                    "source_name": "source2",
-                    "source_type": Source.VCENTER_SOURCE_TYPE,
-                    "has_sudo": False,
-                    "raw_fact_key": fact_name,
-                }
-                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_VCENTER.items()  # noqa E501
-            },
-            metadata_dict,
-        )
+        assert {
+            fingerprint_name: {
+                "server_id": self.server_id,
+                "source_name": "source2",
+                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "has_sudo": False,
+                "raw_fact_key": fact_name,
+            }
+            for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_VCENTER.items()
+        } == metadata_dict
+
         expected_fingerprints = {
             fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_VCENTER
@@ -1324,7 +1321,7 @@ class EngineTest(TestCase):
             }
         expected_fingerprints[PRODUCTS_KEY] = copy_products_list
 
-        self.assertDictEqual(result, expected_fingerprints)
+        assert result == expected_fingerprints
 
     ################################################################
     # Test post processing

@@ -107,6 +107,9 @@ class SystemFingerprint(models.Model):
     cpu_count = models.PositiveIntegerField(unique=False, blank=True, null=True)
 
     architecture = models.CharField(max_length=64, unique=False, blank=True, null=True)
+    system_memory_bytes = models.PositiveIntegerField(
+        unique=False, blank=True, null=True
+    )
 
     # Network scan facts
     bios_uuid = models.CharField(max_length=36, unique=False, blank=True, null=True)
