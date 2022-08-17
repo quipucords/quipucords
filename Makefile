@@ -33,6 +33,7 @@ help:
 	@echo "  manpage             to build the manpage"
 	@echo "  build-ui            to build ui and place result in django server"
 	@echo "  fetch-ui            to fetch prebuilt ui and place it in django server"
+	@echo "  build-container     to build the container image for quipucords"
 
 all: lint test-coverage
 
@@ -127,3 +128,8 @@ $(qpc_on_ui_dir): $(QUIPUCORDS_UI_PATH)
 
 serve-swagger: $(qpc_on_ui_dir)
 	cd $(QUIPUCORDS_UI_PATH);yarn;node ./scripts/swagger.js
+
+build-container:
+	podman build \
+		--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
+		-t quipucords .
