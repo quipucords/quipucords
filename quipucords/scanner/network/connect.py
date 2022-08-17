@@ -30,8 +30,8 @@ from api.vault import decrypt_data_as_unicode, write_to_yaml
 from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
-    _construct_vars,
     check_manager_interrupt,
+    construct_inventory,
     expand_hostpattern,
 )
 from scanner.task import ScanTaskRunner
@@ -262,14 +262,14 @@ def _connect(
         "--timeout=" + ssh_timeout,
         "ssh",
     ]
-    group_names, inventory = _construct_connect_inventory(
-        hosts,
-        cred_data,
-        connection_port,
-        forks,
-        exclude_hosts,
-        ssh_executable,
-        ssh_args,
+    group_names, inventory = construct_inventory(
+        hosts=hosts,
+        credential=cred_data,
+        connection_port=connection_port,
+        concurrency_count=forks,
+        exclude_hosts=exclude_hosts,
+        ssh_executable=ssh_executable,
+        ssh_args=ssh_args,
     )
     inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)
@@ -382,57 +382,3 @@ def _handle_ssh_passphrase(credential):
                 i = child.expect(phrase)
         except pexpect.exceptions.TIMEOUT:
             pass
-
-
-def _construct_connect_inventory(
-    hosts,
-    credential,
-    connection_port,
-    concurrency_count,
-    exclude_hosts=None,
-    ssh_executable=None,
-    ssh_args=None,
-):
-    """Create a dictionary inventory for Ansible to execute with.
-
-    :param hosts: The collection of hosts to test connections
-    :param credential: The credential used for connections
-    :param connection_port: The connection port
-    :param concurrency_count: The number of concurrent scans
-    :param exclude_hosts: Optional. Hosts to exclude test connections
-    :param ssh_executable: the ssh executable to use, or None for 'ssh'
-    :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A dictionary of the ansible inventory
-    """
-    if exclude_hosts is not None:
-        hosts = list(set(hosts) - set(exclude_hosts))
-
-    concurreny_groups = list(
-        [
-            hosts[i : i + concurrency_count]
-            for i in range(0, len(hosts), concurrency_count)
-        ]
-    )
-
-    vars_dict = _construct_vars(connection_port, credential)
-    children = {}
-    inventory = {"all": {"children": children, "vars": vars_dict}}
-    i = 0
-    group_names = []
-    for concurreny_group in concurreny_groups:
-        hosts_dict = {}
-        for host in concurreny_group:
-            host_vars = {}
-            host_vars["ansible_host"] = host
-            if ssh_executable:
-                host_vars["ansible_ssh_executable"] = ssh_executable
-            if ssh_args:
-                host_vars["ansible_ssh_common_args"] = " ".join(ssh_args)
-            hosts_dict[host] = host_vars
-
-        group_name = "group_{}".format(i)
-        i += 1
-        group_names.append(group_name)
-        children[group_name] = {"hosts": hosts_dict}
-
-    return group_names, inventory
