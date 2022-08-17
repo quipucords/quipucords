@@ -32,7 +32,7 @@ from api.models import (
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
-from scanner.network.inspect import _construct_scan_inventory
+from scanner.network.inspect import construct_inventory
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.test_util import create_scan_job
 
@@ -107,7 +107,7 @@ class NetworkInspectScannerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         connection_port = source["port"]
-        inventory_dict = _construct_scan_inventory(self.host_list, connection_port, 50)
+        inventory_dict = construct_inventory(self.host_list, connection_port, 50)
         expected = {
             "all": {
                 "children": {
@@ -134,7 +134,7 @@ class NetworkInspectScannerTest(TestCase):
         connection_port = source["port"]
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        inventory_dict = _construct_scan_inventory(
+        inventory_dict = construct_inventory(
             [
                 ("1.2.3.1", cred),
                 ("1.2.3.2", cred),

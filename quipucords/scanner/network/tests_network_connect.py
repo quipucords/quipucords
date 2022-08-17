@@ -22,11 +22,7 @@ from api.connresult.model import SystemConnectionResult
 from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source, SourceOptions
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network import ConnectTaskRunner
-from scanner.network.connect import (
-    ConnectResultStore,
-    _connect,
-    _construct_connect_inventory,
-)
+from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.utils import _construct_vars
 from scanner.test_util import create_scan_job
@@ -188,12 +184,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         path = "/path/to/executable.py"
         ssh_timeout = "0.1s"
         ssh_args = ["--executable=" + path, "--timeout=" + ssh_timeout, "ssh"]
-        _, inventory_dict = _construct_connect_inventory(
-            hosts,
-            cred,
-            connection_port,
-            1,
-            exclude_hosts,
+        _, inventory_dict = construct_inventory(
+            hosts=hosts,
+            credential=cred,
+            connection_port=connection_port,
+            concurrency_count=1,
+            exclude_hosts=exclude_hosts,
             ssh_executable=path,
             ssh_args=ssh_args,
         )
@@ -381,8 +377,11 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source["port"]
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        _, inventory_dict = _construct_connect_inventory(
-            hosts, cred, connection_port, 1
+        _, inventory_dict = construct_inventory(
+            hosts=hosts,
+            credential=cred,
+            connection_port=connection_port,
+            concurrency_count=1,
         )
         expected = {
             "all": {

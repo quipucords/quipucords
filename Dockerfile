@@ -14,7 +14,7 @@ ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
-RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git jq &&\
+RUN dnf -yq install python39 make openssh-clients sshpass glibc-langpack-en git jq &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
 
