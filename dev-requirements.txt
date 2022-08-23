@@ -449,9 +449,9 @@ packaging==21.3 \
     #   ansible-runner
     #   build
     #   pytest
-paramiko==2.11.0 \
-    --hash=sha256:003e6bee7c034c21fbb051bf83dc0a9ee4106204dd3c53054c71452cc4ec3938 \
-    --hash=sha256:655f25dc8baf763277b933dfcea101d636581df8d6b9774d1fb653426b72c270
+paramiko==2.8.1 \
+    --hash=sha256:7b5910f5815a00405af55da7abcc8a9e0d9657f57fcdd9a89894fdbba1c6b8a8 \
+    --hash=sha256:85b1245054e5d7592b9088cc6d08da22445417912d3a3e48138675c7a8616438
     # via
     #   -r requirements.in
     #   docker
@@ -721,7 +721,6 @@ six==1.16.0 \
     #   ansible-runner
     #   dockerpty
     #   jsonschema
-    #   paramiko
     #   python-dateutil
     #   pyvmomi
     #   requests-mock
