@@ -221,9 +221,9 @@ packaging==21.3 \
     # via
     #   ansible-base
     #   ansible-runner
-paramiko==2.11.0 \
-    --hash=sha256:003e6bee7c034c21fbb051bf83dc0a9ee4106204dd3c53054c71452cc4ec3938 \
-    --hash=sha256:655f25dc8baf763277b933dfcea101d636581df8d6b9774d1fb653426b72c270
+paramiko==2.7.2 \
+    --hash=sha256:4f3e316fef2ac628b05097a637af35685183111d4bc1b5979bd397c2ab7b5898 \
+    --hash=sha256:7f36f4ba2c0d81d219f4595e35f70d56cc94f9ac40a6acdf51d6ca210ce65035
     # via -r requirements.in
 pexpect==4.8.0 \
     --hash=sha256:0b48a55dcb3c05f3329815901ea4fc1537514d6ba867a152b581d69ae3710937 \
@@ -354,7 +354,6 @@ six==1.16.0 \
     --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
     # via
     #   ansible-runner
-    #   paramiko
     #   pyvmomi
 sqlparse==0.4.2 \
     --hash=sha256:0c00730c74263a94e5a9919ade150dfc3b19c574389985446148402998287dae \
