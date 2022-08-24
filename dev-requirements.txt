@@ -449,9 +449,9 @@ packaging==21.3 \
     #   ansible-runner
     #   build
     #   pytest
-paramiko==2.8.1 \
-    --hash=sha256:7b5910f5815a00405af55da7abcc8a9e0d9657f57fcdd9a89894fdbba1c6b8a8 \
-    --hash=sha256:85b1245054e5d7592b9088cc6d08da22445417912d3a3e48138675c7a8616438
+paramiko==2.7.2 \
+    --hash=sha256:4f3e316fef2ac628b05097a637af35685183111d4bc1b5979bd397c2ab7b5898 \
+    --hash=sha256:7f36f4ba2c0d81d219f4595e35f70d56cc94f9ac40a6acdf51d6ca210ce65035
     # via
     #   -r requirements.in
     #   docker

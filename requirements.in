@@ -3,7 +3,7 @@ Django<4
 django-filter
 djangorestframework
 jmespath
-paramiko<2.9
+paramiko<2.8
 pexpect
 pyvmomi
 PyYAML
