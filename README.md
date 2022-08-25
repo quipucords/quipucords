@@ -221,7 +221,7 @@ The examples below all use `podman` but can be replaced with `docker` unless sta
                     -e POSTGRESQL_PASSWORD=qpc \
                     -e POSTGRESQL_DATABASE=qpc-db \
                     -v qpc-data:/var/lib/pgsql/data \
-                    -d postgres:14.1
+                    -d postgres:12
     ```
     Run the quipucords database container:
     ```
