@@ -129,3 +129,6 @@ quipucords/roles/
 
 # asdf
 .tool-versions
+
+# local files
+var/
