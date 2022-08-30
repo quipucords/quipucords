@@ -83,9 +83,6 @@ def construct_inventory(
     concurrency_count,
     *,
     credential=None,
-    exclude_hosts=None,
-    ssh_executable=None,
-    ssh_args=None,
 ):
     """Create a dictionary inventory for Ansible to execute with.
 
@@ -93,41 +90,27 @@ def construct_inventory(
     :param credential: The credential used for connections
     :param connection_port: The connection port
     :param concurrency_count: The number of concurrent scans
-    :param exclude_hosts: Optional. Hosts to exclude test connections
-    :param ssh_executable: the ssh executable to use, or None for 'ssh'
-    :param ssh_args: a list of extra ssh arguments
     :returns: A dictionary of the ansible inventory
     """
-    if exclude_hosts is not None:
-        hosts = list(set(hosts) - set(exclude_hosts))
-
     concurreny_groups = [
         hosts[i : i + concurrency_count]
         for i in range(0, len(hosts), concurrency_count)
     ]
-
     vars_dict = _construct_vars(connection_port, credential)
     children = {}
-    inventory = {"all": {"children": children, "vars": vars_dict}}
     group_names = []
+    inventory = {"all": {"children": children, "vars": vars_dict}}
     for index, group in enumerate(concurreny_groups):
         group_name = f"group_{index}"
         group_names.append(group_name)
-        children[group_name] = {
-            "hosts": _format_hosts_dict(group, ssh_executable, ssh_args)
-        }
-
+        children[group_name] = {"hosts": _format_hosts_dict(group)}
     return group_names, inventory
 
 
-def _format_hosts_dict(group, ssh_executable, ssh_args) -> dict:
+def _format_hosts_dict(group) -> dict:
     hosts_dict = {}
     for host in group:
         host_name, host_vars = _get_host_vars(host)
-        if ssh_executable:
-            host_vars["ansible_ssh_executable"] = ssh_executable
-        if ssh_args:
-            host_vars["ansible_ssh_common_args"] = " ".join(ssh_args)
         hosts_dict[host_name] = host_vars
     return hosts_dict
 
