@@ -149,15 +149,12 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             sys_result.save()
 
-    def _inspect_scan(
-        self, manager_interrupt, connected, base_ssh_executable=None, ssh_timeout=None
-    ):
+    def _inspect_scan(self, manager_interrupt, connected):
         """Execute the host scan with the initialized source.
 
         :param manager_interrupt: Signal used to communicate termination
             of scan
         :param connected: list of (host, credential) pairs to inspect
-        :param roles: list of roles to execute
         :param base_ssh_executable: ssh executable, or None for
             'ssh'. Will be wrapped with a timeout before being passed
             to Ansible.
@@ -190,31 +187,12 @@ class InspectTaskRunner(ScanTaskRunner):
             )
 
         extra_vars["QPC_FEATURE_FLAGS"] = settings.QPC_FEATURE_FLAGS.as_dict()
-
-        ssh_executable = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../bin/timeout_ssh")
-        )
-
-        base_ssh_executable = base_ssh_executable or "ssh"
-        ssh_timeout = ssh_timeout or settings.QPC_SSH_INSPECT_TIMEOUT
-        # pylint: disable=line-too-long
-        # the ssh arg is required for become-pass because
-        # ansible checks for an exact string match of ssh
-        # anywhere in the command array
-        # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
-        # timeout_ssh will remove the ssh argument before running the command
-        ssh_args = [
-            "--executable=" + base_ssh_executable,
-            "--timeout=" + ssh_timeout,
-            "ssh",
-        ]
+        extra_vars["ansible_ssh_timeout"] = settings.QPC_SSH_INSPECT_TIMEOUT
 
         group_names, inventory = construct_inventory(
             hosts=connected,
             connection_port=connection_port,
             concurrency_count=forks,
-            ssh_executable=ssh_executable,
-            ssh_args=ssh_args,
         )
         inventory_file = write_to_yaml(inventory)
 
