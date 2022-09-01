@@ -169,6 +169,7 @@ def expected_network_scan_facts():
         "subman_virt_host_type",
         "subman_virt_is_guest",
         "subman_virt_uuid",
+        "system_memory_bytes",
         "system_purpose_json",
         "system_user_count",
         "systemid",
@@ -370,9 +371,7 @@ class TestNetworkScan:
             "report_version": mock.ANY,
             SOURCES_KEY: [
                 {
-                    "facts": [
-                        {fact: mock.ANY for fact in expected_network_scan_facts},
-                    ],
+                    "facts": [mock.ANY],
                     "report_version": mock.ANY,
                     "server_id": mock.ANY,
                     "source_name": self.SOURCE_NAME,
@@ -381,6 +380,9 @@ class TestNetworkScan:
             ],
         }
         assert report_details_dict == expected_details_report
+        report_details_facts = report_details_dict[SOURCES_KEY][0]["facts"][0]
+        assert isinstance(report_details_facts, dict)
+        assert set(report_details_facts.keys()) == expected_network_scan_facts
 
         some_expected_facts = dict(
             etc_release_name="Red Hat Enterprise Linux",
@@ -388,7 +390,6 @@ class TestNetworkScan:
             date_machine_id=datetime.utcnow().date().isoformat(),
             user_has_sudo=True,
         )
-        report_details_facts = report_details_dict["sources"][0]["facts"][0]
         assert report_details_facts | some_expected_facts == report_details_facts
 
     @pytest.fixture

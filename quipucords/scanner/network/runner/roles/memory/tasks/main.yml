@@ -1,0 +1,25 @@
+---
+# tasks file for memory
+- name: Set internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "memory"
+  # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/deployment_guide/s2-proc-meminfo
+
+- name: Get memory in kb
+  raw: |
+    set -o pipefail
+    cat /proc/meminfo |
+    grep MemTotal |
+    awk '{print $2}'
+  register: memory_in_kb
+  changed_when: "'memory_in_kb' in vars"
+  ignore_errors: yes
+
+- name: Check collected memory
+  debug:
+    msg: "collected memory_in_kb={{ memory_in_kb }} and its type is {{ memory_in_kb.__class__.__name__ }}"
+
+- name: Convert memory to bytes
+  set_fact:
+    system_memory_bytes: "{{ memory_in_kb.stdout | int * 1024 }}"
+  when: memory_in_kb.rc == 0
