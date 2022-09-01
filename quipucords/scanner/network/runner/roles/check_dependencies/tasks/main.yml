@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "check_dependencies"
 
 - name: test if user has sudo cmd
-  raw: echo "user has sudo" 2>/dev/null
+  command: echo "user has sudo" 2>/dev/null
   register: internal_user_has_sudo_cmd
   become: yes
   ignore_errors: yes
@@ -16,7 +16,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_dmidecode_cmd
-  raw: command -v /usr/sbin/dmidecode
+  command: command -v /usr/sbin/dmidecode
   register: internal_have_dmidecode_cmd
   become: yes
   ignore_errors: yes
@@ -28,7 +28,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_tune2fs_cmd
-  raw: command -v tune2fs
+  command: command -v tune2fs
   register: internal_have_tune2fs_cmd
   ignore_errors: yes
 
@@ -38,7 +38,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_yum_cmd
-  raw: command -v yum
+  command: command -v yum
   register: internal_have_yum_cmd
   ignore_errors: yes
 
@@ -48,7 +48,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_java_cmd
-  raw: command -v java
+  command: command -v java
   register: internal_have_java_cmd
   ignore_errors: yes
 
@@ -58,7 +58,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_rpm_cmd
-  raw: command -v rpm
+  command: command -v rpm
   register: internal_have_rpm_cmd
   ignore_errors: yes
 
@@ -68,7 +68,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_subscription_manager_cmd
-  raw: command -v subscription-manager
+  command: command -v subscription-manager
   register: internal_have_subscription_manager_cmd
   become: yes
   ignore_errors: yes
@@ -80,7 +80,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_virsh_cmd
-  raw: command -v virsh
+  command: command -v virsh
   register: internal_have_virsh_cmd
   ignore_errors: yes
 
@@ -90,7 +90,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_virt_what_cmd
-  raw: command -v virt-what
+  command: command -v virt-what
   register: internal_have_virt_what_cmd
   ignore_errors: yes
 
@@ -100,12 +100,12 @@
   ignore_errors: yes
 
 - name: gather internal_have_locate_cmd
-  raw: command -v locate
+  command: command -v locate
   register: internal_have_locate_cmd
   ignore_errors: yes
 
 - name: test locate command
-  raw: locate echo
+  command: locate echo
   register: internal_test_locate
   ignore_errors: yes
   when: (internal_have_locate_cmd.get('rc') == 0)
@@ -122,7 +122,7 @@
   when: (internal_have_locate_cmd.get('rc') == 0 and internal_test_locate.get('rc') == 0)
 
 - name: gather internal_have_systemctl_cmd
-  raw: whereis systemctl
+  command: whereis systemctl
   register: internal_whereis_systemctl_cmd
   ignore_errors: yes
 
@@ -138,7 +138,7 @@
   when: (internal_whereis_systemctl_cmd.get('rc') == 0 and internal_whereis_systemctl_cmd.get('stdout_lines') != ['systemctl:'])
 
 - name: gather internal_whereis_chkconfig_cmd
-  raw: whereis chkconfig
+  command: whereis chkconfig
   register: internal_whereis_chkconfig_cmd
   ignore_errors: yes
 
@@ -154,7 +154,7 @@
   when: (internal_whereis_chkconfig_cmd.get('rc') == 0 and internal_whereis_chkconfig_cmd.get('stdout_lines') != ['chkconfig:'])
 
 - name: gather internal_whereis_ifconfig_cmd
-  raw: whereis ifconfig
+  command: whereis ifconfig
   register:  internal_whereis_ifconfig_cmd
   ignore_errors: yes
 
@@ -170,7 +170,7 @@
   when: "internal_whereis_ifconfig_cmd.get('rc') == 0 and internal_whereis_ifconfig_cmd.get('stdout_lines') != ['ifconfig:']"
 
 - name: gather internal_have_unzip_cmd
-  raw: command -v unzip
+  command: command -v unzip
   register: internal_have_unzip_cmd
   ignore_errors: yes
 

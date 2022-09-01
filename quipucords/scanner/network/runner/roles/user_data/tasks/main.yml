@@ -6,7 +6,7 @@
 
 # Facts to gather last 25 logins
 - name: gather user_login_history data fact
-  raw: last -25
+  command: last -25
   register: internal_user_login_history_cmd
   ignore_errors: yes
   become: yes
@@ -23,7 +23,7 @@
 
 # Facts to determine number of users
 - name: gather etc/passwd data fact
-  raw: cat /etc/passwd
+  command: cat /etc/passwd
   register: internal_system_user_count_cmd
   ignore_errors: yes
   become: yes

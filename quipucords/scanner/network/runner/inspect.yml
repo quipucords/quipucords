@@ -30,3 +30,9 @@
     - redhat_release
     - memory
     - host_done
+  
+  environment:
+    # force envvars in remote host
+    # this won't work for "raw" commands, though
+    LANG: C.UTF-8
+    LC_ALL: C.UTF-8

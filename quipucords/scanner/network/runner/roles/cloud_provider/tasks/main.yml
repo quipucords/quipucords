@@ -6,7 +6,7 @@
 
 # Azure cloud facts
 - name: gather dmi.chassis.asset_tag fact
-  raw: /usr/sbin/dmidecode -t chassis 2>/dev/null | grep "Asset Tag"
+  shell: /usr/sbin/dmidecode -t chassis 2>/dev/null | grep "Asset Tag"
   register: internal_dmi_chassis_asset_tag_cmd
   ignore_errors: yes
   become: yes
@@ -24,7 +24,7 @@
 
 # ## Alibaba cloud facts
 - name: gather dmi.system.product_name fact
-  raw: /usr/sbin/dmidecode -t system 2>/dev/null | grep "Product Name"
+  shell: /usr/sbin/dmidecode -t system 2>/dev/null | grep "Product Name"
   register: internal_dmi_system_product_name_cmd
   ignore_errors: yes
   become: yes

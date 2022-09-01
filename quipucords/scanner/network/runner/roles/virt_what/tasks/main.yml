@@ -11,7 +11,7 @@
   when: 'not internal_have_virt_what'
 
 - name: execute virt-what
-  raw: virt-what;echo $?
+  command: virt-what;echo $?
   register: internal_virt_what_output
   ignore_errors: yes
   become: yes

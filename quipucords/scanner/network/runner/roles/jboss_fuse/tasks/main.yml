@@ -7,7 +7,7 @@
 
 # This will scan linux systems for JBoss Fuse, ActiveMQ, CXF, Camel or Community  Installations
 - name: Gather jboss.activemq-ver
-  raw: FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*activemq-\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
+  shell: FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*activemq-\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
   register: internal_jboss_activemq_ver
   ignore_errors: yes
   become: yes
@@ -19,7 +19,7 @@
   ignore_errors: yes
 
 - name: Gather jboss.camel-ver
-  raw: FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*camel-core\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
+  shell: FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*camel-core\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
   register: internal_jboss_camel_ver
   ignore_errors: yes
   become: yes
@@ -31,7 +31,7 @@
   ignore_errors: yes
 
 - name: Gather jboss.cxf-ver
-  raw: FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*cxf-rt\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
+  shell: FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*cxf-rt\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
   register: internal_jboss_cxf_ver
   ignore_errors: yes
   become: yes

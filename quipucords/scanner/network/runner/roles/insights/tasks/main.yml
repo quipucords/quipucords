@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "insights"
 
 - name: gather insights.machine-id
-  raw: if [ -f /etc/insights-client/machine-id ] ; then cat /etc/insights-client/machine-id; fi || if [ -f /etc/redhat-access-insights ] ; then cat /etc/redhat-access-insights/machine-id; fi | tr -d '\r' | tr -d '\n'
+  shell: if [ -f /etc/insights-client/machine-id ] ; then cat /etc/insights-client/machine-id; fi || if [ -f /etc/redhat-access-insights ] ; then cat /etc/redhat-access-insights/machine-id; fi | tr -d '\r' | tr -d '\n'
   register: internal_get_insights_client_id
   ignore_errors: yes
 

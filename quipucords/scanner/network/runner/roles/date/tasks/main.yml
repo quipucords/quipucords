@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "date"
 
 - name: gather internal_date_date fact
-  raw: date
+  command: date
   register: internal_date_date
   ignore_errors: yes
 
@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: gather uptime fact
-  raw: uptime=$(cat /proc/uptime); array=( $uptime); seconds=" +seconds"; formatted_uptime="${array[0]}$seconds"; TZ=utc date --date -"$formatted_uptime" +"%Y-%m-%d %T"
+  command: uptime=$(cat /proc/uptime); array=( $uptime); seconds=" +seconds"; formatted_uptime="${array[0]}$seconds"; TZ=utc date --date -"$formatted_uptime" +"%Y-%m-%d %T"
   register: internal_uptime_utc_cmd
   ignore_errors: yes
 
@@ -27,7 +27,7 @@
     - "{{ QPC_FEATURE_FLAGS.UPTIME }}"
 
 - name: gather date.anaconda_log fact
-  raw: ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+  shell: ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
   register: internal_date_anaconda_log_cmd
   become: yes
   ignore_errors: yes
@@ -46,7 +46,7 @@
   when: '"stdout" not in internal_date_anaconda_log_cmd'
 
 - name: gather internal_date_machine_id fact
-  raw: if [ -f /etc/machine-id ] ; then ls --full-time /etc/machine-id 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' ; fi
+  shell: if [ -f /etc/machine-id ] ; then ls --full-time /etc/machine-id 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' ; fi
   register: internal_date_machine_id
   ignore_errors: yes
 
@@ -56,7 +56,7 @@
   ignore_errors: yes
 
 - name: gather internal_date_filesystem_create fact
-  raw: fs_date=$(tune2fs -l $(mount | egrep '/ type' | grep -o '/dev.* on' | sed -e 's/\on//g') 2>/dev/null | grep 'Filesystem created' | sed 's/Filesystem created:\s*//g'); if [[ $fs_date ]]; then date +'%F' -d "$fs_date"; else echo "" ; fi
+  shell: fs_date=$(tune2fs -l $(mount | egrep '/ type' | grep -o '/dev.* on' | sed -e 's/\on//g') 2>/dev/null | grep 'Filesystem created' | sed 's/Filesystem created:\s*//g'); if [[ $fs_date ]]; then date +'%F' -d "$fs_date"; else echo "" ; fi
   register: internal_date_filesystem_create
   ignore_errors: yes
   when: 'internal_have_tune2fs'
@@ -67,7 +67,7 @@
   ignore_errors: yes
 
 - name: gather internal_date_yum_history fact
-  raw: yum history 2>/dev/null  | tail -n 2 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+  shell: yum history 2>/dev/null  | tail -n 2 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
   register: internal_date_yum_history
   become: yes
   ignore_errors: yes

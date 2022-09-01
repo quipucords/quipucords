@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "uname"
 
 - name: gather internal_uname_os fact
-  raw: uname -s
+  command: uname -s
   register: internal_uname_os
   ignore_errors: yes
 
@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: gather internal_uname_hostname fact
-  raw: uname -n
+  command: uname -n
   register: internal_uname_hostname
   ignore_errors: yes
 
@@ -25,7 +25,7 @@
   ignore_errors: yes
 
 - name: gather internal_uname_processor fact
-  raw: uname -p
+  command: uname -p
   register: internal_uname_processor
   ignore_errors: yes
 
@@ -35,7 +35,7 @@
   ignore_errors: yes
 
 - name: gather internal_uname_kernel fact
-  raw: uname -r
+  command: uname -r
   register: internal_uname_kernel
   ignore_errors: yes
 
@@ -45,7 +45,7 @@
   ignore_errors: yes
 
 - name: gather internal_uname_all fact
-  raw: uname -a
+  command: uname -a
   register: internal_uname_all
   ignore_errors: yes
 
@@ -55,7 +55,7 @@
   ignore_errors: yes
 
 - name: gather internal_uname_hardware_platform fact
-  raw: uname -i
+  command: uname -i
   register: internal_uname_hardware_platform
   ignore_errors: yes
 

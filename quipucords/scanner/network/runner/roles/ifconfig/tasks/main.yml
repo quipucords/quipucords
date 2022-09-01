@@ -5,13 +5,13 @@
     internal_host_started_processing_role: "ifconfig"
 
 - name: gather ifconfig.mac-addresses fact (no sudo)
-  raw: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+  shell: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
   register: internal_ifconfig_mac_addresses_cmd
   ignore_errors: yes
   when: '(not user_has_sudo) and internal_have_ifconfig'
 
 - name: gather ifconfig.mac-addresses fact (sudo)
-  raw: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+  shell: /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
   register: internal_sudo_ifconfig_mac_addresses_cmd
   ignore_errors: yes
   become: yes
@@ -30,13 +30,13 @@
   when: 'user_has_sudo and "stdout_lines" in internal_sudo_ifconfig_mac_addresses_cmd'
 
 - name: gather ip-address fact (no sudo)
-  raw: if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
+  shell: if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
   register: internal_ifconfig_ip_addresses_cmd
   ignore_errors: yes
   when: '(not user_has_sudo)'
 
 - name: gather ip-address fact (sudo)
-  raw: if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
+  shell: if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
   register: internal_sudo_ifconfig_ip_addresses_cmd
   ignore_errors: yes
   become: yes

@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "redhat_packages"
 
 - name: check to see if any red hat rpms are installed
-  raw: if [ $(rpm -qa --qf "%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l) -gt 0 ]; then echo "Y"; else echo "N"; fi
+  shell: if [ $(rpm -qa --qf "%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l) -gt 0 ]; then echo "Y"; else echo "N"; fi
   register: internal_redhat_packages_gpg_is_redhat_cmd
   ignore_errors: yes
   when: internal_have_rpm
@@ -20,7 +20,7 @@
   ignore_errors: yes
 
 - name: gather the number of all installed red hat packages filtered by gpg keys
-  raw: rpm -qa --qf "%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}\n" 2> /dev/null | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
+  shell: rpm -qa --qf "%{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig}\n" 2> /dev/null | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | wc -l
   register: internal_redhat_packages_gpg_num_rh_packages
   ignore_errors: yes
   when: internal_have_rpm
@@ -31,7 +31,7 @@
   ignore_errors: yes
 
 - name: gather total number of installed packages
-  raw: rpm -qa | wc -l
+  shell: rpm -qa | wc -l
   register: internal_redhat_packages_all_count
   ignore_errors: yes
   when: internal_have_rpm
@@ -42,7 +42,7 @@
   ignore_errors: yes
 
 - name: gather the last installed red hat package filtered by gpg keys
-  raw: rpm -qa --qf "%{INSTALLTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
+  shell: rpm -qa --qf "%{INSTALLTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Installed:%{INSTALLTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
   register: internal_redhat_packages_gpg_last_installed
   ignore_errors: yes
   when:
@@ -56,7 +56,7 @@
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather the last built red hat package filtered by gpg keys
-  raw: rpm -qa --qf "%{BUILDTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Built:%{BUILDTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
+  shell: rpm -qa --qf "%{BUILDTIME} %{DSAHEADER:pgpsig}|%{RSAHEADER:pgpsig}|%{SIGGPG:pgpsig}|%{SIGPGP:pgpsig} |%{NAME}-%{VERSION} Built:%{BUILDTIME:date}\n" | grep 'Key ID 199e2f91fd431d51\|Key ID 5326810137017186\|Key ID 45689c882fa658e0\|Key ID 219180cddb42a60e\|Key ID 7514f77d8366b0d9\|Key ID 45689c882fa658e0' | sort -nr | head -n 1 | cut -d"|" -f2
   register: internal_redhat_packages_gpg_last_built
   ignore_errors: yes
   when:
@@ -70,7 +70,7 @@
     internal_have_rpm and redhat_packages_gpg_is_redhat
 
 - name: gather redhat-packages.certs fact
-  raw: ls /etc/pki/product/ /etc/pki/product-default/ 2> /dev/null |grep '.pem' | sort -u | tr '\n' ';'
+  shell: ls /etc/pki/product/ /etc/pki/product-default/ 2> /dev/null |grep '.pem' | sort -u | tr '\n' ';'
   register: internal_redhat_packages_certs
   ignore_errors: yes
 
@@ -80,7 +80,7 @@
   ignore_errors: yes
 
 - name: gather enabled repositories
-  raw: yum repolist enabled 2> /dev/null
+  command: yum repolist enabled 2> /dev/null
   register: internal_yum_enabled_repolist
   become: yes
   ignore_errors: yes
