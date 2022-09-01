@@ -65,6 +65,7 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "subscription_manager_id": "subman_virt_uuid",
     "system_addons": "system_purpose_json__addons",
     "system_last_checkin_date": "connection_timestamp",
+    "system_memory_bytes": "system_memory_bytes",
     "system_purpose": "system_purpose_json",
     "system_role": "system_purpose_json__role",
     "system_service_level_agreement": "system_purpose_json__service_level_agreement",

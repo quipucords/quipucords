@@ -225,6 +225,7 @@ def fingerprint_fact_map():
         "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
+        "system_memory_bytes": "system_memory_bytes",
         "system_purpose": "system_purpose_json",
         "system_role": "system_purpose_json__role",
         "system_service_level_agreement": "system_purpose_json__service_level_agreement",  # noqa:E501
@@ -243,7 +244,6 @@ def unexpected_fingerprints():
         "virtual_host_name",
         "virtual_host_uuid",
         # vcenter exclusive
-        "system_memory_bytes",
         "vm_cluster",
         "vm_datacenter",
         "vm_dns_name",
