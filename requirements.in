@@ -1,9 +1,9 @@
-ansible<4
+ansible>=6,<7
 Django<4
 django-filter
 djangorestframework
 jmespath
-paramiko<2.8
+paramiko
 pexpect
 pyvmomi
 PyYAML

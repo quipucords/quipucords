@@ -4,11 +4,13 @@
 #
 #    pip-compile --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
 #
-ansible==3.4.0 \
-    --hash=sha256:ca34e2c0c3f92cad5e528c94c133e620845feb11cc62f42e98d28271fe5bd924
+ansible==6.5.0 \
+    --hash=sha256:2cc8c9faf9351dc46d92281eb28f21be3d2faa212b20bfc05afa98946cb788de \
+    --hash=sha256:7c0cdcd1121a5f12ab2da4bdd2e14c2c153e01214bfc6a6bc156b61bd7401c5b
     # via -r requirements.in
-ansible-base==2.10.17 \
-    --hash=sha256:ef925882ca8d4c3c2ccd091cde199e0c869024ccad0d07a337dcf207bff32f34
+ansible-core==2.13.5 \
+    --hash=sha256:26dcd9218d5544cc15144f60bb5b634f2276e476c89f481b3f619c4f9def1588 \
+    --hash=sha256:3d2503ede324e0e73051b14e77f732a3cb0aed2437f94608af53929d2d1d54c8
     # via ansible
 ansible-runner==2.2.1 \
     --hash=sha256:bc3348580b0cbb8b5831039dadad6cce115e155b91c7ad0f66d751d54a0586a0 \
@@ -238,7 +240,7 @@ cryptography==37.0.4 \
     --hash=sha256:f7a6de3e98771e183645181b3627e2563dcde3ce94a9e42a3f427d2255190327 \
     --hash=sha256:f8c0a6e9e1dd3eb0414ba320f85da6b0dcbd543126e30fcc546e7372a7fbf3b9
     # via
-    #   ansible-base
+    #   ansible-core
     #   paramiko
 darker==1.5.0 \
     --hash=sha256:a23a917b9abee0725ba68da5f564ed25dd4e63eab6dc5a43d9e2f88b7c19899e \
@@ -350,7 +352,7 @@ isort==5.10.1 \
 jinja2==3.1.2 \
     --hash=sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852 \
     --hash=sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61
-    # via ansible-base
+    # via ansible-core
 jmespath==1.0.1 \
     --hash=sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980 \
     --hash=sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe
@@ -469,7 +471,7 @@ packaging==21.3 \
     --hash=sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb \
     --hash=sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522
     # via
-    #   ansible-base
+    #   ansible-core
     #   ansible-runner
     #   build
     #   pytest
@@ -743,7 +745,7 @@ pyyaml==5.4.1 \
     --hash=sha256:fe69978f3f768926cfa37b867e3843918e012cf83f680806599ddce33c2c68b0
     # via
     #   -r requirements.in
-    #   ansible-base
+    #   ansible-core
     #   ansible-runner
     #   docker-compose
     #   kubernetes
@@ -766,6 +768,10 @@ requests-oauthlib==1.3.1 \
     --hash=sha256:2577c501a2fb8d05a304c09d090d6e47c306fef15809d102b327cf8364bddab5 \
     --hash=sha256:75beac4a47881eeb94d5ea5d6ad31ef88856affe2332b9aafb52c6452ccf0d7a
     # via kubernetes
+resolvelib==0.8.1 \
+    --hash=sha256:c6ea56732e9fb6fca1b2acc2ccc68a0b6b8c566d8f3e78e0443310ede61dbd37 \
+    --hash=sha256:d9b7907f055c3b3a2cfc56c914ffd940122915826ff5fb5b1de0c99778f4de98
+    # via ansible-core
 rsa==4.9 \
     --hash=sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7 \
     --hash=sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21
