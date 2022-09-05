@@ -20,6 +20,7 @@ help:
 	@echo "  clean               to remove pyc/cache files"
 	@echo "  clean-db            to remove postgres docker container / sqlite db"
 	@echo "  clean-ui            to remove UI assets"
+	@echo "  lint-ansible        to run the ansible linter (for now only do syntax check)"
 	@echo "  lint-flake8         to run the flake8 linter"
 	@echo "  lint-pylint         to run the pylint linter"
 	@echo "  lock-requirements   to lock all python dependencies"
@@ -81,6 +82,10 @@ lint-black:
 	darker --check --diff --revision $(QPC_COMPARISON_REVISION) .
 
 lint: lint-black lint-flake8
+
+lint-ansible:
+	# syntax check playbooks (related roles are loaded and validated as well)
+	ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
 
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings

@@ -169,6 +169,7 @@ def expected_network_scan_facts():
         "subman_virt_host_type",
         "subman_virt_is_guest",
         "subman_virt_uuid",
+        "system_memory_bytes",
         "system_purpose_json",
         "system_user_count",
         "systemid",
@@ -224,6 +225,7 @@ def fingerprint_fact_map():
         "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
+        "system_memory_bytes": "system_memory_bytes",
         "system_purpose": "system_purpose_json",
         "system_role": "system_purpose_json__role",
         "system_service_level_agreement": "system_purpose_json__service_level_agreement",  # noqa:E501
@@ -242,7 +244,6 @@ def unexpected_fingerprints():
         "virtual_host_name",
         "virtual_host_uuid",
         # vcenter exclusive
-        "system_memory_bytes",
         "vm_cluster",
         "vm_datacenter",
         "vm_dns_name",
@@ -370,9 +371,7 @@ class TestNetworkScan:
             "report_version": mock.ANY,
             SOURCES_KEY: [
                 {
-                    "facts": [
-                        {fact: mock.ANY for fact in expected_network_scan_facts},
-                    ],
+                    "facts": [mock.ANY],
                     "report_version": mock.ANY,
                     "server_id": mock.ANY,
                     "source_name": self.SOURCE_NAME,
@@ -381,6 +380,9 @@ class TestNetworkScan:
             ],
         }
         assert report_details_dict == expected_details_report
+        report_details_facts = report_details_dict[SOURCES_KEY][0]["facts"][0]
+        assert isinstance(report_details_facts, dict)
+        assert set(report_details_facts.keys()) == expected_network_scan_facts
 
         some_expected_facts = dict(
             etc_release_name="Red Hat Enterprise Linux",
@@ -388,7 +390,6 @@ class TestNetworkScan:
             date_machine_id=datetime.utcnow().date().isoformat(),
             user_has_sudo=True,
         )
-        report_details_facts = report_details_dict["sources"][0]["facts"][0]
         assert report_details_facts | some_expected_facts == report_details_facts
 
     @pytest.fixture

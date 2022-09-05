@@ -1461,6 +1461,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
             source, "virt_type", fact, "virtualized_type", fingerprint
         )
 
+        self._add_fact_to_fingerprint(
+            source, "system_memory_bytes", fact, "system_memory_bytes", fingerprint
+        )
+
         self._add_entitlements_to_fingerprint(
             source, "subman_consumed", fact, fingerprint
         )

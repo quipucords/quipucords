@@ -26,7 +26,7 @@ from api.deployments_report.util import sanitize_row
 from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
 
-EXPECTED_NUMBER_OF_FINGERPRINTS = 37
+EXPECTED_NUMBER_OF_FINGERPRINTS = 38
 
 
 class DeploymentReportTest(TestCase):

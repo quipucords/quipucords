@@ -28,4 +28,5 @@
     - insights
     - system_purpose
     - redhat_release
+    - memory
     - host_done
