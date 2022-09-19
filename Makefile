@@ -10,7 +10,7 @@ PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 
 QUIPUCORDS_UI_PATH = ../quipucords-ui
-QUIPUCORDS_UI_RELEASE = 0.9.3
+QUIPUCORDS_UI_RELEASE := latest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -118,7 +118,9 @@ build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
 
 fetch-ui: clean-ui
-	curl -k -SL https://github.com/quipucords/quipucords-ui/releases/download/$(QUIPUCORDS_UI_RELEASE)/quipucords-ui-dist.tar.gz -o ui-dist.tar.gz &&\
+	@DOWNLOAD_URL=`curl -s https://api.github.com/repos/quipucords/quipucords-ui/releases/$(QUIPUCORDS_UI_RELEASE) | jq -r '.assets[] | select(.name | test("quipucords-ui-dist.tar.gz")) | .browser_download_url'`; \
+	echo "download_url=$${DOWNLOAD_URL}"; \
+	curl -k -SL "$${DOWNLOAD_URL}" -o ui-dist.tar.gz &&\
     tar -xzvf ui-dist.tar.gz &&\
 	mkdir -p quipucords/quipucords/ &&\
     mv dist/templates quipucords/quipucords/. &&\

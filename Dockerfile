@@ -14,7 +14,7 @@ ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
-RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git &&\
+RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git jq &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
 
@@ -27,7 +27,7 @@ RUN pip install -r requirements.txt
 
 # Fetch UI code
 COPY Makefile .
-ARG UI_RELEASE=0.9.3
+ARG UI_RELEASE=latest
 RUN make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
 # Create /etc/ssl/qpc
