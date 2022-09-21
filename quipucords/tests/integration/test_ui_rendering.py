@@ -49,6 +49,10 @@ class TestUIRendering:
         response = qpc_client.get("/client")
         assert response.ok, response.content
         parsed_html = _parse_html(response.text)
-        js_path = parsed_html.script["src"]
-        js_response = qpc_client.get(js_path)
-        assert js_response.ok, js_response.status_code
+        js_scripts = parsed_html.find_all("script")
+        assert len(js_scripts) > 1
+        # On quipucords-ui>=0.10, first script is a injected script without src path
+        assert "src" not in js_scripts[0].attrs.keys()
+        script_souces = [script["src"] for script in js_scripts[1:]]
+        responses = [qpc_client.get(source) for source in script_souces]
+        assert all(r.ok for r in responses), [r.status_code for r in responses]
