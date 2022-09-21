@@ -118,7 +118,11 @@ build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
 	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
 
 fetch-ui: clean-ui
-	@DOWNLOAD_URL=`curl -s https://api.github.com/repos/quipucords/quipucords-ui/releases/$(QUIPUCORDS_UI_RELEASE) | jq -r '.assets[] | select(.name | test("quipucords-ui-dist.tar.gz")) | .browser_download_url'`; \
+	@if [[ $(QUIPUCORDS_UI_RELEASE) = "latest" ]]; then \
+		DOWNLOAD_URL=`curl -s https://api.github.com/repos/quipucords/quipucords-ui/releases/$(QUIPUCORDS_UI_RELEASE) | jq -r '.assets[] | select(.name | test("quipucords-ui-dist.tar.gz")) | .browser_download_url'`; \
+	else \
+		DOWNLOAD_URL="https://github.com/quipucords/quipucords-ui/releases/download/$(QUIPUCORDS_UI_RELEASE)/quipucords-ui-dist.tar.gz"; \
+	fi; \
 	echo "download_url=$${DOWNLOAD_URL}"; \
 	curl -k -SL "$${DOWNLOAD_URL}" -o ui-dist.tar.gz &&\
     tar -xzvf ui-dist.tar.gz &&\
