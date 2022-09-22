@@ -117,16 +117,19 @@ class OpenShiftApi:
             ocp_project.errors["deployments"] = error
 
     def _init_ocp_deployment(self, raw_deployment):
-        container_images = [
-            c.image for c in raw_deployment.spec.template.spec.containers
-        ]
+        def _getter(obj, name, default_value=None):
+            return getattr(obj, name, default_value) or default_value
+
+        metadata = _getter(raw_deployment, "metadata")
+        template_spec = raw_deployment.spec.template.spec
+        container_images = [c.image for c in _getter(template_spec, "containers", [])]
         init_container_images = [
-            c.image for c in (raw_deployment.spec.template.spec.init_containers or [])
+            c.image for c in _getter(template_spec, "init_containers", [])
         ]
 
         return OCPDeployment(
-            name=raw_deployment.metadata.name,
-            labels=raw_deployment.metadata.labels,
+            name=_getter(metadata, "name"),
+            labels=_getter(metadata, "labels", {}),
             container_images=container_images,
             init_container_images=init_container_images,
         )
