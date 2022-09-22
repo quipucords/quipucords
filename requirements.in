@@ -12,3 +12,4 @@ whitenoise
 psycopg2-binary<2.9
 ansible-runner
 gunicorn
+openshift>=0.13

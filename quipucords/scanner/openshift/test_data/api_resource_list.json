@@ -1,0 +1,15 @@
+{
+    "kind": "APIResourceList",
+    "groupVersion": "v1",
+    "resources": [
+        {
+            "name": "bindings",
+            "singularName": "",
+            "namespaced": true,
+            "kind": "Binding",
+            "verbs": [
+                "create"
+            ]
+        }
+    ]
+}
