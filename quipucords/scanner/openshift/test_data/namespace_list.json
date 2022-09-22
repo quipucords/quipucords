@@ -1,0 +1,78 @@
+{
+    "kind": "NamespaceList",
+    "metadata": {
+        "resourceVersion": "1384353477"
+    },
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Namespace",
+            "metadata": {
+                "annotations": {
+                    "completion-time": "2022-09-20 21:33:40.748125418 +0000 UTC m=+815142.219686150",
+                    "env-status": "ready",
+                    "openshift.io/description": "",
+                    "openshift.io/display-name": "",
+                    "openshift.io/requester": "system:serviceaccount:ephemeral-namespace-operator-system:ephemeral-namespace-operator-controller-manager",
+                    "openshift.io/sa.scc.mcs": "s0:c43,c22",
+                    "openshift.io/sa.scc.supplemental-groups": "1001850000/10000",
+                    "openshift.io/sa.scc.uid-range": "1001850000/10000",
+                    "reserved": "true",
+                    "status": "ready"
+                },
+                "creationTimestamp": "2022-09-20T21:29:56Z",
+                "labels": {
+                    "name": "awesome_project",
+                    "label-for": "awesome_project"
+                },
+                "name": "awesome_project",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "cloud.redhat.com/v1alpha1",
+                        "controller": true,
+                        "kind": "NamespaceReservation",
+                        "name": "bonfire-reservation-023891bc",
+                        "uid": "1b0a99c1-196a-415f-abe1-725ff0d064bc"
+                    }
+                ],
+                "resourceVersion": "1384267435",
+                "uid": "44f1cecb-12ca-444a-a2ba-672b0566f10d"
+            },
+            "spec": {
+                "finalizers": [
+                    "kubernetes"
+                ]
+            },
+            "status": {
+                "phase": "Active"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Namespace",
+            "metadata": {
+                "annotations": {
+                    "openshift.io/description": "forbidden project description",
+                    "openshift.io/display-name": ""
+                },
+                "creationTimestamp": "2021-02-17T21:14:50Z",
+                "labels": {
+                    "service": "insights",
+                    "label-for": "forbidden_project"
+                },
+                "name": "forbidden_project",
+                "resourceVersion": "1334659399",
+                "uid": "e38f8b96-acfb-46b3-9e0e-914c75daa707"
+            },
+            "spec": {
+                "finalizers": [
+                    "kubernetes"
+                ]
+            },
+            "status": {
+                "phase": "Active"
+            }
+        }
+    ]
+}

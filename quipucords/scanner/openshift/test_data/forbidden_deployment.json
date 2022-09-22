@@ -1,0 +1,13 @@
+{
+    "kind": "Status",
+    "apiVersion": "v1",
+    "metadata": {},
+    "status": "Failure",
+    "message": "deployments.apps is forbidden: User \"ocp-user\" cannot list resource \"deployments\" in API group \"apps\" in the namespace \"forbidden_project\"",
+    "reason": "Forbidden",
+    "details": {
+        "group": "apps",
+        "kind": "deployments"
+    },
+    "code": 403
+}
