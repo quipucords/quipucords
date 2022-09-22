@@ -27,7 +27,7 @@ RUN pip install -r requirements.txt
 
 # Fetch UI code
 COPY Makefile .
-ARG UI_RELEASE="0.11.0"
+ARG UI_RELEASE="0.11.1"
 RUN make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
 # Create /etc/ssl/qpc
