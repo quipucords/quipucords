@@ -29,10 +29,6 @@ class CredentialTest(TestCase):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
 
-    def tearDown(self):
-        """Create test case tear down."""
-        pass
-
     # pylint: disable=invalid-name
     def create_credential(
         self,
@@ -142,11 +138,6 @@ class CredentialTest(TestCase):
         Ensure we cannot create a new host credential object without a password
         or an ssh_keyfile.
         """
-        expected_error = {
-            "non_field_errors": [
-                "A host credential must have " "either a password or an " "ssh_keyfile."
-            ]
-        }
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -155,7 +146,7 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["non_field_errors"])
 
     def test_hc_create_err_ssh_bad(self):
         """Test API with bad sshkey.
@@ -163,9 +154,6 @@ class CredentialTest(TestCase):
         Ensure we cannot create a new host credential object an ssh_keyfile
         that cannot be found on the server.
         """
-        expected_error = {
-            "ssh_keyfile": ["ssh_keyfile, blah, is not a " "valid file on the system."]
-        }
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -175,7 +163,7 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["ssh_keyfile"])
 
     def test_hc_create_long_name(self):
         """Test API with long name.
@@ -428,7 +416,6 @@ class CredentialTest(TestCase):
 
     def test_vc_create_extra_keyfile(self):
         """Test VCenter without password."""
-        expected_error = {"non_field_errors": [messages.VC_FIELDS_NOT_ALLOWED]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -439,11 +426,10 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["ssh_keyfile"])
 
     def test_vc_create_extra_become_pass(self):
         """Test VCenter with extra become password."""
-        expected_error = {"non_field_errors": [messages.VC_FIELDS_NOT_ALLOWED]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -454,7 +440,7 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["become_password"])
 
     def test_vcentercred_update(self):
         """Ensure we can create and update a vcenter credential."""
@@ -539,7 +525,6 @@ class CredentialTest(TestCase):
 
     def test_vc_create_extra_keyfile_pass(self):
         """Test VCenter with extra keyfile passphase."""
-        expected_error = {"non_field_errors": [messages.VC_FIELDS_NOT_ALLOWED]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -550,7 +535,7 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["ssh_passphrase"])
 
     def test_sat_cred_create(self):
         """Ensure we can create a new satellite credential."""
@@ -610,12 +595,10 @@ class CredentialTest(TestCase):
             url, json.dumps(update_data), content_type="application/json", format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expected_error = {"non_field_errors": [messages.SAT_FIELDS_NOT_ALLOWED]}
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["ssh_keyfile"])
 
     def test_sat_create_extra_keyfile(self):
         """Test Satellite without password."""
-        expected_error = {"non_field_errors": [messages.SAT_FIELDS_NOT_ALLOWED]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -626,11 +609,10 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["ssh_keyfile"])
 
     def test_sat_create_extra_becomepass(self):
         """Test Satellite with extra become password."""
-        expected_error = {"non_field_errors": [messages.SAT_FIELDS_NOT_ALLOWED]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -641,11 +623,10 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["become_password"])
 
     def test_sat_create_extra_keyfile_pass(self):
         """Test Satellite with extra keyfile passphase."""
-        expected_error = {"non_field_errors": [messages.SAT_FIELDS_NOT_ALLOWED]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -656,4 +637,4 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["ssh_passphrase"])
