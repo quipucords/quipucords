@@ -47,6 +47,8 @@ VC_FIELDS_NOT_ALLOWED = "Field not allowed for Vcenter credential."
 SAT_PWD_AND_USERNAME = "Satellite requires both username and password."
 SAT_FIELD_NOT_ALLOWED = "Field not allowed for Satellite credential."
 UNKNOWN_CRED_TYPE = "Credential type invalid."
+OPENSHIFT_CRED_REQUIRED_FIELD = "This field is required for OpenShift credential."
+OPENSHIFT_FIELD_NOT_ALLOWED = "Field not allowed for OpenShift credential."
 
 # source messages
 SOURCE_NAME_ALREADY_EXISTS = "Source with name=%s already exists"
