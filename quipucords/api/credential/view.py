@@ -36,6 +36,7 @@ IDENTIFIER_KEY = "id"
 NAME_KEY = "name"
 SOURCES_KEY = "sources"
 PASSWORD_KEY = "password"
+AUTH_TOKEN_KEY = "auth_token"
 BECOME_PASSWORD_KEY = "become_password"
 SSH_PASSPHRASE_KEY = "ssh_passphrase"
 PASSWORD_MASK = "********"
@@ -53,6 +54,8 @@ def mask_credential(cred):
         cred[BECOME_PASSWORD_KEY] = PASSWORD_MASK
     if cred.get(SSH_PASSPHRASE_KEY):
         cred[SSH_PASSPHRASE_KEY] = PASSWORD_MASK
+    if cred.get(AUTH_TOKEN_KEY):
+        cred[AUTH_TOKEN_KEY] = PASSWORD_MASK
     return cred
 
 

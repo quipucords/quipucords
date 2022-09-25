@@ -125,12 +125,15 @@ class CredentialTest(TestCase):
         Ensure we cannot create a new host credential object without a
         username.
         """
-        expected_error = {"username": ["This field is required."]}
         url = reverse("cred-list")
-        data = {"name": "cred1", "password": "pass1"}
+        data = {
+            "name": "cred1",
+            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "password": "pass1",
+        }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        self.assertTrue(response.data["username"])
 
     def test_hc_create_err_p_or_ssh(self):
         """Test API without password or keyfile.
