@@ -19,6 +19,7 @@ from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
 from api.models import Credential
+from utils import get_from_object_or_dict
 
 
 def expand_filepath(filepath):
@@ -77,13 +78,16 @@ class CredentialSerializer(NotEmptySerializer):
 
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
-        cred_type = self.instance.cred_type if self.instance else attrs["cred_type"]
+        cred_type = get_from_object_or_dict(self.instance, attrs, "cred_type")
+
         if cred_type == Credential.VCENTER_CRED_TYPE:
             validated_data = self.validate_vcenter_cred(attrs)
         elif cred_type == Credential.SATELLITE_CRED_TYPE:
             validated_data = self.validate_satellite_cred(attrs)
         elif cred_type == Credential.NETWORK_CRED_TYPE:
             validated_data = self.validate_host_cred(attrs)
+        elif cred_type == Credential.OPENSHIFT_CRED_TYPE:
+            validated_data = self.validate_openshift_cred(attrs)
         else:
             raise ValidationError({"cred_type": messages.UNKNOWN_CRED_TYPE})
         return validated_data
@@ -198,9 +202,24 @@ class CredentialSerializer(NotEmptySerializer):
         )
         return attrs
 
+    def validate_openshift_cred(self, attrs):
+        """Validate the attributes for openshift credentials."""
+        # Required field for OpenShift credential
+        auth_token = get_from_object_or_dict(self.instance, attrs, "auth_token")
+
+        if not auth_token:
+            error = {"auth_token": [_(messages.OPENSHIFT_CRED_REQUIRED_FIELD)]}
+            raise ValidationError(error)
+
+        self._check_for_disallowed_fields(
+            Credential.OPENSHIFT_CRED_TYPE, attrs, messages.OPENSHIFT_FIELD_NOT_ALLOWED
+        )
+        return attrs
+
     def _check_for_disallowed_fields(self, credential_type, attrs, message):
         """Check if forbidden fields are being passed to credentials."""
         required_fields_map = {
+            Credential.OPENSHIFT_CRED_TYPE: {"id", "name", "cred_type", "auth_token"},
             Credential.VCENTER_CRED_TYPE: {
                 "cred_type",
                 "id",

@@ -641,3 +641,39 @@ class CredentialTest(TestCase):
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(response.data["ssh_passphrase"])
+
+    def test_openshift_cred_create(self):
+        """Ensure we can create a new openshift credential."""
+        data = {
+            "name": "openshift_cred_1",
+            "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+            "auth_token": "test_token",
+        }
+        self.create_expect_201(data)
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "openshift_cred_1"
+
+    def test_openshift_missing_auth_token(self):
+        """Ensure auth token is required when creating openshift credential."""
+        url = reverse("cred-list")
+        data = {
+            "name": "openshift_cred_1",
+            "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+        }
+        response = self.client.post(url, json.dumps(data), "application/json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["auth_token"]
+
+    def test_openshift_extra_unallowed_fields(self):
+        """Ensure unallowed fields are not accepted when creating openshift cred."""
+        url = reverse("cred-list")
+        data = {
+            "name": "openshift_cred_1",
+            "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+            "auth_token": "test_token",
+            "become_password": "test_become_password",
+            "username": "test_username",
+        }
+        response = self.client.post(url, json.dumps(data), "application/json")
+        assert response.status_code, status.HTTP_400_BAD_REQUEST
+        assert response.data["become_password"] and response.data["username"]
