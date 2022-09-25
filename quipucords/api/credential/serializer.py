@@ -38,8 +38,14 @@ class CredentialSerializer(NotEmptySerializer):
     cred_type = ValidStringChoiceField(
         required=False, choices=Credential.CRED_TYPE_CHOICES
     )
-    username = CharField(required=True, max_length=64)
+    username = CharField(required=False, max_length=64)
     password = CharField(
+        required=False,
+        max_length=1024,
+        allow_null=True,
+        style={"input_type": "password"},
+    )
+    auth_token = CharField(
         required=False,
         max_length=1024,
         allow_null=True,
@@ -127,6 +133,12 @@ class CredentialSerializer(NotEmptySerializer):
         ssh_keyfile = "ssh_keyfile" in attrs and attrs["ssh_keyfile"]
         password = "password" in attrs and attrs["password"]
         ssh_passphrase = "ssh_passphrase" in attrs and attrs["ssh_passphrase"]
+        username = "username" in attrs and attrs["username"]
+
+        if not username and not self.partial:
+            error = {"username": _(messages.HOST_USERNAME_CREDENTIAL)}
+            raise ValidationError(error)
+
         if not (password or ssh_keyfile) and not self.partial:
             error = {"non_field_errors": [_(messages.HC_PWD_OR_KEYFILE)]}
             raise ValidationError(error)
