@@ -19,6 +19,7 @@ from kubernetes.client import (
     Configuration,
     CoreV1Api,
 )
+from urllib3.exceptions import MaxRetryError
 
 from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
 
@@ -35,6 +36,12 @@ def catch_k8s_exception(fn):  # pylint: disable=invalid-name
         except ApiException as api_exception:
             ocp_error = OCPError.from_api_exception(api_exception)
             raise ocp_error from api_exception
+        except MaxRetryError as error:
+            raise OCPError(
+                status=-1,
+                reason=error.reason.__class__.__name__,
+                message=str(error.reason),
+            ) from error
 
     return _decorator
 
@@ -55,14 +62,21 @@ class OpenShiftApi:
         )
         return cls(configuration=kube_config_object)
 
-    def can_connect(self):
+    def can_connect(self, raise_exception=False):
         """Check if it's possible to connect to OCP host."""
         try:
             # call a lightweight endpoint just to check if we can
             # stablish a connection
-            self._core_api.get_api_resources()
-        except ApiException as err:
-            logger.exception("Unable to connect to OCP/K8S api (status=%s)", err.status)
+            catch_k8s_exception(self._core_api.get_api_resources)()
+        except OCPError as err:
+            if raise_exception:
+                raise err
+            logger.error("Unable to connect to OCP/K8S api (status=%s)", err.status)
+            return False
+        except Exception:  # pylint: disable=broad-except
+            if raise_exception:
+                raise
+            logger.exception("Got an unexpected exception. Check system logs.")
             return False
         return True
 
