@@ -28,6 +28,13 @@ from scanner import network, satellite, vcenter
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
+MODULE_PER_SOURCE_TYPE = {
+    Source.NETWORK_SOURCE_TYPE: network,
+    Source.SATELLITE_SOURCE_TYPE: satellite,
+    Source.VCENTER_SOURCE_TYPE: vcenter,
+}
+
+
 class ScanJobRunner(Process):
     """ScanProcess perform a group of scan tasks."""
 
@@ -238,29 +245,26 @@ class ScanJobRunner(Process):
             task_status = ScanTask.FAILED
         return task_status
 
+    @classmethod
+    def _get_source_module(cls, scan_task: ScanTask):
+        """Get the appropriate module for scan task based on its source type."""
+        source_type = scan_task.source.source_type
+        try:
+            return MODULE_PER_SOURCE_TYPE[source_type]
+        except KeyError as error:
+            raise NotImplementedError(
+                f"Unsupported source type: {source_type}"
+            ) from error
+
     def _create_connect_task_runner(self, scan_task):
         """Create connection TaskRunner using source_type."""
-        source_type = scan_task.source.source_type
-        runner = None
-        if source_type == Source.NETWORK_SOURCE_TYPE:
-            runner = network.ConnectTaskRunner(self.scan_job, scan_task)
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
-            runner = vcenter.ConnectTaskRunner(self.scan_job, scan_task)
-        elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            runner = satellite.ConnectTaskRunner(self.scan_job, scan_task)
-        return runner
+        module = self._get_source_module(scan_task)
+        return module.ConnectTaskRunner(self.scan_job, scan_task)
 
     def _create_inspect_task_runner(self, scan_task):
         """Create inspection TaskRunner using source_type."""
-        source_type = scan_task.source.source_type
-        runner = None
-        if source_type == Source.NETWORK_SOURCE_TYPE:
-            runner = network.InspectTaskRunner(self.scan_job, scan_task)
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
-            runner = vcenter.InspectTaskRunner(self.scan_job, scan_task)
-        elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            runner = satellite.InspectTaskRunner(self.scan_job, scan_task)
-        return runner
+        module = self._get_source_module(scan_task)
+        return module.InspectTaskRunner(self.scan_job, scan_task)
 
     def _create_details_report(self):
         """Send collected host scan facts to fact endpoint.
