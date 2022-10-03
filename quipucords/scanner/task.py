@@ -123,6 +123,10 @@ class ScanTaskRunner(metaclass=ABCMeta):
         the ScanTask.STATUS_CHOICES status
         """
 
+    def log(self, message, *args, **kwargs):
+        """Shortcut for scan_task.log_message method."""
+        self.scan_task.log_message(message, *args, **kwargs)
+
     def __str__(self):
         """Convert to string."""
         data = {

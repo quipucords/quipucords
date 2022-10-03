@@ -56,6 +56,17 @@ def scan_manager():
     _kill_scan_manager(scan_manager_instance)
 
 
+@pytest.fixture
+def disabled_scan_manager(mocker):
+    """Completely disabled scan manager. Use when task manager is not required."""
+    _manager = mocker.MagicMock()
+    mocker.patch("scanner.manager.Manager", _manager)
+    mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
+    mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
+    mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
+    yield _manager
+
+
 @pytest.fixture(autouse=True)
 def _patch_scan_manager(scan_manager):
     with (
