@@ -22,7 +22,7 @@ from api.details_report.util import (
 )
 from api.models import ScanJob, ScanTask, Source
 from fingerprinter.task import FingerprintTaskRunner
-from scanner import network, satellite, vcenter
+from scanner import network, openshift, satellite, vcenter
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 MODULE_PER_SOURCE_TYPE = {
     Source.NETWORK_SOURCE_TYPE: network,
+    Source.OPENSHIFT_SOURCE_TYPE: openshift,
     Source.SATELLITE_SOURCE_TYPE: satellite,
     Source.VCENTER_SOURCE_TYPE: vcenter,
 }
