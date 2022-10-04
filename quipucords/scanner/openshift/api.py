@@ -80,11 +80,11 @@ class OpenShiftApi:
             return False
         return True
 
-    def retrieve_projects(self) -> List[OCPProject]:
+    def retrieve_projects(self, retrieve_all=True) -> List[OCPProject]:
         """Retrieve projects/namespaces under OCP host."""
         project_list = []
         for project in self._list_projects().items:
-            ocp_project = self._init_ocp_project(project)
+            ocp_project = self._init_ocp_project(project, retrieve_all=retrieve_all)
             project_list.append(ocp_project)
         return project_list
 
@@ -115,18 +115,20 @@ class OpenShiftApi:
     def _list_deployments(self, namespace, **kwargs):
         return self._apps_api.list_namespaced_deployment(namespace, **kwargs)
 
-    def _init_ocp_project(self, raw_project) -> OCPProject:
+    def _init_ocp_project(self, raw_project, retrieve_all=True) -> OCPProject:
         ocp_project = OCPProject(
             name=raw_project.metadata.name,
             labels=raw_project.metadata.labels,
         )
-        self._add_deployments_to_project(ocp_project)
+        if retrieve_all:
+            self.add_deployments_to_project(ocp_project)
         return ocp_project
 
-    def _add_deployments_to_project(self, ocp_project):
+    def add_deployments_to_project(self, ocp_project):
+        """Retrieve deployments and add to OCPProject."""
         try:
             deployments = self.retrieve_deployments(ocp_project.name)
-            ocp_project.deployments.extend(deployments)
+            ocp_project.deployments = deployments
         except OCPError as error:
             ocp_project.errors["deployments"] = error
 
