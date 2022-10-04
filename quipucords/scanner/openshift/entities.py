@@ -9,12 +9,20 @@
 #
 """Entities representing data collected from OpenShift."""
 import json
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Dict, List
 
 
+class ToDictMixin:
+    """Mixin that adds "to_dict" method to dataclasses."""
+
+    def to_dict(self):
+        """Convert object to dict."""
+        return asdict(self)
+
+
 @dataclass
-class OCPProject:
+class OCPProject(ToDictMixin):
     """Entity representing OpenShift Projects/Namespaces."""
 
     name: str
@@ -24,7 +32,7 @@ class OCPProject:
 
 
 @dataclass
-class OCPDeployment:
+class OCPDeployment(ToDictMixin):
     """Entity representing OpenShift Deployments."""
 
     name: str
@@ -34,7 +42,7 @@ class OCPDeployment:
 
 
 @dataclass
-class OCPError(Exception):
+class OCPError(Exception, ToDictMixin):
     """Entity/Error class for OpenShift errors."""
 
     status: int = None
