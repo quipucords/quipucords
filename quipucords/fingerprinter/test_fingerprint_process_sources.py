@@ -93,19 +93,23 @@ def task_runner(mocker, scan_task):
 def expected_messages():
     """Messages expected when mocked FingerprintTaskRunner is executed."""
     return [
-        "3 sources to process",
-        "PROCESSING Source 1 of 3 - (name=network, type=network, server=<ID>)",
+        "4 sources to process",
+        "PROCESSING Source 1 of 4 - (name=network, type=network, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 network fingerprints",
         "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=0, satellite=0, total=3)",
-        "PROCESSING Source 2 of 3 - (name=vcenter, type=vcenter, server=<ID>)",
+        "- Fingerprints (network=3, vcenter=0, satellite=0, openshift=0, total=3)",
+        "PROCESSING Source 2 of 4 - (name=vcenter, type=vcenter, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 vcenter fingerprints",
         "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=3, satellite=0, total=6)",
-        "PROCESSING Source 3 of 3 - (name=satellite, type=satellite, server=<ID>)",
+        "- Fingerprints (network=3, vcenter=3, satellite=0, openshift=0, total=6)",
+        "PROCESSING Source 3 of 4 - (name=satellite, type=satellite, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 satellite fingerprints",
         "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=3, satellite=3, total=9)",
+        "- Fingerprints (network=3, vcenter=3, satellite=3, openshift=0, total=9)",
+        "PROCESSING Source 4 of 4 - (name=openshift, type=openshift, server=<ID>)",
+        "SOURCE FINGERPRINTS - 3 openshift fingerprints",
+        "TOTAL FINGERPRINT COUNT "
+        "- Fingerprints (network=3, vcenter=3, satellite=3, openshift=3, total=12)",
         "NETWORK DEDUPLICATION by keys ['subscription_manager_id', 'bios_uuid']",
         "NETWORK DEDUPLICATION RESULT - (before=3, after=2)",
         "SATELLITE DEDUPLICATION by keys ['subscription_manager_id']",
@@ -113,14 +117,14 @@ def expected_messages():
         "VCENTER DEDUPLICATION by keys ['vm_uuid']",
         "VCENTER DEDUPLICATION RESULT - (before=3, after=2)",
         "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=2, vcenter=2, satellite=2, total=6)",
+        "- Fingerprints (network=2, vcenter=2, satellite=2, openshift=3, total=9)",
         "NETWORK and SATELLITE DEDUPLICATION by keys pairs [(network_key, "
         "satellite_key)]=[('subscription_manager_id', 'subscription_manager_id'), "
         "('mac_addresses', 'mac_addresses')]",
         "NETWORK and SATELLITE DEDUPLICATION START COUNT "
-        "- Fingerprints (network=2, vcenter=2, satellite=2, total=6)",
+        "- Fingerprints (network=2, vcenter=2, satellite=2, openshift=3, total=9)",
         "NETWORK and SATELLITE DEDUPLICATION END COUNT "
-        "- Fingerprints (vcenter=2, combined_fingerprints=2, total=4)",
+        "- Fingerprints (vcenter=2, openshift=3, combined_fingerprints=2, total=7)",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION by keys pairs "
         "[(network_satellite_key, vcenter_key)]=[('bios_uuid', 'vm_uuid'), "
         "('mac_addresses', 'mac_addresses')]",
@@ -128,9 +132,10 @@ def expected_messages():
         "(we trust vcenter more than network/satellite): "
         "{'cpu_count', 'infrastructure_type'}",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION START COUNT "
-        "- Fingerprints (vcenter=2, combined_fingerprints=2, total=4)",
+        "- Fingerprints (vcenter=2, openshift=3, combined_fingerprints=2, total=7)",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT "
-        "- Fingerprints (total=2)",
+        "- Fingerprints (openshift=3, combined_fingerprints=2, total=5)",
+        "COMBINE with OPENSHIFT fingerprints - Fingerprints (total=5)",
     ]
 
 
@@ -141,5 +146,7 @@ def test_process_sources(
     caplog.set_level(logging.INFO)
 
     fingerprints = task_runner._process_sources(details_report)  # noqa: W0212
-    assert fingerprints == [1, 2]
+    ocp_fingerprints = [1, 2, 2]
+    # ocp fingerprints wont be part of deduplication/merging process
+    assert fingerprints == [1, 2] + ocp_fingerprints
     assert [rec.message for rec in caplog.records] == expected_messages

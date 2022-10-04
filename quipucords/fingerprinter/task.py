@@ -112,6 +112,7 @@ COMBINED_KEY = "combined_fingerprints"
 NETWORK_KEY = Source.NETWORK_SOURCE_TYPE
 VCENTER_KEY = Source.VCENTER_SOURCE_TYPE
 SATELLITE_KEY = Source.SATELLITE_SOURCE_TYPE
+OPENSHIFT_KEY = Source.OPENSHIFT_SOURCE_TYPE
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -516,6 +517,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             NETWORK_KEY: [],
             VCENTER_KEY: [],
             SATELLITE_KEY: [],
+            OPENSHIFT_KEY: [],
         }
 
         total_source_count = len(details_report.get_sources())
@@ -640,6 +642,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._log_message_with_count(
             "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT",
             fingerprint_map,
+        )
+
+        # openshift fingerprints - These won't be deduplicated or merged
+        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(OPENSHIFT_KEY))
+        self._log_message_with_count(
+            "COMBINE with OPENSHIFT fingerprints",
+            fingerprint_map,
             total_only=True,
         )
 
@@ -685,6 +694,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     system_creation_date_metadata, date_key, date_value, date_pattern
                 )
 
+        if not system_creation_date_metadata:
+            # no fact for system_creation_date detected (openshift scan?). skipping...
+            return
+
         fingerprint[sys_creation_key] = system_creation_date
         if system_creation_date is not None:
             fingerprint[META_DATA_KEY][sys_creation_key] = system_creation_date_metadata
@@ -702,6 +715,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         fingerprints = []
         process_fact_fn = {
             NETWORK_KEY: self._process_network_fact,
+            OPENSHIFT_KEY: self._process_openshift_fact,
             SATELLITE_KEY: self._process_satellite_fact,
             VCENTER_KEY: self._process_vcenter_fact,
         }
@@ -1694,6 +1708,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         self._add_entitlements_to_fingerprint(source, "entitlements", fact, fingerprint)
         self._add_products_to_fingerprint(source, fact, fingerprint)
+
+        return fingerprint
+
+    def _process_openshift_fact(self, source, fact):
+        """Process a fact and convert to a fingerprint.
+
+        :param source: The source that provided this fact.
+        :param facts: fact to process
+        :returns: fingerprint produced from fact
+        """
+        fingerprint = {
+            META_DATA_KEY: {},
+            ENTITLEMENTS_KEY: [],
+            PRODUCTS_KEY: [],
+        }
+        self._add_fact_to_fingerprint(source, "name", fact, "name", fingerprint)
 
         return fingerprint
 
