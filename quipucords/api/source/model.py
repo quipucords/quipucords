@@ -12,9 +12,9 @@
 
 These models are used in the REST definitions
 """
-
 import json
 import ssl
+from functools import cached_property
 
 from django.db import models
 
@@ -123,3 +123,8 @@ class Source(models.Model):
         if self.exclude_hosts:
             return json.loads(self.exclude_hosts)
         return []
+
+    @cached_property
+    def single_credential(self) -> Credential:
+        """Retrieve related credential - for sources that only map to one credential."""
+        return self.credentials.get()

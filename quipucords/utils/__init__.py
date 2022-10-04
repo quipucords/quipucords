@@ -16,3 +16,8 @@ All utils should be imported here so the internal api for importing is just
 
 from .deepget import deepget
 from .default_getter import default_getter
+
+
+def get_choice_ids(choices):
+    """Retrieve choice ids."""
+    return [choice[0] for choice in choices]
