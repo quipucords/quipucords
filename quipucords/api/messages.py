@@ -86,20 +86,12 @@ NET_CIDR_RANGE = (
 NET_INVALID_PORT = "Source of type network must have ssh port in" " range [0, 65535]"
 NET_HC_DO_NOT_EXIST = "Host credential with id=%d could not be" " found in database."
 NET_SSL_OPTIONS_NOT_ALLOWED = "Invalid SSL options for network source: %s"
-
-VC_ONE_HOST = "Source of type vcenter must have a single hosts."
-VC_ONE_CRED = "Source of type vcenter must have a single credential."
-VC_EXCLUDE_HOSTS_INCLUDED = (
-    "The exclude_hosts option is not valid for " "source of type vcenter."
-)
 VC_INVALID_OPTIONS = "Invalid options for vcenter source: %s"
-
-SAT_ONE_HOST = "Source of type satellite must have a single hosts."
-SAT_ONE_CRED = "Source of type satellite must have a single credential."
-SAT_EXCLUDE_HOSTS_INCLUDED = (
-    "The exclude_hosts option is not valid for " "source of type satellite."
-)
 SAT_INVALID_OPTIONS = "Invalid options for satellite source: %s"
+SOURCE_ONE_HOST = "This source must have a single host."
+SOURCE_EXCLUDE_HOSTS_INCLUDED = "The exclude_hosts option is not valid for this source."
+SOURCE_ONE_CRED = "This source must have a single credential."
+UNKNOWN_SOURCE_TYPE = "Source type invalid."
 
 # Scan messages
 SCAN_NAME_ALREADY_EXISTS = "Scan with name=%s already exists"

@@ -106,41 +106,78 @@ class SourceSerializer(NotEmptySerializer):
         valid_sat_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
         if source_type == Source.SATELLITE_SOURCE_TYPE:
-            invalid_options = [opt for opt in options if opt not in valid_sat_options]
-            if invalid_options:
-                error = {
-                    "options": [
-                        _(messages.SAT_INVALID_OPTIONS % ", ".join(invalid_options))
-                    ]
-                }
-                raise ValidationError(error)
+            cls._check_for_disallowed_fields(
+                options,
+                messages.SAT_INVALID_OPTIONS,
+                valid_sat_options,
+            )
             if options.get("ssl_cert_verify") is None:
                 options["ssl_cert_verify"] = True
 
         elif source_type == Source.VCENTER_SOURCE_TYPE:
-            invalid_options = [opt for opt in options if opt not in valid_vc_options]
-            if invalid_options:
-                error = {
-                    "options": [
-                        _(messages.VC_INVALID_OPTIONS % ", ".join(invalid_options))
-                    ]
-                }
-                raise ValidationError(error)
+            cls._check_for_disallowed_fields(
+                options,
+                messages.VC_INVALID_OPTIONS,
+                valid_vc_options,
+            )
             if options.get("ssl_cert_verify") is None:
                 options["ssl_cert_verify"] = True
 
         elif source_type == Source.NETWORK_SOURCE_TYPE:
-            invalid_options = [opt for opt in options if opt not in valid_net_options]
-            if invalid_options:
-                error = {
-                    "options": [
-                        _(
-                            messages.NET_SSL_OPTIONS_NOT_ALLOWED
-                            % ", ".join(invalid_options)
-                        )
-                    ]
-                }
-                raise ValidationError(error)
+            cls._check_for_disallowed_fields(
+                options,
+                messages.NET_SSL_OPTIONS_NOT_ALLOWED,
+                valid_net_options,
+            )
+
+    @classmethod
+    def _check_for_disallowed_fields(cls, options, message, valid_fields):
+        """Verify if disallowed fields are present."""
+        invalid_options = [opt for opt in options if opt not in valid_fields]
+        if invalid_options:
+            error = {"options": [_(message % ", ".join(invalid_options))]}
+            raise ValidationError(error)
+
+    def _validate_number_hosts_and_credentials(
+        self, hosts_list, source_type, credentials, exclude_hosts_list
+    ):
+        """Verify if each source received appropriate number of hosts and creds."""
+        if hosts_list and len(hosts_list) != 1:
+            error = {"hosts": [_(messages.SOURCE_ONE_HOST)]}
+            raise ValidationError(error)
+        if hosts_list and "[" in hosts_list[0]:
+            error = {"hosts": [_(messages.SOURCE_ONE_HOST)]}
+            raise ValidationError(error)
+        if exclude_hosts_list is not None:
+            error = {"exclude_hosts": [_(messages.SOURCE_EXCLUDE_HOSTS_INCLUDED)]}
+            raise ValidationError(error)
+        if credentials and len(credentials) > 1:
+            error = {"credentials": [_(messages.SOURCE_ONE_CRED)]}
+            raise ValidationError(error)
+        if credentials and len(credentials) == 1:
+            SourceSerializer.check_credential_type(source_type, credentials[0])
+
+    def _make_ssl_cert_verify_true(self, source):
+        """Make ssl_cert_verify flag true."""
+        options = SourceOptions()
+        options.ssl_cert_verify = True
+        options.save()
+        source.options = options
+
+    def validate(self, attrs):
+        """Validate if fields received are appropriate for each credential."""
+        source_type = (
+            self.instance.source_type if self.instance else attrs.get("source_type")
+        )
+        if source_type == Source.NETWORK_SOURCE_TYPE:
+            validated_data = self.validate_network_source(attrs, source_type)
+        elif source_type == Source.VCENTER_SOURCE_TYPE:
+            validated_data = self.validate_vcenter_source(attrs, source_type)
+        elif source_type == Source.SATELLITE_SOURCE_TYPE:
+            validated_data = self.validate_satellite_source(attrs, source_type)
+        else:
+            raise ValidationError({"source_type": messages.UNKNOWN_SOURCE_TYPE})
+        return validated_data
 
     # pylint: disable=too-many-branches,too-many-statements
     @transaction.atomic
@@ -158,53 +195,7 @@ class SourceSerializer(NotEmptySerializer):
         credentials = validated_data.pop("credentials")
         hosts_list = validated_data.pop("hosts", None)
         exclude_hosts_list = validated_data.pop("exclude_hosts", None)
-        port = None
-        if "port" in validated_data:
-            port = validated_data["port"]
-
         options = validated_data.pop("options", None)
-
-        if source_type == Source.NETWORK_SOURCE_TYPE:
-            if credentials:
-                for cred in credentials:
-                    SourceSerializer.check_credential_type(source_type, cred)
-            if port is None:
-                validated_data["port"] = 22
-
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if port is None:
-                validated_data["port"] = 443
-            if hosts_list and len(hosts_list) != 1:
-                error = {"hosts": [_(messages.VC_ONE_HOST)]}
-                raise ValidationError(error)
-            if hosts_list and "[" in hosts_list[0]:
-                error = {"hosts": [_(messages.VC_ONE_HOST)]}
-                raise ValidationError(error)
-            if exclude_hosts_list is not None:
-                error = {"exclude_hosts": [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) > 1:
-                error = {"credentials": [_(messages.VC_ONE_CRED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type, credentials[0])
-        elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            if port is None:
-                validated_data["port"] = 443
-            if hosts_list and len(hosts_list) != 1:
-                error = {"hosts": [_(messages.SAT_ONE_HOST)]}
-                raise ValidationError(error)
-            if hosts_list and "[" in hosts_list[0]:
-                error = {"hosts": [_(messages.VC_ONE_HOST)]}
-                raise ValidationError(error)
-            if exclude_hosts_list is not None:
-                error = {"exclude_hosts": [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) > 1:
-                error = {"credentials": [_(messages.SAT_ONE_CRED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type, credentials[0])
 
         source = Source.objects.create(**validated_data)
 
@@ -213,16 +204,11 @@ class SourceSerializer(NotEmptySerializer):
             options = SourceOptions.objects.create(**options)
             options.save()
             source.options = options
-        elif not options and source_type == Source.SATELLITE_SOURCE_TYPE:
-            options = SourceOptions()
-            options.ssl_cert_verify = True
-            options.save()
-            source.options = options
-        elif not options and source_type == Source.VCENTER_SOURCE_TYPE:
-            options = SourceOptions()
-            options.ssl_cert_verify = True
-            options.save()
-            source.options = options
+        elif not options and source_type in (
+            Source.SATELLITE_SOURCE_TYPE,
+            Source.VCENTER_SOURCE_TYPE,
+        ):
+            self._make_ssl_cert_verify_true(source)
 
         source.hosts = json.dumps(hosts_list)
         if exclude_hosts_list:
@@ -256,41 +242,6 @@ class SourceSerializer(NotEmptySerializer):
         hosts_list = validated_data.pop("hosts", None)
         exclude_hosts_list = validated_data.pop("exclude_hosts", None)
         options = validated_data.pop("options", None)
-
-        if source_type == Source.NETWORK_SOURCE_TYPE:
-            if credentials:
-                for cred in credentials:
-                    SourceSerializer.check_credential_type(source_type, cred)
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
-            if hosts_list and len(hosts_list) != 1:
-                error = {"hosts": [_(messages.VC_ONE_HOST)]}
-                raise ValidationError(error)
-            if hosts_list and "[" in hosts_list[0]:
-                error = {"hosts": [_(messages.VC_ONE_HOST)]}
-                raise ValidationError(error)
-            if exclude_hosts_list is not None:
-                error = {"exclude_hosts": [_(messages.VC_EXCLUDE_HOSTS_INCLUDED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) > 1:
-                error = {"credentials": [_(messages.VC_ONE_CRED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type, credentials[0])
-        elif source_type == Source.SATELLITE_SOURCE_TYPE:
-            if hosts_list and len(hosts_list) != 1:
-                error = {"hosts": [_(messages.SAT_ONE_HOST)]}
-                raise ValidationError(error)
-            if hosts_list and "[" in hosts_list[0]:
-                error = {"hosts": [_(messages.VC_ONE_HOST)]}
-                raise ValidationError(error)
-            if exclude_hosts_list is not None:
-                error = {"exclude_hosts": [_(messages.SAT_EXCLUDE_HOSTS_INCLUDED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) > 1:
-                error = {"credentials": [_(messages.SAT_ONE_CRED)]}
-                raise ValidationError(error)
-            if credentials and len(credentials) == 1:
-                SourceSerializer.check_credential_type(source_type, credentials[0])
 
         for name, value in validated_data.items():
             setattr(instance, name, value)
@@ -602,3 +553,50 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.SOURCE_MIN_CREDS))
 
         return credentials
+
+    def validate_network_source(self, attrs, source_type):
+        """Validate the attributes for network source."""
+        credentials = attrs.get("credentials")
+        attrs.get("hosts")
+        attrs.get("exclude_hosts")
+        port = self.instance.port if self.instance else attrs.get("port")
+        if not port:
+            attrs["port"] = 22
+        if credentials:
+            for cred in credentials:
+                SourceSerializer.check_credential_type(source_type, cred)
+        return attrs
+
+    def validate_vcenter_source(self, attrs, source_type):
+        """Validate the attributes for vcenter source."""
+        credentials = attrs.get("credentials")
+        hosts_list = attrs.get("hosts")
+        exclude_hosts_list = attrs.get("exclude_hosts")
+        port = self.instance.port if self.instance else attrs.get("port")
+        if not port:
+            attrs["port"] = 443
+        if credentials:
+            self._validate_number_hosts_and_credentials(
+                hosts_list,
+                source_type,
+                credentials,
+                exclude_hosts_list,
+            )
+        return attrs
+
+    def validate_satellite_source(self, attrs, source_type):
+        """Validate the attributes for Satellite source."""
+        credentials = attrs.get("credentials")
+        hosts_list = attrs.get("hosts")
+        exclude_hosts_list = attrs.get("exclude_hosts")
+        port = self.instance.port if self.instance else attrs.get("port")
+        if not port:
+            attrs["port"] = 443
+        if credentials:
+            self._validate_number_hosts_and_credentials(
+                hosts_list,
+                source_type,
+                credentials,
+                exclude_hosts_list,
+            )
+        return attrs
