@@ -57,20 +57,6 @@ class SourceOptions(models.Model):
             protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
         return protocol
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{ id:%s, ssl_protocol:%s, ssl_cert_verify:%s,"
-            "disable_ssl:%s, use_paramiko:%s}"
-            % (
-                self.id,
-                self.ssl_protocol,
-                self.ssl_cert_verify,
-                self.disable_ssl,
-                self.use_paramiko,
-            )
-        )
-
 
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""
@@ -78,10 +64,12 @@ class Source(models.Model):
     NETWORK_SOURCE_TYPE = "network"
     VCENTER_SOURCE_TYPE = "vcenter"
     SATELLITE_SOURCE_TYPE = "satellite"
+    OPENSHIFT_SOURCE_TYPE = "openshift"
     SOURCE_TYPE_CHOICES = (
         (NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
         (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE),
         (SATELLITE_SOURCE_TYPE, SATELLITE_SOURCE_TYPE),
+        (OPENSHIFT_SOURCE_TYPE, OPENSHIFT_SOURCE_TYPE),
     )
 
     name = models.CharField(max_length=64, unique=True)
@@ -97,16 +85,6 @@ class Source(models.Model):
     most_recent_connect_scan = models.ForeignKey(
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{ id:%s, "
-            "name:%s, "
-            "type:%s, "
-            "options:%s, "
-            "port:%s}" % (self.id, self.name, self.source_type, self.options, self.port)
-        )
 
     def get_hosts(self):
         """Access hosts as python list instead of str.
