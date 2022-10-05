@@ -326,6 +326,7 @@ class SourceSerializer(NotEmptySerializer):
         return name
 
     # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    # pylint: disable=consider-using-f-string
     @staticmethod
     def validate_ipaddr_list(hosts):
         """Make sure the hosts list is present and has valid IP addresses."""
@@ -488,9 +489,9 @@ class SourceSerializer(NotEmptySerializer):
 
         try:
             base_address, prefix_bits = ip_range.split("/")
-        except ValueError:
+        except ValueError as err:
             err_msg = _(messages.NET_CIDR_INVALID % (ip_range,))
-            raise ValidationError(err_msg)
+            raise ValidationError(err_msg) from err
 
         prefix_bits = int(prefix_bits)
 
@@ -543,7 +544,7 @@ class SourceSerializer(NotEmptySerializer):
 
                 lower_bound = octets[i] & mask
                 upper_bound = lower_bound + ~mask
-                ansible_out[i] = "[{0}:{1}]".format(lower_bound, upper_bound)
+                ansible_out[i] = f"[{lower_bound}:{upper_bound}]"
 
         return ".".join(ansible_out)
 
