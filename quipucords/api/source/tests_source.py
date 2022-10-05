@@ -1255,7 +1255,7 @@ class SourceTest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         json_rsp = response.json()
-        self.assertEqual(json_rsp["hosts"][0], messages.VC_ONE_HOST)
+        self.assertEqual(json_rsp["hosts"][0], messages.SOURCE_ONE_HOST)
 
     def test_create_req_type(self):
         """A vcenter source must have an type."""
@@ -1515,4 +1515,4 @@ class SourceTest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         json_rsp = response.json()
-        self.assertEqual(json_rsp["hosts"][0], messages.VC_ONE_HOST)
+        self.assertEqual(json_rsp["hosts"][0], messages.SOURCE_ONE_HOST)
