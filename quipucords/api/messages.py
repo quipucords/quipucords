@@ -92,6 +92,7 @@ SOURCE_ONE_HOST = "This source must have a single host."
 SOURCE_EXCLUDE_HOSTS_INCLUDED = "The exclude_hosts option is not valid for this source."
 SOURCE_ONE_CRED = "This source must have a single credential."
 UNKNOWN_SOURCE_TYPE = "Source type invalid."
+OPENSHIFT_INVALID_OPTIONS = "Invalid options for openshift source: %s"
 
 # Scan messages
 SCAN_NAME_ALREADY_EXISTS = "Scan with name=%s already exists"

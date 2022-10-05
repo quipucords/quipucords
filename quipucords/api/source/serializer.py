@@ -32,6 +32,7 @@ from api.common.serializer import (
 )
 from api.common.util import check_for_existing_name
 from api.models import Credential, Source, SourceOptions
+from utils import get_from_object_or_dict
 
 
 class CredentialsField(PrimaryKeyRelatedField):
@@ -104,6 +105,7 @@ class SourceSerializer(NotEmptySerializer):
         valid_net_options = ["use_paramiko"]
         valid_vc_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
         valid_sat_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
+        valid_openshift_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
         if source_type == Source.SATELLITE_SOURCE_TYPE:
             cls._check_for_disallowed_fields(
@@ -129,6 +131,14 @@ class SourceSerializer(NotEmptySerializer):
                 messages.NET_SSL_OPTIONS_NOT_ALLOWED,
                 valid_net_options,
             )
+        elif source_type == Source.OPENSHIFT_SOURCE_TYPE:
+            cls._check_for_disallowed_fields(
+                options,
+                messages.OPENSHIFT_INVALID_OPTIONS,
+                valid_openshift_options,
+            )
+            if options.get("ssl_cert_verify") is None:
+                options["ssl_cert_verify"] = True
 
     @classmethod
     def _check_for_disallowed_fields(cls, options, message, valid_fields):
@@ -157,8 +167,8 @@ class SourceSerializer(NotEmptySerializer):
         if credentials and len(credentials) == 1:
             SourceSerializer.check_credential_type(source_type, credentials[0])
 
-    def _make_ssl_cert_verify_true(self, source):
-        """Make ssl_cert_verify flag true."""
+    def _options_with_ssl_cert_verify_true(self, source):
+        """Add options to source with ssl_cert_verify flag set to true."""
         options = SourceOptions()
         options.ssl_cert_verify = True
         options.save()
@@ -166,15 +176,15 @@ class SourceSerializer(NotEmptySerializer):
 
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
-        source_type = (
-            self.instance.source_type if self.instance else attrs.get("source_type")
-        )
+        source_type = get_from_object_or_dict(self.instance, attrs, "source_type")
         if source_type == Source.NETWORK_SOURCE_TYPE:
             validated_data = self.validate_network_source(attrs, source_type)
         elif source_type == Source.VCENTER_SOURCE_TYPE:
             validated_data = self.validate_vcenter_source(attrs, source_type)
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             validated_data = self.validate_satellite_source(attrs, source_type)
+        elif source_type == Source.OPENSHIFT_SOURCE_TYPE:
+            validated_data = self.validate_openshift_source(attrs, source_type)
         else:
             raise ValidationError({"source_type": messages.UNKNOWN_SOURCE_TYPE})
         return validated_data
@@ -207,8 +217,9 @@ class SourceSerializer(NotEmptySerializer):
         elif not options and source_type in (
             Source.SATELLITE_SOURCE_TYPE,
             Source.VCENTER_SOURCE_TYPE,
+            Source.OPENSHIFT_SOURCE_TYPE,
         ):
-            self._make_ssl_cert_verify_true(source)
+            self._options_with_ssl_cert_verify_true(source)
 
         source.hosts = json.dumps(hosts_list)
         if exclude_hosts_list:
@@ -554,14 +565,15 @@ class SourceSerializer(NotEmptySerializer):
 
         return credentials
 
+    def _set_default_port(self, attrs, port_number):
+        port = get_from_object_or_dict(self.instance, attrs, "port")
+        if not port:
+            attrs["port"] = port_number
+
     def validate_network_source(self, attrs, source_type):
         """Validate the attributes for network source."""
         credentials = attrs.get("credentials")
-        attrs.get("hosts")
-        attrs.get("exclude_hosts")
-        port = self.instance.port if self.instance else attrs.get("port")
-        if not port:
-            attrs["port"] = 22
+        self._set_default_port(attrs, 22)
         if credentials:
             for cred in credentials:
                 SourceSerializer.check_credential_type(source_type, cred)
@@ -572,9 +584,7 @@ class SourceSerializer(NotEmptySerializer):
         credentials = attrs.get("credentials")
         hosts_list = attrs.get("hosts")
         exclude_hosts_list = attrs.get("exclude_hosts")
-        port = self.instance.port if self.instance else attrs.get("port")
-        if not port:
-            attrs["port"] = 443
+        self._set_default_port(attrs, 443)
         if credentials:
             self._validate_number_hosts_and_credentials(
                 hosts_list,
@@ -589,9 +599,22 @@ class SourceSerializer(NotEmptySerializer):
         credentials = attrs.get("credentials")
         hosts_list = attrs.get("hosts")
         exclude_hosts_list = attrs.get("exclude_hosts")
-        port = self.instance.port if self.instance else attrs.get("port")
-        if not port:
-            attrs["port"] = 443
+        self._set_default_port(attrs, 443)
+        if credentials:
+            self._validate_number_hosts_and_credentials(
+                hosts_list,
+                source_type,
+                credentials,
+                exclude_hosts_list,
+            )
+        return attrs
+
+    def validate_openshift_source(self, attrs, source_type):
+        """Validate the attributes for OpenShift source."""
+        credentials = attrs.get("credentials")
+        hosts_list = attrs.get("hosts")
+        exclude_hosts_list = attrs.get("exclude_hosts")
+        self._set_default_port(attrs, 6443)
         if credentials:
             self._validate_number_hosts_and_credentials(
                 hosts_list,
