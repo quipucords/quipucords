@@ -78,6 +78,13 @@ class SourceTest(TestCase):
             "name": self.sat_cred.name,
         }
 
+        self.openshift_cred = Credential.objects.create(
+            name="openshift_cred1",
+            cred_type=Credential.OPENSHIFT_CRED_TYPE,
+            auth_token="openshift_token",
+        )
+        self.openshift_cred_for_upload = self.openshift_cred.id
+
     def create(self, data):
         """Call the create endpoint."""
         url = reverse("source-list")
@@ -1516,3 +1523,87 @@ class SourceTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         json_rsp = response.json()
         self.assertEqual(json_rsp["hosts"][0], messages.SOURCE_ONE_HOST)
+
+    def test_openshift_source_create(self):
+        """Ensure we can create a new openshift source."""
+        data = {
+            "name": "openshift_source_1",
+            "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+            "hosts": ["1.2.3.4"],
+            "credentials": [self.openshift_cred_for_upload],
+        }
+        self.create_expect_201(data)
+        assert Source.objects.count() == 1
+        assert Source.objects.get().name == "openshift_source_1"
+
+    def test_openshift_missing_host(self):
+        """Ensure hosts field is required when creating openshift credential."""
+        url = reverse("source-list")
+        data = {
+            "name": "openshift_source_1",
+            "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+            "credentials": [self.openshift_cred_for_upload],
+        }
+        response = self.client.post(url, json.dumps(data), "application/json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["hosts"]
+
+    def test_openshift_extra_unallowed_fields(self):
+        """Ensure unallowed fields are not accepted when creating openshift source."""
+        url = reverse("source-list")
+        data = {
+            "name": "openshift_source_1",
+            "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+            "hosts": ["1.2.3.4"],
+            "credentials": [self.openshift_cred_for_upload],
+            "options": {"use_paramiko": True},
+        }
+        response = self.client.post(url, json.dumps(data), "application/json")
+        assert response.status_code, status.HTTP_400_BAD_REQUEST
+        assert response.data["options"]
+
+    def test_update_openshift_green_path(self):
+        """Fail update due to invalid host array."""
+        source_to_be_updated = self.create_expect_201(
+            {
+                "name": "openshift_source_1",
+                "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+                "hosts": ["1.2.3.4"],
+                "credentials": [self.openshift_cred_for_upload],
+            }
+        )
+        data = {
+            "name": "openshift_source_1",
+            "hosts": ["5.3.2.1"],
+            "credentials": [self.openshift_cred_for_upload],
+        }
+
+        url = reverse("source-detail", args=(source_to_be_updated["id"],))
+        response = self.client.put(
+            url, json.dumps(data), content_type="application/json", format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_update_openshift_range_hosts(self):
+        """Fail update due to invalid host array."""
+        source_to_be_updated = self.create_expect_201(
+            {
+                "name": "openshift_source_1",
+                "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+                "hosts": ["1.2.3.4"],
+                "credentials": [self.openshift_cred_for_upload],
+            }
+        )
+
+        data = {
+            "name": "openshift_source_1",
+            "hosts": ["1.2.3.4/5"],
+            "credentials": [self.openshift_cred_for_upload],
+        }
+        url = reverse("source-detail", args=(source_to_be_updated["id"],))
+        response = self.client.put(
+            url, json.dumps(data), content_type="application/json", format="json"
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        response = response.json()
+        assert response["hosts"][0] == messages.SOURCE_ONE_HOST
