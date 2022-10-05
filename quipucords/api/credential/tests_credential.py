@@ -174,9 +174,7 @@ class CredentialTest(TestCase):
         Ensure we cannot create a new host credential object with a
         long name.
         """
-        expected_error = {
-            "name": ["Ensure this field has no more than " "64 characters."]
-        }
+        expected_error = {"name": ["Ensure this field has no more than 64 characters."]}
         url = reverse("cred-list")
         data = {"name": "A" * 100, "username": "user1", "password": "pass1"}
         response = self.client.post(url, json.dumps(data), "application/json")
@@ -190,7 +188,7 @@ class CredentialTest(TestCase):
         long username.
         """
         expected_error = {
-            "username": ["Ensure this field has no more than " "64 characters."]
+            "username": ["Ensure this field has no more than 64 characters."]
         }
         url = reverse("cred-list")
         data = {"name": "cred1", "username": "A" * 100, "password": "pass1"}
@@ -205,7 +203,7 @@ class CredentialTest(TestCase):
         long password.
         """
         expected_error = {
-            "password": ["Ensure this field has no more than " "1024 characters."]
+            "password": ["Ensure this field has no more than 1024 characters."]
         }
         url = reverse("cred-list")
         data = {"name": "cred1", "username": "user1", "password": "A" * 2000}
@@ -220,9 +218,7 @@ class CredentialTest(TestCase):
         long become_password.
         """
         expected_error = {
-            "become_password": [
-                "Ensure this field has no more " "than 1024 characters."
-            ]
+            "become_password": ["Ensure this field has no more than 1024 characters."]
         }
         url = reverse("cred-list")
         data = {
@@ -242,7 +238,7 @@ class CredentialTest(TestCase):
         long ssh_keyfile.
         """
         expected_error = {
-            "ssh_keyfile": ["Ensure this field has no more than " "1024 characters."]
+            "ssh_keyfile": ["Ensure this field has no more than 1024 characters."]
         }
         url = reverse("cred-list")
         data = {"name": "cred1", "username": "user1", "ssh_keyfile": "A" * 2000}
