@@ -19,6 +19,7 @@ from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
 from api.models import Credential
+from utils import get_from_object_or_dict
 
 
 def expand_filepath(filepath):
@@ -38,8 +39,14 @@ class CredentialSerializer(NotEmptySerializer):
     cred_type = ValidStringChoiceField(
         required=False, choices=Credential.CRED_TYPE_CHOICES
     )
-    username = CharField(required=True, max_length=64)
+    username = CharField(required=False, max_length=64)
     password = CharField(
+        required=False,
+        max_length=1024,
+        allow_null=True,
+        style={"input_type": "password"},
+    )
+    auth_token = CharField(
         required=False,
         max_length=1024,
         allow_null=True,
@@ -69,6 +76,22 @@ class CredentialSerializer(NotEmptySerializer):
         model = Credential
         fields = "__all__"
 
+    def validate(self, attrs):
+        """Validate if fields received are appropriate for each credential."""
+        cred_type = get_from_object_or_dict(self.instance, attrs, "cred_type")
+
+        if cred_type == Credential.VCENTER_CRED_TYPE:
+            validated_data = self.validate_vcenter_cred(attrs)
+        elif cred_type == Credential.SATELLITE_CRED_TYPE:
+            validated_data = self.validate_satellite_cred(attrs)
+        elif cred_type == Credential.NETWORK_CRED_TYPE:
+            validated_data = self.validate_host_cred(attrs)
+        elif cred_type == Credential.OPENSHIFT_CRED_TYPE:
+            validated_data = self.validate_openshift_cred(attrs)
+        else:
+            raise ValidationError({"cred_type": messages.UNKNOWN_CRED_TYPE})
+        return validated_data
+
     def create(self, validated_data):
         """Create host credential."""
         name = validated_data.get("name")
@@ -91,13 +114,6 @@ class CredentialSerializer(NotEmptySerializer):
             # Set the default become_user to root if not specified
             validated_data["become_user"] = Credential.BECOME_USER_DEFAULT
 
-        if cred_type == Credential.VCENTER_CRED_TYPE:
-            validated_data = self.validate_vcenter_cred(validated_data)
-        elif cred_type == Credential.SATELLITE_CRED_TYPE:
-            validated_data = self.validate_satellite_cred(validated_data)
-        else:
-            validated_data = self.validate_host_cred(validated_data)
-
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -114,14 +130,6 @@ class CredentialSerializer(NotEmptySerializer):
             error = {"cred_type": [_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE)]}
             raise ValidationError(error)
 
-        cred_type = instance.cred_type
-        if cred_type == Credential.VCENTER_CRED_TYPE:
-            validated_data = self.validate_vcenter_cred(validated_data)
-        elif cred_type == Credential.SATELLITE_CRED_TYPE:
-            validated_data = self.validate_satellite_cred(validated_data)
-        else:
-            validated_data = self.validate_host_cred(validated_data)
-
         return super().update(instance, validated_data)
 
     def validate_host_cred(self, attrs):
@@ -129,6 +137,12 @@ class CredentialSerializer(NotEmptySerializer):
         ssh_keyfile = "ssh_keyfile" in attrs and attrs["ssh_keyfile"]
         password = "password" in attrs and attrs["password"]
         ssh_passphrase = "ssh_passphrase" in attrs and attrs["ssh_passphrase"]
+        username = "username" in attrs and attrs["username"]
+
+        if not username and not self.partial:
+            error = {"username": _(messages.HOST_USERNAME_CREDENTIAL)}
+            raise ValidationError(error)
+
         if not (password or ssh_keyfile) and not self.partial:
             error = {"non_field_errors": [_(messages.HC_PWD_OR_KEYFILE)]}
             raise ValidationError(error)
@@ -148,6 +162,10 @@ class CredentialSerializer(NotEmptySerializer):
             error = {"ssh_passphrase": [_(messages.HC_NO_KEY_W_PASS)]}
             raise ValidationError(error)
 
+        self._check_for_disallowed_fields(
+            Credential.NETWORK_CRED_TYPE, attrs, messages.HOST_FIELD_NOT_ALLOWED
+        )
+
         return attrs
 
     def validate_vcenter_cred(self, attrs):
@@ -161,23 +179,9 @@ class CredentialSerializer(NotEmptySerializer):
                 error = {"non_field_errors": [_(messages.VC_PWD_AND_USERNAME)]}
                 raise ValidationError(error)
 
-        # Not allowed fields for vcenter
-        ssh_keyfile = "ssh_keyfile" in attrs and attrs["ssh_keyfile"]
-        ssh_passphrase = "ssh_passphrase" in attrs and attrs["ssh_passphrase"]
-        become_password = "become_password" in attrs and attrs["become_password"]
-        become_user = "become_user" in attrs and attrs["become_user"]
-        become_method = "become_method" in attrs and attrs["become_method"]
-
-        if (
-            ssh_keyfile
-            or ssh_passphrase
-            or become_password
-            or become_user
-            or become_method
-        ):
-            error = {"non_field_errors": [_(messages.VC_FIELDS_NOT_ALLOWED)]}
-            raise ValidationError(error)
-
+        self._check_for_disallowed_fields(
+            Credential.VCENTER_CRED_TYPE, attrs, messages.VC_FIELDS_NOT_ALLOWED
+        )
         return attrs
 
     def validate_satellite_cred(self, attrs):
@@ -191,20 +195,64 @@ class CredentialSerializer(NotEmptySerializer):
                 error = {"non_field_errors": [_(messages.SAT_PWD_AND_USERNAME)]}
                 raise ValidationError(error)
 
-        # Not allowed fields for satellite
-        ssh_keyfile = "ssh_keyfile" in attrs and attrs["ssh_keyfile"]
-        ssh_passphrase = "ssh_passphrase" in attrs and attrs["ssh_passphrase"]
-        become_password = "become_password" in attrs and attrs["become_password"]
-        become_user = "become_user" in attrs and attrs["become_user"]
-        become_method = "become_method" in attrs and attrs["become_method"]
-
-        if (
-            ssh_keyfile
-            or ssh_passphrase
-            or become_password
-            or become_user
-            or become_method
-        ):
-            error = {"non_field_errors": [_(messages.SAT_FIELDS_NOT_ALLOWED)]}
-            raise ValidationError(error)
+        self._check_for_disallowed_fields(
+            Credential.SATELLITE_CRED_TYPE,
+            attrs,
+            messages.SAT_FIELD_NOT_ALLOWED,
+        )
         return attrs
+
+    def validate_openshift_cred(self, attrs):
+        """Validate the attributes for openshift credentials."""
+        # Required field for OpenShift credential
+        auth_token = get_from_object_or_dict(self.instance, attrs, "auth_token")
+
+        if not auth_token:
+            error = {"auth_token": [_(messages.OPENSHIFT_CRED_REQUIRED_FIELD)]}
+            raise ValidationError(error)
+
+        self._check_for_disallowed_fields(
+            Credential.OPENSHIFT_CRED_TYPE, attrs, messages.OPENSHIFT_FIELD_NOT_ALLOWED
+        )
+        return attrs
+
+    def _check_for_disallowed_fields(self, credential_type, attrs, message):
+        """Check if forbidden fields are being passed to credentials."""
+        required_fields_map = {
+            Credential.OPENSHIFT_CRED_TYPE: {"id", "name", "cred_type", "auth_token"},
+            Credential.VCENTER_CRED_TYPE: {
+                "cred_type",
+                "id",
+                "name",
+                "password",
+                "username",
+            },
+            Credential.SATELLITE_CRED_TYPE: {
+                "cred_type",
+                "id",
+                "name",
+                "password",
+                "username",
+            },
+            Credential.NETWORK_CRED_TYPE: {
+                "become_method",
+                "become_password",
+                "become_user",
+                "cred_type",
+                "id",
+                "name",
+                "password",
+                "ssh_keyfile",
+                "ssh_passphrase",
+                "username",
+            },
+        }
+
+        complete_fields_map = set(self.fields.keys())
+        not_allowed_fields = complete_fields_map - required_fields_map[credential_type]
+        errors = {}
+        for field in not_allowed_fields:
+            if attrs.get(field):
+                errors[field] = message
+        if errors:
+            raise ValidationError(errors)

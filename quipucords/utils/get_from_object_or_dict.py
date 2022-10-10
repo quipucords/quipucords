@@ -7,13 +7,9 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""
-Common utils for quipucords.
+"""get_from_object_or_dict module."""
 
-All utils should be imported here so the internal api for importing is just
-"from utils import some_util_func".
-"""
 
-from .deepget import deepget
-from .default_getter import default_getter
-from .get_from_object_or_dict import get_from_object_or_dict
+def get_from_object_or_dict(instance, dict_obj, key):
+    """Get an attribute from instance or key from dictionary - in this order."""
+    return getattr(instance, key, None) or dict_obj.get(key)
