@@ -9,7 +9,6 @@
 
 """Integration test for network scan."""
 
-import json
 import tarfile
 from datetime import datetime
 from io import BytesIO
@@ -28,13 +27,9 @@ from fingerprinter.constants import (
 )
 from tests import constants
 from tests.utils.facts import RawFactComparator, fact_expander
+from utils import load_json_from_tarball
 
 logger = getLogger(__name__)
-
-
-def load_json_from_tarball(filename_json, tarball):
-    """Extract a json as dict from given TarFile interface."""
-    return json.loads(tarball.extractfile(filename_json).read())
 
 
 @pytest.fixture
