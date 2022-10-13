@@ -130,7 +130,7 @@ else:
     SECRET_KEY = DJANGO_SECRET_PATH.read_text(encoding="utf-8").strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DJANGO_DEBUG", True))
+DEBUG = os.environ.get("DJANGO_DEBUG", True)
 if isinstance(DEBUG, str):
     DEBUG = DEBUG.lower() == "true"
 
