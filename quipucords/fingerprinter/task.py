@@ -51,6 +51,7 @@ from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
 from fingerprinter.utils import strip_suffix
+from scanner.openshift import formatters as ocp_formatters
 from scanner.task import ScanTaskRunner
 from scanner.vcenter.utils import VcenterRawFacts
 from utils import deepget, default_getter
@@ -1724,6 +1725,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
             PRODUCTS_KEY: [],
         }
         self._add_fact_to_fingerprint(source, "name", fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(
+            source,
+            "deployments",
+            fact,
+            "container_images",
+            fingerprint,
+            fact_formatter=ocp_formatters.image_names,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "deployments",
+            fact,
+            "container_labels",
+            fingerprint,
+            fact_formatter=ocp_formatters.labels,
+        )
 
         return fingerprint
 

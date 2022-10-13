@@ -246,6 +246,9 @@ def unexpected_fingerprints():
         "vm_host_socket_count",
         "vm_state",
         "vm_uuid",
+        # openshift
+        "container_images",
+        "container_labels",
     }
 
 
