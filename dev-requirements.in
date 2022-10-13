@@ -5,6 +5,7 @@ coverage
 factory-boy
 pytest-cov
 pytest-django
+pytest-mock
 pytest-xdist
 pytest
 requests-mock
