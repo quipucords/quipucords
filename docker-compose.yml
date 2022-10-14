@@ -4,7 +4,7 @@ services:
     environment:
       ANSIBLE_LOG_LEVEL: 3
       QPC_DBMS: postgres
-      QPC_DBMS_DATABASE: postgres
+      QPC_DBMS_DATABASE: qpc
       QPC_DBMS_HOST: qpc-db
       QPC_DBMS_PASSWORD: qpc
       QPC_DBMS_PORT: 5432
@@ -31,7 +31,7 @@ services:
     environment:
       POSTGRESQL_USER: qpc
       POSTGRESQL_PASSWORD: qpc
-      POSTGRESQL_DATABASE: qpc-db
+      POSTGRESQL_DATABASE: qpc
     ports:
       - 54321:5432
     # Set health checks to wait until postgres has started
