@@ -65,7 +65,7 @@ class InspectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task, supports_partial_results=True)
         self.connect_scan_task = None
 
-    def run(self, manager_interrupt):
+    def execute_task(self, manager_interrupt):
         """Scan target systems to collect facts.
 
         Attempts connections to a source using a list of credentials
@@ -74,9 +74,6 @@ class InspectTaskRunner(ScanTaskRunner):
         reachable. Collects the associated facts for the scanned systems
         """
         # pylint: disable=too-many-return-statements, too-many-locals
-        super_message, super_status = super().run(manager_interrupt)
-        if super_status != ScanTask.COMPLETED:
-            return super_message, super_status
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
@@ -129,14 +126,6 @@ class InspectTaskRunner(ScanTaskRunner):
         except AssertionError as assertion_error:
             error_message = f"Scan task encountered error: {assertion_error}"
             return error_message, ScanTask.FAILED
-        except NetworkCancelException:
-            error_message = "Inspect scan cancel for %s." % (self.scan_task.source.name)
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-        except NetworkPauseException:
-            error_message = "Inspect scan pause for %s." % (self.scan_task.source.name)
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
         except ScannerException as scan_error:
             error_message = f"Scan task encountered error: {scan_error}"
             return error_message, ScanTask.FAILED

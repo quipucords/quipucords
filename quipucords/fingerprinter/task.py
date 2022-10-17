@@ -35,14 +35,7 @@ from api.deployments_report.util import (
     VCENTER_DETECTION_KEY,
     compute_source_info,
 )
-from api.models import (
-    DeploymentsReport,
-    Product,
-    ScanJob,
-    ScanTask,
-    Source,
-    SystemFingerprint,
-)
+from api.models import DeploymentsReport, Product, ScanTask, Source, SystemFingerprint
 from api.serializers import SystemFingerprintSerializer
 from fingerprinter import formatters
 from fingerprinter.constants import (
@@ -220,35 +213,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         return system_profile
 
-    def check_for_interrupt(self, manager_interrupt):
-        """Process the details report.
-
-        :param manager_interrupt: Signal to indicate job is canceled
-        :return status, message indicating if shutdown should occur.
-            ScanTask.RUNNING indicates process should continue
-        """
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = "Scan canceled"
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-
-        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = "Scan paused"
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
-        return "keep going", ScanTask.RUNNING
-
-    def run(self, manager_interrupt):
-        """Scan network range and attempt connections."""
-        # Make sure job is not cancelled or paused
-        interrupt_message, interrupt_status = self.check_for_interrupt(
-            manager_interrupt
-        )
-        if interrupt_status != ScanTask.RUNNING:
-            return interrupt_message, interrupt_status
-
+    def execute_task(self, manager_interrupt):
+        """Execute fingerprint task."""
         details_report = self.scan_task.details_report
 
         deployment_report = DeploymentsReport(report_version=create_report_version())

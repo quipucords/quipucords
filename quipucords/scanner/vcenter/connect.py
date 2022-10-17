@@ -98,12 +98,8 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         self.scan_task.connection_result.save()
 
-    def run(self, manager_interrupt):
+    def execute_task(self, manager_interrupt):
         """Scan vcenter and attempt connections."""
-        super_message, super_status = super().run(manager_interrupt)
-        if super_status != ScanTask.COMPLETED:
-            return super_message, super_status
-
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()
         try:

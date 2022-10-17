@@ -10,14 +10,20 @@
 #
 """ScanTaskRunner is a logical breakdown of work."""
 
+from abc import ABCMeta, abstractmethod
+from multiprocessing import Value
+from typing import Tuple
+
 from api.models import ScanJob, ScanTask
+from scanner.exceptions import ScanInterruptException
 
 
-class ScanTaskRunner:
+class ScanTaskRunner(metaclass=ABCMeta):
     """ScanTaskRunner is a logical breakdown of work."""
 
-    # pylint: disable=too-few-public-methods
-    def __init__(self, scan_job, scan_task, supports_partial_results=False):
+    def __init__(
+        self, scan_job: ScanJob, scan_task: ScanTask, supports_partial_results=False
+    ):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
@@ -46,7 +52,7 @@ class ScanTaskRunner:
                         self.scan_task.log_message(
                             "REMOVING PARTIAL RESULTS - deleting %d "
                             "fingerprints from previous scan"
-                            % len(deployment_report.system_fingerprints.all())
+                            % deployment_report.system_fingerprints.count()
                         )
                         deployment_report.system_fingerprints.all().delete()
                         deployment_report.save()
@@ -54,7 +60,7 @@ class ScanTaskRunner:
                         details_report.save()
                         deployment_report.delete()
 
-    def run(self, manager_interrupt):
+    def run(self, manager_interrupt: Value):
         """Block that will be executed.
 
         Results are expected to be persisted.  The state of
@@ -66,29 +72,61 @@ class ScanTaskRunner:
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status
         """
-        # pylint: disable=unused-argument
         # Make sure job is not cancelled or paused
+        message, task_status = self.check_for_interrupt(manager_interrupt)
+        if task_status != ScanTask.RUNNING:
+            return message, task_status
+        try:
+            # call the inner task executor (should be implemented in concrete classes)
+            return self.execute_task(manager_interrupt)
+        except ScanInterruptException as interrupt_exc:
+            return self.handle_interrupt_exception(interrupt_exc, manager_interrupt)
+
+    def check_for_interrupt(self, manager_interrupt: Value):
+        """Check if task runner should stop.
+
+        :param manager_interrupt: Signal to indicate job is canceled
+        :return status, message indicating if shutdown should occur.
+            ScanTask.RUNNING indicates process should continue
+        """
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = "Scan canceled"
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
+            return "Scan canceled", ScanTask.CANCELED
 
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
             manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            error_message = "Scan paused"
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
+            return "Scan paused", ScanTask.PAUSED
+        return "keep going", ScanTask.RUNNING
 
-        return "Task ran successfully", ScanTask.COMPLETED
+    def handle_interrupt_exception(
+        self, interrupt_exception: ScanInterruptException, manager_interrupt: Value
+    ):
+        """Stop scan job when InterruptScanException is raised."""
+        manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
+        error_message = (
+            f"Scan '{self.scan_task.scan_type}' "
+            f"got signal to {interrupt_exception.STATUS} "
+            f"for source='{self.scan_task.source}'."
+        )
+        return error_message, interrupt_exception.STATUS
+
+    @abstractmethod
+    def execute_task(self, manager_interrupt: Value) -> Tuple[str, str]:
+        """
+        Actual logic for each implementation of ScanTaskRunner.
+
+        :param manager_interrupt: Shared memory Value which can inform
+        a task of the need to shutdown immediately
+
+        :returns: Returns a status message to be saved/displayed and
+        the ScanTask.STATUS_CHOICES status
+        """
 
     def __str__(self):
         """Convert to string."""
-        return (
-            "{" + "scan_job:{}, "
-            "sequence_number: {}, "
-            "scan_task: {}".format(
-                self.scan_job.id, self.scan_task.sequence_number, self.scan_task
-            )
-            + "}"
-        )
+        data = {
+            "scan_job": self.scan_job.id,
+            "sequence_number": self.scan_task.sequence_number,
+            "scan_task": self.scan_task,
+        }
+        return str(data)

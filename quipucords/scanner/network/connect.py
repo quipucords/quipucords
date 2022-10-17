@@ -29,7 +29,6 @@ from api.serializers import CredentialSerializer, SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
 from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
-from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.utils import (
     _construct_vars,
     check_manager_interrupt,
@@ -131,39 +130,15 @@ class ConnectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def __init__(self, scan_job, scan_task):
-        """Set context for task execution.
-
-        :param scan_job: the scan job that contains this task
-        :param scan_task: the scan task model for this task
-        to store results
-        """
-        super().__init__(scan_job, scan_task)
-        self.scan_task = scan_task
-
-    def run(self, manager_interrupt):
+    def execute_task(self, manager_interrupt):
         """Scan network range and attempt connections."""
-        super_message, super_status = super().run(manager_interrupt)
-        if super_status != ScanTask.COMPLETED:
-            return super_message, super_status
-
         result_store = ConnectResultStore(self.scan_task)
-        try:
-            scan_message, scan_result = self.run_with_result_store(
-                manager_interrupt, result_store
-            )
-        except NetworkCancelException:
-            error_message = "Connect scan cancel for %s." % (self.scan_task.source.name)
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.CANCELED
-        except NetworkPauseException:
-            error_message = "Connect scan pause for %s." % (self.scan_task.source.name)
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return error_message, ScanTask.PAUSED
+        scan_message, scan_result = self.run_with_result_store(
+            manager_interrupt, result_store
+        )
         return scan_message, scan_result
 
     # pylint: disable=too-many-locals
-
     def run_with_result_store(self, manager_interrupt, result_store):
         """Run with a given ConnectResultStore."""
         serializer = SourceSerializer(self.scan_task.source)
