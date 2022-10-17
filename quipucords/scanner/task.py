@@ -15,7 +15,7 @@ from multiprocessing import Value
 from typing import Tuple
 
 from api.models import ScanJob, ScanTask
-from scanner.exceptions import ScanInterruptException
+from scanner.exceptions import ScanFailureError, ScanInterruptException
 
 
 class ScanTaskRunner(metaclass=ABCMeta):
@@ -81,6 +81,8 @@ class ScanTaskRunner(metaclass=ABCMeta):
             return self.execute_task(manager_interrupt)
         except ScanInterruptException as interrupt_exc:
             return self.handle_interrupt_exception(interrupt_exc, manager_interrupt)
+        except ScanFailureError as failure_error:
+            return failure_error.message, ScanTask.FAILED
 
     def check_for_interrupt(self, manager_interrupt: Value):
         """Check if task runner should stop.

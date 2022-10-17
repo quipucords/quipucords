@@ -26,11 +26,8 @@ from api.models import (
     SystemInspectionResult,
 )
 from api.vault import write_to_yaml
-from scanner.network.exceptions import (
-    NetworkCancelException,
-    NetworkPauseException,
-    ScannerException,
-)
+from scanner.exceptions import ScanFailureError
+from scanner.network.exceptions import ScannerException
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import (
     _construct_vars,
@@ -73,7 +70,7 @@ class InspectTaskRunner(ScanTaskRunner):
         failures (host/ip). Runs a host scan on the set of systems that are
         reachable. Collects the associated facts for the scanned systems
         """
-        # pylint: disable=too-many-return-statements, too-many-locals
+        # pylint: disable=too-many-locals
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
@@ -115,20 +112,14 @@ class InspectTaskRunner(ScanTaskRunner):
             self._add_unreachable_hosts(temp_facts)
             if temp_facts is None or fact_size == 0:
                 msg = (
-                    "SystemFacts set is empty.  "
+                    "SystemFacts set is empty. "
                     "No results will be reported to fact endpoint."
                 )
-                return msg, ScanTask.FAILED
+                raise ScanFailureError(msg)
 
-        except AnsibleRunnerException as ansible_error:
-            error_message = f"Scan task encountered error: {ansible_error}"
-            return error_message, ScanTask.FAILED
-        except AssertionError as assertion_error:
-            error_message = f"Scan task encountered error: {assertion_error}"
-            return error_message, ScanTask.FAILED
-        except ScannerException as scan_error:
-            error_message = f"Scan task encountered error: {scan_error}"
-            return error_message, ScanTask.FAILED
+        except (AnsibleRunnerException, AssertionError, ScannerException) as error:
+            error_message = f"Scan task encountered error: {error}"
+            raise ScanFailureError(error_message)  # pylint: disable=raise-missing-from
 
         if self.scan_task.systems_failed > 0:
             scan_message = (
@@ -289,8 +280,8 @@ class InspectTaskRunner(ScanTaskRunner):
                     verbosity=verbosity_lvl,
                 )
             except Exception as error:
-                error_msg = error
-                raise AnsibleRunnerException(error_msg)
+                logger.exception("Unexpected error")
+                raise AnsibleRunnerException(str(error)) from error
 
             final_status = runner_obj.status
             if final_status != "successful":
