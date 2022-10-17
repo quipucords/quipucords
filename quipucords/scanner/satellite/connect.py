@@ -9,70 +9,19 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """ScanTask used for satellite connection task."""
-import socket
-
-from requests import exceptions
-
-from api.models import ScanTask
-from scanner.satellite import utils
-from scanner.satellite.api import SatelliteAuthException, SatelliteException
-from scanner.satellite.factory import create
-from scanner.task import ScanTaskRunner
 
 
-class ConnectTaskRunner(ScanTaskRunner):
+from scanner.satellite.task import SatelliteTaskRunner
+
+
+class ConnectTaskRunner(SatelliteTaskRunner):
     """ConnectTaskRunner satellite connection capabilities.
 
     Attempts connections to a source using a credential
     and gathers the set of available systems.
     """
 
-    # pylint: disable=too-many-return-statements
-    def execute_task(self, manager_interrupt):
-        """Scan Satellite for system connection data."""
-        source = self.scan_task.source
-        try:
-            status_code, api_version, satellite_version = utils.status(self.scan_task)
-            if status_code is None:
-                error_message = "Unknown satellite version is not " "supported. "
-                error_message += "Connect scan failed for source %s." % (source.name)
-                return error_message, ScanTask.FAILED
-            if status_code == 200:
-                api = create(
-                    satellite_version, api_version, self.scan_job, self.scan_task
-                )
-                if not api:
-                    error_message = (
-                        "Satellite version %s with "
-                        "api version %s is not supported.\n"
-                        % (satellite_version, api_version)
-                    )
-                    error_message += "Connect scan failed for %s. " % source.name
-                    return error_message, ScanTask.FAILED
-                api.host_count()
-                api.hosts()
-            else:
-                error_message = "Connect scan failed for source %s." % source.name
-                return error_message, ScanTask.FAILED
-        except SatelliteAuthException as auth_error:
-            error_message = "Satellite auth error encountered: %s. " % auth_error
-            error_message += "Connect scan failed for source %s." % source.name
-            return error_message, ScanTask.FAILED
-        except SatelliteException as sat_error:
-            error_message = "Satellite unknown error encountered: %s. " % sat_error
-            error_message += "Connect scan failed for source %s." % source.name
-            return error_message, ScanTask.FAILED
-        except exceptions.ConnectionError as conn_error:
-            error_message = "Satellite connect error encountered: %s. " % conn_error
-            error_message += "Connect scan failed for source %s." % source.name
-            return error_message, ScanTask.FAILED
-        except TimeoutError as timeout_error:
-            error_message = "Satellite timeout error encountered: %s. " % timeout_error
-            error_message += "Connect scan failed for source %s." % source.name
-            return error_message, ScanTask.FAILED
-        except socket.gaierror as socket_error:
-            error_message = "Satellite gaierror error encountered: %s. " % socket_error
-            error_message += "Connect scan failed for source %s." % source.name
-            return error_message, ScanTask.FAILED
-
-        return None, ScanTask.COMPLETED
+    def handle_api_calls(self, api, manager_interrupt):
+        """Handle api calls for connetion phase."""
+        api.host_count()
+        api.hosts()
