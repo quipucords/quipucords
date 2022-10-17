@@ -380,9 +380,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                 "system_purpose"
                             )
                         system_sources = fingerprint_dict.get(SOURCES_KEY)
+                        source_types = []
                         if system_sources is not None:
                             sources_info = compute_source_info(system_sources)
-                            source_types = []
                             if sources_info.get(NETWORK_DETECTION_KEY):
                                 source_types.append("network")
                             if sources_info.get(VCENTER_DETECTION_KEY):
