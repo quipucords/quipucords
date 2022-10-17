@@ -5,12 +5,12 @@ TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
 TEST_OPTS := -n auto -ra -m 'not integration'
-QPC_COMPARISON_REVISION = a362b28db064c7a4ee38fe66685ba891f33ee5ba
+QPC_COMPARISON_REVISION ?= a362b28db064c7a4ee38fe66685ba891f33ee5ba
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 
-QUIPUCORDS_UI_PATH = ../quipucords-ui
-QUIPUCORDS_UI_RELEASE := latest
+QUIPUCORDS_UI_PATH ?= ../quipucords-ui
+QUIPUCORDS_UI_RELEASE ?= latest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
