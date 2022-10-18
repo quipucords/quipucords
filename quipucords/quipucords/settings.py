@@ -22,6 +22,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import logging
 import os
+import random
+import string
 from pathlib import Path
 
 from .featureflag import FeatureFlag
@@ -53,6 +55,18 @@ def is_int(value):
         return True
     except ValueError:
         return False
+
+
+def create_random_key():
+    """Create a randomized string."""
+    return "".join(
+        [
+            random.SystemRandom().choice(
+                string.ascii_letters + string.digits + string.punctuation
+            )
+            for _ in range(50)
+        ]
+    )
 
 
 QPC_SSH_CONNECT_TIMEOUT = os.environ.get("QPC_SSH_CONNECT_TIMEOUT", "60")
@@ -103,37 +117,17 @@ if not is_int(ANSIBLE_LOG_LEVEL):
     )
     ANSIBLE_LOG_LEVEL = "0"
 
-DJANGO_SECRET_PATH = os.environ.get(
-    "DJANGO_SECRET_PATH", os.path.join(BASE_DIR, "secret.txt")
-)
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-    if not os.path.exists(DJANGO_SECRET_PATH):
-        import random
-        import string
 
-        SECRET_KEY = "".join(
-            [
-                random.SystemRandom().choice(
-                    "{}{}{}".format(
-                        string.ascii_letters, string.digits, string.punctuation
-                    )
-                )
-                for i in range(50)
-            ]
-        )
+DJANGO_SECRET_PATH = Path(os.environ.get("DJANGO_SECRET_PATH", BASE_DIR / "secret.txt"))
+if not DJANGO_SECRET_PATH.exists():
+    SECRET_KEY = create_random_key()
+    DJANGO_SECRET_PATH.write_text(SECRET_KEY, encoding="utf-8")
 else:
-    # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = "79vtvq2r0m20a4$%#iyzabn#*(7&!&%60aoga@m4(in3-*ys8)"
-
-if not os.path.exists(DJANGO_SECRET_PATH):
-    with open(DJANGO_SECRET_PATH, "w") as secret_file:
-        secret_file.write(SECRET_KEY)
-else:
-    with open(DJANGO_SECRET_PATH, "r") as secret_file:
-        SECRET_KEY = secret_file.read().splitlines()[0]
+    SECRET_KEY = DJANGO_SECRET_PATH.read_text(encoding="utf-8").strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DJANGO_DEBUG", True))
