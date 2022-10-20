@@ -129,6 +129,21 @@ class ScanJobFactory(DjangoModelFactory):
         model = "api.ScanJob"
 
 
+class ScanTaskFactory(DjangoModelFactory):
+    """Factory for ScanTask."""
+
+    start_time = factory.Faker("past_datetime")
+    end_time = factory.Faker("date_time_between", start_date="-15d")
+
+    source = factory.SubFactory("tests.factories.SourceFactory")
+    job = factory.SubFactory("tests.factories.ScanJobFactory")
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.ScanTask"
+
+
 class CredentialFactory(DjangoModelFactory):
     """Factory for Credential model."""
 
@@ -141,16 +156,35 @@ class CredentialFactory(DjangoModelFactory):
         model = models.Credential
 
 
+class SourceOptions(DjangoModelFactory):
+    """Factory for SourceOptions model."""
+
+    class Meta:
+        """Factory options."""
+
+        model = models.SourceOptions
+
+
 class SourceFactory(DjangoModelFactory):
     """Factory for Source model."""
 
     name = factory.Faker("slug")
     source_type = factory.Iterator(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+    options = factory.SubFactory(SourceOptions)
 
     class Meta:
         """Factory options."""
 
         model = models.Source
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        """Override DjangoModelFactoy internal create method."""
+        credentials = kwargs.pop("credentials", [])
+        source = super()._create(*args, **kwargs)
+        # simple M2M fields are not supported as attributes on factory boy, hence this
+        source.credentials.add(*credentials)
+        return source
 
     @factory.post_generation
     def number_of_credentials(obj: models.Source, create, extracted, **kwargs):

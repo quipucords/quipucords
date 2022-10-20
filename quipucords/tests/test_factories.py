@@ -13,8 +13,8 @@ from unittest import mock
 
 import pytest
 
-from api.models import DeploymentsReport, SystemFingerprint
-from tests.factories import DeploymentReportFactory
+from api.models import DeploymentsReport, Source, SourceOptions, SystemFingerprint
+from tests.factories import DeploymentReportFactory, SourceFactory
 
 
 @pytest.mark.django_db
@@ -97,3 +97,23 @@ class TestDeploymentReportFactoryReportID:
         assert deployments_report.id
         # using build method report_id won't match pk
         assert deployments_report.id != deployments_report.report_id
+
+
+@pytest.mark.django_db
+class TestSourceFactory:
+    """Test SourceFactory."""
+
+    def test_option_default(self):
+        """Test SourceFactory option default behavior."""
+        source = SourceFactory()
+        assert isinstance(source, Source)
+        assert source.id
+        assert isinstance(source.options, SourceOptions)
+        assert source.options.id
+
+    def test_option_none(self):
+        """Test SourceFactory option set to none."""
+        source = SourceFactory(options=None)
+        assert isinstance(source, Source)
+        assert source.id
+        assert source.options is None
