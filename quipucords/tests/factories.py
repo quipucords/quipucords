@@ -36,6 +36,14 @@ def format_sources(obj):
     )
 
 
+def system_fingerprint_source_types():
+    """Return default source types for fingerprints."""
+    all_types = set(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+    # OpenShift will be ignored by default for convenience on insights tests
+    ignored_types = {models.Source.OPENSHIFT_SOURCE_TYPE}
+    return all_types - ignored_types
+
+
 class SystemFingerprintFactory(DjangoModelFactory):
     """SystemFingerprint factory."""
 
@@ -49,9 +57,7 @@ class SystemFingerprintFactory(DjangoModelFactory):
     class Params:
         """Factory parameters."""
 
-        source_type = factory.Iterator(
-            get_choice_ids(models.Source.SOURCE_TYPE_CHOICES)
-        )
+        source_type = factory.Iterator(system_fingerprint_source_types())
         ip_addresses_list = factory.List([factory.Faker("ipv4")])
 
     class Meta:
