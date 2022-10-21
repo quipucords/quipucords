@@ -4,7 +4,7 @@ PYTHON		= $(shell which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
-TEST_OPTS := -n auto -ra -m 'not integration'
+TEST_OPTS := -n auto -ra -m 'not slow'
 QPC_COMPARISON_REVISION ?= a362b28db064c7a4ee38fe66685ba891f33ee5ba
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
@@ -70,7 +70,7 @@ test-coverage:
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords"
 
 test-integration:
-	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
+	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m slow"
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
