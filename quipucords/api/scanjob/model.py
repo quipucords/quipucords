@@ -87,10 +87,8 @@ class ScanJob(models.Model):
         return (
             "{" + "id:{}, "
             "scan:{}, "
-            "sources:{}, "
             "scan_type:{}, "
             "status:{}, "
-            "tasks: {}, "
             "options: {}, "
             "report_id: {}, "
             "start_time: {}, "
@@ -98,18 +96,15 @@ class ScanJob(models.Model):
             "connection_results: {}, "
             "inspection_results: {}".format(
                 self.id,
-                self.scan,
-                self.sources,
+                self.scan_id,
                 self.scan_type,
                 self.status,
-                # pylint: disable=no-member
-                self.tasks,
-                self.options,
+                self.options_id,
                 self.report_id,
                 self.start_time,
                 self.end_time,
-                self.connection_results,
-                self.inspection_results,
+                self.connection_results_id,
+                self.inspection_results_id,
             )
             + "}"
         )
