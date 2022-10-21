@@ -231,11 +231,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 manager_interrupt, details_report
             )
 
-            interrupt_message, interrupt_status = self.check_for_interrupt(
-                manager_interrupt
-            )
-            if interrupt_status != ScanTask.RUNNING:
-                return interrupt_message, interrupt_status
+            self.check_for_interrupt(manager_interrupt)
 
             if status == ScanTask.COMPLETED:
                 deployment_report.status = DeploymentsReport.STATUS_COMPLETE
@@ -313,11 +309,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
 
             if status_count % 100 == 0:
-                interrupt_message, interrupt_status = self.check_for_interrupt(
-                    manager_interrupt
-                )
-                if interrupt_status != ScanTask.RUNNING:
-                    return interrupt_message, interrupt_status
+                self.check_for_interrupt(manager_interrupt)
             fingerprint_dict["deployment_report"] = deployment_report.id
             serializer = SystemFingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():
