@@ -20,7 +20,7 @@ from typing import Dict, List
 from django.conf import settings
 from django.db.models import F
 
-from api.models import DeploymentsReport, SystemFingerprint
+from api.models import DeploymentsReport, Source, SystemFingerprint
 
 
 @dataclass
@@ -121,12 +121,15 @@ class ReportEntity:
             DeploymentsReport.objects.annotate(
                 last_discovered=F("details_report__scanjob__end_time")
             )
-            .prefetch_related("system_fingerprints")
             .filter(pk=report_id)
             .get()
         )
-
-        fingerprints = list(deployment_report.system_fingerprints.all())
+        # openshift sources won't make sense in insights reports.
+        fingerprints = list(
+            SystemFingerprint.objects.filter(deployment_report=deployment_report)
+            .exclude(sources__icontains=Source.OPENSHIFT_SOURCE_TYPE)
+            .all()
+        )
         if len(fingerprints) == 0:
             raise SystemFingerprint.DoesNotExist(
                 f"Report with '{report_id=}' don't have hosts."
