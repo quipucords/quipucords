@@ -56,31 +56,15 @@ class InspectTaskRunner(ScanTaskRunner):
     and gathers the set of available virtual systems.
     """
 
-    def __init__(self, scan_job, scan_task):
-        """Set context for task execution.
-
-        :param scan_job: the scan job that contains this task
-        :param scan_task: the scan task model for this task
-        :param prerequisite_tasks: An array of scan task model objects
-        that were execute prior to running this task.
-        """
-        super().__init__(scan_job, scan_task)
-        self.connect_scan_task = None
-        self.source = scan_task.source
-
-    def run(self, manager_interrupt):
+    def execute_task(self, manager_interrupt):
         """Scan vcenter range and attempt scan."""
-        # Make sure job is not cancelled or paused
-        super_message, super_status = super().run(manager_interrupt)
-        if super_status != ScanTask.COMPLETED:
-            return super_message, super_status
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()
 
-        self.connect_scan_task = self.scan_task.prerequisites.first()
-        if self.connect_scan_task.status != ScanTask.COMPLETED:
+        connect_scan_task = self.scan_task.prerequisites.first()
+        if connect_scan_task.status != ScanTask.COMPLETED:
             error_message = (
-                f"Prerequisites scan task {self.connect_scan_task.sequence_number}"
+                f"Prerequisites scan task {connect_scan_task.sequence_number}"
                 " failed."
             )
             return error_message, ScanTask.FAILED
@@ -290,9 +274,10 @@ class InspectTaskRunner(ScanTaskRunner):
     def _init_stats(self):
         """Initialize the scan_task stats."""
         # Save counts
+        connect_scan_task = self.scan_task.prerequisites.first()
         self.scan_task.update_stats(
             "INITIAL VCENTER CONNECT STATS.",
-            sys_count=self.connect_scan_task.systems_count,
+            sys_count=connect_scan_task.systems_count,
         )
 
     def _property_set(self):

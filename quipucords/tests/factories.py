@@ -14,7 +14,9 @@ import random
 import factory
 from factory.django import DjangoModelFactory
 
+from api import models
 from api.status import get_server_id
+from utils import get_choice_ids
 
 
 def format_sources(obj):
@@ -46,7 +48,9 @@ class SystemFingerprintFactory(DjangoModelFactory):
     class Params:
         """Factory parameters."""
 
-        source_type = factory.Iterator(["network", "satellite", "vcenter"])
+        source_type = factory.Iterator(
+            get_choice_ids(models.Source.SOURCE_TYPE_CHOICES)
+        )
         ip_addresses_list = factory.List([factory.Faker("ipv4")])
 
     class Meta:
@@ -123,3 +127,43 @@ class ScanJobFactory(DjangoModelFactory):
         """Factory options."""
 
         model = "api.ScanJob"
+
+
+class CredentialFactory(DjangoModelFactory):
+    """Factory for Credential model."""
+
+    name = factory.Faker("slug")
+    cred_type = factory.Iterator(get_choice_ids(models.Credential.CRED_TYPE_CHOICES))
+
+    class Meta:
+        """Factory options."""
+
+        model = models.Credential
+
+
+class SourceFactory(DjangoModelFactory):
+    """Factory for Source model."""
+
+    name = factory.Faker("slug")
+    source_type = factory.Iterator(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+
+    class Meta:
+        """Factory options."""
+
+        model = models.Source
+
+    @factory.post_generation
+    def number_of_credentials(obj: models.Source, create, extracted, **kwargs):
+        """Create n credentials associated to Source."""
+        if not create:
+            return
+
+        if not obj.credentials.count() and extracted is None:
+            # if no credential was created, create at least one
+            extracted = 1
+
+        if extracted:
+            credentials = [
+                CredentialFactory(cred_type=obj.source_type) for _ in range(extracted)
+            ]
+            obj.credentials.add(*credentials)

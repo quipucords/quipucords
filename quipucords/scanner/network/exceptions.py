@@ -11,17 +11,15 @@
 
 """Exceptions used by network scan."""
 
+from scanner.exceptions import ScanCancelException, ScanPauseException
 
-class NetworkCancelException(Exception):
+
+class NetworkCancelException(ScanCancelException):
     """Exception for Network Cancel interrupt."""
 
-    pass
 
-
-class NetworkPauseException(Exception):
+class NetworkPauseException(ScanPauseException):
     """Exception for Network Pause interrupt."""
-
-    pass
 
 
 class ScannerException(Exception):

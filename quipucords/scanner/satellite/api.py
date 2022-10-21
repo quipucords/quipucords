@@ -21,6 +21,7 @@ from api.models import (
     SystemConnectionResult,
     SystemInspectionResult,
 )
+from scanner.exceptions import ScanCancelException, ScanPauseException
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -32,25 +33,17 @@ SATELLITE_VERSION_6 = "6"
 class SatelliteAuthException(Exception):
     """Exception for Satellite Authentication interaction."""
 
-    pass
-
 
 class SatelliteException(Exception):
     """Exception for Satellite interaction."""
 
-    pass
 
-
-class SatelliteCancelException(Exception):
+class SatelliteCancelException(ScanCancelException):
     """Exception for Satellite Cancel interrupt."""
 
-    pass
 
-
-class SatellitePauseException(Exception):
+class SatellitePauseException(ScanPauseException):
     """Exception for Satellite Pause interrupt."""
-
-    pass
 
 
 class SatelliteInterface:
