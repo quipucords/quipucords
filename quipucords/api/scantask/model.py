@@ -105,7 +105,6 @@ class ScanTask(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        # pylint: disable=no-member
         return (
             "{" + "id:{}, "
             "job:{}, "
@@ -123,10 +122,10 @@ class ScanTask(models.Model):
             "inspection_result: {}, "
             "details_report: {}".format(
                 self.id,
-                self.job.id,
+                self.job_id,
                 self.scan_type,
                 self.status,
-                self.source,
+                self.source_id,
                 self.sequence_number,
                 self.systems_count,
                 self.systems_scanned,
@@ -134,9 +133,9 @@ class ScanTask(models.Model):
                 self.systems_unreachable,
                 self.start_time,
                 self.end_time,
-                self.connection_result,
-                self.inspection_result,
-                self.details_report,
+                self.connection_result_id,
+                self.inspection_result_id,
+                self.details_report_id,
             )
             + "}"
         )
