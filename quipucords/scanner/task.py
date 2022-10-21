@@ -15,7 +15,12 @@ from multiprocessing import Value
 from typing import Tuple
 
 from api.models import ScanJob, ScanTask
-from scanner.exceptions import ScanFailureError, ScanInterruptException
+from scanner.exceptions import (
+    ScanCancelException,
+    ScanFailureError,
+    ScanInterruptException,
+    ScanPauseException,
+)
 
 
 class ScanTaskRunner(metaclass=ABCMeta):
@@ -72,11 +77,9 @@ class ScanTaskRunner(metaclass=ABCMeta):
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status
         """
-        # Make sure job is not cancelled or paused
-        message, task_status = self.check_for_interrupt(manager_interrupt)
-        if task_status != ScanTask.RUNNING:
-            return message, task_status
         try:
+            # Make sure job is not cancelled or paused
+            self.check_for_interrupt(manager_interrupt)
             # call the inner task executor (should be implemented in concrete classes)
             return self.execute_task(manager_interrupt)
         except ScanInterruptException as interrupt_exc:
@@ -87,18 +90,14 @@ class ScanTaskRunner(metaclass=ABCMeta):
     def check_for_interrupt(self, manager_interrupt: Value):
         """Check if task runner should stop.
 
+        This method should preferably be called after long running commands.
+
         :param manager_interrupt: Signal to indicate job is canceled
-        :return status, message indicating if shutdown should occur.
-            ScanTask.RUNNING indicates process should continue
         """
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return "Scan canceled", ScanTask.CANCELED
-
+            raise ScanCancelException()
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return "Scan paused", ScanTask.PAUSED
-        return "keep going", ScanTask.RUNNING
+            raise ScanPauseException()
 
     def handle_interrupt_exception(
         self, interrupt_exception: ScanInterruptException, manager_interrupt: Value
