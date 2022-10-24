@@ -146,8 +146,11 @@ class TestOpenShiftScan:
         return scan_id
 
     @pytest.fixture
-    def scan_response(self, django_client, scan_id):
+    def scan_response(self, scan_manager, django_client, scan_id):
         """Start a scan job and poll its results endpoint until completion."""
+        scan_manager.start()
+        # scan_manager.join(5)
+        # raise Exception()
         create_scan_job_response = django_client.post(f"scans/{scan_id}/jobs/")
         assert create_scan_job_response.ok, create_scan_job_response.text
 

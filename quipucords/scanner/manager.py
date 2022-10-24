@@ -59,6 +59,9 @@ class Manager(Thread):
         self.running = True
         logger.info("%s: Scan manager instance created.", SCAN_MANAGER_LOG_PREFIX)
 
+    def stop(self):
+        self.running = False
+
     def start_log_timer(self):
         """Start log timer."""
         self.log_info()

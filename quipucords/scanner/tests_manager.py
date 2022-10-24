@@ -14,7 +14,6 @@ from multiprocessing import Process
 from unittest.mock import Mock
 
 import pytest
-from django.test import TestCase
 
 from api.models import ScanTask
 
@@ -25,7 +24,7 @@ class MockTask(Process):
     # pylint: disable=invalid-name
     def __init__(self):
         """Create a mock task."""
-        Process.__init__(self)
+        super().__init__()
         self.id = 1
         self.scan_job = Mock()
         self.scan_job.status = ScanTask.PENDING
@@ -35,36 +34,29 @@ class MockTask(Process):
         """Fake log message."""
 
 
-class ScanManagerTest(TestCase):
+class ScanManagerTest:
     """Tests against the Manager class and functions."""
 
-    @pytest.fixture(autouse=True)
-    def _set_scan_manager(self, scan_manager):
-        # pylint: disable=attribute-defined-outside-init
-        self.scan_manager = scan_manager
-        self.scan_manager.start()
+    @pytest.fixture
+    def task(self):
+        task = MockTask()
+        yield task
+        if task.is_alive():
+            task.kill()
 
-    @pytest.fixture(autouse=True)
-    def _set_task(self):
-        # pylint: disable=attribute-defined-outside-init
-        self.task = MockTask()
-        yield
-        if self.task.is_alive():
-            self.task.kill()
-
-    def test_put(self):
+    def test_put(self, task, scan_manager):
         """Test the put feature of the manager."""
-        self.scan_manager.put(self.task)
-        self.assertEqual(len(self.scan_manager.scan_queue), 1)
+        scan_manager.put(task)
+        len(scan_manager.scan_queue) == 1
 
-    def test_work(self):
+    def test_work(self, task, scan_manager):
         """Test the work function."""
-        self.assertIsNone(self.scan_manager.current_job_runner)
-        self.scan_manager.put(self.task)
-        self.assertIsNone(self.scan_manager.current_job_runner)
-        self.scan_manager.work()
+        assert scan_manager.current_job_runner is None
+        scan_manager.put(task)
+        assert scan_manager.current_job_runner is None
+        scan_manager.work()
 
-    def test_kill_missing(self):
+    def test_kill_missing(self, task, scan_manager):
         """Test kill on missing id."""
-        killed = self.scan_manager.kill(self.task, "cancel")
-        self.assertFalse(killed)
+        killed = scan_manager.kill(task, "cancel")
+        assert killed is False

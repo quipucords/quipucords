@@ -48,33 +48,35 @@ def scan_manager():
 
     scan_manager_instance = manager.Manager()
     with (
+        patch.object(manager.Manager, "__call__", _return_itself),
         patch.object(manager, "sleep"),
         patch.object(manager, "SCAN_MANAGER", scan_manager_instance),
+        patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", scan_manager_instance)
     ):
         yield scan_manager_instance
 
     _kill_scan_manager(scan_manager_instance)
 
 
-@pytest.fixture
-def disabled_scan_manager(mocker):
+@pytest.fixture(scope="session", autouse=True)
+def disabled_scan_manager(session_mocker):
     """Completely disabled scan manager. Use when task manager is not required."""
-    _manager = mocker.MagicMock()
-    mocker.patch("scanner.manager.Manager", _manager)
-    mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
-    mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
+    _manager = session_mocker.MagicMock()
+    # session_mocker.patch("scanner.manager.Manager", _manager)
+    session_mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
+    # session_mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
+    session_mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
     yield _manager
 
 
-@pytest.fixture(autouse=True)
-def _patch_scan_manager(scan_manager):
-    with (
-        patch.object(scan_manager.__class__, "__call__", _return_itself),
-        patch("api.signal.scanjob_signal.manager.Manager", scan_manager),
-        patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", scan_manager),
-    ):
-        yield
+# @pytest.fixture(autouse=True)
+# def _patch_scan_manager(scan_manager):
+#     with (
+#         patch.object(scan_manager.__class__, "__call__", _return_itself),
+#         patch("api.signal.scanjob_signal.manager.Manager", scan_manager),
+#         patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", scan_manager),
+#     ):
+#         yield
 
 
 @pytest.fixture(scope="session")
