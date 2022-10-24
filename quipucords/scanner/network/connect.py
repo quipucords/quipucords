@@ -209,6 +209,7 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 def _connect(
+    *,
     manager_interrupt,
     scan_task,
     hosts,

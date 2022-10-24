@@ -23,11 +23,10 @@ from tests.utils.http import BaseUrlClient
 
 
 def _kill_scan_manager(manager_instance):
+    manager_instance.stop()
     for job in manager_instance.scan_queue:
         with suppress(AttributeError):
             job.kill()
-
-    manager_instance.running = False
     if manager_instance.is_alive():
         manager_instance.join()
 
@@ -43,6 +42,7 @@ def scan_manager(mocker):
 
     If started, ensure its proper teardown.
     """
+    mocker.patch("scanner.manager.SCAN_MANAGER")
     from scanner import manager
 
     # mocker.patch.object(manager.Manager, "__call__", _return_itself),
@@ -53,18 +53,17 @@ def scan_manager(mocker):
     mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _instance)
     yield _instance
 
-    _instance.stop()
     _kill_scan_manager(_instance)
 
 
-@pytest.fixture(scope="class", autouse=True)
-def disabled_scan_manager(class_mocker):
+@pytest.fixture(scope="session", autouse=True)
+def disabled_scan_manager(session_mocker):
     """Completely disabled scan manager. Use when task manager is not required."""
-    _manager = class_mocker.MagicMock()
-    class_mocker.patch("scanner.manager.Manager", _manager)
-    class_mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    class_mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
-    class_mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
+    _manager = session_mocker.MagicMock()
+    session_mocker.patch("scanner.manager.Manager", _manager)
+    session_mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
+    session_mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
+    session_mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
     yield _manager
 
 

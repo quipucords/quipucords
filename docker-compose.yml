@@ -3,7 +3,8 @@ services:
     build: .
     environment:
       ANSIBLE_LOG_LEVEL: 3
-      QPC_DBMS: postgres
+      # QPC_DBMS: postgres
+      QPC_DBMS: sqlite
       QPC_DBMS_DATABASE: qpc
       QPC_DBMS_HOST: qpc-db
       QPC_DBMS_PASSWORD: qpc
@@ -45,6 +46,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.scan-target
-    privileged: true
+    # privileged: true
     ports:
       - 2222:2222

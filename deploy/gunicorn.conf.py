@@ -71,8 +71,10 @@ def worker_int(worker):
             if line:
                 code.append("  %s" % (line.strip()))
     worker.log.debug("\n".join(code))
+    return
 
 
 def worker_abort(worker):
     """Abort logging for worker."""
     worker.log.info("worker received SIGABRT signal")
+    return
