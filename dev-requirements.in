@@ -6,6 +6,7 @@ factory-boy
 pytest-cov
 pytest-django
 pytest-mock
+pytest-timeout
 pytest-xdist
 pytest
 requests-mock
