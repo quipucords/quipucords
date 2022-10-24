@@ -4,7 +4,7 @@ PYTHON		= $(shell which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
-TEST_OPTS := -n auto -ra -m 'not slow'
+TEST_OPTS := -n auto -ra -m 'not slow' --timeout=30
 QPC_COMPARISON_REVISION ?= a362b28db064c7a4ee38fe66685ba891f33ee5ba
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin

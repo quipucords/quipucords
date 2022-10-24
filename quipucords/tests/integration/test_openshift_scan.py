@@ -95,6 +95,11 @@ def patched_openshift_client(mocker, expected_projects):
     )
 
 
+@pytest.fixture(scope="class", autouse=True)
+def disabled_scan_manager():
+    ...
+
+
 @pytest.mark.integration
 @pytest.mark.django_db
 class TestOpenShiftScan:
@@ -146,12 +151,13 @@ class TestOpenShiftScan:
         return scan_id
 
     @pytest.fixture
-    def scan_response(self, scan_manager, django_client, scan_id):
+    def scan_response(self, django_client, scan_id):
         """Start a scan job and poll its results endpoint until completion."""
-        scan_manager.start()
+        # scan_manager.start()
         # scan_manager.join(5)
         # raise Exception()
         create_scan_job_response = django_client.post(f"scans/{scan_id}/jobs/")
+        # scan_manager.stop()
         assert create_scan_job_response.ok, create_scan_job_response.text
 
         response = django_client.get(f"scans/{scan_id}/")
@@ -169,7 +175,7 @@ class TestOpenShiftScan:
             assert response.ok, response.text
 
         assert scan_status == ScanTask.COMPLETED, response.json()
-
+        scan_manager.stop()
         return response
 
     @pytest.fixture

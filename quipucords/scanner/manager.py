@@ -13,7 +13,7 @@
 
 import logging
 import os
-from threading import Thread, Timer
+from threading import Event, Thread, Timer
 from time import sleep
 
 from django.db.models import Q
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 DEFAULT_HEARTBEAT = 60 * 15
 DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN = 30
 RUN_QUEUE_SLEEP_TIME = 5
-SCAN_MANAGER_LOG_PREFIX = "SCAN JOB MANAGER"
+SCAN_MANAGER_LOG_PREFIX = "SCAN JOB MANAGER <%s>"
 
 try:
     ORDERLY_SHUTDOWN_TIMEOUT_LENGTH = int(
@@ -46,6 +46,9 @@ except ValueError:
     HEART_BEAT_INTERVAL = DEFAULT_HEARTBEAT
 
 
+STOP_EVENT = Event()
+
+
 class Manager(Thread):
     """Manager of scan job queue."""
 
@@ -56,11 +59,21 @@ class Manager(Thread):
         self.current_job_runner = None
         self.terminated_job_runner = None
         self.termination_elapsed_time = 0
-        self.running = True
-        logger.info("%s: Scan manager instance created.", SCAN_MANAGER_LOG_PREFIX)
+        self.log_prefix = SCAN_MANAGER_LOG_PREFIX % self._name
+        logger.info("%s: Scan manager instance created.", self.log_prefix)
+
+    @property
+    def running(self):
+        return not STOP_EVENT.is_set()
+
+    def start(self):
+        logger.info("%s: STARTING...", self.log_prefix)
+        STOP_EVENT.clear()
+        return super().start()
 
     def stop(self):
-        self.running = False
+        logger.info("%s: STOPPING...", self.log_prefix)
+        STOP_EVENT.set()
 
     def start_log_timer(self):
         """Start log timer."""
@@ -83,7 +96,7 @@ class Manager(Thread):
 
         logger.info(
             "%s: %s.  Scan queue length is %s. Queued jobs: %s",
-            SCAN_MANAGER_LOG_PREFIX,
+            self.log_prefix,
             scan_job_message,
             len(self.scan_queue),
             scan_queue_ids,
@@ -99,14 +112,14 @@ class Manager(Thread):
             ]:
                 logger.info(
                     "%s: Loading scan job %s.",
-                    SCAN_MANAGER_LOG_PREFIX,
+                    self.log_prefix,
                     self.current_job_runner.scan_job.id,
                 )
                 self.current_job_runner.start()
                 self.log_info()
             else:
                 error = "%s: Could not start job. Job was not in %s state." % (
-                    SCAN_MANAGER_LOG_PREFIX,
+                    self.log_prefix,
                     ScanTask.PENDING,
                 )
                 self.current_job_runner.scan_job.log_message(
@@ -141,8 +154,7 @@ class Manager(Thread):
             self.current_job_runner = None
 
             job.log_message(
-                "%s: Send interrupt to allow job orderly shutdown"
-                % SCAN_MANAGER_LOG_PREFIX
+                "%s: Send interrupt to allow job orderly shutdown" % self.log_prefix
             )
             if command == "cancel":
                 self.terminated_job_runner.manager_interrupt.value = (
@@ -154,9 +166,7 @@ class Manager(Thread):
                 )
             self.termination_elapsed_time = 0
         else:
-            logger.info(
-                "%s: Checking scan queue for job to remove.", SCAN_MANAGER_LOG_PREFIX
-            )
+            logger.info("%s: Checking scan queue for job to remove.", self.log_prefix)
             removed = False
             for queued_job in self.scan_queue:
                 if queued_job.identifier == job_id:
@@ -168,20 +178,20 @@ class Manager(Thread):
                 killed = True
                 logger.info(
                     "%s: Job %d has been removed from the scan queue.",
-                    SCAN_MANAGER_LOG_PREFIX,
+                    self.log_prefix,
                     job_id,
                 )
             else:
                 logger.info(
                     "%s: Job %d was not found in the scan queue.",
-                    SCAN_MANAGER_LOG_PREFIX,
+                    self.log_prefix,
                     job_id,
                 )
             return killed
 
     def restart_incomplete_scansjobs(self):
         """Look for incomplete scans and restart."""
-        logger.info("%s: Searching for incomplete scans", SCAN_MANAGER_LOG_PREFIX)
+        logger.info("%s: Searching for incomplete scans", self.log_prefix)
 
         incomplete_scans = ScanJob.objects.filter(
             Q(status=ScanTask.RUNNING)
@@ -193,7 +203,7 @@ class Manager(Thread):
             scanner = ScanJobRunner(scanjob)
             logger.info(
                 "%s: Adding scan job(id=%d, status=%s, scan_type=%s)",
-                SCAN_MANAGER_LOG_PREFIX,
+                self.log_prefix,
                 scanjob.id,
                 scanjob.status,
                 scanjob.scan_type,
@@ -204,15 +214,13 @@ class Manager(Thread):
             restarted_scan_count += 1
 
         if restarted_scan_count == 0:
-            logger.info(
-                "%s: No running or pending scan jobs to start", SCAN_MANAGER_LOG_PREFIX
-            )
+            logger.info("%s: No running or pending scan jobs to start", self.log_prefix)
 
     def run(self):
         """Trigger thread execution."""
         # pylint: disable=too-many-branches
         self.restart_incomplete_scansjobs()
-        logger.info("%s: Started run loop.", SCAN_MANAGER_LOG_PREFIX)
+        logger.info("%s: Started run loop.", self.log_prefix)
         self.start_log_timer()
         while self.running:
             queue_len = len(self.scan_queue)
@@ -223,13 +231,13 @@ class Manager(Thread):
                 if killed:
                     # Set this to None so another job can run.
                     self.terminated_job_runner.scan_job.log_message(
-                        "%s: Process successfully terminated." % SCAN_MANAGER_LOG_PREFIX
+                        "%s: Process successfully terminated." % self.log_prefix
                     )
                     self.terminated_job_runner = None
                 elif interrupt.value == ScanJob.JOB_TERMINATE_ACK:
                     self.terminated_job_runner.log_message(
                         "%s: Scan job acknowledged request to terminate"
-                        " but still processing." % SCAN_MANAGER_LOG_PREFIX
+                        " but still processing." % self.log_prefix
                     )
                 else:
                     self.terminated_job_runner.scan_job.log_message(
@@ -260,14 +268,14 @@ class Manager(Thread):
                         ]:
                             terminated_job.log_message(
                                 "%s: scan job has unexpectedly failed."
-                                % SCAN_MANAGER_LOG_PREFIX
+                                % self.log_prefix
                             )
                             terminated_job.fail(
                                 "Scan manager failed job " "due to unexpected error."
                             )
                         else:
                             terminated_job.log_message(
-                                "%s: scan job has completed." % SCAN_MANAGER_LOG_PREFIX
+                                "%s: scan job has completed." % self.log_prefix
                             )
                     else:
                         self.current_job_runner.scan_job.log_message(

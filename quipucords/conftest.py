@@ -15,7 +15,6 @@ the proper patching.
 """
 # pylint: disable=import-outside-toplevel
 from contextlib import suppress
-from unittest.mock import patch
 from urllib.parse import urljoin
 
 import pytest
@@ -38,7 +37,7 @@ def _return_itself(instance):
 
 
 @pytest.fixture
-def scan_manager():
+def scan_manager(mocker):
     """
     Scan manager fixture.
 
@@ -46,26 +45,26 @@ def scan_manager():
     """
     from scanner import manager
 
-    scan_manager_instance = manager.Manager()
-    with (
-        patch.object(manager.Manager, "__call__", _return_itself),
-        patch.object(manager, "sleep"),
-        patch.object(manager, "SCAN_MANAGER", scan_manager_instance),
-        patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", scan_manager_instance)
-    ):
-        yield scan_manager_instance
+    # mocker.patch.object(manager.Manager, "__call__", _return_itself),
+    mocker.patch.object(manager, "sleep"),
+    mocker.patch.object(manager, "Timer")
+    _instance = manager.Manager()
+    mocker.patch.object(manager, "SCAN_MANAGER", _instance),
+    mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _instance)
+    yield _instance
 
-    _kill_scan_manager(scan_manager_instance)
+    _instance.stop()
+    _kill_scan_manager(_instance)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def disabled_scan_manager(session_mocker):
+@pytest.fixture(scope="class", autouse=True)
+def disabled_scan_manager(class_mocker):
     """Completely disabled scan manager. Use when task manager is not required."""
-    _manager = session_mocker.MagicMock()
-    # session_mocker.patch("scanner.manager.Manager", _manager)
-    session_mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    # session_mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
-    session_mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
+    _manager = class_mocker.MagicMock()
+    class_mocker.patch("scanner.manager.Manager", _manager)
+    class_mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
+    class_mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
+    class_mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
     yield _manager
 
 
