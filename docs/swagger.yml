@@ -1629,6 +1629,10 @@ definitions:
   Scan:
     type: "object"
     properties:
+        name:
+          type: "string"
+          description: "Scan name"
+          example: "Example Scan"
         scan_type:
           type: "string"
           description: "The type of scan"
