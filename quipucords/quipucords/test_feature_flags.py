@@ -29,7 +29,7 @@ def test_if_returns_default_value_if_another_env_set():
         dict_with_test_flags = FeatureFlag.get_feature_flags_from_env()
         assert "OVERALL_STATUS" in dict_with_test_flags
         assert "TEST" in dict_with_test_flags
-        assert dict_with_test_flags["OVERALL_STATUS"] is False
+        assert dict_with_test_flags["OVERALL_STATUS"] is True
         assert dict_with_test_flags["TEST"] is False
 
 
@@ -139,7 +139,7 @@ def test_if_instance_attributes_values_are_correct(
 ):
     """Tests if the right values are attributed to attribute."""
     assert setup_feature_flag_instance_for_tests.TEST is True
-    assert setup_feature_flag_instance_for_tests.OVERALL_STATUS is False
+    assert setup_feature_flag_instance_for_tests.OVERALL_STATUS is True
 
 
 def test_is_feature_active(setup_feature_flag_instance_for_tests):
@@ -147,7 +147,7 @@ def test_is_feature_active(setup_feature_flag_instance_for_tests):
     assert setup_feature_flag_instance_for_tests.is_feature_active("TEST") is True
     assert (
         setup_feature_flag_instance_for_tests.is_feature_active("OVERALL_STATUS")
-        is False
+        is True
     )
     with pytest.raises(ValueError):
         setup_feature_flag_instance_for_tests.is_feature_active("FALSE_ATTRIBUTE")
@@ -156,5 +156,5 @@ def test_is_feature_active(setup_feature_flag_instance_for_tests):
 def test_as_dict(setup_feature_flag_instance_for_tests):
     """Tests method as_dict."""
     assert isinstance(setup_feature_flag_instance_for_tests.as_dict(), dict)
-    assert setup_feature_flag_instance_for_tests.as_dict()["OVERALL_STATUS"] is False
+    assert setup_feature_flag_instance_for_tests.as_dict()["OVERALL_STATUS"] is True
     assert setup_feature_flag_instance_for_tests.as_dict()["TEST"] is True
