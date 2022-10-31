@@ -16,8 +16,11 @@ the proper patching.
 # pylint: disable=import-outside-toplevel
 from contextlib import suppress
 from unittest.mock import patch
+from urllib.parse import urljoin
 
 import pytest
+
+from tests.utils.http import BaseUrlClient
 
 
 def _kill_scan_manager(manager_instance):
@@ -53,6 +56,17 @@ def scan_manager():
     _kill_scan_manager(scan_manager_instance)
 
 
+@pytest.fixture
+def disabled_scan_manager(mocker):
+    """Completely disabled scan manager. Use when task manager is not required."""
+    _manager = mocker.MagicMock()
+    mocker.patch("scanner.manager.Manager", _manager)
+    mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
+    mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
+    mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
+    yield _manager
+
+
 @pytest.fixture(autouse=True)
 def _patch_scan_manager(scan_manager):
     with (
@@ -61,3 +75,12 @@ def _patch_scan_manager(scan_manager):
         patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", scan_manager),
     ):
         yield
+
+
+@pytest.fixture(scope="session")
+def django_client(live_server):
+    """HTTP client which connects to django live server."""
+    client = BaseUrlClient(
+        base_url=urljoin(live_server.url, "api/v1/"),
+    )
+    return client

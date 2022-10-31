@@ -13,6 +13,7 @@ import random
 
 import factory
 from factory.django import DjangoModelFactory
+from faker import Faker
 
 from api import models
 from api.status import get_server_id
@@ -35,6 +36,14 @@ def format_sources(obj):
     )
 
 
+def system_fingerprint_source_types():
+    """Return default source types for fingerprints."""
+    all_types = set(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+    # OpenShift will be ignored by default for convenience on insights tests
+    ignored_types = {models.Source.OPENSHIFT_SOURCE_TYPE}
+    return all_types - ignored_types
+
+
 class SystemFingerprintFactory(DjangoModelFactory):
     """SystemFingerprint factory."""
 
@@ -48,9 +57,7 @@ class SystemFingerprintFactory(DjangoModelFactory):
     class Params:
         """Factory parameters."""
 
-        source_type = factory.Iterator(
-            get_choice_ids(models.Source.SOURCE_TYPE_CHOICES)
-        )
+        source_type = factory.Iterator(system_fingerprint_source_types())
         ip_addresses_list = factory.List([factory.Faker("ipv4")])
 
     class Meta:
@@ -115,6 +122,24 @@ class DetailsReportFactory(DjangoModelFactory):
         model = "api.DetailsReport"
 
 
+class JobConnectionResultFactory(DjangoModelFactory):
+    """Factory for JobConnectionResult model."""
+
+    class Meta:
+        """Factory options."""
+
+        model = models.JobConnectionResult
+
+
+class JobInspectionResultFactory(DjangoModelFactory):
+    """Factory for JobInspectionResult model."""
+
+    class Meta:
+        """Factory options."""
+
+        model = models.JobInspectionResult
+
+
 class ScanJobFactory(DjangoModelFactory):
     """Factory for ScanJob."""
 
@@ -122,11 +147,55 @@ class ScanJobFactory(DjangoModelFactory):
     end_time = factory.Faker("date_time_between", start_date="-15d")
 
     details_report = factory.SubFactory(DetailsReportFactory, scanjob=None)
+    connection_results = factory.SubFactory(JobConnectionResultFactory)
+    inspection_results = factory.SubFactory(JobInspectionResultFactory)
 
     class Meta:
         """Factory options."""
 
         model = "api.ScanJob"
+
+
+class TaskConnectionResultFactory(DjangoModelFactory):
+    """Factory for TaskConnectionResult model."""
+
+    job_connection_result_id = factory.SelfAttribute("..job.connection_results_id")
+
+    class Meta:
+        """Factory options."""
+
+        model = models.TaskConnectionResult
+
+
+class TaskInspectionResultFactory(DjangoModelFactory):
+    """Factory for TaskInspectionResult model."""
+
+    job_inspection_result_id = factory.SelfAttribute("..job.inspection_results_id")
+
+    class Meta:
+        """Factory options."""
+
+        model = models.TaskInspectionResult
+
+
+class ScanTaskFactory(DjangoModelFactory):
+    """Factory for ScanTask."""
+
+    start_time = factory.Faker("past_datetime")
+    end_time = factory.Faker("date_time_between", start_date="-15d")
+
+    source = factory.SubFactory("tests.factories.SourceFactory")
+    job = factory.SubFactory("tests.factories.ScanJobFactory")
+
+    connection_result = factory.SubFactory(
+        TaskConnectionResultFactory,
+    )
+    inspection_result = factory.SubFactory(TaskInspectionResultFactory)
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.ScanTask"
 
 
 class CredentialFactory(DjangoModelFactory):
@@ -140,17 +209,43 @@ class CredentialFactory(DjangoModelFactory):
 
         model = models.Credential
 
+    @factory.lazy_attribute
+    def auth_token(self):
+        """Set auth_token lazily."""
+        if self.cred_type == models.Credential.OPENSHIFT_CRED_TYPE:
+            return Faker().password()
+        return None
+
+
+class SourceOptions(DjangoModelFactory):
+    """Factory for SourceOptions model."""
+
+    class Meta:
+        """Factory options."""
+
+        model = models.SourceOptions
+
 
 class SourceFactory(DjangoModelFactory):
     """Factory for Source model."""
 
     name = factory.Faker("slug")
     source_type = factory.Iterator(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+    options = factory.SubFactory(SourceOptions)
 
     class Meta:
         """Factory options."""
 
         model = models.Source
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        """Override DjangoModelFactoy internal create method."""
+        credentials = kwargs.pop("credentials", [])
+        source = super()._create(*args, **kwargs)
+        # simple M2M fields are not supported as attributes on factory boy, hence this
+        source.credentials.add(*credentials)
+        return source
 
     @factory.post_generation
     def number_of_credentials(obj: models.Source, create, extracted, **kwargs):

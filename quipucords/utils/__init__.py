@@ -13,11 +13,18 @@ Common utils for quipucords.
 All utils should be imported here so the internal api for importing is just
 "from utils import some_util_func".
 """
+import json
 
 from .deepget import deepget
 from .default_getter import default_getter
+from .get_from_object_or_dict import get_from_object_or_dict
 
 
 def get_choice_ids(choices):
     """Retrieve choice ids."""
     return [choice[0] for choice in choices]
+
+
+def load_json_from_tarball(json_filename, tarball):
+    """Extract a json as dict from given TarFile interface."""
+    return json.loads(tarball.extractfile(json_filename).read())
