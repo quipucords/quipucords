@@ -31,6 +31,7 @@ def catch_k8s_exception(fn):  # pylint: disable=invalid-name
 
     @wraps(fn)
     def _decorator(*args, **kwargs):
+        _normalize_kwargs(kwargs)
         try:
             return fn(*args, **kwargs)
         except ApiException as api_exception:
@@ -42,6 +43,14 @@ def catch_k8s_exception(fn):  # pylint: disable=invalid-name
                 reason=error.reason.__class__.__name__,
                 message=str(error.reason),
             ) from error
+
+    def _normalize_kwargs(kwargs):
+        """Normalize kwargs before sending them to internal k8s api calls."""
+        timeout = kwargs.pop("timeout_seconds", None)
+        if timeout:
+            # translate "timeout_seconds" to its internal equivalent
+            # https://github.com/kubernetes-client/python/blob/9df5fa766631beb071a2cff36c839e8b8ffa911b/kubernetes/client/api_client.py#L125
+            kwargs["_request_timeout"] = timeout
 
     return _decorator
 
@@ -69,12 +78,12 @@ class OpenShiftApi:
         )
         return cls(configuration=kube_config_object, ssl_verify=ssl_verify)
 
-    def can_connect(self, raise_exception=False):
+    def can_connect(self, raise_exception=False, **kwargs):
         """Check if it's possible to connect to OCP host."""
         try:
             # call a lightweight endpoint just to check if we can
             # stablish a connection
-            catch_k8s_exception(self._core_api.get_api_resources)()
+            catch_k8s_exception(self._core_api.get_api_resources)(**kwargs)
         except OCPError as err:
             if raise_exception:
                 raise err
@@ -87,17 +96,17 @@ class OpenShiftApi:
             return False
         return True
 
-    def retrieve_projects(self, retrieve_all=True) -> List[OCPProject]:
+    def retrieve_projects(self, retrieve_all=True, **kwargs) -> List[OCPProject]:
         """Retrieve projects/namespaces under OCP host."""
         project_list = []
-        for project in self._list_projects().items:
+        for project in self._list_projects(**kwargs).items:
             ocp_project = self._init_ocp_project(project, retrieve_all=retrieve_all)
             project_list.append(ocp_project)
         return project_list
 
-    def retrieve_deployments(self, project_name) -> List[OCPDeployment]:
+    def retrieve_deployments(self, project_name, **kwargs) -> List[OCPDeployment]:
         """Retrieve deployments under project 'project_name'."""
-        deployments_raw = self._list_deployments(project_name)
+        deployments_raw = self._list_deployments(project_name, **kwargs)
         deployments_list = []
         for dep in deployments_raw.items:
             ocp_deployment = self._init_ocp_deployment(dep)
@@ -131,10 +140,10 @@ class OpenShiftApi:
             self.add_deployments_to_project(ocp_project)
         return ocp_project
 
-    def add_deployments_to_project(self, ocp_project):
+    def add_deployments_to_project(self, ocp_project, **kwargs):
         """Retrieve deployments and add to OCPProject."""
         try:
-            deployments = self.retrieve_deployments(ocp_project.name)
+            deployments = self.retrieve_deployments(ocp_project.name, **kwargs)
             ocp_project.deployments = deployments
         except OCPError as error:
             ocp_project.errors["deployments"] = error

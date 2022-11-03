@@ -12,6 +12,7 @@
 
 from json import dumps
 
+from django.conf import settings
 from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
@@ -34,14 +35,20 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         self._check_prerequisites()
 
         ocp_client = self.get_ocp_client(self.scan_task)
-        project_list = ocp_client.retrieve_projects(retrieve_all=False)
+        project_list = ocp_client.retrieve_projects(
+            retrieve_all=False,
+            timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
+        )
 
         self._init_stats(project_list)
 
         for project in project_list:
             # check if scanjob is paused or cancelled
             self.check_for_interrupt(manager_interrupt)
-            ocp_client.add_deployments_to_project(project)
+            ocp_client.add_deployments_to_project(
+                project,
+                timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
+            )
             self._save_results(project)
 
         self.log(f"Collected facts for {self.scan_task.systems_scanned} projects.")
