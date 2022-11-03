@@ -14,7 +14,6 @@ These models are used in the REST definitions.
 """
 import json
 import logging
-import traceback
 from datetime import datetime
 
 from django.db import models, transaction
@@ -213,7 +212,7 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         # pylint: disable=no-member
         if exception:
-            logger.error(traceback.format_tb(exception.__traceback__))
+            logger.exception("Got an exception.")
 
         if self.scan_job_task_count is None:
             self.scan_job_task_count = self.job.tasks.all().count()
