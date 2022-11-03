@@ -49,18 +49,25 @@ def catch_k8s_exception(fn):  # pylint: disable=invalid-name
 class OpenShiftApi:
     """OpenShift interface for Quipucords."""
 
-    def __init__(self, configuration: Configuration):
+    def __init__(
+        self,
+        configuration: Configuration,
+        ssl_verify: bool = True,
+    ):
         """Initialize OpenShiftApi."""
+        configuration.verify_ssl = ssl_verify
         self._api_client = ApiClient(configuration=configuration)
 
     @classmethod
-    def from_auth_token(cls, *, host, protocol, port, auth_token):
+    def from_auth_token(
+        cls, *, host, protocol, port, auth_token, ssl_verify: bool = True
+    ):
         """Initialize OpenShiftApi with auth token."""
         kube_config_object = Configuration(
             host=f"{protocol}://{host}:{port}",
             api_key={"authorization": f"bearer {auth_token}"},
         )
-        return cls(configuration=kube_config_object)
+        return cls(configuration=kube_config_object, ssl_verify=ssl_verify)
 
     def can_connect(self, raise_exception=False):
         """Check if it's possible to connect to OCP host."""
