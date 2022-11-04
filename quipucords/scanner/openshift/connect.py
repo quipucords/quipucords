@@ -11,6 +11,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db import transaction
 
 from api.models import ScanTask, SystemConnectionResult
@@ -29,7 +30,10 @@ class ConnectTaskRunner(OpenShiftTaskRunner):
         self._init_stats()
         ocp_client = self.get_ocp_client(self.scan_task)
         try:
-            ocp_client.can_connect(raise_exception=True)
+            ocp_client.can_connect(
+                raise_exception=True,
+                timeout_seconds=settings.QPC_CONNECT_TASK_TIMEOUT,
+            )
             conn_result = SystemConnectionResult.SUCCESS
         except OCPError as error:
             conn_result = self._handle_ocp_error(error)

@@ -66,3 +66,7 @@ class OCPError(Exception, ToDictMixin):
             return error_data["message"]
         except (json.JSONDecodeError, KeyError):
             return error
+
+    def __str__(self):
+        """Format as string."""
+        return str(self.to_dict())

@@ -77,7 +77,7 @@ def error():
 def _patched_retrieve_deployments(mocker, error, deployment):
     """Mock OpenShiftApi retrieve_deployments method to return our fixtures."""
 
-    def _retrieve(project_name):
+    def _retrieve(project_name, **kwargs):
         if project_name == "project-ok":
             return deployment
         if project_name == "project-err":
