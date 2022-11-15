@@ -34,6 +34,7 @@ class FactsSerializer(Serializer):
     last_discovered = fields.DateTimeField()
     qpc_server_version = fields.CharField(default=server_version)
     qpc_server_id = fields.CharField(default=get_server_id)
+    rh_products_installed = fields.ListField(child=fields.CharField())
 
 
 class FactsetSerializer(Serializer):
@@ -65,9 +66,11 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     """
 
     number_of_cpus = fields.IntegerField(source="cpu_count", **default_kwargs)
-    system_memory_bytes = fields.IntegerField(
-        **default_kwargs
-    )  # TODO: not mapped yet to a fingerprint
+    number_of_sockets = fields.IntegerField(source="cpu_socket_count", **default_kwargs)
+    cores_per_socket = fields.IntegerField(
+        source="cpu_core_per_socket", **default_kwargs
+    )
+    system_memory_bytes = fields.IntegerField(**default_kwargs)
     infrastructure_type = fields.CharField(max_length=100, **default_kwargs)
     infrastructure_vendor = fields.CharField(
         max_length=100, **default_kwargs

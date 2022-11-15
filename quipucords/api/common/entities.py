@@ -18,9 +18,10 @@ from functools import cached_property
 from typing import Dict, List
 
 from django.conf import settings
-from django.db.models import F
+from django.db.models import F, Q, Value
 
-from api.models import DeploymentsReport, Source, SystemFingerprint
+from api.compat.db import StringAgg
+from api.models import DeploymentsReport, Product, Source, SystemFingerprint
 
 
 @dataclass
@@ -66,6 +67,46 @@ class HostEntity:
         if value and value.lower() in valid_providers:
             return value
         return None
+
+    @property
+    def products(self) -> set:
+        """
+        Return a set of product names present in db.
+
+        Will only work if associated fingerprint was initialized with the proper
+        annotated query.
+        """
+        try:
+            return {p for p in self._fingerprints.product_names.split(",") if p != ""}
+        except AttributeError as err:
+            raise NotImplementedError(
+                "Host wasn't properly initialized to list products"
+            ) from err
+
+    @property
+    def rh_products_installed(self):
+        """Return the installed products on the system.
+
+        This is a LEGACY fact on HBI and should be replaced with
+        installed_products in the near future.
+
+        installed_products ref: https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L374-L377  # noqa: E501
+        """
+
+        def is_not_none(obj):
+            return obj is not None
+
+        name_to_product = {
+            "JBoss EAP": "EAP",
+            "JBoss Fuse": "FUSE",
+            "JBoss BRMS": "DCSM",
+            "JBoss Web Server": "JWS",
+        }
+        products = [name_to_product.get(product) for product in self.products]
+        products = list(filter(is_not_none, products))
+        if self._fingerprints.is_redhat:
+            products.append("RHEL")
+        return products
 
 
 @dataclass
@@ -128,6 +169,13 @@ class ReportEntity:
         fingerprints = list(
             SystemFingerprint.objects.filter(deployment_report=deployment_report)
             .exclude(sources__icontains=Source.OPENSHIFT_SOURCE_TYPE)
+            .annotate(
+                product_names=StringAgg(
+                    "products__name",
+                    default=Value(""),
+                    filter=Q(products__presence=Product.PRESENT),
+                )
+            )
             .all()
         )
         if len(fingerprints) == 0:

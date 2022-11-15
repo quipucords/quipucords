@@ -658,6 +658,7 @@ pytest==7.1.2 \
     #   pytest-django
     #   pytest-docker-tools
     #   pytest-forked
+    #   pytest-lazy-fixture
     #   pytest-mock
     #   pytest-xdist
 pytest-cov==3.0.0 \
@@ -676,6 +677,10 @@ pytest-forked==1.4.0 \
     --hash=sha256:8b67587c8f98cbbadfdd804539ed5455b6ed03802203485dd2f53c1422d7440e \
     --hash=sha256:bbbb6717efc886b9d64537b41fb1497cfaf3c9601276be8da2cccfea5a3c8ad8
     # via pytest-xdist
+pytest-lazy-fixture==0.6.3 \
+    --hash=sha256:0e7d0c7f74ba33e6e80905e9bfd81f9d15ef9a790de97993e34213deb5ad10ac \
+    --hash=sha256:e0b379f38299ff27a653f03eaa69b08a6fd4484e46fd1c9907d984b9f9daeda6
+    # via -r dev-requirements.in
 pytest-mock==3.10.0 \
     --hash=sha256:f4c973eeae0282963eb293eb173ce91b091a79c1334455acfac9ddee8a1c784b \
     --hash=sha256:fbbdb085ef7c252a326fd8cdcac0aa3b1333d8811f131bdcc701002e1be7ed4f

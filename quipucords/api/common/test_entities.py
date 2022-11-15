@@ -14,9 +14,9 @@ from itertools import chain
 
 import pytest
 
-from api.common.entities import ReportEntity, ReportSlice
+from api.common.entities import HostEntity, ReportEntity, ReportSlice
 from api.deployments_report.model import DeploymentsReport
-from api.models import SystemFingerprint
+from api.models import Product, SystemFingerprint
 from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
 
 
@@ -24,6 +24,38 @@ from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
 def deployment_reports():
     """Return a list of deployment reports with variable number of fingerprints."""
     return DeploymentReportFactory.create_batch(size=5)
+
+
+@pytest.fixture
+def fingerprint_wo_products():
+    """Return a system fingerprint instance."""
+    report = DeploymentReportFactory.create(number_of_fingerprints=1)
+    return report.system_fingerprints.get()
+
+
+@pytest.fixture
+def fingerprint_with_products():
+    """Return a system fingerprint instance with 3 products."""
+    report = DeploymentReportFactory.create(number_of_fingerprints=1)
+    sys_fp = report.system_fingerprints.get()
+    products = [
+        Product(name="JBoss EAP", presence=Product.PRESENT, fingerprint=sys_fp),
+        Product(name="JBoss Fuse", presence=Product.ABSENT, fingerprint=sys_fp),
+        Product(name="UNKOWN PRODUCT", presence=Product.PRESENT, fingerprint=sys_fp),
+    ]
+    Product.objects.bulk_create(products)
+    return sys_fp
+
+
+@pytest.fixture(
+    params=[
+        pytest.lazy_fixture("fingerprint_wo_products"),
+        pytest.lazy_fixture("fingerprint_with_products"),
+    ]
+)
+def fingerprint(request):
+    """Return a multiplexed system fingerprint."""
+    return request.param
 
 
 @pytest.fixture
@@ -45,6 +77,8 @@ class TestReportEntity:
 
         with django_assert_max_num_queries(2):
             report = ReportEntity.from_report_id(report_id)
+            # ensure products does not trigger another query
+            assert isinstance(report.hosts[0].products, set)
 
         assert isinstance(report, ReportEntity)
 
@@ -88,6 +122,7 @@ class TestReportEntity:
             assert isinstance(report.last_discovered, datetime)
 
 
+@pytest.mark.django_db
 class TestReportSlicing:
     """Test ReportSliceEntity and ReportEntity slicing mechanism."""
 
@@ -126,3 +161,53 @@ class TestReportSlicing:
             chain.from_iterable(s.hosts for s in report_entity.slices.values())
         )
         assert hosts_from_slices == report_entity.hosts
+
+
+@pytest.mark.django_db
+class TestHostEntity:
+    """Test HostEntity."""
+
+    @classmethod
+    def host_init(cls, system_fingerprint) -> HostEntity:
+        """Initialize HostEntity using ReportEntity annotated query."""
+        report = ReportEntity.from_report_id(system_fingerprint.deployment_report.id)
+        return report.hosts[0]
+
+    def test_products_not_implemented(self, fingerprint):
+        """Ensure only properly initialized host have products."""
+        host = HostEntity(fingerprint, last_discovered=None)
+        with pytest.raises(NotImplementedError):
+            host.products  # pylint: disable=pointless-statement  # false positive
+
+    @pytest.mark.parametrize(
+        "fingerprint,expected_product_names,expected_rh_products_installed",
+        [
+            (
+                pytest.lazy_fixture("fingerprint_wo_products"),
+                set(),
+                [],
+            ),
+            (
+                pytest.lazy_fixture("fingerprint_with_products"),
+                {"JBoss EAP", "UNKOWN PRODUCT"},
+                ["EAP"],
+            ),
+        ],
+    )
+    def test_products(
+        self,
+        fingerprint,
+        expected_product_names,
+        expected_rh_products_installed,
+    ):
+        """Test products/rh_products_installed properties."""
+        host = self.host_init(fingerprint)
+        assert host.products == expected_product_names
+        assert host.rh_products_installed == expected_rh_products_installed
+
+    def test_products_is_rhel(self, fingerprint):
+        """Check if RHEL is added to rh_products_installed when system is rhel."""
+        fingerprint.is_redhat = True
+        fingerprint.save()
+        host = self.host_init(fingerprint)
+        assert "RHEL" in host.rh_products_installed
