@@ -9,12 +9,15 @@
 
 """Insights report serializers."""
 
+import socket
 from functools import partial
 
+from django.conf import settings
 from rest_framework import fields
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import Serializer, SerializerMethodField
 
 from api.common.common_report import create_filename
+from api.common.entities import HostEntity
 from api.common.serializer import ForcedListSerializer, NotEmptyMixin
 from api.status import get_server_id
 from quipucords.environment import server_version
@@ -101,6 +104,28 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
     vm_uuid = fields.CharField(**default_kwargs)
     facts = FactsetSerializer(source="*", many=True)
     system_profile = SystemProfileSerializer(source="*", **default_kwargs)
+    tags = SerializerMethodField()
+
+    def get_tags(self, host: HostEntity):
+        """Format tags to appear as inventory labels."""
+        data_collector = settings.QPC_INSIGHTS_DATA_COLLECTOR_LABEL
+        hostname = socket.getfqdn()
+        ip_address = socket.gethostbyname(hostname)
+        tags = {
+            "data-collector": data_collector,
+            "last-discovered": host.last_discovered,
+            "scanner-hostname": hostname,
+            "scanner-id": get_server_id(),
+            "scanner-ip-address": ip_address,
+            "scanner-version": server_version(),
+        }
+        # this differ from actual HBI format due to yupana constraints
+        # yupana will format this accordingly
+        # https://github.com/quipucords/yupana/blob/961b376ff80f835203097c43bbf6239a1bc6afbc/yupana/processor/report_slice_processor.py#L226-L252
+        return [
+            {"namespace": data_collector, "key": key, "value": value}
+            for key, value in tags.items()
+        ]
 
     def to_representation(self, instance):
         """Format HostEntity as dict and validate."""
