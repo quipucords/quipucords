@@ -211,3 +211,54 @@ class TestHostEntity:
         fingerprint.save()
         host = self.host_init(fingerprint)
         assert "RHEL" in host.rh_products_installed
+
+    @pytest.mark.parametrize(
+        "cpu_socket_count,vm_host_socket_count,expected_result",
+        (
+            ("cpu", "host", "cpu"),
+            ("cpu", None, "cpu"),
+            (None, "host", "host"),
+            (None, None, None),
+        ),
+    )
+    def test_number_of_sockets(
+        self,
+        mocker,
+        cpu_socket_count,
+        vm_host_socket_count,
+        expected_result,
+    ):
+        """Test number_of_sockets logic."""
+        mocked_fingerprint = mocker.Mock(
+            cpu_socket_count=cpu_socket_count, vm_host_socket_count=vm_host_socket_count
+        )
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.number_of_sockets == expected_result
+
+    @pytest.mark.parametrize(
+        "cpu_core_per_socket,vm_host_core_count,vm_host_socket_count,expected_result",
+        (
+            (1, 4, 2, 1),
+            (None, 4, 2, 2),
+            (None, None, 2, None),
+            (None, 4, None, None),
+            (None, 4, 0, None),
+            (None, None, None, None),
+        ),
+    )
+    def test_cores_per_socket(  # pylint: disable=too-many-arguments
+        self,
+        mocker,
+        cpu_core_per_socket,
+        vm_host_core_count,
+        vm_host_socket_count,
+        expected_result,
+    ):
+        """Test cores_per_socket logic."""
+        mocked_fingerprint = mocker.Mock(
+            cpu_core_per_socket=cpu_core_per_socket,
+            vm_host_core_count=vm_host_core_count,
+            vm_host_socket_count=vm_host_socket_count,
+        )
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.cores_per_socket == expected_result

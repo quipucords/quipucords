@@ -65,11 +65,9 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     - https://consoledot.pages.redhat.com/docs/dev/services/inventory.html#_system_profile  # noqa: E501
     """
 
-    number_of_cpus = fields.IntegerField(source="cpu_count", **default_kwargs)
-    number_of_sockets = fields.IntegerField(source="cpu_socket_count", **default_kwargs)
-    cores_per_socket = fields.IntegerField(
-        source="cpu_core_per_socket", **default_kwargs
-    )
+    number_of_cpus = fields.IntegerField(**default_kwargs)
+    number_of_sockets = fields.IntegerField(**default_kwargs)
+    cores_per_socket = fields.IntegerField(**default_kwargs)
     system_memory_bytes = fields.IntegerField(**default_kwargs)
     infrastructure_type = fields.CharField(max_length=100, **default_kwargs)
     infrastructure_vendor = fields.CharField(

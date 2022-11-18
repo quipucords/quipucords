@@ -43,6 +43,30 @@ class HostEntity:
         return getattr(self._fingerprints, attr)
 
     @property
+    def number_of_cpus(self):
+        """Retrieve number of cpus."""
+        return self._fingerprints.cpu_count
+
+    @property
+    def cores_per_socket(self):
+        """Retrieve number of cores per socket."""
+        return self._fingerprints.cpu_core_per_socket or self._host_cores_per_socket()
+
+    def _host_cores_per_socket(self):
+        with suppress(TypeError, ZeroDivisionError):
+            return (
+                self._fingerprints.vm_host_core_count
+                / self._fingerprints.vm_host_socket_count
+            )
+
+    @property
+    def number_of_sockets(self):
+        """Retrieve number of sockets."""
+        cpu_socket_count = self._fingerprints.cpu_socket_count
+        host_socket_count = self._fingerprints.vm_host_socket_count
+        return cpu_socket_count or host_socket_count
+
+    @property
     def ip_addresses(self):
         """Retrieve ip_addresses."""
         with suppress(TypeError):
