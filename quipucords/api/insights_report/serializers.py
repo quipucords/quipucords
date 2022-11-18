@@ -99,6 +99,8 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
         **default_kwargs
     )  # TODO: not sure on this one https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L901-L907  # noqa: E501
     subscription_manager_id = fields.CharField(**default_kwargs)
+    etc_machine_id = fields.CharField(**default_kwargs)
+    vm_uuid = fields.CharField(**default_kwargs)
     facts = FactsetSerializer(source="*", many=True)
     system_profile = SystemProfileSerializer(source="*", **default_kwargs)
 
