@@ -9,6 +9,7 @@
 
 """Test common entities."""
 
+import logging
 from datetime import datetime
 from itertools import chain
 
@@ -120,6 +121,26 @@ class TestReportEntity:
         )
         with django_assert_num_queries(2):
             assert isinstance(report.last_discovered, datetime)
+
+    def test_canonical_facts_skipping(self, caplog):
+        """Test the mechanism for skipping hosts w/o canonical facts."""
+        caplog.set_level(logging.WARNING)
+        deployment_report = DeploymentReportFactory.create(number_of_fingerprints=1)
+        non_canonical_fp = SystemFingerprint.objects.create(
+            deployment_report=deployment_report
+        )
+        assert deployment_report.system_fingerprints.count() == 2
+        report_filtered = ReportEntity.from_report_id(deployment_report.id)
+        assert len(report_filtered.hosts) == 1
+        report_unfiltered = ReportEntity.from_report_id(
+            deployment_report.id, skip_non_canonical=False
+        )
+        assert len(report_unfiltered.hosts) == 2
+        assert (
+            caplog.messages[-1]
+            == f"Host (fingerprint={non_canonical_fp.id}, name=None) "
+            "ignored due to lack of canonical facts."
+        )
 
 
 @pytest.mark.django_db

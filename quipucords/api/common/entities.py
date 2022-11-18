@@ -15,6 +15,7 @@ from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import cached_property
+from logging import getLogger
 from typing import Dict, List
 
 from django.conf import settings
@@ -22,6 +23,19 @@ from django.db.models import F, Q, Value
 
 from api.compat.db import StringAgg
 from api.models import DeploymentsReport, Product, Source, SystemFingerprint
+
+CANONICAL_FACTS = (
+    "fqdn",
+    "bios_uuid",
+    "insights_id",
+    "ip_addresses",
+    "mac_addresses",
+    "satellite_id",
+    "subscription_manager_id",
+    ("provider_id", "provider_type"),
+)
+
+logger = getLogger(__name__)
 
 
 @dataclass
@@ -67,6 +81,16 @@ class HostEntity:
         return cpu_socket_count or host_socket_count
 
     @property
+    def fqdn(self):
+        """Retrieve fqdn."""
+        return self._fingerprints.name
+
+    @property
+    def insights_id(self):
+        """Retrieve insights id."""
+        return self._fingerprints.insights_client_id
+
+    @property
     def ip_addresses(self):
         """Retrieve ip_addresses."""
         with suppress(TypeError):
@@ -77,6 +101,15 @@ class HostEntity:
         """Retrieve mac_addresses."""
         with suppress(TypeError):
             return json.loads(self._fingerprints.mac_addresses)
+
+    @property
+    def provider_id(self):
+        """Retrieve provider_id.
+
+        On AWS EC2 vms, this should be the content of /var/lib/cloud/data/instance-id
+        (which would be aa new fact). We need to map this for other providers as well.
+        """
+        return None
 
     @property
     def provider_type(self):
@@ -132,6 +165,18 @@ class HostEntity:
             products.append("RHEL")
         return products
 
+    def has_canonical_facts(self):
+        """Return True if host contains at least one canonical fact."""
+        for canonical_fact in CANONICAL_FACTS:
+            if isinstance(canonical_fact, tuple):
+                # special case for facts that should be present together
+                if all(getattr(self, fact, None) for fact in canonical_fact):
+                    return True
+                continue
+            if getattr(self, canonical_fact, None):
+                return True
+        return False
+
 
 @dataclass
 class ReportEntity:
@@ -168,10 +213,13 @@ class ReportEntity:
             return self._deployment_report.details_report.scanjob.end_time
 
     @classmethod
-    def from_report_id(cls, report_id):
+    def from_report_id(cls, report_id, skip_non_canonical=True):
         """Create a Report from a report_id."""
         deployment_report, fingerprints = cls._get_deployment_report(report_id)
         hosts = [HostEntity(f, deployment_report.last_discovered) for f in fingerprints]
+        if skip_non_canonical:
+            hosts = list(filter(cls._has_canonical_facts, hosts))
+        cls._validate_hosts_qty(report_id, hosts)
         return ReportEntity(deployment_report, hosts=hosts)
 
     @classmethod
@@ -202,10 +250,6 @@ class ReportEntity:
             )
             .all()
         )
-        if len(fingerprints) == 0:
-            raise SystemFingerprint.DoesNotExist(
-                f"Report with '{report_id=}' don't have hosts."
-            )
         return deployment_report, fingerprints
 
     @cached_property
@@ -216,6 +260,24 @@ class ReportEntity:
         If the report_slices don't exist yet, it'll be generated on the spot.
         """
         return self._initialize_report_slices()
+
+    @classmethod
+    def _has_canonical_facts(cls, host: HostEntity):
+        if host.has_canonical_facts():
+            return True
+        logger.warning(
+            "Host (fingerprint=%d, name=%s) ignored due to lack of canonical facts.",
+            host.id,
+            host.name,
+        )
+        return False
+
+    @staticmethod
+    def _validate_hosts_qty(report_id, hosts):
+        if len(hosts) == 0:
+            raise SystemFingerprint.DoesNotExist(
+                f"Report ({report_id=} doesn't have valid hosts."
+            )
 
     def _initialize_report_slices(self):
         number_hosts = len(self.hosts)

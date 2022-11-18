@@ -12,11 +12,10 @@
 from functools import partial
 
 from rest_framework import fields
-from rest_framework.serializers import Serializer, ValidationError
+from rest_framework.serializers import Serializer
 
 from api.common.common_report import create_filename
 from api.common.serializer import ForcedListSerializer, NotEmptyMixin
-from api.insights_report.constants import CANONICAL_FACTS
 from api.status import get_server_id
 from quipucords.environment import server_version
 
@@ -84,14 +83,14 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
     display_name = fields.CharField(source="name", **default_kwargs)
     bios_uuid = fields.CharField(**default_kwargs)
     fqdn = fields.CharField(
-        source="name", **default_kwargs
+        **default_kwargs
     )  # TODO: not sure on this one, just followed old implementation https://github.com/quipucords/quipucords/blob/da644172fb35ad7128ba20372cf64fbf7ff4f367/quipucords/fingerprinter/task.py#L373  # noqa: E501
     insights_id = fields.CharField(source="insights_client_id", **default_kwargs)
     ip_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
     mac_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
     provider_id = fields.CharField(
-        source="name", **default_kwargs
-    )  # TODO: not sure on this one
+        **default_kwargs
+    )  # TODO: this probably needs to be adapted for each provider type
     provider_type = fields.CharField(**default_kwargs)
     satellite_id = fields.CharField(
         **default_kwargs
@@ -105,14 +104,8 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
     def to_representation(self, instance):
         """Format HostEntity as dict and validate."""
         data = super().to_representation(instance)
-        self.validate(data)
+        self._validate_provider(data)
         return data
-
-    def validate(self, attrs: dict):
-        """Validate serializer data."""
-        attrs = self._validate_canonical_facts(attrs)
-        attrs = self._validate_provider(attrs)
-        return attrs
 
     def _validate_provider(self, attrs: dict):
         # hbi requires either provider_id and provider_type or none
@@ -124,14 +117,6 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
 
         present_provider_attr = present_provider_attr_set.pop()
         attrs.pop(present_provider_attr)
-        return attrs
-
-    def _validate_canonical_facts(self, attrs):
-        if not set(attrs).intersection(CANONICAL_FACTS):
-            raise ValidationError(
-                "At least one 'canonical fact' must be present on the report. "
-                f"(Canonical facts are: {CANONICAL_FACTS})"
-            )
         return attrs
 
 
