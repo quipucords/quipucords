@@ -67,6 +67,7 @@ def report_entity():
     return ReportEntity(deployment_report, fingerprints)
 
 
+@pytest.mark.dbcompat
 @pytest.mark.django_db
 class TestReportEntity:
     """Test ReportEntity."""

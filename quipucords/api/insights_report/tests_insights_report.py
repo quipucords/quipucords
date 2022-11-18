@@ -14,6 +14,7 @@ import json
 import uuid
 from unittest.mock import patch
 
+import pytest
 from django.core import management
 from django.test import TestCase, override_settings
 from rest_framework import status
@@ -23,6 +24,7 @@ from api.models import DeploymentsReport
 from tests.factories import DeploymentReportFactory
 
 
+@pytest.mark.dbcompat
 class InsightsReportTest(TestCase):
     """Tests against the Insights reports function."""
 
