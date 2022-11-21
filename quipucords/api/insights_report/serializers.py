@@ -75,6 +75,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     # yupana builds operating_system from os_release
     os_release = fields.CharField(max_length=100, **default_kwargs)
     arch = fields.CharField(source="architecture", max_length=50, **default_kwargs)
+    cloud_provider = fields.CharField(**default_kwargs)
 
 
 class YupanaHostSerializer(NotEmptyMixin, Serializer):

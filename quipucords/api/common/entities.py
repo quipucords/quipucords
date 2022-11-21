@@ -86,6 +86,28 @@ class HostEntity:
         return self._fingerprints.name
 
     @property
+    def infrastructure_type(self):
+        """
+        Map QPC infrastructure types to rh_subscription types.
+
+        Inventory is pretty permissive on the content for this field, but
+        rh_subscriptions expects certain values:
+        https://github.com/RedHatInsights/rhsm-subscriptions/blob/adbac748687724a5603d3e2dac747acb6ba13b29/src/main/java/org/candlepin/subscriptions/tally/MetricUsageCollector.java#L319-L324  # noqa: E501
+
+        Having this mapped appropriately is important for internal swatch sockets count
+        logic.
+
+        https://github.com/RedHatInsights/rhsm-subscriptions/blob/410b8a2f461588255d86a15b8fad0475e334e417/src/main/java/org/candlepin/subscriptions/tally/facts/FactNormalizer.java#L172-L180
+        """
+        qpc2insights = {
+            SystemFingerprint.BARE_METAL: "physical",
+            SystemFingerprint.VIRTUALIZED: "virtual",
+        }
+
+        _infra_type = self._fingerprints.infrastructure_type
+        return qpc2insights.get(_infra_type, _infra_type)
+
+    @property
     def insights_id(self):
         """Retrieve insights id."""
         return self._fingerprints.insights_client_id
