@@ -69,6 +69,9 @@ test-case:
 test-coverage:
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords"
 
+test-coverage-sqlite:
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QPC_DBMS=sqlite
+
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m slow"
 

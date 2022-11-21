@@ -17,6 +17,8 @@ import os
 import tarfile
 import time
 
+from rest_framework.renderers import JSONRenderer
+
 from quipucords.environment import server_version
 
 # Get an instance of a logger
@@ -104,7 +106,7 @@ def create_tar_buffer(files_data):
     with tarfile.open(fileobj=tar_buffer, mode="w:gz") as tar_file:
         for file_name, file_content in files_data.items():
             if file_name.endswith("json"):
-                file_buffer = io.BytesIO(json.dumps(file_content).encode("utf-8"))
+                file_buffer = io.BytesIO(JSONRenderer().render(file_content))
             elif file_name.endswith("csv"):
                 file_buffer = io.BytesIO(file_content.encode("utf-8"))
             elif "SHA256SUM" in file_name:

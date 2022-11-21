@@ -27,6 +27,7 @@ def report_entity():
     return ReportEntity.from_report_id(deployment_report.id)
 
 
+@pytest.mark.dbcompat
 def test_factset_serializer(db, report_entity):
     """Test FactsetSerializer."""
     serializer = FactsetSerializer(
@@ -37,6 +38,7 @@ def test_factset_serializer(db, report_entity):
     assert isinstance(serializer.data[0]["facts"], dict)
 
 
+@pytest.mark.dbcompat
 def test_metadata_serializer(db, report_entity):
     """Test YupanaMetadataSerializer."""
     serializer = YupanaMetadataSerializer(report_entity)
@@ -47,6 +49,7 @@ def test_metadata_serializer(db, report_entity):
     }
 
 
+@pytest.mark.dbcompat
 def test_payload_serializer(db, report_entity: ReportEntity):
     """Test YupanaPayloadSerializer."""
     serializer = YupanaPayloadSerializer(report_entity)
