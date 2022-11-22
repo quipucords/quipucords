@@ -13,7 +13,6 @@ jobs:
         type:
           [
             lint,
-            lint-ansible,
             test-coverage,
             test-coverage-sqlite,
             test-integration,
