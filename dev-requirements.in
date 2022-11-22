@@ -3,7 +3,7 @@ coverage
 
 # Test runner/testing utils
 factory-boy
-pytest-cov
+pytest-cov<4  # changes on how it handles multiprocessing conflicts with scan_manager
 pytest-django
 pytest-lazy-fixture
 pytest-mock
