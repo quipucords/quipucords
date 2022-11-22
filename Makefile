@@ -84,7 +84,7 @@ lint-flake8:
 lint-black:
 	darker --check --diff --revision $(QPC_COMPARISON_REVISION) .
 
-lint: lint-black lint-flake8
+lint: lint-black lint-flake8 lint-ansible
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
