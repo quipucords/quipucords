@@ -661,6 +661,7 @@ pytest==7.2.0 \
     #   pytest-docker-tools
     #   pytest-lazy-fixture
     #   pytest-mock
+    #   pytest-timeout
     #   pytest-xdist
 pytest-cov==3.0.0 \
     --hash=sha256:578d5d15ac4a25e5f961c938b85a05b09fdaae9deef3bb6de9a6e766622ca7a6 \
@@ -681,6 +682,10 @@ pytest-lazy-fixture==0.6.3 \
 pytest-mock==3.10.0 \
     --hash=sha256:f4c973eeae0282963eb293eb173ce91b091a79c1334455acfac9ddee8a1c784b \
     --hash=sha256:fbbdb085ef7c252a326fd8cdcac0aa3b1333d8811f131bdcc701002e1be7ed4f
+    # via -r dev-requirements.in
+pytest-timeout==2.1.0 \
+    --hash=sha256:c07ca07404c612f8abbe22294b23c368e2e5104b521c1790195561f37e1ac3d9 \
+    --hash=sha256:f6f50101443ce70ad325ceb4473c4255e9d74e3c7cd0ef827309dfa4c0d975c6
     # via -r dev-requirements.in
 pytest-xdist==3.0.2 \
     --hash=sha256:688da9b814370e891ba5de650c9327d1a9d861721a524eb917e620eec3e90291 \
