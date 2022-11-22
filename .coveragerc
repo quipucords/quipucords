@@ -1,2 +1,7 @@
 [report]
 omit = */test*.py,*/manage.py,*/apps.py,*/wsgi.py,*/settings.py,*/migrations/*,*/docs/*,*/client/*,*/deploy/*,*/local_gunicorn.conf.py
+# required multiprocessing config due to changes on pytest-cov 4.0.0
+[run]
+concurrency = multiprocessing
+parallel = true
+sigterm = true
