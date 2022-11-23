@@ -9,14 +9,15 @@
 
 """Test common entities."""
 
+import logging
 from datetime import datetime
 from itertools import chain
 
 import pytest
 
-from api.common.entities import ReportEntity, ReportSlice
+from api.common.entities import HostEntity, ReportEntity, ReportSlice
 from api.deployments_report.model import DeploymentsReport
-from api.models import SystemFingerprint
+from api.models import Product, SystemFingerprint
 from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
 
 
@@ -27,6 +28,38 @@ def deployment_reports():
 
 
 @pytest.fixture
+def fingerprint_wo_products():
+    """Return a system fingerprint instance."""
+    report = DeploymentReportFactory.create(number_of_fingerprints=1)
+    return report.system_fingerprints.get()
+
+
+@pytest.fixture
+def fingerprint_with_products():
+    """Return a system fingerprint instance with 3 products."""
+    report = DeploymentReportFactory.create(number_of_fingerprints=1)
+    sys_fp = report.system_fingerprints.get()
+    products = [
+        Product(name="JBoss EAP", presence=Product.PRESENT, fingerprint=sys_fp),
+        Product(name="JBoss Fuse", presence=Product.ABSENT, fingerprint=sys_fp),
+        Product(name="UNKOWN PRODUCT", presence=Product.PRESENT, fingerprint=sys_fp),
+    ]
+    Product.objects.bulk_create(products)
+    return sys_fp
+
+
+@pytest.fixture(
+    params=[
+        pytest.lazy_fixture("fingerprint_wo_products"),
+        pytest.lazy_fixture("fingerprint_with_products"),
+    ]
+)
+def fingerprint(request):
+    """Return a multiplexed system fingerprint."""
+    return request.param
+
+
+@pytest.fixture
 def report_entity():
     """Return a report entity with 100 hosts."""
     deployment_report = DeploymentReportFactory.build(id=42)
@@ -34,6 +67,7 @@ def report_entity():
     return ReportEntity(deployment_report, fingerprints)
 
 
+@pytest.mark.dbcompat
 @pytest.mark.django_db
 class TestReportEntity:
     """Test ReportEntity."""
@@ -45,6 +79,8 @@ class TestReportEntity:
 
         with django_assert_max_num_queries(2):
             report = ReportEntity.from_report_id(report_id)
+            # ensure products does not trigger another query
+            assert isinstance(report.hosts[0].products, set)
 
         assert isinstance(report, ReportEntity)
 
@@ -87,7 +123,28 @@ class TestReportEntity:
         with django_assert_num_queries(2):
             assert isinstance(report.last_discovered, datetime)
 
+    def test_canonical_facts_skipping(self, caplog):
+        """Test the mechanism for skipping hosts w/o canonical facts."""
+        caplog.set_level(logging.WARNING)
+        deployment_report = DeploymentReportFactory.create(number_of_fingerprints=1)
+        non_canonical_fp = SystemFingerprint.objects.create(
+            deployment_report=deployment_report
+        )
+        assert deployment_report.system_fingerprints.count() == 2
+        report_filtered = ReportEntity.from_report_id(deployment_report.id)
+        assert len(report_filtered.hosts) == 1
+        report_unfiltered = ReportEntity.from_report_id(
+            deployment_report.id, skip_non_canonical=False
+        )
+        assert len(report_unfiltered.hosts) == 2
+        assert (
+            caplog.messages[-1]
+            == f"Host (fingerprint={non_canonical_fp.id}, name=None) "
+            "ignored due to lack of canonical facts."
+        )
 
+
+@pytest.mark.django_db
 class TestReportSlicing:
     """Test ReportSliceEntity and ReportEntity slicing mechanism."""
 
@@ -126,3 +183,104 @@ class TestReportSlicing:
             chain.from_iterable(s.hosts for s in report_entity.slices.values())
         )
         assert hosts_from_slices == report_entity.hosts
+
+
+@pytest.mark.django_db
+class TestHostEntity:
+    """Test HostEntity."""
+
+    @classmethod
+    def host_init(cls, system_fingerprint) -> HostEntity:
+        """Initialize HostEntity using ReportEntity annotated query."""
+        report = ReportEntity.from_report_id(system_fingerprint.deployment_report.id)
+        return report.hosts[0]
+
+    def test_products_not_implemented(self, fingerprint):
+        """Ensure only properly initialized host have products."""
+        host = HostEntity(fingerprint, last_discovered=None)
+        with pytest.raises(NotImplementedError):
+            host.products  # pylint: disable=pointless-statement  # false positive
+
+    @pytest.mark.parametrize(
+        "fingerprint,expected_product_names,expected_rh_products_installed",
+        [
+            (
+                pytest.lazy_fixture("fingerprint_wo_products"),
+                set(),
+                [],
+            ),
+            (
+                pytest.lazy_fixture("fingerprint_with_products"),
+                {"JBoss EAP", "UNKOWN PRODUCT"},
+                ["EAP"],
+            ),
+        ],
+    )
+    def test_products(
+        self,
+        fingerprint,
+        expected_product_names,
+        expected_rh_products_installed,
+    ):
+        """Test products/rh_products_installed properties."""
+        host = self.host_init(fingerprint)
+        assert host.products == expected_product_names
+        assert host.rh_products_installed == expected_rh_products_installed
+
+    def test_products_is_rhel(self, fingerprint):
+        """Check if RHEL is added to rh_products_installed when system is rhel."""
+        fingerprint.is_redhat = True
+        fingerprint.save()
+        host = self.host_init(fingerprint)
+        assert "RHEL" in host.rh_products_installed
+
+    @pytest.mark.parametrize(
+        "cpu_socket_count,vm_host_socket_count,expected_result",
+        (
+            ("cpu", "host", "cpu"),
+            ("cpu", None, "cpu"),
+            (None, "host", "host"),
+            (None, None, None),
+        ),
+    )
+    def test_number_of_sockets(
+        self,
+        mocker,
+        cpu_socket_count,
+        vm_host_socket_count,
+        expected_result,
+    ):
+        """Test number_of_sockets logic."""
+        mocked_fingerprint = mocker.Mock(
+            cpu_socket_count=cpu_socket_count, vm_host_socket_count=vm_host_socket_count
+        )
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.number_of_sockets == expected_result
+
+    @pytest.mark.parametrize(
+        "cpu_core_per_socket,vm_host_core_count,vm_host_socket_count,expected_result",
+        (
+            (1, 4, 2, 1),
+            (None, 4, 2, 2),
+            (None, None, 2, None),
+            (None, 4, None, None),
+            (None, 4, 0, None),
+            (None, None, None, None),
+        ),
+    )
+    def test_cores_per_socket(  # pylint: disable=too-many-arguments
+        self,
+        mocker,
+        cpu_core_per_socket,
+        vm_host_core_count,
+        vm_host_socket_count,
+        expected_result,
+    ):
+        """Test cores_per_socket logic."""
+        mocked_fingerprint = mocker.Mock(
+            cpu_core_per_socket=cpu_core_per_socket,
+            vm_host_core_count=vm_host_core_count,
+            vm_host_socket_count=vm_host_socket_count,
+        )
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.cores_per_socket == expected_result

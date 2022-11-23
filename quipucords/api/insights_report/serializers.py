@@ -12,11 +12,10 @@
 from functools import partial
 
 from rest_framework import fields
-from rest_framework.serializers import Serializer, ValidationError
+from rest_framework.serializers import Serializer
 
 from api.common.common_report import create_filename
 from api.common.serializer import ForcedListSerializer, NotEmptyMixin
-from api.insights_report.constants import CANONICAL_FACTS
 from api.status import get_server_id
 from quipucords.environment import server_version
 
@@ -34,6 +33,7 @@ class FactsSerializer(Serializer):
     last_discovered = fields.DateTimeField()
     qpc_server_version = fields.CharField(default=server_version)
     qpc_server_id = fields.CharField(default=get_server_id)
+    rh_products_installed = fields.ListField(child=fields.CharField())
 
 
 class FactsetSerializer(Serializer):
@@ -64,10 +64,10 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     - https://consoledot.pages.redhat.com/docs/dev/services/inventory.html#_system_profile  # noqa: E501
     """
 
-    number_of_cpus = fields.IntegerField(source="cpu_count", **default_kwargs)
-    system_memory_bytes = fields.IntegerField(
-        **default_kwargs
-    )  # TODO: not mapped yet to a fingerprint
+    number_of_cpus = fields.IntegerField(**default_kwargs)
+    number_of_sockets = fields.IntegerField(**default_kwargs)
+    cores_per_socket = fields.IntegerField(**default_kwargs)
+    system_memory_bytes = fields.IntegerField(**default_kwargs)
     infrastructure_type = fields.CharField(max_length=100, **default_kwargs)
     infrastructure_vendor = fields.CharField(
         max_length=100, **default_kwargs
@@ -75,6 +75,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     # yupana builds operating_system from os_release
     os_release = fields.CharField(max_length=100, **default_kwargs)
     arch = fields.CharField(source="architecture", max_length=50, **default_kwargs)
+    cloud_provider = fields.CharField(**default_kwargs)
 
 
 class YupanaHostSerializer(NotEmptyMixin, Serializer):
@@ -83,33 +84,29 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
     display_name = fields.CharField(source="name", **default_kwargs)
     bios_uuid = fields.CharField(**default_kwargs)
     fqdn = fields.CharField(
-        source="name", **default_kwargs
+        **default_kwargs
     )  # TODO: not sure on this one, just followed old implementation https://github.com/quipucords/quipucords/blob/da644172fb35ad7128ba20372cf64fbf7ff4f367/quipucords/fingerprinter/task.py#L373  # noqa: E501
     insights_id = fields.CharField(source="insights_client_id", **default_kwargs)
     ip_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
     mac_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
     provider_id = fields.CharField(
-        source="name", **default_kwargs
-    )  # TODO: not sure on this one
+        **default_kwargs
+    )  # TODO: this probably needs to be adapted for each provider type
     provider_type = fields.CharField(**default_kwargs)
     satellite_id = fields.CharField(
         **default_kwargs
     )  # TODO: not sure on this one https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L901-L907  # noqa: E501
     subscription_manager_id = fields.CharField(**default_kwargs)
+    etc_machine_id = fields.CharField(**default_kwargs)
+    vm_uuid = fields.CharField(**default_kwargs)
     facts = FactsetSerializer(source="*", many=True)
     system_profile = SystemProfileSerializer(source="*", **default_kwargs)
 
     def to_representation(self, instance):
         """Format HostEntity as dict and validate."""
         data = super().to_representation(instance)
-        self.validate(data)
+        self._validate_provider(data)
         return data
-
-    def validate(self, attrs: dict):
-        """Validate serializer data."""
-        attrs = self._validate_canonical_facts(attrs)
-        attrs = self._validate_provider(attrs)
-        return attrs
 
     def _validate_provider(self, attrs: dict):
         # hbi requires either provider_id and provider_type or none
@@ -121,14 +118,6 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
 
         present_provider_attr = present_provider_attr_set.pop()
         attrs.pop(present_provider_attr)
-        return attrs
-
-    def _validate_canonical_facts(self, attrs):
-        if not set(attrs).intersection(CANONICAL_FACTS):
-            raise ValidationError(
-                "At least one 'canonical fact' must be present on the report. "
-                f"(Canonical facts are: {CANONICAL_FACTS})"
-            )
         return attrs
 
 

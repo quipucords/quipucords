@@ -10,7 +10,13 @@ jobs:
   test:
     strategy:
       matrix:
-        type: [lint, lint-ansible, test-coverage, test-integration]
+        type: [
+            lint,
+            lint-ansible,
+            test-coverage,
+            test-coverage-sqlite,
+            test-integration,
+          ]
     runs-on: ubuntu-latest
     services:
       postgres:
