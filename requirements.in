@@ -1,4 +1,5 @@
 ansible<4
+cryptography<3.4  # avoid rust dependencies
 Django<4
 django-filter
 djangorestframework
