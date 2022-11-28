@@ -10,11 +10,10 @@ jobs:
   test:
     strategy:
       matrix:
-        type: [
+        type:
+          [
             lint,
-            lint-ansible,
             test-coverage,
-            test-coverage-sqlite,
             test-integration,
           ]
     runs-on: ubuntu-latest
@@ -47,13 +46,25 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -U pip wheel
           pip install -r dev-requirements.txt
           pip install -e .
 
       - name: Docker Layer Caching
+        if: ${{ success() && contains(matrix.type, 'test-integration') }}
         uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
+
+      # speedup linting with QPC_COMPARISON_REVISION set to a more recent commitish
+      - name: Setup ENV for PR
+        if: ${{ success() && github.event_name == 'pull_request' }}
+        run: |
+          echo "QPC_COMPARISON_REVISION=origin/${GITHUB_BASE_REF}" >> $GITHUB_ENV
+      - name: Setup ENV for push
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        run: |
+          echo "QPC_COMPARISON_REVISION=HEAD^" >> $GITHUB_ENV
 
       - name: Run Test
         run: make ${{ matrix.type }} -k
@@ -66,6 +77,5 @@ jobs:
           QPC_DBMS_HOST: localhost
 
       - name: Report coverage
-        run: |
-          pip install codecov
-          codecov
+        if: ${{ success() && contains(matrix.type, 'test-coverage') }}
+        uses: codecov/codecov-action@v3
