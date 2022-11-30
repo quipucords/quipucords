@@ -4,7 +4,7 @@ PYTHON		= $(shell which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
-TEST_OPTS := -n auto -ra -m 'not slow'
+TEST_OPTS := -n auto -ra -m 'not slow' --timeout=15
 QPC_COMPARISON_REVISION ?= a362b28db064c7a4ee38fe66685ba891f33ee5ba
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
@@ -67,10 +67,8 @@ test-case:
 	$(MAKE) test -e TEST_OPTS="${TEST_OPTS} $(pattern)"
 
 test-coverage:
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords"
-
-test-coverage-sqlite:
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QPC_DBMS=sqlite
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords --cov-append" QPC_DBMS=sqlite
 
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m slow"
@@ -84,7 +82,7 @@ lint-flake8:
 lint-black:
 	darker --check --diff --revision $(QPC_COMPARISON_REVISION) .
 
-lint: lint-black lint-flake8
+lint: lint-black lint-flake8 lint-ansible
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)

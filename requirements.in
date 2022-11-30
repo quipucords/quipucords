@@ -5,7 +5,7 @@ djangorestframework
 jmespath
 paramiko<2.8
 pexpect
-pyvmomi
+pyvmomi<8 # pyvmomi 8 has will break quipucords w/o code changes https://github.com/vmware/pyvmomi/releases/tag/v8.0.0.1
 PyYAML
 requests
 whitenoise
