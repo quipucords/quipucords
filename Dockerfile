@@ -7,14 +7,14 @@ ENV DJANGO_LOG_FORMATTER=verbose
 ENV DJANGO_LOG_HANDLERS=console,file
 ENV DJANGO_LOG_LEVEL=INFO
 ENV DJANGO_SECRET_PATH=/var/data/secret.txt
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 ENV PATH="/opt/venv/bin:${PATH}"
 ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
-RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git jq &&\
+RUN dnf -yq install python39 make openssh-clients sshpass glibc-langpack-en git jq &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
 

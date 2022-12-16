@@ -30,8 +30,8 @@ from api.vault import decrypt_data_as_unicode, write_to_yaml
 from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
-    _construct_vars,
     check_manager_interrupt,
+    construct_inventory,
     expand_hostpattern,
 )
 from scanner.task import ScanTaskRunner
@@ -208,9 +208,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-# pylint: disable=too-many-arguments, too-many-locals,
-# pylint: disable=too-many-statements, too-many-branches
-def _connect(
+def _connect(  # pylint: disable=too-many-arguments
     manager_interrupt,
     scan_task,
     hosts,
@@ -220,8 +218,6 @@ def _connect(
     forks,
     use_paramiko=False,
     exclude_hosts=None,
-    base_ssh_executable=None,
-    ssh_timeout=None,
 ):
     """Attempt to connect to hosts using the given credential.
 
@@ -234,42 +230,17 @@ def _connect(
     :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with
     :param exclude_hosts: Optional. Hosts to exclude from test connections
-    :param base_ssh_executable: ssh executable, or None for
-            'ssh'. Will be wrapped with a timeout before being passed
-            to Ansible.
-        :param ssh_timeout: string in the format of the 'timeout'
-            command. Timeout for individual tasks.
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
+    # pylint: disable=too-many-locals, disable=too-many-statements, too-many-branches
     cred_data = CredentialSerializer(credential).data
-
-    ssh_executable = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../bin/timeout_ssh")
-    )
-
-    base_ssh_executable = base_ssh_executable or "ssh"
-    ssh_timeout = ssh_timeout or settings.QPC_SSH_CONNECT_TIMEOUT
-
-    # pylint: disable=line-too-long
-    # the ssh arg is required for become-pass because
-    # ansible checks for an exact string match of ssh
-    # anywhere in the command array
-    # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
-    # timeout_ssh will remove the ssh argument before running the command
-    ssh_args = [
-        "--executable=" + base_ssh_executable,
-        "--timeout=" + ssh_timeout,
-        "ssh",
-    ]
-    group_names, inventory = _construct_connect_inventory(
-        hosts,
-        cred_data,
-        connection_port,
-        forks,
-        exclude_hosts,
-        ssh_executable,
-        ssh_args,
+    group_names, inventory = construct_inventory(
+        hosts=hosts,
+        credential=cred_data,
+        connection_port=connection_port,
+        concurrency_count=forks,
+        exclude_hosts=exclude_hosts,
     )
     inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)
@@ -298,7 +269,10 @@ def _connect(
 
         # Create parameters for ansible runner
         runner_settings = {"job_timeout": int(settings.NETWORK_CONNECT_JOB_TIMEOUT)}
-        extra_vars_dict = {"variable_host": group_name}
+        extra_vars_dict = {
+            "variable_host": group_name,
+            "ansible_ssh_timeout": settings.QPC_SSH_CONNECT_TIMEOUT,
+        }
         playbook_path = os.path.join(
             settings.BASE_DIR, "scanner/network/runner/connect.yml"
         )
@@ -382,57 +356,3 @@ def _handle_ssh_passphrase(credential):
                 i = child.expect(phrase)
         except pexpect.exceptions.TIMEOUT:
             pass
-
-
-def _construct_connect_inventory(
-    hosts,
-    credential,
-    connection_port,
-    concurrency_count,
-    exclude_hosts=None,
-    ssh_executable=None,
-    ssh_args=None,
-):
-    """Create a dictionary inventory for Ansible to execute with.
-
-    :param hosts: The collection of hosts to test connections
-    :param credential: The credential used for connections
-    :param connection_port: The connection port
-    :param concurrency_count: The number of concurrent scans
-    :param exclude_hosts: Optional. Hosts to exclude test connections
-    :param ssh_executable: the ssh executable to use, or None for 'ssh'
-    :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A dictionary of the ansible inventory
-    """
-    if exclude_hosts is not None:
-        hosts = list(set(hosts) - set(exclude_hosts))
-
-    concurreny_groups = list(
-        [
-            hosts[i : i + concurrency_count]
-            for i in range(0, len(hosts), concurrency_count)
-        ]
-    )
-
-    vars_dict = _construct_vars(connection_port, credential)
-    children = {}
-    inventory = {"all": {"children": children, "vars": vars_dict}}
-    i = 0
-    group_names = []
-    for concurreny_group in concurreny_groups:
-        hosts_dict = {}
-        for host in concurreny_group:
-            host_vars = {}
-            host_vars["ansible_host"] = host
-            if ssh_executable:
-                host_vars["ansible_ssh_executable"] = ssh_executable
-            if ssh_args:
-                host_vars["ansible_ssh_common_args"] = " ".join(ssh_args)
-            hosts_dict[host] = host_vars
-
-        group_name = "group_{}".format(i)
-        i += 1
-        group_names.append(group_name)
-        children[group_name] = {"hosts": hosts_dict}
-
-    return group_names, inventory
