@@ -1,0 +1,14 @@
+Report ID,Report Type,Report Version,Report Platform ID,Number Sources
+1,details,{report_version},{report_platform_id},1
+
+
+Source
+Server Identifier,Source Name,Source Type
+{server_id},test_source,network
+Facts
+connection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type
+1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt
+1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt
+1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt
+
+

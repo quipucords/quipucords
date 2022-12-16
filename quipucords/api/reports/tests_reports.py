@@ -13,6 +13,7 @@
 import json
 import sys
 import tarfile
+from pathlib import Path
 
 from django.core import management
 from django.test import TestCase
@@ -55,10 +56,7 @@ class ReportsTest(TestCase):
         self.deployments_json = None
         self.mock_req = MockRequest()
         self.mock_renderer_context = {"request": self.mock_req}
-
-    def tearDown(self):
-        """Create test case tearDown."""
-        pass
+        self.test_data_path = Path(__file__).parent / "test_data"
 
     def create_details_report(self, data):
         """Call the create endpoint."""
@@ -154,30 +152,18 @@ class ReportsTest(TestCase):
     # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer(self):
         """Get a tar.gz return for report_id via API."""
-        # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict()
-        deployments_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID\r\n"
-            f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
-            "\r\n"
-            "\r\n"
-            "System Fingerprints:\r\n"
-            "architecture,bios_uuid,cloud_provider,container_images,container_labels,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
-            ",,,,,2,2,,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,,,2,2,False,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,,,2,2,False,2,True,False,False,,,virtualized,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            "\r\n"
+        deployments_csv_path = self.test_data_path / "deployments.csv"
+        details_csv_path = self.test_data_path / "details.csv"
+        deployments_csv = deployments_csv_path.read_text().format(
+            report_version=self.report_version,
+            report_platform_id=reports_dict["deployments_json"]["report_platform_id"],
         )
-
-        # pylint: disable=line-too-long
-        details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"
-            % (
-                self.report_version,
-                reports_dict.get("details_json").get("report_platform_id"),
-                self.server_id,
-            )
-        )  # noqa
+        details_csv = details_csv_path.read_text().format(
+            report_version=self.report_version,
+            report_platform_id=reports_dict["details_json"]["report_platform_id"],
+            server_id=self.server_id,
+        )
 
         renderer = ReportsGzipRenderer()
         tar_gz_result = renderer.render(
@@ -193,9 +179,9 @@ class ReportsTest(TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith("csv"):
                 if "details" in file_contents:
-                    assert file_contents == details_csv
+                    assert file_contents.splitlines() == details_csv.splitlines()
                 elif "deployments" in file_contents:
-                    assert file_contents == deployments_csv
+                    assert file_contents.splitlines() == deployments_csv.splitlines()
                 else:
                     sys.exit("Could not identify .csv return.")
             elif filenames[idx].endswith("json"):
@@ -223,29 +209,19 @@ class ReportsTest(TestCase):
     # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer_masked(self):
         """Get a tar.gz return for report_id via API with masked values."""
-        # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict(query_params="?mask=True")
-        deployments_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID\r\n"
-            f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
-            "\r\n"
-            "\r\n"
-            "System Fingerprints:\r\n"
-            "architecture,bios_uuid,cloud_provider,container_images,container_labels,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-network,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
-            ",,,,,2,2,,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,,,2,2,False,2,True,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            "\r\n"
-        )  # noqa
-        # pylint: disable=line-too-long
-        details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"
-            % (
-                self.report_version,
-                reports_dict.get("details_json").get("report_platform_id"),
-                self.server_id,
-            )
-        )  # noqa
+
+        deployments_csv_path = self.test_data_path / "deployments_masked.csv"
+        details_csv_path = self.test_data_path / "details_masked.csv"
+        deployments_csv = deployments_csv_path.read_text().format(
+            report_version=self.report_version,
+            report_platform_id=reports_dict["deployments_json"]["report_platform_id"],
+        )
+        details_csv = details_csv_path.read_text().format(
+            report_version=self.report_version,
+            report_platform_id=reports_dict["details_json"]["report_platform_id"],
+            server_id=self.server_id,
+        )
         renderer = ReportsGzipRenderer()
         mock_req = MockRequest(mask_rep=True)
         mock_renderer_context = {"request": mock_req}
@@ -262,9 +238,9 @@ class ReportsTest(TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith("csv"):
                 if "details" in file_contents:
-                    assert file_contents == details_csv
+                    assert file_contents.splitlines() == details_csv.splitlines()
                 elif "deployments" in file_contents:
-                    assert file_contents == deployments_csv
+                    assert file_contents.splitlines() == deployments_csv.splitlines()
                 else:
                     sys.exit("Could not identify .csv return.")
             elif filenames[idx].endswith("json"):
