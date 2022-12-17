@@ -49,8 +49,6 @@ def fingerprint_fact_map():
     """Map fingerprint to raw fact name."""
     return {
         "name": "name",
-        "container_images": "deployments",
-        "container_labels": "deployments",
     }
 
 

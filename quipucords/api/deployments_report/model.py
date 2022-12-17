@@ -176,10 +176,6 @@ class SystemFingerprint(models.Model):
         unique=False, blank=True, null=True
     )
 
-    # openshift facts
-    container_images = models.JSONField(blank=True, null=True)
-    container_labels = models.JSONField(blank=True, null=True)
-
     metadata = models.TextField(unique=False, null=False)
     sources = models.TextField(unique=False, null=False)
     etc_machine_id = models.CharField(
