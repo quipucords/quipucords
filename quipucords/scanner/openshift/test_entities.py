@@ -9,9 +9,17 @@
 #
 """Test OCPEntities methods."""
 
+from copy import deepcopy
+
 import pytest
 
-from scanner.openshift.entities import OCPBaseEntity, OCPError
+from scanner.openshift.entities import (
+    OCPBaseEntity,
+    OCPDeployment,
+    OCPError,
+    OCPProject,
+    load_entity,
+)
 
 
 @pytest.mark.parametrize("reason", ["FOO", "BAR"])
@@ -33,6 +41,46 @@ def test_message_parsing(mocker, error_body, expected_message, status, reason):
     assert error.status == status
     assert error.reason == reason
     assert error.message == expected_message
+
+
+@pytest.fixture
+def deployment_data():
+    """Return data representing a Deployment."""
+    return dict(
+        kind="deployment",
+        name="deployment",
+        labels={"foo": "bar"},
+        container_images=["some-image"],
+        init_container_images=[],
+    )
+
+
+@pytest.fixture
+def project_data():
+    """Return data representing a Project."""
+    return dict(
+        name="some project",
+        kind="namespace",
+        labels={"foo": "bar"},
+        deployments=[],
+        errors=[],
+    )
+
+
+@pytest.mark.parametrize(
+    "data,expected_class",
+    [
+        (pytest.lazy_fixture("deployment_data"), OCPDeployment),
+        (pytest.lazy_fixture("project_data"), OCPProject),
+    ],
+)
+def test_load_entity(data, expected_class):
+    """Test load_entity function."""
+    # protect data for future comparison
+    expected_data = deepcopy(data)
+    entity = load_entity(data)
+    assert isinstance(entity, expected_class)
+    assert expected_data == entity.to_dict()
 
 
 class TestOCPBaseEntity:  # pylint: disable=missing-class-docstring, unused-variable

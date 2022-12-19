@@ -13,6 +13,12 @@ from dataclasses import asdict, dataclass, field
 from typing import Dict, List
 
 
+def load_entity(data: dict) -> "OCPBaseEntity":
+    """Trasform data into the appropriate OCP entity."""
+    kind = data["kind"]
+    return OCPBaseEntity.OCP_ENTITIES[kind](**data)
+
+
 class ToDictMixin:
     """Mixin that adds "to_dict" method to dataclasses."""
 
