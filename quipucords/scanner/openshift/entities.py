@@ -21,33 +21,87 @@ class ToDictMixin:
         return asdict(self)
 
 
+class OCPBaseEntity(ToDictMixin):
+    """Base OCP entity. All OCP entities should inherit from this class."""
+
+    OCP_ENTITIES = {}
+
+    def __post_init__(self):
+        """Run after dataclass '__init__'."""
+        # avoid kind being improperly set
+        self.kind = self.__class__.kind  # noqa: E1101
+
+    def __new__(cls, *args, **kwargs):
+        """Override __new__ magic method."""
+        if cls == OCPBaseEntity:
+            raise TypeError(f"{cls.__name__} can't be initialized.")
+        return super().__new__(cls)
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        Override __init_subclass__ magic method.
+
+        Setup subclasses enforcing some standards.
+        """
+        super().__init_subclass__(**kwargs)
+        kind = cls._get_kind()
+        cls._set_kind_as_annotation(kind)
+        cls.OCP_ENTITIES[kind] = cls
+
+    @classmethod
+    def _get_kind(cls):
+        try:
+            kind = cls.kind
+        except AttributeError:
+            raise NotImplementedError(  # pylint: disable=raise-missing-from
+                f"{cls.__name__} MUST implement an attribute 'kind'."
+            )
+        assert isinstance(kind, str), "'kind' attribute should be an str."
+        assert kind not in cls.OCP_ENTITIES, f"Entity with {kind=} already registered."
+        return kind
+
+    @classmethod
+    def _set_kind_as_annotation(cls, kind):
+        try:
+            # force kind to work as a dataclass field.
+            cls.__annotations__["kind"] = field(default=kind)
+        except AttributeError:
+            raise AttributeError(  # pylint: disable=raise-missing-from
+                f"{cls.__name__} don't have type annotations. "
+                "Did you forgot to implement it's dataclass fields?"
+            )
+
+
 @dataclass
-class OCPProject(ToDictMixin):
+class OCPProject(OCPBaseEntity):
     """Entity representing OpenShift Projects/Namespaces."""
 
     name: str
     labels: Dict[str, str]
     deployments: List["OCPDeployment"] = field(default_factory=list)
     errors: Dict[str, "OCPError"] = field(default_factory=dict)
+    kind = "namespace"
 
 
 @dataclass
-class OCPDeployment(ToDictMixin):
+class OCPDeployment(OCPBaseEntity):
     """Entity representing OpenShift Deployments."""
 
     name: str
     labels: Dict[str, str]
     container_images: List[str]
     init_container_images: List[str]
+    kind = "deployment"
 
 
 @dataclass
-class OCPError(Exception, ToDictMixin):
+class OCPError(Exception, OCPBaseEntity):
     """Entity/Error class for OpenShift errors."""
 
     status: int = None
     reason: str = None
     message: str = None
+    kind = "error"
 
     @classmethod
     def from_api_exception(cls, api_exception):
