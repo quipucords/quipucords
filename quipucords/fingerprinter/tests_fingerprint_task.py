@@ -115,6 +115,17 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "vm_state": "vm.state",
     "vm_uuid": "vm.uuid",
 }
+EXPECTED_FINGERPRINT_MAP_OPENSHIFT = {
+    "name": "name",
+    "system_creation_date": "creation_timestamp",
+    "ip_addresses": "addresses",
+    "cpu_count": "cpu_allocatable",
+    "system_memory_bytes": "memory_capacity",
+    "architecture": "architecture",
+    "etc_machine_id": "machine_id",
+    "roles": "taints",
+    "is_schedulable": "taints",
+}
 
 PRODUCTS = [
     {"name": "JBoss EAP", "presence": "absent"},

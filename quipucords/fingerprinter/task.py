@@ -1724,6 +1724,59 @@ class FingerprintTaskRunner(ScanTaskRunner):
             PRODUCTS_KEY: [],
         }
         self._add_fact_to_fingerprint(source, "name", fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(
+            source, "creation_timestamp", fact, "system_creation_date", fingerprint
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "addresses",
+            fact,
+            "ip_addresses",
+            fingerprint,
+            fact_formatter=formatters.extract_ip_addresses,
+        )
+        self._add_fact_to_fingerprint(
+            source, "cpu_capacity", fact, "cpu_count", fingerprint
+        )
+        self._add_fact_to_fingerprint(
+            source, "cpu_allocatable", fact, "allocatable_cpu", fingerprint
+        )
+        # memory_allocatable or memory_capacity? remove if questions are not answered before recharge
+        self._add_fact_to_fingerprint(
+            source,
+            "memory_capacity",
+            fact,
+            "system_memory_bytes",
+            fingerprint,
+            fact_formatter=formatters.convert_memory_fact_to_bytes,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "architecture",
+            fact,
+            "architecture",
+            fingerprint,
+            fact_formatter=formatters.convert_architecture,
+        )
+        self._add_fact_to_fingerprint(
+            source, "machine_id", fact, "etc_machine_id", fingerprint
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "taints",
+            fact,
+            "roles",
+            fingerprint,
+            fact_formatter=formatters.get_node_roles,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "taints",
+            fact,
+            "is_schedulable",
+            fingerprint,
+            fact_formatter=formatters.is_schedulable,
+        )
 
         return fingerprint
 
