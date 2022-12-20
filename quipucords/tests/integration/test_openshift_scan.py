@@ -196,7 +196,7 @@ class TestOpenShiftScan:
         }
         assert report_details_dict == expected_details_report
         report_details_facts = report_details_dict[SOURCES_KEY][0]["facts"]
-        assert report_details_facts == [p.to_dict() for p in expected_projects]
+        assert report_details_facts == [p.dict() for p in expected_projects]
 
     @pytest.fixture
     def expected_fingerprint_metadata(self, fingerprint_fact_map):
