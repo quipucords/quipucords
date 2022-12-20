@@ -21,8 +21,8 @@ from typing import Dict, List
 from django.conf import settings
 from django.db.models import F, Q, Value
 
-from api.compat.db import StringAgg
 from api.models import DeploymentsReport, Product, Source, SystemFingerprint
+from compat.db import StringAgg
 
 CANONICAL_FACTS = (
     "fqdn",
