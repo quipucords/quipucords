@@ -9,30 +9,27 @@
 #
 """Entities representing data collected from OpenShift."""
 import json
-from dataclasses import asdict, dataclass, field
 from typing import Dict, List
 
+from pydantic import Field  # pylint: disable=no-name-in-module
 
-class ToDictMixin:
-    """Mixin that adds "to_dict" method to dataclasses."""
-
-    def to_dict(self):
-        """Convert object to dict."""
-        return asdict(self)
+from compat.pydantic import BaseModel, raises
 
 
-@dataclass
-class OCPProject(ToDictMixin):
+class OCPBaseEntity(BaseModel):
+    """Base OCP entity. All OCP entities should inherit from this class."""
+
+
+class OCPProject(OCPBaseEntity):
     """Entity representing OpenShift Projects/Namespaces."""
 
     name: str
     labels: Dict[str, str]
-    deployments: List["OCPDeployment"] = field(default_factory=list)
-    errors: Dict[str, "OCPError"] = field(default_factory=dict)
+    deployments: List["OCPDeployment"] = Field(default_factory=list)
+    errors: Dict[str, "OCPError"] = Field(default_factory=dict)
 
 
-@dataclass
-class OCPDeployment(ToDictMixin):
+class OCPDeployment(OCPBaseEntity):
     """Entity representing OpenShift Deployments."""
 
     name: str
@@ -41,8 +38,8 @@ class OCPDeployment(ToDictMixin):
     init_container_images: List[str]
 
 
-@dataclass
-class OCPError(Exception, ToDictMixin):
+@raises(ValueError)
+class OCPError(OCPBaseEntity):
     """Entity/Error class for OpenShift errors."""
 
     status: int = None
@@ -53,7 +50,9 @@ class OCPError(Exception, ToDictMixin):
     def from_api_exception(cls, api_exception):
         """Initialize OCPError from kubernetes ApiException."""
         error_message = cls._parse_error_message(api_exception.body)
-        return cls(
+        # we need explicitly return OCPError instead of cls because the latter
+        # is not modified by the decorator.
+        return OCPError(
             status=api_exception.status,
             reason=api_exception.reason,
             message=error_message,
@@ -69,4 +68,7 @@ class OCPError(Exception, ToDictMixin):
 
     def __str__(self):
         """Format as string."""
-        return str(self.to_dict())
+        return str(self.dict())
+
+    def __raise__(self):
+        return (self.message,)
