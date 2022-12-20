@@ -36,6 +36,7 @@ target-version = ['py39']
 profile = "black"
 known_first_party = [
     "api",
+    "compat",
     "fingerprinter",
     "log_messages",
     "quipucords",
