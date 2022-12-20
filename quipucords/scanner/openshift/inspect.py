@@ -10,14 +10,12 @@
 
 """OpenShift inspect task runner."""
 
-from json import dumps
-
 from django.conf import settings
 from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
-from scanner.openshift.entities import OCPProject
+from scanner.openshift.entities import OCPBaseEntity, OCPProject
 from scanner.openshift.task import OpenShiftTaskRunner
 
 
@@ -91,24 +89,23 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             task_inspection_result=self.scan_task.inspection_result,
         )
         sys_result.save()
-        RawFact.objects.bulk_create(self._init_raw_facts(project, sys_result))
+        raw_fact = self._entity_as_raw_fact(project, sys_result)
+        raw_fact.save()
         return sys_result
+
+    def _entity_as_raw_fact(
+        self, entity: OCPBaseEntity, inspection_result: SystemInspectionResult
+    ) -> RawFact:
+        return RawFact(
+            name=entity.kind,
+            value=entity.json(),
+            system_inspection_result=inspection_result,
+        )
 
     def _infer_inspection_status(self, project: OCPProject):
         if project.errors:
             return SystemInspectionResult.FAILED
         return SystemInspectionResult.SUCCESS
-
-    def _init_raw_facts(self, project: OCPProject, system_result):
-        _raw_facts = []
-        for fact_name, fact_value in project.dict().items():
-            raw_fact = RawFact(
-                name=fact_name,
-                value=dumps(fact_value),
-                system_inspection_result=system_result,
-            )
-            _raw_facts.append(raw_fact)
-        return _raw_facts
 
     def _get_increment_kwargs(self, inspection_status):
         return {
