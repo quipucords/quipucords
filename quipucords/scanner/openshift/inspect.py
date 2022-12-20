@@ -101,7 +101,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def _init_raw_facts(self, project: OCPProject, system_result):
         _raw_facts = []
-        for fact_name, fact_value in project.to_dict().items():
+        for fact_name, fact_value in project.dict().items():
             raw_fact = RawFact(
                 name=fact_name,
                 value=dumps(fact_value),
