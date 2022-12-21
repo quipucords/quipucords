@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    continue-on-error: ${{ github.event_name == 'pull_request' && startsWith(github.base_ref, 'feature/') }}
     strategy:
       matrix:
         type:
