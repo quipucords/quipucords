@@ -153,7 +153,7 @@ def test_retrieve_deployments_succesful(ocp_client: OpenShiftApi):
     deployments = ocp_client.retrieve_deployments(FULL_ACCESS_PROJECT)
     assert_elements_type(deployments, OCPDeployment)
 
-    another_app_dep, awesome_app, bare_minimum_app = deployments
+    another_app_dep, awesome_app = deployments
 
     assert another_app_dep.name == "another-app"
     assert another_app_dep.labels == {
@@ -170,11 +170,6 @@ def test_retrieve_deployments_succesful(ocp_client: OpenShiftApi):
     }
     assert awesome_app.container_images == ["main-container-image:latest"]
     assert awesome_app.init_container_images == ["some-init-container-img:latest"]
-
-    assert bare_minimum_app.name is None
-    assert bare_minimum_app.labels == {}
-    assert bare_minimum_app.container_images == []
-    assert bare_minimum_app.init_container_images == []
 
 
 @httpretty.activate
