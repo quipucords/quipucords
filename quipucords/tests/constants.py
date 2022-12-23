@@ -9,7 +9,11 @@
 
 """Test constants."""
 
+from __future__ import annotations
+
 from pathlib import Path
+
+from tests.env import BaseURI, EnvVar, as_bool
 
 PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent.parent
 
@@ -27,3 +31,15 @@ READINESS_TIMEOUT_SECONDS = 60
 SCAN_TARGET_PASSWORD = "super-secret-password"
 SCAN_TARGET_SSH_PORT = "2222"
 SCAN_TARGET_USERNAME = "non-root-user"
+
+
+class ConstantsFromEnv:
+    """
+    Constants from env vars.
+
+    Environment variable names match the attribute name.
+    """
+
+    TEST_OCP_AUTH_TOKEN = EnvVar("<AUTH_TOKEN>")
+    TEST_OCP_SSL_VERIFY = EnvVar("true", as_bool)
+    TEST_OCP_URI = EnvVar("https://fake.ocp.host:9872", BaseURI)

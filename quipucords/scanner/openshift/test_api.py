@@ -16,13 +16,10 @@ import pytest
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
 from tests.asserts import assert_elements_type
+from tests.constants import ConstantsFromEnv
 
 FULL_ACCESS_PROJECT = "awesome_project"
 FORBIDDEN_PROJECT = "forbidden_project"
-OPENSHIFT_HOST = "fake.openshift.host"
-OPENSHIFT_PORT = 9876
-OPENSHIFT_TOKEN = "<API TOKEN>"
-OPENSHIFT_PROTOCOL = "https"
 
 
 def data_path(filename) -> Path:
@@ -48,9 +45,10 @@ class TestData:
 
 def patch_ocp_api(path, **kwargs):
     """Shortcut for patching ocp requests."""
+    ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
     httpretty.register_uri(
         httpretty.GET,
-        f"{OPENSHIFT_PROTOCOL}://{OPENSHIFT_HOST}:{OPENSHIFT_PORT}/{path}",
+        f"{ocp_uri.protocol}://{ocp_uri.host}:{ocp_uri.port}/{path}",
         **kwargs,
     )
 
@@ -58,11 +56,13 @@ def patch_ocp_api(path, **kwargs):
 @pytest.fixture
 def ocp_client():
     """OCP client for testing."""
-    return OpenShiftApi.from_auth_token(
-        auth_token=OPENSHIFT_TOKEN,
-        host=OPENSHIFT_HOST,
-        port=OPENSHIFT_PORT,
-        protocol=OPENSHIFT_PROTOCOL,
+    ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
+    client = OpenShiftApi.from_auth_token(
+        auth_token=ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value,
+        host=ocp_uri.host,
+        port=ocp_uri.port,
+        protocol=ocp_uri.protocol,
+        ssl_verify=ConstantsFromEnv.TEST_OCP_SSL_VERIFY.value,
     )
 
 
