@@ -11,12 +11,16 @@
 
 from __future__ import annotations
 
+import datetime
 import json
+import re
 from typing import Dict, List
 
-from pydantic import Field  # pylint: disable=no-name-in-module
+from pydantic import Field, validator  # pylint: disable=no-name-in-module
 
 from compat.pydantic import BaseModel, raises
+
+MEMORY_CONVERSION_ERROR = "This value couldn't be converted."
 
 
 def load_entity(data: dict) -> OCPBaseEntity:
@@ -82,6 +86,24 @@ class OCPCluster(OCPBaseEntity):
         return f"cluster:{self.uuid}"
 
 
+class OCPNode(OCPBaseEntity):
+    """Entity representing OpenShift Node."""
+
+    name: str
+    creation_timestamp: datetime.datetime = None
+    labels: Dict[str, str] = None
+    addresses: List[dict] = None
+    allocatable: NodeResources = None
+    capacity: NodeResources = None
+    architecture: str = None
+    kernel_version: str = None
+    machine_id: str = None
+    operating_system: str = None
+    taints: List[dict] = None
+    errors: Dict[str, OCPError] = Field(default_factory=dict)
+    _kind = "node"
+
+
 class OCPProject(OCPBaseEntity):
     """Entity representing OpenShift Projects/Namespaces."""
 
@@ -138,6 +160,50 @@ class OCPError(OCPBaseEntity):
     def __raise__(self):
         """Arguments for raised exception."""
         return (self.message,)
+
+
+class NodeResources(OCPBaseEntity):
+    """Class representing node's resources."""
+
+    cpu: float = None
+    memory_in_bytes: int = None
+    pods: int = None
+    _kind = "node-resources"
+
+    @validator("cpu", pre=True)
+    def _convert_cpu_value(cls, value):  # pylint: disable=no-self-argument
+        # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu
+        millicore_suffix = re.compile(r"^\d+m$")
+        if isinstance(value, str) and millicore_suffix.match(value):
+            value = float(value.replace("m", "")) / 1000
+        return value
+
+    @validator("memory_in_bytes", pre=True)
+    def _convert_memory_bytes(cls, value):  # pylint: disable=no-self-argument
+        # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory
+        if isinstance(value, str):
+            resources_regex = re.compile(r"^(\d+)([kKMGTPE])(i?)$")
+            match = resources_regex.match(value)
+            if not match:
+                raise ValueError(MEMORY_CONVERSION_ERROR)
+            value = int(match.group(1))
+            power_name = match.group(2)
+            ends_with_i = match.group(3)
+            if ends_with_i:
+                base = 1024
+            else:
+                base = 1000
+            power = {
+                "K": 1,
+                "M": 2,
+                "G": 3,
+                "T": 4,
+                "P": 5,
+                "E": 6,
+            }[power_name.upper()]
+            return value * base**power
+
+        return value
 
 
 # update nested model references - this should always be the last thing to run

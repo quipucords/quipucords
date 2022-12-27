@@ -12,8 +12,11 @@
 from copy import deepcopy
 
 import pytest
+from pydantic import ValidationError  # pylint: disable=no-name-in-module
 
 from scanner.openshift.entities import (
+    MEMORY_CONVERSION_ERROR,
+    NodeResources,
     OCPBaseEntity,
     OCPDeployment,
     OCPError,
@@ -144,3 +147,77 @@ class TestOCPBaseEntity:  # pylint: disable=missing-class-docstring, unused-vari
 
         entity = TestClass(name="foo")
         assert entity.kind is not None
+
+
+@pytest.mark.parametrize(
+    "value, expected_result, attr_value",
+    [
+        ("200m", 0.2, 0.2),
+        ("3500m", 3.5, 3.5),
+        (2.0, 2.0, 2.0),
+        (4, 4.0, 4.0),
+        ("2", "2", 2.0),
+    ],
+)
+# pylint: disable=no-value-for-parameter, protected-access
+def test_cpu_validator_with_convertible_values(value, expected_result, attr_value):
+    """Ensure cpu data is being converted appropriately."""
+    converted_value = NodeResources._convert_cpu_value(value)
+    assert converted_value == expected_result
+
+    node_resource = NodeResources(cpu=value)
+    assert node_resource.cpu == attr_value
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["cpu_value", [2.0], "200k", {"cpu_value": "3500m"}],
+)
+def test_cpu_validator_with_inappropriate_values(value):
+    """Ensure proper error is being raised for values that belong to wrong data type."""
+    with pytest.raises(ValidationError) as error_info:
+        NodeResources(cpu=value)
+    assert "value is not a valid float" in str(error_info.value)
+
+
+@pytest.mark.parametrize(
+    "value, expected_result",
+    [
+        ("1Ki", 1024),
+        ("1K", 1000),
+        ("10Gi", 10737418240),
+        ("1P", 1000000000000000),
+        ("150Mi", 157286400),
+        (123, 123),
+    ],
+)
+# pylint: disable=no-value-for-parameter, protected-access
+def test_memory_validator_with_convertible_values(value, expected_result):
+    """Ensure memory data is being converted appropriately."""
+    converted_value = NodeResources._convert_memory_bytes(value)
+    assert converted_value == expected_result
+
+    node_resources = NodeResources(memory_in_bytes=value)
+    assert node_resources.memory_in_bytes == expected_result
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["15000GI", "15000L", "1500mi"],
+)
+# pylint: disable=no-value-for-parameter, protected-access
+def test_memory_validator_with_uncovertible_values(value):
+    """Ensure proper error is being raised for values that can't be converted."""
+    with pytest.raises(ValueError, match=MEMORY_CONVERSION_ERROR):
+        NodeResources._convert_memory_bytes(value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [[2.0], {"memory_value": "15500Ki"}, ("1500Ki",)],
+)
+def test_memory_validator_with_inappropriate_values(value):
+    """Ensure proper error is being raised for wrong data types."""
+    with pytest.raises(ValidationError) as exc_info:
+        NodeResources(memory_in_bytes=value)
+    assert "value is not a valid integer" in str(exc_info.value)
