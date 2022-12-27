@@ -11,7 +11,9 @@
 
 from __future__ import annotations
 
+import datetime
 import json
+from dataclasses import dataclass
 from typing import Dict, List
 
 from pydantic import Field  # pylint: disable=no-name-in-module
@@ -66,6 +68,33 @@ class OCPBaseEntity(BaseModel):
         assert isinstance(kind, str), "'_kind' attribute should be an str."
         assert kind not in cls._OCP_ENTITIES, f"Entity with {kind=} already registered."
         return kind
+
+
+class OCPCluster(OCPBaseEntity):
+    """Entity representing OpenShift Cluster."""
+
+    uuid: str = None
+    errors: Dict[str, OCPError] = Field(default_factory=dict)
+    _kind = "cluster"
+
+
+class OCPNode(OCPBaseEntity):
+    """Entity representing OpenShift Node."""
+
+    name: str
+    creation_timestamp: datetime.datetime = None
+    labels: Dict[str, str] = None
+    addresses: List[dict] = None
+    cpu: Dict[str, float] = None
+    memory: Dict[str, int] = None
+    pods: Dict[str, int] = None
+    architecture: str = None
+    kernel_version: str = None
+    machine_id: str = None
+    operating_system: str = None
+    taints: List[dict] = None
+    errors: Dict[str, OCPError] = Field(default_factory=dict)
+    _kind = "node"
 
 
 class OCPProject(OCPBaseEntity):
@@ -128,3 +157,27 @@ class OCPError(OCPBaseEntity):
 
 # update nested model references - this should always be the last thing to run
 _update_model_refs()
+
+
+@dataclass
+class Cpu:
+    """Class representing CPU's attributes."""
+
+    allocatable: float
+    capacity: float
+
+
+@dataclass
+class Memory:
+    """Class representing Memory's attributes."""
+
+    allocatable: int
+    capacity: int
+
+
+@dataclass
+class Pods:
+    """Class representing Pod's attributes."""
+
+    allocatable: int
+    capacity: int
