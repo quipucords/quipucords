@@ -23,7 +23,14 @@ from kubernetes.client import (
 from openshift.dynamic import DynamicClient
 from urllib3.exceptions import MaxRetryError
 
-from scanner.openshift.entities import OCPCluster, OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import (
+    NodeResources,
+    OCPCluster,
+    OCPDeployment,
+    OCPError,
+    OCPNode,
+    OCPProject,
+)
 
 logger = getLogger(__name__)
 
@@ -117,6 +124,14 @@ class OpenShiftApi:
             project_list.append(ocp_project)
         return project_list
 
+    def retrieve_nodes(self, **kwargs) -> List[OCPNode]:
+        """Retrieve nodes under OCP host."""
+        node_list = []
+        for node in self._list_nodes(**kwargs).items:
+            ocp_node = self._init_ocp_nodes(node)
+            node_list.append(ocp_node)
+        return node_list
+
     def retrieve_cluster(self, **kwargs) -> OCPCluster:
         """Retrieve cluster under OCP host."""
         clusters = self._list_clusters(**kwargs).items
@@ -138,6 +153,10 @@ class OpenShiftApi:
         return CoreV1Api(api_client=self._api_client)
 
     @cached_property
+    def _node_api(self):
+        return self._dynamic_client.resources.get(api_version="v1", kind="Node")
+
+    @cached_property
     def _apps_api(self):
         return AppsV1Api(api_client=self._api_client)
 
@@ -151,6 +170,10 @@ class OpenShiftApi:
     @wraps(CoreV1Api.list_namespace)
     def _list_projects(self, **kwargs):
         return self._core_api.list_namespace(**kwargs)
+
+    @catch_k8s_exception
+    def _list_nodes(self, **kwargs):
+        return self._node_api.get(**kwargs)
 
     @catch_k8s_exception
     def _list_clusters(self, **kwargs):
@@ -169,6 +192,29 @@ class OpenShiftApi:
         if retrieve_all:
             self.add_deployments_to_project(ocp_project)
         return ocp_project
+
+    def _init_ocp_nodes(self, node) -> OCPNode:
+        return OCPNode(
+            name=node.metadata.name,
+            creation_timestamp=node.metadata.creationTimestamp,
+            labels=node.metadata.labels,
+            addresses=node.status["addresses"],
+            allocatable=NodeResources(
+                cpu=node.status["allocatable"]["cpu"],
+                memory_in_bytes=node.status["allocatable"]["memory"],
+                pods=node.status["allocatable"]["pods"],
+            ),
+            capacity=NodeResources(
+                cpu=node.status["capacity"]["cpu"],
+                memory_in_bytes=node.status["capacity"]["memory"],
+                pods=node.status["capacity"]["pods"],
+            ),
+            architecture=node.status["nodeInfo"]["architecture"],
+            kernel_version=node.status["nodeInfo"]["kernelVersion"],
+            machine_id=node.status["nodeInfo"]["machineID"],
+            operating_system=node.status["nodeInfo"]["operatingSystem"],
+            taints=node.spec["taints"],
+        )
 
     def _init_cluster(self, cluster) -> OCPCluster:
         ocp_cluster = OCPCluster(
