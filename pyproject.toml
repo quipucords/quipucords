@@ -60,6 +60,8 @@ load-plugins = [
 pythonpath = "quipucords/"
 addopts = [
     "--ds=quipucords.settings",
+    "--block-network",
+    "--allowed-hosts=127.0.0.1,::1",
 ]
 python_files = [
     "tests.py",
