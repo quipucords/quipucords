@@ -7,6 +7,7 @@ pytest-cov<4  # changes on how it handles multiprocessing conflicts with scan_ma
 pytest-django
 pytest-lazy-fixture
 pytest-mock
+pytest-recording
 pytest-timeout
 pytest-xdist
 pytest
