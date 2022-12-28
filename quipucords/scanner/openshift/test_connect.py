@@ -18,11 +18,6 @@ from scanner.openshift.entities import OCPError
 from tests.factories import ScanTaskFactory
 
 
-@pytest.fixture(autouse=True)
-def _patch_scan_manager(disabled_scan_manager):
-    """Disable automatic spawned scan manager."""
-
-
 @pytest.fixture
 def scan_task():
     """Return a ScanTask for testing."""

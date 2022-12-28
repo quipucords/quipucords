@@ -144,11 +144,11 @@ class TestOpenShiftScan:
         return scan_id
 
     @pytest.fixture
-    def scan_response(self, django_client, scan_id):
+    def scan_response(self, django_client, scan_id, scan_manager):
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = django_client.post(f"scans/{scan_id}/jobs/")
         assert create_scan_job_response.ok, create_scan_job_response.text
-
+        scan_manager.work()
         response = django_client.get(f"scans/{scan_id}/")
         attempts = 1
         assert response.ok, response.text
@@ -194,7 +194,7 @@ class TestOpenShiftScan:
         }
         assert report_details_dict == expected_details_report
         report_details_facts = report_details_dict[SOURCES_KEY][0]["facts"]
-        assert report_details_facts == [p.to_dict() for p in expected_projects]
+        assert report_details_facts == [p.dict() for p in expected_projects]
 
     @pytest.fixture
     def expected_fingerprint_metadata(self, fingerprint_fact_map):
