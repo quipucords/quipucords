@@ -96,3 +96,45 @@ def _replace_cassete_uri(vcr_request, uri_map: dict):
     fallback_base_uri = uri_map[vcr_base_uri]
     vcr_request.uri = fallback_base_uri.replace_base_uri(vcr_request.uri)
     return vcr_request
+
+
+def pytest_addoption(parser):
+    """Add custom args to pytest cmdline."""
+    parser.addoption(
+        "--refresh-cassettes",
+        action="store_true",
+        default=False,
+        help="Refresh VCR cassettes.",
+    )
+
+
+def pytest_configure(config):
+    """Customize pytest configuration."""
+    if config.option.refresh_cassettes:
+        # force options required to refresh_cassettes properly work
+        config.option.record_mode = "new_episodes"
+        # only execute tests marked with vcr_primer
+        config.option.markexpr = "vcr_primer"
+    # document quipucords custom markers
+    markers = [
+        "dbcompat: marks tests using our db compat module.",
+        "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",  # noqa: E501
+        "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+        "vcr_primer: tests intented to record vcr cassettes.",
+    ]
+    for mark in markers:
+        config.addinivalue_line("markers", mark)
+
+
+def pytest_collection_modifyitems(config, items):  # pylint: disable=unused-argument
+    """Modify tests as they are collected."""
+    for item in items:
+        # vcr_primer marker config
+        if "vcr_primer" in item.keywords:
+            # inject vcr markers - allows vcr_primer marked tests to not require
+            # these markers (which might look redundant for readers)
+            if "vcr" not in item.keywords:
+                item.add_marker(pytest.mark.vcr)
+            if "default_cassette" not in item.keywords:
+                vcr_primer = list(item.iter_markers(name="vcr_primer"))[0]
+                item.add_marker(pytest.mark.default_cassette(*vcr_primer.args))

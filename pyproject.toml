@@ -69,8 +69,3 @@ python_files = [
     "*_tests.py",
     "tests_*.py",
 ]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
-    "dbcompat: marks tests using our db compat module."
-]
