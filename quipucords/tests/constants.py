@@ -81,3 +81,4 @@ class VCRCassettes:
 
     OCP_DISCOVERER_CACHE = VCRPath()
     OCP_UNAUTHORIZED = VCRPath()
+    OCP_CLUSTER = VCRPath()
