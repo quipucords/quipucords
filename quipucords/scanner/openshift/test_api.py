@@ -16,7 +16,7 @@ import pytest
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
 from tests.asserts import assert_elements_type
-from tests.constants import ConstantsFromEnv
+from tests.constants import ConstantsFromEnv, VCRCassettes
 
 FULL_ACCESS_PROJECT = "awesome_project"
 FORBIDDEN_PROJECT = "forbidden_project"
@@ -54,16 +54,28 @@ def patch_ocp_api(path, **kwargs):
 
 
 @pytest.fixture
-def ocp_client():
+def ocp_client(tmp_path, request):
     """OCP client for testing."""
     ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
+    auth_token = getattr(request, "param", ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value)
     client = OpenShiftApi.from_auth_token(
-        auth_token=ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value,
+        auth_token=auth_token,
         host=ocp_uri.host,
         port=ocp_uri.port,
         protocol=ocp_uri.protocol,
         ssl_verify=ConstantsFromEnv.TEST_OCP_SSL_VERIFY.value,
     )
+
+
+@pytest.mark.default_cassette(VCRCassettes.OCP_UNAUTHORIZED)
+@pytest.mark.vcr
+@pytest.mark.parametrize("ocp_client", ["<INVALID_AUTH_TOKEN>"], indirect=True)
+def test_unauthorized_token(ocp_client: OpenShiftApi):
+    """Test calling OCP with an invalid token."""
+    with pytest.raises(OCPError) as exc_info:
+        ocp_client._list_projects()
+    assert exc_info.value.status == 401
+    assert exc_info.value.reason == "Unauthorized"
 
 
 def test_from_auth_token(mocker):
