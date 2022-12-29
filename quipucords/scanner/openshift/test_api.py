@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 from pathlib import Path
 
 import httpretty
@@ -53,30 +54,68 @@ def patch_ocp_api(path, **kwargs):
     )
 
 
-@pytest.fixture
-def ocp_client(tmp_path, request):
+def dynamic_scope(fixture_name, config):  # pylint: disable=unused-argument
+    """Set scope to session when running with --refresh-cassettes."""
+    if config.getoption("--refresh-cassettes", None):
+        return "session"
+    return "function"
+
+
+@pytest.fixture(scope=dynamic_scope)
+def discoverer_cache(request, testrun_uid):
+    """OCP dynamic client "discoverer" cache."""
+    if request.config.getoption("--refresh-cassettes"):
+        # persist cache file for whole test suite execution
+        _file = Path("/tmp/qpc") / testrun_uid / "ocp-disovery.json"
+        _file.parent.mkdir(parents=True, exist_ok=True)
+        yield _file
+
+    else:
+        yield request.getfixturevalue("tmp_path") / "ocp-discovery.json"
+
+
+@pytest.fixture(scope=dynamic_scope)
+def ocp_client(request, discoverer_cache):
     """OCP client for testing."""
+    # pylint: disable=protected-access
     ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
     auth_token = getattr(request, "param", ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value)
-    return OpenShiftApi.from_auth_token(
+    client = OpenShiftApi.from_auth_token(
         auth_token=auth_token,
         host=ocp_uri.host,
         port=ocp_uri.port,
         protocol=ocp_uri.protocol,
         ssl_verify=ConstantsFromEnv.TEST_OCP_SSL_VERIFY.value,
     )
+    client._discoverer_cache_file = discoverer_cache
+    yield client
 
 
-@pytest.mark.default_cassette(VCRCassettes.OCP_UNAUTHORIZED)
-@pytest.mark.vcr
+@pytest.mark.vcr_primer(VCRCassettes.OCP_UNAUTHORIZED)
+@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "query"])
 @pytest.mark.parametrize("ocp_client", ["<INVALID_AUTH_TOKEN>"], indirect=True)
-def test_unauthorized_token(ocp_client: OpenShiftApi):
+@pytest.mark.parametrize("api_method", ["_list_projects", "_dynamic_client"])
+def test_unauthorized_token(ocp_client: OpenShiftApi, api_method):
     """Test calling OCP with an invalid token."""
     # pylint: disable=protected-access
     with pytest.raises(OCPError) as exc_info:
-        ocp_client._list_projects()
+        client_attr = getattr(ocp_client, api_method)
+        # if error wasn't thrown in previous line, let's assume attribute is a callable
+        client_attr()
     assert exc_info.value.status == 401
     assert exc_info.value.reason == "Unauthorized"
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_dynamic_client_cache(ocp_client: OpenShiftApi):
+    """Test dynamic_client cache."""
+    # pylint: disable=protected-access,pointless-statement
+    assert (
+        not ocp_client._discoverer_cache_file.exists()
+    ), "Cache file exists prior to test excecution!"
+    # just acessing the attribute will trigger "introspection" requests at ocp
+    ocp_client._dynamic_client
+    assert ocp_client._discoverer_cache_file.exists()
 
 
 def test_from_auth_token(mocker):

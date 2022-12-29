@@ -96,3 +96,69 @@ def _replace_cassete_uri(vcr_request, uri_map: dict):
     fallback_base_uri = uri_map[vcr_base_uri]
     vcr_request.uri = fallback_base_uri.replace_base_uri(vcr_request.uri)
     return vcr_request
+
+
+def pytest_addoption(parser):
+    """Add custom args to pytest cmdline."""
+    parser.addoption(
+        "--refresh-cassettes",
+        action="store_true",
+        default=False,
+        help="Refresh VCR cassettes.",
+    )
+
+
+def pytest_configure(config):
+    """Customize pytest configuration."""
+    from _pytest.config.exceptions import UsageError
+
+    record_mode_is_none = config.option.record_mode in [None, "none"]
+    if config.option.refresh_cassettes:
+        if record_mode_is_none:
+            config.option.record_mode = "new_episodes"
+        # only execute tests marked with vcr_primer
+        config.option.markexpr = "vcr_primer"
+        num_processes = config.option.numprocesses or 1
+        if num_processes > 1:
+            raise UsageError(
+                "--refresh-cassetes option should not run with multiple processes"
+                " UNLESS the implementation of OCP api tests that depend on"
+                " dynamic client are adapted."
+            )
+    elif not record_mode_is_none:
+        raise UsageError(
+            "Quipucords VCR cassettes should be recorded with --refresh-cassettes"
+            " option explicitly set."
+        )
+    # document quipucords custom markers
+    markers = [
+        "dbcompat: marks tests using our db compat module.",
+        "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",  # noqa: E501
+        "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+        "vcr_primer: tests intended to record vcr cassettes.",
+    ]
+    for mark in markers:
+        config.addinivalue_line("markers", mark)
+
+
+def pytest_collection_modifyitems(config, items):  # pylint: disable=unused-argument
+    """Modify tests as they are collected."""
+    for item in items:
+        # vcr_primer marker config
+        if "vcr_primer" in item.keywords:
+            # inject vcr markers - allows vcr_primer marked tests to not require
+            # these markers (which might look redundant for readers)
+            vcr_primer = list(item.iter_markers(name="vcr_primer"))[0]
+            if "vcr" not in item.keywords:
+                if not config.option.refresh_cassettes and len(vcr_primer.args) > 1:
+                    # pytest-recording combines all extra cassettes in one single blob
+                    # https://github.com/kiwicom/pytest-recording/blob/2643539b634b746cb2e989e0e6a17e157a1bde3a/src/pytest_recording/_vcr.py#L84-L86
+                    # this is fine for us when --record-mode set to "none", but in
+                    # any other scenario this would lead to data duplication and
+                    # nullyfing the advantage of using multiple cassettes at the
+                    # same time
+                    item.add_marker(pytest.mark.vcr(*vcr_primer.args[1:]))
+                else:
+                    item.add_marker(pytest.mark.vcr)
+            if "default_cassette" not in item.keywords:
+                item.add_marker(pytest.mark.default_cassette(vcr_primer.args[0]))

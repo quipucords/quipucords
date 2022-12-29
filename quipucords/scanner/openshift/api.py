@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
@@ -19,6 +20,7 @@ from kubernetes.client import (
     Configuration,
     CoreV1Api,
 )
+from openshift.dynamic import DynamicClient
 from urllib3.exceptions import MaxRetryError
 
 from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
@@ -66,6 +68,17 @@ class OpenShiftApi:
         """Initialize OpenShiftApi."""
         configuration.verify_ssl = ssl_verify
         self._api_client = ApiClient(configuration=configuration)
+        # discoverer cache is used to cache resources for dynamic client
+        self._discoverer_cache_file = None
+
+    @cached_property
+    def _dynamic_client(self):
+        # decorate DynamicClient to catch k8s exceptions
+        dynamic_client = catch_k8s_exception(DynamicClient)
+        return dynamic_client(
+            self._api_client,
+            cache_file=self._discoverer_cache_file,
+        )
 
     @classmethod
     def from_auth_token(
