@@ -10,12 +10,13 @@
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
 
 from pathlib import Path
+from uuid import UUID
 
 import httpretty
 import pytest
 
 from scanner.openshift.api import OpenShiftApi
-from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import OCPCluster, OCPDeployment, OCPError, OCPProject
 from tests.asserts import assert_elements_type
 from tests.constants import ConstantsFromEnv, VCRCassettes
 
@@ -121,7 +122,25 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     ), "Cache file exists prior to test excecution!"
     # just acessing the attribute will trigger "introspection" requests at ocp
     ocp_client._dynamic_client
-    assert ocp_client._discoverer_cache_file.exists()
+    ocp_client._cluster_api
+    assert Path(ocp_client._discoverer_cache_file).exists()
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_cluster_api(ocp_client: OpenShiftApi):
+    """Test _cluster_api."""
+    # pylint: disable=protected-access
+    clusters = ocp_client._list_clusters()
+    assert clusters
+
+
+@pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_retrieve_cluster(ocp_client: OpenShiftApi):
+    """Test retrieve cluster method."""
+    cluster = ocp_client.retrieve_cluster()
+    assert isinstance(cluster, OCPCluster)
+    assert UUID(cluster.uuid)
+    assert cluster.version
 
 
 def test_from_auth_token(mocker):

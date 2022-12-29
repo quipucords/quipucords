@@ -520,11 +520,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
             SATELLITE_KEY: [],
             OPENSHIFT_KEY: [],
         }
-
-        total_source_count = len(details_report.get_sources())
+        source_list = details_report.get_sources()
+        total_source_count = len(source_list)
         self.scan_task.log_message("%d sources to process" % total_source_count)
         source_count = 0
-        for source in details_report.get_sources():
+        for source in source_list:
             source_count += 1
             source_type = source.get("source_type")
             source_name = source.get("source_name")
@@ -539,6 +539,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     source.get("server_id"),
                 )
             )
+
             source_fingerprints = self._process_source(source)
             fingerprint_map[source_type].extend(source_fingerprints)
 
@@ -725,6 +726,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
             server_id = source.get("server_id")
             source_type = source.get("source_type")
             source_name = source.get("source_name")
+            if fact.get("cluster") and source_type == Source.OPENSHIFT_SOURCE_TYPE:
+                # skip cluster fact in openshift scans since this type of "system"
+                # won't generate a fingerprint
+                continue
 
             try:
                 fingerprint = process_fact_fn[source_type](source, fact)
