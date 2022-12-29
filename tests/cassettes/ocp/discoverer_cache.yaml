@@ -1,0 +1,112 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version
+  response:
+    body:
+      string: "{\n  \"major\": \"1\",\n  \"minor\": \"24\",\n  \"gitVersion\": \"v1.24.6+5658434\",\n
+        \ \"gitCommit\": \"eddac29feb4bb46b99fb570999324e582d761a66\",\n  \"gitTreeState\":
+        \"clean\",\n  \"buildDate\": \"2022-11-09T10:31:39Z\",\n  \"goVersion\": \"go1.18.7\",\n
+        \ \"compiler\": \"gc\",\n  \"platform\": \"linux/amd64\"\n}"
+    headers:
+      Audit-Id:
+      - b30aeb7f-1151-4a29-a95c-99a85192ead0
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '271'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 29 Dec 2022 06:48:40 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - 5b4ac792-4aa0-4079-b48c-2c9f822a17db
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 37b99375-07ce-4ce8-af07-f91a85590eb3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version/openshift
+  response:
+    body:
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"the
+        server could not find the requested resource","reason":"NotFound","details":{},"code":404}
+
+        '
+    headers:
+      Audit-Id:
+      - 0b8c62eb-9ef5-4a8b-a01c-353a86acdbda
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '174'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 29 Dec 2022 06:48:40 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - 5b4ac792-4aa0-4079-b48c-2c9f822a17db
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 37b99375-07ce-4ce8-af07-f91a85590eb3
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis
+  response:
+    body:
+      string: '{"kind":"APIGroupList","apiVersion":"v1","groups":[{"name":"apiregistration.k8s.io","versions":[{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}},{"name":"apps","versions":[{"groupVersion":"apps/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps/v1","version":"v1"}},{"name":"events.k8s.io","versions":[{"groupVersion":"events.k8s.io/v1","version":"v1"},{"groupVersion":"events.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"events.k8s.io/v1","version":"v1"}},{"name":"authentication.k8s.io","versions":[{"groupVersion":"authentication.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authentication.k8s.io/v1","version":"v1"}},{"name":"authorization.k8s.io","versions":[{"groupVersion":"authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.k8s.io/v1","version":"v1"}},{"name":"autoscaling","versions":[{"groupVersion":"autoscaling/v2","version":"v2"},{"groupVersion":"autoscaling/v1","version":"v1"},{"groupVersion":"autoscaling/v2beta1","version":"v2beta1"},{"groupVersion":"autoscaling/v2beta2","version":"v2beta2"}],"preferredVersion":{"groupVersion":"autoscaling/v2","version":"v2"}},{"name":"batch","versions":[{"groupVersion":"batch/v1","version":"v1"},{"groupVersion":"batch/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"batch/v1","version":"v1"}},{"name":"certificates.k8s.io","versions":[{"groupVersion":"certificates.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"certificates.k8s.io/v1","version":"v1"}},{"name":"networking.k8s.io","versions":[{"groupVersion":"networking.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"networking.k8s.io/v1","version":"v1"}},{"name":"policy","versions":[{"groupVersion":"policy/v1","version":"v1"},{"groupVersion":"policy/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"policy/v1","version":"v1"}},{"name":"rbac.authorization.k8s.io","versions":[{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}},{"name":"storage.k8s.io","versions":[{"groupVersion":"storage.k8s.io/v1","version":"v1"},{"groupVersion":"storage.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"storage.k8s.io/v1","version":"v1"}},{"name":"admissionregistration.k8s.io","versions":[{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}},{"name":"apiextensions.k8s.io","versions":[{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}},{"name":"scheduling.k8s.io","versions":[{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}},{"name":"coordination.k8s.io","versions":[{"groupVersion":"coordination.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"coordination.k8s.io/v1","version":"v1"}},{"name":"node.k8s.io","versions":[{"groupVersion":"node.k8s.io/v1","version":"v1"},{"groupVersion":"node.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"node.k8s.io/v1","version":"v1"}},{"name":"discovery.k8s.io","versions":[{"groupVersion":"discovery.k8s.io/v1","version":"v1"},{"groupVersion":"discovery.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"discovery.k8s.io/v1","version":"v1"}},{"name":"flowcontrol.apiserver.k8s.io","versions":[{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"},{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"}},{"name":"apps.openshift.io","versions":[{"groupVersion":"apps.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps.openshift.io/v1","version":"v1"}},{"name":"authorization.openshift.io","versions":[{"groupVersion":"authorization.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.openshift.io/v1","version":"v1"}},{"name":"build.openshift.io","versions":[{"groupVersion":"build.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"build.openshift.io/v1","version":"v1"}},{"name":"image.openshift.io","versions":[{"groupVersion":"image.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"image.openshift.io/v1","version":"v1"}},{"name":"oauth.openshift.io","versions":[{"groupVersion":"oauth.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"oauth.openshift.io/v1","version":"v1"}},{"name":"project.openshift.io","versions":[{"groupVersion":"project.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"project.openshift.io/v1","version":"v1"}},{"name":"quota.openshift.io","versions":[{"groupVersion":"quota.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"quota.openshift.io/v1","version":"v1"}},{"name":"route.openshift.io","versions":[{"groupVersion":"route.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"route.openshift.io/v1","version":"v1"}},{"name":"security.openshift.io","versions":[{"groupVersion":"security.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.openshift.io/v1","version":"v1"}},{"name":"template.openshift.io","versions":[{"groupVersion":"template.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"template.openshift.io/v1","version":"v1"}},{"name":"user.openshift.io","versions":[{"groupVersion":"user.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"user.openshift.io/v1","version":"v1"}},{"name":"packages.operators.coreos.com","versions":[{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}],"preferredVersion":{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}},{"name":"config.openshift.io","versions":[{"groupVersion":"config.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"config.openshift.io/v1","version":"v1"}},{"name":"operator.openshift.io","versions":[{"groupVersion":"operator.openshift.io/v1","version":"v1"},{"groupVersion":"operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operator.openshift.io/v1","version":"v1"}},{"name":"apiserver.openshift.io","versions":[{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}},{"name":"authentication.maistra.io","versions":[{"groupVersion":"authentication.maistra.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authentication.maistra.io/v1","version":"v1"}},{"name":"autoscaling.openshift.io","versions":[{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"},{"groupVersion":"autoscaling.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"}},{"name":"ceph.rook.io","versions":[{"groupVersion":"ceph.rook.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"ceph.rook.io/v1","version":"v1"}},{"name":"cloudcredential.openshift.io","versions":[{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}},{"name":"console.openshift.io","versions":[{"groupVersion":"console.openshift.io/v1","version":"v1"},{"groupVersion":"console.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"console.openshift.io/v1","version":"v1"}},{"name":"federation.maistra.io","versions":[{"groupVersion":"federation.maistra.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"federation.maistra.io/v1","version":"v1"}},{"name":"imageregistry.operator.openshift.io","versions":[{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}},{"name":"ingress.operator.openshift.io","versions":[{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}},{"name":"jaegertracing.io","versions":[{"groupVersion":"jaegertracing.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"jaegertracing.io/v1","version":"v1"}},{"name":"k8s.cni.cncf.io","versions":[{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}},{"name":"k8s.ovn.org","versions":[{"groupVersion":"k8s.ovn.org/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.ovn.org/v1","version":"v1"}},{"name":"logging.openshift.io","versions":[{"groupVersion":"logging.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"logging.openshift.io/v1","version":"v1"}},{"name":"machineconfiguration.openshift.io","versions":[{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}},{"name":"maistra.io","versions":[{"groupVersion":"maistra.io/v2","version":"v2"},{"groupVersion":"maistra.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"maistra.io/v2","version":"v2"}},{"name":"monitoring.coreos.com","versions":[{"groupVersion":"monitoring.coreos.com/v1","version":"v1"},{"groupVersion":"monitoring.coreos.com/v1beta1","version":"v1beta1"},{"groupVersion":"monitoring.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"monitoring.coreos.com/v1","version":"v1"}},{"name":"network.operator.openshift.io","versions":[{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}},{"name":"ocs.openshift.io","versions":[{"groupVersion":"ocs.openshift.io/v1","version":"v1"},{"groupVersion":"ocs.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"ocs.openshift.io/v1","version":"v1"}},{"name":"operators.coreos.com","versions":[{"groupVersion":"operators.coreos.com/v2","version":"v2"},{"groupVersion":"operators.coreos.com/v1","version":"v1"},{"groupVersion":"operators.coreos.com/v1alpha2","version":"v1alpha2"},{"groupVersion":"operators.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operators.coreos.com/v2","version":"v2"}},{"name":"performance.openshift.io","versions":[{"groupVersion":"performance.openshift.io/v2","version":"v2"},{"groupVersion":"performance.openshift.io/v1","version":"v1"},{"groupVersion":"performance.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"performance.openshift.io/v2","version":"v2"}},{"name":"rbac.maistra.io","versions":[{"groupVersion":"rbac.maistra.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"rbac.maistra.io/v1","version":"v1"}},{"name":"samples.operator.openshift.io","versions":[{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}},{"name":"security.internal.openshift.io","versions":[{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}},{"name":"snapshot.storage.k8s.io","versions":[{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}},{"name":"tuned.openshift.io","versions":[{"groupVersion":"tuned.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"tuned.openshift.io/v1","version":"v1"}},{"name":"argoproj.io","versions":[{"groupVersion":"argoproj.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"argoproj.io/v1alpha1","version":"v1alpha1"}},{"name":"controlplane.operator.openshift.io","versions":[{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"csiaddons.openshift.io","versions":[{"groupVersion":"csiaddons.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"csiaddons.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"extensions.istio.io","versions":[{"groupVersion":"extensions.istio.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"extensions.istio.io/v1alpha1","version":"v1alpha1"}},{"name":"integreatly.org","versions":[{"groupVersion":"integreatly.org/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"integreatly.org/v1alpha1","version":"v1alpha1"}},{"name":"kafka.strimzi.io","versions":[{"groupVersion":"kafka.strimzi.io/v1beta2","version":"v1beta2"},{"groupVersion":"kafka.strimzi.io/v1beta1","version":"v1beta1"},{"groupVersion":"kafka.strimzi.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"kafka.strimzi.io/v1beta2","version":"v1beta2"}},{"name":"kiali.io","versions":[{"groupVersion":"kiali.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"kiali.io/v1alpha1","version":"v1alpha1"}},{"name":"metal3.io","versions":[{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}},{"name":"migration.k8s.io","versions":[{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}},{"name":"monitoring.kiali.io","versions":[{"groupVersion":"monitoring.kiali.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"monitoring.kiali.io/v1alpha1","version":"v1alpha1"}},{"name":"noobaa.io","versions":[{"groupVersion":"noobaa.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"noobaa.io/v1alpha1","version":"v1alpha1"}},{"name":"objectbucket.io","versions":[{"groupVersion":"objectbucket.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"objectbucket.io/v1alpha1","version":"v1alpha1"}},{"name":"odf.openshift.io","versions":[{"groupVersion":"odf.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"odf.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"pipelines.openshift.io","versions":[{"groupVersion":"pipelines.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"pipelines.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"replication.storage.openshift.io","versions":[{"groupVersion":"replication.storage.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"replication.storage.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"telemetry.istio.io","versions":[{"groupVersion":"telemetry.istio.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"telemetry.istio.io/v1alpha1","version":"v1alpha1"}},{"name":"whereabouts.cni.cncf.io","versions":[{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}},{"name":"networking.istio.io","versions":[{"groupVersion":"networking.istio.io/v1beta1","version":"v1beta1"},{"groupVersion":"networking.istio.io/v1alpha3","version":"v1alpha3"}],"preferredVersion":{"groupVersion":"networking.istio.io/v1beta1","version":"v1beta1"}},{"name":"helm.openshift.io","versions":[{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}},{"name":"machine.openshift.io","versions":[{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}},{"name":"security.istio.io","versions":[{"groupVersion":"security.istio.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"security.istio.io/v1beta1","version":"v1beta1"}},{"name":"core.strimzi.io","versions":[{"groupVersion":"core.strimzi.io/v1beta2","version":"v1beta2"}],"preferredVersion":{"groupVersion":"core.strimzi.io/v1beta2","version":"v1beta2"}},{"name":"metrics.k8s.io","versions":[{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 0ca22121-825c-4829-8ba5-6d60821fae39
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 29 Dec 2022 06:48:41 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - 5b4ac792-4aa0-4079-b48c-2c9f822a17db
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 37b99375-07ce-4ce8-af07-f91a85590eb3
+    status:
+      code: 200
+      message: OK
+version: 1

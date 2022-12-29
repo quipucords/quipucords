@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 from pathlib import Path
 
 import httpretty
@@ -56,6 +57,7 @@ def patch_ocp_api(path, **kwargs):
 @pytest.fixture
 def ocp_client(tmp_path, request):
     """OCP client for testing."""
+    # pylint: disable=protected-access
     ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
     auth_token = getattr(request, "param", ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value)
     client = OpenShiftApi.from_auth_token(
@@ -65,17 +67,37 @@ def ocp_client(tmp_path, request):
         protocol=ocp_uri.protocol,
         ssl_verify=ConstantsFromEnv.TEST_OCP_SSL_VERIFY.value,
     )
+    client._discoverer_cache_file = tmp_path / "ocp-client-discovery.json"
+    yield client
+    # cleanup dynamic_client cache
+    client.__dict__.pop("_dynamic_client", None)
 
 
 @pytest.mark.default_cassette(VCRCassettes.OCP_UNAUTHORIZED)
-@pytest.mark.vcr
+@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "query"])
 @pytest.mark.parametrize("ocp_client", ["<INVALID_AUTH_TOKEN>"], indirect=True)
-def test_unauthorized_token(ocp_client: OpenShiftApi):
+@pytest.mark.parametrize("api_method", ["_list_projects", "_dynamic_client"])
+def test_unauthorized_token(ocp_client: OpenShiftApi, api_method):
     """Test calling OCP with an invalid token."""
     with pytest.raises(OCPError) as exc_info:
-        ocp_client._list_projects()
+        client_attr = getattr(ocp_client, api_method)
+        # if error wasn't thrown in previous line, let's assume attribute is a callable
+        client_attr()
     assert exc_info.value.status == 401
     assert exc_info.value.reason == "Unauthorized"
+
+
+@pytest.mark.default_cassette(VCRCassettes.OCP_DISCOVERER_CACHE)
+@pytest.mark.vcr
+def test_dynamic_client_cache(ocp_client: OpenShiftApi):
+    """Test dynamic_client cache."""
+    # pylint: disable=protected-access
+    assert not Path(
+        ocp_client._discoverer_cache_file
+    ).exists(), "Cache file exists prior to test excecution!"
+    # just acessing the attribute will trigger "introspection" requests at ocp
+    ocp_client._dynamic_client  # pylint: disable=pointless-statement
+    assert Path(ocp_client._discoverer_cache_file).exists()
 
 
 def test_from_auth_token(mocker):

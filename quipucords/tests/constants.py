@@ -79,4 +79,7 @@ class VCRPath:
 class VCRCassettes:
     """Paths to VCR cassettes."""
 
+    OCP_DISCOVERER_CACHE = VCRPath()
     OCP_UNAUTHORIZED = VCRPath()
+
+    OCP_CLUSTER = VCRPath()
