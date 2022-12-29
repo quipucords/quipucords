@@ -68,10 +68,25 @@ class OCPBaseEntity(BaseModel):
         return kind
 
 
+class OCPCluster(OCPBaseEntity):
+    """Entity representing OpenShift Cluster."""
+
+    uuid: str
+    version: str = None
+    errors: Dict[str, OCPError] = Field(default_factory=dict)
+    _kind = "cluster"
+
+    @property
+    def name(self):
+        """Cluster 'name'."""
+        return f"cluster:{self.uuid}"
+
+
 class OCPProject(OCPBaseEntity):
     """Entity representing OpenShift Projects/Namespaces."""
 
     name: str
+    cluster_uuid: str = None
     labels: Dict[str, str]
     deployments: List[OCPDeployment] = Field(default_factory=list)
     errors: Dict[str, OCPError] = Field(default_factory=dict)
