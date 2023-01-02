@@ -25,6 +25,14 @@ services:
     depends_on:
       - qpc-db
     restart: always
+    entrypoint:
+      - /bin/bash
+      - -c
+      - >-
+        pip install "watchdog[watchmedo]" &&
+        watchmedo auto-restart \
+          -d quipucords -p '*.py' --recursive \
+          -- bash ./deploy/docker_run.sh
 
   qpc-db:
     image: registry.redhat.io/rhel8/postgresql-12

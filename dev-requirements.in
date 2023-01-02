@@ -33,3 +33,4 @@ beautifulsoup4
 docker-compose
 pip-tools
 pytest-docker-tools
+watchdog[watchmedo]
