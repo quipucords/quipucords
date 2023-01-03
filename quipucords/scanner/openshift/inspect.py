@@ -18,7 +18,7 @@ from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
-from scanner.openshift.entities import OCPBaseEntity, OCPCluster
+from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPNode
 from scanner.openshift.task import OpenShiftTaskRunner
 
 
@@ -39,7 +39,16 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
         self.log("Retrieving essential cluster facts.")
         cluster = ocp_client.retrieve_cluster()
-        self._init_stats(1)
+
+        self.log("Retrieving node facts.")
+        nodes_list = ocp_client.retrieve_nodes(
+            timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
+        )
+        self._init_stats(len(nodes_list) + 1)
+        for node in nodes_list:
+            # check if scanjob is paused or cancelled
+            self.check_for_interrupt(manager_interrupt)
+            self._save_node(node)
 
         self.log("Retrieving extra cluster facts.")
         project_list = ocp_client.retrieve_projects(
@@ -88,6 +97,12 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         increment_kwargs = self._get_increment_kwargs(system_result.status)
         self.scan_task.increment_stats(cluster.name, **increment_kwargs)
 
+    @transaction.atomic
+    def _save_node(self, node: OCPNode):
+        system_result = self._persist_facts(node)
+        increment_kwargs = self._get_increment_kwargs(system_result.status)
+        self.scan_task.increment_stats(node.name, **increment_kwargs)
+
     def _persist_cluster_facts(self, cluster, other_facts):
         inspection_status = self._infer_inspection_status(cluster)
         system_result = SystemInspectionResult(
@@ -102,6 +117,19 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         other_raw_facts = self._entities_as_raw_facts(other_facts, system_result)
         RawFact.objects.bulk_create(other_raw_facts)
         return system_result
+
+    def _persist_facts(self, node: OCPNode) -> SystemInspectionResult:
+        inspection_status = self._infer_inspection_status(node)
+        sys_result = SystemInspectionResult(
+            name=node.name,
+            status=inspection_status,
+            source=self.scan_task.source,
+            task_inspection_result=self.scan_task.inspection_result,
+        )
+        sys_result.save()
+        raw_fact = self._entity_as_raw_fact(node, sys_result)
+        raw_fact.save()
+        return sys_result
 
     def _entity_as_raw_fact(
         self, entity: OCPBaseEntity, inspection_result: SystemInspectionResult
