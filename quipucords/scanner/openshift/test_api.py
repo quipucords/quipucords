@@ -8,21 +8,20 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 from pathlib import Path
+from uuid import UUID
 
 import httpretty
 import pytest
 
 from scanner.openshift.api import OpenShiftApi
-from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import OCPCluster, OCPDeployment, OCPError, OCPProject
 from tests.asserts import assert_elements_type
+from tests.constants import ConstantsFromEnv, VCRCassettes
 
 FULL_ACCESS_PROJECT = "awesome_project"
 FORBIDDEN_PROJECT = "forbidden_project"
-OPENSHIFT_HOST = "fake.openshift.host"
-OPENSHIFT_PORT = 9876
-OPENSHIFT_TOKEN = "<API TOKEN>"
-OPENSHIFT_PROTOCOL = "https"
 
 
 def data_path(filename) -> Path:
@@ -48,22 +47,89 @@ class TestData:
 
 def patch_ocp_api(path, **kwargs):
     """Shortcut for patching ocp requests."""
+    ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
     httpretty.register_uri(
         httpretty.GET,
-        f"{OPENSHIFT_PROTOCOL}://{OPENSHIFT_HOST}:{OPENSHIFT_PORT}/{path}",
+        f"{ocp_uri.protocol}://{ocp_uri.host}:{ocp_uri.port}/{path}",
         **kwargs,
     )
 
 
 @pytest.fixture
-def ocp_client():
+def discoverer_cache(request, testrun_uid, tmp_path):
+    """OCP dynamic client "discoverer" cache."""
+    if request.config.getoption("--refresh-cassettes"):
+        # persist cache file for whole test suite execution
+        _file = Path("/tmp/qpc") / testrun_uid / "ocp-disovery.json"
+        _file.parent.mkdir(parents=True, exist_ok=True)
+        yield _file
+
+    else:
+        # include discoverer cache request to "normal" tests
+        request.node.add_marker(pytest.mark.vcr(VCRCassettes.OCP_DISCOVERER_CACHE))
+        yield tmp_path / "ocp-discovery.json"
+
+
+@pytest.fixture
+def ocp_client(request, discoverer_cache):
     """OCP client for testing."""
-    return OpenShiftApi.from_auth_token(
-        auth_token=OPENSHIFT_TOKEN,
-        host=OPENSHIFT_HOST,
-        port=OPENSHIFT_PORT,
-        protocol=OPENSHIFT_PROTOCOL,
+    # pylint: disable=protected-access
+    ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
+    auth_token = getattr(request, "param", ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value)
+    client = OpenShiftApi.from_auth_token(
+        auth_token=auth_token,
+        host=ocp_uri.host,
+        port=ocp_uri.port,
+        protocol=ocp_uri.protocol,
+        ssl_verify=ConstantsFromEnv.TEST_OCP_SSL_VERIFY.value,
     )
+    client._discoverer_cache_file = discoverer_cache
+    yield client
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_UNAUTHORIZED)
+@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "query"])
+@pytest.mark.parametrize("ocp_client", ["<INVALID_AUTH_TOKEN>"], indirect=True)
+@pytest.mark.parametrize("api_method", ["_list_projects", "_dynamic_client"])
+def test_unauthorized_token(ocp_client: OpenShiftApi, api_method):
+    """Test calling OCP with an invalid token."""
+    # pylint: disable=protected-access
+    with pytest.raises(OCPError) as exc_info:
+        client_attr = getattr(ocp_client, api_method)
+        # if error wasn't thrown in previous line, let's assume attribute is a callable
+        client_attr()
+    assert exc_info.value.status == 401
+    assert exc_info.value.reason == "Unauthorized"
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_dynamic_client_cache(ocp_client: OpenShiftApi):
+    """Test dynamic_client cache."""
+    # pylint: disable=protected-access,pointless-statement
+    assert (
+        not ocp_client._discoverer_cache_file.exists()
+    ), "Cache file exists prior to test excecution!"
+    # just acessing the attribute will trigger "introspection" requests at ocp
+    ocp_client._dynamic_client
+    ocp_client._cluster_api
+    assert Path(ocp_client._discoverer_cache_file).exists()
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER)
+def test_cluster_api(ocp_client: OpenShiftApi):
+    """Test _cluster_api."""
+    # pylint: disable=protected-access
+    clusters = ocp_client._list_clusters()
+    assert clusters
+
+
+@pytest.mark.vcr(VCRCassettes.OCP_CLUSTER)
+def test_retrieve_cluster(ocp_client: OpenShiftApi):
+    """Test retrieve cluster method."""
+    cluster = ocp_client.retrieve_cluster()
+    assert isinstance(cluster, OCPCluster)
+    assert UUID(cluster.uuid)
+    assert cluster.version
 
 
 def test_from_auth_token(mocker):
@@ -153,7 +219,7 @@ def test_retrieve_deployments_succesful(ocp_client: OpenShiftApi):
     deployments = ocp_client.retrieve_deployments(FULL_ACCESS_PROJECT)
     assert_elements_type(deployments, OCPDeployment)
 
-    another_app_dep, awesome_app, bare_minimum_app = deployments
+    another_app_dep, awesome_app = deployments
 
     assert another_app_dep.name == "another-app"
     assert another_app_dep.labels == {
@@ -170,11 +236,6 @@ def test_retrieve_deployments_succesful(ocp_client: OpenShiftApi):
     }
     assert awesome_app.container_images == ["main-container-image:latest"]
     assert awesome_app.init_container_images == ["some-init-container-img:latest"]
-
-    assert bare_minimum_app.name is None
-    assert bare_minimum_app.labels == {}
-    assert bare_minimum_app.container_images == []
-    assert bare_minimum_app.init_container_images == []
 
 
 @httpretty.activate

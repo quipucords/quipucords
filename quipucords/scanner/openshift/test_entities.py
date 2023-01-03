@@ -61,6 +61,7 @@ def project_data():
     return dict(
         name="some project",
         kind="namespace",
+        cluster_uuid="some uuid",
         labels={"foo": "bar"},
         deployments=[],
         errors={},

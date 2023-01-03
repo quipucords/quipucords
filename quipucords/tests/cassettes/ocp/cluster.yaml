@@ -1,0 +1,191 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version
+  response:
+    body:
+      string: "{\n  \"major\": \"1\",\n  \"minor\": \"24\",\n  \"gitVersion\": \"v1.24.6+5658434\",\n
+        \ \"gitCommit\": \"eddac29feb4bb46b99fb570999324e582d761a66\",\n  \"gitTreeState\":
+        \"clean\",\n  \"buildDate\": \"2022-11-09T10:31:39Z\",\n  \"goVersion\": \"go1.18.7\",\n
+        \ \"compiler\": \"gc\",\n  \"platform\": \"linux/amd64\"\n}"
+    headers:
+      Audit-Id:
+      - c88c0471-b003-49e8-bb34-b9c37075b58b
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '271'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 02 Jan 2023 20:45:17 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - f2a7e076-58e9-4649-b759-da14a6245d04
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version/openshift
+  response:
+    body:
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"the
+        server could not find the requested resource","reason":"NotFound","details":{},"code":404}
+
+        '
+    headers:
+      Audit-Id:
+      - a32853a9-eb32-4da5-9a1b-97592a53ad64
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '174'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 02 Jan 2023 20:45:17 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - f2a7e076-58e9-4649-b759-da14a6245d04
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis
+  response:
+    body:
+      string: '{"kind":"APIGroupList","apiVersion":"v1","groups":[{"name":"apiregistration.k8s.io","versions":[{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}},{"name":"apps","versions":[{"groupVersion":"apps/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps/v1","version":"v1"}},{"name":"events.k8s.io","versions":[{"groupVersion":"events.k8s.io/v1","version":"v1"},{"groupVersion":"events.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"events.k8s.io/v1","version":"v1"}},{"name":"authentication.k8s.io","versions":[{"groupVersion":"authentication.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authentication.k8s.io/v1","version":"v1"}},{"name":"authorization.k8s.io","versions":[{"groupVersion":"authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.k8s.io/v1","version":"v1"}},{"name":"autoscaling","versions":[{"groupVersion":"autoscaling/v2","version":"v2"},{"groupVersion":"autoscaling/v1","version":"v1"},{"groupVersion":"autoscaling/v2beta1","version":"v2beta1"},{"groupVersion":"autoscaling/v2beta2","version":"v2beta2"}],"preferredVersion":{"groupVersion":"autoscaling/v2","version":"v2"}},{"name":"batch","versions":[{"groupVersion":"batch/v1","version":"v1"},{"groupVersion":"batch/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"batch/v1","version":"v1"}},{"name":"certificates.k8s.io","versions":[{"groupVersion":"certificates.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"certificates.k8s.io/v1","version":"v1"}},{"name":"networking.k8s.io","versions":[{"groupVersion":"networking.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"networking.k8s.io/v1","version":"v1"}},{"name":"policy","versions":[{"groupVersion":"policy/v1","version":"v1"},{"groupVersion":"policy/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"policy/v1","version":"v1"}},{"name":"rbac.authorization.k8s.io","versions":[{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}},{"name":"storage.k8s.io","versions":[{"groupVersion":"storage.k8s.io/v1","version":"v1"},{"groupVersion":"storage.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"storage.k8s.io/v1","version":"v1"}},{"name":"admissionregistration.k8s.io","versions":[{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}},{"name":"apiextensions.k8s.io","versions":[{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}},{"name":"scheduling.k8s.io","versions":[{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}},{"name":"coordination.k8s.io","versions":[{"groupVersion":"coordination.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"coordination.k8s.io/v1","version":"v1"}},{"name":"node.k8s.io","versions":[{"groupVersion":"node.k8s.io/v1","version":"v1"},{"groupVersion":"node.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"node.k8s.io/v1","version":"v1"}},{"name":"discovery.k8s.io","versions":[{"groupVersion":"discovery.k8s.io/v1","version":"v1"},{"groupVersion":"discovery.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"discovery.k8s.io/v1","version":"v1"}},{"name":"flowcontrol.apiserver.k8s.io","versions":[{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"},{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"}},{"name":"apps.openshift.io","versions":[{"groupVersion":"apps.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps.openshift.io/v1","version":"v1"}},{"name":"authorization.openshift.io","versions":[{"groupVersion":"authorization.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.openshift.io/v1","version":"v1"}},{"name":"build.openshift.io","versions":[{"groupVersion":"build.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"build.openshift.io/v1","version":"v1"}},{"name":"image.openshift.io","versions":[{"groupVersion":"image.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"image.openshift.io/v1","version":"v1"}},{"name":"oauth.openshift.io","versions":[{"groupVersion":"oauth.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"oauth.openshift.io/v1","version":"v1"}},{"name":"project.openshift.io","versions":[{"groupVersion":"project.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"project.openshift.io/v1","version":"v1"}},{"name":"quota.openshift.io","versions":[{"groupVersion":"quota.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"quota.openshift.io/v1","version":"v1"}},{"name":"route.openshift.io","versions":[{"groupVersion":"route.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"route.openshift.io/v1","version":"v1"}},{"name":"security.openshift.io","versions":[{"groupVersion":"security.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.openshift.io/v1","version":"v1"}},{"name":"template.openshift.io","versions":[{"groupVersion":"template.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"template.openshift.io/v1","version":"v1"}},{"name":"user.openshift.io","versions":[{"groupVersion":"user.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"user.openshift.io/v1","version":"v1"}},{"name":"packages.operators.coreos.com","versions":[{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}],"preferredVersion":{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}},{"name":"config.openshift.io","versions":[{"groupVersion":"config.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"config.openshift.io/v1","version":"v1"}},{"name":"operator.openshift.io","versions":[{"groupVersion":"operator.openshift.io/v1","version":"v1"},{"groupVersion":"operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operator.openshift.io/v1","version":"v1"}},{"name":"apiserver.openshift.io","versions":[{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}},{"name":"autoscaling.openshift.io","versions":[{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"},{"groupVersion":"autoscaling.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"}},{"name":"cloudcredential.openshift.io","versions":[{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}},{"name":"console.openshift.io","versions":[{"groupVersion":"console.openshift.io/v1","version":"v1"},{"groupVersion":"console.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"console.openshift.io/v1","version":"v1"}},{"name":"imageregistry.operator.openshift.io","versions":[{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}},{"name":"ingress.operator.openshift.io","versions":[{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}},{"name":"k8s.cni.cncf.io","versions":[{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}},{"name":"k8s.ovn.org","versions":[{"groupVersion":"k8s.ovn.org/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.ovn.org/v1","version":"v1"}},{"name":"machineconfiguration.openshift.io","versions":[{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}},{"name":"monitoring.coreos.com","versions":[{"groupVersion":"monitoring.coreos.com/v1","version":"v1"},{"groupVersion":"monitoring.coreos.com/v1beta1","version":"v1beta1"},{"groupVersion":"monitoring.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"monitoring.coreos.com/v1","version":"v1"}},{"name":"network.operator.openshift.io","versions":[{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}},{"name":"operators.coreos.com","versions":[{"groupVersion":"operators.coreos.com/v2","version":"v2"},{"groupVersion":"operators.coreos.com/v1","version":"v1"},{"groupVersion":"operators.coreos.com/v1alpha2","version":"v1alpha2"},{"groupVersion":"operators.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operators.coreos.com/v2","version":"v2"}},{"name":"performance.openshift.io","versions":[{"groupVersion":"performance.openshift.io/v2","version":"v2"},{"groupVersion":"performance.openshift.io/v1","version":"v1"},{"groupVersion":"performance.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"performance.openshift.io/v2","version":"v2"}},{"name":"samples.operator.openshift.io","versions":[{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}},{"name":"security.internal.openshift.io","versions":[{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}},{"name":"snapshot.storage.k8s.io","versions":[{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}},{"name":"tuned.openshift.io","versions":[{"groupVersion":"tuned.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"tuned.openshift.io/v1","version":"v1"}},{"name":"controlplane.operator.openshift.io","versions":[{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"metal3.io","versions":[{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}},{"name":"migration.k8s.io","versions":[{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}},{"name":"whereabouts.cni.cncf.io","versions":[{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}},{"name":"helm.openshift.io","versions":[{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}},{"name":"machine.openshift.io","versions":[{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}},{"name":"metrics.k8s.io","versions":[{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 1bb78e00-e84f-48b7-a5fd-c08a22177688
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 02 Jan 2023 20:45:18 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - f2a7e076-58e9-4649-b759-da14a6245d04
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/config.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"config.openshift.io/v1","resources":[{"name":"apiservers","singularName":"apiserver","namespaced":false,"kind":"APIServer","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"yr4VqIMvOkg="},{"name":"apiservers/status","singularName":"","namespaced":false,"kind":"APIServer","verbs":["get","patch","update"]},{"name":"oauths","singularName":"oauth","namespaced":false,"kind":"OAuth","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"4BZS3Rc6+4g="},{"name":"oauths/status","singularName":"","namespaced":false,"kind":"OAuth","verbs":["get","patch","update"]},{"name":"projects","singularName":"project","namespaced":false,"kind":"Project","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"q4gdBJZsxYc="},{"name":"projects/status","singularName":"","namespaced":false,"kind":"Project","verbs":["get","patch","update"]},{"name":"networks","singularName":"network","namespaced":false,"kind":"Network","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"gAEoywwmFz4="},{"name":"consoles","singularName":"console","namespaced":false,"kind":"Console","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"0HpeDULnQWY="},{"name":"consoles/status","singularName":"","namespaced":false,"kind":"Console","verbs":["get","patch","update"]},{"name":"builds","singularName":"build","namespaced":false,"kind":"Build","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"OCpV5nXxruQ="},{"name":"builds/status","singularName":"","namespaced":false,"kind":"Build","verbs":["get","patch","update"]},{"name":"authentications","singularName":"authentication","namespaced":false,"kind":"Authentication","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"GY8wWr8iSHA="},{"name":"authentications/status","singularName":"","namespaced":false,"kind":"Authentication","verbs":["get","patch","update"]},{"name":"imagecontentpolicies","singularName":"imagecontentpolicy","namespaced":false,"kind":"ImageContentPolicy","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"4sS3ccaNRA4="},{"name":"imagecontentpolicies/status","singularName":"","namespaced":false,"kind":"ImageContentPolicy","verbs":["get","patch","update"]},{"name":"infrastructures","singularName":"infrastructure","namespaced":false,"kind":"Infrastructure","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"s/S0qwLEaK4="},{"name":"infrastructures/status","singularName":"","namespaced":false,"kind":"Infrastructure","verbs":["get","patch","update"]},{"name":"dnses","singularName":"dns","namespaced":false,"kind":"DNS","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"SAHetG08gBY="},{"name":"dnses/status","singularName":"","namespaced":false,"kind":"DNS","verbs":["get","patch","update"]},{"name":"images","singularName":"image","namespaced":false,"kind":"Image","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"6sMalKeq6tY="},{"name":"images/status","singularName":"","namespaced":false,"kind":"Image","verbs":["get","patch","update"]},{"name":"clusterversions","singularName":"clusterversion","namespaced":false,"kind":"ClusterVersion","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"jfyZTemckiE="},{"name":"clusterversions/status","singularName":"","namespaced":false,"kind":"ClusterVersion","verbs":["get","patch","update"]},{"name":"featuregates","singularName":"featuregate","namespaced":false,"kind":"FeatureGate","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"HSu6crTvi5E="},{"name":"featuregates/status","singularName":"","namespaced":false,"kind":"FeatureGate","verbs":["get","patch","update"]},{"name":"schedulers","singularName":"scheduler","namespaced":false,"kind":"Scheduler","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"ptedUcY9aMg="},{"name":"schedulers/status","singularName":"","namespaced":false,"kind":"Scheduler","verbs":["get","patch","update"]},{"name":"ingresses","singularName":"ingress","namespaced":false,"kind":"Ingress","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"PHiQOptbYkg="},{"name":"ingresses/status","singularName":"","namespaced":false,"kind":"Ingress","verbs":["get","patch","update"]},{"name":"nodes","singularName":"node","namespaced":false,"kind":"Node","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"QOl4Ml/XMag="},{"name":"nodes/status","singularName":"","namespaced":false,"kind":"Node","verbs":["get","patch","update"]},{"name":"operatorhubs","singularName":"operatorhub","namespaced":false,"kind":"OperatorHub","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"O7bQeZSTFtM="},{"name":"operatorhubs/status","singularName":"","namespaced":false,"kind":"OperatorHub","verbs":["get","patch","update"]},{"name":"proxies","singularName":"proxy","namespaced":false,"kind":"Proxy","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"2I4SQ6PshRY="},{"name":"proxies/status","singularName":"","namespaced":false,"kind":"Proxy","verbs":["get","patch","update"]},{"name":"clusteroperators","singularName":"clusteroperator","namespaced":false,"kind":"ClusterOperator","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["co"],"storageVersionHash":"hIXM1ouzyag="},{"name":"clusteroperators/status","singularName":"","namespaced":false,"kind":"ClusterOperator","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 7cb51071-1fb6-4330-877a-f402f2a1e7a8
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 02 Jan 2023 20:45:19 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - f2a7e076-58e9-4649-b759-da14a6245d04
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/config.openshift.io/v1/clusterversions
+  response:
+    body:
+      string: '{"apiVersion":"config.openshift.io/v1","items":[{"apiVersion":"config.openshift.io/v1","kind":"ClusterVersion","metadata":{"creationTimestamp":"2023-01-01T02:05:00Z","generation":2,"managedFields":[{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{".":{},"f:channel":{},"f:clusterID":{}}},"manager":"cluster-bootstrap","operation":"Update","time":"2023-01-01T02:05:00Z"},{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:availableUpdates":{},"f:capabilities":{".":{},"f:enabledCapabilities":{},"f:knownCapabilities":{}},"f:conditions":{},"f:desired":{".":{},"f:channels":{},"f:image":{},"f:url":{},"f:version":{}},"f:history":{},"f:observedGeneration":{},"f:versionHash":{}}},"manager":"cluster-version-operator","operation":"Update","subresource":"status","time":"2023-01-01T02:05:03Z"}],"name":"version","resourceVersion":"36690","uid":"392cceaf-07b0-42d2-a8ee-a08277968d84"},"spec":{"channel":"stable-4.11","clusterID":"ba2ff442-7623-44d6-9992-ba3e9ad12004"},"status":{"availableUpdates":[{"channels":["candidate-4.11","candidate-4.12","fast-4.11","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3","url":"https://access.redhat.com/errata/RHSA-2022:8893","version":"4.11.20"},{"channels":["candidate-4.11","candidate-4.12","fast-4.11","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:22e149142517dfccb47be828f012659b1ccf71d26620e6f62468c264a7ce7863","url":"https://access.redhat.com/errata/RHBA-2022:8698","version":"4.11.18"}],"capabilities":{"enabledCapabilities":["baremetal","marketplace","openshift-samples"],"knownCapabilities":["baremetal","marketplace","openshift-samples"]},"conditions":[{"lastTransitionTime":"2023-01-01T02:05:03Z","status":"True","type":"RetrievedUpdates"},{"lastTransitionTime":"2023-01-01T02:05:03Z","message":"Kubernetes
+        1.25 and therefore OpenShift 4.12 remove several APIs which require admin
+        consideration. Please see the knowledge article https://access.redhat.com/articles/6955381
+        for details and instructions.","reason":"AdminAckRequired","status":"False","type":"Upgradeable"},{"lastTransitionTime":"2023-01-01T02:05:03Z","message":"Capabilities
+        match configured spec","reason":"AsExpected","status":"False","type":"ImplicitlyEnabledCapabilities"},{"lastTransitionTime":"2023-01-01T02:05:03Z","message":"Payload
+        loaded version=\"4.11.17\" image=\"quay.io/openshift-release-dev/ocp-release@sha256:a4e3391f3ff6e33211a91ccd446f2dc57075301e3b974023172b8b8f6aac5461\"","reason":"PayloadLoaded","status":"True","type":"ReleaseAccepted"},{"lastTransitionTime":"2023-01-01T04:12:54Z","message":"Done
+        applying 4.11.17","status":"True","type":"Available"},{"lastTransitionTime":"2023-01-01T04:12:54Z","status":"False","type":"Failing"},{"lastTransitionTime":"2023-01-01T04:12:54Z","message":"Cluster
+        version is 4.11.17","status":"False","type":"Progressing"}],"desired":{"channels":["candidate-4.11","candidate-4.12","fast-4.11","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:a4e3391f3ff6e33211a91ccd446f2dc57075301e3b974023172b8b8f6aac5461","url":"https://access.redhat.com/errata/RHBA-2022:8627","version":"4.11.17"},"history":[{"completionTime":"2023-01-01T04:12:54Z","image":"quay.io/openshift-release-dev/ocp-release@sha256:a4e3391f3ff6e33211a91ccd446f2dc57075301e3b974023172b8b8f6aac5461","startedTime":"2023-01-01T02:05:03Z","state":"Completed","verified":false,"version":"4.11.17"}],"observedGeneration":2,"versionHash":"fTSfOLtQuEo="}}],"kind":"ClusterVersionList","metadata":{"continue":"","resourceVersion":"821733"}}
+
+        '
+    headers:
+      Audit-Id:
+      - bfd4e347-e8ac-40e3-9a32-b310c6824659
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 02 Jan 2023 20:45:19 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - f2a7e076-58e9-4649-b759-da14a6245d04
+    status:
+      code: 200
+      message: OK
+version: 1

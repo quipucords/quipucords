@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
@@ -19,9 +20,10 @@ from kubernetes.client import (
     Configuration,
     CoreV1Api,
 )
+from openshift.dynamic import DynamicClient
 from urllib3.exceptions import MaxRetryError
 
-from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import OCPCluster, OCPDeployment, OCPError, OCPProject
 
 logger = getLogger(__name__)
 
@@ -66,6 +68,17 @@ class OpenShiftApi:
         """Initialize OpenShiftApi."""
         configuration.verify_ssl = ssl_verify
         self._api_client = ApiClient(configuration=configuration)
+        # discoverer cache is used to cache resources for dynamic client
+        self._discoverer_cache_file = None
+
+    @cached_property
+    def _dynamic_client(self):
+        # decorate DynamicClient to catch k8s exceptions
+        dynamic_client = catch_k8s_exception(DynamicClient)
+        return dynamic_client(
+            self._api_client,
+            cache_file=self._discoverer_cache_file,
+        )
 
     @classmethod
     def from_auth_token(
@@ -104,6 +117,13 @@ class OpenShiftApi:
             project_list.append(ocp_project)
         return project_list
 
+    def retrieve_cluster(self, **kwargs) -> OCPCluster:
+        """Retrieve cluster under OCP host."""
+        clusters = self._list_clusters(**kwargs).items
+        assert len(clusters) == 1, "More than one cluster in cluster API"
+        cluster_entity = self._init_cluster(clusters[0])
+        return cluster_entity
+
     def retrieve_deployments(self, project_name, **kwargs) -> List[OCPDeployment]:
         """Retrieve deployments under project 'project_name'."""
         deployments_raw = self._list_deployments(project_name, **kwargs)
@@ -121,10 +141,20 @@ class OpenShiftApi:
     def _apps_api(self):
         return AppsV1Api(api_client=self._api_client)
 
+    @cached_property
+    def _cluster_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="config.openshift.io/v1", kind="ClusterVersion"
+        )
+
     @catch_k8s_exception
     @wraps(CoreV1Api.list_namespace)
     def _list_projects(self, **kwargs):
         return self._core_api.list_namespace(**kwargs)
+
+    @catch_k8s_exception
+    def _list_clusters(self, **kwargs):
+        return self._cluster_api.get(**kwargs)
 
     @catch_k8s_exception
     @wraps(AppsV1Api.list_namespaced_deployment)
@@ -139,6 +169,13 @@ class OpenShiftApi:
         if retrieve_all:
             self.add_deployments_to_project(ocp_project)
         return ocp_project
+
+    def _init_cluster(self, cluster) -> OCPCluster:
+        ocp_cluster = OCPCluster(
+            uuid=cluster["spec"]["clusterID"],
+            version=cluster["status"]["desired"]["version"],
+        )
+        return ocp_cluster
 
     def add_deployments_to_project(self, ocp_project, **kwargs):
         """Retrieve deployments and add to OCPProject."""

@@ -10,12 +10,15 @@
 
 """OpenShift inspect task runner."""
 
+import json
+from collections import defaultdict
+
 from django.conf import settings
 from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
-from scanner.openshift.entities import OCPBaseEntity, OCPProject
+from scanner.openshift.entities import OCPBaseEntity, OCPCluster
 from scanner.openshift.task import OpenShiftTaskRunner
 
 
@@ -33,26 +36,31 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         self._check_prerequisites()
 
         ocp_client = self.get_ocp_client(self.scan_task)
+
+        self.log("Retrieving essential cluster facts.")
+        cluster = ocp_client.retrieve_cluster()
+        self._init_stats(1)
+
+        self.log("Retrieving extra cluster facts.")
         project_list = ocp_client.retrieve_projects(
             retrieve_all=False,
             timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
         )
-
-        self._init_stats(project_list)
-
         for project in project_list:
             # check if scanjob is paused or cancelled
             self.check_for_interrupt(manager_interrupt)
+            project.cluster_uuid = cluster.uuid
             ocp_client.add_deployments_to_project(
                 project,
                 timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
             )
-            self._save_results(project)
+        self._save_cluster(cluster, project_list)
 
-        self.log(f"Collected facts for {self.scan_task.systems_scanned} projects.")
-        self.log(
-            f"Failed collecting facts for {self.scan_task.systems_failed} projects."
-        )
+        self.log(f"Collected facts for {self.scan_task.systems_scanned} systems.")
+        if self.scan_task.systems_failed:
+            self.log(
+                f"Failed collecting facts for {self.scan_task.systems_failed} systems."
+            )
 
         if self.scan_task.systems_scanned and self.scan_task.systems_failed:
             return self.PARTIAL_SUCCESS_MESSAGE, ScanTask.COMPLETED
@@ -65,33 +73,35 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         if connect_scan_task.status != ScanTask.COMPLETED:
             raise ScanFailureError("Prerequisite scan have failed.")
 
-    def _init_stats(self, project_list):
+    def _init_stats(self, number_of_systems):
         return self.scan_task.update_stats(
             "INITIAL OCP INSPECT STATS.",
-            sys_count=len(project_list),
+            sys_count=number_of_systems,
             sys_scanned=0,
             sys_failed=0,
             sys_unreachable=0,
         )
 
     @transaction.atomic
-    def _save_results(self, project: OCPProject):
-        system_result = self._persist_facts(project)
+    def _save_cluster(self, cluster: OCPCluster, cluster_facts):
+        system_result = self._persist_cluster_facts(cluster, cluster_facts)
         increment_kwargs = self._get_increment_kwargs(system_result.status)
-        self.scan_task.increment_stats(project.name, **increment_kwargs)
+        self.scan_task.increment_stats(cluster.name, **increment_kwargs)
 
-    def _persist_facts(self, project: OCPProject) -> SystemInspectionResult:
-        inspection_status = self._infer_inspection_status(project)
-        sys_result = SystemInspectionResult(
-            name=project.name,
+    def _persist_cluster_facts(self, cluster, other_facts):
+        inspection_status = self._infer_inspection_status(cluster)
+        system_result = SystemInspectionResult(
+            name=cluster.name,
             status=inspection_status,
             source=self.scan_task.source,
             task_inspection_result=self.scan_task.inspection_result,
         )
-        sys_result.save()
-        raw_fact = self._entity_as_raw_fact(project, sys_result)
+        system_result.save()
+        raw_fact = self._entity_as_raw_fact(cluster, system_result)
         raw_fact.save()
-        return sys_result
+        other_raw_facts = self._entities_as_raw_facts(other_facts, system_result)
+        RawFact.objects.bulk_create(other_raw_facts)
+        return system_result
 
     def _entity_as_raw_fact(
         self, entity: OCPBaseEntity, inspection_result: SystemInspectionResult
@@ -102,8 +112,28 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             system_inspection_result=inspection_result,
         )
 
-    def _infer_inspection_status(self, project: OCPProject):
-        if project.errors:
+    def _entities_as_raw_facts(
+        self, entities: list[OCPBaseEntity], inspection_result: SystemInspectionResult
+    ) -> list[RawFact]:
+        def _pydantic_encoder(value):
+            return value.dict()
+
+        entities_per_kind = defaultdict(list)
+        raw_facts = []
+        for ent in entities:
+            entities_per_kind[ent.kind].append(ent)
+        for kind, entity_list in entities_per_kind.items():
+            raw_facts.append(
+                RawFact(
+                    name=kind,
+                    value=json.dumps(entity_list, default=_pydantic_encoder),
+                    system_inspection_result=inspection_result,
+                )
+            )
+        return raw_facts
+
+    def _infer_inspection_status(self, entity):
+        if entity.errors:
             return SystemInspectionResult.FAILED
         return SystemInspectionResult.SUCCESS
 
