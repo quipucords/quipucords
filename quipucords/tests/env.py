@@ -13,7 +13,7 @@ class EnvVar:
     Environment value with an fallback value.
 
     The environment variable name will match the name of the attribute
-    where this is instanciated.
+    where this is instantiated.
     """
 
     def __init__(self, fallback_value, coercer=str):
