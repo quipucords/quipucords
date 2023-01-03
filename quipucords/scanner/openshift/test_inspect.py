@@ -15,7 +15,14 @@ from api.models import ScanTask, Source
 from scanner.exceptions import ScanFailureError
 from scanner.openshift import InspectTaskRunner
 from scanner.openshift.api import OpenShiftApi
-from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import (
+    NodeResources,
+    OCPCluster,
+    OCPDeployment,
+    OCPError,
+    OCPNode,
+    OCPProject,
+)
 from tests.factories import ScanTaskFactory
 
 
@@ -52,6 +59,12 @@ def project_err():
 
 
 @pytest.fixture
+def node_resources():
+    """Return Node Resources entity."""
+    return NodeResources(cpu="350m", memory_in_bytes="15252796Ki", pods="250")
+
+
+@pytest.fixture
 def deployment():
     """Return OCPDeployment entity."""
     return OCPDeployment(
@@ -66,6 +79,44 @@ def deployment():
 def error():
     """Return OCPError entity."""
     return OCPError(status=500, reason="error-reason", message="error-message")
+
+
+@pytest.fixture
+def node_ok(node_resources):
+    """Return OCPNode entity."""
+    return OCPNode(
+        name="node-ok",
+        creation_timestamp="2022-12-18T03:56:20Z",
+        labels={"_ok": "label"},
+        addresses=[{"ip_1": "4.3.2.1"}, {"ip_2": "1.2.3.4"}],
+        allocatable=node_resources,
+        capacity=node_resources,
+        architecture="arch",
+        kernel_version="node_kernel_version",
+        machine_id="12345",
+        operating_system="linux",
+        taints=[{"effect": "_ok-effect", "key": "master"}],
+    )
+
+
+@pytest.fixture
+def node_err(error):
+    """Return OCPNode entity with error."""
+    return OCPNode(
+        name="node-err", labels={"project": "err"}, errors={"error": error.dict()}
+    )
+
+
+@pytest.fixture
+def cluster():
+    """Return OCPCluster."""
+    return OCPCluster(uuid="not-a-uuid", version="1.2.3.4")
+
+
+@pytest.fixture
+def cluster_err(error):
+    """Return OCPCluster with associated error."""
+    return OCPCluster(uuid="yet-another-not-uuid", errors={"some-error": error.dict()})
 
 
 @pytest.fixture(autouse=True)
@@ -95,46 +146,67 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 
 @pytest.mark.django_db
-def test_inspect_with_success(mocker, scan_task: ScanTask, project_ok):
+def test_inspect_with_success(
+    mocker, scan_task: ScanTask, project_ok, cluster, node_ok
+):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
+    mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
+
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
     assert message == InspectTaskRunner.SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
-    assert scan_task.systems_count == 1
-    assert scan_task.systems_scanned == 1
+    assert scan_task.systems_count == 2
+    assert scan_task.systems_scanned == 2
     assert scan_task.systems_failed == 0
     assert scan_task.systems_unreachable == 0
 
 
 @pytest.mark.django_db
-def test_inspect_with_partial_success(
-    mocker, scan_task: ScanTask, project_ok, project_err
+def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
+    mocker,
+    scan_task: ScanTask,
+    project_ok,
+    cluster,
+    node_ok,
+    node_err,
 ):
     """Test connecting to OpenShift host with success."""
+    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(
-        OpenShiftApi, "retrieve_projects", return_value=[project_ok, project_err]
+        OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
     )
+
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
     assert message == InspectTaskRunner.PARTIAL_SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
-    assert scan_task.systems_count == 2
-    assert scan_task.systems_scanned == 1
+    assert scan_task.systems_count == 3
+    assert scan_task.systems_scanned == 2
     assert scan_task.systems_failed == 1
     assert scan_task.systems_unreachable == 0
 
 
 @pytest.mark.django_db
-def test_inspect_with_failure(mocker, scan_task: ScanTask, project_err):
+def test_inspect_with_failure(
+    mocker,
+    scan_task: ScanTask,
+    project_err,
+    cluster_err,
+    node_err,
+):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project_err])
+    mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
+    mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
     assert message == InspectTaskRunner.FAILURE_MESSAGE
     assert status == ScanTask.FAILED
-    assert scan_task.systems_count == 1
+    assert scan_task.systems_count == 2
     assert scan_task.systems_scanned == 0
-    assert scan_task.systems_failed == 1
+    assert scan_task.systems_failed == 2
     assert scan_task.systems_unreachable == 0
