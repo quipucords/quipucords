@@ -78,6 +78,7 @@ class OCPCluster(OCPBaseEntity):
 
     @property
     def name(self):
+        """Cluster 'name'."""
         return f"cluster:{self.uuid}"
 
 
