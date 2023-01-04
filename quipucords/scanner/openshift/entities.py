@@ -16,6 +16,8 @@ import re
 from datetime import datetime
 from typing import Dict, List
 
+from kubernetes.dynamic.resource import ResourceInstance as K8SResourceInstance
+from openshift.dynamic.resource import ResourceInstance as OCPResourceInstance
 from pydantic import Field, validator  # pylint: disable=no-name-in-module
 
 from compat.pydantic import BaseModel, raises
@@ -205,6 +207,82 @@ class NodeResources(OCPBaseEntity):
             return value * base**power
 
         return value
+
+
+class ClusterOperator(BaseModel):
+    """OCP Cluster Operator."""
+
+    _kind = "cluster-operator"
+    name: str
+    version: str = None
+    created_at: datetime = None
+    updated_at: datetime = None
+
+    @classmethod
+    def from_raw_object(cls, raw_object):
+        """Instantiate ClusterOperator using its equivalent api object."""
+
+        def _get_version(raw_object):
+            for version in raw_object.status.versions:
+                if version.name == "operator":
+                    return version.version
+            return None
+
+        return ClusterOperator(
+            name=raw_object.metadata.name,
+            created_at=raw_object.metadata.creationTimestamp,
+            updated_at=raw_object.status.conditions[0].lastTransitionTime,
+            version=_get_version(raw_object),
+        )
+
+
+class OLMOperator(ClusterOperator):
+    """Operator managed by Operator Lifecycle Manager."""
+
+    _kind = "olm-operator"
+    package: str = None
+    source: str = None
+    channel: str = None
+    namespace: str = None
+
+    @classmethod
+    def from_raw_object(cls, raw_object):
+        installed_version = raw_object.status.installedCSV
+        package, version = installed_version.split(".", 1)
+        return OLMOperator(
+            name=raw_object.metadata.name,
+            created_at=raw_object.metadata.creationTimestamp,
+            updated_at=raw_object.status.lastUpdated,
+            namespace=raw_object.metadata.namespace,
+            source=raw_object.spec.source,
+            channel=raw_object.spec.channel,
+            package=package,
+            version=version,
+        )
+
+
+class OCPOperators(OCPBaseEntity):
+    """OCP Operators."""
+
+    _kind = "operators"
+    cluster_operators: List[ClusterOperator] = Field(default_factory=list)
+    olm_operators: List[OLMOperator] = Field(default_factory=list)
+    errors: Dict[str, OCPError] = Field(default_factory=dict)
+
+    @validator("cluster_operators", pre=True)
+    def _init_cluster_operators(cls, values):
+        return cls._parse_resource_instance(values, ClusterOperator.from_raw_object)
+
+    @validator("olm_operators", pre=True)
+    def _init_olm_operators(cls, values):
+        return cls._parse_resource_instance(values, OLMOperator.from_raw_object)
+
+    @classmethod
+    def _parse_resource_instance(cls, values, parser):
+
+        if isinstance(values, (K8SResourceInstance, OCPResourceInstance)):
+            return [parser(res) for res in values.items]
+        return values
 
 
 # update nested model references - this should always be the last thing to run

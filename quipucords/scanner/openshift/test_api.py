@@ -16,7 +16,15 @@ import httpretty
 import pytest
 
 from scanner.openshift.api import OpenShiftApi
-from scanner.openshift.entities import OCPCluster, OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import (
+    ClusterOperator,
+    OCPCluster,
+    OCPDeployment,
+    OCPError,
+    OCPOperators,
+    OCPProject,
+    OLMOperator,
+)
 from tests.asserts import assert_elements_type
 from tests.constants import ConstantsFromEnv, VCRCassettes
 
@@ -117,6 +125,8 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     # just acessing the attribute will trigger "introspection" requests at ocp
     ocp_client._dynamic_client
     ocp_client._cluster_api
+    ocp_client._cluster_operator_api
+    ocp_client._subscription_api
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
@@ -128,6 +138,26 @@ def test_cluster_api(ocp_client: OpenShiftApi):
     assert clusters
 
 
+@pytest.mark.vcr_primer(
+    VCRCassettes.OCP_CLUSTER_OPERATORS, VCRCassettes.OCP_DISCOVERER_CACHE
+)
+def test_cluster_operators_api(ocp_client: OpenShiftApi):
+    """Test _cluster_api."""
+    # pylint: disable=protected-access
+    clusters = ocp_client._list_cluster_operators()
+    assert clusters
+
+
+@pytest.mark.vcr_primer(
+    VCRCassettes.OCP_SUBSCRIPTIONS, VCRCassettes.OCP_DISCOVERER_CACHE
+)
+def test_subscriptions_api(ocp_client: OpenShiftApi):
+    """Test _cluster_api."""
+    # pylint: disable=protected-access
+    clusters = ocp_client._list_subscriptions()
+    assert clusters
+
+
 @pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_retrieve_cluster(ocp_client: OpenShiftApi):
     """Test retrieve cluster method."""
@@ -135,6 +165,20 @@ def test_retrieve_cluster(ocp_client: OpenShiftApi):
     assert isinstance(cluster, OCPCluster)
     assert UUID(cluster.uuid)
     assert cluster.version
+
+
+@pytest.mark.vcr(
+    VCRCassettes.OCP_CLUSTER_OPERATORS,
+    VCRCassettes.OCP_SUBSCRIPTIONS,
+    VCRCassettes.OCP_DISCOVERER_CACHE,
+)
+def test_retrieve_operators(ocp_client: OpenShiftApi):
+    """Test retrieve operators method."""
+    operators = ocp_client.retrieve_operators()
+    assert isinstance(operators, OCPOperators)
+    assert isinstance(operators.cluster_operators[0], ClusterOperator)
+    assert isinstance(operators.olm_operators[0], OLMOperator)
+    assert not operators.errors
 
 
 def test_from_auth_token(mocker):

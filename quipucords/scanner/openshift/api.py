@@ -29,6 +29,7 @@ from scanner.openshift.entities import (
     OCPDeployment,
     OCPError,
     OCPNode,
+    OCPOperators,
     OCPProject,
 )
 
@@ -148,6 +149,29 @@ class OpenShiftApi:
             deployments_list.append(ocp_deployment)
         return deployments_list
 
+    def retrieve_operators(self, **kwargs) -> OCPOperators:
+        """Retrieve OCP Operators."""
+        _errors = {}
+        try:
+            _cluster_operators = self._list_cluster_operators()
+
+        except OCPError as err:
+            _errors["cluster_operators"] = err
+            _cluster_operators = []
+
+        try:
+            _olm_operators = self._list_subscriptions()
+
+        except OCPError as err:
+            _errors["olm_operators"] = err
+            _olm_operators = []
+
+        return OCPOperators(
+            cluster_operators=_cluster_operators,
+            olm_operators=_olm_operators,
+            errors=_errors,
+        )
+
     @cached_property
     def _core_api(self):
         return CoreV1Api(api_client=self._api_client)
@@ -166,6 +190,18 @@ class OpenShiftApi:
             api_version="config.openshift.io/v1", kind="ClusterVersion"
         )
 
+    @cached_property
+    def _cluster_operator_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="config.openshift.io/v1", kind="ClusterOperator"
+        )
+
+    @cached_property
+    def _subscription_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="operators.coreos.com/v1alpha1", kind="Subscription"
+        )
+
     @catch_k8s_exception
     @wraps(CoreV1Api.list_namespace)
     def _list_projects(self, **kwargs):
@@ -178,6 +214,14 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_clusters(self, **kwargs):
         return self._cluster_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_cluster_operators(self, **kwargs):
+        return self._cluster_operator_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_subscriptions(self, **kwargs):
+        return self._subscription_api.get(**kwargs)
 
     @catch_k8s_exception
     @wraps(AppsV1Api.list_namespaced_deployment)

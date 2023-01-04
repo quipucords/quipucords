@@ -134,8 +134,42 @@ interactions:
       - application/json
       Date:
       - Wed, 04 Jan 2023 17:37:15 GMT
-      Transfer-Encoding:
-      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - f2a7e076-58e9-4649-b759-da14a6245d04
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/operators.coreos.com/v1alpha1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"operators.coreos.com/v1alpha1","resources":[{"name":"clusterserviceversions","singularName":"clusterserviceversion","namespaced":true,"kind":"ClusterServiceVersion","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["csv","csvs"],"categories":["olm"],"storageVersionHash":"bafXBXMPCeY="},{"name":"clusterserviceversions/status","singularName":"","namespaced":true,"kind":"ClusterServiceVersion","verbs":["get","patch","update"]},{"name":"installplans","singularName":"installplan","namespaced":true,"kind":"InstallPlan","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["ip"],"categories":["olm"],"storageVersionHash":"6gw8IwttiW4="},{"name":"installplans/status","singularName":"","namespaced":true,"kind":"InstallPlan","verbs":["get","patch","update"]},{"name":"catalogsources","singularName":"catalogsource","namespaced":true,"kind":"CatalogSource","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["catsrc"],"categories":["olm"],"storageVersionHash":"58Nwkl8WW7w="},{"name":"catalogsources/status","singularName":"","namespaced":true,"kind":"CatalogSource","verbs":["get","patch","update"]},{"name":"subscriptions","singularName":"subscription","namespaced":true,"kind":"Subscription","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["sub","subs"],"categories":["olm"],"storageVersionHash":"cJUAl67Y7C4="},{"name":"subscriptions/status","singularName":"","namespaced":true,"kind":"Subscription","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 663c7877-b94c-4cbe-8c09-506aa6261c75
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '1691'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 04 Jan 2023 21:37:22 GMT
       X-Kubernetes-Pf-Flowschema-Uid:
       - f8a416f6-2ac0-4d1e-87c4-d00d2095eeb3
       X-Kubernetes-Pf-Prioritylevel-Uid:

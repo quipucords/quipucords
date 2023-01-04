@@ -63,7 +63,12 @@ class InspectTaskRunner(OpenShiftTaskRunner):
                 project,
                 timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
             )
-        self._save_cluster(cluster, project_list)
+        operators = ocp_client.retrieve_operators()
+        self._save_cluster(
+            cluster,
+            solo_entities=[operators],
+            grouped_entities=project_list,
+        )
 
         self.log(f"Collected facts for {self.scan_task.systems_scanned} systems.")
         if self.scan_task.systems_failed:
@@ -92,8 +97,10 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         )
 
     @transaction.atomic
-    def _save_cluster(self, cluster: OCPCluster, cluster_facts):
-        system_result = self._persist_cluster_facts(cluster, cluster_facts)
+    def _save_cluster(self, cluster: OCPCluster, *, solo_entities, grouped_entities):
+        system_result = self._persist_cluster_facts(
+            cluster, solo_entities=solo_entities, grouped_entities=grouped_entities
+        )
         increment_kwargs = self._get_increment_kwargs(system_result.status)
         self.scan_task.increment_stats(cluster.name, **increment_kwargs)
 
@@ -103,7 +110,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         increment_kwargs = self._get_increment_kwargs(system_result.status)
         self.scan_task.increment_stats(node.name, **increment_kwargs)
 
-    def _persist_cluster_facts(self, cluster, other_facts):
+    def _persist_cluster_facts(self, cluster, *, solo_entities, grouped_entities):
         inspection_status = self._infer_inspection_status(cluster)
         system_result = SystemInspectionResult(
             name=cluster.name,
@@ -112,10 +119,12 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             task_inspection_result=self.scan_task.inspection_result,
         )
         system_result.save()
-        raw_fact = self._entity_as_raw_fact(cluster, system_result)
-        raw_fact.save()
-        other_raw_facts = self._entities_as_raw_facts(other_facts, system_result)
-        RawFact.objects.bulk_create(other_raw_facts)
+        raw_facts = [self._entity_as_raw_fact(cluster, system_result)]
+        raw_facts.extend(
+            self._entity_as_raw_fact(entity, system_result) for entity in solo_entities
+        )
+        raw_facts.extend(self._entities_as_raw_facts(grouped_entities, system_result))
+        RawFact.objects.bulk_create(raw_facts)
         return system_result
 
     def _persist_facts(self, node: OCPNode) -> SystemInspectionResult:
