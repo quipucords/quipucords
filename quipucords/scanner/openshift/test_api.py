@@ -55,8 +55,15 @@ def patch_ocp_api(path, **kwargs):
     )
 
 
-@pytest.fixture
-def discoverer_cache(request, testrun_uid, tmp_path):
+def dynamic_scope(fixture_name, config):  # pylint: disable=unused-argument
+    """Set scope to session when running with --refresh-cassettes."""
+    if config.getoption("--refresh-cassettes", None):
+        return "session"
+    return "function"
+
+
+@pytest.fixture(scope=dynamic_scope)
+def discoverer_cache(request, testrun_uid):
     """OCP dynamic client "discoverer" cache."""
     if request.config.getoption("--refresh-cassettes"):
         # persist cache file for whole test suite execution
@@ -65,12 +72,10 @@ def discoverer_cache(request, testrun_uid, tmp_path):
         yield _file
 
     else:
-        # include discoverer cache request to "normal" tests
-        request.node.add_marker(pytest.mark.vcr(VCRCassettes.OCP_DISCOVERER_CACHE))
-        yield tmp_path / "ocp-discovery.json"
+        yield request.getfixturevalue("tmp_path") / "ocp-discovery.json"
 
 
-@pytest.fixture
+@pytest.fixture(scope=dynamic_scope)
 def ocp_client(request, discoverer_cache):
     """OCP client for testing."""
     # pylint: disable=protected-access
@@ -115,7 +120,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
-@pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER)
+@pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_cluster_api(ocp_client: OpenShiftApi):
     """Test _cluster_api."""
     # pylint: disable=protected-access
@@ -123,7 +128,7 @@ def test_cluster_api(ocp_client: OpenShiftApi):
     assert clusters
 
 
-@pytest.mark.vcr(VCRCassettes.OCP_CLUSTER)
+@pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_retrieve_cluster(ocp_client: OpenShiftApi):
     """Test retrieve cluster method."""
     cluster = ocp_client.retrieve_cluster()
