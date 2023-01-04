@@ -120,7 +120,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
-@pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER)
+@pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_cluster_api(ocp_client: OpenShiftApi):
     """Test _cluster_api."""
     # pylint: disable=protected-access
@@ -128,7 +128,7 @@ def test_cluster_api(ocp_client: OpenShiftApi):
     assert clusters
 
 
-@pytest.mark.vcr(VCRCassettes.OCP_CLUSTER)
+@pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_retrieve_cluster(ocp_client: OpenShiftApi):
     """Test retrieve cluster method."""
     cluster = ocp_client.retrieve_cluster()
