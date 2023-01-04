@@ -118,7 +118,8 @@ def pytest_configure(config):
             config.option.record_mode = "new_episodes"
         # only execute tests marked with vcr_primer
         config.option.markexpr = "vcr_primer"
-        if config.option.numprocesses > 1:
+        num_processes = config.option.numprocesses or 1
+        if num_processes > 1:
             raise UsageError(
                 "--refresh-cassetes option should not run with multiple processes"
                 " UNLESS the implementation of OCP api tests that depend on"
