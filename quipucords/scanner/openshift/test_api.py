@@ -55,8 +55,15 @@ def patch_ocp_api(path, **kwargs):
     )
 
 
-@pytest.fixture
-def discoverer_cache(request, testrun_uid, tmp_path):
+def dynamic_scope(fixture_name, config):  # pylint: disable=unused-argument
+    """Set scope to session when running with --refresh-cassettes."""
+    if config.getoption("--refresh-cassettes", None):
+        return "session"
+    return "function"
+
+
+@pytest.fixture(scope=dynamic_scope)
+def discoverer_cache(request, testrun_uid):
     """OCP dynamic client "discoverer" cache."""
     if request.config.getoption("--refresh-cassettes"):
         # persist cache file for whole test suite execution
@@ -65,12 +72,10 @@ def discoverer_cache(request, testrun_uid, tmp_path):
         yield _file
 
     else:
-        # include discoverer cache request to "normal" tests
-        request.node.add_marker(pytest.mark.vcr(VCRCassettes.OCP_DISCOVERER_CACHE))
-        yield tmp_path / "ocp-discovery.json"
+        yield request.getfixturevalue("tmp_path") / "ocp-discovery.json"
 
 
-@pytest.fixture
+@pytest.fixture(scope=dynamic_scope)
 def ocp_client(request, discoverer_cache):
     """OCP client for testing."""
     # pylint: disable=protected-access
