@@ -11,9 +11,9 @@
 
 from __future__ import annotations
 
-import datetime
 import json
 import re
+from datetime import datetime
 from typing import Dict, List
 
 from pydantic import Field, validator  # pylint: disable=no-name-in-module
@@ -90,7 +90,7 @@ class OCPNode(OCPBaseEntity):
     """Entity representing OpenShift Node."""
 
     name: str
-    creation_timestamp: datetime.datetime = None
+    creation_timestamp: datetime = None
     labels: Dict[str, str] = None
     addresses: List[dict] = None
     allocatable: NodeResources = None
