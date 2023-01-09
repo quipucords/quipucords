@@ -30,6 +30,7 @@ pylint
 
 # other dev tools
 beautifulsoup4
+debugpy
 docker-compose
 pip-tools
 pytest-docker-tools
