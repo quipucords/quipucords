@@ -37,14 +37,14 @@ RUN pip install -r requirements.txt
 
 # Fetch UI code
 COPY Makefile .
-ARG UI_RELEASE="1.1.0"
+ARG UI_RELEASE="latest"
 RUN make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
 # Create /etc/ssl/qpc
-COPY deploy/ssl/* /etc/ssl/qpc/
+COPY deploy/ssl /etc/ssl/qpc
 
 # Create /deploy
-COPY deploy/*  /deploy/
+COPY deploy  /deploy
 
 # Create log directories
 VOLUME /var/log
@@ -52,11 +52,6 @@ VOLUME /var/log
 # Create /var/data
 RUN mkdir -p /var/data
 VOLUME /var/data
-
-# Create /etc/ansible/roles/
-RUN mkdir -p /etc/ansible/roles/
-COPY quipucords/scanner/network/runner/roles/ /etc/ansible/roles/
-VOLUME /etc/ansible/roles/
 
 # Set production environment
 ARG BUILD_COMMIT=master
