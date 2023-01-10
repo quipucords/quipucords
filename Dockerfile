@@ -1,4 +1,4 @@
-FROM redhat/ubi8
+FROM redhat/ubi8-minimal
 
 ENV DJANGO_DB_PATH=/var/data/
 ENV DJANGO_DEBUG=False
@@ -14,10 +14,20 @@ ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
-RUN dnf -yq install python39 make openssh-clients sshpass glibc-langpack-en git jq &&\
+COPY scripts/dnf /usr/local/bin/dnf
+RUN dnf install \
+        git \
+        glibc-langpack-en \
+        jq \
+        make \
+        openssh-clients \
+        python39 \
+        sshpass \
+        tar \
+        which \
+        -y &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
-
 
 RUN pip install --upgrade pip wheel
 

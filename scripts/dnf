@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -oue pipefail
+
+if [ -x /usr/bin/microdnf ]; then
+    set -- /usr/bin/microdnf --nodocs --setopt install_weak_deps=0 "$@"
+elif [ -x /usr/bin/dnf ]; then
+    set -- /usr/bin/dnf --nodocs --setopt install_weak_deps=0 "$@"
+elif [ -x /usr/bin/yum ]; then
+    set -- /usr/bin/yum "$@"
+else
+    echo "Could not detect a supported package manager. Exiting now."
+    exit 1
+fi
+
+set -x
+"$@"
