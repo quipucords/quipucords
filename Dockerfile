@@ -53,10 +53,6 @@ VOLUME /var/log
 RUN mkdir -p /var/data
 VOLUME /var/data
 
-# Set production environment
-ARG BUILD_COMMIT=master
-ENV QUIPUCORDS_COMMIT=$BUILD_COMMIT
-
 # Copy server code
 COPY . .
 

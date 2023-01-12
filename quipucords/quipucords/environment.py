@@ -25,15 +25,12 @@ logger = logging.getLogger(__name__)
 
 
 def commit():
-    """Collect the build number for the server.
-
-    :returns: A build number
-    """
-    commit_info = os.environ.get("QUIPUCORDS_COMMIT", None)
-    if commit_info is None:
+    """Collect the commit for the server."""
+    commit_info = os.environ.get("QUIPUCORDS_COMMIT", "").strip()
+    if not commit_info:
         try:
             commit_info = subprocess.check_output(
-                ["git", "describe", "--always"]
+                ["git", "rev-parse", "--verify", "HEAD"]
             ).strip()
             commit_info = commit_info.decode("utf-8")
         except Exception:  # pylint: disable=broad-except
