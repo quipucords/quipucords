@@ -25,17 +25,17 @@ from fingerprinter.constants import (
     SOURCES_KEY,
 )
 from scanner.openshift.api import OpenShiftApi
-from scanner.openshift.entities import OCPDeployment, OCPProject
+from scanner.openshift.entities import (
+    NodeResources,
+    OCPCluster,
+    OCPDeployment,
+    OCPNode,
+    OCPProject,
+)
 from tests.utils.facts import RawFactComparator
 from utils import load_json_from_tarball
 
 logger = getLogger(__name__)
-
-
-@pytest.fixture
-def expected_facts():
-    """Set of expected facts on a OpenShift scan."""
-    return {}
 
 
 @pytest.fixture
@@ -48,8 +48,49 @@ def expected_middleware_names():
 def fingerprint_fact_map():
     """Map fingerprint to raw fact name."""
     return {
-        "name": "name",
+        "name": "node__name",
+        "etc_machine_id": "node__machine_id",
+        "cpu_count": "node__capacity__cpu",
+        "ip_addresses": "node__addresses",
+        "architecture": "node__architecture",
+        "system_creation_date": "node__creation_timestamp",
     }
+
+
+@pytest.fixture
+def node_resources():
+    """Return a NodeResources instance."""
+    return NodeResources(cpu="4", memory_in_bytes="15252796Ki", pods="250")
+
+
+@pytest.fixture
+def expected_node(node_resources):
+    """Return a list with OCP node."""
+    return [
+        OCPNode(
+            name="node name",
+            errors={},
+            labels={"some": "label"},
+            taints=[{"key": "some", "effect": "some"}],
+            capacity=node_resources,
+            addresses=[{"type": "ip", "address": "1.2.3.4"}],
+            machine_id="1234-some56",
+            allocatable=node_resources,
+            architecture="amd64",
+            kernel_version="4.18.0-305.65.1.el8_4.x86_64",
+            operating_system="linux",
+            creation_timestamp="2022-12-18T03:56:20Z",
+        )
+    ]
+
+
+@pytest.fixture
+def expected_cluster():
+    """Return an OCP cluster."""
+    return OCPCluster(
+        uuid="1234-some56",
+        version="4.10",
+    )
 
 
 @pytest.fixture
@@ -73,13 +114,31 @@ def expected_projects():
                     init_container_images=["some-other-image:ver"],
                 ),
             ],
+            cluster_uuid="1234-some56",
         ),
     ]
 
 
+@pytest.fixture
+def expected_facts(expected_projects, expected_node, expected_cluster):
+    """Return a list of expected raw facts on OCP scans."""
+    projects_list = [p.dict() for p in expected_projects]
+    _node = expected_node[0].dict()
+    _node["creation_timestamp"] = _node["creation_timestamp"].isoformat()
+    return [
+        {"node": _node},
+        {
+            "cluster": expected_cluster.dict(),
+            "namespace": projects_list,
+        },
+    ]
+
+
 @pytest.fixture(autouse=True)
-def patched_openshift_client(mocker, expected_projects):
-    """Mock OpenShiftApi forcing it to return expected_projects."""
+def patched_openshift_client(
+    mocker, expected_projects, expected_node, expected_cluster
+):
+    """Mock OpenShiftApi forcing it to return expected entities."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(
         OpenShiftApi,
@@ -90,6 +149,16 @@ def patched_openshift_client(mocker, expected_projects):
         OpenShiftApi,
         "retrieve_deployments",
         return_value=expected_projects[0].deployments,
+    )
+    mocker.patch.object(
+        OpenShiftApi,
+        "retrieve_nodes",
+        return_value=expected_node,
+    )
+    mocker.patch.object(
+        OpenShiftApi,
+        "retrieve_cluster",
+        return_value=expected_cluster,
     )
 
 
@@ -104,7 +173,7 @@ class TestOpenShiftScan:
 
     @pytest.fixture
     def credential_id(self, django_client):
-        """Create network credentials through api and return credentials identifier."""
+        """Create ocp credentials through api and return credentials identifier."""
         response = django_client.post(
             "credentials/",
             json={
@@ -118,7 +187,7 @@ class TestOpenShiftScan:
 
     @pytest.fixture
     def source_id(self, django_client, credential_id):
-        """Register source for network scan through api and return its identifier."""
+        """Register source for ocp scan through api and return its identifier."""
         response = django_client.post(
             "sources/",
             json={
@@ -172,7 +241,12 @@ class TestOpenShiftScan:
         """Return the latest report id from performed scan."""
         return scan_response.json()["most_recent"]["report_id"]
 
-    def test_details_report(self, django_client, expected_projects, report_id):
+    def test_details_report(
+        self,
+        django_client,
+        report_id,
+        expected_facts,
+    ):
         """Sanity check details report."""
         response = django_client.get(f"reports/{report_id}/details/")
         assert response.ok, response.text
@@ -194,7 +268,7 @@ class TestOpenShiftScan:
         }
         assert report_details_dict == expected_details_report
         report_details_facts = report_details_dict[SOURCES_KEY][0]["facts"]
-        assert report_details_facts == [p.dict() for p in expected_projects]
+        assert report_details_facts == expected_facts
 
     @pytest.fixture
     def expected_fingerprint_metadata(self, fingerprint_fact_map):
