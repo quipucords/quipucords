@@ -249,9 +249,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 f"Fact collection {details_report.id} failed to be processed."
             )
 
-            self.scan_task.log_message("%s" % (error_message), log_level=logging.ERROR)
+            self.scan_task.log_message(f"{error_message}", log_level=logging.ERROR)
             self.scan_task.log_message(
-                "%s:%s" % (error.__class__.__name__, error), log_level=logging.ERROR
+                f"{error.__class__.__name__}:{error}", log_level=logging.ERROR
             )
             raise error
 
@@ -305,9 +305,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             name = fingerprint_dict.get("name", "unknown")
             os_release = fingerprint_dict.get("os_release", "unknown")
             self.scan_task.log_message(
-                "FINGERPRINT %d of %d SAVED - Fingerprint "
-                "(name=%s, os_release=%s)"
-                % (status_count, total_count, name, os_release)
+                f"FINGERPRINT {status_count} of {total_count} SAVED - Fingerprint "
+                f"(name={name}, os_release={os_release})"
             )
 
             if status_count % 100 == 0:
@@ -401,24 +400,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     number_invalid += 1
                     self.scan_task.log_message(
                         "The fingerprint could not be saved. "
-                        "Fingerprint: %s. Error: %s"
-                        % (str(error).strip(), fingerprint_dict),
+                        f"Fingerprint: {str(error).strip()}. Error: {fingerprint_dict}",
                         log_level=logging.ERROR,
                         exception=error,
                     )
             else:
                 number_invalid += 1
                 self.scan_task.log_message(
-                    "Invalid fingerprint: %s" % fingerprint_dict,
+                    f"Invalid fingerprint: {fingerprint_dict}",
                     log_level=logging.ERROR,
                 )
                 self.scan_task.log_message(
-                    "Fingerprint errors: %s" % serializer.errors,
+                    f"Fingerprint errors: {serializer.errors}",
                     log_level=logging.ERROR,
                 )
             self.scan_task.log_message(
-                "Fingerprints (report id=%d): %s"
-                % (details_report.id, fingerprint_dict),
+                f"Fingerprints (report id={details_report.id}): {fingerprint_dict}",
                 log_level=logging.DEBUG,
             )
 
@@ -443,22 +440,21 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         deployment_report.save()
         self.scan_task.log_message(
-            "RESULTS (report id=%d) -  "
-            "(valid fingerprints=%d, "
-            "invalid fingerprints=%d)"
-            % (deployment_report.report_id, number_valid, number_invalid)
+            f"RESULTS (report id={deployment_report.report_id}) -  "
+            f"(valid fingerprints={number_valid}, "
+            f"invalid fingerprints={number_invalid})"
         )
 
         self.scan_task.log_message("END FINGERPRINT PERSISTENCE")
         self.scan_task.log_message(
-            "%d of %d hosts valid for Insights."
-            % (insights_valid, number_valid + number_invalid)
+            f"{insights_valid} of {number_valid + number_invalid} "
+            + "hosts valid for Insights."
         )
         if invalid_hosts:
             self.scan_task.log_message(
                 "The following hosts have no canonical "
                 "facts and will be excluded from the Insights "
-                "report: %s" % str(invalid_hosts)
+                f"report: {str(invalid_hosts)}"
             )
         if not insights_hosts:
             insights_message = (
@@ -468,7 +464,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(insights_message, log_level=logging.WARN)
         else:
             insights_message = (
-                "Insights report id=%d created " % deployment_report.report_id
+                f"Insights report id={deployment_report.report_id} created "
             )
             self.scan_task.log_message(insights_message)
         deployment_report.cached_insights = json.dumps(insights_hosts)
@@ -522,22 +518,16 @@ class FingerprintTaskRunner(ScanTaskRunner):
         }
         source_list = details_report.get_sources()
         total_source_count = len(source_list)
-        self.scan_task.log_message("%d sources to process" % total_source_count)
+        self.scan_task.log_message(f"{total_source_count} sources to process")
         source_count = 0
         for source in source_list:
             source_count += 1
             source_type = source.get("source_type")
             source_name = source.get("source_name")
             self.scan_task.log_message(
-                "PROCESSING Source %d of %d - "
-                "(name=%s, type=%s, server=%s)"
-                % (
-                    source_count,
-                    total_source_count,
-                    source_name,
-                    source_type,
-                    source.get("server_id"),
-                )
+                f"PROCESSING Source {source_count} of {total_source_count} - "
+                f"(name={source_name}, type={source_type},"
+                + f" server={source.get('server_id')})"
             )
 
             source_fingerprints = self._process_source(source)
@@ -545,7 +535,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
             self.scan_task.log_message(
                 "SOURCE FINGERPRINTS - "
-                "%d %s fingerprints" % (len(source_fingerprints), source_type)
+                f"{len(source_fingerprints)} {source_type} fingerprints"
             )
             self._log_message_with_count("TOTAL FINGERPRINT COUNT", fingerprint_map)
 
@@ -560,12 +550,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         self.scan_task.log_message(
             "NETWORK DEDUPLICATION RESULT - "
-            "(before=%d, after=%d)" % (before_count, len(fingerprint_map[NETWORK_KEY]))
+            f"(before={before_count}, after={len(fingerprint_map[NETWORK_KEY])})"
         )
 
         # Deduplicate satellite fingerprints
         self.scan_task.log_message(
-            "SATELLITE DEDUPLICATION by keys %s" % SATELLITE_IDENTIFICATION_KEYS
+            f"SATELLITE DEDUPLICATION by keys {SATELLITE_IDENTIFICATION_KEYS}"
         )
         before_count = len(fingerprint_map[SATELLITE_KEY])
         fingerprint_map[SATELLITE_KEY] = self._remove_duplicate_fingerprints(
@@ -573,13 +563,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         self.scan_task.log_message(
             "SATELLITE DEDUPLICATION RESULT - "
-            "(before=%d, after=%d)"
-            % (before_count, len(fingerprint_map[SATELLITE_KEY]))
+            f"(before={before_count}, after={len(fingerprint_map[SATELLITE_KEY])})"
         )
 
         # Deduplicate vcenter fingerprints
         self.scan_task.log_message(
-            "VCENTER DEDUPLICATION by keys %s" % VCENTER_IDENTIFICATION_KEYS
+            f"VCENTER DEDUPLICATION by keys {VCENTER_IDENTIFICATION_KEYS}"
         )
         before_count = len(fingerprint_map[VCENTER_KEY])
         fingerprint_map[VCENTER_KEY] = self._remove_duplicate_fingerprints(
@@ -587,7 +576,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         self.scan_task.log_message(
             "VCENTER DEDUPLICATION RESULT - "
-            "(before=%d, after=%d)" % (before_count, len(fingerprint_map[VCENTER_KEY]))
+            f"(before={before_count}, after={len(fingerprint_map[VCENTER_KEY])})"
         )
 
         self._log_message_with_count("TOTAL FINGERPRINT COUNT", fingerprint_map)
@@ -625,7 +614,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task.log_message(
             "NETWORK-SATELLITE and VCENTER DEDUPLICATION"
             " by reverse priority keys "
-            "(we trust vcenter more than network/satellite): %s" % reverse_priority_keys
+            f"(we trust vcenter more than network/satellite): {reverse_priority_keys}"
         )
 
         self._log_message_with_count(
@@ -735,8 +724,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 fingerprint = process_fact_fn[source_type](source, fact)
             except KeyError:
                 self.scan_task.log_message.error(
-                    "Could not process source, "
-                    "unknown source type: %s" % source_type,
+                    "Could not process source, " f"unknown source type: {source_type}",
                     log_level=logging.ERROR,
                 )
 
@@ -954,8 +942,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if number_duplicates:
             self.scan_task.log_message(
                 "_create_index_for_fingerprints - "
-                "Potential lost fingerprint due to duplicate %s: %d."
-                % (id_key, number_duplicates),
+                "Potential lost fingerprint due to duplicate"
+                + f" {id_key}: {number_duplicates}.",
                 log_level=logging.DEBUG,
             )
         return result_by_key, key_not_found_list
@@ -1044,9 +1032,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             # remove duplicate entitlements
             for entitlement in combined_entitlements_list:
                 # entitlements have a name, entitlement_id or both
-                unique_entitlement_id = "%s:%s" % (
-                    entitlement.get("name", "_"),
-                    entitlement.get("entitlement_id", "_"),
+                unique_entitlement_id = (
+                    f"{entitlement.get('name', '_')}:"
+                    + f"{entitlement.get('entitlement_id', '_')}"
                 )
                 if unique_entitlement_dict.get(unique_entitlement_id) is None:
                     # we haven't seen this entitlement
@@ -1578,7 +1566,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         if not satellite_os_name:
             # grab the os release
             satellite_os_release = fact.get("os_release", "")
-            if satellite_os_release in rhel_versions.keys():
+            if satellite_os_release in rhel_versions:
                 # if the os release is a rhel version
                 # 1. set the is redhat fact to true and add it to fingerprint
                 # 2. set the rhel version to the rhel versions value
@@ -1661,6 +1649,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         else:
             infrastructure_type = SystemFingerprint.UNKNOWN
         if name.startswith("virt-who-") and name.endswith(
+            # pylint: disable=consider-using-generator
             tuple(["-" + str(num) for num in range(1, 10)])
         ):
             infrastructure_type = SystemFingerprint.HYPERVISOR
@@ -1781,16 +1770,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     date_error = error
 
             self.scan_task.log_message(
-                "Fingerprinter (%s, %s) - "
-                "Could not parse date for %s. "
-                "Unsupported date format: '%s'. Error: %s"
-                % (
-                    source["source_type"],
-                    source["source_name"],
-                    raw_fact_key,
-                    raw_date_value,
-                    date_error,
-                ),
+                f"Fingerprinter ({source['source_type']}, {source['source_name']}) - "
+                f"Could not parse date for {raw_fact_key}. "
+                f"Unsupported date format: '{raw_date_value}'. Error: {date_error}",
                 log_level=logging.ERROR,
             )
         return None
