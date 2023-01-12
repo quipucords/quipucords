@@ -90,6 +90,7 @@ RAW_DATE_KEYS = dict(
         ("date_anaconda_log", ["%Y-%m-%d"]),
         ("registration_time", ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"]),
         ("date_machine_id", ["%Y-%m-%d"]),
+        ("creation_timestamp", ["%Y-%m-%dT%H:%M:%S%z"]),
     ]
 )
 
@@ -1723,7 +1724,36 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ENTITLEMENTS_KEY: [],
             PRODUCTS_KEY: [],
         }
-        self._add_fact_to_fingerprint(source, "name", fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(source, "node__name", fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(
+            source, "node__capacity__cpu", fact, "cpu_count", fingerprint
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "node__architecture",
+            fact,
+            "architecture",
+            fingerprint,
+            fact_formatter=formatters.convert_architecture,
+        )
+        self._add_fact_to_fingerprint(
+            source, "node__machine_id", fact, "etc_machine_id", fingerprint
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "node__addresses",
+            fact,
+            "ip_addresses",
+            fingerprint,
+            fact_formatter=formatters.extract_ip_addresses,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "node__creation_timestamp",
+            fact,
+            "creation_timestamp",
+            fingerprint,
+        )
 
         return fingerprint
 
