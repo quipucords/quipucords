@@ -17,7 +17,6 @@ import django.dispatch
 from django.utils.translation import gettext as _
 
 from api import messages
-from scanner import manager
 from scanner.job import ScanJobRunner
 
 # Get an instance of a logger
@@ -38,6 +37,8 @@ def handle_scan(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    from scanner import manager  # pylint: disable=import-outside-toplevel
+
     instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("START"))
     scanner = ScanJobRunner(instance)
     instance.queue()
@@ -69,6 +70,8 @@ def scan_action(sender, instance, action, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    from scanner import manager  # pylint: disable=import-outside-toplevel
+
     if action in [PAUSE, CANCEL]:
         manager.SCAN_MANAGER.kill(instance, action)
 
@@ -105,6 +108,8 @@ def scan_restart(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
+    from scanner import manager  # pylint: disable=import-outside-toplevel
+
     instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("RESTART"))
     scanner = ScanJobRunner(instance)
 

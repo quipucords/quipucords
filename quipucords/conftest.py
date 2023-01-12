@@ -14,8 +14,6 @@ IMPORTANT: Don't import aplication code on toplevel as this can influence
 the proper patching.
 """
 # pylint: disable=import-outside-toplevel
-from contextlib import suppress
-from unittest.mock import patch
 from urllib.parse import urljoin
 
 import pytest
@@ -23,58 +21,19 @@ import pytest
 from tests.utils.http import BaseUrlClient
 
 
-def _kill_scan_manager(manager_instance):
-    for job in manager_instance.scan_queue:
-        with suppress(AttributeError):
-            job.kill()
-
-    manager_instance.running = False
-    if manager_instance.is_alive():
-        manager_instance.join()
-
-
-def _return_itself(instance):
-    return instance
-
-
-@pytest.fixture
-def scan_manager():
-    """
-    Scan manager fixture.
-
-    If started, ensure its proper teardown.
-    """
-    from scanner import manager
-
-    scan_manager_instance = manager.Manager()
-    with (
-        patch.object(manager, "sleep"),
-        patch.object(manager, "SCAN_MANAGER", scan_manager_instance),
-    ):
-        yield scan_manager_instance
-
-    _kill_scan_manager(scan_manager_instance)
-
-
-@pytest.fixture
-def disabled_scan_manager(mocker):
-    """Completely disabled scan manager. Use when task manager is not required."""
-    _manager = mocker.MagicMock()
-    mocker.patch("scanner.manager.Manager", _manager)
-    mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    mocker.patch("api.signal.scanjob_signal.manager.Manager", _manager)
-    mocker.patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", _manager)
-    yield _manager
-
-
 @pytest.fixture(autouse=True)
-def _patch_scan_manager(scan_manager):
-    with (
-        patch.object(scan_manager.__class__, "__call__", _return_itself),
-        patch("api.signal.scanjob_signal.manager.Manager", scan_manager),
-        patch("api.signal.scanjob_signal.manager.SCAN_MANAGER", scan_manager),
-    ):
-        yield
+def scan_manager(mocker):
+    """return a DummyScanManager instance."""
+    # pylint: disable=protected-access
+    from tests.dummy_scan_manager import DummyScanManager
+
+    _manager = DummyScanManager()
+    mocker.patch("scanner.manager.Manager", DummyScanManager)
+    mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
+    yield _manager
+    for job in _manager._queue:
+        job.kill()
+    _manager._queue = []
 
 
 @pytest.fixture(scope="session")
