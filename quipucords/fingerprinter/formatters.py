@@ -32,3 +32,20 @@ def gigabytes_to_bytes(gigabytes):
     if gigabytes is None:
         return None
     return gigabytes * (1024**3)
+
+
+def convert_architecture(architecture):
+    """Convert architecture name."""
+    architecture_map = {"amd64": "x86_64"}
+    if not architecture_map.get(architecture):
+        return architecture
+    return architecture_map.get(architecture)
+
+
+def extract_ip_addresses(addresses):
+    """Extract only ip addresses from list of addresses."""
+    ip_addresses = []
+    for element in addresses:
+        if "ip" in element.get("type").lower():
+            ip_addresses.append(element.get("address"))
+    return ip_addresses
