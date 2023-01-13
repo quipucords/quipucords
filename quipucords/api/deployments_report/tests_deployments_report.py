@@ -100,7 +100,7 @@ class DeploymentReportTest(TestCase):
             os_versions = ["7.3", "7.4"]
 
         for version in os_versions:
-            release = "{} {}".format(os_name, version)
+            release = f"{os_name} {version}"
             fact_json = {
                 "connection_host": "1.2.3.4",
                 "connection_port": 22,

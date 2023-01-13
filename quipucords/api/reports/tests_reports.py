@@ -96,7 +96,7 @@ class ReportsTest(TestCase):
             os_versions = ["7.3", "7.4"]
 
         for version in os_versions:
-            release = "{} {}".format(os_name, version)
+            release = f"{os_name} {version}"
             fact_json = {
                 "connection_host": "1.2.3.4",
                 "connection_port": 22,
@@ -145,7 +145,7 @@ class ReportsTest(TestCase):
         self.deployments_json = report
         self.details_json = self.retrieve_expect_200_details(1, query_params)
 
-        reports_dict = dict()
+        reports_dict = {}
         reports_dict["report_id"] = 1
         reports_dict["details_json"] = self.details_json
         reports_dict["deployments_json"] = self.deployments_json
@@ -184,7 +184,7 @@ class ReportsTest(TestCase):
             reports_dict, renderer_context=self.mock_renderer_context
         )
         self.assertNotEqual(tar_gz_result, None)
-        tar = tarfile.open(fileobj=tar_gz_result)
+        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
         files = tar.getmembers()
         filenames = tar.getnames()
         self.assertEqual(len(files), 5)
@@ -253,7 +253,7 @@ class ReportsTest(TestCase):
             reports_dict, renderer_context=mock_renderer_context
         )
         self.assertNotEqual(tar_gz_result, None)
-        tar = tarfile.open(fileobj=tar_gz_result)
+        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
         files = tar.getmembers()
         filenames = tar.getnames()
         self.assertEqual(len(files), 5)
