@@ -54,6 +54,8 @@ def fingerprint_fact_map():
         "ip_addresses": "node__addresses",
         "name": "node__name",
         "system_creation_date": "node__creation_timestamp",
+        "system_role": "node__labels",
+        "vm_cluster": "node__cluster_uuid",
     }
 
 
@@ -70,7 +72,7 @@ def expected_node(node_resources):
         OCPNode(
             name="node name",
             errors={},
-            labels={"some": "label"},
+            labels={"node-role.kubernetes.io/master": ""},
             taints=[{"key": "some", "effect": "some"}],
             capacity=node_resources,
             addresses=[{"type": "ip", "address": "1.2.3.4"}],
@@ -124,6 +126,7 @@ def expected_facts(expected_projects, expected_node, expected_cluster):
     projects_list = [p.dict() for p in expected_projects]
     _node = expected_node[0].dict()
     _node["creation_timestamp"] = _node["creation_timestamp"].isoformat()
+    _node["cluster_uuid"] = expected_cluster.uuid
     return [
         {"node": _node},
         {
@@ -328,6 +331,8 @@ class TestOpenShiftScan:
         }
         assert fingerprints_dict[META_DATA_KEY] == expected_fingerprint_metadata
         assert fingerprints_dict["architecture"] == "x86_64"
+        assert fingerprints_dict["system_role"] == "master"
+        assert fingerprints_dict["vm_cluster"] == "<CLUSTER-UUID>"
 
     def test_compare_standalone_json_reports_with_tarball(
         self, django_client, report_id

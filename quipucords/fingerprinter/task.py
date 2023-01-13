@@ -1749,6 +1749,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
             "creation_timestamp",
             fingerprint,
         )
+        self._add_fact_to_fingerprint(
+            source,
+            "node__cluster_uuid",
+            fact,
+            "vm_cluster",
+            fingerprint,
+        )
+
+        self._add_fact_to_fingerprint(
+            source,
+            "node__labels",
+            fact,
+            "system_role",
+            fingerprint,
+            fact_formatter=ocp_formatters.infer_node_role,
+        )
 
         return fingerprint
 

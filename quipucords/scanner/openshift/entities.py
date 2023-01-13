@@ -90,6 +90,7 @@ class OCPNode(OCPBaseEntity):
     """Entity representing OpenShift Node."""
 
     name: str
+    cluster_uuid: str = None
     creation_timestamp: datetime.datetime = None
     labels: Dict[str, str] = None
     addresses: List[dict] = None

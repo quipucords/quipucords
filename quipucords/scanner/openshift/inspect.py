@@ -48,6 +48,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         for node in nodes_list:
             # check if scanjob is paused or cancelled
             self.check_for_interrupt(manager_interrupt)
+            node.cluster_uuid = cluster.uuid
             self._save_node(node)
 
         self.log("Retrieving extra cluster facts.")
