@@ -28,10 +28,28 @@ def image_names(deployment_list) -> list:
     return sorted(images_set)
 
 
-def labels(deployment_list) -> dict:
+def get_labels(deployment_list) -> dict:
     """Group labels from the same key for a given deployment list."""
     labels_dict = defaultdict(set)
     for deployment_dict in deployment_list:
         for label_key, label_value in deployment_dict["labels"].items():
             labels_dict[label_key].add(label_value)
     return {k: sorted(v) for k, v in labels_dict.items()}
+
+
+def extract_ip_addresses(addresses):
+    """Extract only ip addresses from list of addresses."""
+    ip_addresses = []
+    for element in addresses:
+        if "ip" in element.get("type").lower():
+            ip_addresses.append(element.get("address"))
+    return ip_addresses
+
+
+def infer_node_role(labels: dict):
+    """Infer node role based on its labels dict."""
+    node_roles = []
+    for role in ["worker", "master"]:
+        if labels.get(f"node-role.kubernetes.io/{role}"):
+            node_roles.append(role)
+    return "/".join(node_roles)

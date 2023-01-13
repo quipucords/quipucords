@@ -40,12 +40,3 @@ def convert_architecture(architecture):
     if not architecture_map.get(architecture):
         return architecture
     return architecture_map.get(architecture)
-
-
-def extract_ip_addresses(addresses):
-    """Extract only ip addresses from list of addresses."""
-    ip_addresses = []
-    for element in addresses:
-        if "ip" in element.get("type").lower():
-            ip_addresses.append(element.get("address"))
-    return ip_addresses

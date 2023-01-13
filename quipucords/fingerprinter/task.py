@@ -1740,7 +1740,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "ip_addresses",
             fingerprint,
-            fact_formatter=formatters.extract_ip_addresses,
+            fact_formatter=ocp_formatters.extract_ip_addresses,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1748,6 +1748,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "creation_timestamp",
             fingerprint,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "node__cluster_uuid",
+            fact,
+            "vm_cluster",
+            fingerprint,
+        )
+
+        self._add_fact_to_fingerprint(
+            source,
+            "node__labels",
+            fact,
+            "system_role",
+            fingerprint,
+            fact_formatter=ocp_formatters.infer_node_role,
         )
 
         return fingerprint
