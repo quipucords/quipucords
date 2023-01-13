@@ -31,6 +31,7 @@ from api.common.util import (
 )
 from api.deployments_report.util import (
     NETWORK_DETECTION_KEY,
+    OPENSHIFT_DETECTION_KEY,
     SATELLITE_DETECTION_KEY,
     VCENTER_DETECTION_KEY,
     compute_source_info,
@@ -383,6 +384,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                 source_types.append("vcenter")
                             if sources_info.get(SATELLITE_DETECTION_KEY):
                                 source_types.append("satellite")
+                            if sources_info.get(OPENSHIFT_DETECTION_KEY):
+                                source_types.append("openshift")
                         if source_types:
                             nested_facts["source_types"] = source_types
 
