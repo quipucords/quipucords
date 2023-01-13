@@ -60,3 +60,7 @@ def test_payload_serializer(db, report_entity: ReportEntity):
         str(s.slice_id): {"number_hosts": len(s.hosts)}
         for s in report_entity.slices.values()
     }
+    slice_id = list(report_entity.slices.values())[0].slice_id
+    host_list = data[f"report_id_{report_entity.report_id}/{slice_id}.json"]["hosts"]
+    for host in host_list:
+        assert dict(namespace="qpc", key="data-collector", value="qpc") in host["tags"]
