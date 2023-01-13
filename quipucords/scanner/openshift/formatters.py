@@ -35,3 +35,12 @@ def labels(deployment_list) -> dict:
         for label_key, label_value in deployment_dict["labels"].items():
             labels_dict[label_key].add(label_value)
     return {k: sorted(v) for k, v in labels_dict.items()}
+
+
+def extract_ip_addresses(addresses):
+    """Extract only ip addresses from list of addresses."""
+    ip_addresses = []
+    for element in addresses:
+        if "ip" in element.get("type").lower():
+            ip_addresses.append(element.get("address"))
+    return ip_addresses

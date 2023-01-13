@@ -1740,7 +1740,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "ip_addresses",
             fingerprint,
-            fact_formatter=formatters.extract_ip_addresses,
+            fact_formatter=ocp_formatters.extract_ip_addresses,
         )
         self._add_fact_to_fingerprint(
             source,
