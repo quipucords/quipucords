@@ -48,11 +48,11 @@ def expected_middleware_names():
 def fingerprint_fact_map():
     """Map fingerprint to raw fact name."""
     return {
-        "name": "node__name",
-        "etc_machine_id": "node__machine_id",
-        "cpu_count": "node__capacity__cpu",
-        "ip_addresses": "node__addresses",
         "architecture": "node__architecture",
+        "cpu_count": "node__capacity__cpu",
+        "etc_machine_id": "node__machine_id",
+        "ip_addresses": "node__addresses",
+        "name": "node__name",
         "system_creation_date": "node__creation_timestamp",
     }
 
