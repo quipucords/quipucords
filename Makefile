@@ -31,7 +31,6 @@ help:
 	@echo "  server-init         to run server initializion steps"
 	@echo "  serve               to run the server with default db"
 	@echo "  serve-swagger       to run the openapi/swagger ui for quipucords"
-	@echo "  manpage             to build the manpage"
 	@echo "  build-ui            to build ui and place result in django server"
 	@echo "  fetch-ui            to fetch prebuilt ui and place it in django server"
 	@echo "  build-container     to build the container image for quipucords"
