@@ -123,6 +123,36 @@ class OCPApp(OCPBaseEntity):
     init_container_images: List[str] = Field(default_factory=list)
     _kind = "app"
 
+    @classmethod
+    def from_api_object(cls, api_object):
+        """Init OCPPod from object returned from ocp/k8s api."""
+
+        def _get_container_images(container_list):
+            container_list = container_list or []
+            return list({c["image"] for c in container_list if c.get("image")})
+
+        return cls(
+            name=api_object.metadata.name,
+            namespace=api_object.metadata.namespace,
+            labels=api_object.metadata.labels,
+            container_images=_get_container_images(api_object.spec["containers"]),
+            init_container_images=_get_container_images(
+                api_object.spec["initContainers"]
+            ),
+        )
+
+
+class OCPPod(OCPApp):
+    """Entity representing OpenShift Pods."""
+
+    _kind = "pod"
+
+    @property
+    def app_name(self):
+        """Return app name."""
+        # if not available as a label,
+        return self.labels.get("app") or self.name.rsplit("-", 1)[0]
+
 
 @raises(ValueError)
 class OCPError(OCPBaseEntity):

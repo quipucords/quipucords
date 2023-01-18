@@ -25,9 +25,11 @@ from urllib3.exceptions import MaxRetryError
 
 from scanner.openshift.entities import (
     NodeResources,
+    OCPApp,
     OCPCluster,
     OCPError,
     OCPNode,
+    OCPPod,
     OCPProject,
 )
 
@@ -138,6 +140,30 @@ class OpenShiftApi:
         cluster_entity = self._init_cluster(clusters[0])
         return cluster_entity
 
+    def retrieve_pods(self, **kwargs) -> List[OCPPod]:
+        """Retrieve OCP Pods."""
+        pods_raw = self._list_pods(**kwargs)
+        pods_list = []
+        for pod in pods_raw.items:
+            ocp_pod = OCPPod.from_api_object(pod)
+            pods_list.append(ocp_pod)
+        return pods_list
+
+    def retrieve_apps(self, **kwargs):
+        """Retrieve OCP "Apps"."""
+        pod_list = self.retrieve_pods()
+        _uniq_apps_set = set()
+        app_list = []
+        for pod in pod_list:
+            pod_id = (pod.namespace, pod.app_name)
+            if pod_id in _uniq_apps_set:
+                continue
+            _uniq_apps_set.add(pod_id)
+            data = pod.dict()
+            data["name"] = pod.app_name
+            app_list.append(OCPApp(**data))
+        return app_list
+
     @cached_property
     def _core_api(self):
         return CoreV1Api(api_client=self._api_client)
@@ -156,6 +182,10 @@ class OpenShiftApi:
             api_version="config.openshift.io/v1", kind="ClusterVersion"
         )
 
+    @cached_property
+    def _pod_api(self):
+        return self._dynamic_client.resources.get(api_version="v1", kind="Pod")
+
     @catch_k8s_exception
     def _list_projects(self, **kwargs):
         return self._namespace_api.get(**kwargs)
@@ -167,6 +197,10 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_clusters(self, **kwargs):
         return self._cluster_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_pods(self, **kwargs):
+        return self._pod_api.get(**kwargs)
 
     def _init_ocp_project(self, raw_project) -> OCPProject:
         ocp_project = OCPProject(

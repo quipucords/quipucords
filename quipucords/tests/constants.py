@@ -84,3 +84,4 @@ class VCRCassettes:
     OCP_CLUSTER = VCRPath()
     OCP_NODE = VCRPath()
     OCP_NAMESPACES = VCRPath()
+    OCP_PODS = VCRPath()
