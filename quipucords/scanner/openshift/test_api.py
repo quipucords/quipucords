@@ -116,7 +116,12 @@ def test_unauthorized_token(ocp_client: OpenShiftApi, api_method):
 
 @pytest.mark.vcr_primer(VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_dynamic_client_cache(ocp_client: OpenShiftApi):
-    """Test dynamic_client cache."""
+    """
+    Test dynamic_client cache.
+
+    Everytime a new "api resource" is added to ocp_client we need to add it to this test
+    and run `pytest --refresh-cassettes` using a valid OCP connection.
+    """
     # pylint: disable=protected-access,pointless-statement
     assert (
         not ocp_client._discoverer_cache_file.exists()
