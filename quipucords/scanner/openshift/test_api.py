@@ -21,7 +21,9 @@ from scanner.openshift.entities import (
     OCPCluster,
     OCPError,
     OCPNode,
+    OCPPod,
     OCPProject,
+    OCPWorkload,
 )
 from tests.asserts import assert_elements_type
 from tests.constants import ConstantsFromEnv, VCRCassettes
@@ -123,6 +125,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     ocp_client._cluster_api
     ocp_client._node_api
     ocp_client._namespace_api
+    ocp_client._pod_api
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
@@ -222,3 +225,32 @@ def test_retrieve_projects(ocp_client: OpenShiftApi):
     """Test retrieving projects."""
     projects = ocp_client.retrieve_projects()
     assert_elements_type(projects, OCPProject)
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_PODS, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_pods_api(ocp_client: OpenShiftApi):
+    """Test pods api."""
+    # pylint: disable=protected-access
+    pods = ocp_client._list_pods()
+    assert pods
+
+
+@pytest.mark.vcr(VCRCassettes.OCP_PODS, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_retrieve_pods(ocp_client: OpenShiftApi):
+    """Test retrieving pods."""
+    pods = ocp_client.retrieve_pods()
+    assert_elements_type(pods, OCPPod)
+
+
+@pytest.mark.vcr(
+    VCRCassettes.OCP_PODS,
+    VCRCassettes.OCP_DISCOVERER_CACHE,
+    allow_playback_repeats=True,
+)
+def test_retrieve_workloads(ocp_client: OpenShiftApi):
+    """Test retrieving workloads."""
+    pods = ocp_client.retrieve_pods()
+    workloads = ocp_client.retrieve_workloads()
+    assert_elements_type(workloads, OCPWorkload)
+    assert len(workloads) < len(pods)
+    assert {p.app_name for p in pods} == {a.name for a in workloads}

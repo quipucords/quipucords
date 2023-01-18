@@ -30,6 +30,7 @@ from scanner.openshift.entities import (
     OCPCluster,
     OCPNode,
     OCPProject,
+    OCPWorkload,
 )
 from tests.utils.facts import RawFactComparator
 from utils import load_json_from_tarball
@@ -106,7 +107,15 @@ def expected_projects():
 
 
 @pytest.fixture
-def expected_facts(expected_projects, expected_node, expected_cluster):
+def expected_workloads():
+    """Return a list of OCP workloads."""
+    return [OCPWorkload(name="workload-name", container_images=["some-image"])]
+
+
+@pytest.fixture
+def expected_facts(
+    expected_projects, expected_node, expected_cluster, expected_workloads
+):
     """Return a list of expected raw facts on OCP scans."""
     projects_list = [p.dict() for p in expected_projects]
     _node = expected_node[0].dict()
@@ -116,14 +125,15 @@ def expected_facts(expected_projects, expected_node, expected_cluster):
         {"node": _node},
         {
             "cluster": expected_cluster.dict(),
-            "namespace": projects_list,
+            "projects": projects_list,
+            "workloads": expected_workloads,
         },
     ]
 
 
 @pytest.fixture(autouse=True)
 def patched_openshift_client(
-    mocker, expected_projects, expected_node, expected_cluster
+    mocker, expected_projects, expected_node, expected_cluster, expected_workloads
 ):
     """Mock OpenShiftApi forcing it to return expected entities."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
@@ -141,6 +151,11 @@ def patched_openshift_client(
         OpenShiftApi,
         "retrieve_cluster",
         return_value=expected_cluster,
+    )
+    mocker.patch.object(
+        OpenShiftApi,
+        "retrieve_workloads",
+        return_value=expected_workloads,
     )
 
 

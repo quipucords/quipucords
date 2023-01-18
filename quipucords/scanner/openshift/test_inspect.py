@@ -21,6 +21,7 @@ from scanner.openshift.entities import (
     OCPError,
     OCPNode,
     OCPProject,
+    OCPWorkload,
 )
 from tests.factories import ScanTaskFactory
 
@@ -48,7 +49,13 @@ def scan_task():
 @pytest.fixture
 def project():
     """Return OCPProject entity."""
-    return OCPProject(name="project-ok", labels={"project": "ok"})
+    return OCPProject(name="project", labels={"project": "ok"})
+
+
+@pytest.fixture
+def workload():
+    """Return OCPWorkload entity."""
+    return OCPWorkload(name="workload", namespace="project")
 
 
 @pytest.fixture
@@ -114,11 +121,14 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 
 @pytest.mark.django_db
-def test_inspect_with_success(mocker, scan_task: ScanTask, project, cluster, node_ok):
+def test_inspect_with_success(  # pylint: disable=too-many-arguments
+    mocker, scan_task: ScanTask, project, cluster, node_ok, workload
+):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -138,6 +148,7 @@ def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
     cluster,
     node_ok,
     node_err,
+    workload,
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
@@ -145,6 +156,7 @@ def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
     mocker.patch.object(
         OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
     )
+    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -157,17 +169,19 @@ def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
 
 
 @pytest.mark.django_db
-def test_inspect_with_failure(
+def test_inspect_with_failure(  # pylint: disable=too-many-arguments
     mocker,
     scan_task: ScanTask,
     project,
     cluster_err,
     node_err,
+    workload,
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
+    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
     assert message == InspectTaskRunner.FAILURE_MESSAGE

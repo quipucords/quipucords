@@ -11,14 +11,13 @@
 """OpenShift inspect task runner."""
 
 import json
-from collections import defaultdict
 
 from django.conf import settings
 from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
-from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPNode
+from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPError, OCPNode
 from scanner.openshift.task import OpenShiftTaskRunner
 
 
@@ -34,7 +33,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
     def execute_task(self, manager_interrupt):
         """Scan satellite manager and obtain host facts."""
         self._check_prerequisites()
-
         ocp_client = self.get_ocp_client(self.scan_task)
 
         self.log("Retrieving essential cluster facts.")
@@ -44,6 +42,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         nodes_list = ocp_client.retrieve_nodes(
             timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
         )
+        # cluster is considered a "system", hence the +1
         self._init_stats(len(nodes_list) + 1)
         for node in nodes_list:
             # check if scanjob is paused or cancelled
@@ -52,10 +51,10 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             self._save_node(node)
 
         self.log("Retrieving extra cluster facts.")
-        project_list = ocp_client.retrieve_projects(
-            timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
+        extra_cluster_facts = self._extra_cluster_facts(
+            manager_interrupt, ocp_client, cluster
         )
-        self._save_cluster(cluster, project_list)
+        self._save_cluster(cluster, extra_cluster_facts)
 
         self.log(f"Collected facts for {self.scan_task.systems_scanned} systems.")
         if self.scan_task.systems_failed:
@@ -68,6 +67,23 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         if self.scan_task.systems_scanned:
             return self.SUCCESS_MESSAGE, ScanTask.COMPLETED
         return self.FAILURE_MESSAGE, ScanTask.FAILED
+
+    def _extra_cluster_facts(self, manager_interrupt, ocp_client, cluster):
+        """Retrieve extra cluster facts."""
+        fact2method = (
+            ("projects", ocp_client.retrieve_projects),
+            ("workloads", ocp_client.retrieve_workloads),
+        )
+        extra_facts = {}
+        for fact_name, api_method in fact2method:
+            self.check_for_interrupt(manager_interrupt)
+            try:
+                extra_facts[fact_name] = api_method(
+                    timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT
+                )
+            except OCPError as err:
+                cluster.errors[fact_name] = err
+        return extra_facts
 
     def _check_prerequisites(self):
         connect_scan_task = self.scan_task.prerequisites.first()
@@ -106,7 +122,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         system_result.save()
         raw_fact = self._entity_as_raw_fact(cluster, system_result)
         raw_fact.save()
-        other_raw_facts = self._entities_as_raw_facts(other_facts, system_result)
+        other_raw_facts = self._entities_as_raw_facts(system_result, other_facts)
         RawFact.objects.bulk_create(other_raw_facts)
         return system_result
 
@@ -133,24 +149,21 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         )
 
     def _entities_as_raw_facts(
-        self, entities: list[OCPBaseEntity], inspection_result: SystemInspectionResult
+        self, inspection_result: SystemInspectionResult, entities: dict
     ) -> list[RawFact]:
         def _pydantic_encoder(value):
             return value.dict()
 
-        entities_per_kind = defaultdict(list)
-        raw_facts = []
-        for ent in entities:
-            entities_per_kind[ent.kind].append(ent)
-        for kind, entity_list in entities_per_kind.items():
-            raw_facts.append(
-                RawFact(
-                    name=kind,
-                    value=json.dumps(entity_list, default=_pydantic_encoder),
-                    system_inspection_result=inspection_result,
-                )
+        raw_fact_list = []
+        for collection_name, entity in entities.items():
+            raw_fact = RawFact(
+                name=collection_name,
+                value=json.dumps(entity, default=_pydantic_encoder),
+                system_inspection_result=inspection_result,
             )
-        return raw_facts
+            raw_fact_list.append(raw_fact)
+
+        return raw_fact_list
 
     def _infer_inspection_status(self, entity):
         if entity.errors:
