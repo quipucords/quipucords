@@ -83,3 +83,4 @@ class VCRCassettes:
     OCP_UNAUTHORIZED = VCRPath()
     OCP_CLUSTER = VCRPath()
     OCP_NODE = VCRPath()
+    OCP_NAMESPACES = VCRPath()

@@ -110,19 +110,25 @@ class OCPProject(OCPBaseEntity):
 
     name: str
     labels: Dict[str, str]
-    deployments: List[OCPDeployment] = Field(default_factory=list)
-    errors: Dict[str, OCPError] = Field(default_factory=dict)
     _kind = "namespace"
 
 
-class OCPDeployment(OCPBaseEntity):
-    """Entity representing OpenShift Deployments."""
+class OCPWorkload(OCPBaseEntity):
+    """
+    Entity representing ocp/k8s "Workloads".
+
+    The idea behind workload is to act as anything that manage and run pods such as
+    Deployments, StatefulSets, Jobs, custom resources that manage pods, etc...
+
+    More info here: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.26/#-strong-workloads-apis-strong-  # noqa: 501
+    """
 
     name: str
-    labels: Dict[str, str]
-    container_images: List[str]
-    init_container_images: List[str]
-    _kind = "deployment"
+    namespace: str = None
+    labels: Dict[str, str] = Field(default_factory=dict)
+    container_images: List[str] = Field(default_factory=list)
+    init_container_images: List[str] = Field(default_factory=list)
+    _kind = "workload"
 
 
 @raises(ValueError)

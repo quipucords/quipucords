@@ -53,16 +53,8 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
         self.log("Retrieving extra cluster facts.")
         project_list = ocp_client.retrieve_projects(
-            retrieve_all=False,
             timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
         )
-        for project in project_list:
-            # check if scanjob is paused or cancelled
-            self.check_for_interrupt(manager_interrupt)
-            ocp_client.add_deployments_to_project(
-                project,
-                timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
-            )
         self._save_cluster(cluster, project_list)
 
         self.log(f"Collected facts for {self.scan_task.systems_scanned} systems.")

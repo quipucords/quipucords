@@ -13,20 +13,13 @@ from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
 
-from kubernetes.client import (
-    ApiClient,
-    ApiException,
-    AppsV1Api,
-    Configuration,
-    CoreV1Api,
-)
+from kubernetes.client import ApiClient, ApiException, Configuration, CoreV1Api
 from openshift.dynamic import DynamicClient
 from urllib3.exceptions import MaxRetryError
 
 from scanner.openshift.entities import (
     NodeResources,
     OCPCluster,
-    OCPDeployment,
     OCPError,
     OCPNode,
     OCPProject,
@@ -116,11 +109,11 @@ class OpenShiftApi:
             return False
         return True
 
-    def retrieve_projects(self, retrieve_all=True, **kwargs) -> List[OCPProject]:
+    def retrieve_projects(self, **kwargs) -> List[OCPProject]:
         """Retrieve projects/namespaces under OCP host."""
         project_list = []
         for project in self._list_projects(**kwargs).items:
-            ocp_project = self._init_ocp_project(project, retrieve_all=retrieve_all)
+            ocp_project = self._init_ocp_project(project)
             project_list.append(ocp_project)
         return project_list
 
@@ -139,15 +132,6 @@ class OpenShiftApi:
         cluster_entity = self._init_cluster(clusters[0])
         return cluster_entity
 
-    def retrieve_deployments(self, project_name, **kwargs) -> List[OCPDeployment]:
-        """Retrieve deployments under project 'project_name'."""
-        deployments_raw = self._list_deployments(project_name, **kwargs)
-        deployments_list = []
-        for dep in deployments_raw.items:
-            ocp_deployment = self._init_ocp_deployment(dep)
-            deployments_list.append(ocp_deployment)
-        return deployments_list
-
     @cached_property
     def _core_api(self):
         return CoreV1Api(api_client=self._api_client)
@@ -157,8 +141,8 @@ class OpenShiftApi:
         return self._dynamic_client.resources.get(api_version="v1", kind="Node")
 
     @cached_property
-    def _apps_api(self):
-        return AppsV1Api(api_client=self._api_client)
+    def _namespace_api(self):
+        return self._dynamic_client.resources.get(api_version="v1", kind="Namespace")
 
     @cached_property
     def _cluster_api(self):
@@ -167,9 +151,8 @@ class OpenShiftApi:
         )
 
     @catch_k8s_exception
-    @wraps(CoreV1Api.list_namespace)
     def _list_projects(self, **kwargs):
-        return self._core_api.list_namespace(**kwargs)
+        return self._namespace_api.get(**kwargs)
 
     @catch_k8s_exception
     def _list_nodes(self, **kwargs):
@@ -179,18 +162,11 @@ class OpenShiftApi:
     def _list_clusters(self, **kwargs):
         return self._cluster_api.get(**kwargs)
 
-    @catch_k8s_exception
-    @wraps(AppsV1Api.list_namespaced_deployment)
-    def _list_deployments(self, namespace, **kwargs):
-        return self._apps_api.list_namespaced_deployment(namespace, **kwargs)
-
-    def _init_ocp_project(self, raw_project, retrieve_all=True) -> OCPProject:
+    def _init_ocp_project(self, raw_project) -> OCPProject:
         ocp_project = OCPProject(
             name=raw_project.metadata.name,
             labels=raw_project.metadata.labels,
         )
-        if retrieve_all:
-            self.add_deployments_to_project(ocp_project)
         return ocp_project
 
     def _init_ocp_nodes(self, node) -> OCPNode:
@@ -222,29 +198,3 @@ class OpenShiftApi:
             version=cluster["status"]["desired"]["version"],
         )
         return ocp_cluster
-
-    def add_deployments_to_project(self, ocp_project, **kwargs):
-        """Retrieve deployments and add to OCPProject."""
-        try:
-            deployments = self.retrieve_deployments(ocp_project.name, **kwargs)
-            ocp_project.deployments = deployments
-        except OCPError as error:
-            ocp_project.errors["deployments"] = error
-
-    def _init_ocp_deployment(self, raw_deployment):
-        def _getter(obj, name, default_value=None):
-            return getattr(obj, name, default_value) or default_value
-
-        metadata = _getter(raw_deployment, "metadata")
-        template_spec = raw_deployment.spec.template.spec
-        container_images = [c.image for c in _getter(template_spec, "containers", [])]
-        init_container_images = [
-            c.image for c in _getter(template_spec, "init_containers", [])
-        ]
-
-        return OCPDeployment(
-            name=_getter(metadata, "name"),
-            labels=_getter(metadata, "labels", {}),
-            container_images=container_images,
-            init_container_images=init_container_images,
-        )
