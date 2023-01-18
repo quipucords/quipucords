@@ -18,7 +18,6 @@ from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
     NodeResources,
     OCPCluster,
-    OCPDeployment,
     OCPError,
     OCPNode,
     OCPProject,
@@ -47,32 +46,15 @@ def scan_task():
 
 
 @pytest.fixture
-def project_ok():
+def project():
     """Return OCPProject entity."""
     return OCPProject(name="project-ok", labels={"project": "ok"})
-
-
-@pytest.fixture
-def project_err():
-    """Return OCPProject entity."""
-    return OCPProject(name="project-err", labels={"project": "err"})
 
 
 @pytest.fixture
 def node_resources():
     """Return Node Resources entity."""
     return NodeResources(cpu="350m", memory_in_bytes="15252796Ki", pods="250")
-
-
-@pytest.fixture
-def deployment():
-    """Return OCPDeployment entity."""
-    return OCPDeployment(
-        name="deployment-name",
-        labels={"deployment": "label"},
-        container_images=["some-image"],
-        init_container_images=[],
-    )
 
 
 @pytest.fixture
@@ -119,20 +101,6 @@ def cluster_err(error):
     return OCPCluster(uuid="yet-another-not-uuid", errors={"some-error": error.dict()})
 
 
-@pytest.fixture(autouse=True)
-def _patched_retrieve_deployments(mocker, error, deployment):
-    """Mock OpenShiftApi retrieve_deployments method to return our fixtures."""
-
-    def _retrieve(project_name, **kwargs):
-        if project_name == "project-ok":
-            return deployment
-        if project_name == "project-err":
-            raise error
-        raise NotImplementedError()
-
-    mocker.patch.object(OpenShiftApi, "retrieve_deployments", side_effect=_retrieve)
-
-
 @pytest.mark.django_db
 def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
     """Test Inspect scan prerequisite failure."""
@@ -146,11 +114,9 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 
 @pytest.mark.django_db
-def test_inspect_with_success(
-    mocker, scan_task: ScanTask, project_ok, cluster, node_ok
-):
+def test_inspect_with_success(mocker, scan_task: ScanTask, project, cluster, node_ok):
     """Test connecting to OpenShift host with success."""
-    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
 
@@ -168,13 +134,13 @@ def test_inspect_with_success(
 def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
     mocker,
     scan_task: ScanTask,
-    project_ok,
+    project,
     cluster,
     node_ok,
     node_err,
 ):
     """Test connecting to OpenShift host with success."""
-    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(
         OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
@@ -194,12 +160,12 @@ def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
 def test_inspect_with_failure(
     mocker,
     scan_task: ScanTask,
-    project_err,
+    project,
     cluster_err,
     node_err,
 ):
     """Test connecting to OpenShift host with success."""
-    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project_err])
+    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)

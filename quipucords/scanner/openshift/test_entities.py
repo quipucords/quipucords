@@ -18,7 +18,7 @@ from scanner.openshift.entities import (
     MEMORY_CONVERSION_ERROR,
     NodeResources,
     OCPBaseEntity,
-    OCPDeployment,
+    OCPCluster,
     OCPError,
     OCPProject,
     load_entity,
@@ -47,48 +47,43 @@ def test_message_parsing(mocker, error_body, expected_message, status, reason):
 
 
 @pytest.fixture
-def deployment_data():
-    """Return data representing a Deployment."""
-    return dict(
-        kind="deployment",
-        name="deployment",
-        labels={"foo": "bar"},
-        container_images=["some-image"],
-        init_container_images=[],
-    )
-
-
-@pytest.fixture
 def project_data():
     """Return data representing a Project."""
     return dict(
         name="some project",
         kind="namespace",
         labels={"foo": "bar"},
-        deployments=[],
-        errors={},
     )
 
 
 @pytest.fixture
-def project_with_deployment(project_data, deployment_data):
-    """Return data representing a project + deployments."""
-    project_data["deployments"] = [deployment_data]
-    return project_data
+def cluster_data():
+    """Return data representing a cluster + error."""
+    return dict(
+        kind="cluster",
+        uuid="uuid",
+        version="1.2.3",
+        errors=dict(
+            foo=dict(
+                status=-1, reason="some reason", message="some message", kind="error"
+            )
+        ),
+    )
 
 
-def test_load_nested(project_with_deployment):
+def test_load_nested(cluster_data):
     """Test loading entity with other nested entities."""
-    entity = load_entity(project_with_deployment)
-    assert isinstance(entity, OCPProject)
-    assert isinstance(entity.deployments, list)
-    assert isinstance(entity.deployments[0], OCPDeployment)
+    entity = load_entity(cluster_data)
+    assert isinstance(entity, OCPCluster)
+    assert isinstance(entity.errors, dict)
+    # pylint: disable=protected-access
+    assert isinstance(entity.errors["foo"], OCPError._model_class)
 
 
 @pytest.mark.parametrize(
     "data,expected_class",
     [
-        (pytest.lazy_fixture("deployment_data"), OCPDeployment),
+        (pytest.lazy_fixture("cluster_data"), OCPCluster),
         (pytest.lazy_fixture("project_data"), OCPProject),
     ],
 )

@@ -28,7 +28,6 @@ from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
     NodeResources,
     OCPCluster,
-    OCPDeployment,
     OCPNode,
     OCPProject,
 )
@@ -102,20 +101,6 @@ def expected_projects():
         OCPProject(
             name="project name",
             labels={"some": "label"},
-            deployments=[
-                OCPDeployment(
-                    name="deployment 1",
-                    labels={"n": "1"},
-                    container_images=["container-image-1:v1"],
-                    init_container_images=[],
-                ),
-                OCPDeployment(
-                    name="deployment 2",
-                    labels={"n": "2"},
-                    container_images=["container-image-1:v2"],
-                    init_container_images=["some-other-image:ver"],
-                ),
-            ],
             cluster_uuid="1234-some56",
         ),
     ]
@@ -147,11 +132,6 @@ def patched_openshift_client(
         OpenShiftApi,
         "retrieve_projects",
         return_value=expected_projects,
-    )
-    mocker.patch.object(
-        OpenShiftApi,
-        "retrieve_deployments",
-        return_value=expected_projects[0].deployments,
     )
     mocker.patch.object(
         OpenShiftApi,
