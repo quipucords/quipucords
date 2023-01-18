@@ -68,8 +68,7 @@ dnf group install "Development Tools"
 Install versions needed:
 ```
 asdf install python latest:3.9
-asdf install python 2.7.18
-asdf install nodejs 14.18.3
+asdf install nodejs latest:16
 ```
 
 ## Setting Up a Virtual Environment
