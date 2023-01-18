@@ -109,7 +109,6 @@ class OCPProject(OCPBaseEntity):
     """Entity representing OpenShift Projects/Namespaces."""
 
     name: str
-    cluster_uuid: str = None
     labels: Dict[str, str]
     deployments: List[OCPDeployment] = Field(default_factory=list)
     errors: Dict[str, OCPError] = Field(default_factory=dict)

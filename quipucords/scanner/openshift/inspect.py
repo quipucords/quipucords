@@ -59,7 +59,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         for project in project_list:
             # check if scanjob is paused or cancelled
             self.check_for_interrupt(manager_interrupt)
-            project.cluster_uuid = cluster.uuid
             ocp_client.add_deployments_to_project(
                 project,
                 timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
