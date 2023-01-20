@@ -29,11 +29,7 @@ from api.vault import write_to_yaml
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException
 from scanner.network.inspect_callback import InspectResultCallback
-from scanner.network.utils import (
-    _construct_vars,
-    _credential_vars,
-    check_manager_interrupt,
-)
+from scanner.network.utils import check_manager_interrupt, construct_inventory
 from scanner.task import ScanTaskRunner
 
 # Get an instance of a logger
@@ -153,15 +149,12 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             sys_result.save()
 
-    def _inspect_scan(
-        self, manager_interrupt, connected, base_ssh_executable=None, ssh_timeout=None
-    ):
+    def _inspect_scan(self, manager_interrupt, connected):
         """Execute the host scan with the initialized source.
 
         :param manager_interrupt: Signal used to communicate termination
             of scan
         :param connected: list of (host, credential) pairs to inspect
-        :param roles: list of roles to execute
         :param base_ssh_executable: ssh executable, or None for
             'ssh'. Will be wrapped with a timeout before being passed
             to Ansible.
@@ -194,31 +187,12 @@ class InspectTaskRunner(ScanTaskRunner):
             )
 
         extra_vars["QPC_FEATURE_FLAGS"] = settings.QPC_FEATURE_FLAGS.as_dict()
+        extra_vars["ansible_ssh_timeout"] = settings.QPC_SSH_INSPECT_TIMEOUT
 
-        ssh_executable = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../../bin/timeout_ssh")
-        )
-
-        base_ssh_executable = base_ssh_executable or "ssh"
-        ssh_timeout = ssh_timeout or settings.QPC_SSH_INSPECT_TIMEOUT
-        # pylint: disable=line-too-long
-        # the ssh arg is required for become-pass because
-        # ansible checks for an exact string match of ssh
-        # anywhere in the command array
-        # See https://github.com/ansible/ansible/blob/stable-2.3/lib/ansible/plugins/connection/ssh.py#L490-L500 # noqa
-        # timeout_ssh will remove the ssh argument before running the command
-        ssh_args = [
-            "--executable=" + base_ssh_executable,
-            "--timeout=" + ssh_timeout,
-            "ssh",
-        ]
-
-        group_names, inventory = _construct_scan_inventory(
-            connected,
-            connection_port,
-            forks,
-            ssh_executable=ssh_executable,
-            ssh_args=ssh_args,
+        group_names, inventory = construct_inventory(
+            hosts=connected,
+            connection_port=connection_port,
+            concurrency_count=forks,
         )
         inventory_file = write_to_yaml(inventory)
 
@@ -344,48 +318,3 @@ class InspectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(invalid_state_msg, log_level=logging.ERROR)
 
         return connected, completed, failed, unreachable
-
-
-# pylint: disable=too-many-locals
-def _construct_scan_inventory(
-    hosts, connection_port, concurrency_count, ssh_executable=None, ssh_args=None
-):
-    """Create a dictionary inventory for Ansible to execute with.
-
-    :param hosts: The collection of hosts/credential tuples
-    :param connection_port: The connection port
-    :param concurrency_count: The number of concurrent scans
-    :param ssh_executable: the ssh executable to use, or None for 'ssh'
-    :param ssh_args: a list of extra ssh arguments, or None
-    :returns: A list of group names and a dict of the
-    ansible inventory
-    """
-    concurreny_groups = list(
-        [
-            hosts[i : i + concurrency_count]
-            for i in range(0, len(hosts), concurrency_count)
-        ]
-    )
-
-    vars_dict = _construct_vars(connection_port)
-    children = {}
-    inventory = {"all": {"children": children, "vars": vars_dict}}
-    i = 0
-    group_names = []
-    for concurreny_group in concurreny_groups:
-        hosts_dict = {}
-        for host in concurreny_group:
-            host_vars = _credential_vars(host[1])
-            host_vars["ansible_host"] = host[0]
-            if ssh_executable:
-                host_vars["ansible_ssh_executable"] = ssh_executable
-            if ssh_args:
-                host_vars["ansible_ssh_common_args"] = " ".join(ssh_args)
-            hosts_dict[host[0]] = host_vars
-
-        group_name = "group_{}".format(i)
-        i += 1
-        group_names.append(group_name)
-        children[group_name] = {"hosts": hosts_dict}
-
-    return group_names, inventory

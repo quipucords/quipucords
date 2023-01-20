@@ -25,15 +25,12 @@ logger = logging.getLogger(__name__)
 
 
 def commit():
-    """Collect the build number for the server.
-
-    :returns: A build number
-    """
-    commit_info = os.environ.get("QUIPUCORDS_COMMIT", None)
-    if commit_info is None:
+    """Collect the commit for the server."""
+    commit_info = os.environ.get("QUIPUCORDS_COMMIT", "").strip()
+    if not commit_info:
         try:
             commit_info = subprocess.check_output(
-                ["git", "describe", "--always"]
+                ["git", "rev-parse", "--verify", "HEAD"]
             ).strip()
             commit_info = commit_info.decode("utf-8")
         except Exception:  # pylint: disable=broad-except
@@ -83,9 +80,26 @@ def init_server_identifier():
     logger.info("Server ID: %s", server_id)
 
 
+def start_debugger_if_required():
+    """Start a debugger session if QPC_DEBUGPY envvar is set."""
+    # pylint: disable=import-outside-toplevel
+    DEBUG_PY = int(os.environ.get("QPC_DEBUGPY", "0"))
+    DEBUG_PY_PORT = int(os.environ.get("QPC_DEBUGPY_PORT", "5678"))
+    if DEBUG_PY:
+        try:
+            import debugpy
+        except ImportError:
+            logger.exception("debugpy is not installed, can't start debugger.")
+            return
+
+        debugpy.listen(("0.0.0.0", DEBUG_PY_PORT))
+        print("⏳ debugpy debugger can now be attached ⏳", flush=True)
+
+
 def startup():
     """Log environment at startup."""
     # pylint: disable=too-many-locals
+    start_debugger_if_required()
     logger.info("Platform:")
     for name, value in platform_info().items():
         logger.info("%s - %s ", name, value)

@@ -8,20 +8,24 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
 
-from kubernetes.client import (
-    ApiClient,
-    ApiException,
-    AppsV1Api,
-    Configuration,
-    CoreV1Api,
-)
+from kubernetes.client import ApiClient, ApiException, Configuration, CoreV1Api
+from openshift.dynamic import DynamicClient
 from urllib3.exceptions import MaxRetryError
 
-from scanner.openshift.entities import OCPDeployment, OCPError, OCPProject
+from scanner.openshift.entities import (
+    NodeResources,
+    OCPCluster,
+    OCPError,
+    OCPNode,
+    OCPPod,
+    OCPProject,
+    OCPWorkload,
+)
 
 logger = getLogger(__name__)
 
@@ -66,6 +70,17 @@ class OpenShiftApi:
         """Initialize OpenShiftApi."""
         configuration.verify_ssl = ssl_verify
         self._api_client = ApiClient(configuration=configuration)
+        # discoverer cache is used to cache resources for dynamic client
+        self._discoverer_cache_file = None
+
+    @cached_property
+    def _dynamic_client(self):
+        # decorate DynamicClient to catch k8s exceptions
+        dynamic_client = catch_k8s_exception(DynamicClient)
+        return dynamic_client(
+            self._api_client,
+            cache_file=self._discoverer_cache_file,
+        )
 
     @classmethod
     def from_auth_token(
@@ -96,72 +111,124 @@ class OpenShiftApi:
             return False
         return True
 
-    def retrieve_projects(self, retrieve_all=True, **kwargs) -> List[OCPProject]:
+    def retrieve_projects(self, **kwargs) -> List[OCPProject]:
         """Retrieve projects/namespaces under OCP host."""
         project_list = []
         for project in self._list_projects(**kwargs).items:
-            ocp_project = self._init_ocp_project(project, retrieve_all=retrieve_all)
+            ocp_project = self._init_ocp_project(project)
             project_list.append(ocp_project)
         return project_list
 
-    def retrieve_deployments(self, project_name, **kwargs) -> List[OCPDeployment]:
-        """Retrieve deployments under project 'project_name'."""
-        deployments_raw = self._list_deployments(project_name, **kwargs)
-        deployments_list = []
-        for dep in deployments_raw.items:
-            ocp_deployment = self._init_ocp_deployment(dep)
-            deployments_list.append(ocp_deployment)
-        return deployments_list
+    def retrieve_nodes(self, **kwargs) -> List[OCPNode]:
+        """Retrieve nodes under OCP host."""
+        node_list = []
+        for node in self._list_nodes(**kwargs).items:
+            ocp_node = self._init_ocp_nodes(node)
+            node_list.append(ocp_node)
+        return node_list
+
+    def retrieve_cluster(self, **kwargs) -> OCPCluster:
+        """Retrieve cluster under OCP host."""
+        clusters = self._list_clusters(**kwargs).items
+        assert len(clusters) == 1, "More than one cluster in cluster API"
+        cluster_entity = self._init_cluster(clusters[0])
+        return cluster_entity
+
+    def retrieve_pods(self, **kwargs) -> List[OCPPod]:
+        """Retrieve OCP Pods."""
+        pods_raw = self._list_pods(**kwargs)
+        pods_list = []
+        for pod in pods_raw.items:
+            ocp_pod = OCPPod.from_api_object(pod)
+            pods_list.append(ocp_pod)
+        return pods_list
+
+    def retrieve_workloads(self, **kwargs) -> List[OCPWorkload]:
+        """Retrieve OCPWorkloads."""
+        pod_list = self.retrieve_pods(**kwargs)
+        _app_names = set()
+        workload_list = []
+        for pod in pod_list:
+            pod_id = (pod.namespace, pod.app_name)
+            if pod_id in _app_names:
+                continue
+            _app_names.add(pod_id)
+            data = pod.dict()
+            data["name"] = pod.app_name
+            workload_list.append(OCPWorkload(**data))
+        return workload_list
 
     @cached_property
     def _core_api(self):
         return CoreV1Api(api_client=self._api_client)
 
     @cached_property
-    def _apps_api(self):
-        return AppsV1Api(api_client=self._api_client)
+    def _node_api(self):
+        return self._dynamic_client.resources.get(api_version="v1", kind="Node")
+
+    @cached_property
+    def _namespace_api(self):
+        return self._dynamic_client.resources.get(api_version="v1", kind="Namespace")
+
+    @cached_property
+    def _cluster_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="config.openshift.io/v1", kind="ClusterVersion"
+        )
+
+    @cached_property
+    def _pod_api(self):
+        return self._dynamic_client.resources.get(api_version="v1", kind="Pod")
 
     @catch_k8s_exception
-    @wraps(CoreV1Api.list_namespace)
     def _list_projects(self, **kwargs):
-        return self._core_api.list_namespace(**kwargs)
+        return self._namespace_api.get(**kwargs)
 
     @catch_k8s_exception
-    @wraps(AppsV1Api.list_namespaced_deployment)
-    def _list_deployments(self, namespace, **kwargs):
-        return self._apps_api.list_namespaced_deployment(namespace, **kwargs)
+    def _list_nodes(self, **kwargs):
+        return self._node_api.get(**kwargs)
 
-    def _init_ocp_project(self, raw_project, retrieve_all=True) -> OCPProject:
+    @catch_k8s_exception
+    def _list_clusters(self, **kwargs):
+        return self._cluster_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_pods(self, **kwargs):
+        return self._pod_api.get(**kwargs)
+
+    def _init_ocp_project(self, raw_project) -> OCPProject:
         ocp_project = OCPProject(
             name=raw_project.metadata.name,
             labels=raw_project.metadata.labels,
         )
-        if retrieve_all:
-            self.add_deployments_to_project(ocp_project)
         return ocp_project
 
-    def add_deployments_to_project(self, ocp_project, **kwargs):
-        """Retrieve deployments and add to OCPProject."""
-        try:
-            deployments = self.retrieve_deployments(ocp_project.name, **kwargs)
-            ocp_project.deployments = deployments
-        except OCPError as error:
-            ocp_project.errors["deployments"] = error
-
-    def _init_ocp_deployment(self, raw_deployment):
-        def _getter(obj, name, default_value=None):
-            return getattr(obj, name, default_value) or default_value
-
-        metadata = _getter(raw_deployment, "metadata")
-        template_spec = raw_deployment.spec.template.spec
-        container_images = [c.image for c in _getter(template_spec, "containers", [])]
-        init_container_images = [
-            c.image for c in _getter(template_spec, "init_containers", [])
-        ]
-
-        return OCPDeployment(
-            name=_getter(metadata, "name"),
-            labels=_getter(metadata, "labels", {}),
-            container_images=container_images,
-            init_container_images=init_container_images,
+    def _init_ocp_nodes(self, node) -> OCPNode:
+        return OCPNode(
+            name=node.metadata.name,
+            creation_timestamp=node.metadata.creationTimestamp,
+            labels=node.metadata.labels,
+            addresses=node.status["addresses"],
+            allocatable=NodeResources(
+                cpu=node.status["allocatable"]["cpu"],
+                memory_in_bytes=node.status["allocatable"]["memory"],
+                pods=node.status["allocatable"]["pods"],
+            ),
+            capacity=NodeResources(
+                cpu=node.status["capacity"]["cpu"],
+                memory_in_bytes=node.status["capacity"]["memory"],
+                pods=node.status["capacity"]["pods"],
+            ),
+            architecture=node.status["nodeInfo"]["architecture"],
+            kernel_version=node.status["nodeInfo"]["kernelVersion"],
+            machine_id=node.status["nodeInfo"]["machineID"],
+            operating_system=node.status["nodeInfo"]["operatingSystem"],
+            taints=node.spec["taints"],
         )
+
+    def _init_cluster(self, cluster) -> OCPCluster:
+        ocp_cluster = OCPCluster(
+            uuid=cluster["spec"]["clusterID"],
+            version=cluster["status"]["desired"]["version"],
+        )
+        return ocp_cluster

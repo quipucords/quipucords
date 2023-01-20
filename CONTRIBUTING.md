@@ -28,6 +28,8 @@ git clone https://github.com/quipucords/quipucords
 cd quipucords
 git checkout -b issues/my_issue_#
 pip install -r dev-requirements.txt
+docker-compose up -d
+docker-compose exec qpc-db psql -c 'alter role qpc with CREATEDB'
 ```
 
 ### Making Changes
@@ -37,9 +39,46 @@ You can run the lint command on your branch to check compliance.
 make lint
 ```
 
+### Debugging
+
+You can easily attach a debugger to the running qpc-server on docker compose, which
+is also running debugpy by default.
+
+For VSCode this can be easily achieved adding the following to `.vscode/launch.json`
+
+```json
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Docker compose attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "0.0.0.0",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/app"
+                }
+            ]
+        }
+
+    ]
+}
+```
+
+And since debugpy implements microsoft Debugger adapter protocol (DAP), a similar 
+config can be done on other editors that support it:
+
+https://microsoft.github.io/debug-adapter-protocol/implementors/tools/
+
 ### Testing
 Before opening a pull requests, please make sure the tests pass
-in a Python 3.9 environments.
+in a Python 3.9 environment.
 You should also add tests for any new features and bug fixes.
 
 quipucords uses [pytest](http://pytest.org/) for testing.

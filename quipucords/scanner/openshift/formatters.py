@@ -9,29 +9,21 @@
 
 """Fingerprint formatters for OpenShift."""
 
-from collections import defaultdict
-from itertools import product
+
+def extract_ip_addresses(addresses):
+    """Extract only ip addresses from list of addresses."""
+    ip_addresses = []
+    for element in addresses:
+        if "ip" in element.get("type").lower():
+            ip_addresses.append(element.get("address"))
+    return ip_addresses
 
 
-def _strip_hash_or_version(image_name):
-    return image_name.split("@")[0].split(":")[0]
-
-
-def image_names(deployment_list) -> list:
-    """Return a deduplicated list of all image names from given deployments."""
-    images_set = set()
-    for image_list_key, deployment_dict in product(
-        ["container_images", "init_container_images"], deployment_list
-    ):
-        for image_name in deployment_dict[image_list_key]:
-            images_set.add(_strip_hash_or_version(image_name))
-    return sorted(images_set)
-
-
-def labels(deployment_list) -> dict:
-    """Group labels from the same key for a given deployment list."""
-    labels_dict = defaultdict(set)
-    for deployment_dict in deployment_list:
-        for label_key, label_value in deployment_dict["labels"].items():
-            labels_dict[label_key].add(label_value)
-    return {k: sorted(v) for k, v in labels_dict.items()}
+def infer_node_role(labels: dict):
+    """Infer node role based on its labels dict."""
+    node_roles = []
+    for role in ["worker", "master", "control-plane"]:
+        role_label = f"node-role.kubernetes.io/{role}"
+        if role_label in labels.keys():
+            node_roles.append(role)
+    return "/".join(node_roles)

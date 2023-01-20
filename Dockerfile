@@ -1,4 +1,4 @@
-FROM redhat/ubi8
+FROM redhat/ubi8-minimal
 
 ENV DJANGO_DB_PATH=/var/data/
 ENV DJANGO_DEBUG=False
@@ -7,17 +7,27 @@ ENV DJANGO_LOG_FORMATTER=verbose
 ENV DJANGO_LOG_HANDLERS=console,file
 ENV DJANGO_LOG_LEVEL=INFO
 ENV DJANGO_SECRET_PATH=/var/data/secret.txt
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+ENV LANG=C
+ENV LC_ALL=C
 ENV PATH="/opt/venv/bin:${PATH}"
 ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
-RUN dnf -yq install python39 make openssh-clients glibc-langpack-en git jq &&\
+COPY scripts/dnf /usr/local/bin/dnf
+RUN dnf install \
+        git \
+        glibc-langpack-en \
+        jq \
+        make \
+        openssh-clients \
+        python39 \
+        sshpass \
+        tar \
+        which \
+        -y &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
-
 
 RUN pip install --upgrade pip wheel
 
@@ -27,14 +37,14 @@ RUN pip install -r requirements.txt
 
 # Fetch UI code
 COPY Makefile .
-ARG UI_RELEASE="1.1.0"
+ARG UI_RELEASE="latest"
 RUN make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
 # Create /etc/ssl/qpc
-COPY deploy/ssl/* /etc/ssl/qpc/
+COPY deploy/ssl /etc/ssl/qpc
 
 # Create /deploy
-COPY deploy/*  /deploy/
+COPY deploy  /deploy
 
 # Create log directories
 VOLUME /var/log
@@ -42,15 +52,6 @@ VOLUME /var/log
 # Create /var/data
 RUN mkdir -p /var/data
 VOLUME /var/data
-
-# Create /etc/ansible/roles/
-RUN mkdir -p /etc/ansible/roles/
-COPY quipucords/scanner/network/runner/roles/ /etc/ansible/roles/
-VOLUME /etc/ansible/roles/
-
-# Set production environment
-ARG BUILD_COMMIT=master
-ENV QUIPUCORDS_COMMIT=$BUILD_COMMIT
 
 # Copy server code
 COPY . .

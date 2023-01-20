@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/api/v1/namespaces
+  response:
+    body:
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"Unauthorized","reason":"Unauthorized","code":401}
+
+        '
+    headers:
+      Audit-Id:
+      - a987dcb9-84d7-4f98-87a0-f7526c7ed021
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '129'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 02 Jan 2023 20:33:36 GMT
+    status:
+      code: 401
+      message: Unauthorized
+version: 1

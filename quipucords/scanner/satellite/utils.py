@@ -136,9 +136,8 @@ def execute_request(
         host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
 
-    # Remove the 's' from the times (e.g. 60s becomes 60)
-    connect_timeout = int(settings.QPC_SSH_CONNECT_TIMEOUT[:-1])
-    inspect_timeout = int(settings.QPC_SSH_INSPECT_TIMEOUT[:-1])
+    connect_timeout = settings.QPC_SSH_CONNECT_TIMEOUT
+    inspect_timeout = settings.QPC_SSH_INSPECT_TIMEOUT
 
     response = requests.get(
         url,

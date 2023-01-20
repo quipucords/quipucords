@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 NETWORK_DETECTION_KEY = "detection-network"
 VCENTER_DETECTION_KEY = "detection-vcenter"
 SATELLITE_DETECTION_KEY = "detection-satellite"
+OPENSHIFT_DETECTION_KEY = "detection-openshift"
 SOURCES_KEY = "sources"
 
 
@@ -37,6 +38,7 @@ def compute_source_info(sources):
         NETWORK_DETECTION_KEY: False,
         VCENTER_DETECTION_KEY: False,
         SATELLITE_DETECTION_KEY: False,
+        OPENSHIFT_DETECTION_KEY: False,
         SOURCES_KEY: [],
     }
     for source in sources:
@@ -46,6 +48,8 @@ def compute_source_info(sources):
             result[VCENTER_DETECTION_KEY] = True
         elif source.get("source_type") == Source.SATELLITE_SOURCE_TYPE:
             result[SATELLITE_DETECTION_KEY] = True
+        elif source.get("source_type") == Source.OPENSHIFT_SOURCE_TYPE:
+            result[OPENSHIFT_DETECTION_KEY] = True
         result[SOURCES_KEY].append(source.get("source_name"))
     return result
 
@@ -58,6 +62,7 @@ def create_deployments_csv(deployments_report_dict, request):
         NETWORK_DETECTION_KEY,
         VCENTER_DETECTION_KEY,
         SATELLITE_DETECTION_KEY,
+        OPENSHIFT_DETECTION_KEY,
         SOURCES_KEY,
     }
     report_id = deployments_report_dict.get("report_id")

@@ -36,6 +36,7 @@ target-version = ['py39']
 profile = "black"
 known_first_party = [
     "api",
+    "compat",
     "fingerprinter",
     "log_messages",
     "quipucords",
@@ -59,15 +60,12 @@ load-plugins = [
 pythonpath = "quipucords/"
 addopts = [
     "--ds=quipucords.settings",
+    "--block-network",
+    "--allowed-hosts=127.0.0.1,::1",
 ]
 python_files = [
     "tests.py",
     "test_*.py",
     "*_tests.py",
     "tests_*.py",
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
-    "dbcompat: marks tests using our db compat module."
 ]

@@ -22,11 +22,7 @@ from api.connresult.model import SystemConnectionResult
 from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source, SourceOptions
 from api.serializers import CredentialSerializer, SourceSerializer
 from scanner.network import ConnectTaskRunner
-from scanner.network.connect import (
-    ConnectResultStore,
-    _connect,
-    _construct_connect_inventory,
-)
+from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.utils import _construct_vars
 from scanner.test_util import create_scan_job
@@ -185,17 +181,12 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source["port"]
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        path = "/path/to/executable.py"
-        ssh_timeout = "0.1s"
-        ssh_args = ["--executable=" + path, "--timeout=" + ssh_timeout, "ssh"]
-        _, inventory_dict = _construct_connect_inventory(
-            hosts,
-            cred,
-            connection_port,
-            1,
-            exclude_hosts,
-            ssh_executable=path,
-            ssh_args=ssh_args,
+        _, inventory_dict = construct_inventory(
+            hosts=hosts,
+            credential=cred,
+            connection_port=connection_port,
+            concurrency_count=1,
+            exclude_hosts=exclude_hosts,
         )
         # pylint: disable=line-too-long
         expected = {
@@ -205,8 +196,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
                         "hosts": {
                             "1.2.3.4": {
                                 "ansible_host": "1.2.3.4",
-                                "ansible_ssh_executable": "/path/to/executable.py",
-                                "ansible_ssh_common_args": "--executable=/path/to/executable.py --timeout=0.1s ssh",
                             }
                         }
                     }
@@ -222,7 +211,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
                 },
             }
         }
-        self.assertEqual(inventory_dict, expected)
+        assert inventory_dict == expected
 
     @patch("ansible_runner.run")
     @patch(
@@ -280,9 +269,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source["hosts"]
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "test_util/crash.py")
-        )
         _connect(
             Value("i", ScanJob.JOB_RUN),
             self.scan_task,
@@ -292,7 +278,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
             connection_port,
             self.concurrency,
             exclude_hosts,
-            base_ssh_executable=path,
         )
         mock_run.assert_called()
 
@@ -305,9 +290,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source["hosts"]
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "test_util/hang.py")
-        )
         _connect(
             Value("i", ScanJob.JOB_RUN),
             self.scan_task,
@@ -317,8 +299,6 @@ class NetworkConnectTaskRunnerTest(TestCase):
             connection_port,
             self.concurrency,
             exclude_hosts,
-            base_ssh_executable=path,
-            ssh_timeout="0.1s",
         )
         mock_run.assert_called()
 
@@ -381,8 +361,11 @@ class NetworkConnectTaskRunnerTest(TestCase):
         connection_port = source["port"]
         hc_serializer = CredentialSerializer(self.cred)
         cred = hc_serializer.data
-        _, inventory_dict = _construct_connect_inventory(
-            hosts, cred, connection_port, 1
+        _, inventory_dict = construct_inventory(
+            hosts=hosts,
+            credential=cred,
+            connection_port=connection_port,
+            concurrency_count=1,
         )
         expected = {
             "all": {
