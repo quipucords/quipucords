@@ -1,0 +1,1936 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version
+  response:
+    body:
+      string: "{\n  \"major\": \"1\",\n  \"minor\": \"24\",\n  \"gitVersion\": \"v1.24.6+5658434\",\n
+        \ \"gitCommit\": \"eddac29feb4bb46b99fb570999324e582d761a66\",\n  \"gitTreeState\":
+        \"clean\",\n  \"buildDate\": \"2022-11-09T10:31:39Z\",\n  \"goVersion\": \"go1.18.7\",\n
+        \ \"compiler\": \"gc\",\n  \"platform\": \"linux/amd64\"\n}"
+    headers:
+      Audit-Id:
+      - c10cf626-6f1a-4848-b7f1-4e9b96a27fb2
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '271'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 12 Jan 2023 20:56:47 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version/openshift
+  response:
+    body:
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"the
+        server could not find the requested resource","reason":"NotFound","details":{},"code":404}
+
+        '
+    headers:
+      Audit-Id:
+      - cb6816e5-30af-4bd1-b6e1-bb06839a8596
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '174'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 12 Jan 2023 20:56:48 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis
+  response:
+    body:
+      string: '{"kind":"APIGroupList","apiVersion":"v1","groups":[{"name":"apiregistration.k8s.io","versions":[{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}},{"name":"apps","versions":[{"groupVersion":"apps/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps/v1","version":"v1"}},{"name":"events.k8s.io","versions":[{"groupVersion":"events.k8s.io/v1","version":"v1"},{"groupVersion":"events.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"events.k8s.io/v1","version":"v1"}},{"name":"authentication.k8s.io","versions":[{"groupVersion":"authentication.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authentication.k8s.io/v1","version":"v1"}},{"name":"authorization.k8s.io","versions":[{"groupVersion":"authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.k8s.io/v1","version":"v1"}},{"name":"autoscaling","versions":[{"groupVersion":"autoscaling/v2","version":"v2"},{"groupVersion":"autoscaling/v1","version":"v1"},{"groupVersion":"autoscaling/v2beta1","version":"v2beta1"},{"groupVersion":"autoscaling/v2beta2","version":"v2beta2"}],"preferredVersion":{"groupVersion":"autoscaling/v2","version":"v2"}},{"name":"batch","versions":[{"groupVersion":"batch/v1","version":"v1"},{"groupVersion":"batch/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"batch/v1","version":"v1"}},{"name":"certificates.k8s.io","versions":[{"groupVersion":"certificates.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"certificates.k8s.io/v1","version":"v1"}},{"name":"networking.k8s.io","versions":[{"groupVersion":"networking.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"networking.k8s.io/v1","version":"v1"}},{"name":"policy","versions":[{"groupVersion":"policy/v1","version":"v1"},{"groupVersion":"policy/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"policy/v1","version":"v1"}},{"name":"rbac.authorization.k8s.io","versions":[{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}},{"name":"storage.k8s.io","versions":[{"groupVersion":"storage.k8s.io/v1","version":"v1"},{"groupVersion":"storage.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"storage.k8s.io/v1","version":"v1"}},{"name":"admissionregistration.k8s.io","versions":[{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}},{"name":"apiextensions.k8s.io","versions":[{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}},{"name":"scheduling.k8s.io","versions":[{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}},{"name":"coordination.k8s.io","versions":[{"groupVersion":"coordination.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"coordination.k8s.io/v1","version":"v1"}},{"name":"node.k8s.io","versions":[{"groupVersion":"node.k8s.io/v1","version":"v1"},{"groupVersion":"node.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"node.k8s.io/v1","version":"v1"}},{"name":"discovery.k8s.io","versions":[{"groupVersion":"discovery.k8s.io/v1","version":"v1"},{"groupVersion":"discovery.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"discovery.k8s.io/v1","version":"v1"}},{"name":"flowcontrol.apiserver.k8s.io","versions":[{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"},{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"}},{"name":"apps.openshift.io","versions":[{"groupVersion":"apps.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps.openshift.io/v1","version":"v1"}},{"name":"authorization.openshift.io","versions":[{"groupVersion":"authorization.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.openshift.io/v1","version":"v1"}},{"name":"build.openshift.io","versions":[{"groupVersion":"build.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"build.openshift.io/v1","version":"v1"}},{"name":"image.openshift.io","versions":[{"groupVersion":"image.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"image.openshift.io/v1","version":"v1"}},{"name":"oauth.openshift.io","versions":[{"groupVersion":"oauth.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"oauth.openshift.io/v1","version":"v1"}},{"name":"project.openshift.io","versions":[{"groupVersion":"project.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"project.openshift.io/v1","version":"v1"}},{"name":"quota.openshift.io","versions":[{"groupVersion":"quota.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"quota.openshift.io/v1","version":"v1"}},{"name":"route.openshift.io","versions":[{"groupVersion":"route.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"route.openshift.io/v1","version":"v1"}},{"name":"security.openshift.io","versions":[{"groupVersion":"security.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.openshift.io/v1","version":"v1"}},{"name":"template.openshift.io","versions":[{"groupVersion":"template.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"template.openshift.io/v1","version":"v1"}},{"name":"user.openshift.io","versions":[{"groupVersion":"user.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"user.openshift.io/v1","version":"v1"}},{"name":"packages.operators.coreos.com","versions":[{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}],"preferredVersion":{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}},{"name":"config.openshift.io","versions":[{"groupVersion":"config.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"config.openshift.io/v1","version":"v1"}},{"name":"operator.openshift.io","versions":[{"groupVersion":"operator.openshift.io/v1","version":"v1"},{"groupVersion":"operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operator.openshift.io/v1","version":"v1"}},{"name":"apiserver.openshift.io","versions":[{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}},{"name":"autoscaling.openshift.io","versions":[{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"},{"groupVersion":"autoscaling.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"}},{"name":"cloudcredential.openshift.io","versions":[{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}},{"name":"console.openshift.io","versions":[{"groupVersion":"console.openshift.io/v1","version":"v1"},{"groupVersion":"console.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"console.openshift.io/v1","version":"v1"}},{"name":"imageregistry.operator.openshift.io","versions":[{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}},{"name":"ingress.operator.openshift.io","versions":[{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}},{"name":"k8s.cni.cncf.io","versions":[{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}},{"name":"k8s.ovn.org","versions":[{"groupVersion":"k8s.ovn.org/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.ovn.org/v1","version":"v1"}},{"name":"machineconfiguration.openshift.io","versions":[{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}},{"name":"monitoring.coreos.com","versions":[{"groupVersion":"monitoring.coreos.com/v1","version":"v1"},{"groupVersion":"monitoring.coreos.com/v1beta1","version":"v1beta1"},{"groupVersion":"monitoring.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"monitoring.coreos.com/v1","version":"v1"}},{"name":"network.operator.openshift.io","versions":[{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}},{"name":"operators.coreos.com","versions":[{"groupVersion":"operators.coreos.com/v2","version":"v2"},{"groupVersion":"operators.coreos.com/v1","version":"v1"},{"groupVersion":"operators.coreos.com/v1alpha2","version":"v1alpha2"},{"groupVersion":"operators.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operators.coreos.com/v2","version":"v2"}},{"name":"performance.openshift.io","versions":[{"groupVersion":"performance.openshift.io/v2","version":"v2"},{"groupVersion":"performance.openshift.io/v1","version":"v1"},{"groupVersion":"performance.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"performance.openshift.io/v2","version":"v2"}},{"name":"samples.operator.openshift.io","versions":[{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}},{"name":"security.internal.openshift.io","versions":[{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}},{"name":"snapshot.storage.k8s.io","versions":[{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}},{"name":"tuned.openshift.io","versions":[{"groupVersion":"tuned.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"tuned.openshift.io/v1","version":"v1"}},{"name":"controlplane.operator.openshift.io","versions":[{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"metal3.io","versions":[{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}},{"name":"migration.k8s.io","versions":[{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}},{"name":"whereabouts.cni.cncf.io","versions":[{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}},{"name":"helm.openshift.io","versions":[{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}},{"name":"machine.openshift.io","versions":[{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}},{"name":"metrics.k8s.io","versions":[{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 4701790e-98fd-4a3a-875c-8733371ab4c5
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 12 Jan 2023 20:56:48 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/config.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"config.openshift.io/v1","resources":[{"name":"clusterversions","singularName":"clusterversion","namespaced":false,"kind":"ClusterVersion","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"jfyZTemckiE="},{"name":"clusterversions/status","singularName":"","namespaced":false,"kind":"ClusterVersion","verbs":["get","patch","update"]},{"name":"schedulers","singularName":"scheduler","namespaced":false,"kind":"Scheduler","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"ptedUcY9aMg="},{"name":"schedulers/status","singularName":"","namespaced":false,"kind":"Scheduler","verbs":["get","patch","update"]},{"name":"consoles","singularName":"console","namespaced":false,"kind":"Console","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"0HpeDULnQWY="},{"name":"consoles/status","singularName":"","namespaced":false,"kind":"Console","verbs":["get","patch","update"]},{"name":"proxies","singularName":"proxy","namespaced":false,"kind":"Proxy","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"2I4SQ6PshRY="},{"name":"proxies/status","singularName":"","namespaced":false,"kind":"Proxy","verbs":["get","patch","update"]},{"name":"featuregates","singularName":"featuregate","namespaced":false,"kind":"FeatureGate","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"HSu6crTvi5E="},{"name":"featuregates/status","singularName":"","namespaced":false,"kind":"FeatureGate","verbs":["get","patch","update"]},{"name":"operatorhubs","singularName":"operatorhub","namespaced":false,"kind":"OperatorHub","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"O7bQeZSTFtM="},{"name":"operatorhubs/status","singularName":"","namespaced":false,"kind":"OperatorHub","verbs":["get","patch","update"]},{"name":"infrastructures","singularName":"infrastructure","namespaced":false,"kind":"Infrastructure","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"s/S0qwLEaK4="},{"name":"infrastructures/status","singularName":"","namespaced":false,"kind":"Infrastructure","verbs":["get","patch","update"]},{"name":"imagecontentpolicies","singularName":"imagecontentpolicy","namespaced":false,"kind":"ImageContentPolicy","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"4sS3ccaNRA4="},{"name":"imagecontentpolicies/status","singularName":"","namespaced":false,"kind":"ImageContentPolicy","verbs":["get","patch","update"]},{"name":"images","singularName":"image","namespaced":false,"kind":"Image","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"6sMalKeq6tY="},{"name":"images/status","singularName":"","namespaced":false,"kind":"Image","verbs":["get","patch","update"]},{"name":"clusteroperators","singularName":"clusteroperator","namespaced":false,"kind":"ClusterOperator","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["co"],"storageVersionHash":"hIXM1ouzyag="},{"name":"clusteroperators/status","singularName":"","namespaced":false,"kind":"ClusterOperator","verbs":["get","patch","update"]},{"name":"authentications","singularName":"authentication","namespaced":false,"kind":"Authentication","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"GY8wWr8iSHA="},{"name":"authentications/status","singularName":"","namespaced":false,"kind":"Authentication","verbs":["get","patch","update"]},{"name":"nodes","singularName":"node","namespaced":false,"kind":"Node","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"QOl4Ml/XMag="},{"name":"nodes/status","singularName":"","namespaced":false,"kind":"Node","verbs":["get","patch","update"]},{"name":"builds","singularName":"build","namespaced":false,"kind":"Build","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"OCpV5nXxruQ="},{"name":"builds/status","singularName":"","namespaced":false,"kind":"Build","verbs":["get","patch","update"]},{"name":"networks","singularName":"network","namespaced":false,"kind":"Network","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"gAEoywwmFz4="},{"name":"oauths","singularName":"oauth","namespaced":false,"kind":"OAuth","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"4BZS3Rc6+4g="},{"name":"oauths/status","singularName":"","namespaced":false,"kind":"OAuth","verbs":["get","patch","update"]},{"name":"dnses","singularName":"dns","namespaced":false,"kind":"DNS","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"SAHetG08gBY="},{"name":"dnses/status","singularName":"","namespaced":false,"kind":"DNS","verbs":["get","patch","update"]},{"name":"apiservers","singularName":"apiserver","namespaced":false,"kind":"APIServer","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"yr4VqIMvOkg="},{"name":"apiservers/status","singularName":"","namespaced":false,"kind":"APIServer","verbs":["get","patch","update"]},{"name":"ingresses","singularName":"ingress","namespaced":false,"kind":"Ingress","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"PHiQOptbYkg="},{"name":"ingresses/status","singularName":"","namespaced":false,"kind":"Ingress","verbs":["get","patch","update"]},{"name":"projects","singularName":"project","namespaced":false,"kind":"Project","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"q4gdBJZsxYc="},{"name":"projects/status","singularName":"","namespaced":false,"kind":"Project","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 6394de6d-eb6c-436e-85ca-ee9d7a0278b4
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 12 Jan 2023 21:02:41 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/api/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","groupVersion":"v1","resources":[{"name":"bindings","singularName":"","namespaced":true,"kind":"Binding","verbs":["create"]},{"name":"componentstatuses","singularName":"","namespaced":false,"kind":"ComponentStatus","verbs":["get","list"],"shortNames":["cs"]},{"name":"configmaps","singularName":"","namespaced":true,"kind":"ConfigMap","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["cm"],"storageVersionHash":"qFsyl6wFWjQ="},{"name":"endpoints","singularName":"","namespaced":true,"kind":"Endpoints","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ep"],"storageVersionHash":"fWeeMqaN/OA="},{"name":"events","singularName":"","namespaced":true,"kind":"Event","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ev"],"storageVersionHash":"r2yiGXH7wu8="},{"name":"limitranges","singularName":"","namespaced":true,"kind":"LimitRange","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["limits"],"storageVersionHash":"EBKMFVe6cwo="},{"name":"namespaces","singularName":"","namespaced":false,"kind":"Namespace","verbs":["create","delete","get","list","patch","update","watch"],"shortNames":["ns"],"storageVersionHash":"Q3oi5N2YM8M="},{"name":"namespaces/finalize","singularName":"","namespaced":false,"kind":"Namespace","verbs":["update"]},{"name":"namespaces/status","singularName":"","namespaced":false,"kind":"Namespace","verbs":["get","patch","update"]},{"name":"nodes","singularName":"","namespaced":false,"kind":"Node","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["no"],"storageVersionHash":"XwShjMxG9Fs="},{"name":"nodes/proxy","singularName":"","namespaced":false,"kind":"NodeProxyOptions","verbs":["create","delete","get","patch","update"]},{"name":"nodes/status","singularName":"","namespaced":false,"kind":"Node","verbs":["get","patch","update"]},{"name":"persistentvolumeclaims","singularName":"","namespaced":true,"kind":"PersistentVolumeClaim","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["pvc"],"storageVersionHash":"QWTyNDq0dC4="},{"name":"persistentvolumeclaims/status","singularName":"","namespaced":true,"kind":"PersistentVolumeClaim","verbs":["get","patch","update"]},{"name":"persistentvolumes","singularName":"","namespaced":false,"kind":"PersistentVolume","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["pv"],"storageVersionHash":"HN/zwEC+JgM="},{"name":"persistentvolumes/status","singularName":"","namespaced":false,"kind":"PersistentVolume","verbs":["get","patch","update"]},{"name":"pods","singularName":"","namespaced":true,"kind":"Pod","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["po"],"categories":["all"],"storageVersionHash":"xPOwRZ+Yhw8="},{"name":"pods/attach","singularName":"","namespaced":true,"kind":"PodAttachOptions","verbs":["create","get"]},{"name":"pods/binding","singularName":"","namespaced":true,"kind":"Binding","verbs":["create"]},{"name":"pods/ephemeralcontainers","singularName":"","namespaced":true,"kind":"Pod","verbs":["get","patch","update"]},{"name":"pods/eviction","singularName":"","namespaced":true,"group":"policy","version":"v1","kind":"Eviction","verbs":["create"]},{"name":"pods/exec","singularName":"","namespaced":true,"kind":"PodExecOptions","verbs":["create","get"]},{"name":"pods/log","singularName":"","namespaced":true,"kind":"Pod","verbs":["get"]},{"name":"pods/portforward","singularName":"","namespaced":true,"kind":"PodPortForwardOptions","verbs":["create","get"]},{"name":"pods/proxy","singularName":"","namespaced":true,"kind":"PodProxyOptions","verbs":["create","delete","get","patch","update"]},{"name":"pods/status","singularName":"","namespaced":true,"kind":"Pod","verbs":["get","patch","update"]},{"name":"podtemplates","singularName":"","namespaced":true,"kind":"PodTemplate","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"LIXB2x4IFpk="},{"name":"replicationcontrollers","singularName":"","namespaced":true,"kind":"ReplicationController","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["rc"],"categories":["all"],"storageVersionHash":"Jond2If31h0="},{"name":"replicationcontrollers/scale","singularName":"","namespaced":true,"group":"autoscaling","version":"v1","kind":"Scale","verbs":["get","patch","update"]},{"name":"replicationcontrollers/status","singularName":"","namespaced":true,"kind":"ReplicationController","verbs":["get","patch","update"]},{"name":"resourcequotas","singularName":"","namespaced":true,"kind":"ResourceQuota","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["quota"],"storageVersionHash":"8uhSgffRX6w="},{"name":"resourcequotas/status","singularName":"","namespaced":true,"kind":"ResourceQuota","verbs":["get","patch","update"]},{"name":"secrets","singularName":"","namespaced":true,"kind":"Secret","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"S6u1pOWzb84="},{"name":"serviceaccounts","singularName":"","namespaced":true,"kind":"ServiceAccount","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["sa"],"storageVersionHash":"pbx9ZvyFpBE="},{"name":"serviceaccounts/token","singularName":"","namespaced":true,"group":"authentication.k8s.io","version":"v1","kind":"TokenRequest","verbs":["create"]},{"name":"services","singularName":"","namespaced":true,"kind":"Service","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["svc"],"categories":["all"],"storageVersionHash":"0/CO1lhkEBI="},{"name":"services/proxy","singularName":"","namespaced":true,"kind":"ServiceProxyOptions","verbs":["create","delete","get","patch","update"]},{"name":"services/status","singularName":"","namespaced":true,"kind":"Service","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 4c8a80bb-e185-4b0c-b497-b111e66307be
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:24 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/apiregistration.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"apiregistration.k8s.io/v1","resources":[{"name":"apiservices","singularName":"","namespaced":false,"kind":"APIService","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"categories":["api-extensions"],"storageVersionHash":"InPBPD7+PqM="},{"name":"apiservices/status","singularName":"","namespaced":false,"kind":"APIService","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 11bce5a9-5869-4cb6-80e8-170242851ecf
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '455'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:25 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/apps/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"apps/v1","resources":[{"name":"controllerrevisions","singularName":"","namespaced":true,"kind":"ControllerRevision","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"85nkx63pcBU="},{"name":"daemonsets","singularName":"","namespaced":true,"kind":"DaemonSet","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ds"],"categories":["all"],"storageVersionHash":"dd7pWHUlMKQ="},{"name":"daemonsets/status","singularName":"","namespaced":true,"kind":"DaemonSet","verbs":["get","patch","update"]},{"name":"deployments","singularName":"","namespaced":true,"kind":"Deployment","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["deploy"],"categories":["all"],"storageVersionHash":"8aSe+NMegvE="},{"name":"deployments/scale","singularName":"","namespaced":true,"group":"autoscaling","version":"v1","kind":"Scale","verbs":["get","patch","update"]},{"name":"deployments/status","singularName":"","namespaced":true,"kind":"Deployment","verbs":["get","patch","update"]},{"name":"replicasets","singularName":"","namespaced":true,"kind":"ReplicaSet","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["rs"],"categories":["all"],"storageVersionHash":"P1RzHs8/mWQ="},{"name":"replicasets/scale","singularName":"","namespaced":true,"group":"autoscaling","version":"v1","kind":"Scale","verbs":["get","patch","update"]},{"name":"replicasets/status","singularName":"","namespaced":true,"kind":"ReplicaSet","verbs":["get","patch","update"]},{"name":"statefulsets","singularName":"","namespaced":true,"kind":"StatefulSet","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["sts"],"categories":["all"],"storageVersionHash":"H+vl74LkKdo="},{"name":"statefulsets/scale","singularName":"","namespaced":true,"group":"autoscaling","version":"v1","kind":"Scale","verbs":["get","patch","update"]},{"name":"statefulsets/status","singularName":"","namespaced":true,"kind":"StatefulSet","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 6140f1ee-e68a-4b5b-8299-20a0326abc30
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:27 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/events.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"events.k8s.io/v1","resources":[{"name":"events","singularName":"","namespaced":true,"kind":"Event","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ev"],"storageVersionHash":"r2yiGXH7wu8="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 68abbc17-93dd-40dd-882a-2e67c5d20bdc
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '303'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:29 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/authentication.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"authentication.k8s.io/v1","resources":[{"name":"tokenreviews","singularName":"","namespaced":false,"kind":"TokenReview","verbs":["create"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 20b2a69a-1bff-4d9e-b545-63d2d4d6fdb7
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '202'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:31 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/authorization.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"authorization.k8s.io/v1","resources":[{"name":"localsubjectaccessreviews","singularName":"","namespaced":true,"kind":"LocalSubjectAccessReview","verbs":["create"]},{"name":"selfsubjectaccessreviews","singularName":"","namespaced":false,"kind":"SelfSubjectAccessReview","verbs":["create"]},{"name":"selfsubjectrulesreviews","singularName":"","namespaced":false,"kind":"SelfSubjectRulesReview","verbs":["create"]},{"name":"subjectaccessreviews","singularName":"","namespaced":false,"kind":"SubjectAccessReview","verbs":["create"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 19c579b5-01c4-49aa-9041-c78e7633ae7f
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '591'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:32 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/autoscaling/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"autoscaling/v1","resources":[{"name":"horizontalpodautoscalers","singularName":"","namespaced":true,"kind":"HorizontalPodAutoscaler","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["hpa"],"categories":["all"],"storageVersionHash":"oQlkt7f5j/A="},{"name":"horizontalpodautoscalers/status","singularName":"","namespaced":true,"kind":"HorizontalPodAutoscaler","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 5bb4d4c6-0c67-46c2-bf1b-68c11726f786
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '504'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:34 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/batch/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"batch/v1","resources":[{"name":"cronjobs","singularName":"","namespaced":true,"kind":"CronJob","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["cj"],"categories":["all"],"storageVersionHash":"sd5LIXh4Fjs="},{"name":"cronjobs/status","singularName":"","namespaced":true,"kind":"CronJob","verbs":["get","patch","update"]},{"name":"jobs","singularName":"","namespaced":true,"kind":"Job","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"categories":["all"],"storageVersionHash":"mudhfqk/qZY="},{"name":"jobs/status","singularName":"","namespaced":true,"kind":"Job","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 9d7ec8d2-501d-44d7-882a-ac33284331e2
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '745'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:35 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/certificates.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"certificates.k8s.io/v1","resources":[{"name":"certificatesigningrequests","singularName":"","namespaced":false,"kind":"CertificateSigningRequest","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["csr"],"storageVersionHash":"95fRKMXA+00="},{"name":"certificatesigningrequests/approval","singularName":"","namespaced":false,"kind":"CertificateSigningRequest","verbs":["get","patch","update"]},{"name":"certificatesigningrequests/status","singularName":"","namespaced":false,"kind":"CertificateSigningRequest","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - ed9a4d46-2bed-45e8-949f-5676f78265ad
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '653'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:37 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/networking.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"networking.k8s.io/v1","resources":[{"name":"ingressclasses","singularName":"","namespaced":false,"kind":"IngressClass","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"l/iqIbDgFyQ="},{"name":"ingresses","singularName":"","namespaced":true,"kind":"Ingress","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ing"],"storageVersionHash":"39NQlfNR+bo="},{"name":"ingresses/status","singularName":"","namespaced":true,"kind":"Ingress","verbs":["get","patch","update"]},{"name":"networkpolicies","singularName":"","namespaced":true,"kind":"NetworkPolicy","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["netpol"],"storageVersionHash":"YpfwF18m1G8="},{"name":"networkpolicies/status","singularName":"","namespaced":true,"kind":"NetworkPolicy","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - a0b23df5-6377-4425-a689-8c4a56fc385e
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '990'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:38 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/policy/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"policy/v1","resources":[{"name":"poddisruptionbudgets","singularName":"","namespaced":true,"kind":"PodDisruptionBudget","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["pdb"],"storageVersionHash":"6BGBu0kpHtk="},{"name":"poddisruptionbudgets/status","singularName":"","namespaced":true,"kind":"PodDisruptionBudget","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - bd0682ba-9315-4fce-ac52-39642126a5b8
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '462'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:40 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/rbac.authorization.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"rbac.authorization.k8s.io/v1","resources":[{"name":"clusterrolebindings","singularName":"","namespaced":false,"kind":"ClusterRoleBinding","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"48tpQ8gZHFc="},{"name":"clusterroles","singularName":"","namespaced":false,"kind":"ClusterRole","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"bYE5ZWDrJ44="},{"name":"rolebindings","singularName":"","namespaced":true,"kind":"RoleBinding","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"eGsCzGH6b1g="},{"name":"roles","singularName":"","namespaced":true,"kind":"Role","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"7FuwZcIIItM="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - c4374431-9bda-48be-ad65-41cc31a4c802
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '915'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:41 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/storage.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"storage.k8s.io/v1","resources":[{"name":"csidrivers","singularName":"","namespaced":false,"kind":"CSIDriver","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"hL6j/rwBV5w="},{"name":"csinodes","singularName":"","namespaced":false,"kind":"CSINode","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Pe62DkZtjuo="},{"name":"csistoragecapacities","singularName":"","namespaced":true,"kind":"CSIStorageCapacity","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"4as6MA/kOg0="},{"name":"storageclasses","singularName":"","namespaced":false,"kind":"StorageClass","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["sc"],"storageVersionHash":"K+m6uJwbjGY="},{"name":"volumeattachments","singularName":"","namespaced":false,"kind":"VolumeAttachment","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"tJx/ezt6UDU="},{"name":"volumeattachments/status","singularName":"","namespaced":false,"kind":"VolumeAttachment","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - b407f641-1279-4257-89ca-d96897e3e456
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '1276'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:42 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/admissionregistration.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"admissionregistration.k8s.io/v1","resources":[{"name":"mutatingwebhookconfigurations","singularName":"","namespaced":false,"kind":"MutatingWebhookConfiguration","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"categories":["api-extensions"],"storageVersionHash":"Sqi0GUgDaX0="},{"name":"validatingwebhookconfigurations","singularName":"","namespaced":false,"kind":"ValidatingWebhookConfiguration","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"categories":["api-extensions"],"storageVersionHash":"B0wHjQmsGNk="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 77cb6994-2e10-4e78-83d5-0bf25251cf92
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '650'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:44 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/apiextensions.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"apiextensions.k8s.io/v1","resources":[{"name":"customresourcedefinitions","singularName":"","namespaced":false,"kind":"CustomResourceDefinition","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["crd","crds"],"categories":["api-extensions"],"storageVersionHash":"jfWCUB31mvA="},{"name":"customresourcedefinitions/status","singularName":"","namespaced":false,"kind":"CustomResourceDefinition","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 2c72b15f-ed7c-4c67-a2f3-1e8e816347a9
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '537'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:45 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/scheduling.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"scheduling.k8s.io/v1","resources":[{"name":"priorityclasses","singularName":"","namespaced":false,"kind":"PriorityClass","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["pc"],"storageVersionHash":"1QwjyaZjj3Y="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 24e1b272-9100-4dab-9345-c285d9e56538
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '325'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:47 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/coordination.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"coordination.k8s.io/v1","resources":[{"name":"leases","singularName":"","namespaced":true,"kind":"Lease","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"gqkMMb/YqFM="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 32e56260-3cdf-4cf3-aa21-fd493c8fb62e
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '289'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:48 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/node.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"node.k8s.io/v1","resources":[{"name":"runtimeclasses","singularName":"","namespaced":false,"kind":"RuntimeClass","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"WQTu1GL3T2Q="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - b17989b5-375a-4e8a-a25b-737f2b6051d5
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '297'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:50 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/discovery.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"discovery.k8s.io/v1","resources":[{"name":"endpointslices","singularName":"","namespaced":true,"kind":"EndpointSlice","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Nx3SIv6I0mE="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 3c8afde2-5e56-4105-8cc5-eb598e32b77f
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '302'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:51 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/apps.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"apps.openshift.io/v1","resources":[{"name":"deploymentconfigs","singularName":"","namespaced":true,"kind":"DeploymentConfig","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["dc"],"categories":["all"],"storageVersionHash":"6xyoXGsxfiA="},{"name":"deploymentconfigs/instantiate","singularName":"","namespaced":true,"kind":"DeploymentRequest","verbs":["create"]},{"name":"deploymentconfigs/log","singularName":"","namespaced":true,"kind":"DeploymentLog","verbs":["get"]},{"name":"deploymentconfigs/rollback","singularName":"","namespaced":true,"kind":"DeploymentConfigRollback","verbs":["create"]},{"name":"deploymentconfigs/scale","singularName":"","namespaced":true,"group":"extensions","version":"v1beta1","kind":"Scale","verbs":["get","patch","update"]},{"name":"deploymentconfigs/status","singularName":"","namespaced":true,"kind":"DeploymentConfig","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - eafce2bd-a09d-4447-96fa-5fc1ef4d7da3
+      - eafce2bd-a09d-4447-96fa-5fc1ef4d7da3
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '999'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:53 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/authorization.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"authorization.openshift.io/v1","resources":[{"name":"clusterrolebindings","singularName":"","namespaced":false,"kind":"ClusterRoleBinding","verbs":["create","delete","get","list","patch","update"]},{"name":"clusterroles","singularName":"","namespaced":false,"kind":"ClusterRole","verbs":["create","delete","get","list","patch","update"]},{"name":"localresourceaccessreviews","singularName":"","namespaced":true,"kind":"LocalResourceAccessReview","verbs":["create"]},{"name":"localsubjectaccessreviews","singularName":"","namespaced":true,"kind":"LocalSubjectAccessReview","verbs":["create"]},{"name":"resourceaccessreviews","singularName":"","namespaced":false,"kind":"ResourceAccessReview","verbs":["create"]},{"name":"rolebindingrestrictions","singularName":"","namespaced":true,"kind":"RoleBindingRestriction","verbs":["create","delete","deletecollection","get","list","patch","update","watch"]},{"name":"rolebindings","singularName":"","namespaced":true,"kind":"RoleBinding","verbs":["create","delete","get","list","patch","update"]},{"name":"roles","singularName":"","namespaced":true,"kind":"Role","verbs":["create","delete","get","list","patch","update"]},{"name":"selfsubjectrulesreviews","singularName":"","namespaced":true,"kind":"SelfSubjectRulesReview","verbs":["create"]},{"name":"subjectaccessreviews","singularName":"","namespaced":false,"kind":"SubjectAccessReview","verbs":["create"]},{"name":"subjectrulesreviews","singularName":"","namespaced":true,"kind":"SubjectRulesReview","verbs":["create"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - b247620f-939c-45d4-bedb-16129ce644ff
+      - b247620f-939c-45d4-bedb-16129ce644ff
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '1578'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:54 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/build.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"build.openshift.io/v1","resources":[{"name":"buildconfigs","singularName":"","namespaced":true,"kind":"BuildConfig","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["bc"],"categories":["all"],"storageVersionHash":"2ooe95Eo6Y4="},{"name":"buildconfigs/instantiate","singularName":"","namespaced":true,"kind":"BuildRequest","verbs":["create"]},{"name":"buildconfigs/instantiatebinary","singularName":"","namespaced":true,"kind":"BinaryBuildRequestOptions","verbs":["create"]},{"name":"buildconfigs/webhooks","singularName":"","namespaced":true,"kind":"Build","verbs":["create"]},{"name":"builds","singularName":"","namespaced":true,"kind":"Build","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"categories":["all"],"storageVersionHash":"Iv+mFnvyzFc="},{"name":"builds/clone","singularName":"","namespaced":true,"kind":"BuildRequest","verbs":["create"]},{"name":"builds/details","singularName":"","namespaced":true,"kind":"Build","verbs":["update"]},{"name":"builds/log","singularName":"","namespaced":true,"kind":"BuildLog","verbs":["get"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 19067c85-0868-4789-9c37-8f5d20136d15
+      - 19067c85-0868-4789-9c37-8f5d20136d15
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '1189'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:56 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/image.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"image.openshift.io/v1","resources":[{"name":"images","singularName":"","namespaced":false,"kind":"Image","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"FX/i8Tt+3Fc="},{"name":"imagesignatures","singularName":"","namespaced":false,"kind":"ImageSignature","verbs":["create","delete"]},{"name":"imagestreamimages","singularName":"","namespaced":true,"kind":"ImageStreamImage","verbs":["get"],"shortNames":["isimage"]},{"name":"imagestreamimports","singularName":"","namespaced":true,"kind":"ImageStreamImport","verbs":["create"]},{"name":"imagestreammappings","singularName":"","namespaced":true,"kind":"ImageStreamMapping","verbs":["create"]},{"name":"imagestreams","singularName":"","namespaced":true,"kind":"ImageStream","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["is"],"categories":["all"],"storageVersionHash":"mwmf9lCqOiA="},{"name":"imagestreams/layers","singularName":"","namespaced":true,"kind":"ImageStreamLayers","verbs":["get"]},{"name":"imagestreams/secrets","singularName":"","namespaced":true,"kind":"SecretList","verbs":["get"]},{"name":"imagestreams/status","singularName":"","namespaced":true,"kind":"ImageStream","verbs":["get","patch","update"]},{"name":"imagestreamtags","singularName":"","namespaced":true,"kind":"ImageStreamTag","verbs":["create","delete","get","list","patch","update"],"shortNames":["istag"]},{"name":"imagetags","singularName":"","namespaced":true,"kind":"ImageTag","verbs":["create","delete","get","list","patch","update"],"shortNames":["itag"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - c5641729-9ff4-4a50-96bd-f64682f8db92
+      - c5641729-9ff4-4a50-96bd-f64682f8db92
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '1664'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:57 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/oauth.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"oauth.openshift.io/v1","resources":[{"name":"oauthaccesstokens","singularName":"","namespaced":false,"kind":"OAuthAccessToken","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Hss+eIbWaq4="},{"name":"oauthauthorizetokens","singularName":"","namespaced":false,"kind":"OAuthAuthorizeToken","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"boIUgj6jo8I="},{"name":"oauthclientauthorizations","singularName":"","namespaced":false,"kind":"OAuthClientAuthorization","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Q0jsEj2AFkk="},{"name":"oauthclients","singularName":"","namespaced":false,"kind":"OAuthClient","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"8NZGiGeCmFo="},{"name":"tokenreviews","singularName":"","namespaced":false,"group":"authentication.k8s.io","version":"v1","kind":"TokenReview","verbs":["create"]},{"name":"useroauthaccesstokens","singularName":"","namespaced":false,"kind":"UserOAuthAccessToken","verbs":["delete","get","list","watch"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 5b2093ab-172c-4820-b2b3-2a65d030e1f7
+      - 5b2093ab-172c-4820-b2b3-2a65d030e1f7
+      Cache-Control:
+      - no-cache, private
+      - no-cache, private
+      Content-Length:
+      - '1250'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:02:59 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/project.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"project.openshift.io/v1","resources":[{"name":"projectrequests","singularName":"","namespaced":false,"kind":"ProjectRequest","verbs":["create","list"]},{"name":"projects","singularName":"","namespaced":false,"kind":"Project","verbs":["create","delete","get","list","patch","update","watch"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - f36724f4-40a1-40af-b49f-3dc3cbdca8fe
+      - f36724f4-40a1-40af-b49f-3dc3cbdca8fe
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '354'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:00 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/quota.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"quota.openshift.io/v1","resources":[{"name":"appliedclusterresourcequotas","singularName":"","namespaced":true,"kind":"AppliedClusterResourceQuota","verbs":["get","list"]},{"name":"clusterresourcequotas","singularName":"","namespaced":false,"kind":"ClusterResourceQuota","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["clusterquota"]},{"name":"clusterresourcequotas/status","singularName":"","namespaced":false,"kind":"ClusterResourceQuota","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - aede613a-02f3-4995-a474-cf7b0ad9d5d0
+      - aede613a-02f3-4995-a474-cf7b0ad9d5d0
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '589'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:02 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/route.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"route.openshift.io/v1","resources":[{"name":"routes","singularName":"","namespaced":true,"kind":"Route","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"categories":["all"],"storageVersionHash":"jo1F7GfnXH4="},{"name":"routes/status","singularName":"","namespaced":true,"kind":"Route","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - d445d285-fbb1-4eee-bcee-3c24fe8b5366
+      - d445d285-fbb1-4eee-bcee-3c24fe8b5366
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '418'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:03 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/security.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"security.openshift.io/v1","resources":[{"name":"podsecuritypolicyreviews","singularName":"","namespaced":true,"kind":"PodSecurityPolicyReview","verbs":["create"]},{"name":"podsecuritypolicyselfsubjectreviews","singularName":"","namespaced":true,"kind":"PodSecurityPolicySelfSubjectReview","verbs":["create"]},{"name":"podsecuritypolicysubjectreviews","singularName":"","namespaced":true,"kind":"PodSecurityPolicySubjectReview","verbs":["create"]},{"name":"rangeallocations","singularName":"","namespaced":false,"kind":"RangeAllocation","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"8/BJx/M8Ga0="},{"name":"securitycontextconstraints","singularName":"","namespaced":false,"kind":"SecurityContextConstraints","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["scc"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 9dde0003-e42c-4533-beb2-859cc40d10c2
+      - 9dde0003-e42c-4533-beb2-859cc40d10c2
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '937'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:05 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/template.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"template.openshift.io/v1","resources":[{"name":"brokertemplateinstances","singularName":"","namespaced":false,"kind":"BrokerTemplateInstance","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Jxj8HlN0pXU="},{"name":"processedtemplates","singularName":"","namespaced":true,"kind":"Template","verbs":["create"]},{"name":"templateinstances","singularName":"","namespaced":true,"kind":"TemplateInstance","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Q8UwfyPqly4="},{"name":"templateinstances/status","singularName":"","namespaced":true,"kind":"TemplateInstance","verbs":["get","patch","update"]},{"name":"templates","singularName":"","namespaced":true,"kind":"Template","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"utuWisMumJk="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 493f4251-2435-4644-a31f-49a7c427f7c8
+      - 493f4251-2435-4644-a31f-49a7c427f7c8
+      Cache-Control:
+      - no-cache, private
+      - no-store
+      Content-Length:
+      - '968'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:06 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/user.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"user.openshift.io/v1","resources":[{"name":"groups","singularName":"","namespaced":false,"kind":"Group","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"YhnYEx+IpBw="},{"name":"identities","singularName":"","namespaced":false,"kind":"Identity","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"/S8uaPXlz9c="},{"name":"useridentitymappings","singularName":"","namespaced":false,"kind":"UserIdentityMapping","verbs":["create","delete","get","patch","update"]},{"name":"users","singularName":"","namespaced":false,"kind":"User","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"storageVersionHash":"Hbwv6GYPwoQ="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 1d4f2ad8-26a8-4bed-abc9-3fd2582cf0ab
+      - 1d4f2ad8-26a8-4bed-abc9-3fd2582cf0ab
+      Cache-Control:
+      - no-cache, private
+      - no-cache, private
+      Content-Length:
+      - '824'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:08 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/packages.operators.coreos.com/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"packages.operators.coreos.com/v1","resources":[{"name":"packagemanifests","singularName":"","namespaced":true,"kind":"PackageManifest","verbs":["get","list"]},{"name":"packagemanifests/icon","singularName":"","namespaced":true,"kind":"PackageManifest","verbs":["get"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 20da39d4-b559-4b16-b8fe-bc550fff0e46
+      - 20da39d4-b559-4b16-b8fe-bc550fff0e46
+      Cache-Control:
+      - no-cache, private
+      - no-cache, private
+      Content-Length:
+      - '331'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:10 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/operator.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"operator.openshift.io/v1","resources":[{"name":"clustercsidrivers","singularName":"clustercsidriver","namespaced":false,"kind":"ClusterCSIDriver","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"/WO1MfazznM="},{"name":"clustercsidrivers/status","singularName":"","namespaced":false,"kind":"ClusterCSIDriver","verbs":["get","patch","update"]},{"name":"ingresscontrollers","singularName":"ingresscontroller","namespaced":true,"kind":"IngressController","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"3HualLCmNv8="},{"name":"ingresscontrollers/status","singularName":"","namespaced":true,"kind":"IngressController","verbs":["get","patch","update"]},{"name":"ingresscontrollers/scale","singularName":"","namespaced":true,"group":"autoscaling","version":"v1","kind":"Scale","verbs":["get","patch","update"]},{"name":"openshiftcontrollermanagers","singularName":"openshiftcontrollermanager","namespaced":false,"kind":"OpenShiftControllerManager","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["coreoperators"],"storageVersionHash":"hPPlE6lZ+MQ="},{"name":"openshiftcontrollermanagers/status","singularName":"","namespaced":false,"kind":"OpenShiftControllerManager","verbs":["get","patch","update"]},{"name":"kubestorageversionmigrators","singularName":"kubestorageversionmigrator","namespaced":false,"kind":"KubeStorageVersionMigrator","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"8YwaYb4U1KA="},{"name":"kubestorageversionmigrators/status","singularName":"","namespaced":false,"kind":"KubeStorageVersionMigrator","verbs":["get","patch","update"]},{"name":"configs","singularName":"config","namespaced":false,"kind":"Config","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["coreoperators"],"storageVersionHash":"Bt48MmgSCbA="},{"name":"configs/status","singularName":"","namespaced":false,"kind":"Config","verbs":["get","patch","update"]},{"name":"consoles","singularName":"console","namespaced":false,"kind":"Console","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"pq3HXY/v/IM="},{"name":"consoles/status","singularName":"","namespaced":false,"kind":"Console","verbs":["get","patch","update"]},{"name":"etcds","singularName":"etcd","namespaced":false,"kind":"Etcd","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["coreoperators"],"storageVersionHash":"ro9YGgxMvm8="},{"name":"etcds/status","singularName":"","namespaced":false,"kind":"Etcd","verbs":["get","patch","update"]},{"name":"cloudcredentials","singularName":"cloudcredential","namespaced":false,"kind":"CloudCredential","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"rJ9MVOyFQKo="},{"name":"cloudcredentials/status","singularName":"","namespaced":false,"kind":"CloudCredential","verbs":["get","patch","update"]},{"name":"kubecontrollermanagers","singularName":"kubecontrollermanager","namespaced":false,"kind":"KubeControllerManager","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["coreoperators"],"storageVersionHash":"0u2SGVIGzgI="},{"name":"kubecontrollermanagers/status","singularName":"","namespaced":false,"kind":"KubeControllerManager","verbs":["get","patch","update"]},{"name":"kubeschedulers","singularName":"kubescheduler","namespaced":false,"kind":"KubeScheduler","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["coreoperators"],"storageVersionHash":"LqQcZlG4oI4="},{"name":"kubeschedulers/status","singularName":"","namespaced":false,"kind":"KubeScheduler","verbs":["get","patch","update"]},{"name":"storages","singularName":"storage","namespaced":false,"kind":"Storage","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"NnBYY8EyXNM="},{"name":"storages/status","singularName":"","namespaced":false,"kind":"Storage","verbs":["get","patch","update"]},{"name":"authentications","singularName":"authentication","namespaced":false,"kind":"Authentication","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"0+ezrHhttAw="},{"name":"authentications/status","singularName":"","namespaced":false,"kind":"Authentication","verbs":["get","patch","update"]},{"name":"csisnapshotcontrollers","singularName":"csisnapshotcontroller","namespaced":false,"kind":"CSISnapshotController","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"bFbcgq1iZzM="},{"name":"csisnapshotcontrollers/status","singularName":"","namespaced":false,"kind":"CSISnapshotController","verbs":["get","patch","update"]},{"name":"openshiftapiservers","singularName":"openshiftapiserver","namespaced":false,"kind":"OpenShiftAPIServer","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["coreoperators"],"storageVersionHash":"wTEwJGUaNBs="},{"name":"openshiftapiservers/status","singularName":"","namespaced":false,"kind":"OpenShiftAPIServer","verbs":["get","patch","update"]},{"name":"dnses","singularName":"dns","namespaced":false,"kind":"DNS","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"G9905aqbo/s="},{"name":"dnses/status","singularName":"","namespaced":false,"kind":"DNS","verbs":["get","patch","update"]},{"name":"servicecas","singularName":"serviceca","namespaced":false,"kind":"ServiceCA","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"+DF3a5EUlMc="},{"name":"servicecas/status","singularName":"","namespaced":false,"kind":"ServiceCA","verbs":["get","patch","update"]},{"name":"kubeapiservers","singularName":"kubeapiserver","namespaced":false,"kind":"KubeAPIServer","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"fq0dmqlYzhg="},{"name":"kubeapiservers/status","singularName":"","namespaced":false,"kind":"KubeAPIServer","verbs":["get","patch","update"]},{"name":"networks","singularName":"network","namespaced":false,"kind":"Network","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"JuI4WtFKtMI="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 3a02f3cd-02a7-48b5-854a-87aaf4d001c2
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:11 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/apiserver.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"apiserver.openshift.io/v1","resources":[{"name":"apirequestcounts","singularName":"apirequestcount","namespaced":false,"kind":"APIRequestCount","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"S/jlubifV1Y="},{"name":"apirequestcounts/status","singularName":"","namespaced":false,"kind":"APIRequestCount","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - a566aa7e-ccd4-4e36-acd2-fe3651e3c39d
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '458'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:13 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/autoscaling.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"autoscaling.openshift.io/v1","resources":[{"name":"clusterautoscalers","singularName":"clusterautoscaler","namespaced":false,"kind":"ClusterAutoscaler","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["ca"],"storageVersionHash":"zBaLBLdlZGk="},{"name":"clusterautoscalers/status","singularName":"","namespaced":false,"kind":"ClusterAutoscaler","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 20812c58-afbe-4452-bac2-800407d25baa
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '490'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:14 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/cloudcredential.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"cloudcredential.openshift.io/v1","resources":[{"name":"credentialsrequests","singularName":"credentialsrequest","namespaced":true,"kind":"CredentialsRequest","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"Y1KpLs3mWDk="},{"name":"credentialsrequests/status","singularName":"","namespaced":true,"kind":"CredentialsRequest","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 3b5554ff-57b4-4c42-915e-a4afee98d8d3
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '477'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:15 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/console.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"console.openshift.io/v1","resources":[{"name":"consolenotifications","singularName":"consolenotification","namespaced":false,"kind":"ConsoleNotification","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"fjLb6xIjTp8="},{"name":"consolenotifications/status","singularName":"","namespaced":false,"kind":"ConsoleNotification","verbs":["get","patch","update"]},{"name":"consoleexternalloglinks","singularName":"consoleexternalloglink","namespaced":false,"kind":"ConsoleExternalLogLink","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"JNNWRK5+6qk="},{"name":"consoleexternalloglinks/status","singularName":"","namespaced":false,"kind":"ConsoleExternalLogLink","verbs":["get","patch","update"]},{"name":"consoleyamlsamples","singularName":"consoleyamlsample","namespaced":false,"kind":"ConsoleYAMLSample","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"/0X4p1qvFq0="},{"name":"consolelinks","singularName":"consolelink","namespaced":false,"kind":"ConsoleLink","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"QMa1yrz2A1Q="},{"name":"consolelinks/status","singularName":"","namespaced":false,"kind":"ConsoleLink","verbs":["get","patch","update"]},{"name":"consolequickstarts","singularName":"consolequickstart","namespaced":false,"kind":"ConsoleQuickStart","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"jjkxMYsy4hY="},{"name":"consoleclidownloads","singularName":"consoleclidownload","namespaced":false,"kind":"ConsoleCLIDownload","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"hTsPKGVbEc0="},{"name":"consoleclidownloads/status","singularName":"","namespaced":false,"kind":"ConsoleCLIDownload","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 21937605-cceb-4aaf-bd27-ce496ea336a8
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '2038'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:17 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/imageregistry.operator.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"imageregistry.operator.openshift.io/v1","resources":[{"name":"imagepruners","singularName":"imagepruner","namespaced":false,"kind":"ImagePruner","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"csaZlx1bqEc="},{"name":"imagepruners/status","singularName":"","namespaced":false,"kind":"ImagePruner","verbs":["get","patch","update"]},{"name":"configs","singularName":"config","namespaced":false,"kind":"Config","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"ezezfcipwsQ="},{"name":"configs/status","singularName":"","namespaced":false,"kind":"Config","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 86f8d8d8-bdd7-4249-9d20-45f9fa80146e
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '762'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:19 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/ingress.operator.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"ingress.operator.openshift.io/v1","resources":[{"name":"dnsrecords","singularName":"dnsrecord","namespaced":true,"kind":"DNSRecord","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"S3Nu5BOcJQA="},{"name":"dnsrecords/status","singularName":"","namespaced":true,"kind":"DNSRecord","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 6ba46775-4351-4085-8ce7-bddadf593117
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '433'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:20 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/k8s.cni.cncf.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"k8s.cni.cncf.io/v1","resources":[{"name":"network-attachment-definitions","singularName":"network-attachment-definition","namespaced":true,"kind":"NetworkAttachmentDefinition","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["net-attach-def"],"storageVersionHash":"BNF/SJ3/If4="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - b2ddc825-6444-4bf0-99fa-e7d0011d25d7
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '392'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:21 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/k8s.ovn.org/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"k8s.ovn.org/v1","resources":[{"name":"egressqoses","singularName":"egressqos","namespaced":true,"kind":"EgressQoS","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"De2N4yHJLWg="},{"name":"egressqoses/status","singularName":"","namespaced":true,"kind":"EgressQoS","verbs":["get","patch","update"]},{"name":"egressfirewalls","singularName":"egressfirewall","namespaced":true,"kind":"EgressFirewall","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"AElnPxlhG7g="},{"name":"egressips","singularName":"egressip","namespaced":false,"kind":"EgressIP","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["eip"],"storageVersionHash":"3ItexM2Q0e8="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 8eb3155b-4454-443a-ab12-39288d85b523
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '865'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:23 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/machineconfiguration.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"machineconfiguration.openshift.io/v1","resources":[{"name":"containerruntimeconfigs","singularName":"containerruntimeconfig","namespaced":false,"kind":"ContainerRuntimeConfig","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["ctrcfg"],"storageVersionHash":"zQKIZo2axmg="},{"name":"containerruntimeconfigs/status","singularName":"","namespaced":false,"kind":"ContainerRuntimeConfig","verbs":["get","patch","update"]},{"name":"machineconfigpools","singularName":"machineconfigpool","namespaced":false,"kind":"MachineConfigPool","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["mcp"],"storageVersionHash":"hxLDUtTOjtU="},{"name":"machineconfigpools/status","singularName":"","namespaced":false,"kind":"MachineConfigPool","verbs":["get","patch","update"]},{"name":"controllerconfigs","singularName":"controllerconfig","namespaced":false,"kind":"ControllerConfig","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"pooMJA5+L2U="},{"name":"controllerconfigs/status","singularName":"","namespaced":false,"kind":"ControllerConfig","verbs":["get","patch","update"]},{"name":"kubeletconfigs","singularName":"kubeletconfig","namespaced":false,"kind":"KubeletConfig","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"d0/BkupJ0L0="},{"name":"kubeletconfigs/status","singularName":"","namespaced":false,"kind":"KubeletConfig","verbs":["get","patch","update"]},{"name":"machineconfigs","singularName":"machineconfig","namespaced":false,"kind":"MachineConfig","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["mc"],"storageVersionHash":"BDX8m3QUIEc="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 80d5962c-549e-46d1-a871-ec314020abbf
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '1862'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:24 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/monitoring.coreos.com/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"monitoring.coreos.com/v1","resources":[{"name":"podmonitors","singularName":"podmonitor","namespaced":true,"kind":"PodMonitor","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["pmon"],"categories":["prometheus-operator"],"storageVersionHash":"t6BHpUAzPig="},{"name":"prometheusrules","singularName":"prometheusrule","namespaced":true,"kind":"PrometheusRule","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["promrule"],"categories":["prometheus-operator"],"storageVersionHash":"RSJ8iG+KDOo="},{"name":"probes","singularName":"probe","namespaced":true,"kind":"Probe","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["prb"],"categories":["prometheus-operator"],"storageVersionHash":"x4d99qNb5YI="},{"name":"servicemonitors","singularName":"servicemonitor","namespaced":true,"kind":"ServiceMonitor","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["smon"],"categories":["prometheus-operator"],"storageVersionHash":"JLhPcfa+5xE="},{"name":"thanosrulers","singularName":"thanosruler","namespaced":true,"kind":"ThanosRuler","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["ruler"],"categories":["prometheus-operator"],"storageVersionHash":"YBxpg/kA6UI="},{"name":"alertmanagers","singularName":"alertmanager","namespaced":true,"kind":"Alertmanager","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["am"],"categories":["prometheus-operator"],"storageVersionHash":"NshW3zg1K7o="},{"name":"prometheuses","singularName":"prometheus","namespaced":true,"kind":"Prometheus","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["prom"],"categories":["prometheus-operator"],"storageVersionHash":"C8naPY4eojU="},{"name":"prometheuses/status","singularName":"","namespaced":true,"kind":"Prometheus","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - fe65c10f-3d94-4f46-a853-f12072d25de8
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:26 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/network.operator.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"network.operator.openshift.io/v1","resources":[{"name":"operatorpkis","singularName":"operatorpki","namespaced":true,"kind":"OperatorPKI","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"05e+cURVIcw="},{"name":"egressrouters","singularName":"egressrouter","namespaced":true,"kind":"EgressRouter","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"whcNhkpRCxc="},{"name":"egressrouters/status","singularName":"","namespaced":true,"kind":"EgressRouter","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - c24bf3f5-f25f-47f5-b8e1-b0d97c15eb6e
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '661'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:27 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/operators.coreos.com/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"operators.coreos.com/v1","resources":[{"name":"operatorgroups","singularName":"operatorgroup","namespaced":true,"kind":"OperatorGroup","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["og"],"categories":["olm"],"storageVersionHash":"smrHN4vKoms="},{"name":"operatorgroups/status","singularName":"","namespaced":true,"kind":"OperatorGroup","verbs":["get","patch","update"]},{"name":"operators","singularName":"operator","namespaced":false,"kind":"Operator","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["olm"],"storageVersionHash":"G7jRFeS6JKo="},{"name":"operators/status","singularName":"","namespaced":false,"kind":"Operator","verbs":["get","patch","update"]},{"name":"operatorconditions","singularName":"operatorcondition","namespaced":true,"kind":"OperatorCondition","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["condition"],"categories":["olm"],"storageVersionHash":"Cil3d/t/Kpc="},{"name":"operatorconditions/status","singularName":"","namespaced":true,"kind":"OperatorCondition","verbs":["get","patch","update"]},{"name":"olmconfigs","singularName":"olmconfig","namespaced":false,"kind":"OLMConfig","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"categories":["olm"],"storageVersionHash":"rV2ESbqnZdM="},{"name":"olmconfigs/status","singularName":"","namespaced":false,"kind":"OLMConfig","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 2a11e47f-9ba3-4cf5-abdc-0804d474a048
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '1586'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:29 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/performance.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"performance.openshift.io/v1","resources":[{"name":"performanceprofiles","singularName":"performanceprofile","namespaced":false,"kind":"PerformanceProfile","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"+AfVMGb9Yeo="},{"name":"performanceprofiles/status","singularName":"","namespaced":false,"kind":"PerformanceProfile","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 89783048-673a-4b50-a319-1ad8b32cfeda
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '475'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:30 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/samples.operator.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"samples.operator.openshift.io/v1","resources":[{"name":"configs","singularName":"config","namespaced":false,"kind":"Config","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"ky0OJqa2Yqg="},{"name":"configs/status","singularName":"","namespaced":false,"kind":"Config","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - d16f470c-e7ca-4e5d-b9e0-3e027bf72e0a
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '420'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:32 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/security.internal.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"security.internal.openshift.io/v1","resources":[{"name":"rangeallocations","singularName":"rangeallocation","namespaced":false,"kind":"RangeAllocation","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"qZRTPsGHJXw="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 76d2706b-43a9-40b2-956d-cce50f72419b
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '336'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:33 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/snapshot.storage.k8s.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"snapshot.storage.k8s.io/v1","resources":[{"name":"volumesnapshots","singularName":"volumesnapshot","namespaced":true,"kind":"VolumeSnapshot","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["vs"],"storageVersionHash":"CBkCoNN1OpA="},{"name":"volumesnapshots/status","singularName":"","namespaced":true,"kind":"VolumeSnapshot","verbs":["get","patch","update"]},{"name":"volumesnapshotcontents","singularName":"volumesnapshotcontent","namespaced":false,"kind":"VolumeSnapshotContent","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["vsc","vscs"],"storageVersionHash":"ksBm2JR3lFg="},{"name":"volumesnapshotcontents/status","singularName":"","namespaced":false,"kind":"VolumeSnapshotContent","verbs":["get","patch","update"]},{"name":"volumesnapshotclasses","singularName":"volumesnapshotclass","namespaced":false,"kind":"VolumeSnapshotClass","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["vsclass","vsclasses"],"storageVersionHash":"agjrTDFWe0I="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 53cb171a-cf0b-4754-a289-1efc5806102a
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '1162'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:35 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/tuned.openshift.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"tuned.openshift.io/v1","resources":[{"name":"tuneds","singularName":"tuned","namespaced":true,"kind":"Tuned","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"UFSFmIApyE0="},{"name":"profiles","singularName":"profile","namespaced":true,"kind":"Profile","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"storageVersionHash":"Ymd5utw2PCg="}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 429ffda7-8af8-4343-9987-fbf5a979b9a1
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '494'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 13 Jan 2023 14:03:37 GMT
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+version: 1

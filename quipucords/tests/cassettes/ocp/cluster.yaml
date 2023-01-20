@@ -1,0 +1,45 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/25.3.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/config.openshift.io/v1/clusterversions
+  response:
+    body:
+      string: '{"apiVersion":"config.openshift.io/v1","items":[{"apiVersion":"config.openshift.io/v1","kind":"ClusterVersion","metadata":{"creationTimestamp":"2023-01-12T15:34:39Z","generation":2,"managedFields":[{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{".":{},"f:channel":{},"f:clusterID":{}}},"manager":"cluster-bootstrap","operation":"Update","time":"2023-01-12T15:34:39Z"},{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:availableUpdates":{},"f:capabilities":{".":{},"f:enabledCapabilities":{},"f:knownCapabilities":{}},"f:conditions":{},"f:desired":{".":{},"f:channels":{},"f:image":{},"f:url":{},"f:version":{}},"f:history":{},"f:observedGeneration":{},"f:versionHash":{}}},"manager":"cluster-version-operator","operation":"Update","subresource":"status","time":"2023-01-12T15:34:43Z"}],"name":"version","resourceVersion":"84142","uid":"bcf723f0-5f02-4557-9612-9995bf6082cf"},"spec":{"channel":"stable-4.11","clusterID":"92e2cebc-71cd-4972-a8ee-7daad3e0960c"},"status":{"availableUpdates":[{"channels":["candidate-4.11","candidate-4.12","fast-4.11","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:860cc37824074671c4cf76e02d224d243e670d2298e6dab8923ee391fbd0ae1c","url":"https://access.redhat.com/errata/RHSA-2022:9107","version":"4.11.21"}],"capabilities":{"enabledCapabilities":["baremetal","marketplace","openshift-samples"],"knownCapabilities":["baremetal","marketplace","openshift-samples"]},"conditions":[{"lastTransitionTime":"2023-01-12T15:34:43Z","status":"True","type":"RetrievedUpdates"},{"lastTransitionTime":"2023-01-12T15:34:43Z","message":"Kubernetes
+        1.25 and therefore OpenShift 4.12 remove several APIs which require admin
+        consideration. Please see the knowledge article https://access.redhat.com/articles/6955381
+        for details and instructions.","reason":"AdminAckRequired","status":"False","type":"Upgradeable"},{"lastTransitionTime":"2023-01-12T15:34:43Z","message":"Capabilities
+        match configured spec","reason":"AsExpected","status":"False","type":"ImplicitlyEnabledCapabilities"},{"lastTransitionTime":"2023-01-12T15:34:43Z","message":"Payload
+        loaded version=\"4.11.20\" image=\"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3\"","reason":"PayloadLoaded","status":"True","type":"ReleaseAccepted"},{"lastTransitionTime":"2023-01-12T17:55:44Z","message":"Done
+        applying 4.11.20","status":"True","type":"Available"},{"lastTransitionTime":"2023-01-12T19:51:59Z","status":"False","type":"Failing"},{"lastTransitionTime":"2023-01-12T17:55:44Z","message":"Cluster
+        version is 4.11.20","status":"False","type":"Progressing"}],"desired":{"channels":["candidate-4.11","candidate-4.12","fast-4.11","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3","url":"https://access.redhat.com/errata/RHSA-2022:8893","version":"4.11.20"},"history":[{"completionTime":"2023-01-12T17:55:44Z","image":"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3","startedTime":"2023-01-12T15:34:43Z","state":"Completed","verified":false,"version":"4.11.20"}],"observedGeneration":2,"versionHash":"E59dB0eLHfk="}}],"kind":"ClusterVersionList","metadata":{"continue":"","resourceVersion":"109600"}}
+
+        '
+    headers:
+      Audit-Id:
+      - d4e7df4c-c213-4665-938d-858fa7447282
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 12 Jan 2023 21:02:42 GMT
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - ee8439fa-db58-4921-a40d-640133815212
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -32,3 +32,11 @@ def gigabytes_to_bytes(gigabytes):
     if gigabytes is None:
         return None
     return gigabytes * (1024**3)
+
+
+def convert_architecture(architecture):
+    """Convert architecture name."""
+    architecture_map = {"amd64": "x86_64"}
+    if not architecture_map.get(architecture):
+        return architecture
+    return architecture_map.get(architecture)
