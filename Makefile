@@ -8,32 +8,35 @@ TEST_OPTS := -n auto -ra -m 'not slow' --timeout=15
 QPC_COMPARISON_REVISION ?= a362b28db064c7a4ee38fe66685ba891f33ee5ba
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
+PARALLEL_NUM ?= $(shell python -c 'import multiprocessing as m;print(int(max(m.cpu_count()-2, 2)))')
 
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
 QUIPUCORDS_UI_RELEASE ?= latest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
-	@echo "  help                to show this message"
-	@echo "  all                 to execute all following targets (except test)"
-	@echo "  lint                to run all linters"
-	@echo "  clean               to remove pyc/cache files"
-	@echo "  clean-db            to remove postgres docker container / sqlite db"
-	@echo "  clean-ui            to remove UI assets"
-	@echo "  lint-ansible        to run the ansible linter (for now only do syntax check)"
-	@echo "  lint-flake8         to run the flake8 linter"
-	@echo "  lint-pylint         to run the pylint linter"
-	@echo "  lock-requirements   to lock all python dependencies"
-	@echo "  test                to run unit tests"
-	@echo "  test-coverage       to run unit tests and measure test coverage"
-	@echo "  swagger-valid       to run swagger-cli validation"
-	@echo "  setup-postgres      to create a default postgres container"
-	@echo "  server-init         to run server initializion steps"
-	@echo "  serve               to run the server with default db"
-	@echo "  serve-swagger       to run the openapi/swagger ui for quipucords"
-	@echo "  build-ui            to build ui and place result in django server"
-	@echo "  fetch-ui            to fetch prebuilt ui and place it in django server"
-	@echo "  build-container     to build the container image for quipucords"
+	@echo "  help                 to show this message"
+	@echo "  all                  to execute all following targets (except test)"
+	@echo "  lint                 to run all linters"
+	@echo "  clean                to remove pyc/cache files"
+	@echo "  clean-db             to remove postgres docker container / sqlite db"
+	@echo "  clean-ui             to remove UI assets"
+	@echo "  lint-ansible         to run the ansible linter (for now only do syntax check)"
+	@echo "  lint-flake8          to run the flake8 linter"
+	@echo "  lint-pylint          to run the pylint linter"
+	@echo "  lock-requirements    to lock all python dependencies"
+	@echo "  update-requirements  to update all python dependencies"
+	@echo "  check-requirements   to check python dependency files"
+	@echo "  test                 to run unit tests"
+	@echo "  test-coverage        to run unit tests and measure test coverage"
+	@echo "  swagger-valid        to run swagger-cli validation"
+	@echo "  setup-postgres       to create a default postgres container"
+	@echo "  server-init          to run server initializion steps"
+	@echo "  serve                to run the server with default db"
+	@echo "  serve-swagger        to run the openapi/swagger ui for quipucords"
+	@echo "  build-ui             to build ui and place result in django server"
+	@echo "  fetch-ui             to fetch prebuilt ui and place it in django server"
+	@echo "  build-container      to build the container image for quipucords"
 
 all: lint test-coverage
 
@@ -49,13 +52,34 @@ clean-db:
 	rm -rf quipucords/db.sqlite3
 	docker rm -f qpc-db
 
-lock-requirements:
-	pip-compile $(PIP_COMPILE_ARGS) --generate-hashes --output-file=requirements.txt requirements.in
-	pip-compile $(PIP_COMPILE_ARGS) --allow-unsafe --generate-hashes --output-file=requirements-build.txt requirements-build.in
-	pip-compile $(PIP_COMPILE_ARGS) --generate-hashes --output-file=dev-requirements.txt dev-requirements.in requirements.in
+lock-requirements: lock-main-requirements
+	rm -f requirements-build.txt requirements-build.in
+	$(MAKE) search-build-requirements
+	$(MAKE) lock-build-requirements
+	# run another rounds of search/lock for build requirements
+	# (build dependencies also have build dependencies after all :)
+	$(MAKE) search-build-requirements
+	$(MAKE) lock-build-requirements
+	$(MAKE) search-build-requirements
+	$(MAKE) lock-build-requirements
+	mv requirements-build.in tmp-requirements-build.in
+	cat tmp-requirements-build.in | sed 's/ //g' | sort -u  > requirements-build.in
+	rm tmp-requirements-build.in
 
-upgrade-requirements:
-	 $(MAKE) lock-requirements -e PIP_COMPILE_ARGS='--upgrade'
+lock-main-requirements:
+	poetry lock --no-update
+	poetry export -f requirements.txt --only=main --without-hashes -o requirements.txt
+
+lock-build-requirements:
+	poetry run pip-compile $(PIP_COMPILE_ARGS) -r --resolver=backtracking --quiet --allow-unsafe --output-file=requirements-build.txt requirements-build.in
+
+search-build-requirements:
+	cat requirements*.txt | grep -vE '(^ )|(#)' | awk '{print $$1}' | sed 's/==/ /' | \
+	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps 2> /dev/null >> requirements-build.in || true
+
+update-requirements:
+	poetry update --no-cache
+	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
 
 test:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \

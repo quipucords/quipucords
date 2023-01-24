@@ -29,8 +29,8 @@ jobs:
         # this might seem odd but is the recommended way to set variables
         # reference: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
         run: |
-          pip install setuptools-scm
-          BUILD_VERSION=$(python -m setuptools_scm)
+          pip install poetry
+          BUILD_VERSION=$(poetry version -s)
           echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
           echo "IMAGE_NAME_WITH_TAG=$IMAGE_NAME:$BUILD_VERSION" >> $GITHUB_ENV
           echo "TARGZFILE=${TARFILE}.gz" >> $GITHUB_ENV
