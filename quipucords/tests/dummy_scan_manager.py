@@ -1,7 +1,20 @@
 """Dummy scan manager module - a replacement on [Scan]Manager for tests."""
 
+import multiprocessing
+from contextlib import contextmanager
 from datetime import datetime
 from multiprocessing import Process
+
+
+@contextmanager
+def set_mp_start_method(start_method):
+    """Set the multiprocessing start method for the yielded block."""
+    current_start_method = multiprocessing.get_start_method()
+    try:
+        multiprocessing.set_start_method(start_method, force=True)
+        yield
+    finally:
+        multiprocessing.set_start_method(current_start_method, force=True)
 
 
 class SingletonMeta(type):
@@ -52,7 +65,14 @@ class DummyScanManager(metaclass=SingletonMeta):
             return
         while self._queue:
             current_job: Process = self._queue.pop()
-            current_job.start()
+            # Some uses of the Scan manager's work() attempts to fetch data
+            # from OpenShift. In such test cases, we Mock the OpenShiftApi.
+            # Note that Mocks do not work on MacOS as the default invocation
+            # method is spawn instead of a fork. If using spawn, a new Python
+            # interpreter is launched in which the Mocks are not honored so
+            # we need to invoke the tested code via fork.
+            with set_mp_start_method("fork"):
+                current_job.start()
             while current_job.exitcode is None:
                 if self._timed_out:
                     current_job.kill()
