@@ -1,4 +1,5 @@
 ansible>=6,<7
+contextlib2>=21.6.0
 Django<4
 django-filter
 djangorestframework
