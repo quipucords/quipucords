@@ -44,6 +44,7 @@ class OCPBaseEntity(BaseModel):
 
     def __init__(self, *args, **kwargs):
         """Initialize class."""
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
         super().__init__(*args, **kwargs)
         # force kind value
         self.kind = self._kind
