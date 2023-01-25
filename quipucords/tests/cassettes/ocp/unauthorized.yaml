@@ -11,7 +11,7 @@ interactions:
       authorization:
       - <AUTH_TOKEN>
     method: GET
-    uri: https://fake.ocp.host:9872/api/v1/namespaces
+    uri: https://fake.ocp.host:9872/version
   response:
     body:
       string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"Unauthorized","reason":"Unauthorized","code":401}
@@ -19,7 +19,7 @@ interactions:
         '
     headers:
       Audit-Id:
-      - a987dcb9-84d7-4f98-87a0-f7526c7ed021
+      - cf6941e6-8592-45eb-bd99-5f154b5a116e
       Cache-Control:
       - no-cache, private
       Content-Length:
@@ -27,7 +27,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 02 Jan 2023 20:33:36 GMT
+      - Tue, 24 Jan 2023 22:45:18 GMT
     status:
       code: 401
       message: Unauthorized
