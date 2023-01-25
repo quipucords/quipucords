@@ -9,9 +9,7 @@
 
 """Integration test for OpenShift scan."""
 
-import multiprocessing
 import tarfile
-from contextlib import contextmanager
 from io import BytesIO
 from logging import getLogger
 from time import sleep
@@ -38,17 +36,6 @@ from tests.utils.facts import RawFactComparator
 from utils import load_json_from_tarball
 
 logger = getLogger(__name__)
-
-
-@contextmanager
-def set_mp_start_method(start_method):
-    """Set the multiprocessing start method for the yielded block."""
-    current_start_method = multiprocessing.get_start_method()
-    try:
-        multiprocessing.set_start_method(start_method, force=True)
-        yield
-    finally:
-        multiprocessing.set_start_method(current_start_method, force=True)
 
 
 @pytest.fixture
@@ -227,13 +214,7 @@ class TestOpenShiftScan:
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = django_client.post(f"scans/{scan_id}/jobs/")
         assert create_scan_job_response.ok, create_scan_job_response.text
-        # Scan manager's work() attempts to fetch data from openshift, for which
-        # we Mock the OpenShiftApi. Note that Mocks do not work on MacOS as the
-        # default invocation method is spawn instead of a fork. If using spawn,
-        # a new Python interpreter is launched in which the Mocks are not
-        # honored so we need to invoke the tested code via fork.
-        with set_mp_start_method("fork"):
-            scan_manager.work()
+        scan_manager.work()
         response = django_client.get(f"scans/{scan_id}/")
         attempts = 1
         assert response.ok, response.text
