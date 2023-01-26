@@ -10,10 +10,14 @@
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 #
 """Django server management module."""
+import multiprocessing
 import os
 import sys
 
 if __name__ == "__main__":
+    if sys.platform == "darwin":
+        multiprocessing.set_start_method("fork")
+
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quipucords.settings")
     try:
         from django.core.management import execute_from_command_line
