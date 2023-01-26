@@ -18,7 +18,7 @@ from rest_framework.serializers import Serializer, SerializerMethodField
 
 from api.common.common_report import create_filename
 from api.common.entities import HostEntity
-from api.common.serializer import ForcedListSerializer, NotEmptyMixin
+from api.common.serializer import NotEmptyMixin
 from api.status import get_server_id
 from quipucords.environment import server_version
 
@@ -44,17 +44,6 @@ class FactsetSerializer(Serializer):
 
     namespace = fields.CharField(default="qpc")
     facts = FactsSerializer(source="*")
-
-    def __init__(self, instance=None, **kwargs):
-        """Ininialize factset serializer."""
-        if instance is not None and not isinstance(instance, list):
-            instance = [instance]
-        super().__init__(instance, **kwargs)
-
-    class Meta:
-        """Serializer configuration."""
-
-        list_serializer_class = ForcedListSerializer
 
 
 class SystemProfileSerializer(NotEmptyMixin, Serializer):
@@ -102,7 +91,7 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
     subscription_manager_id = fields.CharField(**default_kwargs)
     etc_machine_id = fields.CharField(**default_kwargs)
     vm_uuid = fields.CharField(**default_kwargs)
-    facts = FactsetSerializer(source="*", many=True)
+    facts = FactsetSerializer(source="as_list", many=True)
     system_profile = SystemProfileSerializer(source="*", **default_kwargs)
     tags = SerializerMethodField()
 
