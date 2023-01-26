@@ -56,6 +56,13 @@ class HostEntity:
             return super().__getattribute__(attr)
         return getattr(self._fingerprints, attr)
 
+    def as_list(self):
+        """Return a list containing this instance."""
+        # HBI expects some fields to be formatted as an array of objects, which
+        # sometimes is not applicable
+        # (e.g.: Hosts.facts, SystemProfile.network_interfaces)
+        return [self]
+
     @property
     def number_of_cpus(self):
         """Retrieve number of cpus."""

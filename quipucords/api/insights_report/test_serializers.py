@@ -31,7 +31,7 @@ def report_entity():
 def test_factset_serializer(db, report_entity):
     """Test FactsetSerializer."""
     serializer = FactsetSerializer(
-        report_entity.hosts[0],
+        report_entity.hosts[0].as_list(),
         many=True,
     )
     assert isinstance(serializer.data, list)

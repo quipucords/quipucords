@@ -16,7 +16,6 @@ from collections import OrderedDict
 from rest_framework.serializers import (
     ChoiceField,
     Field,
-    ListSerializer,
     ModelSerializer,
     ValidationError,
 )
@@ -105,13 +104,3 @@ class CustomJSONField(Field):
         if value == "":
             return value
         return json.loads(value)
-
-
-class ForcedListSerializer(ListSerializer):  # pylint: disable=abstract-method
-    """Serializer that forces data output as list."""
-
-    def to_representation(self, data):
-        """Force instance as list."""
-        if not isinstance(data, list):
-            data = [data]
-        return super().to_representation(data)
