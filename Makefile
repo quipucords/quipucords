@@ -38,7 +38,7 @@ help:
 all: lint test-coverage
 
 clean:
-	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -P '(.*\.pyc)|(\.coverage(\..+)*)$$|__pycache__')
+	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -E '(.*\.pyc)|(\.coverage(\..+)*)$$|__pycache__')
 
 clean-ui:
 	rm -rf quipucords/client
