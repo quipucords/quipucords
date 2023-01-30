@@ -7,6 +7,26 @@ on:
     branches: [master, "release/*", "feature/*"]
 
 jobs:
+  check-dependencies:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: "3.9"
+    - name: Install poetry
+      run: |
+        pip install -U pip
+        pip install poetry
+    - name: Check dependencies
+      run: |
+        make lock-main-requirements
+        make check-requirements
   test:
     strategy:
       matrix:

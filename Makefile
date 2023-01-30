@@ -81,6 +81,14 @@ update-requirements:
 	poetry update --no-cache
 	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
 
+check-requirements:
+ifeq ($(shell git diff --exit-code requirements.txt >/dev/null 2>&1; echo $$?), 0)
+	@exit 0
+else
+	@echo "requirements.txt not in sync with poetry.lock. Run 'make lock-requirements' and commit the changes"
+	@exit 1
+endif
+
 test:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
 	pytest $(TEST_OPTS)
