@@ -27,9 +27,7 @@ branch should correspond to an associated issue opened on the main repository
 git clone https://github.com/quipucords/quipucords
 cd quipucords
 git checkout -b issues/my_issue_#
-pip install -r dev-requirements.txt
-docker-compose up -d
-docker-compose exec qpc-db psql -c 'alter role qpc with CREATEDB'
+poetry install
 ```
 
 ### Making Changes

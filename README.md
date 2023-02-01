@@ -3,8 +3,6 @@
 [![Test Status](https://github.com/quipucords/quipucords/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/quipucords/quipucords/actions?query=branch%3Amaster)
 [![Code Coverage](https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg)](https://codecov.io/gh/quipucords/quipucords)
 [![Documentation Status](https://readthedocs.org/projects/quipucords/badge/)](https://quipucords.readthedocs.io/en/latest/)
-[![Updates](https://pyup.io/repos/github/quipucords/quipucords/shield.svg)](https://pyup.io/repos/github/quipucords/quipucords/)
-[![Python 3](https://pyup.io/repos/github/quipucords/quipucords/python-3-shield.svg)](https://pyup.io/repos/github/quipucords/quipucords/)
 
 
 # Overview
@@ -23,16 +21,29 @@ This *README* file contains information about the installation and development o
 ## Requirements and Assumptions
 Before installing quipucords on a system, review the following guidelines about installing and running quipucords:
 
- * quipucords is written to run on RHEL or Centos servers.
+ * quipucords is written to run as a container image.
  * The system that quipucords is installed on must have access to the systems to be discovered and inspected.
  * The target systems must be running SSH.
  * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain files, such as privilege escalation required for the ``systemctl`` command.
  * The user account that quipucords uses for a machine requires an sh shell or a similar shell. For example, the shell *cannot* be a /sbin/nologin or /bin/false shell.
 
-The Python packages that are required for running quipucords on a system can be found in the `dev-requirements.txt` file. The Python packages that are required to build and test quipucords from source can be found in the `requirements.txt` and `dev-requirements.txt` files.
+## Dependencies
 
+The Python packages that are required for running quipucords on a system can be found in the `pyproject.toml` file in the section
+"tool.poetry.dependencies". Packages for development and testing are in the section "tool.poetry.group.dev.dependencies".
+Finally, python packages for compiling quipucords from source can be found in `requirements-build.txt`.
 # <a name="installation"></a> Installation
-quipucords is delivered with an RPM command line tool and a server container image. The following information contains instructions for installing each of these items.
+quipucords server is delivered as a container image on quay.io. As so, the only requirement for 
+it is having `podman`, `docker` or any alternative to those.
+
+## Quick installation
+
+```
+podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quay.io/quipucords/quipucords:latest
+```
+Then open a browser and head to https://localhost:9443
+
+For more info on how to install, configure, and/or even build from source refer to [installation instructions](docs/installation.md)
 
 ## Command Line
 See [qpc cli installation instructions](https://github.com/quipucords/qpc#-installation) for information.
@@ -45,74 +56,43 @@ git clone git@github.com:quipucords/quipucords.git
 
 quipucords currently supports Python 3.9. If you do not have Python on your system, follow these [instructions](https://www.python.org/downloads/).
 
-## Setting Up a Tool to Manage Multiple Runtime Versions
-*asdf* is a single CLI tool and command interface that manages each of the project runtimes. It isn't mandatory, but highly recommended. You could alternatively install *pyenv* and *nvm*. For the instructions below we will assume you have it installed.
+## Initial setup
 
-See [asdf installation instructions](http://asdf-vm.com/guide/getting-started.html#_1-install-dependencies) for more information.
+This project uses poetry to manage it's python dependencies. To install them all, just run the following
 ```
-asdf plugin-add python
-asdf plugin-add nodejs
-```
-In order to properly install *python* versions, you will also need to install [additional dependencies](https://github.com/pyenv/pyenv/wiki#suggested-build-environment) .
-
-For the proper installation of *node* versions, you will need to include the *g++* package. The name of the package will vary according to your OS of choice. 
-
-On Fedora:
-```
-dnf install gcc-g++
-```
-On Rhel8:
-```
-dnf group install "Development Tools"
-```
-Install versions needed:
-```
-asdf install python latest:3.9
-asdf install python 2.7.18
-asdf install nodejs 14.18.3
+poetry install
 ```
 
-## Setting Up a Virtual Environment
-Developing inside a virtual environment is recommended. Add desired environment variables to the `.env` file before creating your virtual environment.  You can copy `.env.example` to get started.
-
-On Mac run the following command to set up a virtual environment:
-```
-asdf local python latest:3.9
-pip install -U pip
-brew install pipenv
-pipenv shell
-pip install -r dev-requirements.txt
-```
-
-On Linux run the following command to set up a virtual environment:
-```
-asdf local python latest:3.9
-pip install -U pip
-pip3 install pipenv
-pipenv shell
-pip install -r dev-requirements.txt
-```
+Quipucords environment variables for configuration. Our recommendation is to use the "poetry
+dotenv" plugin to handle those (`poetry self add poetry-dotenv-plugin`), then add desired environment variables to the `.env` file.  You can copy `.env.example` to get started.
 
 ## Database Options
-Quipucords currently supports development in both SQLite and Postgres. The default database is an internal postgres container.
+Quipucords currently supports both SQLite and PostgreSQL. The default database is an internal postgres container.
 
-Using a Postgres container:
+### Option 1) PostgreSQL container
+All defaults point to this option. Just run the following (requires docker-compose)
 ```
 make setup-postgres
-docker ps
+```
+### Option 2) User provided PostgreSQL instance
+These are the environment variables required to configure quipucords to use a custom postgresql instance.
+```
+QPC_DBMS=postgres
+QPC_DBMS_DATABASE=<name of the database>
+QPC_DBMS_HOST=<hostname or ip address of the database>
+QPC_DBMS_PASSWORD=<db password>
+QPC_DBMS_PORT=<db port>
+QPC_DBMS_USER=<db user>
 ```
 
-Using a SQLite DB:
+### Option 3) SQLite
+To use sqlite just set the following environment variable
 ```
-export QPC_DBMS=SQLite
+QPC_DBMS=sqlite
 ```
 
 ## Initializing the Server
-To initialize the server with SQlite, run the following command:
-```
-make server-init -e QPC_DBMS=sqlite
-```
-To initialize the server with Postgres, run the following command:
+
 ```
 make server-init
 ```
@@ -120,26 +100,21 @@ make server-init
 Both of the above commands create a superuser with name `admin` and password of `qpcpassw0rd`.
 
 ## Running the Server
-Currently, quipucords needs quipucords-ui to run. Both projects need to be on the same root
-folder, like shown below:
+Currently, quipucords needs quipucords-ui to run. In order to get it's latest version, run
 
-/quipucords  
-   --quipucords  
-   --quipucords-ui
+```
+make fetch-ui
+make server-static
+```
 
+If you prefer to build it from source, then `make build-ui` rule will be used instead. 
 See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.
 
-To run the development server using SQlite, run the following command:
+To run the development server, run the following command:
 ```
-make build-ui
-make serve -e QPC_DBMS=sqlite
-```
-To run the development server using Postgres, run the following command:
-```
-make build-ui
 make serve
 ```
-To log in to the server, you must connect to http://127.0.0.1:8000/admin/ and provide the superuser credentials stated above.
+To log in to the server, you must connect to http://127.0.0.1:8000 and provide the superuser credentials stated above.
 
 After logging in, you can change the password and also go to some browsable APIs such as http://127.0.0.1:8000/api/v1/credentials/.
 To use the command line interface, you can configure access to the server by entering `qpc server config`. You can then log in by using `qpc server login`.
@@ -149,11 +124,9 @@ If you intend to run on Mac OS, there are several more steps that are required.
 
 - Increase the maxfile limit as described [here](https://github.com/ansible/ansible/issues/12259#issuecomment-173371493).
 - Install sshpass as described [here](https://github.com/ansible-tw/AMA/issues/21).
-- Install coreutils to obtain the gtimeout command. To do this step, run the `brew install coreutils` command.
 - If you are running macOS 10.13 or later and you encounter unexpected crashes when running scans,
   set the environment variable `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` before starting the server.
   See the explanation for this step [here](https://github.com/ansible/ansible/issues/31869#issuecomment-337769174).
-- Install gtimeout using `brew install coreutils`
 - If installing dependencies fails involving openssl:
     ```
     brew install openssl
@@ -177,187 +150,8 @@ To run the unit tests, use the following command:
 make test
 ```
 
-To test quipucords against virtual machines running on a cloud provider, view the documentation found [here](https://github.com/quipucords/quipucords/blob/master/docs/public_cloud.md).
+To test quipucords against virtual machines running on a cloud provider, view the documentation found [here](docs/public_cloud.md).
 
-# <a name="advanced"></a> Advanced Topics
-
-##  Installing and running the server and database containers 
-The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
-You must have [Docker installed](https://docs.docker.com/engine/installation/) or [Podman installed](https://podman.io/getting-started/installation).
-The examples below all use `podman` but can be replaced with `docker` unless stated otherwise.
-1. Clone the repository:
-   ```
-   git clone git@github.com:quipucords/quipucords.git
-   ```
-
-2. Build the container image:  
-   ```
-   podman build -t quipucords .
-   ```
-3. Run the container:  
-   The container can be run with either of the following methods:  
-
-      A. Run with podman pod (podman exclusive):
-         Register server to register.redhat.io:
-      ```
-         sudo su -
-         subscription-manager register
-         dnf install -y podman
-         podman login registry.redhat.io
-         #Make directories
-         mkdir -p /var/discovery/server/volumes/data
-         mkdir -p /var/discovery/server/volumes/log
-         mkdir -p /var/discovery/server/volumes/sshkeys
-     ```
-    At the prompt, enter your username for the Red Hat Container Catalog, also known as the registry.redhat.io image registry website.
-
-    Run the quipucords server container:
-     ```
-         podman run --name qpc-db \
-                    --pod new:quipucords-pod \
-                    --publish 9443:443 \
-                    --restart on-failure \
-                    -e POSTGRESQL_USER=qpc \
-                    -e POSTGRESQL_PASSWORD=qpc \
-                    -e POSTGRESQL_DATABASE=qpc-db \
-                    -v qpc-data:/var/lib/pgsql/data \
-                    -d postgres:12
-    ```
-    Run the quipucords database container:
-    ```
-         podman run \
-                --name discovery \
-                --restart on-failure \
-                --pod quipucords-pod \
-                -e DJANGO_DEBUG=False \
-                -e NETWORK_CONNECT_JOB_TIMEOUT=600 \
-                -e NETWORK_INSPECT_JOB_TIMEOUT=10800 \
-                -e PRODUCTION=True \
-                -e QPC_DBMS_HOST=qpc-db \
-                -e QPC_DBMS_PASSWORD=qpc \
-                -e QPC_DBMS_USER=qpc \
-                -e QPC_SERVER_TIMEOUT=5 \
-                -e QPC_SERVER_USERNAME=admin \
-                -e QPC_SERVER_PASSWORD=q1w2e3r4 \
-                -e QPC_SERVER_USER_EMAIL=admin@example.com \
-                -v /var/discovery/server/volumes/data/:/var/data:z \
-                -v /var/discovery/server/volumes/log/:/var/log:z \
-                -v /var/discovery/server/volumes/sshkeys/:/sshkeys:z \
-                -d quipucords
-   ```
-   
-     B. Run with external Postgres container:
-
-   ```
-   ifconfig (get your computer's external IP if Postgres is local)
-   podman run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" 
-   -e"QPC_DBMS_HOST=<ip_address_from_ifconfig>" -p 9443:443 -i quipucords
-   ```
-     C. Run with SQlite 
-   
-   ```
-   podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quipucords
-   ```
-     D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory. Mapping the /app directory allows you to rapidly change server code without having to rebuild the container. 
-   ```
-   podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -v 
-   /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords
-   ```
-##  Installing and running the server and database with Docker Compose
-
-1. Clone the repository:
-   ```
-   git clone git@github.com:quipucords/quipucords.git
-   ```
-
-2. Build UI:  
-Currently, quipucords needs quipucords-ui to run while using Docker Compose installation method.  
-Both projects need to be on the same root folder, like shown below:
-/quipucords  
-   --quipucords  
-   --quipucords-ui
-
-   
-   See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.  
-   You will need to have NodeJS installed. See [Nodejs](<https://nodejs.org/>) official website for instructions.  
-   
-   On Mac:
-   ```
-   brew install yarn (if you don't already have yarn)
-   make build-ui 
-   ```
- 
-   On Linux:
-   
-```
-   npm install yarn (if you don't already have yarn)
-   make build-ui 
- ```
-3. Build the Docker image through Docker-compose:
-
-   For Linux users using Podman instead of Docker, this one-time setup is necessary:
-   ```
-   systemctl enable --user podman.socket
-   systemctl start --user podman.socket
-   # add the next line to your ~/.bashrc (or equivalent)
-   export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-   ```
-   then run:
-   ```
-   docker-compose up -d
-   ```
-   _NOTE:_ The need to use ``sudo`` for this step is dependent upon on your system configuration.  
-
-   For Mac users:
-   ```
-   docker-compose up -d
-
-##  Further steps and configuration
-1. Configure the CLI by using the following commands:
-    ```
-    qpc server config --host 127.0.0.1
-    qpc server login
-    ```
-2. You can work with the APIs, the CLI, and UI (visit https://127.0.0.1:9443 if you installed the UI in one of the steps above).
-
-3. To enter the container use the following command:
-    ```
-    docker exec -it quipucords bash
-    ```
-
-4. If you need to restart the server inside of the container, run the following after entering the container to get the server PIDs and restart:
-    ```
-    ps -ef | grep gunicorn
-    kill -9 PID PID
-    ```
-    _NOTE:_ There are usually multiple gunicorn processes running. You can kill them all at once by listing PIDs as shown in the example above.
-
-## Running quipucords server in gunicorn
-You can run the server locally inside of gunicorn.  This can be a useful way to debug.
-
-1. Clone the repository:
-    ```
-    git clone git@github.com:quipucords/quipucords.git
-    cd quipucords
-    ```
-2. Switch to quipucords django app module:
-    ```
-    cd quipucords
-    ```
-
-3. Make symbolic link to ansible roles:
-    ```
-    ln -s ../roles/ roles
-    ```
-4. Start gunicorn:
-    ```
-    gunicorn quipucords.wsgi -c ./local_gunicorn.conf.py
-    ```
-5. Configure the CLI by using the following commands:
-    ```
-    qpc server config --host 127.0.0.1 --port 8000
-    qpc server login
-    ```
 # <a name="issues"></a> Issues
 To report bugs for quipucords [open issues](https://github.com/quipucords/quipucords/issues) against this repository in Github. Complete the issue template when opening a new bug to improve investigation and resolution time.
 
@@ -371,7 +165,6 @@ See the [CONTRIBUTING](CONTRIBUTING.md) guide for information about contributing
 
 
 # <a name="copyright"></a> Copyright and License
-Copyright 2017-2019, Red Hat, Inc.
+Copyright 2017-2023, Red Hat, Inc.
 
 quipucords is released under the [GNU Public License version 3](LICENSE).
-
