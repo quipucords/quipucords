@@ -1,11 +1,10 @@
 DATE		= $(shell date)
-PYTHON		= $(shell which python)
+PYTHON		= $(shell poetry run which python)
 
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
 TEST_OPTS := -n auto -ra -m 'not slow' --timeout=15
-QPC_COMPARISON_REVISION ?= a362b28db064c7a4ee38fe66685ba891f33ee5ba
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 PARALLEL_NUM ?= $(shell python -c 'import multiprocessing as m;print(int(max(m.cpu_count()-2, 2)))')
@@ -91,7 +90,7 @@ endif
 
 test:
 	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 QPC_DISABLE_AUTHENTICATION=True PYTHONPATH=`pwd`/quipucords \
-	pytest $(TEST_OPTS)
+	poetry run pytest $(TEST_OPTS)
 
 test-case:
 	echo $(pattern)
@@ -108,16 +107,16 @@ swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
 lint-flake8:
-	git diff $(QPC_COMPARISON_REVISION) | flakeheaven lint --diff .
+	poetry run flakeheaven lint
 
 lint-black:
-	darker --check --diff --revision $(QPC_COMPARISON_REVISION) .
+	poetry run darker --check --diff .
 
 lint: lint-black lint-flake8 lint-ansible
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
-	ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
+	poetry run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
 
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
@@ -126,7 +125,7 @@ server-migrate:
 	$(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
 
 server-set-superuser:
-	cat ./deploy/setup_user.py | python quipucords/manage.py shell --settings quipucords.settings -v 3
+	cat ./deploy/setup_user.py | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
 
 server-init: server-migrate server-set-superuser
 

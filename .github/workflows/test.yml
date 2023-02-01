@@ -54,8 +54,6 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # fetches all commits/tags
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4.5.0
@@ -72,16 +70,6 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
-
-      # speedup linting with QPC_COMPARISON_REVISION set to a more recent commitish
-      - name: Setup ENV for PR
-        if: ${{ success() && github.event_name == 'pull_request' }}
-        run: |
-          echo "QPC_COMPARISON_REVISION=origin/${GITHUB_BASE_REF}" >> $GITHUB_ENV
-      - name: Setup ENV for push
-        if: ${{ success() && github.event_name != 'pull_request' }}
-        run: |
-          echo "QPC_COMPARISON_REVISION=HEAD^" >> $GITHUB_ENV
 
       - name: Run Test
         run: make ${{ matrix.type }} -k
