@@ -225,14 +225,13 @@ if QPC_DBMS == "sqlite":
 else:
     QPC_DBMS = "postgres"
     # The following variables are only relevant when using a postgres database:
-    QPC_DBMS_DATABASE = os.getenv("QPC_DBMS_DATABASE", "postgres")
-    QPC_DBMS_USER = os.getenv("QPC_DBMS_USER", "postgres")
-    QPC_DBMS_PASSWORD = os.getenv("QPC_DBMS_PASSWORD", "password")
+    QPC_DBMS_DATABASE = os.getenv("QPC_DBMS_DATABASE", "qpc")
+    QPC_DBMS_USER = os.getenv("QPC_DBMS_USER", "qpc")
+    QPC_DBMS_PASSWORD = os.getenv("QPC_DBMS_PASSWORD", "qpc")
     # In the following env variable, :: means localhost but allows IPv4
     #  and IPv6 connections
-    # pylint: disable=invalid-envvar-default
     QPC_DBMS_HOST = os.getenv("QPC_DBMS_HOST", "localhost" or "::")
-    QPC_DBMS_PORT = os.getenv("QPC_DBMS_PORT", 5432)
+    QPC_DBMS_PORT = os.getenv("QPC_DBMS_PORT", "54321")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",

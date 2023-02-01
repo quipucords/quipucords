@@ -49,7 +49,8 @@ clean-ui:
 
 clean-db:
 	rm -rf quipucords/db.sqlite3
-	docker rm -f qpc-db
+	docker-compose stop qpc-db
+	docker-compose rm -f qpc-db
 
 lock-requirements: lock-main-requirements
 	rm -f requirements-build.txt requirements-build.in
@@ -130,7 +131,8 @@ server-set-superuser:
 server-init: server-migrate server-set-superuser
 
 setup-postgres:
-	docker run --name qpc-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:12
+	docker-compose up -d qpc-db
+	docker-compose exec qpc-db psql -c 'alter role qpc with CREATEDB'
 
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
