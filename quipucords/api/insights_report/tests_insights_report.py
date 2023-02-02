@@ -105,12 +105,12 @@ class InsightsReportTest(TestCase):
     def test_get_insights_report_200_exists(self):
         """Retrieve insights report."""
         deployment_report = DeploymentReportFactory(
-            number_of_fingerprints=11,
+            number_of_fingerprints=3,
             status=DeploymentsReport.STATUS_COMPLETE,
         )
         url = f"/api/v1/reports/{deployment_report.id}/insights/"
         # mock slice size so we can expect 2 slices on this test
-        with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
+        with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=2):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200, response.json())
         response_json = response.json()
