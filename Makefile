@@ -4,10 +4,10 @@ PYTHON		= $(shell poetry run which python)
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
-TEST_OPTS := -n auto -ra -m 'not slow' --timeout=15
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
-PARALLEL_NUM ?= $(shell python -c 'import multiprocessing as m;print(int(max(m.cpu_count()-2, 2)))')
+PARALLEL_NUM ?= $(shell python -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
+TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=15
 
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
 QUIPUCORDS_UI_RELEASE ?= latest
