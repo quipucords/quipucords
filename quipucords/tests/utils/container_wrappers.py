@@ -9,12 +9,15 @@
 
 """Extends pytest-docker-tools wrappers with helpers for qpc tests."""
 
+import logging
+
 from abc import ABCMeta, abstractmethod
 
 from pytest_docker_tools import wrappers
 
 from tests.constants import POSTGRES_USER
 from tests.utils.http import BaseUrlClient
+from requests.exceptions import RequestException
 
 SYSTEMCTL_ACTIVE_STATUS_STRING = "Active: active (running)"
 
@@ -67,5 +70,10 @@ class QuipucordsContainer(ReadinessProbeMixin, wrappers.Container):
     def readiness_probe(self):
         """Return true if quipucords api is responsive."""
         client = BaseUrlClient(base_url=self.server_url)
-        response = client.get("api/v1/status/")
+        try:
+            response = client.get("api/v1/status/")
+        except RequestException:
+            logging.critical("Failed if container is ready. See container logs below.")
+            logging.critical(self.logs())
+            raise
         return response.ok

@@ -49,6 +49,7 @@ qpc_server_container = container(
         QPC_DBMS_DATABASE=constants.POSTGRES_DB,
         QPC_DBMS_HOST="{postgres_container.ips.primary}",
         QPC_DBMS_PASSWORD=constants.POSTGRES_PASSWORD,
+        QPC_DBMS_PORT=5432,
         QPC_DBMS_USER=constants.POSTGRES_USER,
         QPC_SERVER_PASSWORD=constants.QPC_SERVER_PASSWORD,
         QPC_SERVER_USERNAME=constants.QPC_SERVER_USERNAME,
