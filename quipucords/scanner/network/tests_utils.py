@@ -75,3 +75,13 @@ class TestExpandHostpattern(unittest.TestCase):
         self.assertEqual(
             utils.expand_hostpattern("1.2.3.[4:6]"), ["1.2.3.4", "1.2.3.5", "1.2.3.6"]
         )
+
+
+def test_raw_facts_template():
+    """Ensure raw facts template only caches fact names, not values."""
+    # any netscan raw fact is good for testing this. just choosing one easy to remember.
+    fact = "cpu_count"
+    template = utils.raw_facts_template()
+    assert template[fact] is None
+    template[fact] = 1
+    assert utils.raw_facts_template()[fact] is None
