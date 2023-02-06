@@ -28,8 +28,8 @@ class ServerInformation(models.Model):
         """Convert to string."""
         return (
             "{"
-            + "id:{}, global_identifier:{}".format(self.id, self.global_identifier)
-            + "}"
+            f"id:{self.id}, global_identifier:{self.global_identifier}"
+            "}"
         )
 
     @staticmethod

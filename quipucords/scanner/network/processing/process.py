@@ -85,8 +85,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     # needed, this is the place to change.
     if is_sudo_error_value(fact_value):
         log_message = (
-            "POST PROCESSING SUDO ERROR %s. "
-            "fact_key %s had sudo error %s" % (host, fact_key, fact_value)
+            f"POST PROCESSING SUDO ERROR {host}. "
+            f"fact_key {fact_key} had sudo error {fact_value}"
         )
         scan_task.log_message(log_message, log_level=DEBUG)
         return NO_DATA
@@ -108,8 +108,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
                     or isinstance(previous_host_facts[dep], Exception)
                 ):
                     log_message = (
-                        "POST PROCESSING MISSING REQ DEP %s. "
-                        "Fact %s missing dependency %s" % (host, fact_key, dep)
+                        f"POST PROCESSING MISSING REQ DEP {host}. "
+                        f"Fact {fact_key} missing dependency {dep}"
                     )
                     scan_task.log_message(log_message, log_level=DEBUG)
                     raise StopIteration()
@@ -122,9 +122,9 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     if fact_value != QPC_FORCE_POST_PROCESS:
         if not is_ansible_task_result(fact_value):
             log_message = (
-                "FAILED POST PROCESSING %s. "
-                "fact_value %s:%s needs postprocessing but"
-                " is not an Ansible result" % (host, fact_key, fact_value)
+                f"FAILED POST PROCESSING {host}."
+                f"fact_value {fact_key}:{fact_value} needs postprocessing but"
+                " is not an Ansible result"
             )
             scan_task.log_message(log_message, log_level=ERROR)
             # We don't know what data is supposed to go here, because
@@ -135,20 +135,15 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
         if fact_value.get(SKIPPED, False):
             log_message = (
-                "SKIPPED POST PROCESSSING %s. "
-                "fact %s skipped, no results" % (host, fact_key)
+                f"SKIPPED POST PROCESSING {host}. "
+                f"fact {fact_key} skipped, no results"
             )
             scan_task.log_message(log_message, log_level=DEBUG)
             return NO_DATA
 
         return_code = fact_value.get(RC, 0)
         if return_code and not getattr(processor, RETURN_CODE_ANY, False):
-            log_message = "FAILED REMOTE COMMAND %s. %s exited with %s: %s" % (
-                host,
-                fact_key,
-                return_code,
-                fact_value["stdout"],
-            )
+            log_message = f"FAILED REMOTE COMMAND {host}. {fact_key} exited with {return_code}: {fact_value['stdout']}"
             scan_task.log_message(log_message, log_level=ERROR)
             return NO_DATA
 
@@ -156,9 +151,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
         processor_out = processor.process(fact_value, dependencies)
     except Exception:  # pylint: disable=broad-except
         log_message = (
-            "FAILED POST PROCESSING %s. "
-            "Processor for %s got value %s, returned %s"
-            % (host, fact_key, fact_value, traceback.format_exc())
+            f"FAILED POST PROCESSING {host}. "
+            f"Processor for {fact_key} got value {fact_value}, returned {traceback.format_exc()}"
         )
         scan_task.log_message(log_message, log_level=ERROR)
         return NO_DATA
@@ -172,7 +166,7 @@ class ProcessorMeta(abc.ABCMeta):
     def __init__(cls, name, bases, dct):
         """Register cls in the PROCESSORS dictionary."""
         if "KEY" not in dct:
-            raise Exception("Processor {0} does not have a KEY".format(name))
+            raise Exception(f"Processor {name} does not have a KEY")
 
         # Setting a falsey KEY means "yes, I did this on purpose, I
         # really don't want this class registered."

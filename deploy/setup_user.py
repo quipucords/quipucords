@@ -25,6 +25,6 @@ if ADMIN_NOT_PRESENT:
     User.objects.create_superuser(
         QPC_SERVER_USERNAME, QPC_SERVER_USER_EMAIL, QPC_SERVER_PASSWORD
     )
-    print("Created user %s" % QPC_SERVER_USERNAME)
+    print(f"Created user {QPC_SERVER_USERNAME}")
 else:
-    print("User %s already exists" % QPC_SERVER_USERNAME)
+    print(f"User {QPC_SERVER_USERNAME} already exists")

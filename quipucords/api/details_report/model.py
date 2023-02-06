@@ -38,9 +38,11 @@ class DetailsReport(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + '"id":{}, '
-            '"report_type":"details", '
-            '"sources":{}'.format(self.id, self.sources) + "}"
+            "{"
+            f'"id":{self.id},'
+            ' "report_type":"details", '
+            f' "sources":{self.sources}'
+            "}"
         )
 
     def get_sources(self):

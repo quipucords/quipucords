@@ -43,7 +43,7 @@ class SourceField(PrimaryKeyRelatedField):
         """Create display value."""
         display = instance
         if isinstance(instance, Source):
-            display = "Source: %s" % instance.name
+            display = f"Source: {instance.name}"
         return display
 
 

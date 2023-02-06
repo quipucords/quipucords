@@ -71,7 +71,7 @@ class Manager(Thread):
         current_scan_job = None
         if self.current_job_runner:
             current_scan_job = self.current_job_runner.identifier
-            scan_job_message = "Currently running scan job %s" % current_scan_job
+            scan_job_message = f"Currently running scan job {current_scan_job}"
         else:
             scan_job_message = "No scan job currently running"
 
@@ -102,10 +102,7 @@ class Manager(Thread):
                 self.current_job_runner.start()
                 self.log_info()
             else:
-                error = "%s: Could not start job. Job was not in %s state." % (
-                    SCAN_MANAGER_LOG_PREFIX,
-                    ScanTask.PENDING,
-                )
+                error = f"{SCAN_MANAGER_LOG_PREFIX}: Could not start job. Job was not in {ScanTask.PENDING} state."
                 self.current_job_runner.scan_job.log_message(
                     error, log_level=logging.ERROR
                 )
@@ -138,8 +135,7 @@ class Manager(Thread):
             self.current_job_runner = None
 
             job.log_message(
-                "%s: Send interrupt to allow job orderly shutdown"
-                % SCAN_MANAGER_LOG_PREFIX
+                f"{SCAN_MANAGER_LOG_PREFIX}: Send interrupt to allow job orderly shutdown"
             )
             if command == "cancel":
                 self.terminated_job_runner.manager_interrupt.value = (
@@ -220,19 +216,18 @@ class Manager(Thread):
                 if killed:
                     # Set this to None so another job can run.
                     self.terminated_job_runner.scan_job.log_message(
-                        "%s: Process successfully terminated." % SCAN_MANAGER_LOG_PREFIX
+                        f"{SCAN_MANAGER_LOG_PREFIX}: Process successfully terminated."
                     )
                     self.terminated_job_runner = None
                 elif interrupt.value == ScanJob.JOB_TERMINATE_ACK:
                     self.terminated_job_runner.log_message(
-                        "%s: Scan job acknowledged request to terminate"
-                        " but still processing." % SCAN_MANAGER_LOG_PREFIX
+                        f"{SCAN_MANAGER_LOG_PREFIX}: Scan job acknowledged request to terminate"
+                        " but still processing."
                     )
                 else:
                     self.terminated_job_runner.scan_job.log_message(
-                        "%s: Scan job has not acknowledged request"
-                        " to terminate after %ds."
-                        % (SCAN_MANAGER_LOG_PREFIX, self.termination_elapsed_time)
+                        f"{SCAN_MANAGER_LOG_PREFIX}: Scan job has not acknowledged request"
+                        f" to terminate after {self.termination_elapsed_time:d}s."
                     )
 
                     # After a time period terminate (will not work in gunicorn)
@@ -256,15 +251,14 @@ class Manager(Thread):
                             ScanTask.RUNNING,
                         ]:
                             terminated_job.log_message(
-                                "%s: scan job has unexpectedly failed."
-                                % SCAN_MANAGER_LOG_PREFIX
+                                f"{SCAN_MANAGER_LOG_PREFIX}: scan job has unexpectedly failed."
                             )
                             terminated_job.fail(
                                 "Scan manager failed job " "due to unexpected error."
                             )
                         else:
                             terminated_job.log_message(
-                                "%s: scan job has completed." % SCAN_MANAGER_LOG_PREFIX
+                                f"{SCAN_MANAGER_LOG_PREFIX}: scan job has completed."
                             )
                     else:
                         self.current_job_runner.scan_job.log_message(

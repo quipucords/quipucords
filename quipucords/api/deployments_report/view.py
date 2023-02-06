@@ -66,8 +66,8 @@ def deployments(request, pk=None):
     if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response(
             {
-                "detail": "Deployment report %s could not be created."
-                "  See server logs." % report.details_report.id
+                "detail": f"Deployment report {report.details_report.id} could not be created."
+                "  See server logs."
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
@@ -75,10 +75,9 @@ def deployments(request, pk=None):
     if deployments_report:
         return Response(deployments_report)
     error = {
-        "detail": "Deployments report %s could not be masked. "
-        "Report version %s. "
-        "Rerun the scan to generate a masked deployments report."
-        % (report.id, report.report_version)
+        "detail": f"Deployments report {report.id} could not be masked."
+        f" Report version {report.report_version}."
+        " Rerun the scan to generate a masked deployments report."
     }
     return Response(error, status=status.HTTP_428_PRECONDITION_REQUIRED)
 

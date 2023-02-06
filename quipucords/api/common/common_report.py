@@ -63,7 +63,7 @@ def extract_tar_gz(file_like_obj):
     else:
         if not isinstance(file_like_obj, (bytes, bytearray)):
             return None
-        tar_name = "/tmp/api_tmp_%s.tar.gz" % time.strftime("%Y%m%d_%H%M%S")
+        tar_name = f"/tmp/api_tmp_{time.strftime('%Y%m%d_%H%M%S')}.tar.gz"
         with open(tar_name, "wb") as out_file:
             out_file.write(file_like_obj)
         tar = tarfile.open(tar_name)
@@ -85,9 +85,9 @@ def extract_tar_gz(file_like_obj):
 
 def create_filename(file_name, file_ext, report_id):
     """Create the filename."""
-    file_name = "report_id_%s/%s" % (report_id, file_name)
+    file_name = f"report_id_{report_id}/{file_name}"
     if file_ext:
-        file_name += ".%s" % file_ext
+        file_name += f".{file_ext}"
     return file_name
 
 

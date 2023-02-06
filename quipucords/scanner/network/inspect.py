@@ -208,10 +208,7 @@ class InspectTaskRunner(ScanTaskRunner):
         # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
             check_manager_interrupt(manager_interrupt.value)
-            log_message = "START INSPECT PROCESSING GROUP %d of %d" % (
-                (idx + 1),
-                len(group_names),
-            )
+            log_message = f"START INSPECT PROCESSING GROUP {(idx + 1):d} of {len(group_names):d}"
             self.scan_task.log_message(log_message)
             call = InspectResultCallback(self.scan_task, manager_interrupt)
 
@@ -226,9 +223,9 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             extra_vars["variable_host"] = group_name
             cmdline_list = []
-            vault_file_path = "--vault-password-file=%s" % (settings.DJANGO_SECRET_PATH)
+            vault_file_path = f"--vault-password-file={settings.DJANGO_SECRET_PATH}"
             cmdline_list.append(vault_file_path)
-            forks_cmd = "--forks=%s" % (forks)
+            forks_cmd = f"--forks={forks}"
             cmdline_list.append(forks_cmd)
             if use_paramiko:
                 cmdline_list.append("--connection=paramiko")
@@ -312,9 +309,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 nostatus.append(result.name)
 
         if bool(nostatus):
-            invalid_state_msg = "Results without a validate state: %s" % (
-                ", ".join(nostatus)
-            )
+            invalid_state_msg = f"Results without a validate state: {', '.join(nostatus)}"
             self.scan_task.log_message(invalid_state_msg, log_level=logging.ERROR)
 
         return connected, completed, failed, unreachable
