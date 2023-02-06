@@ -172,6 +172,11 @@ def collect_all_fact_names():
 
 
 @cache
+def get_fact_names():
+    """List fact names set on ansible rules."""
+    return list(sorted(collect_all_fact_names()))
+
+
 def raw_facts_template():
     """Results template for fact collection on network scans."""
-    return {fact_name: None for fact_name in sorted(collect_all_fact_names())}
+    return {fact_name: None for fact_name in get_fact_names()}
