@@ -25,7 +25,11 @@ class JobInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return "{ id:%s, task_results:%s }" % (self.id, self.task_results)
+        return (
+            "{"
+            f" id:{self.id}, task_results:{self.task_results} "
+            "}"
+        )
 
     class Meta:
         """Metadata for model."""
@@ -43,7 +47,12 @@ class TaskInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return "{ " + "id:{}, " "systems:{}, ".format(self.id, self.systems) + " }"
+        return (
+            "{"
+            f" id:{self.id}, systems:{self.systems}"
+            "}"
+        )
+
 
     class Meta:
         """Metadata for model."""
@@ -73,12 +82,14 @@ class SystemInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return "{ id:%s, name:%s, status:%s, facts:%s, source:%s }" % (
-            self.id,
-            self.name,
-            self.status,
-            self.facts,
-            self.source,
+        return (
+            "{"
+            f" id:{self.id},"
+            f" name:{self.name},"
+            f" status:{self.status},"
+            f" facts:{self.facts},"
+            f" source:{self.source} "
+            "}"
         )
 
     class Meta:
@@ -99,7 +110,14 @@ class RawFact(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return "{ id:%s, name:%s, value:%s }" % (self.id, self.name, self.value)
+        return (
+            "{"
+            f" id:{self.id},"
+            f" name:{self.name},"
+            f" value:{self.value} "
+            "}"
+        )
+
 
     class Meta:
         """Metadata for model."""

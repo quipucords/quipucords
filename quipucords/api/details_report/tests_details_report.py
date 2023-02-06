@@ -207,11 +207,16 @@ class DetailReportTest(TestCase):
         csv_result = renderer.render(
             test_json, renderer_context=self.mock_renderer_context
         )
-        # pylint: disable=line-too-long
         expected = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nip_addresses,mac_addresses,uname_hostname,vm.name\r\n[1.2.3.4],[1.2.3.5;2.4.5.6],foo,foo\r\n\r\n\r\n"
-            % (self.report_version, test_json.get("report_platform_id"), self.server_id)
-        )  # noqa
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},1\r\n\r\n\r\n"
+            "Source\r\n"
+            "Server Identifier,Source Name,Source Type\r\n"
+            f"{self.server_id},test_source,network\r\n"
+            "Facts\r\n"
+            "ip_addresses,mac_addresses,uname_hostname,vm.name\r\n"
+            "[1.2.3.4],[1.2.3.5;2.4.5.6],foo,foo\r\n\r\n\r\n"
+        )
         self.assertEqual(csv_result, expected)
 
         # Test cached works too
@@ -240,11 +245,17 @@ class DetailReportTest(TestCase):
         new_mock_req = MockRequest(mask_rep=True)
         new_renderer = {"request": new_mock_req}
         csv_result = renderer.render(test_json, renderer_context=new_renderer)
-        # pylint: disable=line-too-long
         expected = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nip_addresses,mac_addresses,uname_hostname,vm.name\r\n[-7334718598697473719],[-7048634151319043688;-3493454847440916718],-2457967226571033580,-2457967226571033580\r\n\r\n\r\n"
-            % (self.report_version, test_json.get("report_platform_id"), self.server_id)
-        )  # noqa
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},1\r\n\r\n\r\n"
+            "Source\r\n"
+            "Server Identifier,Source Name,Source Type\r\n"
+            f"{self.server_id},test_source,network\r\n"
+            "Facts\r\n"
+            "ip_addresses,mac_addresses,uname_hostname,vm.name\r\n"
+            "[-7334718598697473719],[-7048634151319043688;-3493454847440916718],"
+            "-2457967226571033580,-2457967226571033580\r\n\r\n\r\n"
+        )
         self.assertEqual(csv_result, expected)
 
         # Test cached works too for hashed
@@ -271,9 +282,9 @@ class DetailReportTest(TestCase):
             test_json, renderer_context=self.mock_renderer_context
         )
         expected = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,0\r\n"
-            % (self.report_version, test_json.get("report_platform_id"))
-        )  # noqa
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},0\r\n"
+        )
         self.assertEqual(csv_result, expected)
 
         # Clear cache
@@ -288,9 +299,9 @@ class DetailReportTest(TestCase):
             test_json, renderer_context=self.mock_renderer_context
         )
         expected = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,0\r\n\r\n\r\n"
-            % (self.report_version, test_json.get("report_platform_id"))
-        )  # noqa
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},0\r\n\r\n\r\n"
+        )
         self.assertEqual(csv_result, expected)
 
         # Clear cache
@@ -304,11 +315,14 @@ class DetailReportTest(TestCase):
         csv_result = renderer.render(
             test_json, renderer_context=self.mock_renderer_context
         )
-        # pylint: disable=line-too-long
         expected = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\n\r\n"
-            % (self.report_version, test_json.get("report_platform_id"), self.server_id)
-        )  # noqa
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},1\r\n\r\n\r\n"
+            "Source\r\n"
+            "Server Identifier,Source Name,Source Type\r\n"
+            f"{self.server_id},test_source,network\r\n"
+            "Facts\r\n\r\n"
+        )
         self.assertEqual(csv_result, expected)
 
     ##############################################################

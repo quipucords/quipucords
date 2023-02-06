@@ -100,7 +100,7 @@ class ConnectResultCallback:
             )
             if not authentication_error:
                 # failure is not authentication
-                message = "FAILED %s. %s" % (host, result_message)
+                message = f"FAILED {host}. {result_message}"
                 self.result_store.scan_task.log_message(
                     message, log_level=logging.ERROR
                 )
@@ -145,7 +145,7 @@ class ConnectResultCallback:
                 if unexpected_error:
                     self.result_store.scan_task.log_message(
                         log_messages.TASK_UNEXPECTED_FAILURE
-                        % ("runner_event", "Unknown State (%s)" % event, event_dict),
+                        % ("runner_event", f"Unknown State ({event})", event_dict),
                         log_level=logging.ERROR,
                     )
 

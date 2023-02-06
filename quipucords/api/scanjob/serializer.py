@@ -94,7 +94,7 @@ class ScanField(PrimaryKeyRelatedField):
         """Create display value."""
         display = instance
         if isinstance(instance, Scan):
-            display = "Scan: %s" % instance.name
+            display = f"Scan: {instance.name}"
         return display
 
 

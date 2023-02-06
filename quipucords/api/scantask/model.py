@@ -105,38 +105,23 @@ class ScanTask(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "job:{}, "
-            "scan_type:{}, "
-            "status:{}, "
-            "source:{}, "
-            "sequence_number:{}, "
-            "systems_count: {}, "
-            "systems_scanned: {}, "
-            "systems_failed: {}, "
-            "systems_unreachable: {}, "
-            "start_time: {} "
-            "end_time: {}, "
-            "connection_result: {}, "
-            "inspection_result: {}, "
-            "details_report: {}".format(
-                self.id,
-                self.job_id,
-                self.scan_type,
-                self.status,
-                self.source_id,
-                self.sequence_number,
-                self.systems_count,
-                self.systems_scanned,
-                self.systems_failed,
-                self.systems_unreachable,
-                self.start_time,
-                self.end_time,
-                self.connection_result_id,
-                self.inspection_result_id,
-                self.details_report_id,
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" job:{self.job_id},"
+            f" scan_type:{self.scan_type},"
+            f" status:{self.status},"
+            f" source:{self.source_id},"
+            f" sequence_number:{self.sequence_number},"
+            f" systems_count: {self.systems_count},"
+            f" systems_scanned: {self.systems_scanned},"
+            f" systems_failed: {self.systems_failed},"
+            f" systems_unreachable: {self.systems_unreachable},"
+            f" start_time: {self.start_time}"
+            f" end_time: {self.end_time},"
+            f" connection_result: {self.connection_result_id},"
+            f" inspection_result: {self.inspection_result_id},"
+            f" details_report: {self.details_report_id}"
+            "}"
         )
 
     class Meta:
@@ -150,12 +135,12 @@ class ScanTask(models.Model):
     def log_current_status(self, show_status_message=False, log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            message = "STATE UPDATE (%s).  " "Additional status information: %s" % (
-                self.status,
-                self.status_message,
-            )
+            message = (
+                          f"STATE UPDATE ({self.status})."
+                          f"  Additional status information: {self.status_message}"
+                      )
         else:
-            message = "STATE UPDATE (%s)" % (self.status)
+            message = f"STATE UPDATE ({self.status})"
         self.log_message(message, log_level=log_level)
 
     # fingerprint task type
@@ -182,9 +167,11 @@ class ScanTask(models.Model):
         if sys_unreachable is None:
             sys_unreachable = 0
         message = (
-            "%s Stats: systems_count=%d,"
-            " systems_scanned=%d, systems_failed=%d, systems_unreachable=%d"
-            % (prefix, sys_count, sys_scanned, sys_failed, sys_unreachable)
+            f"{prefix} Stats:"
+            f" systems_count={sys_count},"
+            f" systems_scanned={sys_scanned},"
+            f" systems_failed={sys_failed},"
+            f" systems_unreachable={sys_unreachable}"
         )
         self.log_message(message)
 
@@ -199,10 +186,10 @@ class ScanTask(models.Model):
                 system_fingerprint_count = (
                     self.details_report.deployment_report.system_fingerprints.count()
                 )
-        message = "%s Stats: system_fingerprint_count=%d," % (
-            prefix,
-            system_fingerprint_count,
-        )
+        message = (
+                    f"{prefix} Stats:"
+                    f" system_fingerprint_count={system_fingerprint_count}"
+                  )
         self.log_message(message)
 
     # All task types
@@ -226,28 +213,18 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         # pylint: disable=no-member
         if static_options is not None:
-            actual_message = "Job %d, Task %d of %d (%s, %s, %s) - " % (
-                static_options["job_id"],
-                static_options["task_sequence_number"],
-                self.scan_job_task_count,
-                static_options["scan_type"],
-                static_options["source_type"],
-                static_options["source_name"],
+            actual_message = (
+                f"Job {self.job_id:d},"
+                f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
+                f" ({self.scan_type}, {self.source.source_type}, {self.source.name}) - "
             )
         else:
             elapsed_time = self._compute_elapsed_time()
             actual_message = (
-                "Job %d, Task %d of %d "
-                "(%s, %s, %s, elapsed_time: %ds) - "
-                % (
-                    self.job.id,
-                    self.sequence_number,
-                    self.scan_job_task_count,
-                    self.scan_type,
-                    self.source.source_type,
-                    self.source.name,
-                    elapsed_time,
-                )
+                f"Job {self.job_id:d},"
+                f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
+                f" ({self.scan_type}, {self.source.source_type}, {self.source.name},"
+                f" elapsed_time: {elapsed_time:d}s) - "
             )
         actual_message += message.strip()
         logger.log(log_level, actual_message)
@@ -261,8 +238,8 @@ class ScanTask(models.Model):
         if self.details_report:
             details_report_id = self.details_report.id
         actual_message = (
-            "Job %d, Task %d of %d "
-            "(%s, details_report=%s, elapsed_time: %ds) - "
+            f"Job %d, Task %d of %d "
+            f"(%s, details_report=%s, elapsed_time: %ds) - "
             % (
                 self.job.id,
                 self.sequence_number,
@@ -386,7 +363,7 @@ class ScanTask(models.Model):
             else:
                 sys_unreachable = self.systems_unreachable
             sys_unreachable += 1
-        stat_string = "%s %s." % (prefix, name)
+        stat_string = f"{prefix} {name}."
         self.update_stats(
             stat_string,
             sys_count=sys_count,

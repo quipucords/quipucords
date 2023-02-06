@@ -1447,14 +1447,14 @@ class ScanJobTest(TestCase):
         initial = self.create_job_expect_201(self.connect_scan.id)
 
         url = reverse("scanjob-detail", args=(initial["id"],))
-        pause_url = "{}pause/".format(url)
+        pause_url = f"{url}pause/"
         response = self.client.put(pause_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_pause_bad_id(self):
         """Pause a scanjob with bad id."""
         url = reverse("scanjob-detail", args=("string",))
-        pause_url = "{}pause/".format(url)
+        pause_url = f"{url}pause/"
         response = self.client.put(pause_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -1464,14 +1464,14 @@ class ScanJobTest(TestCase):
         initial = self.create_job_expect_201(self.connect_scan.id)
 
         url = reverse("scanjob-detail", args=(initial["id"],))
-        pause_url = "{}cancel/".format(url)
+        pause_url = f"{url}cancel/"
         response = self.client.put(pause_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_cancel_bad_id(self):
         """Cancel a scanjob with bad id."""
         url = reverse("scanjob-detail", args=("string",))
-        pause_url = "{}cancel/".format(url)
+        pause_url = f"{url}cancel/"
         response = self.client.put(pause_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -1481,14 +1481,14 @@ class ScanJobTest(TestCase):
         initial = self.create_job_expect_201(self.connect_scan.id)
 
         url = reverse("scanjob-detail", args=(initial["id"],))
-        pause_url = "{}restart/".format(url)
+        pause_url = f"{url}restart/"
         response = self.client.put(pause_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_restart_bad_id(self):
         """Restart a scanjob with bad id."""
         url = reverse("scanjob-detail", args=("string",))
-        pause_url = "{}restart/".format(url)
+        pause_url = f"{url}restart/"
         response = self.client.put(pause_url, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

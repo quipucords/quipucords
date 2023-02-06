@@ -77,8 +77,8 @@ def reports(request, pk=None):
         deployments_id = deployments_data.details_report.id
         return Response(
             {
-                "detail": "Deployment report %s could not be created."
-                "  See server logs." % deployments_id
+                "detail": f"Deployment report {deployments_id} could not be created."
+                "  See server logs."
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
@@ -87,7 +87,7 @@ def reports(request, pk=None):
         reports_dict["deployments_json"] = deployments_report
         return Response(reports_dict)
     error = {
-        "detail": "Deployments report %s could not be masked. "
-        "Rerun the scan to generate a masked deployments report." % (pk)
+        "detail": f"Deployments report {pk} could not be masked."
+        " Rerun the scan to generate a masked deployments report."
     }
     return Response(error, status=status.HTTP_428_PRECONDITION_REQUIRED)

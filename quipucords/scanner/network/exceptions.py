@@ -31,5 +31,5 @@ class ScannerException(Exception):
         :param message: An error message describing the problem encountered
         during scan.
         """
-        self.message = "Scan task failed.  Error: {}".format(message)
+        self.message = f"Scan task failed.  Error: {message}"
         super().__init__(self.message)

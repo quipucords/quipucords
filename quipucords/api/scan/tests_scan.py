@@ -60,8 +60,8 @@ class ScanTest(TestCase):
         response_json = response.json()
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print("Cause of failure: ")
-            print("expected: %s" % expected_response)
-            print("actual: %s" % response_json)
+            print(f"expected: {expected_response}")
+            print(f"actual: {response_json}")
 
         self.assertEqual(response_json, expected_response)
 

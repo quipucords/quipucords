@@ -43,21 +43,14 @@ class ExtendedProductSearchOptions(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "jboss_eap: {}, "
-            "jboss_fuse: {}, "
-            "jboss_brms: {}, "
-            "jboss_ws: {}, "
-            "search_directories:"
-            " {}".format(
-                self.id,
-                self.jboss_eap,
-                self.jboss_fuse,
-                self.jboss_brms,
-                self.jboss_ws,
-                self.get_search_directories(),
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" jboss_eap: {self.jboss_eap},"
+            f" jboss_fuse: {self.jboss_fuse},"
+            f" jboss_brms: {self.jboss_brms},"
+            f" jboss_ws: {self.jboss_ws},"
+            f" search_directories: {self.get_search_directories()}"
+            "}"
         )
 
     def get_search_directories(self):
@@ -88,19 +81,16 @@ class DisabledOptionalProductsOptions(models.Model):
     jboss_brms = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_BRMS)
     jboss_ws = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_WS)
 
-    # pylint: disable=too-many-format-args
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "jboss_eap: {}, "
-            "jboss_fuse: {}, "
-            "jboss_brms: {}"
-            "jboss_ws:"
-            " {}".format(
-                self.id, self.jboss_eap, self.jboss_fuse, self.jboss_brms, self.jboss_ws
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" jboss_eap: {self.jboss_eap},"
+            f" jboss_fuse: {self.jboss_fuse},"
+            f" jboss_brms: {self.jboss_brms},"
+            f" jboss_ws: {self.jboss_ws}"
+            "}"
         )
 
 
@@ -129,17 +119,12 @@ class ScanOptions(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "max_concurrency: {}, "
-            "disabled_optional_products: {}, "
-            "enabled_extended_product_search:"
-            " {}".format(
-                self.id,
-                self.max_concurrency,
-                self.disabled_optional_products,
-                self.enabled_extended_product_search,
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" max_concurrency: {self.max_concurrency},"
+            f" disabled_optional_products: {self.disabled_optional_products},"
+            f" enabled_extended_product_search: {self.enabled_extended_product_search}"
+            "}"
         )
 
     @staticmethod
@@ -234,14 +219,13 @@ class Scan(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "name:{}, "
-            "sources:{}, "
-            "scan_type:{}, "
-            "options: {}".format(
-                self.id, self.name, self.sources, self.scan_type, self.options
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" name:{self.name},"
+            f" sources:{self.sources},"
+            f" scan_type:{self.scan_type},"
+            f" options: {self.options}"
+            "}"
         )
 
     class Meta:

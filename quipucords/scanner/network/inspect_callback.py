@@ -76,7 +76,7 @@ class InspectResultCallback:
         task = event_data.get("task")
         # Print Role started for each host
         if task_action == "set_fact" and task == STARTED_PROCESSING_ROLE:
-            log_message = "PROCESSING %s - ANSIBLE ROLE %s" % (host, self.last_role)
+            log_message = f"PROCESSING {host} - ANSIBLE ROLE {self.last_role}"
             self.scan_task.log_message(log_message)
         task_facts = result.get("ansible_facts")
         if task_facts:
@@ -134,8 +134,8 @@ class InspectResultCallback:
                 if not fact_key.startswith(INTERNAL_)
             }
         self.scan_task.log_message(
-            "host scan complete for %s.  "
-            "Status: %s. Facts %s" % (host, host_status, results),
+            f"host scan complete for {host}.  "
+            f"Status: {host_status}. Facts {results}",
             log_level=logging.DEBUG,
         )
 
@@ -176,7 +176,7 @@ class InspectResultCallback:
         result_message = event_data.get(
             "msg", "No information given on unreachable warning."
         )
-        message = "UNREACHABLE %s. %s" % (host, result_message)
+        message = f"UNREACHABLE {host}. {result_message}"
         self.scan_task.log_message(message, log_level=logging.ERROR)
         self._finalize_host(host, SystemInspectionResult.UNREACHABLE)
 
