@@ -85,8 +85,10 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
                 raise ValidationError(
                     _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
                 )
-        except json_exception_class:
-            raise ValidationError(_(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST))
+        except json_exception_class as exception:
+            raise ValidationError(
+                _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+            ) from exception
         return search_directories
 
 

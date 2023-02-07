@@ -217,7 +217,7 @@ class InspectResultCallback:
                         if event_role != self.last_role:
                             self.last_role = event_role
         except Exception as err_msg:
-            raise AnsibleRunnerException(err_msg)
+            raise AnsibleRunnerException(err_msg) from err_msg
 
     def cancel_callback(self):
         """Control the cancel callback for runner."""

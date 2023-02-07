@@ -27,12 +27,12 @@ if __name__ == "__main__":
         # exceptions on Python 2.
         try:
             import django  # noqa: F401 pylint: disable=unused-import
-        except ImportError:
+        except ImportError as exception:
             raise ImportError(
                 "Couldn't import Django. Are you sure it's "  # noqa: Q000
                 "installed and available on your PYTHONPATH "  # noqa: Q000
                 "environment variable? Did you "  # noqa: Q000
                 "forget to activate a virtual environment?"  # noqa: Q000
-            )
+            ) from exception
         raise
     execute_from_command_line(sys.argv)

@@ -241,5 +241,5 @@ class SourceViewSet(ModelViewSet):
             source.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        except Source.DoesNotExist:
-            raise Http404
+        except Source.DoesNotExist as exception:
+            raise Http404 from exception

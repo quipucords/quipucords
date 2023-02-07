@@ -306,5 +306,5 @@ class ScanViewSet(ModelViewSet):
             logger.info("Deleting scan %s", pk)
             scan.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Scan.DoesNotExist:
-            raise Http404
+        except Scan.DoesNotExist as exception:
+            raise Http404 from exception
