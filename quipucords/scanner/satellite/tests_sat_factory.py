@@ -46,7 +46,6 @@ class SatelliteFactoryTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_create_sat_none(self):
         """Test the method to fail to create a Sat interface."""

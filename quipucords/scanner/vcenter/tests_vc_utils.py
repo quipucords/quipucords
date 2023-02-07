@@ -47,7 +47,6 @@ class VCenterUtilsTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_vcenter_connect(self):
         """Test the connection method."""

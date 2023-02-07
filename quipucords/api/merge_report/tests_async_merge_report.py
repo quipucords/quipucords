@@ -26,7 +26,6 @@ from scanner.test_util import create_scan_job
 
 def dummy_start():
     """Create a dummy method for testing."""
-    pass
 
 
 class AsyncMergeReports(TestCase):

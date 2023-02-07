@@ -22,7 +22,6 @@ from api.serializers import ScanTaskSerializer
 
 def dummy_start():
     """Create a dummy method for testing."""
-    pass
 
 
 # pylint: disable=unused-argument

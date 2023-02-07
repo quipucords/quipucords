@@ -29,7 +29,6 @@ from scanner.test_util import create_scan_job
 
 def dummy_start():
     """Create a dummy method for testing."""
-    pass
 
 
 # pylint: disable=too-many-instance-attributes,invalid-name,R0904,C0302

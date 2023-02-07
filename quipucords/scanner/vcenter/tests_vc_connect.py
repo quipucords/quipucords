@@ -63,7 +63,6 @@ class ConnectTaskRunnerTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_store_connect_data(self):
         """Test the connection data method."""

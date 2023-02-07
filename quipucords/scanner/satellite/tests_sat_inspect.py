@@ -74,7 +74,6 @@ class InspectTaskRunnerTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def create_scan_job(self):
         """Create scan job for tests."""

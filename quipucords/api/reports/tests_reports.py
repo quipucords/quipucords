@@ -58,7 +58,6 @@ class ReportsTest(TestCase):
 
     def tearDown(self):
         """Create test case tearDown."""
-        pass
 
     def create_details_report(self, data):
         """Call the create endpoint."""

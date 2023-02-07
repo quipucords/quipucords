@@ -103,7 +103,6 @@ class SatelliteSixV1Test(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_get_orgs(self):
         """Test the method to get orgs."""
@@ -561,7 +560,6 @@ class SatelliteSixV2Test(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_host_count(self):
         """Test the method host_count."""

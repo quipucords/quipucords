@@ -72,7 +72,6 @@ class SatelliteUtilsTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_get_credential(self):
         """Test the method to extract credential."""

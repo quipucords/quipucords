@@ -117,12 +117,9 @@ class SatelliteInterface:
 
     def host_count(self):
         """Obtain the count of managed hosts."""
-        pass
 
     def hosts(self):
         """Obtain the managed hosts."""
-        pass
 
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
-        pass
