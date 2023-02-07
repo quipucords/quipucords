@@ -43,7 +43,6 @@ from scanner.test_util import create_scan_job, create_scan_job_two_tasks
 
 def dummy_start():
     """Create a dummy method for testing."""
-    pass
 
 
 class ScanJobTest(TestCase):

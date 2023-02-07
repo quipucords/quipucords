@@ -42,7 +42,6 @@ def post_fork(server, worker):
 
 def pre_fork(server, worker):
     """Before fork logging."""
-    pass
 
 
 def pre_exec(server):

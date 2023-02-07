@@ -65,7 +65,6 @@ class InspectTaskRunnerTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_get_nics(self):
         """Test the get_nics method."""

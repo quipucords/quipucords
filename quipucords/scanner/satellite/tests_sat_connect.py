@@ -75,7 +75,6 @@ class ConnectTaskRunnerTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_run_unknown_sat(self):
         """Test the running connect task for unknown sat version."""
