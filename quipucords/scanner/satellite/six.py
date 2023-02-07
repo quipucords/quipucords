@@ -341,7 +341,8 @@ def request_host_details(
                 scan_task.log_message(message, logging.WARN, logging_options)
         elif host_subscriptions_response.status_code != requests.codes.ok:
             raise SatelliteException(
-                f"Invalid response code {host_subscriptions_response.status_code} for url: {host_subscriptions_url}"
+                f"Invalid response code {host_subscriptions_response.status_code}"
+                f" for url: {host_subscriptions_url}"
             )
         system_inspection_result = SystemInspectionResult.SUCCESS
         host_fields_json = host_fields_response.json()

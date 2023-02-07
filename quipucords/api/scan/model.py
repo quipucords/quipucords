@@ -138,11 +138,13 @@ class ScanOptions(models.Model):
 
         :returns: a dictionary representing extra vars
         """
+        # black likes it this way, but we cross the line length limit,
+        # so adding the noqa E501 for keeping pycodestyle happy.
         defaults = {
-            ScanOptions.JBOSS_EAP: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_EAP,
-            ScanOptions.JBOSS_FUSE: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_FUSE,
-            ScanOptions.JBOSS_BRMS: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_BRMS,
-            ScanOptions.JBOSS_WS: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_WS,
+            ScanOptions.JBOSS_EAP: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_EAP,  # noqa: E501
+            ScanOptions.JBOSS_FUSE: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_FUSE,  # noqa: E501
+            ScanOptions.JBOSS_BRMS: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_BRMS,  # noqa: E501
+            ScanOptions.JBOSS_WS: DisabledOptionalProductsOptions.EXTRA_VAR_OPT_JBOSS_WS,  # noqa: E501
             ScanOptions.JBOSS_EAP_EXT: ExtendedProductSearchOptions.EXT_JBOSS_EAP,
             ScanOptions.JBOSS_FUSE_EXT: ExtendedProductSearchOptions.EXT_JBOSS_FUSE,
             ScanOptions.JBOSS_BRMS_EXT: ExtendedProductSearchOptions.EXT_JBOSS_BRMS,

@@ -74,7 +74,7 @@ class InsightsReportTest(TestCase):
                             "bios_uuid": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
                             "ip_addresses": ["10.10.181.116"],
                             "mac_addresses": ["00:50:56:9e:7b:19"],
-                            "subscription_manager_id": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
+                            "subscription_manager_id": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",  # noqa: E501
                             "name": "dhcp181-116.gsslab.rdu2.redhat.com",
                             "os_release": "Red Hat Enterprise Linux \
                                 Server release 5.9 (Tikanga)",

@@ -209,7 +209,8 @@ class DetailReportTest(TestCase):
         )
         expected = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
-            f"1,details,{self.report_version},{test_json.get('report_platform_id')},1\r\n\r\n\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
+            "1\r\n\r\n\r\n"
             "Source\r\n"
             "Server Identifier,Source Name,Source Type\r\n"
             f"{self.server_id},test_source,network\r\n"
@@ -247,7 +248,8 @@ class DetailReportTest(TestCase):
         csv_result = renderer.render(test_json, renderer_context=new_renderer)
         expected = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
-            f"1,details,{self.report_version},{test_json.get('report_platform_id')},1\r\n\r\n\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
+            "1\r\n\r\n\r\n"
             "Source\r\n"
             "Server Identifier,Source Name,Source Type\r\n"
             f"{self.server_id},test_source,network\r\n"
@@ -283,7 +285,8 @@ class DetailReportTest(TestCase):
         )
         expected = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
-            f"1,details,{self.report_version},{test_json.get('report_platform_id')},0\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
+            "0\r\n"
         )
         self.assertEqual(csv_result, expected)
 
@@ -300,7 +303,8 @@ class DetailReportTest(TestCase):
         )
         expected = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
-            f"1,details,{self.report_version},{test_json.get('report_platform_id')},0\r\n\r\n\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
+            "0\r\n\r\n\r\n"
         )
         self.assertEqual(csv_result, expected)
 
@@ -317,7 +321,8 @@ class DetailReportTest(TestCase):
         )
         expected = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
-            f"1,details,{self.report_version},{test_json.get('report_platform_id')},1\r\n\r\n\r\n"
+            f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
+            "1\r\n\r\n\r\n"
             "Source\r\n"
             "Server Identifier,Source Name,Source Type\r\n"
             f"{self.server_id},test_source,network\r\n"

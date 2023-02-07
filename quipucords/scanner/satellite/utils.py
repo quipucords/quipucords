@@ -220,7 +220,8 @@ def _status6(scan_task):
     else:
         err_msg = (
             "Failure while attempting Satellite 6"
-            f" status check at {url} for task {scan_task.id} with status code {status_code}."
+            f" status check at {url} for task {scan_task.id}"
+            f" with status code {status_code}."
         )
         raise SatelliteException(err_msg)
     return (status_code, api_version, SATELLITE_VERSION_6)
