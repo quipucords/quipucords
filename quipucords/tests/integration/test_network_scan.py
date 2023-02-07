@@ -382,12 +382,12 @@ class TestNetworkScan:
         assert isinstance(report_details_facts, dict)
         assert set(report_details_facts.keys()) == expected_network_scan_facts
 
-        some_expected_facts = dict(
-            etc_release_name="Red Hat Enterprise Linux",
-            redhat_packages_gpg_is_redhat=True,
-            date_machine_id=datetime.utcnow().date().isoformat(),
-            user_has_sudo=True,
-        )
+        some_expected_facts = {
+            "etc_release_name": "Red Hat Enterprise Linux",
+            "redhat_packages_gpg_is_redhat": True,
+            "date_machine_id": datetime.utcnow().date().isoformat(),
+            "user_has_sudo": True,
+        }
         assert report_details_facts | some_expected_facts == report_details_facts
 
     @pytest.fixture
@@ -399,13 +399,13 @@ class TestNetworkScan:
         """
         metadata = {}
         for fingerprint_fact, raw_fact in fingerprint_fact_map.items():
-            metadata[fingerprint_fact] = dict(
-                server_id=mock.ANY,
-                source_name=self.SOURCE_NAME,
-                source_type=self.SOURCE_TYPE,
-                raw_fact_key=RawFactComparator(raw_fact),
-                has_sudo=True,
-            )
+            metadata[fingerprint_fact] = {
+                "server_id": mock.ANY,
+                "source_name": self.SOURCE_NAME,
+                "source_type": self.SOURCE_TYPE,
+                "raw_fact_key": RawFactComparator(raw_fact),
+                "has_sudo": True,
+            }
         return metadata
 
     def test_deployments_report(  # pylint: disable=too-many-arguments

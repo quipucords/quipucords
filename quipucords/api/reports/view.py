@@ -56,7 +56,7 @@ else:
 @renderer_classes((ReportsGzipRenderer,))
 def reports(request, pk=None):
     """Lookup and return reports."""
-    reports_dict = dict()
+    reports_dict = {}
     mask_report = request.query_params.get("mask", False)
     if pk is not None:
         if not is_int(pk):
