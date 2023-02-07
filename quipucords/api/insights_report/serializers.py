@@ -22,7 +22,7 @@ from api.common.serializer import NotEmptyMixin
 from api.status import get_server_id
 from quipucords.environment import server_version
 
-default_kwargs = dict(required=False)
+default_kwargs = {"required": False}
 
 # pylint: disable=abstract-method,fixme
 # Serializer has update/create as pseudo-abstract methods we don't need to implement

@@ -276,13 +276,13 @@ class TestOpenShiftScan:
         """
         metadata = {}
         for fingerprint_fact, raw_fact in fingerprint_fact_map.items():
-            metadata[fingerprint_fact] = dict(
-                server_id=mock.ANY,
-                source_name=self.SOURCE_NAME,
-                source_type=self.SOURCE_TYPE,
-                raw_fact_key=RawFactComparator(raw_fact),
-                has_sudo=False,
-            )
+            metadata[fingerprint_fact] = {
+                "server_id": mock.ANY,
+                "source_name": self.SOURCE_NAME,
+                "source_type": self.SOURCE_TYPE,
+                "raw_fact_key": RawFactComparator(raw_fact),
+                "has_sudo": False,
+            }
         return metadata
 
     def test_deployments_report(

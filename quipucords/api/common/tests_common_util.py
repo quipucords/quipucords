@@ -103,7 +103,7 @@ class CommonUtilTest(TestCase):
 
     def test_create_tar_buffer(self):
         """Test create_tar_buffer method."""
-        files_data = dict()
+        files_data = {}
         files_data["test0.json"] = {"id": 1, "report": [{"key": "value"}]}
         files_data["test1.json"] = {"id": 2, "report": [{"key": "value"}]}
         tar_buffer = create_tar_buffer(files_data)
@@ -135,7 +135,7 @@ class CommonUtilTest(TestCase):
 
     def test_extract_tar_gz_content_good(self):
         """Test extracting files by passing a BytesIO object."""
-        files_data = dict()
+        files_data = {}
         files_data["test0.json"] = {"id": 1, "report": [{"key": "value"}]}
         files_data["test1.json"] = {"id": 2, "report": [{"key": "value"}]}
         tar_buffer = create_tar_buffer(files_data)
