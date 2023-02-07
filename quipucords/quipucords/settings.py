@@ -72,7 +72,7 @@ def create_random_key():
 QPC_SSH_CONNECT_TIMEOUT = os.environ.get("QPC_SSH_CONNECT_TIMEOUT", "60")
 if not is_int(QPC_SSH_CONNECT_TIMEOUT):
     logger.error(
-        'QPC_SSH_CONNECT_TIMEOUT "%s" not an int.' "Setting to default of 60.",
+        'QPC_SSH_CONNECT_TIMEOUT "%s" not an int. Setting to default of 60.',
         QPC_SSH_CONNECT_TIMEOUT,
     )
     QPC_SSH_CONNECT_TIMEOUT = "60"
@@ -80,7 +80,7 @@ if not is_int(QPC_SSH_CONNECT_TIMEOUT):
 QPC_SSH_INSPECT_TIMEOUT = os.environ.get("QPC_SSH_INSPECT_TIMEOUT", "120")
 if not is_int(QPC_SSH_INSPECT_TIMEOUT):
     logger.error(
-        'QPC_SSH_INSPECT_TIMEOUT "%s" not an int.' "Setting to default of 120.",
+        'QPC_SSH_INSPECT_TIMEOUT "%s" not an int. Setting to default of 120.',
         QPC_SSH_INSPECT_TIMEOUT,
     )
     QPC_SSH_INSPECT_TIMEOUT = "120"
@@ -93,7 +93,7 @@ NETWORK_INSPECT_JOB_TIMEOUT = os.getenv(
 )  # 3 hours
 if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
     logger.error(
-        'NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int.' "Setting to default of 10800.",
+        'NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int. Setting to default of 10800.',
         NETWORK_INSPECT_JOB_TIMEOUT,
     )
     NETWORK_INSPECT_JOB_TIMEOUT = "10800"
@@ -103,7 +103,7 @@ NETWORK_CONNECT_JOB_TIMEOUT = os.getenv(
 )  # 10 minutes
 if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
     logger.error(
-        'NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int.' "Setting to default of 600.",
+        'NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int. Setting to default of 600.',
         NETWORK_CONNECT_JOB_TIMEOUT,
     )
     NETWORK_CONNECT_JOB_TIMEOUT = "600"
@@ -114,7 +114,7 @@ QPC_INSPECT_TASK_TIMEOUT = int(os.getenv("QPC_INSPECT_TASK_TIMEOUT", "600"))
 ANSIBLE_LOG_LEVEL = os.getenv("ANSIBLE_LOG_LEVEL", "0")
 if not is_int(ANSIBLE_LOG_LEVEL):
     logger.error(
-        'ANSIBLE_LOG_LEVEL "%s" not an int.' "Setting to default of 0.",
+        'ANSIBLE_LOG_LEVEL "%s" not an int. Setting to default of 0.',
         ANSIBLE_LOG_LEVEL,
     )
     ANSIBLE_LOG_LEVEL = "0"
@@ -306,7 +306,7 @@ DJANGO_LOGGING_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
 QUIPUCORDS_LOGGING_LEVEL = os.getenv("QUIPUCORDS_LOG_LEVEL", "INFO")
 LOGGING_HANDLERS = os.getenv("DJANGO_LOG_HANDLERS", "console").split(",")
 VERBOSE_FORMATTING = (
-    "%(levelname)s %(asctime)s %(module)s " "%(process)d %(thread)d %(message)s"
+    "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
 )
 
 # pylint: disable=invalid-envvar-default

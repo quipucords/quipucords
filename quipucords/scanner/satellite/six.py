@@ -78,7 +78,7 @@ ENTITLEMENTS = "entitlements"
 
 ORGS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations"
 HOSTS_V1_URL = (
-    "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+    "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
 )
 HOSTS_FIELDS_V1_URL = (
     "https://{sat_host}:{port}/katello/api"
@@ -90,7 +90,7 @@ HOSTS_SUBS_V1_URL = (
 )
 HOSTS_V2_URL = "https://{sat_host}:{port}/api/v2/hosts"
 HOSTS_FIELDS_V2_URL = "https://{sat_host}:{port}/api/v2/hosts/{host_id}"
-HOSTS_SUBS_V2_URL = "https://{sat_host}:{port}/" "api/v2/hosts/{host_id}/subscriptions"
+HOSTS_SUBS_V2_URL = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
 
 QUERY_PARAMS_FIELDS = {"fields": "full"}
 

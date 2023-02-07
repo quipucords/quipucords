@@ -85,7 +85,7 @@ class TestProcessKarafInitFiles(unittest.TestCase):
             self.assertEqual(
                 processor.process(
                     ansible_result(
-                        "  foo\n  " "sys-fs-fuse-connections.mount\n  " "baz fuse"
+                        "  foo\n  sys-fs-fuse-connections.mount\n  baz fuse"
                     )
                 ),
                 expected,
