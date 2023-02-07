@@ -131,3 +131,20 @@
   set_fact:
     subman_consumed: "{{internal_subman_consumed}}"
   ignore_errors: yes
+
+#  subscription_manager_id fact
+- name: gather subscription_manager_id fact
+  raw: |
+    subscription-manager identity 2>/dev/null | 
+    grep 'system identity:' |
+    sed 's/system identity:\s*//'
+  register: internal_subscription_manager_id_cmd
+  ignore_errors: yes
+  become: yes
+  when: 'user_has_sudo and internal_have_subscription_manager'
+
+- name: extract result value for subscription_manager_id
+  set_fact:
+    subscription_manager_id: "{{ internal_subscription_manager_id_cmd['stdout'] | trim | default(None) }}"
+  ignore_errors: yes
+  when: '"stdout" in internal_subscription_manager_id_cmd'
