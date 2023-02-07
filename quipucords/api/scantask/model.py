@@ -136,9 +136,9 @@ class ScanTask(models.Model):
         """Log current status of task."""
         if show_status_message:
             message = (
-                          f"STATE UPDATE ({self.status})."
-                          f"  Additional status information: {self.status_message}"
-                      )
+                f"STATE UPDATE ({self.status})."
+                f"  Additional status information: {self.status_message}"
+            )
         else:
             message = f"STATE UPDATE ({self.status})"
         self.log_message(message, log_level=log_level)
@@ -186,10 +186,7 @@ class ScanTask(models.Model):
                 system_fingerprint_count = (
                     self.details_report.deployment_report.system_fingerprints.count()
                 )
-        message = (
-                    f"{prefix} Stats:"
-                    f" system_fingerprint_count={system_fingerprint_count}"
-                  )
+        message = f"{prefix} Stats: system_fingerprint_count={system_fingerprint_count}"
         self.log_message(message)
 
     # All task types
@@ -238,16 +235,10 @@ class ScanTask(models.Model):
         if self.details_report:
             details_report_id = self.details_report.id
         actual_message = (
-            f"Job %d, Task %d of %d "
-            f"(%s, details_report=%s, elapsed_time: %ds) - "
-            % (
-                self.job.id,
-                self.sequence_number,
-                self.scan_job_task_count,
-                self.scan_type,
-                details_report_id,
-                elapsed_time,
-            )
+            f"Job {self.job.id:d},"
+            f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
+            f" ({self.scan_type}, details_report={details_report_id},"
+            f" elapsed_time: {elapsed_time:d}s) - "
         )
         actual_message += message.strip()
         logger.log(log_level, actual_message)

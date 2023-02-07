@@ -77,9 +77,7 @@ ENTITLEMENT_TYPE = "type"
 ENTITLEMENTS = "entitlements"
 
 ORGS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations"
-HOSTS_V1_URL = (
-    "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
-)
+HOSTS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
 HOSTS_FIELDS_V1_URL = (
     "https://{sat_host}:{port}/katello/api"
     "/v2/organizations/{org_id}/systems/{host_id}"
@@ -423,8 +421,7 @@ class SatelliteSixV1(SatelliteInterface):
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
-                    f"Invalid response code {response.status_code}"
-                    f" for url: {url}"
+                    f"Invalid response code {response.status_code} for url: {url}"
                 )
             jsonresult = response.json()
             for result in jsonresult.get(RESULTS, []):
@@ -449,8 +446,7 @@ class SatelliteSixV1(SatelliteInterface):
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
-                    f"Invalid response code {response.status_code}"
-                    f" for url: {url}"
+                    f"Invalid response code {response.status_code} for url: {url}"
                 )
             systems_count += response.json().get("total", 0)
             self.connect_scan_task.update_stats(
@@ -643,8 +639,7 @@ class SatelliteSixV2(SatelliteInterface):
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
-                    f"Invalid response code {response.status_code}"
-                    f" for url: {url}"
+                    f"Invalid response code {response.status_code} for url: {url}"
                 )
             jsonresult = response.json()
             for result in jsonresult.get(RESULTS, []):

@@ -306,8 +306,4 @@ class ScanJobRunner(Process):
 
     def __str__(self):
         """Convert to string."""
-        return (
-            "{"
-            f"scan_job:{self.scan_job.id}, "
-            "}"
-        )
+        return "{" f"scan_job:{self.scan_job.id}, " "}"
