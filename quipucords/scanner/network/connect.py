@@ -299,7 +299,7 @@ def _connect(  # pylint: disable=too-many-arguments
                 verbosity=verbosity_lvl,
             )
         except Exception as err_msg:
-            raise AnsibleRunnerException(err_msg)
+            raise AnsibleRunnerException(err_msg) from err_msg
 
         final_status = runner_obj.status
         if final_status != "successful":

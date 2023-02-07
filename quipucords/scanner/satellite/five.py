@@ -130,7 +130,7 @@ class SatelliteFive(SatelliteInterface):
             systems_count = len(systems)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
         self.connect_scan_task.update_stats(
             "INITIAL STATELLITE STATS", sys_count=systems_count
         )
@@ -156,7 +156,7 @@ class SatelliteFive(SatelliteInterface):
                     self.record_conn_result(unique_name, credential)
 
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         return hosts
 
@@ -320,7 +320,7 @@ class SatelliteFive(SatelliteInterface):
             virt_guests = client.system.list_virtual_guests(key, virtual_host_id)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         for guest in virt_guests:
             virt_id = guest.get(ID)
@@ -353,7 +353,7 @@ class SatelliteFive(SatelliteInterface):
                 virtual_hosts[virt_host_id] = virtual_host
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         for virt_host in virt_hosts:
             virt_host_id = virt_host.get(ID)
@@ -386,7 +386,7 @@ class SatelliteFive(SatelliteInterface):
                     physical_hosts.append(host_id)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         return physical_hosts
 
@@ -410,7 +410,7 @@ class SatelliteFive(SatelliteInterface):
                 hosts_before_dedup = client.system.list_user_systems(key)
                 client.auth.logout(key)
             except xmlrpc.client.Fault as xml_error:
-                raise SatelliteException(str(xml_error))
+                raise SatelliteException(str(xml_error)) from xml_error
             virtual_hosts, virtual_guests = self.virtual_hosts()
             physical_hosts = self.physical_hosts()
             hosts_after_dedup = []

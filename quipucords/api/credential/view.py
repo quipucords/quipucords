@@ -188,5 +188,5 @@ class CredentialViewSet(ModelViewSet):
             cred.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        except Credential.DoesNotExist:
-            raise Http404
+        except Credential.DoesNotExist as exception:
+            raise Http404 from exception
