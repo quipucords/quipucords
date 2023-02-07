@@ -2,6 +2,7 @@
 
 import os
 
+# pylint: disable=invalid-name
 backlog = 2048
 
 workers = 1
@@ -29,6 +30,7 @@ raw_env = ["DJANGO_SETTINGS_MODULE=quipucords.settings"]
 keyfile = "../deploy/ssl/server.key"
 certfile = "../deploy/ssl/server.crt"
 proc_name = None
+# pylint: enable=invalid-name
 
 
 def post_fork(server, worker):
@@ -62,8 +64,8 @@ def worker_int(worker):
 
     id2name = dict([(th.ident, th.name) for th in threading.enumerate()])
     code = []
-    for threadId, stack in sys._current_frames().items():
-        code.append(f"\n# Thread: {id2name.get(threadId, '')}({threadId:d})")
+    for thread_id, stack in sys._current_frames().items():
+        code.append(f"\n# Thread: {id2name.get(thread_id, '')}({thread_id:d})")
         for filename, lineno, name, line in traceback.extract_stack(stack):
             code.append(f'File: "{filename}", line {lineno}, in {name}')
             if line:

@@ -2,6 +2,7 @@
 
 import os
 
+# pylint: disable=invalid-name
 bind = "0.0.0.0:443"
 backlog = 2048
 workers = 1
@@ -31,6 +32,7 @@ keyfile = "/etc/ssl/qpc/server.key"
 certfile = "/etc/ssl/qpc/server.crt"
 
 proc_name = None
+# pylint: enable=invalid-name
 
 
 def post_fork(server, worker):
@@ -64,8 +66,8 @@ def worker_int(worker):
 
     id2name = dict([(th.ident, th.name) for th in threading.enumerate()])
     code = []
-    for threadId, stack in sys._current_frames().items():
-        code.append(f"\n# Thread: {id2name.get(threadId, '')}({threadId})")
+    for thread_id, stack in sys._current_frames().items():
+        code.append(f"\n# Thread: {id2name.get(thread_id, '')}({thread_id})")
         for filename, lineno, name, line in traceback.extract_stack(stack):
             code.append(f'File: "{filename}", line {lineno}, in {name}')
             if line:
