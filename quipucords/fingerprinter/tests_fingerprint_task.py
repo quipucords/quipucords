@@ -62,7 +62,7 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "os_version": "etc_release_version",
     "redhat_certs": "redhat_packages_certs",
     "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
-    "subscription_manager_id": "subman_virt_uuid",
+    "subscription_manager_id": "subscription_manager_id",
     "system_addons": "system_purpose_json__addons",
     "system_last_checkin_date": "connection_timestamp",
     "system_memory_bytes": "system_memory_bytes",
@@ -162,6 +162,7 @@ class EngineTest(TestCase):
         dmi_system_uuid=1234,
         subman_virt_uuid=4567,
         subman_consumed=SUBMAN_CONSUMED,
+        subscription_manager_id=42,
         connection_uuid="a037f26f-2988-57bd-85d8-de7617a3aab0",
         connection_host="1.2.3.4",
         connection_port=22,
@@ -217,6 +218,7 @@ class EngineTest(TestCase):
             fact["subman_virt_uuid"] = subman_virt_uuid
         if subman_consumed:
             fact["subman_consumed"] = subman_consumed
+        fact["subscription_manager_id"] = subscription_manager_id
         if connection_uuid:
             fact["connection_uuid"] = connection_uuid
         if connection_host:
@@ -420,7 +422,8 @@ class EngineTest(TestCase):
 
         self.assertEqual(fact.get("dmi_system_uuid"), fingerprint.get("bios_uuid"))
         self.assertEqual(
-            fact.get("subman_virt_uuid"), fingerprint.get("subscription_manager_id")
+            fact.get("subscription_manager_id"),
+            fingerprint.get("subscription_manager_id"),
         )
 
         self.assertEqual(

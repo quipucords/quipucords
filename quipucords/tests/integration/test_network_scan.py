@@ -164,6 +164,7 @@ def expected_network_scan_facts():
         "subman_virt_host_type",
         "subman_virt_is_guest",
         "subman_virt_uuid",
+        "subscription_manager_id",
         "system_memory_bytes",
         "system_purpose_json",
         "system_user_count",
@@ -216,7 +217,7 @@ def fingerprint_fact_map():
         "os_version": "etc_release_version",
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
-        "subscription_manager_id": "subman_virt_uuid",
+        "subscription_manager_id": "subscription_manager_id",
         "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
