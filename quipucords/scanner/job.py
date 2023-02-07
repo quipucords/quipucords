@@ -67,7 +67,7 @@ class ScanJobRunner(Process):
         self.scan_job.start()
         if self.scan_job.status != ScanTask.RUNNING:
             error_message = (
-                "Job could not transition to running state." "  See error logs."
+                "Job could not transition to running state.  See error logs."
             )
             self.scan_job.fail(error_message)
             return ScanTask.FAILED

@@ -25,10 +25,10 @@ FC_MISSING_REPORT_VERSION = (
 PLURAL_HOST_CREDENTIALS_MSG = "Credentials"
 HOST_USERNAME_CREDENTIAL = "A host credential must have a username."
 HC_PWD_OR_KEYFILE = (
-    "A host credential must have either" " a password or an ssh_keyfile."
+    "A host credential must have either a password or an ssh_keyfile."
 )
 HC_NOT_BOTH = (
-    "A host credential must have either" " a password or an ssh_keyfile, not both."
+    "A host credential must have either a password or an ssh_keyfile, not both."
 )
 HC_KEY_INVALID = "ssh_keyfile, %s, is not a valid file on the system."
 HC_NO_KEY_W_PASS = (
@@ -40,7 +40,7 @@ HOST_FIELD_NOT_ALLOWED = "Field not allowed for Host credential."
 CRED_TYPE_REQUIRED_CREATED = "cred_type is required for credential creation"
 CRED_TYPE_NOT_ALLOWED_UPDATE = "cred_type is invalid for credential update"
 CRED_DELETE_NOT_VALID_W_SOURCES = (
-    "Credential cannot be deleted " "because it is used by 1 or more sources."
+    "Credential cannot be deleted because it is used by 1 or more sources."
 )
 VC_PWD_AND_USERNAME = "VCenter requires both username and password."
 VC_FIELDS_NOT_ALLOWED = "Field not allowed for Vcenter credential."
@@ -57,13 +57,13 @@ SOURCE_HOSTS_CANNOT_BE_EMPTY = "List cannot be empty."
 SOURCE_HOST_MUST_BE_JSON_ARRAY = "Must be a JSON array of strings"
 SOURCE_CRED_DISPLAY = "Credential: %s"
 SOURCE_CRED_WRONG_TYPE = "Credentials must have the same type as source."
-SOURCE_TYPE_REQ = "A value for source_type must be provided to " "create a source."
+SOURCE_TYPE_REQ = "A value for source_type must be provided to create a source."
 SOURCE_CONNECTION_SCAN = "The query parameter scan must be a boolean."
 SOURCE_TYPE_INV = "A source_type must not be provided when updating a source."
 SOURCE_CRED_IDS_INV = "Credential identifiers must be integer values."
 SOURCE_MIN_CREDS = "Source must have at least one set of credentials."
 SOURCE_DELETE_NOT_VALID_W_SCANS = (
-    "Source cannot be deleted " "because it is used by 1 or more scans."
+    "Source cannot be deleted because it is used by 1 or more scans."
 )
 
 NET_HOST_AS_STRING = "A host range must be a string."
@@ -83,8 +83,8 @@ NET_CIDR_RANGE = (
     "%(ip_range)s has invalid octet value of %(octet)s."
     " %(octet)s is not in the range [0,255]"
 )
-NET_INVALID_PORT = "Source of type network must have ssh port in" " range [0, 65535]"
-NET_HC_DO_NOT_EXIST = "Host credential with id=%d could not be" " found in database."
+NET_INVALID_PORT = "Source of type network must have ssh port in range [0, 65535]"
+NET_HC_DO_NOT_EXIST = "Host credential with id=%d could not be found in database."
 NET_SSL_OPTIONS_NOT_ALLOWED = "Invalid SSL options for network source: %s"
 VC_INVALID_OPTIONS = "Invalid options for vcenter source: %s"
 SAT_INVALID_OPTIONS = "Invalid options for satellite source: %s"
@@ -106,8 +106,8 @@ PLURAL_SCAN_JOBS_MSG = "Scan jobs"
 SJ_REQ_SOURCES = "Scan job must have one or more sources."
 SJ_SCAN_IDS_INV = "Scan identifiers must be integer values."
 SJ_SOURCE_IDS_INV = "Source identifiers must be integer values."
-SJ_SCAN_DO_NOT_EXIST = "Scan with id=%d could not be" " found in database."
-SJ_SOURCE_DO_NOT_EXIST = "Source with id=%d could not be" " found in database."
+SJ_SCAN_DO_NOT_EXIST = "Scan with id=%d could not be found in database."
+SJ_SOURCE_DO_NOT_EXIST = "Source with id=%d could not be found in database."
 SJ_STATUS_MSG_CREATED = "Job is created."
 SJ_STATUS_MSG_RUNNING = "Job is running."
 SJ_STATUS_MSG_PENDING = "Job is pending."
@@ -117,7 +117,7 @@ SJ_STATUS_MSG_COMPLETED = "Job is complete."
 
 SJ_EXTRA_VARS_DICT = "Extra vars must be a dictionary."
 SJ_EXTRA_VARS_BOOL = "Extra vars values must be type boolean."
-SJ_EXTRA_VARS_KEY = "Extra vars keys must be jboss_eap, jboss_fuse, " "or jboss_brms."
+SJ_EXTRA_VARS_KEY = "Extra vars keys must be jboss_eap, jboss_fuse, or jboss_brms."
 
 SJ_MERGE_JOB_REQUIRED = "This field is required"
 SJ_MERGE_JOB_NOT_LIST = "This field must be a list of job ids."
@@ -130,10 +130,10 @@ SJ_MERGE_JOB_NOT_COMPLETE = (
     "  Only completed scan jobs may be merged. Incomplete scan jobs: %s"
 )
 SJ_MERGE_JOB_NO_RESULTS = (
-    "The specified set of jobs" " produced invalid details report.  Error: %s"
+    "The specified set of jobs produced invalid details report.  Error: %s"
 )
 SJ_MERGE_JOB_NO_TASKS = (
-    "Merge cannot be completed. Source for job with " "id=%d has been deleted."
+    "Merge cannot be completed. Source for job with id=%d has been deleted."
 )
 
 REPORT_MERGE_REQUIRED = "This field is required"
@@ -141,9 +141,9 @@ REPORT_MERGE_NOT_LIST = "This field must be a list of report ids."
 REPORT_MERGE_TOO_SHORT = "Two or more scan report ids are required."
 REPORT_MERGE_NOT_INT = "Scan report ids must be integers."
 REPORT_MERGE_NOT_UNIQUE = "Set of ids must be unique."
-REPORT_MERGE_NOT_FOUND = "Not all scan report ids exist. " "Scan reports not found: %s"
+REPORT_MERGE_NOT_FOUND = "Not all scan report ids exist. Scan reports not found: %s"
 REPORT_MERGE_NO_RESULTS = (
-    "The specified set of reports " "produced invalid details report.  Error: %s"
+    "The specified set of reports produced invalid details report.  Error: %s"
 )
 
 # Scan Manager/Signal
@@ -171,22 +171,22 @@ PLURAL_SYS_INSPECT_RESULTS_MSG = "System inspection results"
 PLURAL_RAW_FACT_MSG = "Raw facts"
 
 QUERY_PARAM_INVALID = (
-    "Invalid value for for query parameter %s. " "Valid inputs are %s."
+    "Invalid value for for query parameter %s. Valid inputs are %s."
 )
 
-NO_PAUSE = "Scan cannot be paused. " "The scan must be running for it to be paused."
+NO_PAUSE = "Scan cannot be paused. The scan must be running for it to be paused."
 
-ALREADY_PAUSED = "Scan cannot be paused. " "The scan is already paused."
+ALREADY_PAUSED = "Scan cannot be paused. The scan is already paused."
 
 NO_CANCEL = (
-    "Scan cannot be canceled. " "The scan has already finished or been canceled."
+    "Scan cannot be canceled. The scan has already finished or been canceled."
 )
 
 NO_RESTART = (
-    "Scan cannot be restarted. " "The scan must be paused for it to be restarted."
+    "Scan cannot be restarted. The scan must be paused for it to be restarted."
 )
 
-ALREADY_RUNNING = "Scan cannot be restarted. " "The scan is already running."
+ALREADY_RUNNING = "Scan cannot be restarted. The scan is already running."
 
 
 # common serializers
@@ -197,12 +197,12 @@ COMMON_ID_INV = "The id must be an integer."
 
 # report messages
 REPORT_GROUP_COUNT_FILTER = (
-    "The group_count filter cannot be used with " "other filters."
+    "The group_count filter cannot be used with other filters."
 )
 REPORT_GROUP_COUNT_FIELD = (
-    "The group_count filter cannot be used with " "the invalid filter key %s."
+    "The group_count filter cannot be used with the invalid filter key %s."
 )
 REPORT_INVALID_FILTER_QUERY_PARAM = (
-    "One or more filter keys are not " "attributes of the system fingerprint: %s."
+    "One or more filter keys are not attributes of the system fingerprint: %s."
 )
-REPORTS_TAR_ERROR = "An error occured compressing files."
+REPORTS_TAR_ERROR = "An error occurred compressing files."

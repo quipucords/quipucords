@@ -117,7 +117,7 @@ class ScanTest(TestCase):
             data,
             {
                 "scan_type": [
-                    "foo, is an invalid choice. " "Valid values are connect,inspect."
+                    "foo, is an invalid choice. Valid values are connect,inspect."
                 ]
             },
         )
@@ -129,7 +129,7 @@ class ScanTest(TestCase):
             data,
             {
                 "scan_type": [
-                    "This field may not be blank. " "Valid values are connect,inspect."
+                    "This field may not be blank. Valid values are connect,inspect."
                 ]
             },
         )
@@ -154,7 +154,7 @@ class ScanTest(TestCase):
         }
         self.create_expect_400(
             data,
-            {"sources": ["Source with id=100000 could " "not be found in database."]},
+            {"sources": ["Source with id=100000 could not be found in database."]},
         )
 
     def test_create_default_host_type(self):
@@ -198,7 +198,7 @@ class ScanTest(TestCase):
             {
                 "options": {
                     "max_concurrency": [
-                        "Ensure this value is greater than or equal " "to 1."
+                        "Ensure this value is greater than or equal to 1."
                     ]
                 }
             },
