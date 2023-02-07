@@ -143,7 +143,10 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
         return_code = fact_value.get(RC, 0)
         if return_code and not getattr(processor, RETURN_CODE_ANY, False):
-            log_message = f"FAILED REMOTE COMMAND {host}. {fact_key} exited with {return_code}: {fact_value['stdout']}"
+            log_message = (
+                f"FAILED REMOTE COMMAND {host}."
+                f" {fact_key} exited with {return_code}: {fact_value['stdout']}"
+            )
             scan_task.log_message(log_message, log_level=ERROR)
             return NO_DATA
 
@@ -152,7 +155,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     except Exception:  # pylint: disable=broad-except
         log_message = (
             f"FAILED POST PROCESSING {host}. "
-            f"Processor for {fact_key} got value {fact_value}, returned {traceback.format_exc()}"
+            f" Processor for {fact_key} got value {fact_value},"
+            f" returned {traceback.format_exc()}"
         )
         scan_task.log_message(log_message, log_level=ERROR)
         return NO_DATA

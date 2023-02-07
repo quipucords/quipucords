@@ -208,7 +208,10 @@ class InspectTaskRunner(ScanTaskRunner):
         # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
             check_manager_interrupt(manager_interrupt.value)
-            log_message = f"START INSPECT PROCESSING GROUP {(idx + 1):d} of {len(group_names):d}"
+            log_message = (
+                "START INSPECT PROCESSING GROUP"
+                f" {(idx + 1):d} of {len(group_names):d}"
+            )
             self.scan_task.log_message(log_message)
             call = InspectResultCallback(self.scan_task, manager_interrupt)
 
@@ -309,7 +312,9 @@ class InspectTaskRunner(ScanTaskRunner):
                 nostatus.append(result.name)
 
         if bool(nostatus):
-            invalid_state_msg = f"Results without a validate state: {', '.join(nostatus)}"
+            invalid_state_msg = (
+                f"Results without a validate state: {', '.join(nostatus)}"
+            )
             self.scan_task.log_message(invalid_state_msg, log_level=logging.ERROR)
 
         return connected, completed, failed, unreachable

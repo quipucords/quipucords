@@ -360,7 +360,8 @@ class SatelliteFive(SatelliteInterface):
             virtual_host = virtual_hosts.get(virt_host_id)
             self.inspect_scan_task.log_message(
                 "Obtaining virtual guests for virtual host"
-                f" (name={virtual_host.get('name', 'unknown')}, id={virtual_host.get('id', 'unknown')})"
+                f" (name={virtual_host.get('name', 'unknown')},"
+                f" id={virtual_host.get('id', 'unknown')})"
             )
             guests, guest_count = self.virtual_guests(virt_host_id)
             virtual_guests.update(guests)

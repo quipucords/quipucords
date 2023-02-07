@@ -236,8 +236,9 @@ class ScanJobRunner(Process):
             runner.scan_task.fail(status_message)
         else:
             error_message = (
-                f"ScanTask {runner.scan_task.sequence_number:d} failed.  Scan task must return "
-                "ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned "
+                f"ScanTask {runner.scan_task.sequence_number:d} failed."
+                " Scan task must return"
+                " ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned "
                 f'"{task_status}" and the following status message: {status_message}'
             )
             runner.scan_task.fail(error_message)
