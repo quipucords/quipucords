@@ -10,14 +10,13 @@
 """Extends pytest-docker-tools wrappers with helpers for qpc tests."""
 
 import logging
-
 from abc import ABCMeta, abstractmethod
 
 from pytest_docker_tools import wrappers
+from requests.exceptions import RequestException
 
 from tests.constants import POSTGRES_USER
 from tests.utils.http import BaseUrlClient
-from requests.exceptions import RequestException
 
 SYSTEMCTL_ACTIVE_STATUS_STRING = "Active: active (running)"
 
