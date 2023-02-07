@@ -25,11 +25,7 @@ class JobInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return (
-            "{"
-            f" id:{self.id}, task_results:{self.task_results} "
-            "}"
-        )
+        return "{" f" id:{self.id}, task_results:{self.task_results} " "}"
 
     class Meta:
         """Metadata for model."""
@@ -47,12 +43,7 @@ class TaskInspectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return (
-            "{"
-            f" id:{self.id}, systems:{self.systems}"
-            "}"
-        )
-
+        return "{" f" id:{self.id}, systems:{self.systems}" "}"
 
     class Meta:
         """Metadata for model."""
@@ -110,14 +101,7 @@ class RawFact(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return (
-            "{"
-            f" id:{self.id},"
-            f" name:{self.name},"
-            f" value:{self.value} "
-            "}"
-        )
-
+        return "{" f" id:{self.id}," f" name:{self.name}," f" value:{self.value} " "}"
 
     class Meta:
         """Metadata for model."""

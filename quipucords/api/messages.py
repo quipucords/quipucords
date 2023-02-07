@@ -24,9 +24,7 @@ FC_MISSING_REPORT_VERSION = (
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = "Credentials"
 HOST_USERNAME_CREDENTIAL = "A host credential must have a username."
-HC_PWD_OR_KEYFILE = (
-    "A host credential must have either a password or an ssh_keyfile."
-)
+HC_PWD_OR_KEYFILE = "A host credential must have either a password or an ssh_keyfile."
 HC_NOT_BOTH = (
     "A host credential must have either a password or an ssh_keyfile, not both."
 )
@@ -170,21 +168,15 @@ PLURAL_TASK_INSPECT_RESULTS_MSG = "Task inspection results"
 PLURAL_SYS_INSPECT_RESULTS_MSG = "System inspection results"
 PLURAL_RAW_FACT_MSG = "Raw facts"
 
-QUERY_PARAM_INVALID = (
-    "Invalid value for for query parameter %s. Valid inputs are %s."
-)
+QUERY_PARAM_INVALID = "Invalid value for for query parameter %s. Valid inputs are %s."
 
 NO_PAUSE = "Scan cannot be paused. The scan must be running for it to be paused."
 
 ALREADY_PAUSED = "Scan cannot be paused. The scan is already paused."
 
-NO_CANCEL = (
-    "Scan cannot be canceled. The scan has already finished or been canceled."
-)
+NO_CANCEL = "Scan cannot be canceled. The scan has already finished or been canceled."
 
-NO_RESTART = (
-    "Scan cannot be restarted. The scan must be paused for it to be restarted."
-)
+NO_RESTART = "Scan cannot be restarted. The scan must be paused for it to be restarted."
 
 ALREADY_RUNNING = "Scan cannot be restarted. The scan is already running."
 
@@ -196,9 +188,7 @@ COMMON_CHOICE_INV = "%s, is an invalid choice. Valid values are %s."
 COMMON_ID_INV = "The id must be an integer."
 
 # report messages
-REPORT_GROUP_COUNT_FILTER = (
-    "The group_count filter cannot be used with other filters."
-)
+REPORT_GROUP_COUNT_FILTER = "The group_count filter cannot be used with other filters."
 REPORT_GROUP_COUNT_FIELD = (
     "The group_count filter cannot be used with the invalid filter key %s."
 )

@@ -163,9 +163,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             check_manager_interrupt(manager_interrupt.value)
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
-                message = (
-                    f"Skipping credential {credential.name}.  No remaining hosts."
-                )
+                message = f"Skipping credential {credential.name}.  No remaining hosts."
                 self.scan_task.log_message(message)
                 break
 

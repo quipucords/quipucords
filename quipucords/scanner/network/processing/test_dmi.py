@@ -42,9 +42,7 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
     def test_invalid_uuid_case(self):
         """Test dmi_system_uuid too long."""
         # stdout_lines looks like ['a', 'b', 'c']
-        dependencies = {
-            "internal_dmi_system_uuid": ansible_result(f"{'a' * 37}\nb\nc")
-        }
+        dependencies = {"internal_dmi_system_uuid": ansible_result(f"{'a' * 37}\nb\nc")}
         self.assertEqual(
             dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies), ""
         )
