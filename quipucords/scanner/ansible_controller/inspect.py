@@ -12,7 +12,7 @@ from scanner.exceptions import ScanFailureError
 
 class InspectTaskRunner(AnsibleControllerTaskRunner):
 
-    TARGET_HOST_FIELDS = [
+    HOST_FIELDS = [
         "name",
         "id",
         "created",
@@ -20,12 +20,19 @@ class InspectTaskRunner(AnsibleControllerTaskRunner):
         "last_job",
         "inventory",
     ]
+    JOB_FIELDS = [
+        "id",
+        "name",
+        "status",
+    ]
 
     def execute_task(self, manager_interrupt):
         self._check_prerequisites()
         client = self.get_client(self.scan_task)
         results = {"ansible_controller_host": self.system_name}
         results["hosts"] = self.get_hosts(client)
+        results["jobs"] = self.get_jobs(client)
+        results["comparison"] = self.compare_hosts(results)
         # for now lets assume success
         inspection_status = SystemInspectionResult.SUCCESS
         self.save_results(inspection_status, results)
@@ -42,9 +49,49 @@ class InspectTaskRunner(AnsibleControllerTaskRunner):
         # skipping pagination info atm
         hosts = []
         for host in response.json()["results"]:
-            parsed_host = {field: host.get(field) for field in self.TARGET_HOST_FIELDS}
+            parsed_host = {field: host.get(field) for field in self.HOST_FIELDS}
             hosts.append(parsed_host)
         return hosts
+
+    def get_jobs(self, client):
+        jobs_response = client.get("/api/v2/jobs/")
+        if not jobs_response.ok:
+            raise NotImplementedError()
+        jobs = []
+
+        # ignoring pagination
+        for job in jobs_response.json()["results"]:
+            parsed_job = {field: job.get(field) for field in self.JOB_FIELDS}
+            job_events_uri = job["related"]["job_events"]
+            number_of_events, unique_hosts = self.get_job_events(client, job_events_uri)
+            parsed_job["number_of_events"] = number_of_events
+            parsed_job["unique_hosts"] = unique_hosts
+            jobs.append(parsed_job)
+        return jobs
+
+    def get_job_events(self, client, job_events_uri):
+        response = client.get(job_events_uri)
+        if not response.ok:
+            raise NotImplementedError()
+            # ignoring pagination once again
+        events_data = response.json()
+        number_of_events = events_data["count"]
+        unique_hosts = set()
+        for event in events_data["results"]:
+            unique_hosts.add(event["host_name"])
+        # ignore garbage hosts
+        unique_hosts -= {"", None}
+        return number_of_events, unique_hosts
+
+    def compare_hosts(self, data: dict):
+        hosts_in_inventory = {host["name"] for host in data["hosts"]}
+        hosts_in_jobs = {host for job in data["jobs"] for host in job["unique_hosts"]}
+        hosts_not_in_inventory = hosts_in_jobs - hosts_in_inventory
+        return {
+            "hosts_in_inventory": hosts_in_inventory,
+            "hosts_in_jobs": hosts_in_jobs,
+            "hosts_not_in_inventory": hosts_not_in_inventory,
+        }
 
     @transaction.atomic
     def save_results(self, inspection_status, facts_dict: dict):
@@ -69,12 +116,18 @@ class InspectTaskRunner(AnsibleControllerTaskRunner):
     def _facts_dict_as_raw_facts(
         self, inspection_result: SystemInspectionResult, **facts_dict
     ) -> list[RawFact]:
+        def json_encoder(data):
+            if isinstance(data, set):
+                return sorted(data)
+            else:
+                return str(data)
+
         raw_facts = []
         for fact_name, fact_value in facts_dict.items():
             raw_facts.append(
                 RawFact(
                     name=fact_name,
-                    value=json.dumps(fact_value, default=str),
+                    value=json.dumps(fact_value, default=json_encoder),
                     system_inspection_result=inspection_result,
                 )
             )
