@@ -80,7 +80,11 @@ class CredentialSerializer(NotEmptySerializer):
         """Validate if fields received are appropriate for each credential."""
         cred_type = get_from_object_or_dict(self.instance, attrs, "cred_type")
 
-        if cred_type == Credential.VCENTER_CRED_TYPE:
+        if cred_type in [
+            Credential.VCENTER_CRED_TYPE,
+            Credential.ANSIBLE_CONTROLLER_SOURCE_TYPE,
+        ]:
+
             validated_data = self.validate_vcenter_cred(attrs)
         elif cred_type == Credential.SATELLITE_CRED_TYPE:
             validated_data = self.validate_satellite_cred(attrs)

@@ -116,7 +116,10 @@ class SourceSerializer(NotEmptySerializer):
             if options.get("ssl_cert_verify") is None:
                 options["ssl_cert_verify"] = True
 
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
+        elif source_type in [
+            Source.VCENTER_SOURCE_TYPE,
+            Source.ANSIBLE_CONTROLLER_SOURCE_TYPE,
+        ]:
             cls._check_for_disallowed_fields(
                 options,
                 messages.VC_INVALID_OPTIONS,
@@ -179,7 +182,10 @@ class SourceSerializer(NotEmptySerializer):
         source_type = get_from_object_or_dict(self.instance, attrs, "source_type")
         if source_type == Source.NETWORK_SOURCE_TYPE:
             validated_data = self.validate_network_source(attrs, source_type)
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
+        elif source_type in [
+            Source.VCENTER_SOURCE_TYPE,
+            Source.ANSIBLE_CONTROLLER_SOURCE_TYPE,
+        ]:
             validated_data = self.validate_vcenter_source(attrs, source_type)
         elif source_type == Source.SATELLITE_SOURCE_TYPE:
             validated_data = self.validate_satellite_source(attrs, source_type)

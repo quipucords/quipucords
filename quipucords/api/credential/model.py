@@ -26,11 +26,14 @@ class Credential(models.Model):
     VCENTER_CRED_TYPE = "vcenter"
     SATELLITE_CRED_TYPE = "satellite"
     OPENSHIFT_CRED_TYPE = "openshift"
+    ANSIBLE_CONTROLLER_SOURCE_TYPE = "ansible-controller"
+
     CRED_TYPE_CHOICES = (
         (NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
         (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
         (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE),
         (OPENSHIFT_CRED_TYPE, OPENSHIFT_CRED_TYPE),
+        (ANSIBLE_CONTROLLER_SOURCE_TYPE, ANSIBLE_CONTROLLER_SOURCE_TYPE),
     )
     BECOME_USER_DEFAULT = "root"
     BECOME_SUDO = "sudo"
@@ -53,7 +56,7 @@ class Credential(models.Model):
     )
 
     name = models.CharField(max_length=64, unique=True)
-    cred_type = models.CharField(max_length=9, choices=CRED_TYPE_CHOICES, null=False)
+    cred_type = models.CharField(max_length=18, choices=CRED_TYPE_CHOICES, null=False)
     username = models.CharField(max_length=64, null=True)
     password = models.CharField(max_length=1024, null=True)
     auth_token = models.CharField(max_length=1024, null=True)

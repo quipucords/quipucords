@@ -65,16 +65,18 @@ class Source(models.Model):
     VCENTER_SOURCE_TYPE = "vcenter"
     SATELLITE_SOURCE_TYPE = "satellite"
     OPENSHIFT_SOURCE_TYPE = "openshift"
+    ANSIBLE_CONTROLLER_SOURCE_TYPE = "ansible-controller"
     SOURCE_TYPE_CHOICES = (
         (NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
         (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE),
         (SATELLITE_SOURCE_TYPE, SATELLITE_SOURCE_TYPE),
         (OPENSHIFT_SOURCE_TYPE, OPENSHIFT_SOURCE_TYPE),
+        (ANSIBLE_CONTROLLER_SOURCE_TYPE, ANSIBLE_CONTROLLER_SOURCE_TYPE),
     )
 
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
-        max_length=12, choices=SOURCE_TYPE_CHOICES, null=False
+        max_length=18, choices=SOURCE_TYPE_CHOICES, null=False
     )
     port = models.IntegerField(null=True)
     options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)
