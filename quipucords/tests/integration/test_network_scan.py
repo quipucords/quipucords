@@ -330,7 +330,7 @@ class TestNetworkScan:
         return scan_id
 
     @pytest.fixture(scope="class")
-    def scan_response(self, apiclient, scan_id):
+    def scan_response(self, apiclient, scan_id, qpc_server_container):
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = apiclient.post(f"scans/{scan_id}/jobs/")
         assert create_scan_job_response.ok, create_scan_job_response.text
@@ -349,6 +349,7 @@ class TestNetworkScan:
             response = apiclient.get(f"scans/{scan_id}/")
             assert response.ok, response.text
 
+        print(qpc_server_container.logs())
         assert scan_status == ScanTask.COMPLETED, response.text
 
         return response

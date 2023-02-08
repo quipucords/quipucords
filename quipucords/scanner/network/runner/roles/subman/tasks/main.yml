@@ -4,6 +4,24 @@
   set_fact:
     internal_host_started_processing_role: "subman"
 
+# subman facts
+- name: gather subman.facts
+  raw: |
+    subscription-manager facts --list 2>/dev/null |
+    perl -pe 's/"/\"/g;s/^([^:]+):\s(.*)/\1: "\2"/g'
+  register: internal_subman_facts_cmd
+  ignore_errors: yes
+  become: yes
+  when: 'user_has_sudo and internal_have_subscription_manager'
+
+- debug:
+    var: internal_subman_facts_cmd.stdout
+
+- name: set fact for subman_facts
+  set_fact:
+    subman_facts: "{{ internal_subman_facts_cmd['stdout'] | from_yaml }}"
+  when: '"stdout" in internal_subman_facts_cmd'
+
 # subman_cpu_cpu fact
 - name: gather subman.cpu.cpu(s) fact
   raw: subscription-manager facts --list | grep '^cpu.cpu(s).' | sed -n -e 's/^.*cpu.cpu(s).\s*//p'
@@ -96,7 +114,7 @@
   when:
     - user_has_sudo
     - internal_have_subscription_manager
-    - "{{ QPC_FEATURE_FLAGS.OVERALL_STATUS }}"
+    - QPC_FEATURE_FLAGS.OVERALL_STATUS
 
 - name: extract result value for subman.overall.status
   set_fact:
@@ -131,6 +149,7 @@
   set_fact:
     subman_consumed: "{{internal_subman_consumed}}"
   ignore_errors: yes
+  when: '"stdout" in internal_subman_consumed'
 
 #  subscription_manager_id fact
 - name: gather subscription_manager_id fact
