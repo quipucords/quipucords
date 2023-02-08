@@ -312,8 +312,8 @@ class DeploymentReportTest(TestCase):
 
         # Test that the data in the subfile equals the report_dict
         tar_gz_result = renderer.render(report_dict)
-        tar = tarfile.open(fileobj=tar_gz_result)
-        json_file = tar.getmembers()[0]
-        tar_info = tar.extractfile(json_file)
-        tar_dict_data = json.loads(tar_info.read().decode())
-        self.assertEqual(tar_dict_data, report_dict)
+        with tarfile.open(fileobj=tar_gz_result) as tar:
+            json_file = tar.getmembers()[0]
+            tar_info = tar.extractfile(json_file)
+            tar_dict_data = json.loads(tar_info.read().decode())
+            self.assertEqual(tar_dict_data, report_dict)

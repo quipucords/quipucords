@@ -184,8 +184,8 @@ class ScanJob(models.Model):
         """Log a message for this job."""
         elapsed_time = self._compute_elapsed_time()
         actual_message = (
-            f"Job {self.id:d}"
-            f" ({self.scan_type}, elapsed_time: {elapsed_time:d}s) - "
+            f"Job {self.id:.0f}"
+            f" ({self.scan_type}, elapsed_time: {elapsed_time:.0f}s) - "
         )
         actual_message += message
         logger.log(log_level, actual_message)

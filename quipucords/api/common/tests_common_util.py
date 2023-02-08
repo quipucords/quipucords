@@ -109,14 +109,14 @@ class CommonUtilTest(TestCase):
         tar_buffer = create_tar_buffer(files_data)
         self.assertIsInstance(tar_buffer, (io.BytesIO))
         self.assertIn("getvalue", dir(tar_buffer))
-        tar = tarfile.open(fileobj=tar_buffer)
-        files = tar.getmembers()
-        self.assertNotEqual(files, [])
-        self.assertEqual(2, len(files))
-        for file_obj in files:
-            file = tar.extractfile(file_obj)
-            extracted_content = json.loads(file.read().decode())
-            self.assertIn(extracted_content, files_data.values())
+        with tarfile.open(fileobj=tar_buffer) as tar:
+            files = tar.getmembers()
+            self.assertNotEqual(files, [])
+            self.assertEqual(2, len(files))
+            for file_obj in files:
+                file = tar.extractfile(file_obj)
+                extracted_content = json.loads(file.read().decode())
+                self.assertIn(extracted_content, files_data.values())
 
     def test_bad_param_type_create_tar_buffer(self):
         """Test passing in a non-list into create_tar_buffer."""
