@@ -36,7 +36,14 @@ from api.deployments_report.util import (
     VCENTER_DETECTION_KEY,
     compute_source_info,
 )
-from api.models import DeploymentsReport, Product, ScanTask, Source, SystemFingerprint
+from api.models import (
+    DeploymentsReport,
+    DetailsReport,
+    Product,
+    ScanTask,
+    Source,
+    SystemFingerprint,
+)
 from api.serializers import SystemFingerprintSerializer
 from fingerprinter import formatters
 from fingerprinter.constants import (
@@ -116,6 +123,7 @@ NETWORK_KEY = Source.NETWORK_SOURCE_TYPE
 VCENTER_KEY = Source.VCENTER_SOURCE_TYPE
 SATELLITE_KEY = Source.SATELLITE_SOURCE_TYPE
 OPENSHIFT_KEY = Source.OPENSHIFT_SOURCE_TYPE
+ANSIBLE_KEY = Source.ANSIBLE_CONTROLLER_SOURCE_TYPE
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -506,7 +514,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             log_level=log_level,
         )
 
-    def _process_sources(self, details_report):
+    def _process_sources(self, details_report: DetailsReport):
         """Process facts and convert to fingerprints.
 
         :param details_report: DetailsReport containing raw facts
@@ -519,6 +527,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             VCENTER_KEY: [],
             SATELLITE_KEY: [],
             OPENSHIFT_KEY: [],
+            ANSIBLE_KEY: [],
         }
         source_list = details_report.get_sources()
         total_source_count = len(source_list)
@@ -639,10 +648,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fingerprint_map,
         )
 
-        # openshift fingerprints - These won't be deduplicated or merged
+        # openshift/ansible fingerprints - These won't be deduplicated or merged
         fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(OPENSHIFT_KEY))
+        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(ANSIBLE_KEY))
         self._log_message_with_count(
-            "COMBINE with OPENSHIFT fingerprints",
+            "COMBINE with OPENSHIFT+ANSIBLE-CONTROLLER fingerprints",
             fingerprint_map,
             total_only=True,
         )
@@ -709,6 +719,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         fingerprints = []
         process_fact_fn = {
+            ANSIBLE_KEY: self._process_ansible_controller_fact,
             NETWORK_KEY: self._process_network_fact,
             OPENSHIFT_KEY: self._process_openshift_fact,
             SATELLITE_KEY: self._process_satellite_fact,
@@ -1769,6 +1780,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_formatter=ocp_formatters.infer_node_role,
         )
 
+        return fingerprint
+
+    def _process_ansible_controller_fact(self, source, fact):
+        """Add a placeholder fingerprint for ansible controller scans."""
+        fingerprint = {
+            META_DATA_KEY: {},
+            ENTITLEMENTS_KEY: [],
+            PRODUCTS_KEY: [],
+        }
+        self._add_fact_to_fingerprint(
+            source, "ansible_controller_host", fact, "name", fingerprint,
+        )
         return fingerprint
 
     def _multi_format_dateparse(self, source, raw_fact_key, date_value, patterns):
