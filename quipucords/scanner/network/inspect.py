@@ -312,9 +312,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 nostatus.append(result.name)
 
         if bool(nostatus):
-            invalid_state_msg = (
-                f"Results without a validate state: {', '.join(nostatus)}"
-            )
+            invalid_state_msg = f"Results without a valid state: {', '.join(nostatus)}"
             self.scan_task.log_message(invalid_state_msg, log_level=logging.ERROR)
 
         return connected, completed, failed, unreachable

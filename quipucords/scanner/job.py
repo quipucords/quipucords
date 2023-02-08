@@ -238,8 +238,8 @@ class ScanJobRunner(Process):
             error_message = (
                 f"ScanTask {runner.scan_task.sequence_number:d} failed."
                 " Scan task must return"
-                " ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned "
-                f'"{task_status}" and the following status message: {status_message}'
+                " ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned"
+                f' "{task_status}" and the following status message: {status_message}'
             )
             runner.scan_task.fail(error_message)
             task_status = ScanTask.FAILED
@@ -306,4 +306,4 @@ class ScanJobRunner(Process):
 
     def __str__(self):
         """Convert to string."""
-        return "{" f"scan_job:{self.scan_job.id}, " "}"
+        return f"{{scan_job:{self.scan_job.id}, }}"

@@ -67,7 +67,7 @@ def deployments(request, pk=None):
         return Response(
             {
                 "detail": f"Deployment report {report.details_report.id}"
-                " could not be created.  See server logs."
+                " could not be created. See server logs."
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )

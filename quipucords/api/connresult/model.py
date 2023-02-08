@@ -27,7 +27,7 @@ class JobConnectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         # pylint: disable=no-member
-        return "{" + f" id:{self.id},task_results:{self.task_results} " + "}"
+        return f"{{ id:{self.id},task_results:{self.task_results} }}"
 
     class Meta:
         """Metadata for model."""
@@ -45,9 +45,7 @@ class TaskConnectionResult(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{"
-            f" id:{self.id}, systems:{self.systems} "  # pylint: disable=no-member
-            "}"
+            f"{{ id:{self.id}, systems:{self.systems} }}"  # pylint: disable=no-member
         )
 
     class Meta:
