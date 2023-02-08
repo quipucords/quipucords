@@ -50,7 +50,7 @@ def mock_timeout_error(param1):  # pylint: disable=unused-argument
 
 def mock_exception(param1, param2):  # pylint: disable=unused-argument
     """Mock method to throw exception."""
-    raise Exception()
+    raise Exception()  # pylint: disable=broad-exception-raised
 
 
 # pylint: disable=too-many-instance-attributes

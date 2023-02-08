@@ -69,7 +69,7 @@ def extract_tar_gz(file_like_obj):
         tar = tarfile.open(tar_name)  # pylint: disable=consider-using-with
         os.remove(tar_name)
 
-    file_data_list = list()
+    file_data_list = []
     files = tar.getmembers()
     for file in files:
         tarfile_obj = tar.extractfile(file)

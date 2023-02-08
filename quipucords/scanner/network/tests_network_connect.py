@@ -11,7 +11,6 @@
 """Test the discovery scanner capabilities."""
 
 # pylint: disable=ungrouped-imports
-import os.path
 from multiprocessing import Value
 from unittest.mock import Mock, patch
 
@@ -30,7 +29,6 @@ from scanner.test_util import create_scan_job
 
 def mock_handle_ssh(cred):  # pylint: disable=unused-argument
     """Mock for handling ssh passphrase setting."""
-    pass
 
 
 class MockResultStore:

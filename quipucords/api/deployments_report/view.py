@@ -29,7 +29,7 @@ from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-import api.messages as messages
+from api import messages
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.common.util import is_int, validate_query_param_bool
 from api.deployments_report.csv_renderer import DeploymentCSVRenderer

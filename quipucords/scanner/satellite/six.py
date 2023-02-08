@@ -318,10 +318,7 @@ def request_host_details(
             options=request_options,
         )
         # pylint: disable=no-member
-        if (
-            host_subscriptions_response.status_code == 400
-            or host_subscriptions_response.status_code == 404
-        ):
+        if host_subscriptions_response.status_code in (400, 404):
             content_type = host_subscriptions_response.headers.get(CONTENT_TYPE)
             if content_type and APP_JSON in content_type:
                 message = (

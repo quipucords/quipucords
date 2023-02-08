@@ -39,8 +39,10 @@ from scanner.satellite.six import (
 from scanner.satellite.utils import construct_url
 from scanner.test_util import create_scan_job
 
+# pylint: disable=too-many-lines
 
-# pylint: disable=unused-argument, too-many-arguments
+
+# pylint: disable=unused-argument, too-many-arguments,
 def mock_sat_exception(
     param1,
     param2,
