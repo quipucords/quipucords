@@ -66,7 +66,7 @@ def extract_tar_gz(file_like_obj):
         tar_name = f"/tmp/api_tmp_{time.strftime('%Y%m%d_%H%M%S')}.tar.gz"
         with open(tar_name, "wb") as out_file:
             out_file.write(file_like_obj)
-        tar = tarfile.open(tar_name)
+        tar = tarfile.open(tar_name)  # pylint: disable=consider-using-with
         os.remove(tar_name)
 
     file_data_list = list()

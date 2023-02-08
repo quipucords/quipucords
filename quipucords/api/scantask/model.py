@@ -221,7 +221,7 @@ class ScanTask(models.Model):
                 f"Job {self.job_id:d},"
                 f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
                 f" ({self.scan_type}, {self.source.source_type}, {self.source.name},"
-                f" elapsed_time: {elapsed_time:d}s) - "
+                f" elapsed_time: {elapsed_time:.0f}s) - "
             )
         actual_message += message.strip()
         logger.log(log_level, actual_message)
@@ -238,7 +238,7 @@ class ScanTask(models.Model):
             f"Job {self.job.id:d},"
             f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
             f" ({self.scan_type}, details_report={details_report_id},"
-            f" elapsed_time: {elapsed_time:d}s) - "
+            f" elapsed_time: {elapsed_time:.0f}s) - "
         )
         actual_message += message.strip()
         logger.log(log_level, actual_message)
