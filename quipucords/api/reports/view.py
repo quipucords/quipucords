@@ -28,7 +28,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-import api.messages as messages
+from api import messages
 from api.common.util import is_int, validate_query_param_bool
 from api.deployments_report.view import build_cached_json_report
 from api.details_report.util import mask_details_facts

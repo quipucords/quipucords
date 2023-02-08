@@ -278,11 +278,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
-        if (
-            scan.status == ScanTask.COMPLETED
-            or scan.status == ScanTask.FAILED
-            or scan.status == ScanTask.CANCELED
-        ):
+        if scan.status in (ScanTask.COMPLETED, ScanTask.FAILED, ScanTask.CANCELED):
             err_msg = _(messages.NO_CANCEL)
             return JsonResponse({"non_field_errors": [err_msg]}, status=400)
 

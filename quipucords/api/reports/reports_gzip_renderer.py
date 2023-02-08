@@ -18,7 +18,7 @@ import tempfile
 
 from rest_framework import renderers
 
-import api.messages as messages
+from api import messages
 from api.common.common_report import create_filename, create_tar_buffer
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv

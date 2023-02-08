@@ -44,7 +44,11 @@ class TaskConnectionResult(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return "{" + f" id:{self.id}, systems:{self.systems} " + "}"
+        return (
+            "{"
+            f" id:{self.id}, systems:{self.systems} "  # pylint: disable=no-member
+            "}"
+        )
 
     class Meta:
         """Metadata for model."""

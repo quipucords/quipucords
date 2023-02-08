@@ -8,7 +8,7 @@ backlog = 2048
 workers = 1
 worker_class = "sync"
 worker_connections = 1000
-timeout = os.getenv("QPC_SERVER_TIMEOUT", 120)
+timeout = int(os.getenv("QPC_SERVER_TIMEOUT", "120"))
 keepalive = 2
 spew = False
 daemon = False
@@ -40,7 +40,7 @@ def post_fork(server, worker):
     server.log.info("Worker spawned (pid: %s)", worker.pid)
 
 
-def pre_fork(server, worker):
+def pre_fork(_server, _worker):
     """Before fork logging."""
 
 
@@ -66,9 +66,12 @@ def worker_int(worker):
 
     # pylint: enable=import-outside-toplevel
 
-    id2name = dict([(th.ident, th.name) for th in threading.enumerate()])
+    id2name = {th.ident: th.name for th in threading.enumerate()}
     code = []
-    for thread_id, stack in sys._current_frames().items():
+    for (
+        thread_id,
+        stack,
+    ) in sys._current_frames().items():  # pylint: disable=protected-access
         code.append(f"\n# Thread: {id2name.get(thread_id, '')}({thread_id})")
         for filename, lineno, name, line in traceback.extract_stack(stack):
             code.append(f'File: "{filename}", line {lineno}, in {name}')

@@ -200,7 +200,7 @@ class ScanJob(models.Model):
         """
         # pylint: disable=too-many-locals
         self.refresh_from_db()
-        if self.status == ScanTask.CREATED or self.status == ScanTask.PENDING:
+        if self.status in (ScanTask.CREATED, ScanTask.PENDING):
             return None, None, None, None, None
 
         systems_count = 0

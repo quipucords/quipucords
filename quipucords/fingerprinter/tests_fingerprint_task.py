@@ -526,7 +526,7 @@ class EngineTest(TestCase):
         )
         self.assertEqual(fact.get("uuid"), fingerprint.get("subscription_manager_id"))
         if fact.get("hostname", "").endswith(
-            tuple(["-" + str(num) for num in range(1, 10)])
+            tuple("-" + str(num) for num in range(1, 10))
         ) and fact.get("hostname").startswith("virt-who-"):
             self.assertEqual("hypervisor", fingerprint.get("infrastructure_type"))
         else:
