@@ -1258,7 +1258,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Set subscription manager id
         self._add_fact_to_fingerprint(
-            source, "subman_virt_uuid", fact, "subscription_manager_id", fingerprint
+            source,
+            "subscription_manager_id",
+            fact,
+            "subscription_manager_id",
+            fingerprint,
         )
 
         # System information

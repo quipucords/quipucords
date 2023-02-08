@@ -164,6 +164,7 @@ def expected_network_scan_facts():
         "subman_virt_host_type",
         "subman_virt_is_guest",
         "subman_virt_uuid",
+        "subscription_manager_id",
         "system_memory_bytes",
         "system_purpose_json",
         "system_user_count",
@@ -216,7 +217,7 @@ def fingerprint_fact_map():
         "os_version": "etc_release_version",
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
-        "subscription_manager_id": "subman_virt_uuid",
+        "subscription_manager_id": "subscription_manager_id",
         "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
@@ -329,7 +330,7 @@ class TestNetworkScan:
         return scan_id
 
     @pytest.fixture(scope="class")
-    def scan_response(self, apiclient, scan_id):
+    def scan_response(self, apiclient, scan_id, qpc_server_container):
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = apiclient.post(f"scans/{scan_id}/jobs/")
         assert create_scan_job_response.ok, create_scan_job_response.text
@@ -348,6 +349,7 @@ class TestNetworkScan:
             response = apiclient.get(f"scans/{scan_id}/")
             assert response.ok, response.text
 
+        print(qpc_server_container.logs())
         assert scan_status == ScanTask.COMPLETED, response.text
 
         return response
