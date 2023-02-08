@@ -134,8 +134,8 @@ class InspectResultCallback:
                 if not fact_key.startswith(INTERNAL_)
             }
         self.scan_task.log_message(
-            f"host scan complete for {host}.  "
-            f"Status: {host_status}. Facts {results}",
+            f"host scan complete for {host}."
+            f" Status: {host_status}. Facts {results}",
             log_level=logging.DEBUG,
         )
 

@@ -137,7 +137,7 @@ class ScanTask(models.Model):
         if show_status_message:
             message = (
                 f"STATE UPDATE ({self.status})."
-                f"  Additional status information: {self.status_message}"
+                f" Additional status information: {self.status_message}"
             )
         else:
             message = f"STATE UPDATE ({self.status})"

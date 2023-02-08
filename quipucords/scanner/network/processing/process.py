@@ -85,8 +85,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
     # needed, this is the place to change.
     if is_sudo_error_value(fact_value):
         log_message = (
-            f"POST PROCESSING SUDO ERROR {host}. "
-            f"fact_key {fact_key} had sudo error {fact_value}"
+            f"POST PROCESSING SUDO ERROR {host}."
+            f" fact_key {fact_key} had sudo error {fact_value}"
         )
         scan_task.log_message(log_message, log_level=DEBUG)
         return NO_DATA
@@ -108,8 +108,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
                     or isinstance(previous_host_facts[dep], Exception)
                 ):
                     log_message = (
-                        f"POST PROCESSING MISSING REQ DEP {host}. "
-                        f"Fact {fact_key} missing dependency {dep}"
+                        f"POST PROCESSING MISSING REQ DEP {host}."
+                        f" Fact {fact_key} missing dependency {dep}"
                     )
                     scan_task.log_message(log_message, log_level=DEBUG)
                     raise StopIteration()
@@ -123,7 +123,7 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
         if not is_ansible_task_result(fact_value):
             log_message = (
                 f"FAILED POST PROCESSING {host}."
-                f"fact_value {fact_key}:{fact_value} needs postprocessing but"
+                f" fact_value {fact_key}:{fact_value} needs postprocessing but"
                 " is not an Ansible result"
             )
             scan_task.log_message(log_message, log_level=ERROR)
@@ -135,8 +135,8 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
         if fact_value.get(SKIPPED, False):
             log_message = (
-                f"SKIPPED POST PROCESSING {host}. "
-                f"fact {fact_key} skipped, no results"
+                f"SKIPPED POST PROCESSING {host}."
+                f" fact {fact_key} skipped, no results"
             )
             scan_task.log_message(log_message, log_level=DEBUG)
             return NO_DATA
@@ -154,7 +154,7 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
         processor_out = processor.process(fact_value, dependencies)
     except Exception:  # pylint: disable=broad-except
         log_message = (
-            f"FAILED POST PROCESSING {host}. "
+            f"FAILED POST PROCESSING {host}."
             f" Processor for {fact_key} got value {fact_value},"
             f" returned {traceback.format_exc()}"
         )
