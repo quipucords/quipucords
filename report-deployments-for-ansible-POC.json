@@ -1,0 +1,32 @@
+{
+    "report_id": 10,
+    "status": "completed",
+    "report_type": "deployments",
+    "report_version": "1.1.5.b7189bb7063ef92e4d35580f330dc824b237a151",
+    "report_platform_id": "93db5300-1632-4b68-a74e-e861f35fa520",
+    "system_fingerprints": [
+        {
+            "metadata": {
+                "name": {
+                    "server_id": "5d9b6899-940c-4171-8295-2eb56d0bbe4a",
+                    "source_name": "ansible",
+                    "source_type": "ansible-controller",
+                    "raw_fact_key": "ansible_controller_host",
+                    "has_sudo": false
+                }
+            },
+            "entitlements": [],
+            "products": [],
+            "name": "54.233.150.173",
+            "sources": [
+                {
+                    "server_id": "5d9b6899-940c-4171-8295-2eb56d0bbe4a",
+                    "source_type": "ansible-controller",
+                    "source_name": "ansible"
+                }
+            ],
+            "deployment_report": 10,
+            "id": 10
+        }
+    ]
+}

@@ -1,0 +1,79 @@
+{
+    "report_type": "details",
+    "report_version": "1.1.5.b7189bb7063ef92e4d35580f330dc824b237a151",
+    "sources": [
+        {
+            "server_id": "5d9b6899-940c-4171-8295-2eb56d0bbe4a",
+            "report_version": "1.1.5.b7189bb7063ef92e4d35580f330dc824b237a151",
+            "source_name": "ansible",
+            "source_type": "ansible-controller",
+            "facts": [
+                {
+                    "ansible_controller_host": "54.233.150.173",
+                    "hosts": [
+                        {
+                            "id": 3,
+                            "name": "172.31.2.182",
+                            "created": "2023-02-07T15:06:07.203295Z",
+                            "last_job": 22,
+                            "modified": "2023-02-07T15:06:07.203313Z"
+                        },
+                        {
+                            "id": 4,
+                            "name": "54.207.107.186",
+                            "created": "2023-02-08T15:04:44.108886Z",
+                            "last_job": 22,
+                            "modified": "2023-02-08T15:04:44.108900Z"
+                        },
+                        {
+                            "id": 1,
+                            "name": "localhost",
+                            "created": "2023-02-07T13:41:19.592350Z",
+                            "last_job": null,
+                            "modified": "2023-02-07T13:41:19.592365Z"
+                        }
+                    ],
+                    "jobs": {
+                        "ids": [
+                            1,
+                            3,
+                            5,
+                            9,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22
+                        ],
+                        "unique_hosts": [
+                            "172.31.2.182",
+                            "18.231.147.210",
+                            "54.207.107.186"
+                        ]
+                    },
+                    "comparison": {
+                        "hosts_in_inventory": [
+                            "172.31.2.182",
+                            "54.207.107.186",
+                            "localhost"
+                        ],
+                        "hosts_only_in_jobs": [
+                            "18.231.147.210"
+                        ],
+                        "number_of_hosts_in_inventory": 3,
+                        "number_of_hosts_only_in_jobs": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "report_id": 10,
+    "report_platform_id": "144f028e-e0a0-482e-9ffb-ea59cb50de42"
+}
