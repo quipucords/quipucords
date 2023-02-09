@@ -18,7 +18,6 @@ class InspectTaskRunner(AnsibleControllerTaskRunner):
         "created",
         "modified",
         "last_job",
-        "inventory",
     ]
     JOB_FIELDS = [
         "id",
@@ -57,40 +56,37 @@ class InspectTaskRunner(AnsibleControllerTaskRunner):
         jobs_response = client.get("/api/v2/jobs/")
         if not jobs_response.ok:
             raise NotImplementedError()
-        jobs = []
-
+        job_ids = []
+        unique_hosts = set()
         # ignoring pagination
         for job in jobs_response.json()["results"]:
-            parsed_job = {field: job.get(field) for field in self.JOB_FIELDS}
+            job_ids.append(job["id"])
             job_events_uri = job["related"]["job_events"]
-            number_of_events, unique_hosts = self.get_job_events(client, job_events_uri)
-            parsed_job["number_of_events"] = number_of_events
-            parsed_job["unique_hosts"] = unique_hosts
-            jobs.append(parsed_job)
-        return jobs
+            unique_hosts |= self.get_hosts_from_job_events(client, job_events_uri)
+        return {"ids": job_ids, "unique_hosts": unique_hosts}
 
-    def get_job_events(self, client, job_events_uri):
+    def get_hosts_from_job_events(self, client, job_events_uri):
         response = client.get(job_events_uri)
         if not response.ok:
             raise NotImplementedError()
             # ignoring pagination once again
         events_data = response.json()
-        number_of_events = events_data["count"]
         unique_hosts = set()
         for event in events_data["results"]:
             unique_hosts.add(event["host_name"])
         # ignore garbage hosts
         unique_hosts -= {"", None}
-        return number_of_events, unique_hosts
+        return unique_hosts
 
     def compare_hosts(self, data: dict):
         hosts_in_inventory = {host["name"] for host in data["hosts"]}
-        hosts_in_jobs = {host for job in data["jobs"] for host in job["unique_hosts"]}
+        hosts_in_jobs = data["jobs"]["unique_hosts"]
         hosts_not_in_inventory = hosts_in_jobs - hosts_in_inventory
         return {
             "hosts_in_inventory": hosts_in_inventory,
-            "hosts_in_jobs": hosts_in_jobs,
-            "hosts_not_in_inventory": hosts_not_in_inventory,
+            "hosts_only_in_jobs": hosts_not_in_inventory,
+            "number_of_hosts_in_inventory": len(hosts_in_inventory),
+            "number_of_hosts_only_in_jobs": len(hosts_not_in_inventory),
         }
 
     @transaction.atomic
