@@ -11,56 +11,17 @@
 """tar.gz renderer for reports."""
 
 import hashlib
-import json
 import logging
-import os
-import tempfile
 
 from rest_framework import renderers
 
 import api.messages as messages
-from api.common.common_report import create_filename, create_tar_buffer
+from api.common.common_report import create_filename, create_tar_buffer, encode_content
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-def create_tempfile(report_data, suffix):
-    """Create a temporary file with the report data."""
-    temporary_file = tempfile.NamedTemporaryFile(delete=False)
-    temp_rep = open(temporary_file.name, "wb")
-    if suffix == "json":
-        myrepcontents = json.dumps(report_data).encode("utf-8")
-    elif suffix == "csv":
-        myrepcontents = str(report_data).encode("utf-8")
-    temp_rep.write(myrepcontents)
-    temp_rep.close()
-    return temporary_file.name
-
-
-def create_hash(report_data, suffix):
-    """Create a temporary file, generate a hash, and delete the file.
-
-    :param: report_data: <dict> or <str> the report data in csv or json format
-    :param: suffix: <str> the file suffix (json or csv)
-    :returns: sha256 hash.
-    """
-    temp_file = create_tempfile(report_data, suffix)  # create a temp file
-    block_size = 65536  # The size of each read from the file
-    # Create the hash object
-    file_hash = hashlib.sha256()
-    with open(temp_file, "rb") as temp_rep:  # Open the file to read it's bytes
-        # Read from the file. Take in the amount declared above
-        file_block = temp_rep.read(block_size)
-        while len(file_block) > 0:  # While there is still data being read
-            file_hash.update(file_block)  # Update the hash
-            # Read the next block from the file
-            file_block = temp_rep.read(block_size)
-        temp_rep.close()
-    os.remove(temp_file)  # remove the temp file
-    return file_hash.hexdigest()  # Get the hexadecimal digest of the hash
 
 
 class ReportsGzipRenderer(renderers.BaseRenderer):
@@ -91,12 +52,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         if any(value is None for value in [details_csv, deployments_csv]):
             return None
 
-        # grab hashes
-        details_json_hash = create_hash(details_json, "json")
-        deployments_json_hash = create_hash(deployments_json, "json")
-        details_csv_hash = create_hash(details_csv, "csv")
-        deployments_csv_hash = create_hash(deployments_csv, "csv")
-
         # create the file names
         details_json_name = create_filename("details", "json", report_id)
         deployments_json_name = create_filename("deployments", "json", report_id)
@@ -106,19 +61,19 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
 
         # map the file names to the file data
         files_data = {
-            details_json_name: details_json,
-            deployments_json_name: deployments_json,
-            details_csv_name: details_csv,
-            deployments_csv_name: deployments_csv,
-            sha256sum_name: details_json_hash
-            + "  details.json\n"
-            + deployments_json_hash
-            + "  deployments.json\n"
-            + details_csv_hash
-            + "  details.csv\n"
-            + deployments_csv_hash
-            + "  deployments.csv",
+            details_json_name: encode_content(details_json, "json"),
+            deployments_json_name: encode_content(deployments_json, "json"),
+            details_csv_name: encode_content(details_csv, "csv"),
+            deployments_csv_name: encode_content(deployments_csv, "csv"),
         }
+
+        # generate hashes
+        sha256sum_content = ""
+        for full_file_name, content in files_data.items():
+            file_name = full_file_name.rsplit("/", 1)[1]
+            sha256 = hashlib.sha256(content).hexdigest()
+            sha256sum_content += f"{sha256}  {file_name}\n"
+        files_data[sha256sum_name] = encode_content(sha256sum_content, "plaintext")
 
         tar_buffer = create_tar_buffer(files_data)
         if tar_buffer is None:
