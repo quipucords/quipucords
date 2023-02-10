@@ -10,6 +10,7 @@
 #
 """Test the reports API."""
 
+import hashlib
 import json
 import sys
 import tarfile
@@ -23,7 +24,7 @@ from rest_framework.serializers import ValidationError
 from api.common.common_report import create_report_version
 from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer, create_hash
+from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 
 
 class ReportsTest(TestCase):
@@ -206,18 +207,6 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
                     sys.exit("Could not identify .json return")
-            else:
-                # verify the hashes
-                name_to_hash = {
-                    "details.json": create_hash(self.details_json, "json"),
-                    "deployments.json": create_hash(self.deployments_json, "json"),
-                    "details.csv": create_hash(details_csv, "csv"),
-                    "deployments.csv": create_hash(deployments_csv, "csv"),
-                }
-                for name, rep_hash in name_to_hash.items():
-                    for line in file_contents:
-                        if name in line:
-                            self.assertIn(rep_hash, line)
 
     # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer_masked(self):
@@ -275,18 +264,6 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
                     sys.exit("Could not identify .json return")
-            else:
-                # verify the hashes
-                name_to_hash = {
-                    "details.json": create_hash(self.details_json, "json"),
-                    "deployments.json": create_hash(self.deployments_json, "json"),
-                    "details.csv": create_hash(details_csv, "csv"),
-                    "deployments.csv": create_hash(deployments_csv, "csv"),
-                }
-                for name, rep_hash in name_to_hash.items():
-                    for line in file_contents:
-                        if name in line:
-                            self.assertIn(rep_hash, line)
 
     def test_reports_gzip_renderer_masked_bad_req(self):
         """Get a tar.gz return for report_id via API with a bad query param."""
@@ -299,3 +276,42 @@ class ReportsTest(TestCase):
                 reports_dict, renderer_context=mock_renderer_context
             )
             self.assertEqual(tar_gz_result, None)
+
+    def test_sha256sum(self):
+        """Ensure SHA256SUM hashes are correct."""
+        reports_dict = self.create_reports_dict()
+        renderer = ReportsGzipRenderer()
+        mock_req = MockRequest(mask_rep=True)
+        mock_renderer_context = {"request": mock_req}
+        tar_gz_result = renderer.render(
+            reports_dict, renderer_context=mock_renderer_context
+        )
+        self.assertNotEqual(tar_gz_result, None)
+        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
+        files = tar.getmembers()
+        # ignore folder name
+        filenames = [file.rsplit("/", 1)[1] for file in tar.getnames()]
+        # tar.getnames() always returns same order as tar.getmembers()
+        filename_to_file = dict(zip(filenames, files))
+        shasum_content = tar.extractfile(filename_to_file["SHA256SUM"]).read().decode()
+        # map calculated hashes for future comparison
+        file2hash = {}
+        for line in shasum_content.splitlines():
+            calculated_hash, hashed_filename = line.split()
+            file2hash[hashed_filename] = calculated_hash
+
+        expected_hashed_filenames = {
+            "details.json",
+            "deployments.json",
+            "details.csv",
+            "deployments.csv",
+        }
+        assert set(file2hash) == expected_hashed_filenames
+        # recalculate hashes
+        new_file2hash = {}
+        for hashed_filename, calculated_hash in file2hash.items():
+            file = filename_to_file[hashed_filename]
+            file_contents = tar.extractfile(file).read()
+            new_hash = hashlib.sha256(file_contents).hexdigest()
+            new_file2hash[hashed_filename] = new_hash
+        assert new_file2hash == file2hash, "SHA256SUM content is incorrect"
