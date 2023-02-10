@@ -14,7 +14,7 @@ import logging
 
 from rest_framework import renderers
 
-from api.common.common_report import create_tar_buffer
+from api.common.common_report import create_tar_buffer, encode_content
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -33,5 +33,8 @@ class InsightsGzipRenderer(renderers.BaseRenderer):
         insights_dict = data
         if not insights_dict:
             return None
-
-        return create_tar_buffer(insights_dict)
+        insights_encoded = {
+            file_name: encode_content(json_data, "json")
+            for file_name, json_data in insights_dict.items()
+        }
+        return create_tar_buffer(insights_encoded)
