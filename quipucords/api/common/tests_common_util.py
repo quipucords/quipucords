@@ -17,7 +17,12 @@ from collections import OrderedDict
 
 from django.test import TestCase
 
-from api.common.common_report import CSVHelper, create_tar_buffer, extract_tar_gz
+from api.common.common_report import (
+    CSVHelper,
+    create_tar_buffer,
+    encode_content,
+    extract_tar_gz,
+)
 
 
 class CommonUtilTest(TestCase):
@@ -103,10 +108,16 @@ class CommonUtilTest(TestCase):
 
     def test_create_tar_buffer(self):
         """Test create_tar_buffer method."""
-        files_data = dict()
-        files_data["test0.json"] = {"id": 1, "report": [{"key": "value"}]}
-        files_data["test1.json"] = {"id": 2, "report": [{"key": "value"}]}
-        tar_buffer = create_tar_buffer(files_data)
+        files_data = {
+            "test0.json": {"id": 1, "report": [{"key": "value"}]},
+            "test1.json": {"id": 2, "report": [{"key": "value"}]},
+        }
+        # create tar buffer expects encoded data
+        files_data_encoded = {
+            file_name: encode_content(data, "json")
+            for file_name, data in files_data.items()
+        }
+        tar_buffer = create_tar_buffer(files_data_encoded)
         self.assertIsInstance(tar_buffer, (io.BytesIO))
         self.assertIn("getvalue", dir(tar_buffer))
         tar = tarfile.open(fileobj=tar_buffer)
@@ -135,10 +146,16 @@ class CommonUtilTest(TestCase):
 
     def test_extract_tar_gz_content_good(self):
         """Test extracting files by passing a BytesIO object."""
-        files_data = dict()
-        files_data["test0.json"] = {"id": 1, "report": [{"key": "value"}]}
-        files_data["test1.json"] = {"id": 2, "report": [{"key": "value"}]}
-        tar_buffer = create_tar_buffer(files_data)
+        files_data = {
+            "test0.json": {"id": 1, "report": [{"key": "value"}]},
+            "test1.json": {"id": 2, "report": [{"key": "value"}]},
+        }
+        # create tar buffer expects encoded data
+        files_data_encoded = {
+            file_name: encode_content(data, "json")
+            for file_name, data in files_data.items()
+        }
+        tar_buffer = create_tar_buffer(files_data_encoded)
         self.assertIsInstance(tar_buffer, (io.BytesIO))
         # bytesIO
         file_contents = extract_tar_gz(tar_buffer)
