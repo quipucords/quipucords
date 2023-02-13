@@ -16,6 +16,7 @@ import os
 import platform
 import subprocess
 import sys
+from functools import lru_cache
 
 from quipucords.release import infer_version
 
@@ -38,6 +39,7 @@ def commit():
     return commit_info
 
 
+@lru_cache
 def server_version():
     """Return server version."""
     return f"{infer_version()}.{commit()}"

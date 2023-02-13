@@ -20,6 +20,12 @@ from django.test import TestCase
 from . import environment, release
 
 
+@pytest.fixture(autouse=True)
+def cleanup_server_version_cache():
+    """Clean server version cache for these tests."""
+    environment.server_version.cache_clear()
+
+
 class EnvironmentTest(TestCase):
     """Tests against the environment functions."""
 
