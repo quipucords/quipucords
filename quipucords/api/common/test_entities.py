@@ -284,3 +284,78 @@ class TestHostEntity:
         )
         host = HostEntity(mocked_fingerprint, None)
         assert host.cores_per_socket == expected_result
+
+    @pytest.mark.parametrize(
+        "role, expected_result",
+        (
+            (
+                "Red Hat Enterprise Linux Workstation",
+                {"role": "Red Hat Enterprise Linux Workstation"},
+            ),
+            (
+                "Red Hat Enterprise Linux Server",
+                {"role": "Red Hat Enterprise Linux Server"},
+            ),
+            (
+                "Red Hat Enterprise Linux Compute Node",
+                {"role": "Red Hat Enterprise Linux Compute Node"},
+            ),
+            ("Red Hat ENterprise", {}),
+            ("Workstation", {}),
+            ("Enterprise Linux Server", {}),
+            (None, {}),
+        ),
+    )
+    def test_role_values(self, mocker, role, expected_result):
+        """Test system purpose role logic."""
+        mocked_fingerprint = mocker.Mock(system_role=role)
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.system_purpose == expected_result
+
+    @pytest.mark.parametrize(
+        "sla, expected_result",
+        (
+            ("Premium", {"sla": "Premium"}),
+            ("Self-Support", {"sla": "Self-Support"}),
+            ("Standard", {"sla": "Standard"}),
+            ("Dev-Professional", {}),
+            (None, {}),
+        ),
+    )
+    def test_sla_values(self, mocker, sla, expected_result):
+        """Test system purpose SLA logic."""
+        mocked_fingerprint = mocker.Mock(system_service_level_agreement=sla)
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.system_purpose == expected_result
+
+    @pytest.mark.parametrize(
+        "usage, expected_result",
+        (
+            ("Development/Test", {"usage": "Development/Test"}),
+            ("Production", {"usage": "Production"}),
+            ("Disaster Recovery", {"usage": "Disaster Recovery"}),
+            ("Development", {}),
+            ("prod", {}),
+            (None, {}),
+        ),
+    )
+    def test_usage_values(self, mocker, usage, expected_result):
+        """Test system purpose usage logic."""
+        mocked_fingerprint = mocker.Mock(system_usage_type=usage)
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.system_purpose == expected_result
+
+    def test_system_purpose(self, mocker):
+        """Test system purpose with all possible fields."""
+        role = "Red Hat Enterprise Linux Workstation"
+        sla = "Premium"
+        usage = "Production"
+        mocked_fingerprints = mocker.Mock(
+            system_role=role,
+            system_service_level_agreement=sla,
+            system_usage_type=usage,
+        )
+        expected_result = {"role": role, "sla": sla, "usage": usage}
+
+        host = HostEntity(mocked_fingerprints, None)
+        assert host.system_purpose == expected_result

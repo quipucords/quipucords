@@ -46,6 +46,14 @@ class FactsetSerializer(Serializer):
     facts = FactsSerializer(source="*")
 
 
+class SystemPurposeSerializer(NotEmptyMixin, Serializer):
+    """Serializer for the field system_purpose of HBI system profile."""
+
+    role = fields.CharField(max_length=37, **default_kwargs)
+    usage = fields.CharField(max_length=17, **default_kwargs)
+    sla = fields.CharField(max_length=12, **default_kwargs)
+
+
 class SystemProfileSerializer(NotEmptyMixin, Serializer):
     """
     Serializer for HBI system profile.
@@ -68,6 +76,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     os_release = fields.CharField(max_length=100, **default_kwargs)
     arch = fields.CharField(source="architecture", max_length=50, **default_kwargs)
     cloud_provider = fields.CharField(**default_kwargs)
+    system_purpose = SystemPurposeSerializer(**default_kwargs)
 
 
 class YupanaHostSerializer(NotEmptyMixin, Serializer):
