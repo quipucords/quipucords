@@ -21,6 +21,11 @@ from typing import Dict, List
 from django.conf import settings
 from django.db.models import F, Q, Value
 
+from api.common.enumerators import (
+    SystemPurposeRole,
+    SystemPurposeSla,
+    SystemPurposeUsage,
+)
 from api.models import DeploymentsReport, Product, Source, SystemFingerprint
 from compat.db import StringAgg
 
@@ -153,6 +158,26 @@ class HostEntity:
         if value and value.lower() in valid_providers:
             return value
         return None
+
+    @property
+    def system_purpose(self):
+        """Return system_purpose dictionary."""
+        sla = self._fingerprints.system_service_level_agreement
+        system_purpose_map = (
+            ("role", self._fingerprints.system_role, SystemPurposeRole),
+            ("usage", self._fingerprints.system_usage_type, SystemPurposeUsage),
+            ("sla", sla, SystemPurposeSla),
+        )
+        _system_purpose = {}
+        for name, attr, enum in system_purpose_map:
+            # since inventory expects specific values for each key in system_purpose
+            # dict, we need to check their values
+            # ref: https://github.com/RedHatInsights/insights-host-inventory/blob/b2c067f/swagger/system_profile.spec.yaml#L526-L547  # noqa: E501
+            for enum_item in enum:
+                if attr == enum_item.value:
+                    _system_purpose[name] = attr
+                    break
+        return _system_purpose
 
     @property
     def products(self) -> set:
