@@ -14,7 +14,7 @@ from functools import partial
 
 from django.conf import settings
 from rest_framework import fields
-from rest_framework.serializers import Serializer, SerializerMethodField
+from rest_framework.serializers import Serializer, SerializerMethodField, empty
 
 from api.common.common_report import create_filename
 from api.common.entities import HostEntity
@@ -98,14 +98,13 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
     def get_tags(self, host: HostEntity):
         """Format tags to appear as inventory labels."""
         data_collector = settings.QPC_INSIGHTS_DATA_COLLECTOR_LABEL
-        hostname = socket.getfqdn()
-        ip_address = socket.gethostbyname(hostname)
+
         tags = {
             "data-collector": data_collector,
             "last-discovered": host.last_discovered,
-            "scanner-hostname": hostname,
+            "scanner-hostname": self.context["hostname"],
             "scanner-id": get_server_id(),
-            "scanner-ip-address": ip_address,
+            "scanner-ip-address": self.context["ipaddress"],
             "scanner-version": server_version(),
         }
         # this differ from actual HBI format due to yupana constraints
@@ -174,6 +173,15 @@ class YupanaPayloadSerializer(Serializer):
 
     metadata = YupanaMetadataSerializer(source="*")
     slices = fields.DictField(child=YupanaReportSliceSerializer())
+
+    def __init__(self, instance=None, data=empty, context=None, **kwargs):
+        """Override serializer initialization."""
+        if context is None:
+            context = {}
+        hostname = socket.getfqdn()
+        ipaddress = socket.gethostbyname(hostname)
+        context.update(hostname=hostname, ipaddress=ipaddress)
+        super().__init__(instance=instance, data=data, context=context, **kwargs)
 
     def to_representation(self, instance):
         """Format ReportEntity and add filenames for tarball construction."""
