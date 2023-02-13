@@ -59,6 +59,8 @@ pip-tools = "^6.12.1"
 pytest-docker-tools = "^3.1.3"
 watchdog = {extras = ["watchmedo"], version = "^2.2.1"}
 pybuild-deps = "*"
+pytest-profiling = "^1.7.0"
+ipython = "^8.10.0"
 
 [tool.flakeheaven]
 base = "https://raw.githubusercontent.com/quipucords/linting/main/base-flakeheaven.toml"
