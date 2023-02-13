@@ -46,7 +46,7 @@ class RawFactComparator:
 
     Note:
     Distinct "child" facts coming from the same "parent" (i.e.
-    "system_purpose_json__addons" and "system_purpose_json__usage_type") are considered
+    "system_purpose_json__addons" and "system_purpose_json__usage") are considered
     equal as they are comming from the fact.
     """
 

@@ -1215,7 +1215,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         self._add_fact_to_fingerprint(
             source,
-            "system_purpose_json__usage_type",
+            "system_purpose_json__usage",
             fact,
             "system_usage_type",
             fingerprint,
