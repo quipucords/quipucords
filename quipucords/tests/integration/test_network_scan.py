@@ -225,7 +225,7 @@ def fingerprint_fact_map():
         "system_purpose": "system_purpose_json",
         "system_role": "system_purpose_json__role",
         "system_service_level_agreement": "system_purpose_json__service_level_agreement",  # noqa:E501
-        "system_usage_type": "system_purpose_json__usage_type",
+        "system_usage_type": "system_purpose_json__usage",
         "system_user_count": "system_user_count",
         "user_login_history": "user_login_history",
         "virtualized_type": "virt_type",

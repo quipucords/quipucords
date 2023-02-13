@@ -69,7 +69,7 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "system_purpose": "system_purpose_json",
     "system_role": "system_purpose_json__role",
     "system_service_level_agreement": "system_purpose_json__service_level_agreement",
-    "system_usage_type": "system_purpose_json__usage_type",
+    "system_usage_type": "system_purpose_json__usage",
     "system_user_count": "system_user_count",
     "user_login_history": "user_login_history",
     "virtualized_type": "virt_type",
@@ -473,7 +473,7 @@ class EngineTest(TestCase):
                 fingerprint.get("system_service_level_agreement"),
             )
             self.assertEqual(
-                system_purpose_json.get("usage_type", None),
+                system_purpose_json.get("usage", None),
                 fingerprint.get("system_usage_type"),
             )
         else:
@@ -610,7 +610,7 @@ class EngineTest(TestCase):
         system_purpose_json["service_level_agreement"] = "self-service"
         self._create_network_fingerprint(system_purpose_json=system_purpose_json)
 
-        system_purpose_json["usage_type"] = "dev"
+        system_purpose_json["usage"] = "dev"
         self._create_network_fingerprint(system_purpose_json=system_purpose_json)
 
         system_purpose_json["addons"] = ["ibm"]
@@ -625,7 +625,7 @@ class EngineTest(TestCase):
             "_version": "1",
             "role": "server",
             "service_level_agreement": "self-support",
-            "usage_type": "test",
+            "usage": "test",
             "addons": ["a", "b", "c"],
         }
 
