@@ -29,8 +29,8 @@ class FeatureFlag:
         """Return attribute value."""
         try:
             return getattr(self, feature_name)
-        except AttributeError:
-            raise ValueError(f"{feature_name=} is not a valid input.")
+        except AttributeError as exception:
+            raise ValueError(f"{feature_name=} is not a valid input.") from exception
 
     @classmethod
     def get_feature_flags_from_env(cls):

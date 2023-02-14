@@ -26,11 +26,7 @@ class ServerInformation(models.Model):
 
     def __str__(self):
         """Convert to string."""
-        return (
-            "{"
-            + "id:{}, global_identifier:{}".format(self.id, self.global_identifier)
-            + "}"
-        )
+        return f"{{id:{self.id}, global_identifier:{self.global_identifier}}}"
 
     @staticmethod
     @transaction.atomic

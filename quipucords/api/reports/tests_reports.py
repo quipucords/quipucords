@@ -10,6 +10,7 @@
 #
 """Test the reports API."""
 
+import hashlib
 import json
 import sys
 import tarfile
@@ -23,7 +24,7 @@ from rest_framework.serializers import ValidationError
 from api.common.common_report import create_report_version
 from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer, create_hash
+from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 
 
 class ReportsTest(TestCase):
@@ -58,7 +59,6 @@ class ReportsTest(TestCase):
 
     def tearDown(self):
         """Create test case tearDown."""
-        pass
 
     def create_details_report(self, data):
         """Call the create endpoint."""
@@ -171,7 +171,7 @@ class ReportsTest(TestCase):
 
         # pylint: disable=line-too-long, consider-using-f-string
         details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
             % (
                 self.report_version,
                 reports_dict.get("details_json").get("report_platform_id"),
@@ -207,18 +207,6 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
                     sys.exit("Could not identify .json return")
-            else:
-                # verify the hashes
-                name_to_hash = {
-                    "details.json": create_hash(self.details_json, "json"),
-                    "deployments.json": create_hash(self.deployments_json, "json"),
-                    "details.csv": create_hash(details_csv, "csv"),
-                    "deployments.csv": create_hash(deployments_csv, "csv"),
-                }
-                for name, rep_hash in name_to_hash.items():
-                    for line in file_contents:
-                        if name in line:
-                            self.assertIn(rep_hash, line)
 
     # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer_masked(self):
@@ -239,7 +227,7 @@ class ReportsTest(TestCase):
         )  # noqa
         # pylint: disable=line-too-long, consider-using-f-string
         details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
             % (
                 self.report_version,
                 reports_dict.get("details_json").get("report_platform_id"),
@@ -276,18 +264,6 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
                     sys.exit("Could not identify .json return")
-            else:
-                # verify the hashes
-                name_to_hash = {
-                    "details.json": create_hash(self.details_json, "json"),
-                    "deployments.json": create_hash(self.deployments_json, "json"),
-                    "details.csv": create_hash(details_csv, "csv"),
-                    "deployments.csv": create_hash(deployments_csv, "csv"),
-                }
-                for name, rep_hash in name_to_hash.items():
-                    for line in file_contents:
-                        if name in line:
-                            self.assertIn(rep_hash, line)
 
     def test_reports_gzip_renderer_masked_bad_req(self):
         """Get a tar.gz return for report_id via API with a bad query param."""
@@ -300,3 +276,42 @@ class ReportsTest(TestCase):
                 reports_dict, renderer_context=mock_renderer_context
             )
             self.assertEqual(tar_gz_result, None)
+
+    def test_sha256sum(self):
+        """Ensure SHA256SUM hashes are correct."""
+        reports_dict = self.create_reports_dict()
+        renderer = ReportsGzipRenderer()
+        mock_req = MockRequest(mask_rep=True)
+        mock_renderer_context = {"request": mock_req}
+        tar_gz_result = renderer.render(
+            reports_dict, renderer_context=mock_renderer_context
+        )
+        self.assertNotEqual(tar_gz_result, None)
+        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
+        files = tar.getmembers()
+        # ignore folder name
+        filenames = [file.rsplit("/", 1)[1] for file in tar.getnames()]
+        # tar.getnames() always returns same order as tar.getmembers()
+        filename_to_file = dict(zip(filenames, files))
+        shasum_content = tar.extractfile(filename_to_file["SHA256SUM"]).read().decode()
+        # map calculated hashes for future comparison
+        file2hash = {}
+        for line in shasum_content.splitlines():
+            calculated_hash, hashed_filename = line.split()
+            file2hash[hashed_filename] = calculated_hash
+
+        expected_hashed_filenames = {
+            "details.json",
+            "deployments.json",
+            "details.csv",
+            "deployments.csv",
+        }
+        assert set(file2hash) == expected_hashed_filenames
+        # recalculate hashes
+        new_file2hash = {}
+        for hashed_filename, calculated_hash in file2hash.items():
+            file = filename_to_file[hashed_filename]
+            file_contents = tar.extractfile(file).read()
+            new_hash = hashlib.sha256(file_contents).hexdigest()
+            new_file2hash[hashed_filename] = new_hash
+        assert new_file2hash == file2hash, "SHA256SUM content is incorrect"

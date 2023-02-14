@@ -164,6 +164,7 @@ def expected_network_scan_facts():
         "subman_virt_host_type",
         "subman_virt_is_guest",
         "subman_virt_uuid",
+        "subscription_manager_id",
         "system_memory_bytes",
         "system_purpose_json",
         "system_user_count",
@@ -216,7 +217,7 @@ def fingerprint_fact_map():
         "os_version": "etc_release_version",
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
-        "subscription_manager_id": "subman_virt_uuid",
+        "subscription_manager_id": "subscription_manager_id",
         "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_yum_history/date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
         "system_last_checkin_date": "connection_timestamp",
@@ -382,12 +383,12 @@ class TestNetworkScan:
         assert isinstance(report_details_facts, dict)
         assert set(report_details_facts.keys()) == expected_network_scan_facts
 
-        some_expected_facts = dict(
-            etc_release_name="Red Hat Enterprise Linux",
-            redhat_packages_gpg_is_redhat=True,
-            date_machine_id=datetime.utcnow().date().isoformat(),
-            user_has_sudo=True,
-        )
+        some_expected_facts = {
+            "etc_release_name": "Red Hat Enterprise Linux",
+            "redhat_packages_gpg_is_redhat": True,
+            "date_machine_id": datetime.utcnow().date().isoformat(),
+            "user_has_sudo": True,
+        }
         assert report_details_facts | some_expected_facts == report_details_facts
 
     @pytest.fixture
@@ -399,13 +400,13 @@ class TestNetworkScan:
         """
         metadata = {}
         for fingerprint_fact, raw_fact in fingerprint_fact_map.items():
-            metadata[fingerprint_fact] = dict(
-                server_id=mock.ANY,
-                source_name=self.SOURCE_NAME,
-                source_type=self.SOURCE_TYPE,
-                raw_fact_key=RawFactComparator(raw_fact),
-                has_sudo=True,
-            )
+            metadata[fingerprint_fact] = {
+                "server_id": mock.ANY,
+                "source_name": self.SOURCE_NAME,
+                "source_type": self.SOURCE_TYPE,
+                "raw_fact_key": RawFactComparator(raw_fact),
+                "has_sudo": True,
+            }
         return metadata
 
     def test_deployments_report(  # pylint: disable=too-many-arguments

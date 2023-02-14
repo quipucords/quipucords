@@ -92,20 +92,20 @@ class ConnectResultStore:
         sys_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
-            message = "%s with %s" % (name, credential.name)
+            message = f"{name} with {credential.name}"
             self.scan_task.increment_stats(
                 message, increment_sys_scanned=True, prefix="CONNECTED"
             )
         elif status == SystemConnectionResult.UNREACHABLE:
-            message = "%s is UNREACHABLE" % (name)
+            message = f"{name} is UNREACHABLE"
             self.scan_task.increment_stats(
                 message, increment_sys_unreachable=True, prefix="FAILED"
             )
         else:
             if credential is not None:
-                message = "%s with %s" % (name, credential.name)
+                message = f"{name} with {credential.name}"
             else:
-                message = "%s has no valid credentials" % name
+                message = f"{name} has no valid credentials"
 
             self.scan_task.increment_stats(
                 message, increment_sys_failed=True, prefix="FAILED"
@@ -163,13 +163,11 @@ class ConnectTaskRunner(ScanTaskRunner):
             check_manager_interrupt(manager_interrupt.value)
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
-                message = (
-                    "Skipping credential %s.  No remaining hosts." % credential.name
-                )
+                message = f"Skipping credential {credential.name}. No remaining hosts."
                 self.scan_task.log_message(message)
                 break
 
-            message = "Attempting credential %s." % credential.name
+            message = f"Attempting credential {credential.name}."
             self.scan_task.log_message(message)
 
             try:
@@ -188,9 +186,8 @@ class ConnectTaskRunner(ScanTaskRunner):
             except AnsibleRunnerException as ansible_error:
                 remaining_hosts_str = ", ".join(result_store.remaining_hosts())
                 error_message = (
-                    "Connect scan task failed with credential %s."
-                    " Error: %s Hosts: %s"
-                    % (credential.name, ansible_error, remaining_hosts_str)
+                    f"Connect scan task failed with credential {credential.name}."
+                    f" Error: {ansible_error} Hosts: {remaining_hosts_str}"
                 )
                 return error_message, ScanTask.FAILED
 
@@ -247,7 +244,7 @@ def _connect(  # pylint: disable=too-many-arguments
 
     log_message = (
         "START CONNECT PROCESSING GROUPS"
-        " with use_paramiko: %s and %d forks" % (use_paramiko, forks)
+        f" with use_paramiko: {use_paramiko} and {forks:d} forks"
     )
     scan_task.log_message(log_message)
     for idx, group_name in enumerate(group_names):
@@ -255,12 +252,11 @@ def _connect(  # pylint: disable=too-many-arguments
         group_ips = (
             inventory.get("all").get("children").get(group_name).get("hosts").keys()
         )
-        group_ips = ["'%s'" % ip for ip in group_ips]
+        group_ips = [f"'{ip}'" for ip in group_ips]
         group_ip_string = ", ".join(group_ips)
         log_message = (
-            "START CONNECT PROCESSING GROUP %d of %d. "
-            "About to connect to hosts [%s]"
-            % ((idx + 1), len(group_names), group_ip_string)
+            f"START CONNECT PROCESSING GROUP {(idx + 1):d} of {len(group_names):d}. "
+            f"About to connect to hosts [{group_ip_string}]"
         )
         scan_task.log_message(log_message)
         call = ConnectResultCallback(
@@ -277,9 +273,9 @@ def _connect(  # pylint: disable=too-many-arguments
             settings.BASE_DIR, "scanner/network/runner/connect.yml"
         )
         cmdline_list = []
-        vault_file_path = "--vault-password-file=%s" % (settings.DJANGO_SECRET_PATH)
+        vault_file_path = f"--vault-password-file={settings.DJANGO_SECRET_PATH}"
         cmdline_list.append(vault_file_path)
-        forks_cmd = "--forks=%s" % (forks)
+        forks_cmd = f"--forks={forks}"
         cmdline_list.append(forks_cmd)
         if use_paramiko:
             cmdline_list.append("--connection=paramiko")  # paramiko conn
@@ -303,7 +299,7 @@ def _connect(  # pylint: disable=too-many-arguments
                 verbosity=verbosity_lvl,
             )
         except Exception as err_msg:
-            raise AnsibleRunnerException(err_msg)
+            raise AnsibleRunnerException(err_msg) from err_msg
 
         final_status = runner_obj.status
         if final_status != "successful":
@@ -345,7 +341,7 @@ def _handle_ssh_passphrase(credential):
     ):
         keyfile = credential.get("ssh_keyfile")
         passphrase = decrypt_data_as_unicode(credential["ssh_passphrase"])
-        cmd_string = "ssh-add {}".format(keyfile)
+        cmd_string = f"ssh-add {keyfile}"
 
         try:
             child = pexpect.spawn(cmd_string, timeout=12)

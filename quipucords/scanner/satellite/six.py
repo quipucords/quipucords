@@ -77,9 +77,7 @@ ENTITLEMENT_TYPE = "type"
 ENTITLEMENTS = "entitlements"
 
 ORGS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations"
-HOSTS_V1_URL = (
-    "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
-)
+HOSTS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
 HOSTS_FIELDS_V1_URL = (
     "https://{sat_host}:{port}/katello/api"
     "/v2/organizations/{org_id}/systems/{host_id}"
@@ -90,7 +88,7 @@ HOSTS_SUBS_V1_URL = (
 )
 HOSTS_V2_URL = "https://{sat_host}:{port}/api/v2/hosts"
 HOSTS_FIELDS_V2_URL = "https://{sat_host}:{port}/api/v2/hosts/{host_id}"
-HOSTS_SUBS_V2_URL = "https://{sat_host}:{port}/" "api/v2/hosts/{host_id}/subscriptions"
+HOSTS_SUBS_V2_URL = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
 
 QUERY_PARAMS_FIELDS = {"fields": "full"}
 
@@ -291,12 +289,12 @@ def request_host_details(
         the response & url for host_fields request, and the
         response & url for the host_subs request.
     """
-    unique_name = "%s_%s" % (host_name, host_id)
+    unique_name = f"{host_name}_{host_id}"
     host_fields_json = {}
     host_subscriptions_json = {}
     results = {}
     try:
-        message = "REQUESTING HOST DETAILS: %s" % unique_name
+        message = f"REQUESTING HOST DETAILS: {unique_name}"
         scan_task.log_message(message, logging.INFO, logging_options)
         host_fields_response, host_fields_url = utils.execute_request(
             scan_task,
@@ -309,8 +307,8 @@ def request_host_details(
         # pylint: disable=no-member
         if host_fields_response.status_code != requests.codes.ok:
             raise SatelliteException(
-                "Invalid response code %s"
-                " for url: %s" % (host_fields_response.status_code, host_fields_url)
+                f"Invalid response code {host_fields_response.status_code}"
+                f" for url: {host_fields_url}"
             )
         host_subscriptions_response, host_subscriptions_url = utils.execute_request(
             scan_task,
@@ -320,38 +318,36 @@ def request_host_details(
             options=request_options,
         )
         # pylint: disable=no-member
-        if (
-            host_subscriptions_response.status_code == 400
-            or host_subscriptions_response.status_code == 404
-        ):
+        if host_subscriptions_response.status_code in (400, 404):
             content_type = host_subscriptions_response.headers.get(CONTENT_TYPE)
             if content_type and APP_JSON in content_type:
-                message = "Invalid status code %s for url: %s. Response: %s" % (
-                    host_subscriptions_response.status_code,
-                    host_subscriptions_url,
-                    host_subscriptions_response.json(),
+                message = (
+                    f"Invalid status code {host_subscriptions_response.status_code}"
+                    f" for url: {host_subscriptions_url}."
+                    f" Response: {host_subscriptions_response.json()}"
                 )
                 scan_task.log_message(message, logging.WARN, logging_options)
             else:
-                message = "Invalid status code %s for url: %s. " "Response not JSON" % (
-                    host_subscriptions_response.status_code,
-                    host_subscriptions_url,
+                message = (
+                    f"Invalid status code {host_subscriptions_response.status_code}"
+                    f" for url: {host_subscriptions_url}."
+                    " Response not JSON"
                 )
                 scan_task.log_message(message, logging.WARN, logging_options)
         elif host_subscriptions_response.status_code != requests.codes.ok:
             raise SatelliteException(
-                "Invalid response code %s for url: %s"
-                % (host_subscriptions_response.status_code, host_subscriptions_url)
+                f"Invalid response code {host_subscriptions_response.status_code}"
+                f" for url: {host_subscriptions_url}"
             )
         system_inspection_result = SystemInspectionResult.SUCCESS
         host_fields_json = host_fields_response.json()
         host_subscriptions_json = host_subscriptions_response.json()
     except SatelliteException as sat_error:
-        error_message = "Satellite 6 unknown error encountered: %s\n" % sat_error
+        error_message = f"Satellite 6 unknown error encountered: {sat_error}\n"
         logger.error(error_message)
         system_inspection_result = SystemInspectionResult.FAILED
     except Timeout as timeout_error:
-        error_message = "Satellite 6 timeout error encountered: %s\n" % timeout_error
+        error_message = f"Satellite 6 timeout error encountered: {timeout_error}\n"
         logger.error(error_message)
         system_inspection_result = SystemInspectionResult.FAILED
     results["unique_name"] = unique_name
@@ -422,8 +418,7 @@ class SatelliteSixV1(SatelliteInterface):
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
-                    "Invalid response code %s"
-                    " for url: %s" % (response.status_code, url)
+                    f"Invalid response code {response.status_code} for url: {url}"
                 )
             jsonresult = response.json()
             for result in jsonresult.get(RESULTS, []):
@@ -448,8 +443,7 @@ class SatelliteSixV1(SatelliteInterface):
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
-                    "Invalid response code %s"
-                    " for url: %s" % (response.status_code, url)
+                    f"Invalid response code {response.status_code} for url: {url}"
                 )
             systems_count += response.json().get("total", 0)
             self.connect_scan_task.update_stats(
@@ -480,8 +474,8 @@ class SatelliteSixV1(SatelliteInterface):
                 # pylint: disable=no-member
                 if response.status_code != requests.codes.ok:
                     raise SatelliteException(
-                        "Invalid response code %s"
-                        " for url: %s" % (response.status_code, url)
+                        f"Invalid response code {response.status_code}"
+                        f" for url: {url}"
                     )
                 jsonresult = response.json()
                 for result in jsonresult.get(RESULTS, []):
@@ -489,7 +483,7 @@ class SatelliteSixV1(SatelliteInterface):
                     host_id = result.get(ID)
 
                     if host_name is not None and host_id is not None:
-                        unique_name = "%s_%s" % (host_name, host_id)
+                        unique_name = f"{host_name}_{host_id}"
                         hosts.append(unique_name)
                         self.record_conn_result(unique_name, credential)
 
@@ -575,8 +569,8 @@ class SatelliteSixV1(SatelliteInterface):
                     # pylint: disable=no-member
                     if response.status_code != requests.codes.ok:
                         raise SatelliteException(
-                            "Invalid response code %s"
-                            " for url: %s" % (response.status_code, url)
+                            f"Invalid response code {response.status_code}"
+                            f" for url: {url}"
                         )
                     jsonresult = response.json()
 
@@ -616,11 +610,11 @@ class SatelliteSixV2(SatelliteInterface):
         # pylint: disable=no-member
         if response.status_code != requests.codes.ok:
             raise SatelliteException(
-                "Invalid response code %s for url: %s" % (response.status_code, url)
+                f"Invalid response code {response.status_code} for url: {url}"
             )
         systems_count = response.json().get("total", 0)
         self.connect_scan_task.update_stats(
-            "INITIAL STATELLITE STATS", sys_count=systems_count
+            "INITIAL SATELLITE STATS", sys_count=systems_count
         )
         return systems_count
 
@@ -642,8 +636,7 @@ class SatelliteSixV2(SatelliteInterface):
             # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
-                    "Invalid response code %s"
-                    " for url: %s" % (response.status_code, url)
+                    f"Invalid response code {response.status_code} for url: {url}"
                 )
             jsonresult = response.json()
             for result in jsonresult.get(RESULTS, []):
@@ -651,7 +644,7 @@ class SatelliteSixV2(SatelliteInterface):
                 host_id = result.get(ID)
 
                 if host_name is not None and host_id is not None:
-                    unique_name = "%s_%s" % (host_name, host_id)
+                    unique_name = f"{host_name}_{host_id}"
                     hosts.append(unique_name)
                     self.record_conn_result(unique_name, credential)
 
@@ -731,8 +724,8 @@ class SatelliteSixV2(SatelliteInterface):
                 # pylint: disable=no-member
                 if response.status_code != requests.codes.ok:
                     raise SatelliteException(
-                        "Invalid response code %s"
-                        " for url: %s" % (response.status_code, url)
+                        f"Invalid response code {response.status_code}"
+                        f" for url: {url}"
                     )
                 jsonresult = response.json()
 

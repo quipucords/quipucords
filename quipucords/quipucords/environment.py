@@ -107,7 +107,7 @@ def startup():
     logger.info("Python: %s", python_version())
     module_list = []
     for name, value in modules().items():
-        mod = "{} - {}".format(name, value)
+        mod = f"{name} - {value}"
         module_list.append(mod)
 
     logger.info("Modules: %s", ", ".join(module_list))
@@ -115,7 +115,7 @@ def startup():
     for key, value in os.environ.items():
         if "password" in key.lower():
             value = "*" * 8
-        env = "{} - {}".format(key, value)
+        env = f"{key} - {value}"
         env_list.append(env)
     mark = "-" * 20
     logger.info("%s BEGIN ENVIRONMENT VARIABLES %s", mark, mark)

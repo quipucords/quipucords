@@ -85,28 +85,18 @@ class ScanJob(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "scan:{}, "
-            "scan_type:{}, "
-            "status:{}, "
-            "options: {}, "
-            "report_id: {}, "
-            "start_time: {}, "
-            "end_time: {}, "
-            "connection_results: {}, "
-            "inspection_results: {}".format(
-                self.id,
-                self.scan_id,
-                self.scan_type,
-                self.status,
-                self.options_id,
-                self.report_id,
-                self.start_time,
-                self.end_time,
-                self.connection_results_id,
-                self.inspection_results_id,
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" scan:{self.scan_id},"
+            f" scan_type:{self.scan_type},"
+            f" status:{self.status},"
+            f" options: {self.options_id},"
+            f" report_id: {self.report_id},"
+            f" start_time: {self.start_time},"
+            f" end_time: {self.end_time},"
+            f" connection_results: {self.connection_results_id},"
+            f" inspection_results: {self.inspection_results_id}"
+            "}"
         )
 
     class Meta:
@@ -181,22 +171,21 @@ class ScanJob(models.Model):
     def log_current_status(self, show_status_message=False, log_level=logging.INFO):
         """Log current status of task."""
         if show_status_message:
-            message = "STATE UPDATE (%s)." "  Additional State information: %s" % (
-                self.status,
-                self.status_message,
+            message = (
+                f"STATE UPDATE ({self.status})."
+                f"  Additional State information: {self.status_message}"
             )
         else:
-            message = "STATE UPDATE (%s)" % (self.status)
+            message = f"STATE UPDATE ({self.status})"
 
         self.log_message(message, log_level=log_level)
 
     def log_message(self, message, log_level=logging.INFO):
         """Log a message for this job."""
         elapsed_time = self._compute_elapsed_time()
-        actual_message = "Job %d (%s, elapsed_time: %ds) - " % (
-            self.id,
-            self.scan_type,
-            elapsed_time,
+        actual_message = (
+            f"Job {self.id:d}"
+            f" ({self.scan_type}, elapsed_time: {elapsed_time:.0f}s) - "
         )
         actual_message += message
         logger.log(log_level, actual_message)
@@ -211,7 +200,7 @@ class ScanJob(models.Model):
         """
         # pylint: disable=too-many-locals
         self.refresh_from_db()
-        if self.status == ScanTask.CREATED or self.status == ScanTask.PENDING:
+        if self.status in (ScanTask.CREATED, ScanTask.PENDING):
             return None, None, None, None, None
 
         systems_count = 0
@@ -303,17 +292,12 @@ class ScanJob(models.Model):
         ) = self.calculate_counts()
 
         message = (
-            "%s Stats: systems_count=%d,"
-            " systems_scanned=%d, systems_failed=%d, "
-            "systems_unreachable=%d, system_fingerprint_count=%d"
-            % (
-                prefix,
-                systems_count,
-                systems_scanned,
-                systems_failed,
-                systems_unreachable,
-                system_fingerprint_count,
-            )
+            f"{prefix} Stats:"
+            f" systems_count={systems_count:d},"
+            f" systems_scanned={systems_scanned:d},"
+            f" systems_failed={systems_failed:d},"
+            f" systems_unreachable={systems_unreachable:d},"
+            f" system_fingerprint_count=%{system_fingerprint_count:d}"
         )
         self.log_message(message)
 
@@ -630,14 +614,13 @@ class ScanJob(models.Model):
         """
         if target_status == self.status:
             self.log_message(
-                "ScanJob status is already %s" % target_status, log_level=logging.DEBUG
+                f"ScanJob status is already {target_status}", log_level=logging.DEBUG
             )
             return False
 
         if self.status not in valid_current_status:
             self.log_message(
-                "Cannot change job state to %s when it is %s"
-                % (target_status, self.status),
+                f"Cannot change job state to {target_status} when it is {self.status}",
                 log_level=logging.ERROR,
             )
             return True

@@ -39,8 +39,10 @@ from scanner.satellite.six import (
 from scanner.satellite.utils import construct_url
 from scanner.test_util import create_scan_job
 
+# pylint: disable=too-many-lines
 
-# pylint: disable=unused-argument, too-many-arguments
+
+# pylint: disable=unused-argument, too-many-arguments,
 def mock_sat_exception(
     param1,
     param2,
@@ -103,7 +105,6 @@ class SatelliteSixV1Test(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_get_orgs(self):
         """Test the method to get orgs."""
@@ -132,7 +133,7 @@ class SatelliteSixV1Test(TestCase):
         """Test the method host_count."""
         mock_get_orgs.return_value = [1]
         hosts_url = (
-            "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
@@ -150,7 +151,7 @@ class SatelliteSixV1Test(TestCase):
         """Test the method host_count with err."""
         mock_get_orgs.return_value = [1]
         hosts_url = (
-            "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
@@ -168,7 +169,7 @@ class SatelliteSixV1Test(TestCase):
         """Test the method hosts."""
         mock_get_orgs.return_value = [1]
         hosts_url = (
-            "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
@@ -193,7 +194,7 @@ class SatelliteSixV1Test(TestCase):
         """Test the method hosts."""
         mock_get_orgs.return_value = [1]
         hosts_url = (
-            "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
@@ -472,7 +473,7 @@ class SatelliteSixV1Test(TestCase):
         """Test the hosts_facts method."""
         mock_get_orgs.return_value = [1]
         hosts_url = (
-            "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
@@ -494,7 +495,7 @@ class SatelliteSixV1Test(TestCase):
     def test_hosts_facts(self, mock_pool):
         """Test the method hosts."""
         hosts_url = (
-            "https://{sat_host}:{port}/katello/api" "/v2/organizations/{org_id}/systems"
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
         with patch.object(SatelliteSixV1, "get_orgs", return_value=[1]):
             with patch("scanner.satellite.six.request_host_details", return_value={}):
@@ -561,7 +562,6 @@ class SatelliteSixV2Test(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_host_count(self):
         """Test the method host_count."""
@@ -732,7 +732,7 @@ class SatelliteSixV2Test(TestCase):
 
     def test_get_https_with_err(self):
         """Test the host subscriptons method with bad status code."""
-        sub_url = "https://{sat_host}:{port}/" "api/v2/hosts/{host_id}/subscriptions"
+        sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
@@ -762,7 +762,7 @@ class SatelliteSixV2Test(TestCase):
 
     def test_processing_subs_err_nojson(self):
         """Test the flow of post processing with bad code and not json."""
-        sub_url = "https://{sat_host}:{port}/" "api/v2/hosts/{host_id}/subscriptions"
+        sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=404, text="error message")
@@ -790,13 +790,13 @@ class SatelliteSixV2Test(TestCase):
 
     def test_host_not_subscribed(self):
         """Test the host subscriptons method for not subscribed error."""
-        sub_url = "https://{sat_host}:{port}/" "api/v2/hosts/{host_id}/subscriptions"
+        sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             err_msg = {
                 "displayMessage": "Host has not been registered "
                 "with subscription-manager",
-                "errors": ["Host has not been registered" " with subscription-manager"],
+                "errors": ["Host has not been registered with subscription-manager"],
             }  # noqa
             mocker.get(url, status_code=400, json=err_msg)
             result = request_host_details(
@@ -823,7 +823,7 @@ class SatelliteSixV2Test(TestCase):
 
     def test_host_subscriptons(self):
         """Test the host subscriptons method."""
-        sub_url = "https://{sat_host}:{port}/" "api/v2/hosts/{host_id}/subscriptions"
+        sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             jsonresult = {

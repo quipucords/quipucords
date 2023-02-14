@@ -26,7 +26,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-import api.messages as messages
+from api import messages
 from api.common.util import is_int
 from api.details_report.util import create_details_report, validate_details_report_json
 from api.models import DetailsReport, ScanJob, ScanTask
@@ -79,7 +79,9 @@ def sync_merge_reports(request):
     runner.run()
 
     if merge_job.status != ScanTask.COMPLETED:
+        # pylint: disable=broad-exception-raised
         raise Exception(merge_job.status_message)
+        # pylint: enable=broad-exception-raised
 
     merge_job.refresh_from_db()
     details_report = DetailsReport.objects.get(pk=details_report.id)

@@ -219,7 +219,7 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
             failed_tasks = scanjob.tasks.all().order_by("sequence_number")
             status_details = job_json["status_details"]
             for task in failed_tasks:
-                task_key = "task_%s_status_message" % task.id
+                task_key = f"task_{task.id}_status_message"
                 status_details[task_key] = task.status_message
 
     return job_json

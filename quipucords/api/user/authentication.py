@@ -30,8 +30,8 @@ class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
             return None
         try:
             token = self.get_model().objects.get(key=key)
-        except self.get_model().DoesNotExist:
-            raise exceptions.AuthenticationFailed("Invalid token")
+        except self.get_model().DoesNotExist as exception:
+            raise exceptions.AuthenticationFailed("Invalid token") from exception
 
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed("User inactive or deleted")

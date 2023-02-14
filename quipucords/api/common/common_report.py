@@ -10,6 +10,7 @@
 #
 
 """Util for common report operations."""
+
 import io
 import json
 import logging
@@ -63,13 +64,13 @@ def extract_tar_gz(file_like_obj):
     else:
         if not isinstance(file_like_obj, (bytes, bytearray)):
             return None
-        tar_name = "/tmp/api_tmp_%s.tar.gz" % time.strftime("%Y%m%d_%H%M%S")
+        tar_name = f"/tmp/api_tmp_{time.strftime('%Y%m%d_%H%M%S')}.tar.gz"
         with open(tar_name, "wb") as out_file:
             out_file.write(file_like_obj)
-        tar = tarfile.open(tar_name)
+        tar = tarfile.open(tar_name)  # pylint: disable=consider-using-with
         os.remove(tar_name)
 
-    file_data_list = list()
+    file_data_list = []
     files = tar.getmembers()
     for file in files:
         tarfile_obj = tar.extractfile(file)
@@ -85,10 +86,24 @@ def extract_tar_gz(file_like_obj):
 
 def create_filename(file_name, file_ext, report_id):
     """Create the filename."""
-    file_name = "report_id_%s/%s" % (report_id, file_name)
+    file_name = f"report_id_{report_id}/{file_name}"
     if file_ext:
-        file_name += ".%s" % file_ext
+        file_name += f".{file_ext}"
     return file_name
+
+
+def encode_content(content, file_format):
+    """Encode content as bytes based on it's file format."""
+
+    def _textfile_encoder(content):
+        return content.encode("utf-8")
+
+    renderer = {
+        "json": JSONRenderer().render,
+        "csv": _textfile_encoder,
+        "plaintext": _textfile_encoder,
+    }
+    return renderer[file_format](content)
 
 
 def create_tar_buffer(files_data):
@@ -96,23 +111,16 @@ def create_tar_buffer(files_data):
 
     :param files_data: A dictionary of strings.
         :key: filepath with filename included
-        :value: the contents of the file as a string or dictionary
+        :value: the contents of the file encoded as bytes
     """
-    if not isinstance(files_data, (dict,)):
+    if not isinstance(files_data, dict):
         return None
-    if not all(isinstance(v, (str, dict)) for v in files_data.values()):
+    if not all(isinstance(v, bytes) for v in files_data.values()):
         return None
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w:gz") as tar_file:
         for file_name, file_content in files_data.items():
-            if file_name.endswith("json"):
-                file_buffer = io.BytesIO(JSONRenderer().render(file_content))
-            elif file_name.endswith("csv"):
-                file_buffer = io.BytesIO(file_content.encode("utf-8"))
-            elif "SHA256SUM" in file_name:
-                file_buffer = io.BytesIO(str(file_content).encode("utf-8"))
-            else:
-                return None
+            file_buffer = io.BytesIO(file_content)
             info = tarfile.TarInfo(name=file_name)
             info.size = len(file_buffer.getvalue())
             tar_file.addfile(tarinfo=info, fileobj=file_buffer)

@@ -101,11 +101,11 @@ class TestFindBRMSKieApiVer(unittest.TestCase):
 
     expected = {
         (
-            "/opt/jboss/jboss-eap-6.4/standalone/" "deployments/business-central.war",
+            "/opt/jboss/jboss-eap-6.4/standalone/deployments/business-central.war",
             "6.5.0.Final-redhat-2",
         ),
         (
-            "/opt/jboss/jboss-eap-6.4/standalone/" "deployments/kie-server.war",
+            "/opt/jboss/jboss-eap-6.4/standalone/deployments/kie-server.war",
             "6.5.0.Final-redhat-2",
         ),
     }

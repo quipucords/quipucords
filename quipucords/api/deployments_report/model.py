@@ -57,10 +57,10 @@ class DeploymentsReport(models.Model):
         """Convert to string."""
         return (
             "{"
-            + "id:{}, report_id: {}, status:{}".format(
-                self.id, self.report_id, self.status
-            )
-            + "}"
+            f"id:{self.id},"
+            f" report_id:{self.report_id},"
+            f" status:{self.status}"
+            "}"
         )
 
 
@@ -233,20 +233,14 @@ class Product(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "fingerprint:{}, "
-            "name:{}, "
-            "version:{}, "
-            "presence:{}, "
-            "metadata:{} ".format(
-                self.id,
-                self.fingerprint.id,
-                self.name,
-                self.version,
-                self.presence,
-                self.metadata,
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" fingerprint:{self.fingerprint.id},"
+            f" name:{self.name},"
+            f" version:{self.version},"
+            f" presence:{self.presence},"
+            f" metadata:{self.metadata} "
+            "}"
         )
 
 
@@ -264,16 +258,11 @@ class Entitlement(models.Model):
     def __str__(self):
         """Convert to string."""
         return (
-            "{" + "id:{}, "
-            "fingerprint:{}, "
-            "name:{}, "
-            "entitlement_id:{}, "
-            "metadata:{} ".format(
-                self.id,
-                self.fingerprint.id,
-                self.name,
-                self.entitlement_id,
-                self.metadata,
-            )
-            + "}"
+            "{"
+            f"id:{self.id},"
+            f" fingerprint:{self.fingerprint.id},"
+            f" name:{self.name},"
+            f" entitlement_id:{self.entitlement_id},"
+            f" metadata:{self.metadata} "
+            "}"
         )

@@ -28,7 +28,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
-import api.messages as messages
+from api import messages
 from api.common.util import is_int, validate_query_param_bool
 from api.deployments_report.view import build_cached_json_report
 from api.details_report.util import mask_details_facts
@@ -56,7 +56,7 @@ else:
 @renderer_classes((ReportsGzipRenderer,))
 def reports(request, pk=None):
     """Lookup and return reports."""
-    reports_dict = dict()
+    reports_dict = {}
     mask_report = request.query_params.get("mask", False)
     if pk is not None:
         if not is_int(pk):
@@ -77,8 +77,8 @@ def reports(request, pk=None):
         deployments_id = deployments_data.details_report.id
         return Response(
             {
-                "detail": "Deployment report %s could not be created."
-                "  See server logs." % deployments_id
+                "detail": f"Deployment report {deployments_id} could not be created."
+                "  See server logs."
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
@@ -87,7 +87,7 @@ def reports(request, pk=None):
         reports_dict["deployments_json"] = deployments_report
         return Response(reports_dict)
     error = {
-        "detail": "Deployments report %s could not be masked. "
-        "Rerun the scan to generate a masked deployments report." % (pk)
+        "detail": f"Deployments report {pk} could not be masked."
+        " Rerun the scan to generate a masked deployments report."
     }
     return Response(error, status=status.HTTP_428_PRECONDITION_REQUIRED)

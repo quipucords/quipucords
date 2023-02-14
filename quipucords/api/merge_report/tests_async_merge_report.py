@@ -26,7 +26,6 @@ from scanner.test_util import create_scan_job
 
 def dummy_start():
     """Create a dummy method for testing."""
-    pass
 
 
 class AsyncMergeReports(TestCase):
@@ -109,7 +108,7 @@ class AsyncMergeReports(TestCase):
         job_id = response_json.pop("id")
         self.assertEqual(response_json, expected)
 
-        url = "/api/v1/reports/merge/jobs/{}/".format(job_id)
+        url = f"/api/v1/reports/merge/jobs/{job_id}/"
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 
@@ -124,13 +123,13 @@ class AsyncMergeReports(TestCase):
         source.save()
         scan_job, _ = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
-        url = "/api/v1/reports/merge/jobs/{}/".format(scan_job.id)
+        url = f"/api/v1/reports/merge/jobs/{scan_job.id}/"
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
 
         scan_job.scan_type = ScanTask.SCAN_TYPE_FINGERPRINT
         scan_job.save()
-        url = "/api/v1/reports/merge/jobs/{}/".format(scan_job.id)
+        url = f"/api/v1/reports/merge/jobs/{scan_job.id}/"
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 

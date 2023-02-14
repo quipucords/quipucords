@@ -55,9 +55,9 @@ class ScanTaskRunner(metaclass=ABCMeta):
                     if deployment_report:
                         # remove partial results
                         self.scan_task.log_message(
-                            "REMOVING PARTIAL RESULTS - deleting %d "
-                            "fingerprints from previous scan"
-                            % deployment_report.system_fingerprints.count()
+                            "REMOVING PARTIAL RESULTS - deleting"
+                            f" {deployment_report.system_fingerprints.count():d}"
+                            " fingerprints from previous scan"
                         )
                         deployment_report.system_fingerprints.all().delete()
                         deployment_report.save()

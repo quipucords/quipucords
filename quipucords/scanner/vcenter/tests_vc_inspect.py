@@ -65,7 +65,6 @@ class InspectTaskRunnerTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     def test_get_nics(self):
         """Test the get_nics method."""
@@ -150,9 +149,9 @@ class InspectTaskRunnerTest(TestCase):
         prop_parent.name, prop_parent.val = "parent", cluster
         props.append(prop_parent)
 
-        for key in facts:
+        for key, value in facts.items():
             prop = Mock()
-            prop.name, prop.val = key, facts[key]
+            prop.name, prop.val = key, value
             props.append(prop)
 
         cluster_dict = {}
@@ -208,9 +207,9 @@ class InspectTaskRunnerTest(TestCase):
         host_dict[str(host)] = host_facts
         props = []
 
-        for key in facts:
+        for key, value in facts.items():
             prop = Mock()
-            prop.name, prop.val = key, facts[key]
+            prop.name, prop.val = key, value
             if key == "runtime.host":
                 prop.val = host
             props.append(prop)

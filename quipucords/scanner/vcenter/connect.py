@@ -107,17 +107,14 @@ class ConnectTaskRunner(ScanTaskRunner):
             self._store_connect_data(connected, credential, source)
         except vim.fault.InvalidLogin as vm_error:
             error_message = (
-                "Unable to connect to VCenter source, %s,"
-                " with supplied credential, %s.\n" % (source.name, credential.name)
+                f"Unable to connect to VCenter source, {source.name},"
+                f" with supplied credential, {credential.name}.\n"
             )
-            error_message += "Connect scan failed for %s. %s" % (
-                self.scan_task,
-                vm_error,
-            )
+            error_message += f"Connect scan failed for {self.scan_task}. {vm_error}"
             return error_message, ScanTask.FAILED
         except gaierror as error:
-            error_message = "Unable to connect to VCenter source %s.\n" % source.name
-            error_message += "Reason for failure: %s" % error
+            error_message = f"Unable to connect to VCenter source {source.name}%s.\n"
+            error_message += f"Reason for failure: {error}"
             return error_message, ScanTask.FAILED
 
         return None, ScanTask.COMPLETED

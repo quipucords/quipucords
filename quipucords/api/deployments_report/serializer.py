@@ -59,7 +59,7 @@ class EntitlementSerializer(NotEmptySerializer):
         fields = ("name", "entitlement_id", "metadata")
 
 
-default_args = dict(required=False, allow_null=True)
+default_args = {"required": False, "allow_null": True}
 
 
 class SystemFingerprintSerializer(ModelSerializer):

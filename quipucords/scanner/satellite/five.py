@@ -77,11 +77,11 @@ def request_host_details(
     :param: logging_options: A dictionary containing the scan_task type,
         scan_task id, and source_type, and the source_name
     """
-    unique_name = "%s_%s" % (host_name, host_id)
+    unique_name = f"{host_name}_{host_id}"
     results = raw_facts_template()
     client, user, password = utils.get_sat5_client(scan_task, request_options)
     try:
-        message = "REQUESTING HOST DETAILS: %s" % unique_name
+        message = f"REQUESTING HOST DETAILS: {unique_name}%s"
         scan_task.log_message(message, logging.INFO, logging_options)
 
         key = client.auth.login(user, password)
@@ -105,7 +105,7 @@ def request_host_details(
         results["registration_date"] = registration_date
 
     except xmlrpc.client.Fault as xml_error:
-        error_message = "Satellite 5 fault error encountered: %s\n" % xml_error
+        error_message = f"Satellite 5 fault error encountered: {xml_error}\n"
         logger.error(error_message)
         system_inspection_result = SystemInspectionResult.FAILED
 
@@ -130,7 +130,7 @@ class SatelliteFive(SatelliteInterface):
             systems_count = len(systems)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
         self.connect_scan_task.update_stats(
             "INITIAL STATELLITE STATS", sys_count=systems_count
         )
@@ -151,12 +151,12 @@ class SatelliteFive(SatelliteInterface):
                 host_id = system.get(ID)
 
                 if host_name is not None and host_id is not None:
-                    unique_name = "%s_%s" % (host_name, host_id)
+                    unique_name = f"{host_name}_{host_id}"
                     hosts.append(unique_name)
                     self.record_conn_result(unique_name, credential)
 
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         return hosts
 
@@ -216,7 +216,7 @@ class SatelliteFive(SatelliteInterface):
         for raw_result in results:
             host_name = raw_result["host_name"]
             host_id = raw_result["host_id"]
-            unique_name = "%s_%s" % (host_name, host_id)
+            unique_name = f"{host_name}_{host_id}"
             last_checkin = raw_result["last_checkin"]
             system_inspection_result = raw_result["system_inspection_result"]
 
@@ -320,7 +320,7 @@ class SatelliteFive(SatelliteInterface):
             virt_guests = client.system.list_virtual_guests(key, virtual_host_id)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         for guest in virt_guests:
             virt_id = guest.get(ID)
@@ -353,18 +353,15 @@ class SatelliteFive(SatelliteInterface):
                 virtual_hosts[virt_host_id] = virtual_host
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         for virt_host in virt_hosts:
             virt_host_id = virt_host.get(ID)
             virtual_host = virtual_hosts.get(virt_host_id)
             self.inspect_scan_task.log_message(
-                "Obtaining virtual guests for virtual host (name=%s, "
-                "id=%s)"
-                % (
-                    virtual_host.get("name", "unknown"),
-                    virtual_host.get("id", "unknown"),
-                )
+                "Obtaining virtual guests for virtual host"
+                f" (name={virtual_host.get('name', 'unknown')},"
+                f" id={virtual_host.get('id', 'unknown')})"
             )
             guests, guest_count = self.virtual_guests(virt_host_id)
             virtual_guests.update(guests)
@@ -389,7 +386,7 @@ class SatelliteFive(SatelliteInterface):
                     physical_hosts.append(host_id)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error))
+            raise SatelliteException(str(xml_error)) from xml_error
 
         return physical_hosts
 
@@ -413,7 +410,7 @@ class SatelliteFive(SatelliteInterface):
                 hosts_before_dedup = client.system.list_user_systems(key)
                 client.auth.logout(key)
             except xmlrpc.client.Fault as xml_error:
-                raise SatelliteException(str(xml_error))
+                raise SatelliteException(str(xml_error)) from xml_error
             virtual_hosts, virtual_guests = self.virtual_hosts()
             physical_hosts = self.physical_hosts()
             hosts_after_dedup = []

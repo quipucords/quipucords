@@ -16,13 +16,14 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                 to show this message"
 	@echo "  all                  to execute all following targets (except test)"
-	@echo "  lint                 to run all linters"
 	@echo "  clean                to remove pyc/cache files"
 	@echo "  clean-db             to remove postgres docker container / sqlite db"
 	@echo "  clean-ui             to remove UI assets"
-	@echo "  lint-ansible         to run the ansible linter (for now only do syntax check)"
+	@echo "  lint                 to run all linters"
+	@echo "  lint-isort           to run the isort import order checker"
 	@echo "  lint-flake8          to run the flake8 linter"
-	@echo "  lint-pylint          to run the pylint linter"
+	@echo "  lint-black           to run the black format checker"
+	@echo "  lint-ansible         to run the ansible linter (for now only do syntax check)"
 	@echo "  lock-requirements    to lock all python dependencies"
 	@echo "  update-requirements  to update all python dependencies"
 	@echo "  check-requirements   to check python dependency files"
@@ -107,13 +108,16 @@ test-integration:
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
+lint: lint-isort lint-flake8 lint-black lint-ansible
+
+lint-isort:
+	poetry run isort . --check --diff
+
 lint-flake8:
 	poetry run flakeheaven lint
 
 lint-black:
-	poetry run darker --check --diff .
-
-lint: lint-black lint-flake8 lint-ansible
+	poetry run black --diff .
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)

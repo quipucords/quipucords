@@ -29,7 +29,6 @@ from scanner.test_util import create_scan_job
 
 def dummy_start():
     """Create a dummy method for testing."""
-    pass
 
 
 # pylint: disable=too-many-instance-attributes,invalid-name,R0904,C0302
@@ -780,8 +779,8 @@ class SourceTest(TestCase):
         }
         # data should be a strict subset of the response, because the
         # response adds an id field.
-        for key, value in expected.items():  # pylint: disable=unused-variable
-            self.assertEqual(expected[key], response.json()[key])
+        for key, value in expected.items():
+            self.assertEqual(value, response.json()[key])
 
     def test_update_collide(self):
         """Fail update due to name conflict."""

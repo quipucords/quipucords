@@ -228,9 +228,13 @@ class NetworkInspectScannerTest(TestCase):
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "test_util/crash.py")
         )
+        # pylint: disable=unexpected-keyword-arg
         _, result = scanner._inspect_scan(
-            Value("i", ScanJob.JOB_RUN), self.host_list, base_ssh_executable=path
+            Value("i", ScanJob.JOB_RUN),
+            self.host_list,
+            base_ssh_executable=path,
         )
+        # pylint: enable=unexpected-keyword-arg
         self.assertEqual(result, ScanTask.COMPLETED)
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
@@ -240,12 +244,14 @@ class NetworkInspectScannerTest(TestCase):
         path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "test_util/hang.py")
         )
+        # pylint: disable=unexpected-keyword-arg
         scanner._inspect_scan(
             Value("i", ScanJob.JOB_RUN),
             self.host_list,
             base_ssh_executable=path,
             ssh_timeout="0.1s",
         )
+        # pylint: enable=unexpected-keyword-arg
 
     @patch("ansible_runner.run")
     def test_scan_with_options(self, mock_run):

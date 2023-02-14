@@ -49,26 +49,29 @@ def test_message_parsing(mocker, error_body, expected_message, status, reason):
 @pytest.fixture
 def project_data():
     """Return data representing a Project."""
-    return dict(
-        name="some project",
-        kind="namespace",
-        labels={"foo": "bar"},
-    )
+    return {
+        "name": "some project",
+        "kind": "namespace",
+        "labels": {"foo": "bar"},
+    }
 
 
 @pytest.fixture
 def cluster_data():
     """Return data representing a cluster + error."""
-    return dict(
-        kind="cluster",
-        uuid="uuid",
-        version="1.2.3",
-        errors=dict(
-            foo=dict(
-                status=-1, reason="some reason", message="some message", kind="error"
-            )
-        ),
-    )
+    return {
+        "kind": "cluster",
+        "uuid": "uuid",
+        "version": "1.2.3",
+        "errors": {
+            "foo": {
+                "status": -1,
+                "reason": "some reason",
+                "message": "some message",
+                "kind": "error",
+            }
+        },
+    }
 
 
 def test_load_nested(cluster_data):

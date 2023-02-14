@@ -11,7 +11,9 @@
 """Test the insights report endpoint."""
 
 import json
+import tarfile
 import uuid
+from io import BytesIO
 from unittest.mock import patch
 
 import pytest
@@ -74,7 +76,7 @@ class InsightsReportTest(TestCase):
                             "bios_uuid": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
                             "ip_addresses": ["10.10.181.116"],
                             "mac_addresses": ["00:50:56:9e:7b:19"],
-                            "subscription_manager_id": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",
+                            "subscription_manager_id": "F1011E42-F121-ED73-0BB8-9CF9E721FC0A",  # noqa: E501
                             "name": "dhcp181-116.gsslab.rdu2.redhat.com",
                             "os_release": "Red Hat Enterprise Linux \
                                 Server release 5.9 (Tikanga)",
@@ -114,20 +116,43 @@ class InsightsReportTest(TestCase):
             response = self.client.get(url)
         self.assertEqual(response.status_code, 200, response.json())
         response_json = response.json()
+        self.validate_data(response_json, deployment_report)
 
+    def test_get_insights_report_tarball_200_exists(self):
+        """Retrieve insights report."""
+        deployments_report = DeploymentReportFactory(
+            number_of_fingerprints=11,
+            status=DeploymentsReport.STATUS_COMPLETE,
+        )
+        url = f"/api/v1/reports/{deployments_report.id}/insights/?format=tar.gz"
+        # mock slice size so we can expect 2 slices on this test
+        with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
+            response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # reformat tarball to match json report
+        with tarfile.open(fileobj=BytesIO(response.content)) as tar:
+            restored_files = (
+                json.loads(tar.extractfile(file).read()) for file in tar.getmembers()
+            )
+            # tar.getnames / getmembers follow the same order, allowing this one-liner
+            data = dict(zip(tar.getnames(), restored_files))
+        self.validate_data(data, deployments_report)
+
+    def validate_data(self, data: dict, deployment_report: DeploymentsReport):
+        """Validate insights report data."""
         self.assertIn(
             create_filename("metadata", "json", deployment_report.id),
-            response_json.keys(),
+            data.keys(),
         )
         report_slices = {}
         metadata_filename = f"report_id_{deployment_report.id}/metadata.json"
-        for key in response_json:
+        for key in data:
             self.assertIn(f"report_id_{deployment_report.id}/", key)
             if key != metadata_filename:
-                report_slices[key] = response_json[key]
+                report_slices[key] = data[key]
         # metadata slice number_hosts matches the actual
         # number of hosts in a slice
-        report_slices_in_metadata = response_json[metadata_filename]["report_slices"]
+        report_slices_in_metadata = data[metadata_filename]["report_slices"]
         self.assertEqual(len(report_slices_in_metadata), 2)
         total_returned_hosts_num = 0
         for key_1, key_2 in zip(report_slices_in_metadata, report_slices):

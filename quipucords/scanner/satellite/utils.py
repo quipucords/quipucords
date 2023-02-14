@@ -188,12 +188,12 @@ def _status5(scan_task):
     except xmlrpc.client.Fault as xml_error:
         invalid_auth = "Either the password or username is incorrect."
         if invalid_auth in str(xml_error):
-            raise SatelliteAuthException(str(xml_error))
-        raise SatelliteException(str(xml_error))
+            raise SatelliteAuthException(str(xml_error)) from xml_error
+        raise SatelliteException(str(xml_error)) from xml_error
     except xmlrpc.client.ProtocolError as protocol_error:
         if protocol_error.errcode == codes.HTTP_404_NOT_FOUND:
             raise protocol_error
-        raise SatelliteException(str(protocol_error))
+        raise SatelliteException(str(protocol_error)) from protocol_error
 
     api_version = SATELLITE_VERSION_5
     status_code = codes.HTTP_200_OK  # pylint: disable=no-member
@@ -218,9 +218,10 @@ def _status6(scan_task):
         err_msg = "Unable to authenticate against " + url
         raise SatelliteAuthException(err_msg)
     else:
-        err_msg = "Failure while attempting Satellite 6"
-        " status check at {} for task {} with status code {}.".format(
-            url, scan_task.id, status_code
+        err_msg = (
+            "Failure while attempting Satellite 6"
+            f" status check at {url} for task {scan_task.id}"
+            f" with status code {status_code}."
         )
         raise SatelliteException(err_msg)
     return (status_code, api_version, SATELLITE_VERSION_6)
@@ -255,7 +256,7 @@ def validate_task_stats(task):
     totals = +systems_scanned + systems_failed + systems_unreachable
     if totals != systems_count:
         missing_sys = systems_count - totals
-        error = "Scan failed to inspect %d systems." % missing_sys
+        error = f"Scan failed to inspect {missing_sys:d} systems."
         task.log_message(error, log_level=logging.ERROR)
         new_failed = missing_sys + systems_failed
         task.update_stats("Missed failed systems", sys_failed=new_failed)

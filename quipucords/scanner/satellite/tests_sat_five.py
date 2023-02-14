@@ -82,7 +82,6 @@ class SatelliteFiveTest(TestCase):
 
     def tearDown(self):
         """Cleanup test case setup."""
-        pass
 
     @patch("xmlrpc.client.ServerProxy")
     def test_host_count(self, mock_serverproxy):
