@@ -175,7 +175,6 @@ class DeploymentReportSerializer(NotEmptySerializer):
     cached_masked_fingerprints = CustomJSONField(read_only=True)
     cached_csv = CharField(read_only=True)
     cached_masked_csv = CharField(read_only=True)
-    cached_insights = CharField(read_only=True)
 
     status = ChoiceField(read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
     system_fingerprints = FingerprintField(many=True, read_only=True)
