@@ -11,13 +11,12 @@
 """ScanTask used for network connection discovery."""
 import json
 import logging
-import math
 import uuid
 from copy import deepcopy
 from datetime import datetime
 
 from django.db import DataError
-from rest_framework.serializers import DateField, DateTimeField
+from rest_framework.serializers import DateField
 
 from api.common.common_report import create_report_version
 from api.common.util import (
@@ -28,13 +27,6 @@ from api.common.util import (
     is_float,
     is_int,
     mask_data_general,
-)
-from api.deployments_report.util import (
-    NETWORK_DETECTION_KEY,
-    OPENSHIFT_DETECTION_KEY,
-    SATELLITE_DETECTION_KEY,
-    VCENTER_DETECTION_KEY,
-    compute_source_info,
 )
 from api.models import DeploymentsReport, Product, ScanTask, Source, SystemFingerprint
 from api.serializers import SystemFingerprintSerializer
@@ -96,17 +88,6 @@ RAW_DATE_KEYS = dict(
     ]
 )
 
-# Insights specific facts
-CANONICAL_FACTS = [
-    "bios_uuid",
-    "etc_machine_id",
-    "insights_client_id",
-    "ip_addresses",
-    "mac_addresses",
-    "subscription_manager_id",
-    "fqdn",
-]
-
 MAC_AND_IP_FACTS = ["ip_addresses", "mac_addresses"]
 NAME_RELATED_FACTS = ["name", "vm_dns_name", "virtual_host_name"]
 
@@ -140,79 +121,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             return [int(cert.strip(".pem")) for cert in redhat_certs if cert]
         except Exception:  # pylint: disable=broad-except
             return []
-
-    @staticmethod
-    def format_products(redhat_products, is_rhel):
-        """Return the installed products on the system.
-
-        :param redhat_products: <dict> of products.
-        :returns: a list of the installed products.
-        """
-        products = []
-        name_to_product = {
-            "JBoss EAP": "EAP",
-            "JBoss Fuse": "FUSE",
-            "JBoss BRMS": "DCSM",
-            "JBoss Web Server": "JWS",
-        }
-        if is_rhel:
-            products.append("RHEL")
-        for product_dict in redhat_products:
-            if product_dict.get("presence") == "present":
-                name = name_to_product.get(product_dict.get("name"))
-                if name:
-                    products.append(name)
-
-        return products
-
-    @staticmethod
-    def format_system_profile(fingerprint_dict):
-        """Grab facts from original fingerprint_dict for system profile.
-
-        :param fingerprint_dict: <dict> the fingerprint_dict to pull facts from
-        :returns: a list with the system profile facts.
-        """
-        qpc_to_system_profile = {
-            "infrastructure_type": "infrastructure_type",
-            "architecture": "arch",
-            "os_release": "os_release",
-            "os_version": "os_kernel_version",
-            "cloud_provider": "cloud_provider",
-        }
-        system_profile = {}
-        for qpc_fact, system_fact in qpc_to_system_profile.items():
-            fact_value = fingerprint_dict.get(qpc_fact)
-            if fact_value:
-                system_profile[system_fact] = str(fact_value)
-        cpu_count = fingerprint_dict.get("cpu_count")
-        # grab the default socket count
-        cpu_socket_count = fingerprint_dict.get("cpu_socket_count")
-        # grab the preferred socket count, and default if it does not exist
-        socket_count = fingerprint_dict.get("vm_host_socket_count", cpu_socket_count)
-        # grab the default core count
-        cpu_core_count = fingerprint_dict.get("cpu_core_count")
-        # grab the preferred core count, and default if it does not exist
-        core_count = fingerprint_dict.get("vm_host_core_count", cpu_core_count)
-        try:
-            # try to get the cores per socket but wrap it in a try/catch
-            # because these values might not exist
-            core_per_socket = math.ceil(int(core_count) / int(socket_count))
-        except Exception:  # pylint: disable=broad-except
-            core_per_socket = None
-        # grab the preferred core per socket, but default if it does not exist
-        cpu_core_per_socket = fingerprint_dict.get(
-            "cpu_core_per_socket", core_per_socket
-        )
-        # check for each of the above facts and add them to the profile if they
-        # are not none
-        if cpu_count:
-            system_profile["number_of_cpus"] = math.ceil(cpu_count)
-        if socket_count:
-            system_profile["number_of_sockets"] = math.ceil(socket_count)
-        if cpu_core_per_socket:
-            system_profile["cores_per_socket"] = math.ceil(cpu_core_per_socket)
-
-        return system_profile
 
     def execute_task(self, manager_interrupt):
         """Execute fingerprint task."""
@@ -281,22 +189,13 @@ class FingerprintTaskRunner(ScanTaskRunner):
         total_count = len(fingerprints_list)
         deployment_report = details_report.deployment_report
         date_field = DateField()
-        datetime_field = DateTimeField()
         final_fingerprint_list = []
-        insights_hosts = []
-        insights_valid = 0
-        invalid_hosts = []
 
         valid_fact_attributes = {
             field.name for field in SystemFingerprint._meta.get_fields()
         }
 
-        # Capture the start time of the scan task for the insights
-        insights_last_reported = datetime_field.to_representation(
-            self.scan_task.start_time
-        )
         for fingerprint_dict in fingerprints_list:
-            found_canonical_facts = False
             # Remove keys that are not part of SystemFingerprint model
             fingerprint_attributes = set(fingerprint_dict.keys())
             invalid_attributes = fingerprint_attributes - valid_fact_attributes
@@ -329,76 +228,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                                 fingerprint_dict.get(field)
                             )
                     final_fingerprint_list.append(fingerprint_dict)
-
-                    # Check if fingerprint has canonical facts
-                    for fact in CANONICAL_FACTS:
-                        if fingerprint_dict.get(fact):
-                            found_canonical_facts = True
-                            break
-                    if found_canonical_facts:
-                        not_null_facts = {
-                            "bios_uuid": "bios_uuid",
-                            "ip_addresses": "ip_addresses",
-                            "mac_addresses": "mac_addresses",
-                            "insights_id": "insights_client_id",
-                            "subscription_manager_id": "subscription_manager_id",
-                            "rhel_machine_id": "etc_machine_id",
-                            "fqdn": "name",
-                        }
-                        insights_host = {}
-                        insights_host["display_name"] = fingerprint_dict.get("name")
-                        for host_inv_fact, qpc_fact in not_null_facts.items():
-                            if fingerprint_dict.get(qpc_fact):
-                                insights_host[host_inv_fact] = fingerprint_dict.get(
-                                    qpc_fact
-                                )
-                        nested_facts = {
-                            "rh_product_certs": self.format_certs(
-                                fingerprint_dict.get("redhat_certs", [])
-                            ),
-                            "rh_products_installed": self.format_products(
-                                fingerprint_dict.get("products", []),
-                                fingerprint_dict.get("is_redhat"),
-                            ),
-                            "last_reported": insights_last_reported,
-                        }
-                        if fingerprint_dict.get("virtual_host_name"):
-                            nested_facts["virtual_host_name"] = fingerprint_dict.get(
-                                "virtual_host_name"
-                            )
-                        if fingerprint_dict.get("virtual_host_uuid"):
-                            nested_facts["virtual_host_uuid"] = fingerprint_dict.get(
-                                "virtual_host_uuid"
-                            )
-                        if fingerprint_dict.get("system_purpose"):
-                            nested_facts["system_purpose"] = fingerprint_dict.get(
-                                "system_purpose"
-                            )
-                        system_sources = fingerprint_dict.get(SOURCES_KEY)
-                        source_types = []
-                        if system_sources is not None:
-                            sources_info = compute_source_info(system_sources)
-                            if sources_info.get(NETWORK_DETECTION_KEY):
-                                source_types.append("network")
-                            if sources_info.get(VCENTER_DETECTION_KEY):
-                                source_types.append("vcenter")
-                            if sources_info.get(SATELLITE_DETECTION_KEY):
-                                source_types.append("satellite")
-                            if sources_info.get(OPENSHIFT_DETECTION_KEY):
-                                source_types.append("openshift")
-                        if source_types:
-                            nested_facts["source_types"] = source_types
-
-                        facts = {"namespace": "qpc", "facts": nested_facts}
-                        insights_host["facts"] = [facts]
-                        system_profile = self.format_system_profile(fingerprint_dict)
-                        if system_profile:
-                            insights_host["system_profile"] = system_profile
-                        insights_hosts.append(insights_host)
-                        insights_valid += 1
-                    else:
-                        invalid_hosts.append(fingerprint_dict.get("name"))
-
                     number_valid += 1
                 except DataError as error:
                     number_invalid += 1
@@ -450,28 +279,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
 
         self.scan_task.log_message("END FINGERPRINT PERSISTENCE")
-        self.scan_task.log_message(
-            f"{insights_valid} of {number_valid + number_invalid} "
-            + "hosts valid for Insights."
-        )
-        if invalid_hosts:
-            self.scan_task.log_message(
-                "The following hosts have no canonical "
-                "facts and will be excluded from the Insights "
-                f"report: {str(invalid_hosts)}"
-            )
-        if not insights_hosts:
-            insights_message = (
-                "FAILED to create Insights report "
-                f"id={deployment_report.report_id} - produced no valid hosts"
-            )
-            self.scan_task.log_message(insights_message, log_level=logging.WARN)
-        else:
-            insights_message = (
-                f"Insights report id={deployment_report.report_id} created "
-            )
-            self.scan_task.log_message(insights_message)
-        deployment_report.cached_insights = json.dumps(insights_hosts)
         deployment_report.save()
 
         return status_message, status
