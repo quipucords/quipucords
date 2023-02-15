@@ -7,9 +7,15 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Status module."""
+"""Misc utils for quipucords."""
+import json
 
-from functools import lru_cache
 
-from .misc import get_server_id
-from .model import ServerInformation
+def get_choice_ids(choices):
+    """Retrieve choice ids."""
+    return [choice[0] for choice in choices]
+
+
+def load_json_from_tarball(json_filename, tarball):
+    """Extract a json as dict from given TarFile interface."""
+    return json.loads(tarball.extractfile(json_filename).read())

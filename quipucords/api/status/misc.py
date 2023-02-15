@@ -7,9 +7,14 @@
 # along with this software; if not, see
 # https://www.gnu.org/licenses/gpl-3.0.txt.
 
-"""Status module."""
+"""Status misc module."""
 
 from functools import lru_cache
 
-from .misc import get_server_id
 from .model import ServerInformation
+
+
+@lru_cache
+def get_server_id():
+    """Get server_id and cache it."""
+    return ServerInformation.create_or_retreive_server_id()
