@@ -1,0 +1,13 @@
+---
+
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "ansible_facts"
+
+- name: gather builtin facts
+  ansible.builtin.setup:
+  ignore_errors: true
+
+- name: gather package facts 
+  ansible.builtin.package_facts:
+  ignore_errors: true

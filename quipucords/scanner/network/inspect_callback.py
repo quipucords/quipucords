@@ -115,14 +115,7 @@ class InspectResultCallback:
         """Save facts collected and update the scan counts."""
         results = raw_facts_template()
         results.update(self._ansible_facts.pop(host, {}))
-
-        if settings.QPC_EXCLUDE_INTERNAL_FACTS:
-            # remove internal facts before saving result
-            results = {
-                fact_key: fact_value
-                for fact_key, fact_value in results.items()
-                if not fact_key.startswith(INTERNAL_)
-            }
+        results = self._organize_facts(results)
         self.scan_task.log_message(
             f"host scan complete for {host}."
             f" Status: {host_status}. Facts {results}",
@@ -157,6 +150,30 @@ class InspectResultCallback:
                 name=result_key, value=final_value, system_inspection_result=sys_result
             )
             stored_fact.save()
+
+    def _organize_facts(self, res):
+        ansible_facts_key = "ansible"
+        ansible_prefix = "ansible_"
+        other_ansible_facts = [
+            "gather_subset",
+            "module_setup",
+            "discovered_interpreter_python",
+            "packages",
+        ]
+        results = {ansible_facts_key: {}}
+        for fact_key, fact_value in res.items():
+            if settings.QPC_EXCLUDE_INTERNAL_FACTS and fact_key.startswith(INTERNAL_):
+                continue
+            if fact_key.startswith(ansible_prefix) or fact_key in other_ansible_facts:
+                # fact_key = re.sub(f"^{ansible_prefix}", "", fact_key)
+                results[ansible_facts_key][fact_key] = fact_value
+            else:
+                results[fact_key] = fact_value
+        # results[ansible_facts_key] = {
+        #     fact_key: results[ansible_facts_key][fact_key]
+        #     for fact_key in sorted(results[ansible_facts_key])
+        # }
+        return results
 
     @transaction.atomic
     def task_on_unreachable(self, event_dict):

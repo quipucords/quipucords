@@ -336,7 +336,7 @@ class ScanJob(models.Model):
             if self.inspection_results is not None:
                 self.inspection_results.task_results.all().delete()
             if self.details_report and self.details_report.deployment_report:
-                self.details_report.deployment_report.system_fingerprints.delete()
+                self.details_report.deployment_report.system_fingerprints.all().delete()
 
         # Create tasks
         conn_tasks = self._create_connection_tasks()
