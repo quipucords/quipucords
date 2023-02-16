@@ -180,8 +180,8 @@ class InspectTaskRunner(ScanTaskRunner):
             {
                 "QPC_FEATURE_FLAGS": settings.QPC_FEATURE_FLAGS.as_dict(),
                 "ansible_ssh_timeout": settings.QPC_SSH_INSPECT_TIMEOUT,
-                "ansible_ssh_extra_args": "-o SetEnv='LC_ALL=C",
-                "ansible_shell_executable": "/bin/sh",
+                # "ansible_ssh_extra_args": "-o SetEnv='LC_ALL=C",
+                # "ansible_shell_executable": "/bin/sh",
             }
         )
 
