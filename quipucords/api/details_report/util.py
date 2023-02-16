@@ -46,7 +46,7 @@ def build_sources_from_tasks(tasks):
     :param tasks: ScanTask objects used to build results
     :returns: dict containing sources structure for facts endpoint
     """
-    server_id = ServerInformation.create_or_retreive_server_id()
+    server_id = ServerInformation.create_or_retrieve_server_id()
     sources = []
     for inspect_task in tasks:
         if inspect_task.scan_type != ScanTask.SCAN_TYPE_INSPECT:

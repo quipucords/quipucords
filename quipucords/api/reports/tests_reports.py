@@ -50,7 +50,7 @@ class ReportsTest(TestCase):
 
         self.net_source.hosts = '["1.2.3.4"]'
         self.net_source.save()
-        self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.report_version = create_report_version()
         self.details_json = None
         self.deployments_json = None

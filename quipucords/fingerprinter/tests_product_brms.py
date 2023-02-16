@@ -23,7 +23,7 @@ class ProductBRMSTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.server_id = ServerInformation.create_or_retrieve_server_id()
 
     def test_detect_jboss_brms_present(self):
         """Test the detect_jboss_brms method."""
