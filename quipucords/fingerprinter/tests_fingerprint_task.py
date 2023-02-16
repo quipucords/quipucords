@@ -129,7 +129,7 @@ class EngineTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.source = Source(
             name="source1",
             hosts=json.dumps(["1.2.3.4"]),

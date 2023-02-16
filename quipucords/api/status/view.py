@@ -37,7 +37,7 @@ def status(request):
     server_info["platform"] = platform_info()
     server_info["python"] = python_version()
     server_info["modules"] = modules()
-    server_info["server_id"] = ServerInformation.create_or_retreive_server_id()
+    server_info["server_id"] = ServerInformation.create_or_retrieve_server_id()
     env_dict = {}
     for key, value in os.environ.items():
         if "password" not in key.lower():

@@ -30,8 +30,8 @@ class ServerInformation(models.Model):
 
     @staticmethod
     @transaction.atomic
-    def create_or_retreive_server_id():
-        """Create or retreive server's global identifier."""
+    def create_or_retrieve_server_id():
+        """Create or retrieve server's global identifier."""
         server_info = ServerInformation.objects.first()
         if server_info is None:
             server_info = ServerInformation(global_identifier=str(uuid.uuid4()))

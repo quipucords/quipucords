@@ -51,7 +51,7 @@ class ScanJobTest(TestCase):
     def setUp(self):
         """Create test setup."""
         management.call_command("flush", "--no-input")
-        self.server_id = ServerInformation.create_or_retreive_server_id()
+        self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.cred = Credential.objects.create(
             name="cred1",
             username="username",
