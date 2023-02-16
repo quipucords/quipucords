@@ -159,6 +159,7 @@ class InspectResultCallback:
             "module_setup",
             "discovered_interpreter_python",
             "packages",
+            "services",
         ]
         results = {ansible_facts_key: {}}
         for fact_key, fact_value in res.items():

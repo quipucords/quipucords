@@ -176,8 +176,14 @@ class InspectTaskRunner(ScanTaskRunner):
                 DEFAULT_SCAN_DIRS
             )
 
-        extra_vars["QPC_FEATURE_FLAGS"] = settings.QPC_FEATURE_FLAGS.as_dict()
-        extra_vars["ansible_ssh_timeout"] = settings.QPC_SSH_INSPECT_TIMEOUT
+        extra_vars.update(
+            {
+                "QPC_FEATURE_FLAGS": settings.QPC_FEATURE_FLAGS.as_dict(),
+                "ansible_ssh_timeout": settings.QPC_SSH_INSPECT_TIMEOUT,
+                "ansible_ssh_extra_args": "-o SetEnv='LC_ALL=C",
+                "ansible_shell_executable": "/bin/sh",
+            }
+        )
 
         group_names, inventory = construct_inventory(
             hosts=connected,
@@ -222,6 +228,8 @@ class InspectTaskRunner(ScanTaskRunner):
             cmdline_list.append(forks_cmd)
             if use_paramiko:
                 cmdline_list.append("--connection=paramiko")
+            else:
+                cmdline_list.append("--connection=ssh")
             all_commands = " ".join(cmdline_list)
 
             if int(settings.ANSIBLE_LOG_LEVEL) == 0:

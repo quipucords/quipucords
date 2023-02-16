@@ -109,7 +109,7 @@ pythonpath = "quipucords/"
 addopts = [
     "--ds=quipucords.settings",
     "--block-network",
-    "--allowed-hosts=127.0.0.1,::1",
+    "--allowed-hosts=127.0.0.1,::1,/var/run/docker.sock",
 ]
 python_files = [
     "tests.py",
