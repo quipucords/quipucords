@@ -11,3 +11,7 @@
 - name: gather package facts 
   ansible.builtin.package_facts:
   ignore_errors: true
+
+- name: gather service facts
+  ansible.builtin.service_facts:
+  ignore_errors: true
