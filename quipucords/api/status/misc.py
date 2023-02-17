@@ -9,12 +9,12 @@
 
 """Status misc module."""
 
-from functools import lru_cache
+from functools import cache
 
 from .model import ServerInformation
 
 
-@lru_cache
+@cache
 def get_server_id():
     """Get server_id and cache it."""
     return ServerInformation.create_or_retrieve_server_id()
