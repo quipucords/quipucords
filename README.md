@@ -127,15 +127,11 @@ If you intend to run on Mac OS, there are several more steps that are required.
 - If you are running macOS 10.13 or later and you encounter unexpected crashes when running scans,
   set the environment variable `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` before starting the server.
   See the explanation for this step [here](https://github.com/ansible/ansible/issues/31869#issuecomment-337769174).
-- If installing dependencies fails involving openssl:
+- If installing dependencies fails involving openssl (`psycopg2-binary` may need this if using custom pyenv paths):
     ```
     brew install openssl
-    pip uninstall pycurl
-    PYCURL_SSL_LIBRARY=openssl pip --no-cache-dir install --install-option="--with-openssl" --install-option="--openssl-dir=$(brew --prefix)/opt/openssl" pycurl
-
-    export LDFLAGS=-L/usr/local/opt/openssl/lib
-    export CPPFLAGS=-I/usr/local/opt/openssl/include
-    export PYCURL_SSL_LIBRARY=openssl
+    export LDFLAGS="-I$(brew --prefix)/opt/openssl/include -L$(brew --prefix)/opt/openssl/lib"
+    poetry install
     ```
 
 ## Linting
