@@ -121,7 +121,7 @@ class SystemFingerprint(models.Model):
     cpu_core_per_socket = models.PositiveIntegerField(
         unique=False, blank=True, null=True
     )
-    cpu_hyperthreading = models.NullBooleanField()
+    cpu_hyperthreading = models.BooleanField(null=True)
 
     system_creation_date = models.DateField(blank=True, null=True)
     system_last_checkin_date = models.DateField(blank=True, null=True)
@@ -168,7 +168,7 @@ class SystemFingerprint(models.Model):
     )
 
     # Red Hat facts
-    is_redhat = models.NullBooleanField()
+    is_redhat = models.BooleanField(null=True)
     redhat_certs = models.TextField(unique=False, blank=True, null=True)
     # pylint: disable=invalid-name
     redhat_package_count = models.PositiveIntegerField(
