@@ -132,11 +132,10 @@ def scan_restart(sender, instance, **kwargs):
         manager.SCAN_MANAGER.put(scanner)
 
 
-# pylint: disable=C0103
-start_scan = django.dispatch.Signal(providing_args=["instance"])
-pause_scan = django.dispatch.Signal(providing_args=["instance"])
-cancel_scan = django.dispatch.Signal(providing_args=["instance"])
-restart_scan = django.dispatch.Signal(providing_args=["instance"])
+start_scan = django.dispatch.Signal()
+pause_scan = django.dispatch.Signal()
+cancel_scan = django.dispatch.Signal()
+restart_scan = django.dispatch.Signal()
 
 start_scan.connect(handle_scan)
 pause_scan.connect(scan_pause)
