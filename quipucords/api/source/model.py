@@ -46,9 +46,9 @@ class SourceOptions(models.Model):
         max_length=10, choices=SSL_PROTOCOL_CHOICES, null=True
     )
 
-    ssl_cert_verify = models.NullBooleanField()
-    disable_ssl = models.NullBooleanField()
-    use_paramiko = models.NullBooleanField()
+    ssl_cert_verify = models.BooleanField(null=True)
+    disable_ssl = models.BooleanField(null=True)
+    use_paramiko = models.BooleanField(null=True)
 
     def get_ssl_protocol(self):
         """Obtain the SSL protocol to be used."""
