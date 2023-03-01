@@ -30,6 +30,10 @@ BASE_DIR = Path(__file__).absolute().parent.parent
 
 PRODUCTION = bool(os.environ.get("PRODUCTION", False))
 
+QPC_DISABLE_THREADED_SCAN_MANAGER = bool(
+    os.environ.get("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
+)
+
 
 def is_int(value):
     """Check if a value is convertable to int.

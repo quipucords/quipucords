@@ -37,7 +37,7 @@ def handle_scan(sender, instance, **kwargs):
             manager.SCAN_MANAGER_LOG_PREFIX,
             _(messages.SIGNAL_SCAN_MANAGER_CRASH),
         )
-        manager.SCAN_MANAGER = manager.Manager()
+        manager.reinitialize()
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
@@ -102,13 +102,16 @@ def scan_restart(sender, instance, **kwargs):
     instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("RESTART"))
     scanner = ScanJobRunner(instance)
 
+    if not manager.SCAN_MANAGER:
+        manager.reinitialize()
+
     if not manager.SCAN_MANAGER.is_alive():
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
             _(messages.SIGNAL_SCAN_MANAGER_CRASH),
         )
-        manager.SCAN_MANAGER = manager.Manager()
+        manager.reinitialize()
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
