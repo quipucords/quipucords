@@ -54,6 +54,22 @@ class SystemPurposeSerializer(NotEmptyMixin, Serializer):
     sla = fields.CharField(max_length=12, **default_kwargs)
 
 
+class NetworkInterfaceSerializer(NotEmptyMixin, Serializer):
+    """Serializer for the field network_interfaces of HBI system profile."""
+
+    # currently we only collect info about ipv4_addresses and mac_address
+    # yuptoo however also requires the fields name and ipv6_addresses
+    # https://github.com/RedHatInsights/yuptoo/blob/265e9033ab66dce26d2a7bb5a909d7ec0b38a7da/yuptoo/modifiers/transform_network_interfaces.py#L8  # noqa: E501
+    ipv4_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
+    ipv6_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
+    name = fields.CharField(source="name_of_interface", max_length=50, **default_kwargs)
+
+    class Meta:
+        """Meta class for NetworkInterfaceSerializer."""
+
+        qpc_allow_empty_fields = ["ipv6_addresses"]
+
+
 class SystemProfileSerializer(NotEmptyMixin, Serializer):
     """
     Serializer for HBI system profile.
@@ -77,6 +93,9 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     arch = fields.CharField(source="architecture", max_length=50, **default_kwargs)
     cloud_provider = fields.CharField(**default_kwargs)
     system_purpose = SystemPurposeSerializer(**default_kwargs)
+    network_interfaces = NetworkInterfaceSerializer(
+        source="as_list", many=True, **default_kwargs
+    )
 
 
 class YupanaHostSerializer(NotEmptyMixin, Serializer):
