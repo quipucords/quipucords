@@ -97,7 +97,7 @@ class TestReportEntity:
         with pytest.raises(DeploymentsReport.DoesNotExist):
             ReportEntity.from_report_id(42)
 
-    def test_from_report_id_fingerprint_not_fount(self):
+    def test_from_report_id_fingerprint_not_found(self):
         """Check if the proper error is raised."""
         deployment_report = DeploymentReportFactory(number_of_fingerprints=0)
         with pytest.raises(SystemFingerprint.DoesNotExist):
@@ -359,3 +359,18 @@ class TestHostEntity:
 
         host = HostEntity(mocked_fingerprints, None)
         assert host.system_purpose == expected_result
+
+    @pytest.mark.parametrize(
+        "ip_addresses, expected_result",
+        (
+            ('["127.0.0.1", "2001:0db8:85a3:0000:0000:8a2e:0370:733"]', ["127.0.0.1"]),
+            ('["random_word", "192.168.1.1"]', ["192.168.1.1"]),
+            (None, []),
+        ),
+    )
+    def test_ipv4_addresses(self, mocker, ip_addresses, expected_result):
+        """Test ipv4_addresses logic."""
+        mocked_fingerprint = mocker.Mock(ip_addresses=ip_addresses)
+        host = HostEntity(mocked_fingerprint, None)
+        assert host.ipv4_addresses == expected_result
+        assert not host.ipv6_addresses

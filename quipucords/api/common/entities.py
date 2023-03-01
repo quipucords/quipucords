@@ -9,6 +9,7 @@
 
 """Common entities."""
 
+import ipaddress
 import json
 import uuid
 from contextlib import suppress
@@ -131,10 +132,40 @@ class HostEntity:
             return json.loads(self._fingerprints.ip_addresses)
 
     @property
+    def ipv4_addresses(self):
+        """Retrieve only ipv4 addresses."""
+        ip_addresses = self.ip_addresses
+        ipv4_addresses = []
+        if ip_addresses:
+            for ip in ip_addresses:  # pylint: disable=invalid-name
+                try:
+                    if ipaddress.ip_address(ip).version == 4:
+                        ipv4_addresses.append(ip)
+                except ValueError:
+                    continue
+        return ipv4_addresses
+
+    @property
+    def ipv6_addresses(self):
+        """Retrieve only ipv6 addresses."""
+        # "Currently, we do not collect this information, but since it is
+        # mandatory for Yuptoo, we have agreed to send a default value."
+        # https://github.com/RedHatInsights/yuptoo/blob/265e9033ab66dce26d2a7bb5a909d7ec0b38a7da/yuptoo/modifiers/transform_network_interfaces.py#L8  # noqa: E501
+        return []
+
+    @property
     def mac_addresses(self):
         """Retrieve mac_addresses."""
         with suppress(TypeError):
             return json.loads(self._fingerprints.mac_addresses)
+
+    @property
+    def name_of_interface(self):
+        """Return interface name."""
+        # "Currently, we do not collect this information, but since it is
+        # mandatory for Yuptoo, we have agreed to send a default value."
+        # https://github.com/RedHatInsights/yuptoo/blob/265e9033ab66dce26d2a7bb5a909d7ec0b38a7da/yuptoo/modifiers/transform_network_interfaces.py#L8  # noqa: E501
+        return "unknown"
 
     @property
     def provider_id(self):
