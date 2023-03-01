@@ -5,6 +5,7 @@ import os
 from threading import Thread, Timer
 from time import sleep
 
+from django.conf import settings
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
@@ -33,6 +34,27 @@ try:
     )
 except ValueError:
     HEART_BEAT_INTERVAL = DEFAULT_HEARTBEAT
+
+
+class DisabledManager:
+    """Drop-in replacement for Manager that does nothing for development purposes."""
+
+    def is_alive(self):
+        """Log a warning message because DisabledManager does nothing."""
+        logger.warning("Scan manager is never actually alive because it is disabled.")
+        return True
+
+    def kill(self, *args, **kwargs):
+        """Log a warning message because DisabledManager does nothing."""
+        logger.warning("Cannot kill scan manager because it is disabled.")
+
+    def start(self):
+        """Log a warning message because DisabledManager does nothing."""
+        logger.warning("Cannot start scan manager because it is disabled.")
+
+    def put(self, *args, **kwargs):
+        """Log a warning message because DisabledManager does nothing."""
+        logger.warning("Cannot put a job on the scan manager because it is disabled.")
 
 
 class Manager(Thread):
@@ -269,4 +291,15 @@ class Manager(Thread):
             sleep(RUN_QUEUE_SLEEP_TIME)
 
 
-SCAN_MANAGER = Manager()
+def reinitialize():
+    """Reinitialize the SCAN_MANAGER module variable."""
+    if settings.QPC_DISABLE_THREADED_SCAN_MANAGER:
+        manager_class = DisabledManager
+    else:
+        manager_class = Manager
+
+    global SCAN_MANAGER  # pylint: disable=W0603
+    SCAN_MANAGER = manager_class()
+
+
+SCAN_MANAGER = None
