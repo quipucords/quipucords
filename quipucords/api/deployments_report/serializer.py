@@ -160,8 +160,8 @@ class DeploymentReportSerializer(NotEmptySerializer):
     report_platform_id = UUIDField(format="hex_verbose", read_only=True)
     details_report = PrimaryKeyRelatedField(queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
-    cached_fingerprints = CustomJSONField(read_only=True)
-    cached_masked_fingerprints = CustomJSONField(read_only=True)
+    cached_fingerprints = JSONField(read_only=True)
+    cached_masked_fingerprints = JSONField(read_only=True)
     cached_csv = CharField(read_only=True)
     cached_masked_csv = CharField(read_only=True)
 
