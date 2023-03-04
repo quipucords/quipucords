@@ -1,5 +1,4 @@
 """ScanTask used for network connection discovery."""
-import json
 import logging
 import uuid
 from copy import deepcopy
@@ -255,11 +254,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             status = ScanTask.FAILED
-        deployment_report.cached_fingerprints = json.dumps(final_fingerprint_list)
-        deployment_report.cached_masked_fingerprints = json.dumps(
-            mask_data_general(
-                final_fingerprint_list, MAC_AND_IP_FACTS, NAME_RELATED_FACTS
-            )
+        deployment_report.cached_fingerprints = final_fingerprint_list
+        deployment_report.cached_masked_fingerprints = mask_data_general(
+            deepcopy(final_fingerprint_list), MAC_AND_IP_FACTS, NAME_RELATED_FACTS
         )
         deployment_report.save()
         self.scan_task.log_message(
