@@ -17,7 +17,7 @@ class SystemConnectionResultSerializer(NotEmptySerializer):
     )
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = SystemConnectionResult
         fields = ["name", "status", "source", "credential"]
@@ -28,7 +28,7 @@ class TaskConnectionResultSerializer(NotEmptySerializer):
     """Serializer for the TaskConnectionResult model."""
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = TaskConnectionResult
         fields = ["source", "systems"]
@@ -39,7 +39,7 @@ class JobConnectionResultSerializer(NotEmptySerializer):
     """Serializer for the JobConnectionResult model."""
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = JobConnectionResult
         fields = ["task_results"]
