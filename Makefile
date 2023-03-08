@@ -108,7 +108,7 @@ test-integration:
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
-lint: lint-isort lint-flake8 lint-black lint-ansible
+lint: lint-isort lint-black lint-flake8 lint-ansible
 
 lint-isort:
 	poetry run isort . --check --diff
