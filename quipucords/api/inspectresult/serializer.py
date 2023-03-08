@@ -17,7 +17,7 @@ class RawFactSerializer(NotEmptySerializer):
     value = CustomJSONField(required=True)
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = RawFact
         fields = ["name", "value"]
@@ -33,7 +33,7 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
     )
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = SystemInspectionResult
         fields = ["name", "status", "source", "facts"]
@@ -44,7 +44,7 @@ class TaskInspectionResultSerializer(NotEmptySerializer):
     """Serializer for the TaskInspectionResult model."""
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = TaskInspectionResult
         fields = ["source", "systems"]
@@ -55,7 +55,7 @@ class JobInspectionResultSerializer(NotEmptySerializer):
     """Serializer for the JobInspectionResult model."""
 
     class Meta:
-        """Metadata for serialzer."""
+        """Metadata for serializer."""
 
         model = JobInspectionResult
         fields = ["task_results"]
