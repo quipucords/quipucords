@@ -287,7 +287,7 @@ class ScanJob(models.Model):
             f" systems_scanned={systems_scanned:d},"
             f" systems_failed={systems_failed:d},"
             f" systems_unreachable={systems_unreachable:d},"
-            f" system_fingerprint_count=%{system_fingerprint_count:d}"
+            f" system_fingerprint_count={system_fingerprint_count:d}"
         )
         self.log_message(message)
 
