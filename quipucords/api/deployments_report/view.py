@@ -1,5 +1,4 @@
 """View for system reports."""
-import json
 import logging
 import os
 
@@ -82,11 +81,11 @@ def build_cached_json_report(report, mask_report):
     """
     if validate_query_param_bool(mask_report):
         if report.cached_masked_fingerprints:
-            system_fingerprints = json.loads(report.cached_masked_fingerprints)
+            system_fingerprints = report.cached_masked_fingerprints
         else:
             return None
     else:
-        system_fingerprints = json.loads(report.cached_fingerprints)
+        system_fingerprints = report.cached_fingerprints
     return {
         "report_id": report.id,
         "status": report.status,
