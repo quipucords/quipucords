@@ -1,4 +1,5 @@
 """ScanJobRunner runs a group of scan tasks."""
+
 import logging
 from multiprocessing import Process, Value
 
@@ -10,20 +11,12 @@ from api.details_report.util import (
     create_details_report,
     validate_details_report_json,
 )
-from api.models import ScanJob, ScanTask, Source
+from api.models import ScanJob, ScanTask
 from fingerprinter.task import FingerprintTaskRunner
-from scanner import network, openshift, satellite, vcenter
+from scanner.get_scanner import get_scanner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-
-
-MODULE_PER_SOURCE_TYPE = {
-    Source.NETWORK_SOURCE_TYPE: network,
-    Source.OPENSHIFT_SOURCE_TYPE: openshift,
-    Source.SATELLITE_SOURCE_TYPE: satellite,
-    Source.VCENTER_SOURCE_TYPE: vcenter,
-}
 
 
 class ScanJobRunner(Process):
@@ -235,26 +228,15 @@ class ScanJobRunner(Process):
             task_status = ScanTask.FAILED
         return task_status
 
-    @classmethod
-    def _get_source_module(cls, scan_task: ScanTask):
-        """Get the appropriate module for scan task based on its source type."""
-        source_type = scan_task.source.source_type
-        try:
-            return MODULE_PER_SOURCE_TYPE[source_type]
-        except KeyError as error:
-            raise NotImplementedError(
-                f"Unsupported source type: {source_type}"
-            ) from error
-
     def _create_connect_task_runner(self, scan_task):
         """Create connection TaskRunner using source_type."""
-        module = self._get_source_module(scan_task)
-        return module.ConnectTaskRunner(self.scan_job, scan_task)
+        scanner = get_scanner(scan_task.source.source_type)
+        return scanner.ConnectTaskRunner(self.scan_job, scan_task)
 
     def _create_inspect_task_runner(self, scan_task):
         """Create inspection TaskRunner using source_type."""
-        module = self._get_source_module(scan_task)
-        return module.InspectTaskRunner(self.scan_job, scan_task)
+        scanner = get_scanner(scan_task.source.source_type)
+        return scanner.InspectTaskRunner(self.scan_job, scan_task)
 
     def _create_details_report(self):
         """Send collected host scan facts to fact endpoint.
