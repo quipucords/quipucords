@@ -7,21 +7,17 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.vault import encrypt_data_as_unicode
+from constants import DataSources
 
 
 class Credential(models.Model):
     """The credential for connecting to systems."""
 
-    NETWORK_CRED_TYPE = "network"
-    VCENTER_CRED_TYPE = "vcenter"
-    SATELLITE_CRED_TYPE = "satellite"
-    OPENSHIFT_CRED_TYPE = "openshift"
-    CRED_TYPE_CHOICES = (
-        (NETWORK_CRED_TYPE, NETWORK_CRED_TYPE),
-        (VCENTER_CRED_TYPE, VCENTER_CRED_TYPE),
-        (SATELLITE_CRED_TYPE, SATELLITE_CRED_TYPE),
-        (OPENSHIFT_CRED_TYPE, OPENSHIFT_CRED_TYPE),
-    )
+    NETWORK_CRED_TYPE = DataSources.NETWORK.value
+    VCENTER_CRED_TYPE = DataSources.VCENTER.value
+    SATELLITE_CRED_TYPE = DataSources.SATELLITE.value
+    OPENSHIFT_CRED_TYPE = DataSources.OPENSHIFT.value
+    CRED_TYPE_CHOICES = DataSources.choices
     BECOME_USER_DEFAULT = "root"
     BECOME_SUDO = "sudo"
     BECOME_SU = "su"

@@ -84,6 +84,7 @@ profile = "black"
 known_first_party = [
     "api",
     "compat",
+    "constants",
     "fingerprinter",
     "log_messages",
     "quipucords",
