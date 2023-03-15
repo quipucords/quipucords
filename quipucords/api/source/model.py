@@ -9,6 +9,7 @@ from functools import cached_property
 from django.db import models
 
 from api.credential.model import Credential
+from constants import DataSources
 
 
 class SourceOptions(models.Model):
@@ -51,16 +52,11 @@ class SourceOptions(models.Model):
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""
 
-    NETWORK_SOURCE_TYPE = "network"
-    VCENTER_SOURCE_TYPE = "vcenter"
-    SATELLITE_SOURCE_TYPE = "satellite"
-    OPENSHIFT_SOURCE_TYPE = "openshift"
-    SOURCE_TYPE_CHOICES = (
-        (NETWORK_SOURCE_TYPE, NETWORK_SOURCE_TYPE),
-        (VCENTER_SOURCE_TYPE, VCENTER_SOURCE_TYPE),
-        (SATELLITE_SOURCE_TYPE, SATELLITE_SOURCE_TYPE),
-        (OPENSHIFT_SOURCE_TYPE, OPENSHIFT_SOURCE_TYPE),
-    )
+    NETWORK_SOURCE_TYPE = DataSources.NETWORK.value
+    VCENTER_SOURCE_TYPE = DataSources.VCENTER.value
+    SATELLITE_SOURCE_TYPE = DataSources.SATELLITE.value
+    OPENSHIFT_SOURCE_TYPE = DataSources.OPENSHIFT.value
+    SOURCE_TYPE_CHOICES = DataSources.choices
 
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
