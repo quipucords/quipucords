@@ -8,7 +8,7 @@ from faker import Faker
 
 from api import models
 from api.status import get_server_id
-from utils import get_choice_ids
+from constants import DataSources
 
 
 def format_sources(obj):
@@ -29,9 +29,9 @@ def format_sources(obj):
 
 def system_fingerprint_source_types():
     """Return default source types for fingerprints."""
-    all_types = set(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+    all_types = set(DataSources.values)
     # OpenShift will be ignored by default for convenience on insights tests
-    ignored_types = {models.Source.OPENSHIFT_SOURCE_TYPE}
+    ignored_types = {DataSources.OPENSHIFT.value}
     return all_types - ignored_types
 
 
@@ -193,7 +193,7 @@ class CredentialFactory(DjangoModelFactory):
     """Factory for Credential model."""
 
     name = factory.Faker("slug")
-    cred_type = factory.Iterator(get_choice_ids(models.Credential.CRED_TYPE_CHOICES))
+    cred_type = factory.Iterator(DataSources.values)
 
     class Meta:
         """Factory options."""
@@ -221,7 +221,7 @@ class SourceFactory(DjangoModelFactory):
     """Factory for Source model."""
 
     name = factory.Faker("slug")
-    source_type = factory.Iterator(get_choice_ids(models.Source.SOURCE_TYPE_CHOICES))
+    source_type = factory.Iterator(DataSources.values)
     options = factory.SubFactory(SourceOptions)
 
     class Meta:
