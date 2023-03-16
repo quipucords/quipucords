@@ -1,6 +1,5 @@
 """Models to capture system facts."""
 
-import json
 import uuid
 
 from django.db import models
@@ -16,7 +15,7 @@ class DetailsReport(models.Model):
     )
     report_version = models.CharField(max_length=64, null=False)
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
-    sources = models.TextField(null=False)
+    sources = models.JSONField(null=True)
     report_id = models.IntegerField(null=True)
     deployment_report = models.OneToOneField(
         "DeploymentsReport", models.CASCADE, related_name="details_report", null=True
@@ -35,8 +34,8 @@ class DetailsReport(models.Model):
         )
 
     def get_sources(self):
-        """Access facts as python dict instead of str.
+        """Access sources.
 
-        :returns: facts as a python dict
+        :returns: sources as a python dict
         """
-        return json.loads(self.sources)
+        return self.sources
