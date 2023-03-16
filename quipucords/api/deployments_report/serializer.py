@@ -120,7 +120,7 @@ class SystemFingerprintSerializer(ModelSerializer):
     # pylint: disable=invalid-name
     redhat_package_count = IntegerField(min_value=0, **default_args)
 
-    metadata = CustomJSONField(required=True)
+    metadata = JSONField(required=True)
     sources = CustomJSONField(required=True)
     etc_machine_id = CharField(max_length=48, **default_args)
 

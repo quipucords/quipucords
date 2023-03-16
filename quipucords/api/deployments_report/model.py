@@ -164,7 +164,7 @@ class SystemFingerprint(models.Model):
         unique=False, blank=True, null=True
     )
 
-    metadata = models.TextField(unique=False, null=False)
+    metadata = models.JSONField(unique=False, null=True)
     sources = models.TextField(unique=False, null=False)
     etc_machine_id = models.CharField(
         max_length=48, unique=False, blank=True, null=True
