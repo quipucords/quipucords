@@ -26,8 +26,8 @@ from api.models import (
 class ProductSerializer(NotEmptySerializer):
     """Serializer for the Product model."""
 
-    version = CustomJSONField(required=False)
-    metadata = CustomJSONField(required=True)
+    version = JSONField(required=False)
+    metadata = JSONField(required=True)
 
     class Meta:
         """Meta class for ProductSerializer."""
