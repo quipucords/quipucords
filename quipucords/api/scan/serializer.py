@@ -8,16 +8,13 @@ from rest_framework.serializers import (
     BooleanField,
     CharField,
     IntegerField,
+    JSONField,
     PrimaryKeyRelatedField,
     ValidationError,
 )
 
 from api import messages  # noqa
-from api.common.serializer import (
-    CustomJSONField,
-    NotEmptySerializer,
-    ValidStringChoiceField,
-)
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name, check_path_validity
 from api.models import (
     DisabledOptionalProductsOptions,
@@ -42,7 +39,7 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
     jboss_fuse = BooleanField(required=False)
     jboss_brms = BooleanField(required=False)
     jboss_ws = BooleanField(required=False)
-    search_directories = CustomJSONField(required=False)
+    search_directories = JSONField(required=False)
 
     class Meta:
         """Metadata for serializer."""
@@ -60,7 +57,7 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
     def validate_search_directories(search_directories):
         """Validate search directories."""
         try:
-            search_directories_list = json.loads(search_directories)
+            search_directories_list = search_directories
             if not isinstance(search_directories_list, list):
                 raise ValidationError(
                     _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
