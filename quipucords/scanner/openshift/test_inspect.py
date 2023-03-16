@@ -23,7 +23,7 @@ def scan_task():
     """Return a ScanTask for testing."""
     connect_task = ScanTaskFactory(
         source__source_type=DataSources.OPENSHIFT,
-        source__hosts='["1.2.3.4"]',
+        source__hosts=["1.2.3.4"],
         source__port=4321,
         scan_type=ScanTask.SCAN_TYPE_CONNECT,
         status=ScanTask.COMPLETED,

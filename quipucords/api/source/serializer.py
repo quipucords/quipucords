@@ -1,6 +1,5 @@
 """Module for serializing all model object for database storage."""
 
-import json
 import logging
 import re
 
@@ -10,16 +9,13 @@ from rest_framework.serializers import (
     BooleanField,
     CharField,
     IntegerField,
+    JSONField,
     PrimaryKeyRelatedField,
     ValidationError,
 )
 
 from api import messages
-from api.common.serializer import (
-    CustomJSONField,
-    NotEmptySerializer,
-    ValidStringChoiceField,
-)
+from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
 from api.models import Credential, Source, SourceOptions
 from constants import DataSources
@@ -76,8 +72,8 @@ class SourceSerializer(NotEmptySerializer):
         choices=DataSources.choices,
     )
     port = IntegerField(required=False, min_value=0, allow_null=True)
-    hosts = CustomJSONField(required=True)
-    exclude_hosts = CustomJSONField(required=False)
+    hosts = JSONField(required=True)
+    exclude_hosts = JSONField(required=False)
     options = SourceOptionsSerializer(required=False, many=False)
     credentials = CredentialsField(many=True, queryset=Credential.objects.all())
 
@@ -213,9 +209,9 @@ class SourceSerializer(NotEmptySerializer):
         ):
             self._options_with_ssl_cert_verify_true(source)
 
-        source.hosts = json.dumps(hosts_list)
+        source.hosts = hosts_list
         if exclude_hosts_list:
-            source.exclude_hosts = json.dumps(exclude_hosts_list)
+            source.exclude_hosts = exclude_hosts_list
 
         for credential in credentials:
             source.credentials.add(credential)
@@ -255,10 +251,10 @@ class SourceSerializer(NotEmptySerializer):
         # this point, so it's safe to use hosts_list as an indicator
         # of whether to replace the hosts.
         if hosts_list:
-            instance.hosts = json.dumps(hosts_list)
+            instance.hosts = hosts_list
 
         if exclude_hosts_list:
-            instance.exclude_hosts = json.dumps(exclude_hosts_list)
+            instance.exclude_hosts = exclude_hosts_list
 
         # credentials is safe to use as a flag for the same reason as
         # hosts_data above.
@@ -322,7 +318,7 @@ class SourceSerializer(NotEmptySerializer):
     @staticmethod
     def validate_ipaddr_list(hosts):
         """Make sure the hosts list is present and has valid IP addresses."""
-        ipaddr_list = json.loads(hosts)
+        ipaddr_list = hosts
         if isinstance(ipaddr_list, list):
             ipaddr_list = [item for item in ipaddr_list if item]
 

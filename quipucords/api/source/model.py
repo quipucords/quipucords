@@ -2,7 +2,6 @@
 
 These models are used in the REST definitions
 """
-import json
 import ssl
 from functools import cached_property
 
@@ -59,8 +58,8 @@ class Source(models.Model):
     port = models.IntegerField(null=True)
     options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
-    hosts = models.TextField(unique=False, null=False)
-    exclude_hosts = models.TextField(unique=False, null=True)
+    hosts = models.JSONField(unique=False, null=True)
+    exclude_hosts = models.JSONField(unique=False, null=True)
 
     most_recent_connect_scan = models.ForeignKey(
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
@@ -71,7 +70,7 @@ class Source(models.Model):
 
         :returns: hosts as a python list
         """
-        return json.loads(self.hosts)
+        return self.hosts
 
     def get_exclude_hosts(self):
         """Access exclude_hosts as python list instead of str.
@@ -79,7 +78,7 @@ class Source(models.Model):
         :returns: excluded hosts as a python list. Empty list if none exist.
         """
         if self.exclude_hosts:
-            return json.loads(self.exclude_hosts)
+            return self.exclude_hosts
         return []
 
     @cached_property

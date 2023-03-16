@@ -45,7 +45,7 @@ class DetailReportTest(TestCase):
         )
         self.net_source.credentials.add(self.net_cred)
 
-        self.net_source.hosts = '["1.2.3.4"]'
+        self.net_source.hosts = ["1.2.3.4"]
         self.net_source.save()
         self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.report_version = create_report_version()

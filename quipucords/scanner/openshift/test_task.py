@@ -69,7 +69,7 @@ def test_get_ocp_client_arguments(  # pylint: disable=too-many-arguments
     scan_task = ScanTaskFactory(
         source__credentials=[cred],
         source__source_type="openshift",
-        source__hosts=f'["{host}"]',
+        source__hosts=[f"{host}"],
         source__port=port,
         **source_kwargs,
     )

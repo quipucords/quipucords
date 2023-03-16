@@ -50,7 +50,7 @@ class NetworkInspectScannerTest(TestCase):
         self.cred_data = hc_serializer.data
 
         # setup source for scan
-        self.source = Source(name="source1", port=22, hosts='["1.2.3.4"]')
+        self.source = Source(name="source1", port=22, hosts=["1.2.3.4"])
         self.source.save()
         self.source.credentials.add(self.cred)
 
@@ -250,7 +250,7 @@ class NetworkInspectScannerTest(TestCase):
         source_options = SourceOptions()
         source_options.save()
         self.source = Source(
-            name="source2", port=22, options=source_options, hosts='["1.2.3.4"]'
+            name="source2", port=22, options=source_options, hosts=["1.2.3.4"]
         )
         self.source.save()
         self.source.credentials.add(self.cred)

@@ -132,7 +132,7 @@ class TestProcess(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.source.hosts = '["1.2.3.4"]'
+        self.source.hosts = ["1.2.3.4"]
         self.source.save()
 
         # Create scan configuration
