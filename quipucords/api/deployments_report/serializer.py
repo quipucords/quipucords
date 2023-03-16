@@ -121,7 +121,7 @@ class SystemFingerprintSerializer(ModelSerializer):
     redhat_package_count = IntegerField(min_value=0, **default_args)
 
     metadata = JSONField(required=True)
-    sources = CustomJSONField(required=True)
+    sources = JSONField(required=True)
     etc_machine_id = CharField(max_length=48, **default_args)
 
     class Meta:
