@@ -139,7 +139,7 @@ class SystemFingerprint(models.Model):
     )
 
     system_user_count = models.PositiveIntegerField(unique=False, blank=True, null=True)
-    user_login_history = models.TextField(unique=False, blank=True, null=True)
+    user_login_history = models.JSONField(unique=False, blank=True, null=True)
 
     # VCenter scan facts
     vm_state = models.CharField(max_length=24, unique=False, blank=True, null=True)
