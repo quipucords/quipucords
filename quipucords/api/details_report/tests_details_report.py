@@ -13,6 +13,7 @@ from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.models import Credential, DetailsReport, ServerInformation, Source
+from constants import DataSources
 
 
 class MockRequest:
@@ -31,12 +32,12 @@ class DetailReportTest(TestCase):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
         self.net_source = Source.objects.create(
-            name="test_source", source_type=Source.NETWORK_SOURCE_TYPE
+            name="test_source", source_type=DataSources.NETWORK
         )
 
         self.net_cred = Credential.objects.create(
             name="net_cred1",
-            cred_type=Credential.NETWORK_CRED_TYPE,
+            cred_type=DataSources.NETWORK,
             username="username",
             password="password",
             become_password=None,

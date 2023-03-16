@@ -7,6 +7,7 @@ from django.test import TestCase
 from requests import exceptions
 
 from api.models import Credential, ScanJob, ScanTask, Source
+from constants import DataSources
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
@@ -51,7 +52,7 @@ class InspectTaskRunnerTest(TestCase):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
         )

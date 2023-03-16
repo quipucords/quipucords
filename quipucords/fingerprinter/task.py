@@ -17,8 +17,9 @@ from api.common.util import (
     is_int,
     mask_data_general,
 )
-from api.models import DeploymentsReport, Product, ScanTask, Source, SystemFingerprint
+from api.models import DeploymentsReport, Product, ScanTask, SystemFingerprint
 from api.serializers import SystemFingerprintSerializer
+from constants import DataSources
 from fingerprinter import formatters
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
@@ -82,10 +83,10 @@ NAME_RELATED_FACTS = ["name", "vm_dns_name", "virtual_host_name"]
 
 # Fingerprint keys
 COMBINED_KEY = "combined_fingerprints"
-NETWORK_KEY = Source.NETWORK_SOURCE_TYPE
-VCENTER_KEY = Source.VCENTER_SOURCE_TYPE
-SATELLITE_KEY = Source.SATELLITE_SOURCE_TYPE
-OPENSHIFT_KEY = Source.OPENSHIFT_SOURCE_TYPE
+NETWORK_KEY = DataSources.NETWORK
+VCENTER_KEY = DataSources.VCENTER
+SATELLITE_KEY = DataSources.SATELLITE
+OPENSHIFT_KEY = DataSources.OPENSHIFT
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -513,7 +514,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             server_id = source.get("server_id")
             source_type = source.get("source_type")
             source_name = source.get("source_name")
-            if fact.get("cluster") and source_type == Source.OPENSHIFT_SOURCE_TYPE:
+            if fact.get("cluster") and source_type == DataSources.OPENSHIFT:
                 # skip cluster fact in openshift scans since this type of "system"
                 # won't generate a fingerprint
                 continue

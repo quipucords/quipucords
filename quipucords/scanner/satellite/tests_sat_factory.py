@@ -2,6 +2,7 @@
 from django.test import TestCase
 
 from api.models import Credential, ScanTask, Source
+from constants import DataSources
 from scanner.satellite.api import SATELLITE_VERSION_5, SATELLITE_VERSION_6
 from scanner.satellite.factory import create
 from scanner.satellite.five import SatelliteFive
@@ -16,7 +17,7 @@ class SatelliteFactoryTest(TestCase):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
             become_password=None,

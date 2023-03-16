@@ -6,6 +6,7 @@ import requests_mock
 from django.test import TestCase
 
 from api.models import Credential, ScanTask, Source, SourceOptions
+from constants import DataSources
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
@@ -38,7 +39,7 @@ class SatelliteUtilsTest(TestCase):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
             become_password=None,

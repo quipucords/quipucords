@@ -4,9 +4,9 @@ import logging
 
 import pytest
 
-from api.models import DetailsReport, ScanJob, ScanTask, Source
+from api.models import DetailsReport, ScanJob, ScanTask
+from constants import DataSources
 from fingerprinter.task import FingerprintTaskRunner
-from utils import get_choice_ids
 
 logger = logging.getLogger(__file__)
 
@@ -21,7 +21,7 @@ def details_report(mocker):
             "source_name": source_type,
             "server_id": "<ID>",
         }
-        for source_type in get_choice_ids(Source.SOURCE_TYPE_CHOICES)
+        for source_type in DataSources.values
     ]
     return report
 

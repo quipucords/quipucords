@@ -7,53 +7,45 @@ from io import StringIO
 
 from api.common.common_report import CSVHelper, sanitize_row
 from api.common.util import validate_query_param_bool
-from api.models import DeploymentsReport, Source, SystemFingerprint
+from api.models import DeploymentsReport, SystemFingerprint
+from constants import DataSources
 
-# pylint: disable=arguments-differ,unused-argument,too-many-locals
-# pylint: disable=too-many-branches,too-many-statements
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
-NETWORK_DETECTION_KEY = "detection-network"
-VCENTER_DETECTION_KEY = "detection-vcenter"
-SATELLITE_DETECTION_KEY = "detection-satellite"
-OPENSHIFT_DETECTION_KEY = "detection-openshift"
+DETECTION_KEY_PREFIX = "detection"
 SOURCES_KEY = "sources"
+
+
+def _get_detection_keys():
+    return (
+        f"{DETECTION_KEY_PREFIX}-{data_source}" for data_source in DataSources.values
+    )
 
 
 def compute_source_info(sources):
     """Detect scan source types."""
     result = {
-        NETWORK_DETECTION_KEY: False,
-        VCENTER_DETECTION_KEY: False,
-        SATELLITE_DETECTION_KEY: False,
-        OPENSHIFT_DETECTION_KEY: False,
         SOURCES_KEY: [],
+        **{
+            source_detection_key: False
+            for source_detection_key in _get_detection_keys()
+        },
     }
+
     for source in sources:
-        if source.get("source_type") == Source.NETWORK_SOURCE_TYPE:
-            result[NETWORK_DETECTION_KEY] = True
-        elif source.get("source_type") == Source.VCENTER_SOURCE_TYPE:
-            result[VCENTER_DETECTION_KEY] = True
-        elif source.get("source_type") == Source.SATELLITE_SOURCE_TYPE:
-            result[SATELLITE_DETECTION_KEY] = True
-        elif source.get("source_type") == Source.OPENSHIFT_SOURCE_TYPE:
-            result[OPENSHIFT_DETECTION_KEY] = True
+        source_type = source.get("source_type")
+        if source_type in DataSources:
+            result[f"{DETECTION_KEY_PREFIX}-{source_type}"] = True
         result[SOURCES_KEY].append(source.get("source_name"))
     return result
 
 
 def create_deployments_csv(deployments_report_dict, request):
     """Create deployments report csv."""
+    # pylint: disable=too-many-branches, too-many-locals, too-many-statements
     deployments_report_dict = deepcopy(deployments_report_dict)
     mask_report = request.query_params.get("mask", False)
-    source_headers = {
-        NETWORK_DETECTION_KEY,
-        VCENTER_DETECTION_KEY,
-        SATELLITE_DETECTION_KEY,
-        OPENSHIFT_DETECTION_KEY,
-        SOURCES_KEY,
-    }
+    source_headers = {SOURCES_KEY, *_get_detection_keys()}
     report_id = deployments_report_dict.get("report_id")
     if report_id is None:
         return None

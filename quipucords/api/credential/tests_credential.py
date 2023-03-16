@@ -10,6 +10,7 @@ from rest_framework import status
 from api import messages
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
+from constants import DataSources
 
 
 class CredentialTest(TestCase):
@@ -25,7 +26,7 @@ class CredentialTest(TestCase):
         name="test_cred",
         username="testuser",
         password="testpass",
-        cred_type=Credential.NETWORK_CRED_TYPE,
+        cred_type=DataSources.NETWORK,
     ):
         """Create a Credential model for use within test cases.
 
@@ -75,7 +76,7 @@ class CredentialTest(TestCase):
         """Ensure we can create a new host credential object via API."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -87,7 +88,7 @@ class CredentialTest(TestCase):
         """Create with duplicate name should fail."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -118,7 +119,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "password": "pass1",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
@@ -135,7 +136,7 @@ class CredentialTest(TestCase):
         data = {
             "name": "cred1",
             "username": "user1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -151,7 +152,7 @@ class CredentialTest(TestCase):
         data = {
             "name": "cred1",
             "username": "user1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "ssh_keyfile": "blah",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
@@ -246,7 +247,7 @@ class CredentialTest(TestCase):
         """Tests the list view with filter set of the Credential API."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -254,7 +255,7 @@ class CredentialTest(TestCase):
 
         data = {
             "name": "cred2",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user2",
             "password": "pass2",
         }
@@ -268,7 +269,7 @@ class CredentialTest(TestCase):
         results = json_resp.get("results")
         self.assertEqual(len(results), 2)
 
-        resp = self.client.get(url, {"cred_type": Credential.VCENTER_CRED_TYPE})
+        resp = self.client.get(url, {"cred_type": DataSources.VCENTER})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         json_resp = resp.json()
         self.assertTrue(json_resp.get("results") is not None)
@@ -280,7 +281,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -288,7 +289,7 @@ class CredentialTest(TestCase):
 
         data = {
             "name": "cred2",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user2",
             "password": "pass2",
         }
@@ -306,7 +307,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -314,7 +315,7 @@ class CredentialTest(TestCase):
 
         data = {
             "name": "cred2",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user2",
             "password": "pass2",
         }
@@ -347,7 +348,7 @@ class CredentialTest(TestCase):
         cred.save()
         source = Source(
             name="cred_source",
-            source_type=Source.NETWORK_SOURCE_TYPE,
+            source_type=DataSources.NETWORK,
             hosts=["1.2.3.4"],
         )
         source.save()
@@ -367,7 +368,7 @@ class CredentialTest(TestCase):
         """Ensure we can create a new vcenter credential."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "password": "pass1",
         }
@@ -379,7 +380,7 @@ class CredentialTest(TestCase):
         """Vcenter cred with duplicate name should fail."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "password": "pass1",
         }
@@ -395,7 +396,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "ssh_keyfile": "keyfile",
         }
@@ -408,7 +409,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "password": "pass1",
             "ssh_keyfile": "keyfile",
@@ -422,7 +423,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "password": "pass1",
             "become_password": "pass2",
@@ -435,7 +436,7 @@ class CredentialTest(TestCase):
         """Ensure we can create and update a vcenter credential."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "password": "pass1",
         }
@@ -449,7 +450,7 @@ class CredentialTest(TestCase):
         """Ensure we can set the default become_method via API."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -461,7 +462,7 @@ class CredentialTest(TestCase):
         """Ensure we can set the credentials become method."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
             "become_method": "doas",
@@ -474,7 +475,7 @@ class CredentialTest(TestCase):
         """Ensure we can set the default become_user via API."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
         }
@@ -486,7 +487,7 @@ class CredentialTest(TestCase):
         """Ensure we can set the become user."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
             "become_method": "doas",
@@ -500,7 +501,7 @@ class CredentialTest(TestCase):
         """Ensure we can set the become password."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.NETWORK_CRED_TYPE,
+            "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
             "become_method": "doas",
@@ -517,7 +518,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.VCENTER_CRED_TYPE,
+            "cred_type": DataSources.VCENTER,
             "username": "user1",
             "password": "pass1",
             "ssh_passphrase": "pass2",
@@ -530,7 +531,7 @@ class CredentialTest(TestCase):
         """Ensure we can create a new satellite credential."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "password": "pass1",
         }
@@ -542,7 +543,7 @@ class CredentialTest(TestCase):
         """Satellite cred with duplicate name should fail."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "password": "pass1",
         }
@@ -558,7 +559,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "ssh_keyfile": "keyfile",
         }
@@ -570,7 +571,7 @@ class CredentialTest(TestCase):
         """Ensure Satellite update doesn't allow adding ssh_keyfile."""
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "password": "pass1",
         }
@@ -591,7 +592,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "password": "pass1",
             "ssh_keyfile": "keyfile",
@@ -605,7 +606,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "password": "pass1",
             "become_password": "pass2",
@@ -619,7 +620,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "cred1",
-            "cred_type": Credential.SATELLITE_CRED_TYPE,
+            "cred_type": DataSources.SATELLITE,
             "username": "user1",
             "password": "pass1",
             "ssh_passphrase": "pass2",
@@ -632,7 +633,7 @@ class CredentialTest(TestCase):
         """Ensure we can create a new openshift credential."""
         data = {
             "name": "openshift_cred_1",
-            "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+            "cred_type": DataSources.OPENSHIFT,
             "auth_token": "test_token",
         }
         self.create_expect_201(data)
@@ -644,7 +645,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "openshift_cred_1",
-            "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+            "cred_type": DataSources.OPENSHIFT,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -655,7 +656,7 @@ class CredentialTest(TestCase):
         url = reverse("cred-list")
         data = {
             "name": "openshift_cred_1",
-            "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+            "cred_type": DataSources.OPENSHIFT,
             "auth_token": "test_token",
             "become_password": "test_become_password",
             "username": "test_username",

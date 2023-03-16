@@ -14,6 +14,7 @@ from api import messages
 from api.models import Credential, Scan, ScanTask, Source
 from api.serializers import SourceSerializer
 from api.source.view import format_source
+from constants import DataSources
 from scanner.test_util import create_scan_job
 
 
@@ -30,7 +31,7 @@ class SourceTest(TestCase):
         management.call_command("flush", "--no-input")
         self.net_cred = Credential.objects.create(
             name="net_cred1",
-            cred_type=Credential.NETWORK_CRED_TYPE,
+            cred_type=DataSources.NETWORK,
             username="username",
             password="password",
             become_password=None,
@@ -44,7 +45,7 @@ class SourceTest(TestCase):
 
         self.vc_cred = Credential.objects.create(
             name="vc_cred1",
-            cred_type=Credential.VCENTER_CRED_TYPE,
+            cred_type=DataSources.VCENTER,
             username="username",
             password="password",
             become_password=None,
@@ -55,7 +56,7 @@ class SourceTest(TestCase):
 
         self.sat_cred = Credential.objects.create(
             name="sat_cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
             become_password=None,
@@ -69,7 +70,7 @@ class SourceTest(TestCase):
 
         self.openshift_cred = Credential.objects.create(
             name="openshift_cred1",
-            cred_type=Credential.OPENSHIFT_CRED_TYPE,
+            cred_type=DataSources.OPENSHIFT,
             auth_token="openshift_token",
         )
         self.openshift_cred_for_upload = self.openshift_cred.id
@@ -131,7 +132,7 @@ class SourceTest(TestCase):
     #################################################
     def test_validate_opts(self):
         """Test the validate_opts function."""
-        source_type = Source.SATELLITE_SOURCE_TYPE
+        source_type = DataSources.SATELLITE
         options = {"use_paramiko": True}
         with self.assertRaises(ValidationError):
             SourceSerializer.validate_opts(options, source_type)
@@ -140,7 +141,7 @@ class SourceTest(TestCase):
         SourceSerializer.validate_opts(options, source_type)
         self.assertEqual(options["ssl_cert_verify"], True)
 
-        source_type = Source.VCENTER_SOURCE_TYPE
+        source_type = DataSources.VCENTER
         options = {"use_paramiko": True}
         with self.assertRaises(ValidationError):
             SourceSerializer.validate_opts(options, source_type)
@@ -149,7 +150,7 @@ class SourceTest(TestCase):
         SourceSerializer.validate_opts(options, source_type)
         self.assertEqual(options["ssl_cert_verify"], True)
 
-        source_type = Source.NETWORK_SOURCE_TYPE
+        source_type = DataSources.NETWORK
         options = {"disable_ssl": True}
         with self.assertRaises(ValidationError):
             SourceSerializer.validate_opts(options, source_type)
@@ -218,7 +219,7 @@ class SourceTest(TestCase):
         query = "?scan=False"
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -231,7 +232,7 @@ class SourceTest(TestCase):
         query = "?scan=True"
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -243,7 +244,7 @@ class SourceTest(TestCase):
         query = "?scan=Foo"
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -254,7 +255,7 @@ class SourceTest(TestCase):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -266,7 +267,7 @@ class SourceTest(TestCase):
         """A valid create request should succeed without port."""
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "credentials": [self.net_cred_for_upload],
         }
@@ -277,7 +278,7 @@ class SourceTest(TestCase):
         """A duplicate create should fail."""
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -290,7 +291,7 @@ class SourceTest(TestCase):
         """A valid create request with two hosts."""
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4", "1.2.3.5"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -302,7 +303,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "hosts": "1.2.3.4",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
             }
@@ -314,7 +315,7 @@ class SourceTest(TestCase):
             {
                 "name": 1,
                 "hosts": "1.2.3.4",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
             }
@@ -325,7 +326,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "\r\n",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": "1.2.3.4",
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -337,7 +338,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
             }
@@ -348,7 +349,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": [],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -360,7 +361,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": {"1.2.3.4": "1.2.3.4"},
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -372,7 +373,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": [1, 2, 3, 4],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -384,7 +385,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "A" * 100,
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -396,7 +397,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": -1,
                 "credentials": [self.net_cred_for_upload],
@@ -408,7 +409,7 @@ class SourceTest(TestCase):
         self.create_expect_201(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["10.10.181.9", ""],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -420,7 +421,7 @@ class SourceTest(TestCase):
         self.create_expect_201(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": [
                     "10.10.181.9",
                     "10.10.181.9/16",
@@ -446,7 +447,7 @@ class SourceTest(TestCase):
         self.create_expect_201(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": [
                     "10.10.181.8",
                     "10.10.181.9",
@@ -489,7 +490,7 @@ class SourceTest(TestCase):
         response = self.create(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": hosts,
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -505,7 +506,7 @@ class SourceTest(TestCase):
         response = self.create(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": hosts,
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -519,7 +520,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "-1",
                 "credentials": [self.net_cred_for_upload],
@@ -531,7 +532,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
             }
@@ -542,7 +543,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [],
@@ -554,7 +555,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [42],
@@ -566,7 +567,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": ["hi"],
@@ -578,7 +579,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.vc_cred_for_upload],
@@ -589,7 +590,7 @@ class SourceTest(TestCase):
         """Test network type doesn't allow ssl options."""
         data = {
             "name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.vc_cred_for_upload],
@@ -601,7 +602,7 @@ class SourceTest(TestCase):
         """List all Source objects."""
         data = {
             "name": "source",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "port": "22",
             "hosts": ["1.2.3.4"],
             "credentials": [self.net_cred_for_upload],
@@ -620,7 +621,7 @@ class SourceTest(TestCase):
             {
                 "id": 1,
                 "name": "source0",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "port": 22,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.net_cred_for_response],
@@ -628,7 +629,7 @@ class SourceTest(TestCase):
             {
                 "id": 2,
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "port": 22,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.net_cred_for_response],
@@ -636,7 +637,7 @@ class SourceTest(TestCase):
             {
                 "id": 3,
                 "name": "source2",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "port": 22,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.net_cred_for_response],
@@ -649,7 +650,7 @@ class SourceTest(TestCase):
         """List all Source objects filtered by type."""
         data = {
             "name": "nsource",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "port": "22",
             "credentials": [self.net_cred_for_upload],
             "hosts": ["1.2.3.4"],
@@ -661,7 +662,7 @@ class SourceTest(TestCase):
 
         data = {
             "name": "vsource",
-            "source_type": Source.VCENTER_SOURCE_TYPE,
+            "source_type": DataSources.VCENTER,
             "credentials": [self.vc_cred_for_upload],
             "hosts": ["1.2.3.4"],
         }
@@ -672,7 +673,7 @@ class SourceTest(TestCase):
             self.create_expect_201(this_data)
 
         url = reverse("source-list")
-        response = self.client.get(url, {"source_type": Source.VCENTER_SOURCE_TYPE})
+        response = self.client.get(url, {"source_type": DataSources.VCENTER})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         content = response.json()
@@ -708,7 +709,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "exclude_hosts": ["1.2.3.4"],
                 "port": "22",
@@ -741,7 +742,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source2",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -762,7 +763,7 @@ class SourceTest(TestCase):
 
         expected = {
             "name": "source2",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.5"],
             "port": 23,
             "credentials": [self.net_cred_for_response],
@@ -777,7 +778,7 @@ class SourceTest(TestCase):
         self.create_expect_201(
             {
                 "name": "source2-double",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -787,7 +788,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source2",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -811,7 +812,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -830,7 +831,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -854,7 +855,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -874,7 +875,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -898,7 +899,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -917,7 +918,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -943,7 +944,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source2",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -952,7 +953,7 @@ class SourceTest(TestCase):
 
         data = {
             "name": "source3",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.5"],
             "port": 23,
             "credentials": [self.net_cred.id],
@@ -968,7 +969,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source2",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -977,7 +978,7 @@ class SourceTest(TestCase):
 
         data = {
             "name": "source3",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.5"],
             "port": 23,
             "credentials": [self.vc_cred.id],
@@ -993,7 +994,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source3",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.net_cred_for_upload],
@@ -1013,7 +1014,7 @@ class SourceTest(TestCase):
         """Delete a Source."""
         data = {
             "name": "source3",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "hosts": ["1.2.3.4"],
             "port": "22",
             "credentials": [self.net_cred_for_upload],
@@ -1030,7 +1031,7 @@ class SourceTest(TestCase):
         cred.save()
         source = Source(
             name="cred_source",
-            source_type=Source.NETWORK_SOURCE_TYPE,
+            source_type=DataSources.NETWORK,
             hosts=["1.2.3.4"],
         )
         source.save()
@@ -1057,7 +1058,7 @@ class SourceTest(TestCase):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
-            "source_type": Source.VCENTER_SOURCE_TYPE,
+            "source_type": DataSources.VCENTER,
             "hosts": ["1.2.3.4"],
             "credentials": [self.vc_cred_for_upload],
         }
@@ -1069,7 +1070,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.vc_cred_for_upload, self.net_cred_for_upload],
             }
@@ -1080,7 +1081,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "credentials": [self.vc_cred_for_upload],
             }
         )
@@ -1090,7 +1091,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": [],
                 "credentials": [self.vc_cred_for_upload],
             }
@@ -1101,7 +1102,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4", "1.2.3.5"],
                 "credentials": [self.vc_cred_for_upload],
             }
@@ -1112,7 +1113,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "exclude_hosts": ["1.2.3.4"],
                 "credentials": [self.vc_cred_for_upload],
@@ -1124,7 +1125,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4/5"],
                 "credentials": [self.vc_cred_for_upload],
             }
@@ -1135,7 +1136,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.vc_cred_for_upload],
@@ -1159,7 +1160,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.vc_cred_for_upload],
@@ -1183,7 +1184,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.vc_cred_for_upload],
@@ -1208,7 +1209,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.vc_cred_for_upload],
@@ -1232,7 +1233,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.vc_cred_for_upload],
@@ -1270,7 +1271,7 @@ class SourceTest(TestCase):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
             "hosts": ["1.2.3.4"],
             "credentials": [self.sat_cred_for_upload],
         }
@@ -1281,7 +1282,7 @@ class SourceTest(TestCase):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
             "hosts": ["1.2.3.4"],
             "credentials": [self.sat_cred_for_upload],
             "options": {"ssl_cert_verify": False},
@@ -1294,7 +1295,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.sat_cred_for_upload, self.net_cred_for_upload],
             }
@@ -1305,7 +1306,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "credentials": [self.sat_cred_for_upload],
             }
         )
@@ -1315,7 +1316,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": [],
                 "credentials": [self.sat_cred_for_upload],
             }
@@ -1326,7 +1327,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4", "1.2.3.5"],
                 "credentials": [self.sat_cred_for_upload],
             }
@@ -1337,7 +1338,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "exclude_hosts": ["1.2.3.4"],
                 "credentials": [self.sat_cred_for_upload],
@@ -1349,7 +1350,7 @@ class SourceTest(TestCase):
         self.create_expect_400(
             {
                 "name": "source1",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4/5"],
                 "credentials": [self.sat_cred_for_upload],
             }
@@ -1360,7 +1361,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.sat_cred_for_upload],
@@ -1384,7 +1385,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.sat_cred_for_upload],
@@ -1419,7 +1420,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.sat_cred_for_upload],
@@ -1443,7 +1444,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.sat_cred_for_upload],
@@ -1468,7 +1469,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.sat_cred_for_upload],
@@ -1492,7 +1493,7 @@ class SourceTest(TestCase):
         initial = self.create_expect_201(
             {
                 "name": "source",
-                "source_type": Source.SATELLITE_SOURCE_TYPE,
+                "source_type": DataSources.SATELLITE,
                 "hosts": ["1.2.3.4"],
                 "port": "22",
                 "credentials": [self.sat_cred_for_upload],
@@ -1517,7 +1518,7 @@ class SourceTest(TestCase):
         """Ensure we can create a new openshift source."""
         data = {
             "name": "openshift_source_1",
-            "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+            "source_type": DataSources.OPENSHIFT,
             "hosts": ["1.2.3.4"],
             "credentials": [self.openshift_cred_for_upload],
         }
@@ -1530,7 +1531,7 @@ class SourceTest(TestCase):
         url = reverse("source-list")
         data = {
             "name": "openshift_source_1",
-            "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+            "source_type": DataSources.OPENSHIFT,
             "credentials": [self.openshift_cred_for_upload],
         }
         response = self.client.post(url, json.dumps(data), "application/json")
@@ -1542,7 +1543,7 @@ class SourceTest(TestCase):
         url = reverse("source-list")
         data = {
             "name": "openshift_source_1",
-            "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+            "source_type": DataSources.OPENSHIFT,
             "hosts": ["1.2.3.4"],
             "credentials": [self.openshift_cred_for_upload],
             "options": {"use_paramiko": True},
@@ -1556,7 +1557,7 @@ class SourceTest(TestCase):
         source_to_be_updated = self.create_expect_201(
             {
                 "name": "openshift_source_1",
-                "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+                "source_type": DataSources.OPENSHIFT,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.openshift_cred_for_upload],
             }
@@ -1578,7 +1579,7 @@ class SourceTest(TestCase):
         source_to_be_updated = self.create_expect_201(
             {
                 "name": "openshift_source_1",
-                "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+                "source_type": DataSources.OPENSHIFT,
                 "hosts": ["1.2.3.4"],
                 "credentials": [self.openshift_cred_for_upload],
             }

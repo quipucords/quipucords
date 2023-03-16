@@ -18,8 +18,9 @@ from api.common.enumerators import (
     SystemPurposeSla,
     SystemPurposeUsage,
 )
-from api.models import DeploymentsReport, Product, Source, SystemFingerprint
+from api.models import DeploymentsReport, Product, SystemFingerprint
 from compat.db import StringAgg
+from constants import DataSources
 
 CANONICAL_FACTS = (
     "fqdn",
@@ -316,7 +317,7 @@ class ReportEntity:
         # openshift sources won't make sense in insights reports.
         fingerprints = list(
             SystemFingerprint.objects.filter(deployment_report=deployment_report)
-            .exclude(sources__icontains=Source.OPENSHIFT_SOURCE_TYPE)
+            .exclude(sources__icontains=DataSources.OPENSHIFT)
             .annotate(
                 product_names=StringAgg(
                     "products__name",

@@ -9,6 +9,7 @@ from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
 from api.models import Credential
+from constants import DataSources
 from utils import get_from_object_or_dict
 
 
@@ -26,9 +27,7 @@ class CredentialSerializer(NotEmptySerializer):
     """Serializer for the Credential model."""
 
     name = CharField(required=True, max_length=64)
-    cred_type = ValidStringChoiceField(
-        required=False, choices=Credential.CRED_TYPE_CHOICES
-    )
+    cred_type = ValidStringChoiceField(required=False, choices=DataSources.choices)
     username = CharField(required=False, max_length=64)
     password = CharField(
         required=False,
@@ -70,13 +69,13 @@ class CredentialSerializer(NotEmptySerializer):
         """Validate if fields received are appropriate for each credential."""
         cred_type = get_from_object_or_dict(self.instance, attrs, "cred_type")
 
-        if cred_type == Credential.VCENTER_CRED_TYPE:
+        if cred_type == DataSources.VCENTER:
             validated_data = self.validate_vcenter_cred(attrs)
-        elif cred_type == Credential.SATELLITE_CRED_TYPE:
+        elif cred_type == DataSources.SATELLITE:
             validated_data = self.validate_satellite_cred(attrs)
-        elif cred_type == Credential.NETWORK_CRED_TYPE:
+        elif cred_type == DataSources.NETWORK:
             validated_data = self.validate_host_cred(attrs)
-        elif cred_type == Credential.OPENSHIFT_CRED_TYPE:
+        elif cred_type == DataSources.OPENSHIFT:
             validated_data = self.validate_openshift_cred(attrs)
         else:
             raise ValidationError({"cred_type": messages.UNKNOWN_CRED_TYPE})
@@ -97,10 +96,10 @@ class CredentialSerializer(NotEmptySerializer):
         become_method = validated_data.get("become_method")
         become_user = validated_data.get("become_user")
 
-        if cred_type == Credential.NETWORK_CRED_TYPE and not become_method:
+        if cred_type == DataSources.NETWORK and not become_method:
             # Set the default become_method to be sudo if not specified
             validated_data["become_method"] = Credential.BECOME_SUDO
-        if cred_type == Credential.NETWORK_CRED_TYPE and not become_user:
+        if cred_type == DataSources.NETWORK and not become_user:
             # Set the default become_user to root if not specified
             validated_data["become_user"] = Credential.BECOME_USER_DEFAULT
 
@@ -153,7 +152,7 @@ class CredentialSerializer(NotEmptySerializer):
             raise ValidationError(error)
 
         self._check_for_disallowed_fields(
-            Credential.NETWORK_CRED_TYPE, attrs, messages.HOST_FIELD_NOT_ALLOWED
+            DataSources.NETWORK, attrs, messages.HOST_FIELD_NOT_ALLOWED
         )
 
         return attrs
@@ -170,7 +169,7 @@ class CredentialSerializer(NotEmptySerializer):
                 raise ValidationError(error)
 
         self._check_for_disallowed_fields(
-            Credential.VCENTER_CRED_TYPE, attrs, messages.VC_FIELDS_NOT_ALLOWED
+            DataSources.VCENTER, attrs, messages.VC_FIELDS_NOT_ALLOWED
         )
         return attrs
 
@@ -186,7 +185,7 @@ class CredentialSerializer(NotEmptySerializer):
                 raise ValidationError(error)
 
         self._check_for_disallowed_fields(
-            Credential.SATELLITE_CRED_TYPE,
+            DataSources.SATELLITE,
             attrs,
             messages.SAT_FIELD_NOT_ALLOWED,
         )
@@ -202,29 +201,29 @@ class CredentialSerializer(NotEmptySerializer):
             raise ValidationError(error)
 
         self._check_for_disallowed_fields(
-            Credential.OPENSHIFT_CRED_TYPE, attrs, messages.OPENSHIFT_FIELD_NOT_ALLOWED
+            DataSources.OPENSHIFT, attrs, messages.OPENSHIFT_FIELD_NOT_ALLOWED
         )
         return attrs
 
     def _check_for_disallowed_fields(self, credential_type, attrs, message):
         """Check if forbidden fields are being passed to credentials."""
         required_fields_map = {
-            Credential.OPENSHIFT_CRED_TYPE: {"id", "name", "cred_type", "auth_token"},
-            Credential.VCENTER_CRED_TYPE: {
+            DataSources.OPENSHIFT: {"id", "name", "cred_type", "auth_token"},
+            DataSources.VCENTER: {
                 "cred_type",
                 "id",
                 "name",
                 "password",
                 "username",
             },
-            Credential.SATELLITE_CRED_TYPE: {
+            DataSources.SATELLITE: {
                 "cred_type",
                 "id",
                 "name",
                 "password",
                 "username",
             },
-            Credential.NETWORK_CRED_TYPE: {
+            DataSources.NETWORK: {
                 "become_method",
                 "become_password",
                 "become_user",

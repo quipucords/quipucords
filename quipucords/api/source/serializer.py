@@ -22,6 +22,7 @@ from api.common.serializer import (
 )
 from api.common.util import check_for_existing_name
 from api.models import Credential, Source, SourceOptions
+from constants import DataSources
 from utils import get_from_object_or_dict
 
 
@@ -71,7 +72,8 @@ class SourceSerializer(NotEmptySerializer):
 
     name = CharField(required=True, max_length=64)
     source_type = ValidStringChoiceField(
-        required=False, choices=Source.SOURCE_TYPE_CHOICES
+        required=False,
+        choices=DataSources.choices,
     )
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = CustomJSONField(required=True)
@@ -97,7 +99,7 @@ class SourceSerializer(NotEmptySerializer):
         valid_sat_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
         valid_openshift_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
-        if source_type == Source.SATELLITE_SOURCE_TYPE:
+        if source_type == DataSources.SATELLITE:
             cls._check_for_disallowed_fields(
                 options,
                 messages.SAT_INVALID_OPTIONS,
@@ -106,7 +108,7 @@ class SourceSerializer(NotEmptySerializer):
             if options.get("ssl_cert_verify") is None:
                 options["ssl_cert_verify"] = True
 
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
+        elif source_type == DataSources.VCENTER:
             cls._check_for_disallowed_fields(
                 options,
                 messages.VC_INVALID_OPTIONS,
@@ -115,13 +117,13 @@ class SourceSerializer(NotEmptySerializer):
             if options.get("ssl_cert_verify") is None:
                 options["ssl_cert_verify"] = True
 
-        elif source_type == Source.NETWORK_SOURCE_TYPE:
+        elif source_type == DataSources.NETWORK:
             cls._check_for_disallowed_fields(
                 options,
                 messages.NET_SSL_OPTIONS_NOT_ALLOWED,
                 valid_net_options,
             )
-        elif source_type == Source.OPENSHIFT_SOURCE_TYPE:
+        elif source_type == DataSources.OPENSHIFT:
             cls._check_for_disallowed_fields(
                 options,
                 messages.OPENSHIFT_INVALID_OPTIONS,
@@ -167,13 +169,13 @@ class SourceSerializer(NotEmptySerializer):
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
         source_type = get_from_object_or_dict(self.instance, attrs, "source_type")
-        if source_type == Source.NETWORK_SOURCE_TYPE:
+        if source_type == DataSources.NETWORK:
             validated_data = self.validate_network_source(attrs, source_type)
-        elif source_type == Source.VCENTER_SOURCE_TYPE:
+        elif source_type == DataSources.VCENTER:
             validated_data = self.validate_vcenter_source(attrs, source_type)
-        elif source_type == Source.SATELLITE_SOURCE_TYPE:
+        elif source_type == DataSources.SATELLITE:
             validated_data = self.validate_satellite_source(attrs, source_type)
-        elif source_type == Source.OPENSHIFT_SOURCE_TYPE:
+        elif source_type == DataSources.OPENSHIFT:
             validated_data = self.validate_openshift_source(attrs, source_type)
         else:
             raise ValidationError({"source_type": messages.UNKNOWN_SOURCE_TYPE})
@@ -205,9 +207,9 @@ class SourceSerializer(NotEmptySerializer):
             options.save()
             source.options = options
         elif not options and source_type in (
-            Source.SATELLITE_SOURCE_TYPE,
-            Source.VCENTER_SOURCE_TYPE,
-            Source.OPENSHIFT_SOURCE_TYPE,
+            DataSources.SATELLITE,
+            DataSources.VCENTER,
+            DataSources.OPENSHIFT,
         ):
             self._options_with_ssl_cert_verify_true(source)
 

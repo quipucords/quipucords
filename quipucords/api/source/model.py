@@ -52,15 +52,9 @@ class SourceOptions(models.Model):
 class Source(models.Model):
     """A source connects a list of credentials and a list of hosts."""
 
-    NETWORK_SOURCE_TYPE = DataSources.NETWORK.value
-    VCENTER_SOURCE_TYPE = DataSources.VCENTER.value
-    SATELLITE_SOURCE_TYPE = DataSources.SATELLITE.value
-    OPENSHIFT_SOURCE_TYPE = DataSources.OPENSHIFT.value
-    SOURCE_TYPE_CHOICES = DataSources.choices
-
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
-        max_length=12, choices=SOURCE_TYPE_CHOICES, null=False
+        max_length=12, choices=DataSources.choices, null=False
     )
     port = models.IntegerField(null=True)
     options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)

@@ -9,8 +9,9 @@ from django.utils.translation import gettext as _
 from api import messages
 from api.common.common_report import CSVHelper, create_report_version, sanitize_row
 from api.common.util import mask_data_general, validate_query_param_bool
-from api.models import DetailsReport, ScanTask, ServerInformation, Source
+from api.models import DetailsReport, ScanTask, ServerInformation
 from api.serializers import DetailsReportSerializer
+from constants import DataSources
 
 ERRORS_KEY = "errors"
 INVALID_SOURCES_KEY = "invalid_sources"
@@ -134,15 +135,9 @@ def _validate_source_json(source_json):
         has_error = True
         invalid_field_obj[SOURCE_NAME_KEY] = _(messages.FC_SOURCE_NAME_NOT_STR)
 
-    if not has_error and not [
-        valid_type
-        for valid_type in Source.SOURCE_TYPE_CHOICES
-        if valid_type[0] == source_type
-    ]:
+    if not has_error and source_type not in DataSources:
         has_error = True
-        valid_choices = ", ".join(
-            [valid_type[0] for valid_type in Source.SOURCE_TYPE_CHOICES]
-        )
+        valid_choices = ", ".join(DataSources.values)
         invalid_field_obj[SOURCE_TYPE_KEY] = _(
             messages.FC_MUST_BE_ONE_OF % valid_choices
         )

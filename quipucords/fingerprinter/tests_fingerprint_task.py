@@ -11,6 +11,7 @@ from django.test import TestCase
 
 from api.deployments_report.model import SystemFingerprint
 from api.models import DeploymentsReport, DetailsReport, ServerInformation, Source
+from constants import DataSources
 from fingerprinter.constants import ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY
 from fingerprinter.task import (
     FINGERPRINT_GLOBAL_ID_KEY,
@@ -141,7 +142,7 @@ class EngineTest(TestCase):
         self,
         report_id=1,
         source_name="source1",
-        source_type=Source.NETWORK_SOURCE_TYPE,
+        source_type=DataSources.NETWORK,
         cpu_count=1,
         etc_release_name="RHEL",
         etc_release_version="7.4 (Maipo)",
@@ -257,7 +258,7 @@ class EngineTest(TestCase):
         self,
         report_id=1,
         source_name="source2",
-        source_type=Source.VCENTER_SOURCE_TYPE,
+        source_type=DataSources.VCENTER,
         vm_cpu_count=2,
         vm_os="RHEL 7.3",
         vm_mac_addresses=None,
@@ -324,7 +325,7 @@ class EngineTest(TestCase):
         self,
         report_id=1,
         source_name="source3",
-        source_type=Source.SATELLITE_SOURCE_TYPE,
+        source_type=DataSources.SATELLITE,
         hostname="9.8.7.6",
         os_name="RHEL",
         os_release="RHEL 7.3",
@@ -536,7 +537,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "facts": n_details_report["facts"],
         }
         nfingerprints = self.fp_task_runner._process_source(source)
@@ -552,7 +553,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source2",
-            "source_type": Source.VCENTER_SOURCE_TYPE,
+            "source_type": DataSources.VCENTER,
             "facts": v_details_report["facts"],
         }
         vfingerprints = self.fp_task_runner._process_source(source)
@@ -567,7 +568,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source3",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
             "facts": s_details_report["facts"],
         }
         sfingerprints = self.fp_task_runner._process_source(source)
@@ -625,7 +626,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.NETWORK_SOURCE_TYPE,
+            "source_type": DataSources.NETWORK,
             "facts": details_report["facts"],
         }
         fingerprints = self.fp_task_runner._process_source(source)
@@ -639,7 +640,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.VCENTER_SOURCE_TYPE,
+            "source_type": DataSources.VCENTER,
             "facts": details_report["facts"],
         }
         fingerprints = self.fp_task_runner._process_source(source)
@@ -651,7 +652,7 @@ class EngineTest(TestCase):
         details_report = self._create_vcenter_fc_json(
             report_id=1,
             source_name="source2",
-            source_type=Source.VCENTER_SOURCE_TYPE,
+            source_type=DataSources.VCENTER,
             vm_cpu_count=2,
             vm_os="RHEL 7.3",
             vm_mac_addresses=None,
@@ -665,7 +666,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.VCENTER_SOURCE_TYPE,
+            "source_type": DataSources.VCENTER,
             "facts": details_report["facts"],
         }
         fingerprints = self.fp_task_runner._process_source(source)
@@ -679,7 +680,7 @@ class EngineTest(TestCase):
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
             "facts": details_report["facts"],
         }
         fingerprints = self.fp_task_runner._process_source(source)
@@ -691,14 +692,14 @@ class EngineTest(TestCase):
         details_report = self._create_satellite_fc_json(
             report_id=1,
             source_name="source3",
-            source_type=Source.SATELLITE_SOURCE_TYPE,
+            source_type=DataSources.SATELLITE,
             hostname="virt-who-9384389442-5",
         )
         fact = details_report["facts"][0]
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
             "facts": details_report["facts"],
         }
         fingerprints = self.fp_task_runner._process_source(source)
@@ -710,14 +711,14 @@ class EngineTest(TestCase):
         details_report = self._create_satellite_fc_json(
             report_id=1,
             source_name="source3",
-            source_type=Source.SATELLITE_SOURCE_TYPE,
+            source_type=DataSources.SATELLITE,
             hostname="virt-who-9384389442-0",
         )
         fact = details_report["facts"][0]
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
             "facts": details_report["facts"],
         }
         fingerprints = self.fp_task_runner._process_source(source)
@@ -874,19 +875,19 @@ class EngineTest(TestCase):
         nmetadata = {
             "os_release": {
                 "source_name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "raw_fact_key": "etc_release_release",
             },
             "bios_uuid": {
                 "source_name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "raw_fact_key": "dmi_system_uuid",
             },
         }
         nsources = {
             "source1": {
                 "source_name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
             }
         }
         nfingerprint_to_merge = {
@@ -918,19 +919,19 @@ class EngineTest(TestCase):
         vmetadata = {
             "os_release": {
                 "source_name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "raw_fact_key": "etc_release_release",
             },
             "vm_uuid": {
                 "source_name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
                 "raw_fact_key": "vm.uuid",
             },
         }
         vsources = {
             "source1": {
                 "source_name": "source1",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
             }
         }
         vfingerprint_to_merge = {
@@ -973,7 +974,7 @@ class EngineTest(TestCase):
         merged_sources = {
             "source1": {
                 "source_name": "source1",
-                "source_type": Source.NETWORK_SOURCE_TYPE,
+                "source_type": DataSources.NETWORK,
             }
         }
 
@@ -1239,7 +1240,7 @@ class EngineTest(TestCase):
         source_dict = {
             "server_id": self.server_id,
             "source_name": "source2",
-            "source_type": Source.VCENTER_SOURCE_TYPE,
+            "source_type": DataSources.VCENTER,
         }
         facts_dict = vcenter_template()
         result = self.fp_task_runner._process_vcenter_fact(source_dict, facts_dict)
@@ -1251,7 +1252,7 @@ class EngineTest(TestCase):
             fingerprint_name: {
                 "server_id": self.server_id,
                 "source_name": "source2",
-                "source_type": Source.VCENTER_SOURCE_TYPE,
+                "source_type": DataSources.VCENTER,
                 "has_sudo": False,
                 "raw_fact_key": fact_name,
             }
@@ -1273,7 +1274,7 @@ class EngineTest(TestCase):
         source_dict = {
             "server_id": self.server_id,
             "source_name": "source3",
-            "source_type": Source.SATELLITE_SOURCE_TYPE,
+            "source_type": DataSources.SATELLITE,
         }
         facts_dict = satellite_template()
         result = self.fp_task_runner._process_satellite_fact(source_dict, facts_dict)
@@ -1288,7 +1289,7 @@ class EngineTest(TestCase):
                 fingerprint_name: {
                     "server_id": self.server_id,
                     "source_name": "source3",
-                    "source_type": Source.SATELLITE_SOURCE_TYPE,
+                    "source_type": DataSources.SATELLITE,
                     "has_sudo": False,
                     "raw_fact_key": fact_name,
                 }

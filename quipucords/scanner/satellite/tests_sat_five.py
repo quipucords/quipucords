@@ -16,6 +16,7 @@ from api.models import (
     SystemInspectionResult,
     TaskConnectionResult,
 )
+from constants import DataSources
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.five import SatelliteFive, request_host_details
 from scanner.test_util import create_scan_job
@@ -34,7 +35,7 @@ class SatelliteFiveTest(TestCase):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
             become_password=None,
