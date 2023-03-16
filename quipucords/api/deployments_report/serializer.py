@@ -13,7 +13,7 @@ from rest_framework.serializers import (
     UUIDField,
 )
 
-from api.common.serializer import CustomJSONField, NotEmptySerializer
+from api.common.serializer import NotEmptySerializer
 from api.models import (
     DeploymentsReport,
     DetailsReport,
@@ -39,7 +39,7 @@ class ProductSerializer(NotEmptySerializer):
 class EntitlementSerializer(NotEmptySerializer):
     """Serializer for the Entitlement model."""
 
-    metadata = CustomJSONField(required=True)
+    metadata = JSONField(required=True)
 
     class Meta:
         """Meta class for EntitlementSerializer."""

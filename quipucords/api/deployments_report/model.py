@@ -241,7 +241,7 @@ class Entitlement(models.Model):
     name = models.CharField(max_length=256, unique=False, null=True)
     entitlement_id = models.CharField(max_length=256, unique=False, null=True)
 
-    metadata = models.TextField(unique=False, null=False)
+    metadata = models.JSONField(unique=False, null=True)
 
     def __str__(self):
         """Convert to string."""
