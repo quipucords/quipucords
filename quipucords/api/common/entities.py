@@ -1,7 +1,6 @@
 """Common entities."""
 
 import ipaddress
-import json
 import uuid
 from contextlib import suppress
 from dataclasses import dataclass, field
@@ -149,7 +148,7 @@ class HostEntity:
     def mac_addresses(self):
         """Retrieve mac_addresses."""
         with suppress(TypeError):
-            return json.loads(self._fingerprints.mac_addresses)
+            return self._fingerprints.mac_addresses
 
     @property
     def name_of_interface(self):

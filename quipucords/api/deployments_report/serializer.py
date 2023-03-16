@@ -67,7 +67,7 @@ class SystemFingerprintSerializer(ModelSerializer):
 
     cloud_provider = CharField(max_length=16, **default_args)
 
-    mac_addresses = CustomJSONField(**default_args)
+    mac_addresses = JSONField(**default_args)
     ip_addresses = JSONField(**default_args)
 
     cpu_count = IntegerField(min_value=0, **default_args)
