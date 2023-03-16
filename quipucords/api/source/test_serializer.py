@@ -4,6 +4,7 @@ import pytest
 from api import messages
 from api.models import Credential, Source, SourceOptions
 from api.source.serializer import SourceSerializer
+from constants import DataSources
 
 
 @pytest.fixture
@@ -11,7 +12,7 @@ def openshift_cred_id():
     """Return openshift credential."""
     openshift_credential = Credential.objects.create(
         name="openshift_cred",
-        cred_type=Credential.OPENSHIFT_CRED_TYPE,
+        cred_type=DataSources.OPENSHIFT,
         auth_token="openshift_token",
     )
     return openshift_credential.id
@@ -22,7 +23,7 @@ def satellite_cred_id():
     """Return satellite credential."""
     satellite_credential = Credential.objects.create(
         name="sat_cred",
-        cred_type=Credential.SATELLITE_CRED_TYPE,
+        cred_type=DataSources.SATELLITE,
         username="satellite_user",
         password="satellite_password",
         become_password=None,
@@ -36,7 +37,7 @@ def openshift_source(openshift_cred_id):
     """Openshift Source."""
     source = Source.objects.create(
         name="source_saved",
-        source_type=Source.OPENSHIFT_SOURCE_TYPE,
+        source_type=DataSources.OPENSHIFT,
         port=222,
         hosts='["1.2.3.4"]',
         options=SourceOptions.objects.create(ssl_cert_verify=True),
@@ -65,7 +66,7 @@ def test_wrong_cred_type(satellite_cred_id):
     error_message = messages.SOURCE_CRED_WRONG_TYPE
     data = {
         "name": "source2",
-        "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+        "source_type": DataSources.OPENSHIFT,
         "hosts": ["1.2.3.4"],
         "credentials": [satellite_cred_id],
     }
@@ -80,7 +81,7 @@ def test_openshift_source_green_path(openshift_cred_id):
     """Test if serializer is valid when passing mandatory fields."""
     data = {
         "name": "source3",
-        "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+        "source_type": DataSources.OPENSHIFT,
         "port": 222,
         "hosts": ["1.2.3.4"],
         "credentials": [openshift_cred_id],
@@ -98,7 +99,7 @@ def test_openshift_source_default_port(openshift_cred_id):
     """Test if serializer is valid when not passing port field."""
     data = {
         "name": "source3",
-        "source_type": Source.OPENSHIFT_SOURCE_TYPE,
+        "source_type": DataSources.OPENSHIFT,
         "hosts": ["1.2.3.4"],
         "credentials": [openshift_cred_id],
     }
@@ -121,7 +122,7 @@ def test_openshift_source_update(openshift_source, openshift_cred_id):
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     assert openshift_source.name == "source_updated"
-    assert openshift_source.source_type == Source.OPENSHIFT_SOURCE_TYPE
+    assert openshift_source.source_type == DataSources.OPENSHIFT
 
 
 @pytest.mark.django_db
@@ -138,5 +139,5 @@ def test_openshift_source_update_options(openshift_source, openshift_cred_id):
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     assert openshift_source.name == "source_updated"
-    assert openshift_source.source_type == Source.OPENSHIFT_SOURCE_TYPE
+    assert openshift_source.source_type == DataSources.OPENSHIFT
     assert not openshift_source.options.ssl_cert_verify

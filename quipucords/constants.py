@@ -1,4 +1,4 @@
-"""Constants for quipucords"""
+"""Constants for quipucords."""
 
 from django.db.models.enums import TextChoices
 

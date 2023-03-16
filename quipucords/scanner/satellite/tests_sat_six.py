@@ -17,6 +17,7 @@ from api.models import (
     SystemInspectionResult,
     TaskConnectionResult,
 )
+from constants import DataSources
 from scanner.satellite.api import SatelliteException
 from scanner.satellite.six import (
     SatelliteSixV1,
@@ -57,7 +58,7 @@ class SatelliteSixV1Test(TestCase):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
             become_password=None,
@@ -514,7 +515,7 @@ class SatelliteSixV2Test(TestCase):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
-            cred_type=Credential.SATELLITE_CRED_TYPE,
+            cred_type=DataSources.SATELLITE,
             username="username",
             password="password",
             become_password=None,

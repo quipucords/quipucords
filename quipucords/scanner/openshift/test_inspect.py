@@ -2,7 +2,8 @@
 
 import pytest
 
-from api.models import ScanTask, Source
+from api.models import ScanTask
+from constants import DataSources
 from scanner.exceptions import ScanFailureError
 from scanner.openshift import InspectTaskRunner
 from scanner.openshift.api import OpenShiftApi
@@ -21,7 +22,7 @@ from tests.factories import ScanTaskFactory
 def scan_task():
     """Return a ScanTask for testing."""
     connect_task = ScanTaskFactory(
-        source__source_type=Source.OPENSHIFT_SOURCE_TYPE,
+        source__source_type=DataSources.OPENSHIFT,
         source__hosts='["1.2.3.4"]',
         source__port=4321,
         scan_type=ScanTask.SCAN_TYPE_CONNECT,

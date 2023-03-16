@@ -31,7 +31,7 @@ def system_fingerprint_source_types():
     """Return default source types for fingerprints."""
     all_types = set(DataSources.values)
     # OpenShift will be ignored by default for convenience on insights tests
-    ignored_types = {DataSources.OPENSHIFT.value}
+    ignored_types = {DataSources.OPENSHIFT}
     return all_types - ignored_types
 
 
@@ -203,7 +203,7 @@ class CredentialFactory(DjangoModelFactory):
     @factory.lazy_attribute
     def auth_token(self):
         """Set auth_token lazily."""
-        if self.cred_type == models.Credential.OPENSHIFT_CRED_TYPE:
+        if self.cred_type == DataSources.OPENSHIFT:
             return Faker().password()
         return None
 

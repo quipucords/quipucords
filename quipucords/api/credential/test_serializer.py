@@ -3,6 +3,7 @@ import pytest
 
 from api.credential.serializer import CredentialSerializer
 from api.models import Credential
+from constants import DataSources
 
 
 @pytest.fixture
@@ -10,7 +11,7 @@ def ocp_credential():
     """Previously created OCP Credential."""
     cred = Credential(
         name="cred1",
-        cred_type=Credential.OPENSHIFT_CRED_TYPE,
+        cred_type=DataSources.OPENSHIFT,
         auth_token="test_auth_token",
     )
     cred.save()
@@ -33,7 +34,7 @@ def test_openshift_cred_correct_fields():
     """Test if serializer is valid when passing mandatory fields."""
     data = {
         "name": "cred1",
-        "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+        "cred_type": DataSources.OPENSHIFT,
         "auth_token": "test_auth_token",
     }
     serializer = CredentialSerializer(data=data)
@@ -45,7 +46,7 @@ def test_openshift_cred_unallowed_fields():
     """Test if serializer is invalid when passing unallowed fields."""
     data = {
         "name": "cred1",
-        "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+        "cred_type": DataSources.OPENSHIFT,
         "auth_token": "test_auth_token",
         "password": "test_password",
         "become_password": "test_become_password",
@@ -59,7 +60,7 @@ def test_openshift_cred_empty_auth_token():
     """Test if serializer is invalid when auth token is empty."""
     data = {
         "name": "cred1",
-        "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+        "cred_type": DataSources.OPENSHIFT,
         "auth_token": "",
     }
     serializer = CredentialSerializer(data=data)
@@ -71,7 +72,7 @@ def test_openshift_cred_absent_auth_token():
     """Test if serializer is invalid when auth token is absent."""
     data = {
         "name": "cred1",
-        "cred_type": Credential.OPENSHIFT_CRED_TYPE,
+        "cred_type": DataSources.OPENSHIFT,
     }
     serializer = CredentialSerializer(data=data)
     assert not serializer.is_valid(), serializer.errors
@@ -89,7 +90,7 @@ def test_openshift_cred_update(ocp_credential):
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     assert ocp_credential.name == "cred2"
-    assert ocp_credential.cred_type == Credential.OPENSHIFT_CRED_TYPE
+    assert ocp_credential.cred_type == DataSources.OPENSHIFT
 
 
 @pytest.mark.django_db
@@ -104,7 +105,7 @@ def test_openshift_cred_update_no_token(ocp_credential):
     serializer.save()
     assert serializer.is_valid()
     assert ocp_credential.name == "cred2"
-    assert ocp_credential.cred_type == Credential.OPENSHIFT_CRED_TYPE
+    assert ocp_credential.cred_type == DataSources.OPENSHIFT
     assert ocp_credential.auth_token == original_auth_token
 
 

@@ -11,6 +11,7 @@ from rest_framework import status
 from api import messages
 from api.common.common_report import create_report_version
 from api.models import Credential, ScanTask, ServerInformation, Source
+from constants import DataSources
 from scanner.test_util import create_scan_job
 
 
@@ -26,12 +27,12 @@ class AsyncMergeReports(TestCase):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
         self.net_source = Source.objects.create(
-            name="test_source", source_type=Source.NETWORK_SOURCE_TYPE
+            name="test_source", source_type=DataSources.NETWORK
         )
 
         self.net_cred = Credential.objects.create(
             name="net_cred1",
-            cred_type=Credential.NETWORK_CRED_TYPE,
+            cred_type=DataSources.NETWORK,
             username="username",
             password="password",
             become_password=None,
@@ -270,9 +271,7 @@ class AsyncMergeReports(TestCase):
         self.assertEqual(len(response_json["valid_sources"]), 0)
         self.assertEqual(len(response_json["invalid_sources"]), 1)
 
-        valid_choices = ", ".join(
-            [valid_type[0] for valid_type in Source.SOURCE_TYPE_CHOICES]
-        )
+        valid_choices = ", ".join(DataSources.values)
 
         self.assertEqual(
             response_json["invalid_sources"][0]["errors"]["source_type"],

@@ -13,11 +13,6 @@ from constants import DataSources
 class Credential(models.Model):
     """The credential for connecting to systems."""
 
-    NETWORK_CRED_TYPE = DataSources.NETWORK.value
-    VCENTER_CRED_TYPE = DataSources.VCENTER.value
-    SATELLITE_CRED_TYPE = DataSources.SATELLITE.value
-    OPENSHIFT_CRED_TYPE = DataSources.OPENSHIFT.value
-    CRED_TYPE_CHOICES = DataSources.choices
     BECOME_USER_DEFAULT = "root"
     BECOME_SUDO = "sudo"
     BECOME_SU = "su"
@@ -39,7 +34,7 @@ class Credential(models.Model):
     )
 
     name = models.CharField(max_length=64, unique=True)
-    cred_type = models.CharField(max_length=9, choices=CRED_TYPE_CHOICES, null=False)
+    cred_type = models.CharField(max_length=9, choices=DataSources.choices, null=False)
     username = models.CharField(max_length=64, null=True)
     password = models.CharField(max_length=1024, null=True)
     auth_token = models.CharField(max_length=1024, null=True)
