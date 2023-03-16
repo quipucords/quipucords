@@ -28,7 +28,7 @@ class ExtendedProductSearchOptions(models.Model):
     jboss_fuse = models.BooleanField(null=False, default=EXT_JBOSS_FUSE)
     jboss_brms = models.BooleanField(null=False, default=EXT_JBOSS_BRMS)
     jboss_ws = models.BooleanField(null=False, default=EXT_JBOSS_WS)
-    search_directories = models.TextField(null=True)
+    search_directories = models.JSONField(null=True)
 
     def __str__(self):
         """Convert to string."""
