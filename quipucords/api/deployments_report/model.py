@@ -213,10 +213,10 @@ class Product(models.Model):
         SystemFingerprint, models.CASCADE, related_name="products"
     )
     name = models.CharField(max_length=256, unique=False, null=False)
-    version = models.TextField(unique=False, null=True)
+    version = models.JSONField(unique=False, null=True)
     presence = models.CharField(max_length=10, choices=PRESENCE_TYPE)
 
-    metadata = models.TextField(unique=False, null=False)
+    metadata = models.JSONField(unique=False, null=True)
 
     def __str__(self):
         """Convert to string."""
