@@ -90,7 +90,7 @@ class SystemFingerprint(models.Model):
     )
 
     mac_addresses = models.TextField(unique=False, blank=True, null=True)
-    ip_addresses = models.TextField(unique=False, blank=True, null=True)
+    ip_addresses = models.JSONField(unique=False, blank=True, null=True)
 
     cpu_count = models.PositiveIntegerField(unique=False, blank=True, null=True)
 

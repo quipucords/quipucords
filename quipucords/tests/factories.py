@@ -41,7 +41,7 @@ class SystemFingerprintFactory(DjangoModelFactory):
     name = factory.Faker("hostname")
     bios_uuid = factory.Faker("uuid4")
     os_release = "Red Hat Enterprise Linux release 8.5 (Ootpa)"
-    ip_addresses = factory.LazyAttribute(lambda o: json.dumps(o.ip_addresses_list))
+    ip_addresses = factory.LazyAttribute(lambda o: o.ip_addresses_list)
     architecture = factory.Iterator(["x86_64", "ARM"])
     sources = factory.LazyAttribute(format_sources)
 

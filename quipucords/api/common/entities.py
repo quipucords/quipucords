@@ -121,7 +121,7 @@ class HostEntity:
     def ip_addresses(self):
         """Retrieve ip_addresses."""
         with suppress(TypeError):
-            return json.loads(self._fingerprints.ip_addresses)
+            return self._fingerprints.ip_addresses
 
     @property
     def ipv4_addresses(self):
