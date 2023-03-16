@@ -160,7 +160,7 @@ class SourceTest(TestCase):
         start = datetime.now()
         source = Source(
             name="source1",
-            hosts=json.dumps(["1.2.3.4"]),
+            hosts=["1.2.3.4"],
             source_type="network",
             port=22,
         )

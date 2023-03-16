@@ -35,7 +35,7 @@ class InspectTaskRunnerTest(TestCase):
         )
         cred.save()
 
-        source = Source(name="source1", port=22, hosts='["1.2.3.4"]')
+        source = Source(name="source1", port=22, hosts=["1.2.3.4"])
 
         source.save()
         source.credentials.add(cred)

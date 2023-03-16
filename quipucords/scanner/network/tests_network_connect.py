@@ -66,8 +66,8 @@ class NetworkConnectTaskRunnerTest(TestCase):
         # Source with excluded hosts
         self.source = Source(
             name="source1",
-            hosts='["1.2.3.4", "1.2.3.5"]',
-            exclude_hosts='["1.2.3.5", "1.2.3.6"]',
+            hosts=["1.2.3.4", "1.2.3.5"],
+            exclude_hosts=["1.2.3.5", "1.2.3.6"],
             source_type="network",
             port=22,
         )
@@ -83,7 +83,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
         # Source without excluded hosts
         self.source2 = Source(
-            name="source2", hosts='["1.2.3.4"]', source_type="network", port=22
+            name="source2", hosts=["1.2.3.4"], source_type="network", port=22
         )
         self.source2.save()
         self.source2.credentials.add(self.cred)
@@ -102,7 +102,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         source_options.save()
         self.source3 = Source(
             name="source3",
-            hosts='["1.2.3.4","1.2.3.5","1.2.3.6"]',
+            hosts=["1.2.3.4", "1.2.3.5", "1.2.3.6"],
             source_type="network",
             port=22,
             options=source_options,

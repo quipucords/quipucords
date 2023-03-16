@@ -43,7 +43,7 @@ class TestConnectResultCallback(TestCase):
 
         self.source = Source(
             name="source1",
-            hosts='["1.2.3.4", "1.2.3.5", "1.2.3.6"]',
+            hosts=["1.2.3.4", "1.2.3.5", "1.2.3.6"],
             source_type="network",
             port=22,
         )

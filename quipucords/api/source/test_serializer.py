@@ -39,7 +39,7 @@ def openshift_source(openshift_cred_id):
         name="source_saved",
         source_type=DataSources.OPENSHIFT,
         port=222,
-        hosts='["1.2.3.4"]',
+        hosts=["1.2.3.4"],
         options=SourceOptions.objects.create(ssl_cert_verify=True),
     )
     source.credentials.add(openshift_cred_id)
@@ -90,7 +90,7 @@ def test_openshift_source_green_path(openshift_cred_id):
     assert serializer.is_valid(), serializer.errors
     source: Source = serializer.save()
     assert source.port == 222
-    assert source.hosts == '["1.2.3.4"]'
+    assert source.hosts == ["1.2.3.4"]
     assert source.options.ssl_cert_verify
 
 

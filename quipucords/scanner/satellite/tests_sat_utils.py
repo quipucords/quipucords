@@ -49,7 +49,7 @@ class SatelliteUtilsTest(TestCase):
         )
         self.cred.save()
 
-        self.source = Source(name="source1", port=443, hosts='["1.2.3.4"]')
+        self.source = Source(name="source1", port=443, hosts=["1.2.3.4"])
         self.source.save()
         self.source.credentials.add(self.cred)
         self.options = SourceOptions(ssl_cert_verify=False)

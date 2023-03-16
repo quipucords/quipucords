@@ -26,7 +26,7 @@ class VCenterUtilsTest(TestCase):
         options = SourceOptions(disable_ssl=True)
         options.save()
 
-        self.source = Source(name="source1", port=22, hosts='["1.2.3.4"]')
+        self.source = Source(name="source1", port=22, hosts=["1.2.3.4"])
         self.source.options = options
         self.source.save()
         self.source.credentials.add(self.cred)
