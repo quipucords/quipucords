@@ -105,7 +105,11 @@ class CredentialTest(TestCase):
         """
         expected_error = {"name": ["This field is required."]}
         url = reverse("cred-list")
-        data = {"username": "user1", "password": "pass1"}
+        data = {
+            "username": "user1",
+            "password": "pass1",
+            "cred_type": DataSources.NETWORK,
+        }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
@@ -167,7 +171,12 @@ class CredentialTest(TestCase):
         """
         expected_error = {"name": ["Ensure this field has no more than 64 characters."]}
         url = reverse("cred-list")
-        data = {"name": "A" * 100, "username": "user1", "password": "pass1"}
+        data = {
+            "name": "A" * 100,
+            "username": "user1",
+            "password": "pass1",
+            "cred_type": DataSources.NETWORK,
+        }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
@@ -182,7 +191,12 @@ class CredentialTest(TestCase):
             "username": ["Ensure this field has no more than 64 characters."]
         }
         url = reverse("cred-list")
-        data = {"name": "cred1", "username": "A" * 100, "password": "pass1"}
+        data = {
+            "name": "cred1",
+            "username": "A" * 100,
+            "password": "pass1",
+            "cred_type": DataSources.NETWORK,
+        }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
@@ -197,7 +211,12 @@ class CredentialTest(TestCase):
             "password": ["Ensure this field has no more than 1024 characters."]
         }
         url = reverse("cred-list")
-        data = {"name": "cred1", "username": "user1", "password": "A" * 2000}
+        data = {
+            "name": "cred1",
+            "username": "user1",
+            "password": "A" * 2000,
+            "cred_type": DataSources.NETWORK,
+        }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
@@ -217,6 +236,7 @@ class CredentialTest(TestCase):
             "username": "user1",
             "password": "pass1",
             "become_password": "A" * 2000,
+            "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -232,7 +252,12 @@ class CredentialTest(TestCase):
             "ssh_keyfile": ["Ensure this field has no more than 1024 characters."]
         }
         url = reverse("cred-list")
-        data = {"name": "cred1", "username": "user1", "ssh_keyfile": "A" * 2000}
+        data = {
+            "name": "cred1",
+            "username": "user1",
+            "ssh_keyfile": "A" * 2000,
+            "cred_type": DataSources.NETWORK,
+        }
         response = self.client.post(url, json.dumps(data), "application/json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, expected_error)
