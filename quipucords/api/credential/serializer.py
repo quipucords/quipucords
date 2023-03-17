@@ -3,7 +3,7 @@
 import os
 
 from django.utils.translation import gettext as _
-from rest_framework.serializers import CharField, ValidationError
+from rest_framework.serializers import CharField, ValidationError, empty
 
 from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
@@ -27,7 +27,6 @@ class CredentialSerializer(NotEmptySerializer):
     """Serializer for the Credential model."""
 
     name = CharField(required=True, max_length=64)
-    cred_type = ValidStringChoiceField(required=False, choices=DataSources.choices)
     username = CharField(required=False, max_length=64)
     password = CharField(
         required=False,
@@ -65,6 +64,22 @@ class CredentialSerializer(NotEmptySerializer):
         model = Credential
         fields = "__all__"
 
+    def __init__(self, instance=None, data=empty, **kwargs):
+        """Customize class initialization."""
+        if instance and isinstance(data, dict):
+            # assume cred_type == instance.cred_type if not provided
+            # this is only required to avoid breaking current functionality
+            # that was treating 'cred_type' as optional for updates and required for
+            # credential creation
+            data.setdefault("cred_type", instance.cred_type)
+        super().__init__(instance=instance, data=data, **kwargs)
+
+    def validate_cred_type(self, cred_type):
+        """Validate cred_type field."""
+        if self.instance and cred_type != self.instance.cred_type:
+            raise ValidationError((messages.CRED_TYPE_NOT_ALLOWED_UPDATE))
+        return cred_type
+
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
         cred_type = get_from_object_or_dict(self.instance, attrs, "cred_type")
@@ -88,10 +103,6 @@ class CredentialSerializer(NotEmptySerializer):
             Credential.objects, name, _(messages.HC_NAME_ALREADY_EXISTS % name)
         )
 
-        if "cred_type" not in validated_data:
-            error = {"cred_type": [_(messages.CRED_TYPE_REQUIRED_CREATED)]}
-            raise ValidationError(error)
-
         cred_type = validated_data.get("cred_type")
         become_method = validated_data.get("become_method")
         become_user = validated_data.get("become_user")
@@ -114,11 +125,6 @@ class CredentialSerializer(NotEmptySerializer):
             _(messages.HC_NAME_ALREADY_EXISTS % name),
             search_id=instance.id,
         )
-
-        if "cred_type" in validated_data:
-            error = {"cred_type": [_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE)]}
-            raise ValidationError(error)
-
         return super().update(instance, validated_data)
 
     def validate_host_cred(self, attrs):
