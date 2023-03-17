@@ -5,6 +5,7 @@ import os.path
 import ansible_runner
 import pexpect
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.conf import settings
 from django.db import transaction
 
 import log_messages
@@ -17,7 +18,6 @@ from api.models import (
 )
 from api.serializers import CredentialSerializer, SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
-from quipucords import settings
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
     check_manager_interrupt,
