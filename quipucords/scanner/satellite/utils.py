@@ -5,10 +5,10 @@ import ssl
 import xmlrpc.client
 
 import requests
+from django.conf import settings
 from rest_framework import status as codes
 
 from api.vault import decrypt_data_as_unicode
-from quipucords import settings
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
