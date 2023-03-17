@@ -2,8 +2,10 @@
 import pytest
 
 from api.credential.serializer import CredentialSerializer
+from api.messages import CRED_TYPE_NOT_ALLOWED_UPDATE
 from api.models import Credential
 from constants import DataSources
+from tests.factories import CredentialFactory
 
 
 @pytest.fixture
@@ -122,3 +124,30 @@ def test_openshift_update_cred_partial(ocp_credential):
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     assert ocp_credential.auth_token != original_auth_token
+
+
+@pytest.mark.django_db
+def test_change_cred_type():
+    """Test if an attempt to change credential type will cause an error."""
+    credential = CredentialFactory(cred_type=DataSources.NETWORK, name="whatever")
+    serializer = CredentialSerializer(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+        },
+        instance=credential,
+        partial=True,
+    )
+    assert not serializer.is_valid()
+    assert serializer.errors["cred_type"] == [CRED_TYPE_NOT_ALLOWED_UPDATE]
+
+
+@pytest.mark.django_db
+def test_change_with_same_cred_type():
+    """Test if "changing" a credential with the same cred_type won't raise an error."""
+    credential = CredentialFactory(cred_type=DataSources.OPENSHIFT, name="whatever")
+    serializer = CredentialSerializer(
+        data={"cred_type": DataSources.OPENSHIFT},
+        instance=credential,
+        partial=True,
+    )
+    assert serializer.is_valid()
