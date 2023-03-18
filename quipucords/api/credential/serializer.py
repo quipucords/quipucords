@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from rest_framework.serializers import CharField, ValidationError, empty
 
 from api import messages
-from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
+from api.common.serializer import NotEmptySerializer
 from api.common.util import check_for_existing_name
 from api.models import Credential
 from constants import DataSources
@@ -23,46 +23,25 @@ def expand_filepath(filepath):
     return filepath
 
 
+ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
+
+
 class CredentialSerializer(NotEmptySerializer):
     """Serializer for the Credential model."""
 
     name = CharField(required=True, max_length=64)
-    username = CharField(required=False, max_length=64)
-    password = CharField(
-        required=False,
-        max_length=1024,
-        allow_null=True,
-        style={"input_type": "password"},
-    )
-    auth_token = CharField(
-        required=False,
-        max_length=1024,
-        allow_null=True,
-        style={"input_type": "password"},
-    )
-    ssh_keyfile = CharField(required=False, max_length=1024, allow_null=True)
-    ssh_passphrase = CharField(
-        required=False,
-        max_length=1024,
-        allow_null=True,
-        style={"input_type": "password"},
-    )
-    become_method = ValidStringChoiceField(
-        required=False, choices=Credential.BECOME_METHOD_CHOICES
-    )
-    become_user = CharField(required=False, max_length=64)
-    become_password = CharField(
-        required=False,
-        max_length=1024,
-        allow_null=True,
-        style={"input_type": "password"},
-    )
 
     class Meta:
         """Metadata for the serializer."""
 
         model = Credential
         fields = "__all__"
+        extra_kwargs = {
+            "password": ENCRYPTED_FIELD_KWARGS,
+            "auth_token": ENCRYPTED_FIELD_KWARGS,
+            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
+            "become_password": ENCRYPTED_FIELD_KWARGS,
+        }
 
     def __init__(self, instance=None, data=empty, **kwargs):
         """Customize class initialization."""
