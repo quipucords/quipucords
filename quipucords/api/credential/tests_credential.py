@@ -59,18 +59,18 @@ class CredentialTest(TestCase):
     def create_expect_400(self, data):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""
         response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     def test_hostcred_creation(self):
         """Tests the creation of a Credential model."""
         host_cred = self.create_credential()
-        self.assertTrue(isinstance(host_cred, Credential))
+        assert isinstance(host_cred, Credential)
 
     def test_hostcred_create(self):
         """Ensure we can create a new host credential object via API."""
@@ -111,8 +111,8 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_hc_create_err_username(self):
         """Test create without username.
@@ -127,8 +127,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["username"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["username"]
 
     def test_hc_create_err_p_or_ssh(self):
         """Test API without password or keyfile.
@@ -143,8 +143,8 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["non_field_errors"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, response.data
+        assert response.data["non_field_errors"]
 
     def test_hc_create_err_ssh_bad(self):
         """Test API with bad sshkey.
@@ -160,8 +160,8 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "blah",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["ssh_keyfile"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["ssh_keyfile"]
 
     def test_hc_create_long_name(self):
         """Test API with long name.
@@ -178,8 +178,8 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_hc_create_long_user(self):
         """Test API with long user.
@@ -198,8 +198,8 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_hc_create_long_password(self):
         """Test api with long password.
@@ -218,8 +218,8 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_hc_create_long_become(self):
         """Test api with long become password.
@@ -239,8 +239,8 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_hc_create_long_ssh(self):
         """Test api with long ssh.
@@ -259,14 +259,14 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.NETWORK,
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_hostcred_list_view(self):
         """Tests the list view set of the Credential API."""
         url = reverse("cred-list")
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        assert resp.status_code == status.HTTP_200_OK
 
     def test_hostcred_list_filter_view(self):
         """Tests the list view with filter set of the Credential API."""
@@ -288,16 +288,16 @@ class CredentialTest(TestCase):
 
         url = reverse("cred-list")
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        assert resp.status_code == status.HTTP_200_OK
         json_resp = resp.json()
-        self.assertTrue(json_resp.get("results") is not None)
+        assert json_resp.get("results") is not None
         results = json_resp.get("results")
         self.assertEqual(len(results), 2)
 
         resp = self.client.get(url, {"cred_type": DataSources.VCENTER})
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        assert resp.status_code == status.HTTP_200_OK
         json_resp = resp.json()
-        self.assertTrue(json_resp.get("results") is not None)
+        assert json_resp.get("results") is not None
         results = json_resp.get("results")
         self.assertEqual(len(results), 1)
 
@@ -325,7 +325,7 @@ class CredentialTest(TestCase):
         resp = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        assert resp.status_code == status.HTTP_200_OK
 
     def test_hostcred_update_double(self):
         """Update to new name that conflicts with other should fail."""
@@ -351,13 +351,13 @@ class CredentialTest(TestCase):
         resp = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_hostcred_get_bad_id(self):
         """Tests the get view set of the Credential API with a bad id."""
         url = reverse("cred-detail", args=("string",))
         resp = self.client.get(url, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_hostcred_delete_view(self):
         """Tests the delete view set of the Credential API."""
@@ -365,7 +365,7 @@ class CredentialTest(TestCase):
         cred.save()
         url = reverse("cred-detail", args=(cred.pk,))
         resp = self.client.delete(url, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        assert resp.status_code == status.HTTP_204_NO_CONTENT
 
     def test_cred_delete_with_source(self):
         """Tests delete when cred used by source."""
@@ -382,7 +382,7 @@ class CredentialTest(TestCase):
 
         url = reverse("cred-detail", args=(cred.pk,))
         resp = self.client.delete(url, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
         response_json = resp.json()
         self.assertEqual(
             response_json["detail"], messages.CRED_DELETE_NOT_VALID_W_SOURCES
@@ -426,8 +426,8 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "keyfile",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_vc_create_extra_keyfile(self):
         """Test VCenter without password."""
@@ -440,8 +440,8 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "keyfile",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["ssh_keyfile"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["ssh_keyfile"]
 
     def test_vc_create_extra_become_pass(self):
         """Test VCenter with extra become password."""
@@ -454,8 +454,8 @@ class CredentialTest(TestCase):
             "become_password": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["become_password"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["become_password"]
 
     def test_vcentercred_update(self):
         """Ensure we can create and update a vcenter credential."""
@@ -549,8 +549,8 @@ class CredentialTest(TestCase):
             "ssh_passphrase": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["ssh_passphrase"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["ssh_passphrase"]
 
     def test_sat_cred_create(self):
         """Ensure we can create a new satellite credential."""
@@ -589,8 +589,8 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "keyfile",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, expected_error)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data == expected_error
 
     def test_sat_cred_update_ssh_key_not_allowed(self):
         """Ensure Satellite update doesn't allow adding ssh_keyfile."""
@@ -609,8 +609,8 @@ class CredentialTest(TestCase):
         response = self.client.patch(
             url, json.dumps(update_data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["ssh_keyfile"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["ssh_keyfile"]
 
     def test_sat_create_extra_keyfile(self):
         """Test Satellite without password."""
@@ -623,8 +623,8 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "keyfile",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["ssh_keyfile"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["ssh_keyfile"]
 
     def test_sat_create_extra_becomepass(self):
         """Test Satellite with extra become password."""
@@ -637,8 +637,8 @@ class CredentialTest(TestCase):
             "become_password": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["become_password"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["become_password"]
 
     def test_sat_create_extra_keyfile_pass(self):
         """Test Satellite with extra keyfile passphase."""
@@ -651,8 +651,8 @@ class CredentialTest(TestCase):
             "ssh_passphrase": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertTrue(response.data["ssh_passphrase"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["ssh_passphrase"]
 
     def test_openshift_cred_create(self):
         """Ensure we can create a new openshift credential."""
