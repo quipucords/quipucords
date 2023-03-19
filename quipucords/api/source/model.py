@@ -73,13 +73,11 @@ class Source(models.Model):
         return self.hosts
 
     def get_exclude_hosts(self):
-        """Access exclude_hosts as python list instead of str.
+        """Access exclude_hosts as a python list.
 
         :returns: excluded hosts as a python list. Empty list if none exist.
         """
-        if self.exclude_hosts:
-            return self.exclude_hosts
-        return []
+        return self.exclude_hosts or []
 
     @cached_property
     def single_credential(self) -> Credential:

@@ -15,7 +15,7 @@ logger = logging.getLogger(__file__)
 def details_report(mocker):
     """Details report patched to contain all possible source types."""
     report = mocker.MagicMock(spec=DetailsReport)
-    report.get_sources.return_value = [
+    report.sources = [
         {
             "source_type": source_type,
             "source_name": source_type,

@@ -32,10 +32,3 @@ class DetailsReport(models.Model):
             f' "sources":{self.sources}'
             "}"
         )
-
-    def get_sources(self):
-        """Access sources.
-
-        :returns: sources as a python dict
-        """
-        return self.sources

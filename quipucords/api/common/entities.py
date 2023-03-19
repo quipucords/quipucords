@@ -119,8 +119,7 @@ class HostEntity:
     @property
     def ip_addresses(self):
         """Retrieve ip_addresses."""
-        with suppress(TypeError):
-            return self._fingerprints.ip_addresses
+        return self._fingerprints.ip_addresses
 
     @property
     def ipv4_addresses(self):
@@ -147,8 +146,7 @@ class HostEntity:
     @property
     def mac_addresses(self):
         """Retrieve mac_addresses."""
-        with suppress(TypeError):
-            return self._fingerprints.mac_addresses
+        return self._fingerprints.mac_addresses
 
     @property
     def name_of_interface(self):
