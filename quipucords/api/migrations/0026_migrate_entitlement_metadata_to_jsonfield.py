@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="entitlement",
             name="metadata",
-            field=models.JSONField(null=True),
+            field=models.JSONField(default=dict),
         ),
     ]

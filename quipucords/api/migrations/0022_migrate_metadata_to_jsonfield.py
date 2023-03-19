@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="systemfingerprint",
             name="metadata",
-            field=models.JSONField(null=True),
+            field=models.JSONField(default=dict),
         ),
     ]

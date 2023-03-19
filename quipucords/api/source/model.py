@@ -58,7 +58,7 @@ class Source(models.Model):
     port = models.IntegerField(null=True)
     options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential)
-    hosts = models.JSONField(unique=False, null=True)
+    hosts = models.JSONField(unique=False, null=False, default=list)
     exclude_hosts = models.JSONField(unique=False, null=True)
 
     most_recent_connect_scan = models.ForeignKey(

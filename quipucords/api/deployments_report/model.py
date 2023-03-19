@@ -164,8 +164,8 @@ class SystemFingerprint(models.Model):
         unique=False, blank=True, null=True
     )
 
-    metadata = models.JSONField(unique=False, null=True)
-    sources = models.JSONField(unique=False, null=True)
+    metadata = models.JSONField(unique=False, null=False, default=dict)
+    sources = models.JSONField(unique=False, null=False, default=list)
     etc_machine_id = models.CharField(
         max_length=48, unique=False, blank=True, null=True
     )
@@ -216,7 +216,7 @@ class Product(models.Model):
     version = models.JSONField(unique=False, null=True)
     presence = models.CharField(max_length=10, choices=PRESENCE_TYPE)
 
-    metadata = models.JSONField(unique=False, null=True)
+    metadata = models.JSONField(unique=False, null=False, default=dict)
 
     def __str__(self):
         """Convert to string."""
@@ -241,7 +241,7 @@ class Entitlement(models.Model):
     name = models.CharField(max_length=256, unique=False, null=True)
     entitlement_id = models.CharField(max_length=256, unique=False, null=True)
 
-    metadata = models.JSONField(unique=False, null=True)
+    metadata = models.JSONField(unique=False, null=False, default=dict)
 
     def __str__(self):
         """Convert to string."""
