@@ -315,7 +315,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             SATELLITE_KEY: [],
             OPENSHIFT_KEY: [],
         }
-        source_list = details_report.get_sources()
+        source_list = details_report.sources
         total_source_count = len(source_list)
         self.scan_task.log_message(f"{total_source_count} sources to process")
         source_count = 0
