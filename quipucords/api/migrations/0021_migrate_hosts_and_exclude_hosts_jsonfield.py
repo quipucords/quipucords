@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="source",
             name="hosts",
-            field=models.JSONField(null=True),
+            field=models.JSONField(default=list),
         ),
     ]
