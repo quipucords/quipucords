@@ -152,7 +152,7 @@ class InspectResultCallback:
             stored_fact.save()
 
     def _organize_facts(self, res):
-        ansible_facts_key = "ansible"
+        ansible_facts_key = "ansible_facts"
         ansible_prefix = "ansible_"
         other_ansible_facts = [
             "gather_subset",
