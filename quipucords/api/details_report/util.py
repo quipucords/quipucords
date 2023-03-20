@@ -250,7 +250,15 @@ def create_details_csv(details_report_dict, request):
             ]
         )
         csv_writer.writerow(["Facts"])
-        fact_list = source.get("facts")
+        fact_list = source.get("facts", [])
+        for fact in fact_list:
+            # flatten ansible facts for improved readability
+            ansible_facts = fact.pop("ansible_facts", {})
+            for fact_name, fact_value in ansible_facts:
+                if not fact_name.startswith("ansible_"):
+                    fact_name = "ansible_" + fact_name
+                fact[fact_name] = fact_value
+
         if not fact_list:
             # write a space line and move to next
             csv_writer.writerow([])
