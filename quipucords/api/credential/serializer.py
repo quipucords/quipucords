@@ -238,8 +238,12 @@ class NetworkCredentialSerializer(BaseCredentialSerializer):
 
     def validate(self, attrs):
         """Validate fields that need to be evaluated together."""
-        data = super().validate(attrs)
-        errors = defaultdict(list)
+        try:
+            data = super().validate(attrs)
+            errors = defaultdict(list)
+        except ValidationError as exc:
+            data = attrs
+            errors = exc.get_full_details()
         password = data.get("password")
         ssh_keyfile = data.get("ssh_keyfile")
         ssh_passphrase = data.get("ssh_passphrase")
