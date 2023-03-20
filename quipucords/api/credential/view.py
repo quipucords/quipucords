@@ -141,6 +141,8 @@ class CredentialViewSet(ModelViewSet):
     # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):
         """Update a host credential."""
+        # CLI and UI use PUT method as if it was a PATCH, hence the need to set
+        # partial to True
         partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)

@@ -1,6 +1,7 @@
 """Module for serializing all model object for database storage."""
 
 import os
+from collections import defaultdict
 
 from django.utils.translation import gettext as _
 from rest_framework.serializers import CharField, ValidationError, empty
@@ -10,7 +11,6 @@ from api.common.serializer import NotEmptySerializer
 from api.common.util import check_for_existing_name
 from api.models import Credential
 from constants import DataSources
-from utils import get_from_object_or_dict
 
 
 def expand_filepath(filepath):
@@ -24,10 +24,63 @@ def expand_filepath(filepath):
 
 
 ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
+SERIALIZER_PER_DATASOURCE = {}
 
 
-class CredentialSerializer(NotEmptySerializer):
-    """Serializer for the Credential model."""
+class CredentialSerializer:
+    """Proxy for Credential Serializers.
+
+    This class reads instance and data args/kwargs to figure out the appropriate
+    serializer class to return.
+    """
+
+    def __new__(cls, instance=None, data=empty, **kwargs):
+        """Initialize the adequate serializer."""
+        klass = cls._get_serializer_class(instance, data)
+        return klass(instance=instance, data=data, **kwargs)
+
+    @classmethod
+    def _get_serializer_class(cls, instance: Credential, data: dict):
+        if not instance and data == empty:
+            return BaseCredentialSerializer
+        if isinstance(instance, list):
+            return BaseCredentialSerializer
+        cred_type = cls._get_cred_type(instance, data)
+        if not cred_type:
+            return BaseCredentialSerializer
+        try:
+            return SERIALIZER_PER_DATASOURCE[cred_type]
+        except KeyError:
+            # this KeyError won't add anything to the tb
+            # pylint: disable=raise-missing-from
+            raise NotImplementedError(f"No serializer implemented for {cred_type=}")
+
+    @classmethod
+    def _get_cred_type(cls, instance, data):
+        if instance:
+            return instance.cred_type
+        if isinstance(data, dict) and data.get("cred_type") in DataSources.values:
+            return data["cred_type"]
+        return None
+
+
+class BaseCredentialSerializer(NotEmptySerializer):
+    """Base Serializer for the Credential model.
+
+    Specialized Credential serializers should be created inheriting from this one
+    and MUST have a 'qpc_data_sources' set in its 'Meta' configuration class.
+
+    Here's one example:
+
+    class NewCredentialSerializer(BaseCredentialSerializer):
+        class Meta:
+            model = Credential
+            fields = ["id", "name", "cred_type", "new_field"]
+            extra_kwargs = {
+                "new_field": {"required": True, **ENCRYPTED_FIELD_KWARGS},
+            }
+            qpc_data_sources = [DataSources.NEW_SOURCE]
+    """
 
     name = CharField(required=True, max_length=64)
 
@@ -53,6 +106,26 @@ class CredentialSerializer(NotEmptySerializer):
             data.setdefault("cred_type", instance.cred_type)
         super().__init__(instance=instance, data=data, **kwargs)
 
+    def __init_subclass__(cls, **kwargs):
+        """Overload subclass creation method."""
+        super().__init_subclass__(**kwargs)
+        if not getattr(cls.Meta, "qpc_data_sources", None):
+            raise NotImplementedError(
+                "subclasses of CredentialSerializer MUST have a 'Meta' class "
+                "with 'qpc_data_sources' set as a list of DataSources."
+            )
+
+        # pylint doesn't know cls in __init_subclass__ refer to it's subclasses...
+        # pylint: disable=no-member
+        for data_source in cls.Meta.qpc_data_sources:
+            # pylint: enable=no-member
+            if data_source in SERIALIZER_PER_DATASOURCE:
+                raise RuntimeError(
+                    f"Data source {data_source} already has a serializer set "
+                    f"({SERIALIZER_PER_DATASOURCE[data_source].__name__})."
+                )
+            SERIALIZER_PER_DATASOURCE[data_source] = cls
+
     def validate_cred_type(self, cred_type):
         """Validate cred_type field."""
         if self.instance and cred_type != self.instance.cred_type:
@@ -61,19 +134,16 @@ class CredentialSerializer(NotEmptySerializer):
 
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
-        cred_type = get_from_object_or_dict(self.instance, attrs, "cred_type")
-
-        if cred_type == DataSources.VCENTER:
-            validated_data = self.validate_vcenter_cred(attrs)
-        elif cred_type == DataSources.SATELLITE:
-            validated_data = self.validate_satellite_cred(attrs)
-        elif cred_type == DataSources.NETWORK:
-            validated_data = self.validate_host_cred(attrs)
-        elif cred_type == DataSources.OPENSHIFT:
-            validated_data = self.validate_openshift_cred(attrs)
-        else:
-            raise ValidationError({"cred_type": messages.UNKNOWN_CRED_TYPE})
-        return validated_data
+        errors = {}
+        if hasattr(self, "initial_data"):
+            unknown_keys = set(self.initial_data.keys()) - set(self.fields.keys())
+            for key in unknown_keys:
+                errors[key] = (
+                    messages.FIELD_NOT_ALLOWED_FOR_DATA_SOURCE % attrs["cred_type"]
+                )
+        if errors:
+            raise ValidationError(errors)
+        return attrs
 
     def create(self, validated_data):
         """Create host credential."""
@@ -81,18 +151,6 @@ class CredentialSerializer(NotEmptySerializer):
         check_for_existing_name(
             Credential.objects, name, _(messages.HC_NAME_ALREADY_EXISTS % name)
         )
-
-        cred_type = validated_data.get("cred_type")
-        become_method = validated_data.get("become_method")
-        become_user = validated_data.get("become_user")
-
-        if cred_type == DataSources.NETWORK and not become_method:
-            # Set the default become_method to be sudo if not specified
-            validated_data["become_method"] = Credential.BECOME_SUDO
-        if cred_type == DataSources.NETWORK and not become_user:
-            # Set the default become_user to root if not specified
-            validated_data["become_user"] = Credential.BECOME_USER_DEFAULT
-
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -106,127 +164,92 @@ class CredentialSerializer(NotEmptySerializer):
         )
         return super().update(instance, validated_data)
 
-    def validate_host_cred(self, attrs):
-        """Validate the attributes for host creds."""
-        ssh_keyfile = "ssh_keyfile" in attrs and attrs["ssh_keyfile"]
-        password = "password" in attrs and attrs["password"]
-        ssh_passphrase = "ssh_passphrase" in attrs and attrs["ssh_passphrase"]
-        username = "username" in attrs and attrs["username"]
 
-        if not username and not self.partial:
-            error = {"username": _(messages.HOST_USERNAME_CREDENTIAL)}
-            raise ValidationError(error)
+class AuthTokenSerializer(BaseCredentialSerializer):
+    """Serializer for credentials that require only auth_token."""
 
-        if not (password or ssh_keyfile) and not self.partial:
-            error = {"non_field_errors": [_(messages.HC_PWD_OR_KEYFILE)]}
-            raise ValidationError(error)
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = ["id", "name", "cred_type", "auth_token"]
+        extra_kwargs = {
+            "auth_token": {"required": True, **ENCRYPTED_FIELD_KWARGS},
+        }
+        qpc_data_sources = [DataSources.OPENSHIFT]
+
+
+class UsernamePasswordSerializer(BaseCredentialSerializer):
+    """Serializer for credentials that require username and password."""
+
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = [
+            "cred_type",
+            "id",
+            "name",
+            "password",
+            "username",
+        ]
+        extra_kwargs = {
+            "password": {"required": True, **ENCRYPTED_FIELD_KWARGS},
+            "username": {"required": True},
+        }
+        qpc_data_sources = [DataSources.SATELLITE, DataSources.VCENTER]
+
+
+class NetworkCredentialSerializer(BaseCredentialSerializer):
+    """Serializer class for network scan credentials."""
+
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = [
+            "id",
+            "name",
+            "become_method",
+            "become_password",
+            "become_user",
+            "cred_type",
+            "password",
+            "ssh_keyfile",
+            "ssh_passphrase",
+            "username",
+        ]
+        extra_kwargs = {
+            "become_method": {"default": Credential.BECOME_SUDO},
+            "become_password": ENCRYPTED_FIELD_KWARGS,
+            "become_user": {"default": Credential.BECOME_USER_DEFAULT},
+            "password": ENCRYPTED_FIELD_KWARGS,
+            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
+            "username": {"required": True},
+        }
+        qpc_data_sources = [DataSources.NETWORK]
+
+    def validate_ssh_keyfile(self, ssh_keyfile):
+        """Validate ssh_keyfile field."""
+        keyfile = expand_filepath(ssh_keyfile)
+        if not os.path.isfile(keyfile):
+            raise ValidationError(_(messages.HC_KEY_INVALID % (ssh_keyfile)))
+        return keyfile
+
+    def validate(self, attrs):
+        """Validate fields that need to be evaluated together."""
+        data = super().validate(attrs)
+        errors = defaultdict(list)
+        password = data.get("password")
+        ssh_keyfile = data.get("ssh_keyfile")
+        ssh_passphrase = data.get("ssh_passphrase")
 
         if password and ssh_keyfile:
-            error = {"non_field_errors": [_(messages.HC_NOT_BOTH)]}
-            raise ValidationError(error)
-
-        if ssh_keyfile:
-            keyfile = expand_filepath(ssh_keyfile)
-            if not os.path.isfile(keyfile):
-                error = {"ssh_keyfile": [_(messages.HC_KEY_INVALID % (ssh_keyfile))]}
-                raise ValidationError(error)
-            attrs["ssh_keyfile"] = keyfile
-
-        if ssh_passphrase and not ssh_keyfile and not self.partial:
-            error = {"ssh_passphrase": [_(messages.HC_NO_KEY_W_PASS)]}
-            raise ValidationError(error)
-
-        self._check_for_disallowed_fields(
-            DataSources.NETWORK, attrs, messages.HOST_FIELD_NOT_ALLOWED
-        )
-
-        return attrs
-
-    def validate_vcenter_cred(self, attrs):
-        """Validate the attributes for vcenter creds."""
-        # Required fields for vcenter
-        if not self.partial:
-            username = "username" in attrs and attrs["username"]
-            password = "password" in attrs and attrs["password"]
-
-            if not (password and username):
-                error = {"non_field_errors": [_(messages.VC_PWD_AND_USERNAME)]}
-                raise ValidationError(error)
-
-        self._check_for_disallowed_fields(
-            DataSources.VCENTER, attrs, messages.VC_FIELDS_NOT_ALLOWED
-        )
-        return attrs
-
-    def validate_satellite_cred(self, attrs):
-        """Validate the attributes for satellite creds."""
-        # Required fields for satellite
-        if not self.partial:
-            username = "username" in attrs and attrs["username"]
-            password = "password" in attrs and attrs["password"]
-
-            if not (password and username):
-                error = {"non_field_errors": [_(messages.SAT_PWD_AND_USERNAME)]}
-                raise ValidationError(error)
-
-        self._check_for_disallowed_fields(
-            DataSources.SATELLITE,
-            attrs,
-            messages.SAT_FIELD_NOT_ALLOWED,
-        )
-        return attrs
-
-    def validate_openshift_cred(self, attrs):
-        """Validate the attributes for openshift credentials."""
-        # Required field for OpenShift credential
-        auth_token = get_from_object_or_dict(self.instance, attrs, "auth_token")
-
-        if not auth_token:
-            error = {"auth_token": [_(messages.OPENSHIFT_CRED_REQUIRED_FIELD)]}
-            raise ValidationError(error)
-
-        self._check_for_disallowed_fields(
-            DataSources.OPENSHIFT, attrs, messages.OPENSHIFT_FIELD_NOT_ALLOWED
-        )
-        return attrs
-
-    def _check_for_disallowed_fields(self, credential_type, attrs, message):
-        """Check if forbidden fields are being passed to credentials."""
-        required_fields_map = {
-            DataSources.OPENSHIFT: {"id", "name", "cred_type", "auth_token"},
-            DataSources.VCENTER: {
-                "cred_type",
-                "id",
-                "name",
-                "password",
-                "username",
-            },
-            DataSources.SATELLITE: {
-                "cred_type",
-                "id",
-                "name",
-                "password",
-                "username",
-            },
-            DataSources.NETWORK: {
-                "become_method",
-                "become_password",
-                "become_user",
-                "cred_type",
-                "id",
-                "name",
-                "password",
-                "ssh_keyfile",
-                "ssh_passphrase",
-                "username",
-            },
-        }
-
-        complete_fields_map = set(self.fields.keys())
-        not_allowed_fields = complete_fields_map - required_fields_map[credential_type]
-        errors = {}
-        for field in not_allowed_fields:
-            if attrs.get(field):
-                errors[field] = message
+            errors["non_field_errors"].append(_(messages.HC_NOT_BOTH))
+        if not self.partial and not (password or ssh_keyfile):
+            errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE))
+        if not self.partial and ssh_passphrase and not ssh_keyfile:
+            errors["ssh_passphrase"].append(_(messages.HC_NO_KEY_W_PASS))
         if errors:
             raise ValidationError(errors)
+        return data
