@@ -254,7 +254,7 @@ def create_details_csv(details_report_dict, request):
         for fact in fact_list:
             # flatten ansible facts for improved readability
             ansible_facts = fact.pop("ansible_facts", {})
-            for fact_name, fact_value in ansible_facts:
+            for fact_name, fact_value in ansible_facts.items():
                 if not fact_name.startswith("ansible_"):
                     fact_name = "ansible_" + fact_name
                 fact[fact_name] = fact_value

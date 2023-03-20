@@ -2,7 +2,7 @@ services:
   qpc-server:
     build: .
     environment:
-      ANSIBLE_LOG_LEVEL: 3
+      ANSIBLE_LOG_LEVEL: 2
       QPC_DBMS: postgres
       QPC_DBMS_DATABASE: qpc
       QPC_DBMS_HOST: qpc-db
