@@ -95,6 +95,9 @@ class BaseCredentialSerializer(NotEmptySerializer):
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "become_password": ENCRYPTED_FIELD_KWARGS,
         }
+        # Only "specialized" serializers should be able to write to the database
+        # subclasses don't need to set this, it's done automatically
+        qpc_read_only = True
 
     def __init__(self, instance=None, data=empty, **kwargs):
         """Customize class initialization."""
@@ -125,6 +128,7 @@ class BaseCredentialSerializer(NotEmptySerializer):
                     f"({SERIALIZER_PER_DATASOURCE[data_source].__name__})."
                 )
             SERIALIZER_PER_DATASOURCE[data_source] = cls
+            cls.Meta.qpc_read_only = False
 
     def validate_cred_type(self, cred_type):
         """Validate cred_type field."""
@@ -147,6 +151,7 @@ class BaseCredentialSerializer(NotEmptySerializer):
 
     def create(self, validated_data):
         """Create host credential."""
+        self._ensure_not_read_only()
         name = validated_data.get("name")
         check_for_existing_name(
             Credential.objects, name, _(messages.HC_NAME_ALREADY_EXISTS % name)
@@ -155,6 +160,7 @@ class BaseCredentialSerializer(NotEmptySerializer):
 
     def update(self, instance, validated_data):
         """Update a host credential."""
+        self._ensure_not_read_only()
         name = validated_data.get("name")
         check_for_existing_name(
             Credential.objects,
@@ -163,6 +169,18 @@ class BaseCredentialSerializer(NotEmptySerializer):
             search_id=instance.id,
         )
         return super().update(instance, validated_data)
+
+    def _ensure_not_read_only(self, **kwargs):
+        """Stop code execution if serializer is "read only"."""
+        # force BaseCredentialSerializer to act as "read only"
+        # a 'RuntimeError' was chosen instead of a user-friendly 'ValidationError'
+        # because this method would only be called if there's an error on a
+        # implementation (for instance, if calling BaseCredentialSerializer directly)
+        if self.Meta.qpc_read_only:
+            raise RuntimeError(
+                "BaseCredentialSerializer should not be used to save data. "
+                "Use one of the specialized subclasses instead."
+            )
 
 
 class AuthTokenSerializer(BaseCredentialSerializer):
