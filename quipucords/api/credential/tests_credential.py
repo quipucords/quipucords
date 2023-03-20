@@ -417,7 +417,7 @@ class CredentialTest(TestCase):
 
     def test_vc_create_missing_password(self):
         """Test VCenter without password."""
-        expected_error = {"non_field_errors": [messages.VC_PWD_AND_USERNAME]}
+        expected_error = {"password": ["This field is required."]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
@@ -580,7 +580,7 @@ class CredentialTest(TestCase):
 
     def test_sat_create_missing_password(self):
         """Test Satellite without password."""
-        expected_error = {"non_field_errors": [messages.SAT_PWD_AND_USERNAME]}
+        expected_error = {"password": ["This field is required."]}
         url = reverse("cred-list")
         data = {
             "name": "cred1",
