@@ -4,10 +4,15 @@ from unittest import mock
 
 import pytest
 from django.forms.models import model_to_dict
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ListSerializer, ValidationError
 
 from api import messages
-from api.credential.serializer import CredentialSerializer
+from api.credential.serializer import (
+    AuthTokenSerializer,
+    CredentialSerializer,
+    NetworkCredentialSerializer,
+    UsernamePasswordSerializer,
+)
 from api.models import Credential
 from api.vault import decrypt_data_as_unicode
 from constants import DataSources
@@ -148,7 +153,9 @@ def test_openshift_cred_update_no_token(ocp_credential):
     updated_data = {
         "name": "cred2",
     }
-    serializer = CredentialSerializer(data=updated_data, instance=ocp_credential)
+    serializer = CredentialSerializer(
+        data=updated_data, instance=ocp_credential, partial=True
+    )
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     assert serializer.is_valid()
@@ -513,3 +520,65 @@ class TestNetworkCredential:
         assert not credential_with_ssh_key.ssh_passphrase
         serializer.save()
         assert credential_with_ssh_key.ssh_passphrase
+
+
+@pytest.mark.parametrize(
+    "cred_type, expected_class",
+    (
+        (DataSources.NETWORK, NetworkCredentialSerializer),
+        (DataSources.OPENSHIFT, AuthTokenSerializer),
+        (DataSources.SATELLITE, UsernamePasswordSerializer),
+        (DataSources.VCENTER, UsernamePasswordSerializer),
+    ),
+)
+class TestSerializerPolymorphism:
+    """Test serializer polymorphism."""
+
+    def test_with_data(self, cred_type, expected_class):
+        """Test polymorphism passing data."""
+        serializer = CredentialSerializer(data={"cred_type": cred_type})
+        assert isinstance(serializer, expected_class)
+
+    @pytest.mark.django_db
+    def test_with_instance(self, cred_type, expected_class):
+        """Test polymorphism passing instance."""
+        serializer = CredentialSerializer(
+            CredentialFactory(name="cred", cred_type=cred_type)
+        )
+        assert isinstance(serializer, expected_class)
+
+
+class TestBaseCredentialSerializer:
+    """Test BaseCredentialSerializer."""
+
+    @pytest.mark.parametrize("kwargs", ({}, {"instance": None}, {"data": {}}))
+    def test_read_only_polymorphism(self, kwargs):
+        """Test read_only polymorphism."""
+        serializer = CredentialSerializer(**kwargs)
+        # isinstance wouldn't be good for testing since the other classes
+        # are subclasses of this one
+        assert serializer.__class__ == CredentialSerializer
+
+    @pytest.mark.django_db
+    def test_with_multiple_instances(self):
+        """Test init CredentialSerializer with many instances and many=False."""
+        credentials = CredentialFactory.create_batch(10)
+        serializer = CredentialSerializer(instance=credentials)
+        # this might seem a fluke, but it's DRF design
+        assert serializer.__class__ == CredentialSerializer
+        # attempting to serialize this data would fail horribly due to lack of
+        # many=True.
+
+    @pytest.mark.django_db
+    def test_with_many(self):
+        """Test to serialize instances and many=True."""
+        credentials = CredentialFactory.create_batch(10)
+        serializer = CredentialSerializer(instance=credentials, many=True)
+        assert isinstance(serializer, ListSerializer)
+        assert serializer.child.__class__ == CredentialSerializer
+        expected_data = []
+        # prep a list of credentials dict as the serializer would return
+        for cred in credentials:
+            cred_dict = {k: v for k, v in model_to_dict(cred).items() if v is not None}
+            expected_data.append(cred_dict)
+        assert serializer.data == expected_data

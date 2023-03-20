@@ -11,7 +11,6 @@ FC_MISSING_REPORT_VERSION = (
 
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = "Credentials"
-HOST_USERNAME_CREDENTIAL = "A host credential must have a username."
 HC_PWD_OR_KEYFILE = "A host credential must have either a password or an ssh_keyfile."
 HC_NOT_BOTH = (
     "A host credential must have either a password or an ssh_keyfile, not both."
@@ -22,19 +21,13 @@ HC_NO_KEY_W_PASS = (
     " a ssh_passphrase is provided."
 )
 HC_NAME_ALREADY_EXISTS = "Host credential with name=%s already exists"
-HOST_FIELD_NOT_ALLOWED = "Field not allowed for Host credential."
 CRED_TYPE_REQUIRED_CREATED = "cred_type is required for credential creation"
 CRED_TYPE_NOT_ALLOWED_UPDATE = "cred_type is invalid for credential update"
 CRED_DELETE_NOT_VALID_W_SOURCES = (
     "Credential cannot be deleted because it is used by 1 or more sources."
 )
-VC_PWD_AND_USERNAME = "VCenter requires both username and password."
-VC_FIELDS_NOT_ALLOWED = "Field not allowed for Vcenter credential."
-SAT_PWD_AND_USERNAME = "Satellite requires both username and password."
-SAT_FIELD_NOT_ALLOWED = "Field not allowed for Satellite credential."
 UNKNOWN_CRED_TYPE = "Credential type invalid."
-OPENSHIFT_CRED_REQUIRED_FIELD = "This field is required for OpenShift credential."
-OPENSHIFT_FIELD_NOT_ALLOWED = "Field not allowed for OpenShift credential."
+FIELD_NOT_ALLOWED_FOR_DATA_SOURCE = "Field not allowed for '%s' credential."
 
 # source messages
 SOURCE_NAME_ALREADY_EXISTS = "Source with name=%s already exists"
