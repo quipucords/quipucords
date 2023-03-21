@@ -2,7 +2,6 @@
 
 These models are used in the REST definitions.
 """
-import json
 import logging
 from datetime import datetime
 
@@ -483,8 +482,7 @@ class ScanTask(models.Model):
                         if not raw_fact.value or raw_fact.value == "":
                             continue
                         # Load values as JSON
-                        value_to_use = json.loads(raw_fact.value)
-                        fact[raw_fact.name] = value_to_use
+                        fact[raw_fact.name] = raw_fact.value
 
                     if fact.get(identity_key) is None:
                         system_result.facts.all().delete()

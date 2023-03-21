@@ -1,7 +1,5 @@
 """OpenShift inspect task runner."""
 
-import json
-
 from django.conf import settings
 from django.db import transaction
 
@@ -134,7 +132,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
     ) -> RawFact:
         return RawFact(
             name=entity.kind,
-            value=entity.json(),
+            value=entity,
             system_inspection_result=inspection_result,
         )
 
@@ -148,7 +146,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         for collection_name, entity in entities.items():
             raw_fact = RawFact(
                 name=collection_name,
-                value=json.dumps(entity, default=_pydantic_encoder),
+                value=entity,
                 system_inspection_result=inspection_result,
             )
             raw_fact_list.append(raw_fact)

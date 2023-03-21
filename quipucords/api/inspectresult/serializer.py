@@ -1,7 +1,7 @@
 """Module for serializing all model object for database storage."""
-from rest_framework.serializers import CharField, ChoiceField
+from rest_framework.serializers import CharField, ChoiceField, JSONField
 
-from api.common.serializer import CustomJSONField, NotEmptySerializer
+from api.common.serializer import NotEmptySerializer
 from api.models import (
     JobInspectionResult,
     RawFact,
@@ -14,7 +14,7 @@ class RawFactSerializer(NotEmptySerializer):
     """Serializer for the SystemInspectionResult model."""
 
     name = CharField(required=True, max_length=1024)
-    value = CustomJSONField(required=True)
+    value = JSONField(required=True)
 
     class Meta:
         """Metadata for serializer."""

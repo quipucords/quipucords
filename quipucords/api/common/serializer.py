@@ -1,14 +1,8 @@
 """Common serializer to remove empty or null values."""
 
-import json
 from collections import OrderedDict
 
-from rest_framework.serializers import (
-    ChoiceField,
-    Field,
-    ModelSerializer,
-    ValidationError,
-)
+from rest_framework.serializers import ChoiceField, ModelSerializer, ValidationError
 
 from api import messages
 
@@ -80,17 +74,3 @@ class NotEmptySerializer(NotEmptyMixin, ModelSerializer):
     class Meta:
         qpc_allow_empty_fields = ['key1','key2']
     """
-
-
-class CustomJSONField(Field):
-    """Serializer reading and writing JSON to CharField."""
-
-    def to_internal_value(self, data):
-        """Transform  python object to JSON str."""
-        return json.dumps(data)
-
-    def to_representation(self, value):
-        """Transform JSON str to python object."""
-        if value == "":
-            return value
-        return json.loads(value)

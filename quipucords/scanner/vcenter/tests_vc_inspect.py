@@ -1,6 +1,5 @@
 """Test the vcenter inspect capabilities."""
 
-import json
 from datetime import datetime
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
@@ -237,8 +236,7 @@ class InspectTaskRunnerTest(TestCase):
             }
             sys_fact = {}
             for raw_fact in sys_results.first().facts.all():
-                # Must read as JSON as this is what task.py does
-                sys_fact[raw_fact.name] = json.loads(raw_fact.value)
+                sys_fact[raw_fact.name] = raw_fact.value
 
             self.assertEqual(1, len(sys_results))
             self.assertEqual("vm1", sys_results.first().name)

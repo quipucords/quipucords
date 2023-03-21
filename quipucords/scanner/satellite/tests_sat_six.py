@@ -1,5 +1,4 @@
 """Test the satellite six interface."""
-import json
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
@@ -454,7 +453,7 @@ class SatelliteSixV1Test(TestCase):
                 self.assertEqual(sys_1_result.status, "success")
                 result = {}
                 for fact in sys_1_result.facts.all():
-                    result[fact.name] = json.loads(fact.value)
+                    result[fact.name] = fact.value
                 self.assertEqual(result, expected)
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)
@@ -982,7 +981,7 @@ class SatelliteSixV2Test(TestCase):
                 self.assertEqual(sys_1_result.status, "success")
                 result = {}
                 for fact in sys_1_result.facts.all():
-                    result[fact.name] = json.loads(fact.value)
+                    result[fact.name] = fact.value
                 self.assertEqual(result, expected)
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)

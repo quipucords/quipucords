@@ -1,6 +1,5 @@
 """Describes the views associated with the API models."""
 
-import json
 import logging
 import os
 
@@ -75,8 +74,6 @@ def expand_system_inspection(system):
             raw_fact = (
                 RawFact.objects.filter(id=fact_id).values("name", "value").first()
             )
-            if raw_fact.get("value") is not None:
-                raw_fact["value"] = json.loads(raw_fact["value"])
             facts.append(raw_fact)
         system["facts"] = facts
 

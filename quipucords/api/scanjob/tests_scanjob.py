@@ -819,7 +819,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -847,7 +847,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -875,7 +875,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -903,7 +903,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -933,7 +933,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -948,7 +948,7 @@ class ScanJobTest(TestCase):
 
         fact2 = RawFact(
             name="fact_key2",
-            value='"fact_value2"',
+            value="fact_value2",
             system_inspection_result=inspect_sys_result2,
         )
         fact2.save()
@@ -995,7 +995,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -1010,7 +1010,7 @@ class ScanJobTest(TestCase):
 
         fact2 = RawFact(
             name="fact_key2",
-            value='"fact_value2"',
+            value="fact_value2",
             system_inspection_result=inspect_sys_result2,
         )
         fact2.save()
@@ -1092,7 +1092,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -1107,7 +1107,7 @@ class ScanJobTest(TestCase):
 
         fact2 = RawFact(
             name="fact_key2",
-            value='"fact_value2"',
+            value="fact_value2",
             system_inspection_result=inspect_sys_result2,
         )
         fact2.save()
@@ -1178,7 +1178,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -1193,7 +1193,7 @@ class ScanJobTest(TestCase):
 
         fact2 = RawFact(
             name="fact_key2",
-            value='"fact_value2"',
+            value="fact_value2",
             system_inspection_result=inspect_sys_result2,
         )
         fact2.save()
@@ -1272,7 +1272,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -1316,7 +1316,7 @@ class ScanJobTest(TestCase):
 
         fact = RawFact(
             name="fact_key",
-            value='"fact_value"',
+            value="fact_value",
             system_inspection_result=inspect_sys_result,
         )
         fact.save()
@@ -1789,7 +1789,7 @@ class ScanJobTest(TestCase):
         sys_result.save()
 
         fact = RawFact(
-            name="fact_key", value='"fact_value"', system_inspection_result=sys_result
+            name="fact_key", value="fact_value", system_inspection_result=sys_result
         )
         fact.save()
 
