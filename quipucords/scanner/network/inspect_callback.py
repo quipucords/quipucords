@@ -1,6 +1,5 @@
 """Callback object for capturing ansible task execution."""
 
-import json
 import logging
 
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -151,10 +150,8 @@ class InspectResultCallback:
             if result_value == process.NO_DATA:
                 result_value = None
 
-            # Convert all values to JSON.  Noop for str, int
-            final_value = json.dumps(result_value)
             stored_fact = RawFact(
-                name=result_key, value=final_value, system_inspection_result=sys_result
+                name=result_key, value=result_value, system_inspection_result=sys_result
             )
             stored_fact.save()
 

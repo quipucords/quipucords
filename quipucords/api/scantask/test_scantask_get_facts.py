@@ -1,7 +1,5 @@
 """Test ScanTask.get_facts."""
 
-import json
-
 import pytest
 
 from api.models import (
@@ -39,7 +37,7 @@ def inspection_scantask(raw_facts_list):
             RawFact(
                 name=fact_name,
                 system_inspection_result=system_inspection_result,
-                value=json.dumps(fact_value),
+                value=fact_value,
             )
             for fact_name, fact_value in facts.items()
         ]

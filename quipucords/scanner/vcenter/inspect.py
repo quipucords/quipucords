@@ -1,5 +1,4 @@
 """ScanTask used for vcenter inspection task."""
-import json
 import logging
 from datetime import datetime
 
@@ -202,9 +201,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
         for key, val in facts.items():
             if val is not None:
-                final_value = json.dumps(val)
                 stored_fact = RawFact(
-                    name=key, value=final_value, system_inspection_result=sys_result
+                    name=key, value=val, system_inspection_result=sys_result
                 )
                 stored_fact.save()
 

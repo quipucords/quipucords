@@ -1,5 +1,4 @@
 """Test the satellite five interface."""
-import json
 import xmlrpc.client
 from multiprocessing import Value
 from unittest.mock import ANY, patch
@@ -178,7 +177,7 @@ class SatelliteFiveTest(TestCase):
         self.assertEqual(sys_1_result.status, "success")
         result = {}
         for fact in sys_1_result.facts.all():
-            result[fact.name] = json.loads(fact.value)
+            result[fact.name] = fact.value
         self.assertEqual(result, expected)
 
     @patch("xmlrpc.client.ServerProxy")
@@ -233,7 +232,7 @@ class SatelliteFiveTest(TestCase):
         self.assertEqual(sys_1_result.status, "success")
         result = {}
         for fact in sys_1_result.facts.all():
-            result[fact.name] = json.loads(fact.value)
+            result[fact.name] = fact.value
         self.assertEqual(result, expected)
 
     def test_prepare_host_s5(self):
@@ -296,7 +295,7 @@ class SatelliteFiveTest(TestCase):
         self.assertEqual(sys_1_result.status, "failed")
         result = {}
         for fact in sys_1_result.facts.all():
-            result[fact.name] = json.loads(fact.value)
+            result[fact.name] = fact.value
         self.assertEqual(result, {})
 
     @patch("xmlrpc.client.ServerProxy")
