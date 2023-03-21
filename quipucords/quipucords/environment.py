@@ -145,6 +145,13 @@ def log_database_configuration():
         logger.info("%s set to %s", setting_name, repr(getattr(settings, setting_name)))
 
 
+def log_redis_configuration():
+    """Log settings related to the Redis configuration."""
+    settings_to_log = ["REDIS_USERNAME", "REDIS_HOST", "REDIS_PORT"]
+    for setting_name in settings_to_log:
+        logger.info("%s set to %s", setting_name, repr(getattr(settings, setting_name)))
+
+
 def log_server_version():
     """Log the server version."""
     logger.info("Server version: %s", server_version())
@@ -158,4 +165,5 @@ def startup():
     log_system_info()
     log_all_environment_variables()
     log_database_configuration()
+    log_redis_configuration()
     log_server_version()

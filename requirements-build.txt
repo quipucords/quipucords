@@ -10,14 +10,23 @@ cython==0.29.33
     # via -r requirements-build.in
 docutils==0.19
     # via -r requirements-build.in
+editables==0.3
+    # via hatchling
 flit-core==3.8.0
+    # via -r requirements-build.in
+hatchling==1.13.0
     # via -r requirements-build.in
 packaging==23.0
     # via
     #   -r requirements-build.in
+    #   hatchling
     #   setuptools-scm
+pathspec==0.11.1
+    # via hatchling
 pbr==5.11.1
     # via -r requirements-build.in
+pluggy==1.0.0
+    # via hatchling
 poetry-core==1.5.2
     # via -r requirements-build.in
 pycparser==2.21
@@ -29,7 +38,9 @@ setuptools-rust==1.5.2
 setuptools-scm==7.1.0
     # via -r requirements-build.in
 tomli==2.0.1
-    # via setuptools-scm
+    # via
+    #   hatchling
+    #   setuptools-scm
 typing-extensions==4.5.0
     # via
     #   -r requirements-build.in
