@@ -788,7 +788,7 @@ class SatelliteSixV2Test(TestCase):
                 "displayMessage": "Host has not been registered "
                 "with subscription-manager",
                 "errors": ["Host has not been registered with subscription-manager"],
-            }  # noqa
+            }
             mocker.get(url, status_code=400, json=err_msg)
             result = request_host_details(
                 self.scan_task,
@@ -1044,7 +1044,7 @@ class SatelliteSixV2Test(TestCase):
                 "page": 1,
                 "per_page": 100,
                 "results": [{"id": 10, "name": "sys10"}],
-            }  # noqa
+            }
             mocker.get(url, status_code=200, json=jsonresult)
             api.hosts_facts(Value("i", ScanJob.JOB_RUN))
             inspect_result = scan_task.inspection_result

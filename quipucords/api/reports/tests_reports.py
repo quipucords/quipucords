@@ -168,7 +168,7 @@ class ReportsTest(TestCase):
                 reports_dict.get("details_json").get("report_platform_id"),
                 self.server_id,
             )
-        )  # noqa
+        )
 
         renderer = ReportsGzipRenderer()
         tar_gz_result = renderer.render(
@@ -215,7 +215,7 @@ class ReportsTest(TestCase):
             ",,,2,2,False,2,True,False,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
             ",,,2,2,False,2,True,False,False,False,,,virtualized,,[-7334718598697473719],,absent,absent,absent,absent,,-7334718598697473719,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
             "\r\n"
-        )  # noqa
+        )
         # pylint: disable=line-too-long, consider-using-f-string
         details_csv = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[-7334718598697473719],-7334718598697473719,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
@@ -224,7 +224,7 @@ class ReportsTest(TestCase):
                 reports_dict.get("details_json").get("report_platform_id"),
                 self.server_id,
             )
-        )  # noqa
+        )
         renderer = ReportsGzipRenderer()
         mock_req = MockRequest(mask_rep=True)
         mock_renderer_context = {"request": mock_req}

@@ -187,7 +187,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
                             }
                         }
                     }
-                },  # noqa
+                },
                 "vars": {
                     "ansible_port": 22,
                     "ansible_user": "username",

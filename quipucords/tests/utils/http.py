@@ -1,5 +1,5 @@
 """Http utils for quipucords testing."""
-# pylint: disable=unused-import
+
 from functools import cached_property
 from urllib.parse import urljoin
 
