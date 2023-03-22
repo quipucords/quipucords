@@ -168,9 +168,7 @@ else:
     QPC_DBMS_DATABASE = env.str("QPC_DBMS_DATABASE", "qpc")
     QPC_DBMS_USER = env.str("QPC_DBMS_USER", "qpc")
     QPC_DBMS_PASSWORD = env.str("QPC_DBMS_PASSWORD", "qpc")
-    # In the following env variable, :: means localhost but allows IPv4
-    #  and IPv6 connections
-    QPC_DBMS_HOST = env.str("QPC_DBMS_HOST", "localhost" or "::")
+    QPC_DBMS_HOST = env.str("QPC_DBMS_HOST", "localhost")
     QPC_DBMS_PORT = env.int("QPC_DBMS_PORT", 54321)
     DATABASES = {
         "default": {
