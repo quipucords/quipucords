@@ -4,7 +4,6 @@ import unittest
 
 from django.test import TestCase
 
-# pylint: disable=wrong-import-order
 from api.models import ServerInformation
 from fingerprinter.jboss_eap import (
     detect_jboss_eap,

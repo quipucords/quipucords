@@ -2,7 +2,6 @@
 
 from django.test import TestCase
 
-# pylint: disable=wrong-import-order
 from api.models import ServerInformation
 from fingerprinter.jboss_brms import detect_jboss_brms
 

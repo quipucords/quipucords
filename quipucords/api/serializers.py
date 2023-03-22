@@ -1,7 +1,7 @@
 """API serializers for import organization."""
 
 # flake8: noqa
-# pylint: disable=unused-import
+
 from api.connresult.serializer import (
     JobConnectionResultSerializer,
     SystemConnectionResultSerializer,

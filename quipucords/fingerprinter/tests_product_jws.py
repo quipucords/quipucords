@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-# pylint: disable=wrong-import-order
 from api.models import ServerInformation
 from fingerprinter.jboss_web_server import detect_jboss_ws, get_version
 
