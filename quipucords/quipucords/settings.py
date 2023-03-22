@@ -17,6 +17,7 @@ import string
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 from .featureflag import FeatureFlag
 
@@ -149,6 +150,9 @@ REST_FRAMEWORK = {
 
 # Database Management System could be 'sqlite' or 'postgresql'
 QPC_DBMS = env.str("QPC_DBMS", "postgres").lower()
+allowed_db_engines = ["sqlite", "postgres"]
+if QPC_DBMS not in allowed_db_engines:
+    raise ImproperlyConfigured(f"QPC_DBMS must be one of {allowed_db_engines}")
 
 if QPC_DBMS == "sqlite":
     # If user enters an invalid QPC_DBMS, use default postgresql
@@ -162,8 +166,7 @@ if QPC_DBMS == "sqlite":
             "TEST": {"NAME": ":memory:"},
         }
     }
-else:
-    QPC_DBMS = "postgres"
+elif QPC_DBMS == "postgres":
     # The following variables are only relevant when using a postgres database:
     QPC_DBMS_DATABASE = env.str("QPC_DBMS_DATABASE", "qpc")
     QPC_DBMS_USER = env.str("QPC_DBMS_USER", "qpc")
