@@ -66,10 +66,11 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     Serializer for HBI system profile.
 
     System profile facts are a set of curated facts with a well defined schema.
-
-    - https://github.com/RedHatInsights/inventory-schemas/blob/master/schemas/system_profile/v1.yaml  # noqa: E501
-    - https://consoledot.pages.redhat.com/docs/dev/services/inventory.html#_system_profile  # noqa: E501
     """
+
+    # about system profile schema:
+    # - https://github.com/RedHatInsights/inventory-schemas/blob/master/schemas/system_profile/v1.yaml  # noqa: E501
+    # - https://consoledot.pages.redhat.com/docs/dev/services/inventory.html#_system_profile  # noqa: E501
 
     number_of_cpus = fields.IntegerField(**default_kwargs)
     number_of_sockets = fields.IntegerField(**default_kwargs)

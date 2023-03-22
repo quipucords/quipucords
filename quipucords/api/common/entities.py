@@ -95,14 +95,14 @@ class HostEntity:
         Map QPC infrastructure types to rh_subscription types.
 
         Inventory is pretty permissive on the content for this field, but
-        rh_subscriptions expects certain values:
-        https://github.com/RedHatInsights/rhsm-subscriptions/blob/adbac748687724a5603d3e2dac747acb6ba13b29/src/main/java/org/candlepin/subscriptions/tally/MetricUsageCollector.java#L319-L324  # noqa: E501
+        rh_subscriptions expects certain values ([1]).
 
         Having this mapped appropriately is important for internal swatch sockets count
-        logic.
+        logic ([2]).
 
-        https://github.com/RedHatInsights/rhsm-subscriptions/blob/410b8a2f461588255d86a15b8fad0475e334e417/src/main/java/org/candlepin/subscriptions/tally/facts/FactNormalizer.java#L172-L180
-        """
+        [1]: https://github.com/RedHatInsights/rhsm-subscriptions/blob/adbac748687724a5603d3e2dac747acb6ba13b29/src/main/java/org/candlepin/subscriptions/tally/MetricUsageCollector.java#L319-L324
+        [2]: https://github.com/RedHatInsights/rhsm-subscriptions/blob/410b8a2f461588255d86a15b8fad0475e334e417/src/main/java/org/candlepin/subscriptions/tally/facts/FactNormalizer.java#L172-L180
+        """  # noqa: E501
         qpc2insights = {
             SystemFingerprint.BARE_METAL: "physical",
             SystemFingerprint.VIRTUALIZED: "virtual",
@@ -167,12 +167,11 @@ class HostEntity:
 
     @property
     def provider_type(self):
-        """Retrieve provider_type.
-
-        provider_type (cloud_provider here) don't necessarily match what HBI expects
-        - https://github.com/quipucords/quipucords/blob/8c89dfa6f3a4577d32b9c4314149d1ffcff38e79/quipucords/scanner/network/processing/cloud_provider.py#L14-L17  # noqa: E501
-        - https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L611-L619  # noqa: E501
-        """
+        """Retrieve provider_type."""
+        # provider_type (cloud_provider here) don't necessarily match what HBI expects.
+        # References:
+        # - https://github.com/quipucords/quipucords/blob/8c89dfa6f3a4577d32b9c4314149d1ffcff38e79/quipucords/scanner/network/processing/cloud_provider.py#L14-L17  # noqa: E501
+        # - https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L611-L619  # noqa: E501
         valid_providers = {"alibaba", "aws", "azure", "gcp", "ibm"}
         value = self._fingerprints.cloud_provider
         if value and value.lower() in valid_providers:
@@ -220,9 +219,8 @@ class HostEntity:
 
         This is a LEGACY fact on HBI and should be replaced with
         installed_products in the near future.
-
-        installed_products ref: https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L374-L377  # noqa: E501
         """
+        # installed_products ref: https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L374-L377  # noqa: E501
 
         def is_not_none(obj):
             return obj is not None

@@ -112,8 +112,8 @@ class OCPWorkload(OCPBaseEntity):
     The idea behind workload is to act as anything that manage and run pods such as
     Deployments, StatefulSets, Jobs, custom resources that manage pods, etc...
 
-    More info here: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.26/#-strong-workloads-apis-strong-  # noqa: 501
-    """
+    More info here: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.26/#-strong-workloads-apis-strong-
+    """  # noqa: 501
 
     name: str
     namespace: str = None
