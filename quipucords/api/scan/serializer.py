@@ -13,7 +13,7 @@ from rest_framework.serializers import (
     ValidationError,
 )
 
-from api import messages  # noqa
+from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name, check_path_validity
 from api.models import (

@@ -5,7 +5,7 @@ These models are used in the REST definitions
 from django.db import models
 from django.utils.translation import gettext as _
 
-from api import messages  # noqa
+from api import messages
 from api.source.model import Source
 
 

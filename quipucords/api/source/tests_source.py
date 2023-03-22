@@ -204,7 +204,7 @@ class SourceTest(TestCase):
                 "source_systems_failed": 1,
                 "source_systems_unreachable": 0,
             },
-        }  # noqa
+        }
         self.assertEqual(out, expected)
 
     #################################################

@@ -16,7 +16,7 @@ if __name__ == "__main__":
         # issue is really that Django is missing to avoid masking other
         # exceptions on Python 2.
         try:
-            import django  # noqa: F401 pylint: disable=unused-import
+            import django  # noqa: F401
         except ImportError as exception:
             raise ImportError(
                 "Couldn't import Django. Are you sure it's "  # noqa: Q000
