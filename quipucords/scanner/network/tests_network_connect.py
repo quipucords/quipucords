@@ -9,7 +9,8 @@ from django.test import TestCase
 
 from api.connresult.model import SystemConnectionResult
 from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source, SourceOptions
-from api.serializers import CredentialSerializer, SourceSerializer
+from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
+from api.serializers import SourceSerializer
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException

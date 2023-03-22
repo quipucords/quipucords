@@ -19,7 +19,8 @@ from api.models import (
     SourceOptions,
     SystemConnectionResult,
 )
-from api.serializers import CredentialSerializer, SourceSerializer
+from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
+from api.serializers import SourceSerializer
 from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.inspect import construct_inventory

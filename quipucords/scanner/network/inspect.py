@@ -7,7 +7,6 @@ from ansible_runner.exceptions import AnsibleRunnerException
 from django.conf import settings
 
 import log_messages
-from api.credential.serializer import CredentialSerializer
 from api.models import (
     ScanJob,
     ScanOptions,
@@ -15,6 +14,7 @@ from api.models import (
     SystemConnectionResult,
     SystemInspectionResult,
 )
+from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
 from api.vault import write_to_yaml
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException

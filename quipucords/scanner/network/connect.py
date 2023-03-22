@@ -16,7 +16,8 @@ from api.models import (
     ScanTask,
     SystemConnectionResult,
 )
-from api.serializers import CredentialSerializer, SourceSerializer
+from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
+from api.serializers import SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
