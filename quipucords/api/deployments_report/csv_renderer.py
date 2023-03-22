@@ -8,7 +8,6 @@ from api.deployments_report.util import create_deployments_csv
 class DeploymentCSVRenderer(renderers.BaseRenderer):
     """Class to render report as CSV."""
 
-    # pylint: disable=too-few-public-methods
     media_type = "text/csv"
     format = "csv"
 

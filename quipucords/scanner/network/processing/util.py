@@ -20,7 +20,6 @@ def get_line(lines, line_index=0):
     return process.NO_DATA
 
 
-# pylint: disable=too-few-public-methods
 class InitLineFinder(process.Processor):
     """Process the output of an init system.
 

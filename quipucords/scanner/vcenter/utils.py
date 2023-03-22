@@ -84,7 +84,7 @@ def retrieve_properties(content, filter_spec_set, max_objects=None):
     return objects
 
 
-class HostRawFacts:  # pylint: disable=too-few-public-methods
+class HostRawFacts:
     """Constants of vcenter hosts raw facts."""
 
     CLUSTER = "host.cluster"
@@ -96,7 +96,7 @@ class HostRawFacts:  # pylint: disable=too-few-public-methods
     UUID = "host.uuid"
 
 
-class VcenterRawFacts:  # pylint: disable=too-few-public-methods
+class VcenterRawFacts:
     """Constants of vcenter raw facts."""
 
     CLUSTER = "vm.cluster"
@@ -119,7 +119,7 @@ class VcenterRawFacts:  # pylint: disable=too-few-public-methods
     UUID = "vm.uuid"
 
 
-class ClusterRawFacts:  # pylint: disable=too-few-public-methods
+class ClusterRawFacts:
     """Constants of vcenter cluster raw facts."""
 
     DATACENTER = "cluster.datacenter"

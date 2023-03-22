@@ -7,8 +7,6 @@ from scanner.network.processing import process
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=too-few-public-methods
-
 
 class ProcessSystemPurpose(process.Processor):
     """Process the system_purpose_json fact."""

@@ -7,8 +7,6 @@ from scanner.network.processing import util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=too-few-public-methods
-
 
 class ProcessVersionTxt(util.StdoutSearchProcessor):
     """Process the output of 'cat .../version.txt'."""

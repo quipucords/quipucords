@@ -73,7 +73,6 @@ class TestIsAnsibleTaskResult(TestCase):
         )
 
 
-# pylint: disable=too-few-public-methods
 class MyProcessor(process.Processor):
     """Basic test processor."""
 
@@ -85,7 +84,6 @@ class MyProcessor(process.Processor):
         return 1
 
 
-# pylint: disable=too-few-public-methods
 class MyDependentProcessor(process.Processor):
     """Processor that depends on another key."""
 
@@ -98,7 +96,6 @@ class MyDependentProcessor(process.Processor):
         return 2
 
 
-# pylint: disable=too-few-public-methods
 class MyErroringProcessor(process.Processor):
     """Processor that has an internal error."""
 

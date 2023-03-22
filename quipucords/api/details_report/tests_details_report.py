@@ -19,7 +19,6 @@ from constants import DataSources
 class MockRequest:
     """Mock a request object for the renderer."""
 
-    # pylint: disable=too-few-public-methods
     def __init__(self, mask_rep=False):
         """Initialize a fake request object."""
         self.query_params = {"mask": mask_rep}

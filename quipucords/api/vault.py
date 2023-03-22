@@ -63,7 +63,6 @@ def write_to_yaml(data):
     return vault.dump_as_yaml_to_tempfile(data)
 
 
-# pylint: disable=too-few-public-methods
 class Vault:
     """Read and write data using the Ansible vault."""
 

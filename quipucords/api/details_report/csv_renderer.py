@@ -8,7 +8,6 @@ from api.details_report.util import create_details_csv
 class DetailsCSVRenderer(renderers.BaseRenderer):
     """Class to render report as CSV."""
 
-    # pylint: disable=too-few-public-methods
     media_type = "text/csv"
     format = "csv"
 
