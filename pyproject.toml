@@ -64,6 +64,16 @@ ipython = "^8.10.0"
 
 [tool.flakeheaven]
 base = "https://raw.githubusercontent.com/quipucords/linting/main/base-flakeheaven.toml"
+exclude = [
+    ".coverage*",
+    ".git",
+    ".idea",
+    ".pytest_cache",
+    "__pycache__",
+    "quipucords/client",
+    "quipucords/staticfiles",
+    "quipucords/templates",
+]
 
 [tool.flakeheaven.exceptions."quipucords/api/migrations/*.py"]
 "flake8-*" = [
