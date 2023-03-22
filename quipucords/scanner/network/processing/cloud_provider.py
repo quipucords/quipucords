@@ -7,8 +7,6 @@ GOOGLE = "google"
 AZURE = "azure"
 ALIBABA = "alibaba"
 
-# pylint: disable=too-few-public-methods
-
 
 class ProcessDmiChassisAssetTag(process.Processor):
     """Process the dmi chassis asset tag."""

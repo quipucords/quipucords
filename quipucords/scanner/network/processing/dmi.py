@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ProcessDmiSystemUuid(process.Processor):
     """Process the dmi system uuid."""
 
-    # pylint: disable=too-few-public-methods
     KEY = "dmi_system_uuid"
 
     DEPS = ["internal_dmi_system_uuid"]

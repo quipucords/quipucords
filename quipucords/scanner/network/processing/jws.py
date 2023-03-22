@@ -3,7 +3,6 @@
 from scanner.network.processing import process
 
 
-# pylint: disable=too-few-public-methods
 class ProcessJWSInstalledWithRpm(process.Processor):
     """Process the results of 'yum grouplist jws3 jws3plus jws5...'."""
 
@@ -19,7 +18,6 @@ class ProcessJWSInstalledWithRpm(process.Processor):
         return False
 
 
-# pylint: disable=too-few-public-methods
 class ProcessHasJBossEULA(process.Processor):
     """Process result of $(ls $JWS_HOME/JBossEULA.txt)."""
 
@@ -32,7 +30,6 @@ class ProcessHasJBossEULA(process.Processor):
         return stdout == "true"
 
 
-# pylint: disable=too-few-public-methods
 class ProcessTomcatPartOfRedhatProduct(process.Processor):
     """Process output of search for redhat string in tomcat files."""
 
@@ -47,7 +44,6 @@ class ProcessTomcatPartOfRedhatProduct(process.Processor):
         return False
 
 
-# pylint: disable=too-few-public-methods
 class ProcessJWSHasCert(process.Processor):
     """Process output of 'ls /etc/pki/product/185.pem 2>/dev/null'."""
 

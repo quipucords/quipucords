@@ -3,7 +3,6 @@
 from scanner.network.processing import process
 
 
-# pylint: disable=too-few-public-methods
 class ProcessSystemUserCount(process.Processor):
     """Process the system_user_count fact."""
 

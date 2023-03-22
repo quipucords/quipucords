@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class ReportJsonGzipRenderer(renderers.BaseRenderer):
     """Class to render reports as tar.gz containing a json file."""
 
-    # pylint: disable=too-few-public-methods
     media_type = "application/json+gzip"
     format = "tar.gz"
     render_style = "binary"

@@ -3,8 +3,6 @@
 from api.common.util import convert_to_int, is_int
 from scanner.network.processing import process
 
-# pylint: disable=too-few-public-methods
-
 VIRT_TYPE_VMWARE = "vmware"
 VIRT_TYPE_VIRTUALBOX = "virtualbox"
 VIRT_TYPE_VIRTUALPC = "virtualpc"

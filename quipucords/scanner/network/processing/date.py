@@ -7,8 +7,6 @@ from scanner.network.processing.util import get_line
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=too-few-public-methods
-
 # #### Processors ####
 
 

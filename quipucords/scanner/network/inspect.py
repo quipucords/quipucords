@@ -37,7 +37,6 @@ class InspectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    # pylint: disable=too-few-public-methods
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 

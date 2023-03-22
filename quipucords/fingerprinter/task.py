@@ -98,7 +98,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
     """
 
     # pylint: disable=too-many-locals
-    # pylint: disable=too-many-arguments,too-few-public-methods
+    # pylint: disable=too-many-arguments
 
     @staticmethod
     def format_certs(redhat_certs):

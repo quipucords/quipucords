@@ -6,8 +6,6 @@ from scanner.network.processing import process, util
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-# pylint: disable=too-few-public-methods
-
 # #### Processors ####
 
 FIND_WARNING = (
