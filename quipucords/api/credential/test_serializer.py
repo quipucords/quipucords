@@ -422,9 +422,6 @@ class TestNetworkCredential:
         assert not serializer.is_valid()
         assert serializer.errors == {"non_field_errors": [messages.HC_PWD_OR_KEYFILE]}
 
-    @pytest.mark.xfail(
-        reason="This behavior is not implemented yet - clients are forced to do it."
-    )
     def test_replace_password(self, credential_with_ssh_key):
         """Test replacing password with ssh_keyfile."""
         serializer = CredentialSerializer(
@@ -432,6 +429,7 @@ class TestNetworkCredential:
                 "password": "super-duper-secret",
             },
             instance=credential_with_ssh_key,
+            partial=True,
         )
         assert serializer.is_valid(), serializer.errors
         serializer.save()
@@ -439,11 +437,10 @@ class TestNetworkCredential:
             decrypt_data_as_unicode(credential_with_ssh_key.password)
             == "super-duper-secret"
         )
-        assert credential_with_ssh_key.ssh_keyfile is None
+        assert (
+            credential_with_ssh_key.ssh_keyfile is None
+        ), "the same credential can't have both ssh_keyfile and password"
 
-    @pytest.mark.xfail(
-        reason="This behavior is not implemented yet - clients are forced to do it."
-    )
     def test_replace_ssh_keyfile(self, credential_with_password, fake_ssh_key):
         """Test replacing ssh_keyfile with password."""
         serializer = CredentialSerializer(
@@ -451,10 +448,13 @@ class TestNetworkCredential:
                 "ssh_keyfile": fake_ssh_key,
             },
             instance=credential_with_password,
+            partial=True,
         )
         assert serializer.is_valid(), serializer.errors
         serializer.save()
-        assert credential_with_password.password is None
+        assert (
+            credential_with_password.password is None
+        ), "the same credential can't have both ssh_keyfile and password"
         assert credential_with_password.ssh_keyfile == fake_ssh_key
 
     @pytest.fixture(scope="class")
@@ -479,29 +479,25 @@ class TestNetworkCredential:
         assert serializer.errors == {"ssh_passphrase": [messages.HC_NO_KEY_W_PASS]}
 
     @pytest.mark.parametrize(
-        "extra_serializer_kwargs",
+        "kwargs",
         (
             pytest.param({}, id="full-update"),
-            pytest.param(
-                {"partial": True},
-                marks=pytest.mark.xfail(reason="BUG DETECTED!"),
-                id="partial-update",
-            ),
+            pytest.param({"partial": True}, id="partial-update"),
         ),
     )
     def test_update_ssh_passphrase_without_ssh_keyfile(
         self,
         payload_with_passphrase_without_ssh_key,
-        extra_serializer_kwargs,
+        kwargs,
         credential_with_password,
     ):
         """Test updating a credential with ssh_passphrase and w/o ssh key."""
         serializer = CredentialSerializer(
             data=payload_with_passphrase_without_ssh_key,
             instance=credential_with_password,
-            **extra_serializer_kwargs,
+            **kwargs,
         )
-        assert not serializer.is_valid()
+        assert not serializer.is_valid(), "ssh_passphrase require a ssh_key!"
         assert serializer.errors == {"ssh_passphrase": [messages.HC_NO_KEY_W_PASS]}
 
     def test_only_partial_update_ssh_passphrase_with_previously_saved_ssh_key(
