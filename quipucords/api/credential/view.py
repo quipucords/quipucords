@@ -21,6 +21,7 @@ from api.filters import ListFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
+from constants import PASSWORD_MASK
 
 IDENTIFIER_KEY = "id"
 NAME_KEY = "name"
@@ -29,7 +30,6 @@ PASSWORD_KEY = "password"
 AUTH_TOKEN_KEY = "auth_token"
 BECOME_PASSWORD_KEY = "become_password"
 SSH_PASSPHRASE_KEY = "ssh_passphrase"
-PASSWORD_MASK = "********"
 
 
 def mask_credential(cred):
