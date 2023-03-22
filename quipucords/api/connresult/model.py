@@ -5,7 +5,6 @@ These models are used in the REST definitions
 from django.db import models
 from django.utils.translation import gettext as _
 
-# pylint: disable=wrong-import-order
 from api import messages
 from api.credential.model import Credential
 from api.source.model import Source

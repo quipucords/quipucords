@@ -1,7 +1,7 @@
 """API views for import organization"""
 
 # flake8: noqa
-# pylint: disable=unused-import
+
 from api.credential.view import CredentialViewSet
 from api.deployments_report.view import deployments
 from api.details_report.view import DetailsReportsViewSet, details

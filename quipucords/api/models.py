@@ -1,6 +1,7 @@
 """API models for import organization."""
+
 # flake8: noqa
-# pylint: disable=unused-import
+
 from api.connresult.model import (
     JobConnectionResult,
     SystemConnectionResult,

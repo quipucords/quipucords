@@ -3,7 +3,6 @@
 
 from rest_framework.serializers import CharField, ChoiceField
 
-# pylint: disable=wrong-import-order
 from api.common.serializer import NotEmptySerializer
 from api.models import JobConnectionResult, SystemConnectionResult, TaskConnectionResult
 

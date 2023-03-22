@@ -3,7 +3,6 @@
 
 from django.test import TestCase
 
-# pylint: disable=wrong-import-order
 from api.models import ServerInformation
 from fingerprinter.jboss_fuse import detect_jboss_fuse, get_version
 
