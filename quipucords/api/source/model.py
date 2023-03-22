@@ -57,7 +57,7 @@ class Source(models.Model):
     )
     port = models.IntegerField(null=True)
     options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)
-    credentials = models.ManyToManyField(Credential)
+    credentials = models.ManyToManyField(Credential, related_name="sources")
     hosts = models.JSONField(unique=False, null=False, default=list)
     exclude_hosts = models.JSONField(unique=False, null=True)
 

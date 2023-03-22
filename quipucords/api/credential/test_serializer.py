@@ -15,7 +15,7 @@ from api.credential.serializer import (
 )
 from api.models import Credential
 from api.vault import decrypt_data_as_unicode
-from constants import DataSources
+from constants import PASSWORD_MASK, DataSources
 from tests.factories import CredentialFactory
 
 
@@ -567,6 +567,12 @@ class TestBaseCredentialSerializer:
     @pytest.mark.django_db
     def test_with_many(self):
         """Test to serialize instances and many=True."""
+
+        def _value_formatter(value):
+            if isinstance(value, str) and Credential.is_encrypted(value):
+                return PASSWORD_MASK
+            return value
+
         credentials = CredentialFactory.create_batch(10)
         serializer = CredentialSerializer(instance=credentials, many=True)
         assert isinstance(serializer, ListSerializer)
@@ -574,6 +580,10 @@ class TestBaseCredentialSerializer:
         expected_data = []
         # prep a list of credentials dict as the serializer would return
         for cred in credentials:
-            cred_dict = {k: v for k, v in model_to_dict(cred).items() if v is not None}
+            cred_dict = {
+                k: _value_formatter(v)
+                for k, v in model_to_dict(cred).items()
+                if v is not None
+            }
             expected_data.append(cred_dict)
         assert serializer.data == expected_data

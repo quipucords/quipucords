@@ -8,8 +8,8 @@ from rest_framework.serializers import ValidationError, empty
 
 from api import messages
 from api.common.serializer import NotEmptySerializer
-from api.models import Credential
-from constants import DataSources
+from api.models import Credential, Source
+from constants import PASSWORD_MASK, DataSources
 
 
 def expand_filepath(filepath):
@@ -25,8 +25,20 @@ def expand_filepath(filepath):
 ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
 
 
+class RelatedSourceSerializer(NotEmptySerializer):
+    """Serializer for Source objects related to Credential."""
+
+    class Meta:
+        """Metadata for the serializer."""
+
+        model = Source
+        fields = ["id", "name"]
+
+
 class CredentialSerializer(NotEmptySerializer):
     """Base Serializer for the Credential model."""
+
+    sources = RelatedSourceSerializer(many=True, read_only=True)
 
     class Meta:
         """Metadata for the serializer."""
@@ -109,6 +121,14 @@ class CredentialSerializer(NotEmptySerializer):
             raise ValidationError(errors)
         return attrs
 
+    def to_representation(self, instance):
+        """Overload DRF representation method to mask encrypted fields."""
+        _data = super().to_representation(instance)
+        for field in Credential.ENCRYPTED_FIELDS:
+            if field in _data:
+                _data[field] = PASSWORD_MASK
+        return _data
+
 
 class AuthTokenSerializer(CredentialSerializer):
     """Serializer for credentials that require only auth_token."""
@@ -117,7 +137,7 @@ class AuthTokenSerializer(CredentialSerializer):
         """Serializer configuration."""
 
         model = Credential
-        fields = ["id", "name", "cred_type", "auth_token"]
+        fields = ["id", "name", "cred_type", "auth_token", "sources"]
         extra_kwargs = {
             "auth_token": {"required": True, **ENCRYPTED_FIELD_KWARGS},
         }
@@ -136,6 +156,7 @@ class UsernamePasswordSerializer(CredentialSerializer):
             "name",
             "password",
             "username",
+            "sources",
         ]
         extra_kwargs = {
             "password": {"required": True, **ENCRYPTED_FIELD_KWARGS},
@@ -161,6 +182,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             "ssh_keyfile",
             "ssh_passphrase",
             "username",
+            "sources",
         ]
         extra_kwargs = {
             "become_method": {"default": Credential.BECOME_SUDO},
