@@ -1,7 +1,9 @@
 """Test the API application."""
 
 import json
+from unittest import mock
 
+import pytest
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
@@ -10,7 +12,8 @@ from rest_framework import status
 from api import messages
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
-from constants import DataSources
+from constants import PASSWORD_MASK, DataSources
+from tests.factories import CredentialFactory, SourceFactory
 
 
 class CredentialTest(TestCase):
@@ -689,3 +692,115 @@ class CredentialTest(TestCase):
         response = self.client.post(url, json.dumps(data), "application/json")
         assert response.status_code, status.HTTP_400_BAD_REQUEST
         assert response.data["become_password"] and response.data["username"]
+
+
+# tuple of triples (input, expected output, pytest-param-id)
+INPUT_OUTPUT_ID = (
+    (
+        {
+            "name": "network",
+            "cred_type": DataSources.NETWORK.value,
+            "username": "some-user",
+            "password": "some-password",
+            "become_password": "become-pass",
+            # this is invalid input, but OK. we're just testing serialization
+            "ssh_passphrase": "non-sense",
+        },
+        {
+            "id": mock.ANY,
+            "name": "network",
+            "cred_type": DataSources.NETWORK.value,
+            "username": "some-user",
+            "password": PASSWORD_MASK,
+            "become_password": PASSWORD_MASK,
+            "ssh_passphrase": PASSWORD_MASK,
+        },
+        "user-pass-become-pass",
+    ),
+    (
+        {
+            "name": "satellite",
+            "cred_type": DataSources.SATELLITE.value,
+            "username": "some-user",
+            "password": "some-password",
+        },
+        {
+            "id": mock.ANY,
+            "name": "satellite",
+            "cred_type": DataSources.SATELLITE.value,
+            "username": "some-user",
+            "password": PASSWORD_MASK,
+        },
+        "satellite-user-pass",
+    ),
+    (
+        {
+            "name": "vcenter",
+            "cred_type": DataSources.VCENTER.value,
+            "username": "some-user",
+            "password": "some-password",
+        },
+        {
+            "id": mock.ANY,
+            "name": "vcenter",
+            "cred_type": DataSources.VCENTER.value,
+            "username": "some-user",
+            "password": PASSWORD_MASK,
+        },
+        "vcenter-user-pass",
+    ),
+    (
+        {
+            "name": "ocp",
+            "cred_type": DataSources.OPENSHIFT.value,
+            "auth_token": "token",
+        },
+        {
+            "id": mock.ANY,
+            "name": "ocp",
+            "cred_type": DataSources.OPENSHIFT.value,
+            "auth_token": PASSWORD_MASK,
+        },
+        "ocp-auth-token",
+    ),
+)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "input_data, expected_output",
+    (pytest.param(*params, id=id) for *params, id in INPUT_OUTPUT_ID),
+)
+def test_masked_data_serialization_retrieve(input_data, expected_output, django_client):
+    """Test if data is masked as expected for get method."""
+    credential = CredentialFactory(**input_data)
+    response = django_client.get(f"/api/v1/credentials/{credential.id}/")
+    assert response.ok
+    assert response.json() == expected_output
+
+
+@pytest.mark.django_db
+def test_masked_data_serialization_list(django_client):
+    """Test if data is masked as expected for list method."""
+    results = []
+    for input_data, output, _ in INPUT_OUTPUT_ID:
+        CredentialFactory(**input_data)
+        results.append(output)
+    # sorting results to match default credentials api sorting
+    results = sorted(results, key=lambda x: x["name"])
+    response = django_client.get("/api/v1/credentials/")
+    assert response.ok
+    expected_output = {"count": 4, "next": None, "previous": None, "results": results}
+    assert response.json() == expected_output
+
+
+@pytest.mark.django_db
+def test_related_source_detail(django_client):
+    """Test if related sources are included in the output."""
+    credential = CredentialFactory()
+    source = SourceFactory(credentials=[credential])
+    response = django_client.get(f"/api/v1/credentials/{credential.id}/")
+    assert response.ok
+    resp_data = response.json()
+    assert "sources" in resp_data
+    assert resp_data["sources"] == [{"id": source.id, "name": source.name}]

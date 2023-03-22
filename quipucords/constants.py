@@ -10,3 +10,6 @@ class DataSources(TextChoices):
     VCENTER = "vcenter", "vcenter"
     SATELLITE = "satellite", "satellite"
     OPENSHIFT = "openshift", "openshift"
+
+
+PASSWORD_MASK = "********"
