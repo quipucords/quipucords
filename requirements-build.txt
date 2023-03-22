@@ -18,7 +18,7 @@ packaging==23.0
     #   setuptools-scm
 pbr==5.11.1
     # via -r requirements-build.in
-poetry-core==1.5.1
+poetry-core==1.5.2
     # via -r requirements-build.in
 pycparser==2.21
     # via cffi
@@ -35,11 +35,11 @@ typing-extensions==4.5.0
     #   -r requirements-build.in
     #   setuptools-rust
     #   setuptools-scm
-wheel==0.38.4
+wheel==0.40.0
     # via -r requirements-build.in
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==67.3.3 ; python_version != "3.3"
+setuptools==67.6.0 ; python_version != "3.3"
     # via
     #   -r requirements-build.in
     #   setuptools-rust
