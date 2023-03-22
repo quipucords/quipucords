@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 from django.forms.models import model_to_dict
-from rest_framework.serializers import ListSerializer, ValidationError
+from rest_framework.serializers import ListSerializer
 
 from api import messages
 from api.credential.serializer import (
@@ -39,6 +39,7 @@ def ocp_credential():
     return cred
 
 
+@pytest.mark.django_db
 def test_unknown_cred_type():
     """Test if serializer is invalid when passing unknown cred type."""
     data = {
@@ -51,6 +52,7 @@ def test_unknown_cred_type():
     assert serializer.errors["cred_type"]
 
 
+@pytest.mark.django_db
 def test_openshift_cred_correct_fields():
     """Test if serializer is valid when passing mandatory fields."""
     data = {
@@ -63,6 +65,7 @@ def test_openshift_cred_correct_fields():
     assert serializer.validated_data == data
 
 
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "input_data,improper_fields",
     (
@@ -109,6 +112,7 @@ def test_openshift_cred_unallowed_fields(input_data, improper_fields):
     assert improper_fields == set(serializer.errors.keys())
 
 
+@pytest.mark.django_db
 def test_openshift_cred_empty_auth_token():
     """Test if serializer is invalid when auth token is empty."""
     data = {
@@ -121,6 +125,7 @@ def test_openshift_cred_empty_auth_token():
     assert serializer.errors["auth_token"]
 
 
+@pytest.mark.django_db
 def test_openshift_cred_absent_auth_token():
     """Test if serializer is invalid when auth token is absent."""
     data = {
@@ -192,12 +197,8 @@ def test_create_cred_with_non_unique_name():
             "auth_token": "other token",
         }
     )
-    assert serializer.is_valid(), serializer.errors
-    with pytest.raises(ValidationError) as exc_info:
-        serializer.save()
-    assert exc_info.value.args[0] == {
-        "name": [messages.HC_NAME_ALREADY_EXISTS % "non-unique"]
-    }
+    assert not serializer.is_valid()
+    assert serializer.errors == {"name": ["credential with this name already exists."]}
 
 
 @pytest.mark.django_db
@@ -362,6 +363,7 @@ def test_always_required_fields():
     assert {"name", "cred_type"}.issubset(serializer.errors)
 
 
+@pytest.mark.django_db
 @pytest.mark.parametrize("data_source", (DataSources.VCENTER, DataSources.SATELLITE))
 @pytest.mark.parametrize("extra_fields", ({"username": "user"}, {"password": "pass"}))
 def test_auth_credentials(data_source, extra_fields):
@@ -372,6 +374,7 @@ def test_auth_credentials(data_source, extra_fields):
     assert not serializer.is_valid()
 
 
+@pytest.mark.django_db
 class TestNetworkCredential:
     """Group tests for network credentials."""
 
@@ -419,7 +422,6 @@ class TestNetworkCredential:
         assert not serializer.is_valid()
         assert serializer.errors == {"non_field_errors": [messages.HC_PWD_OR_KEYFILE]}
 
-    @pytest.mark.django_db
     @pytest.mark.xfail(
         reason="This behavior is not implemented yet - clients are forced to do it."
     )
@@ -439,7 +441,6 @@ class TestNetworkCredential:
         )
         assert credential_with_ssh_key.ssh_keyfile is None
 
-    @pytest.mark.django_db
     @pytest.mark.xfail(
         reason="This behavior is not implemented yet - clients are forced to do it."
     )
@@ -477,7 +478,6 @@ class TestNetworkCredential:
         assert not serializer.is_valid()
         assert serializer.errors == {"ssh_passphrase": [messages.HC_NO_KEY_W_PASS]}
 
-    @pytest.mark.django_db
     @pytest.mark.parametrize(
         "extra_serializer_kwargs",
         (
@@ -504,7 +504,6 @@ class TestNetworkCredential:
         assert not serializer.is_valid()
         assert serializer.errors == {"ssh_passphrase": [messages.HC_NO_KEY_W_PASS]}
 
-    @pytest.mark.django_db
     def test_only_partial_update_ssh_passphrase_with_previously_saved_ssh_key(
         self,
         payload_with_passphrase_without_ssh_key: dict,

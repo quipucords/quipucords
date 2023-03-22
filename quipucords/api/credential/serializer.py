@@ -4,11 +4,10 @@ import os
 from collections import defaultdict
 
 from django.utils.translation import gettext as _
-from rest_framework.serializers import CharField, ValidationError, empty
+from rest_framework.serializers import ValidationError, empty
 
 from api import messages
 from api.common.serializer import NotEmptySerializer
-from api.common.util import check_for_existing_name
 from api.models import Credential
 from constants import DataSources
 
@@ -28,8 +27,6 @@ ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
 
 class CredentialSerializer(NotEmptySerializer):
     """Base Serializer for the Credential model."""
-
-    name = CharField(required=True, max_length=64)
 
     class Meta:
         """Metadata for the serializer."""
@@ -111,25 +108,6 @@ class CredentialSerializer(NotEmptySerializer):
         if errors:
             raise ValidationError(errors)
         return attrs
-
-    def create(self, validated_data):
-        """Create host credential."""
-        name = validated_data.get("name")
-        check_for_existing_name(
-            Credential.objects, name, _(messages.HC_NAME_ALREADY_EXISTS % name)
-        )
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        """Update a host credential."""
-        name = validated_data.get("name")
-        check_for_existing_name(
-            Credential.objects,
-            name,
-            _(messages.HC_NAME_ALREADY_EXISTS % name),
-            search_id=instance.id,
-        )
-        return super().update(instance, validated_data)
 
 
 class AuthTokenSerializer(CredentialSerializer):
