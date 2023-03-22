@@ -2,7 +2,6 @@
 
 These models are used in the REST definitions.
 """
-import json
 import logging
 
 from django.db import models
@@ -45,9 +44,7 @@ class ExtendedProductSearchOptions(models.Model):
 
     def get_search_directories(self):
         """Load JSON search directory."""
-        if self.search_directories is not None:
-            return json.loads(self.search_directories)
-        return []
+        return self.search_directories or []
 
 
 class DisabledOptionalProductsOptions(models.Model):
@@ -179,7 +176,7 @@ class ScanOptions(models.Model):
 
             # Add search directories if it is not None, not empty
             if extended_search.search_directories is not None:
-                search_directories = json.loads(extended_search.search_directories)
+                search_directories = extended_search.search_directories
                 if search_directories and isinstance(search_directories, list):
                     search_directories = " ".join(search_directories)
                     extra_vars[self.EXT_PRODUCT_SEARCH_DIRS] = search_directories
