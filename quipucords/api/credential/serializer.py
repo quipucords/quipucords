@@ -185,13 +185,28 @@ class NetworkCredentialSerializer(CredentialSerializer):
         password = data.get("password")
         ssh_keyfile = data.get("ssh_keyfile")
         ssh_passphrase = data.get("ssh_passphrase")
+        instance_ssh_key = getattr(self.instance, "ssh_keyfile", None)
 
         if password and ssh_keyfile:
             errors["non_field_errors"].append(_(messages.HC_NOT_BOTH))
         if not self.partial and not (password or ssh_keyfile):
             errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE))
-        if not self.partial and ssh_passphrase and not ssh_keyfile:
+        if ssh_passphrase and not (ssh_keyfile or instance_ssh_key):
             errors["ssh_passphrase"].append(_(messages.HC_NO_KEY_W_PASS))
         if errors:
             raise ValidationError(errors)
+        if self.instance:
+            self.prepare_data_for_update(data)
         return data
+
+    @classmethod
+    def prepare_data_for_update(cls, data: dict):
+        """Transform validated data prior to an update."""
+        password = data.get("password")
+        ssh_keyfile = data.get("ssh_keyfile")
+        # a credential should have either password or ssh_key
+        # (this method assumes the premise that data is properly validated)
+        if password:
+            data["ssh_keyfile"] = None
+        elif ssh_keyfile:
+            data["password"] = None
