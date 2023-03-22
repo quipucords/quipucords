@@ -1614,7 +1614,7 @@ class ScanJobTest(TestCase):
             jboss_fuse=True,
             jboss_brms=True,
             jboss_ws=True,
-            search_directories='["a", "b"]',
+            search_directories=["a", "b"],
         )
         extended.save()
         disabled = DisabledOptionalProductsOptions()
