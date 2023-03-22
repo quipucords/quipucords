@@ -232,3 +232,14 @@ class NetworkCredentialSerializer(CredentialSerializer):
             data["ssh_keyfile"] = None
         elif ssh_keyfile:
             data["password"] = None
+
+
+class ReadOnlyCredentialSerializer(NotEmptySerializer):
+    """A specialized serializer for scanner needs."""
+
+    class Meta:
+        """Metadata for the serializer."""
+
+        model = Credential
+        fields = "__all__"
+        read_only_fields = [field.name for field in Credential._meta.fields]
