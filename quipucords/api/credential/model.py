@@ -46,6 +46,13 @@ class Credential(models.Model):
     become_user = models.CharField(max_length=64, null=True)
     become_password = models.CharField(max_length=1024, null=True)
 
+    ENCRYPTED_FIELDS = [
+        "password",
+        "ssh_passphrase",
+        "become_password",
+        "auth_token",
+    ]
+
     @staticmethod
     def is_encrypted(field):
         """Check to see if the password is already encrypted."""
@@ -59,14 +66,11 @@ class Credential(models.Model):
         # passphrase is not already encrypted, which would be the case
         # in partial_updates that do not update the password
         # (as it grabs the old, encrypted one)
-        if self.password and not self.is_encrypted(self.password):
-            self.password = encrypt_data_as_unicode(self.password)
-        if self.ssh_passphrase and not self.is_encrypted(self.ssh_passphrase):
-            self.ssh_passphrase = encrypt_data_as_unicode(self.ssh_passphrase)
-        if self.become_password and not self.is_encrypted(self.become_password):
-            self.become_password = encrypt_data_as_unicode(self.become_password)
-        if self.auth_token and not self.is_encrypted(self.auth_token):
-            self.auth_token = encrypt_data_as_unicode(self.auth_token)
+        for field_name in self.ENCRYPTED_FIELDS:
+            field_value = getattr(self, field_name, None)
+            if field_value and not self.is_encrypted(field_value):
+                encrypted_value = encrypt_data_as_unicode(field_value)
+                setattr(self, field_name, encrypted_value)
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
