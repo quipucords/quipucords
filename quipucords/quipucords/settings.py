@@ -16,39 +16,21 @@ import random
 import string
 from pathlib import Path
 
+import environ
+
 from .featureflag import FeatureFlag
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
+env = environ.Env()
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).absolute().parent.parent
 
+PRODUCTION = env.bool("PRODUCTION", False)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-
-PRODUCTION = bool(os.environ.get("PRODUCTION", False))
-
-QPC_DISABLE_THREADED_SCAN_MANAGER = bool(
-    os.environ.get("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
-)
-
-
-def is_int(value):
-    """Check if a value is convertable to int.
-
-    :param value: The value to convert
-    :returns: The int or None if not convertable
-    """
-    if isinstance(value, int):
-        return True
-
-    try:
-        int(value)
-        return True
-    except ValueError:
-        return False
+QPC_DISABLE_THREADED_SCAN_MANAGER = env.bool("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
 
 
 def create_random_key():
@@ -63,75 +45,39 @@ def create_random_key():
     )
 
 
-QPC_SSH_CONNECT_TIMEOUT = os.environ.get("QPC_SSH_CONNECT_TIMEOUT", "60")
-if not is_int(QPC_SSH_CONNECT_TIMEOUT):
-    logger.error(
-        'QPC_SSH_CONNECT_TIMEOUT "%s" not an int. Setting to default of 60.',
-        QPC_SSH_CONNECT_TIMEOUT,
-    )
-    QPC_SSH_CONNECT_TIMEOUT = "60"
+QPC_SSH_CONNECT_TIMEOUT = env.int("QPC_SSH_CONNECT_TIMEOUT", 60)
+QPC_SSH_INSPECT_TIMEOUT = env.int("QPC_SSH_INSPECT_TIMEOUT", 120)
 
-QPC_SSH_INSPECT_TIMEOUT = os.environ.get("QPC_SSH_INSPECT_TIMEOUT", "120")
-if not is_int(QPC_SSH_INSPECT_TIMEOUT):
-    logger.error(
-        'QPC_SSH_INSPECT_TIMEOUT "%s" not an int. Setting to default of 120.',
-        QPC_SSH_INSPECT_TIMEOUT,
-    )
-    QPC_SSH_INSPECT_TIMEOUT = "120"
+NETWORK_INSPECT_JOB_TIMEOUT = env.int("NETWORK_INSPECT_JOB_TIMEOUT", 10800)  # 3 hours
+NETWORK_CONNECT_JOB_TIMEOUT = env.int("NETWORK_CONNECT_JOB_TIMEOUT", 600)  # 10 minutes
 
-QPC_SSH_CONNECT_TIMEOUT = int(QPC_SSH_CONNECT_TIMEOUT)
-QPC_SSH_INSPECT_TIMEOUT = int(QPC_SSH_INSPECT_TIMEOUT)
+QPC_CONNECT_TASK_TIMEOUT = env.int("QPC_CONNECT_TASK_TIMEOUT", 30)
+QPC_INSPECT_TASK_TIMEOUT = env.int("QPC_INSPECT_TASK_TIMEOUT", 600)
 
-NETWORK_INSPECT_JOB_TIMEOUT = os.getenv(
-    "NETWORK_INSPECT_JOB_TIMEOUT", "10800"
-)  # 3 hours
-if not is_int(NETWORK_INSPECT_JOB_TIMEOUT):
-    logger.error(
-        'NETWORK_INSPECT_JOB_TIMEOUT "%s" not an int. Setting to default of 10800.',
-        NETWORK_INSPECT_JOB_TIMEOUT,
-    )
-    NETWORK_INSPECT_JOB_TIMEOUT = "10800"
-
-NETWORK_CONNECT_JOB_TIMEOUT = os.getenv(
-    "NETWORK_CONNECT_JOB_TIMEOUT", "600"
-)  # 10 minutes
-if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
-    logger.error(
-        'NETWORK_CONNECT_JOB_TIMEOUT "%s" not an int. Setting to default of 600.',
-        NETWORK_CONNECT_JOB_TIMEOUT,
-    )
-    NETWORK_CONNECT_JOB_TIMEOUT = "600"
-
-QPC_CONNECT_TASK_TIMEOUT = int(os.getenv("QPC_CONNECT_TASK_TIMEOUT", "30"))
-QPC_INSPECT_TASK_TIMEOUT = int(os.getenv("QPC_INSPECT_TASK_TIMEOUT", "600"))
-
-ANSIBLE_LOG_LEVEL = os.getenv("ANSIBLE_LOG_LEVEL", "0")
-if not is_int(ANSIBLE_LOG_LEVEL):
-    logger.error(
-        'ANSIBLE_LOG_LEVEL "%s" not an int. Setting to default of 0.',
-        ANSIBLE_LOG_LEVEL,
-    )
-    ANSIBLE_LOG_LEVEL = "0"
+ANSIBLE_LOG_LEVEL = env.int("ANSIBLE_LOG_LEVEL", 0)
 
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-DJANGO_SECRET_PATH = Path(os.environ.get("DJANGO_SECRET_PATH", BASE_DIR / "secret.txt"))
+DJANGO_SECRET_PATH = Path(env.str("DJANGO_SECRET_PATH", str(BASE_DIR / "secret.txt")))
 if not DJANGO_SECRET_PATH.exists():
     SECRET_KEY = create_random_key()
     DJANGO_SECRET_PATH.write_text(SECRET_KEY, encoding="utf-8")
 else:
     SECRET_KEY = DJANGO_SECRET_PATH.read_text(encoding="utf-8").strip()
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", True)
-if isinstance(DEBUG, str):
-    DEBUG = DEBUG.lower() == "true"
+# SECURITY WARNING: Running with DEBUG=True is a *BAD IDEA*, but this is unfortunately
+# necessary because in some cases we still need to serve static files through Django.
+# Please consider this note from the official Django docs:
+# > This view will only work if DEBUG is True.
+# > That’s because this view is grossly inefficient and probably insecure. This is only
+# > intended for local development, and should never be used in production.
+# TODO FIXME Remove this dangerous default.  # pylint: disable=fixme
+DEBUG = env.bool("DJANGO_DEBUG", True)
 
-ALLOWED_HOST_LIST = os.environ.get("DJANGO_ALLOWED_HOST_LIST", "*").split(",")
-ALLOWED_HOSTS = ALLOWED_HOST_LIST
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOST_LIST", default=["*"])
 
 # Application definition
 
@@ -202,12 +148,12 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # Database Management System could be 'sqlite' or 'postgresql'
-QPC_DBMS = os.getenv("QPC_DBMS", "postgres").lower()
+QPC_DBMS = env.str("QPC_DBMS", "postgres").lower()
 
 if QPC_DBMS == "sqlite":
     # If user enters an invalid QPC_DBMS, use default postgresql
     DEV_DB = os.path.join(BASE_DIR, "db.sqlite3")
-    PROD_DB = os.path.join(os.environ.get("DJANGO_DB_PATH", BASE_DIR), "db.sqlite3")
+    PROD_DB = os.path.join(env.str("DJANGO_DB_PATH", str(BASE_DIR)), "db.sqlite3")
     DB_PATH = PROD_DB if PRODUCTION else DEV_DB
     DATABASES = {
         "default": {
@@ -219,13 +165,13 @@ if QPC_DBMS == "sqlite":
 else:
     QPC_DBMS = "postgres"
     # The following variables are only relevant when using a postgres database:
-    QPC_DBMS_DATABASE = os.getenv("QPC_DBMS_DATABASE", "qpc")
-    QPC_DBMS_USER = os.getenv("QPC_DBMS_USER", "qpc")
-    QPC_DBMS_PASSWORD = os.getenv("QPC_DBMS_PASSWORD", "qpc")
+    QPC_DBMS_DATABASE = env.str("QPC_DBMS_DATABASE", "qpc")
+    QPC_DBMS_USER = env.str("QPC_DBMS_USER", "qpc")
+    QPC_DBMS_PASSWORD = env.str("QPC_DBMS_PASSWORD", "qpc")
     # In the following env variable, :: means localhost but allows IPv4
     #  and IPv6 connections
-    QPC_DBMS_HOST = os.getenv("QPC_DBMS_HOST", "localhost" or "::")
-    QPC_DBMS_PORT = os.getenv("QPC_DBMS_PORT", "54321")
+    QPC_DBMS_HOST = env.str("QPC_DBMS_HOST", "localhost" or "::")
+    QPC_DBMS_PORT = env.int("QPC_DBMS_PORT", 54321)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -295,19 +241,17 @@ STATICFILES_DIRS = [
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-LOGGING_FORMATTER = os.getenv("DJANGO_LOG_FORMATTER", "simple")
-DJANGO_LOGGING_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
-QUIPUCORDS_LOGGING_LEVEL = os.getenv("QUIPUCORDS_LOG_LEVEL", "INFO")
-LOGGING_HANDLERS = os.getenv("DJANGO_LOG_HANDLERS", "console").split(",")
+LOGGING_FORMATTER = env.str("DJANGO_LOG_FORMATTER", "simple")
+DJANGO_LOGGING_LEVEL = env.str("DJANGO_LOG_LEVEL", "INFO")
+QUIPUCORDS_LOGGING_LEVEL = env.str("QUIPUCORDS_LOG_LEVEL", "INFO")
+LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
 VERBOSE_FORMATTING = (
     "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
 )
 
-# pylint: disable=invalid-envvar-default
-LOG_DIRECTORY = Path(os.getenv("LOG_DIRECTORY", BASE_DIR))
+LOG_DIRECTORY = Path(env.str("LOG_DIRECTORY", str(BASE_DIR)))
 DEFAULT_LOG_FILE = LOG_DIRECTORY / "app.log"
-LOGGING_FILE = Path(os.getenv("DJANGO_LOG_FILE", DEFAULT_LOG_FILE))
-# pylint: enable=invalid-envvar-default
+LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(DEFAULT_LOG_FILE)))
 
 LOGGING = {
     "version": 1,
@@ -400,22 +344,10 @@ LOGGING = {
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
 
-
-QPC_EXCLUDE_INTERNAL_FACTS = os.getenv("QPC_EXCLUDE_INTERNAL_FACTS", "True")
-if isinstance(QPC_EXCLUDE_INTERNAL_FACTS, str):
-    QPC_EXCLUDE_INTERNAL_FACTS = QPC_EXCLUDE_INTERNAL_FACTS.lower() == "true"
-
-QPC_TOKEN_EXPIRE_HOURS = os.getenv("QPC_TOKEN_EXPIRE_HOURS", "24")
-if is_int(QPC_TOKEN_EXPIRE_HOURS):
-    QPC_TOKEN_EXPIRE_HOURS = int(QPC_TOKEN_EXPIRE_HOURS)
-
-QPC_INSIGHTS_REPORT_SLICE_SIZE = os.getenv("QPC_INSIGHTS_REPORT_SLICE_SIZE", "10000")
-if is_int(QPC_INSIGHTS_REPORT_SLICE_SIZE):
-    QPC_INSIGHTS_REPORT_SLICE_SIZE = int(QPC_INSIGHTS_REPORT_SLICE_SIZE)
-
-QPC_INSIGHTS_DATA_COLLECTOR_LABEL = os.getenv(
-    "QPC_INSIGHTS_DATA_COLLECTOR_LABEL", "qpc"
-)
+QPC_EXCLUDE_INTERNAL_FACTS = env.bool("QPC_EXCLUDE_INTERNAL_FACTS", True)
+QPC_TOKEN_EXPIRE_HOURS = env.int("QPC_TOKEN_EXPIRE_HOURS", 24)
+QPC_INSIGHTS_REPORT_SLICE_SIZE = env.int("QPC_INSIGHTS_REPORT_SLICE_SIZE", 10000)
+QPC_INSIGHTS_DATA_COLLECTOR_LABEL = env.str("QPC_INSIGHTS_DATA_COLLECTOR_LABEL", "qpc")
 
 # Load Feature Flags
 QPC_FEATURE_FLAGS = FeatureFlag()
