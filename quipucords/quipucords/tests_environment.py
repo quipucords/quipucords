@@ -25,7 +25,7 @@ class EnvironmentTest(TestCase):
         expected = "buildnum"
         mock_os.get.return_value = expected
         result = environment.commit()
-        self.assertEqual(result, expected)
+        assert result == expected
 
     @patch("subprocess.check_output")
     def test_commit_with_subprocess(self, mock_subprocess):
@@ -33,7 +33,7 @@ class EnvironmentTest(TestCase):
         expected = "buildnum"
         mock_subprocess.return_value = expected
         result = environment.commit()
-        self.assertEqual(result, expected)
+        assert result == expected
 
     @patch("platform.uname")
     def test_platform_info(self, mock_platform):
@@ -42,8 +42,8 @@ class EnvironmentTest(TestCase):
         a_plat = platform_record("Red Hat", "7.4")
         mock_platform.return_value = a_plat
         result = environment.platform_info()
-        self.assertEqual(result["os"], "Red Hat")
-        self.assertEqual(result["version"], "7.4")
+        assert result["os"] == "Red Hat"
+        assert result["version"] == "7.4"
 
     @patch("sys.version")
     def test_python_version(self, mock_sys_ver):
@@ -51,7 +51,7 @@ class EnvironmentTest(TestCase):
         expected = "Python 3.6"
         mock_sys_ver.replace.return_value = expected
         result = environment.python_version()
-        self.assertEqual(result, expected)
+        assert result == expected
 
     @patch("sys.modules")
     def test_modules(self, mock_modules):
@@ -61,7 +61,7 @@ class EnvironmentTest(TestCase):
         mod2 = Mock(__version__="version2")
         mock_modules.items.return_value = (("module1", mod1), ("module2", mod2))
         result = environment.modules()
-        self.assertEqual(result, expected)
+        assert result == expected
 
     @patch("quipucords.environment.logger.info")
     def test_startup(self, mock_logger):

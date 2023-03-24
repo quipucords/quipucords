@@ -12,29 +12,28 @@ class TestProcessVirtXenPrivcmdFound(unittest.TestCase):
 
     def test_success_case(self):
         """Found internal_xen_privcmd_found fact."""
-        self.assertEqual(
-            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("Y\r\n"), {}), True
+        assert (
+            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("Y\r\n"), {}) is True
         )
-        self.assertEqual(
-            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("N\r\n"), {}), False
+        assert (
+            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("N\r\n"), {})
+            is False
         )
 
     def test_sudo_case(self):
         """Sudo found internal_xen_privcmd_found fact."""
-        self.assertEqual(
-            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("\r\nY\r\n"), {}),
-            True,
+        assert (
+            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("\r\nY\r\n"), {})
+            is True
         )
-        self.assertEqual(
-            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("\r\nN\r\n"), {}),
-            False,
+        assert (
+            virt.ProcessVirtXenPrivcmdFound.process(ansible_result("\r\nN\r\n"), {})
+            is False
         )
 
     def test_not_found(self):
         """Did not find internal_xen_privcmd_found fact."""
-        self.assertEqual(
-            virt.ProcessVirtXenPrivcmdFound.process(ansible_result(""), {}), False
-        )
+        assert virt.ProcessVirtXenPrivcmdFound.process(ansible_result(""), {}) is False
 
 
 class TestProcessVirtKvmFound(unittest.TestCase):
@@ -42,27 +41,19 @@ class TestProcessVirtKvmFound(unittest.TestCase):
 
     def test_success_case(self):
         """Found internal_kvm_found fact."""
-        self.assertEqual(
-            virt.ProcessVirtKvmFound.process(ansible_result("Y\r\n"), {}), True
-        )
-        self.assertEqual(
-            virt.ProcessVirtKvmFound.process(ansible_result("N\r\n"), {}), False
-        )
+        assert virt.ProcessVirtKvmFound.process(ansible_result("Y\r\n"), {}) is True
+        assert virt.ProcessVirtKvmFound.process(ansible_result("N\r\n"), {}) is False
 
     def test_sudo_case(self):
         """Sudo found internal_kvm_found fact."""
-        self.assertEqual(
-            virt.ProcessVirtKvmFound.process(ansible_result("\r\nY\r\n"), {}), True
-        )
-        self.assertEqual(
-            virt.ProcessVirtKvmFound.process(ansible_result("\r\nN\r\n"), {}), False
+        assert virt.ProcessVirtKvmFound.process(ansible_result("\r\nY\r\n"), {}) is True
+        assert (
+            virt.ProcessVirtKvmFound.process(ansible_result("\r\nN\r\n"), {}) is False
         )
 
     def test_not_found(self):
         """Did not find internal_kvm_found fact."""
-        self.assertEqual(
-            virt.ProcessVirtKvmFound.process(ansible_result(""), {}), False
-        )
+        assert virt.ProcessVirtKvmFound.process(ansible_result(""), {}) is False
 
 
 class TestProcessVirtXenGuest(unittest.TestCase):
@@ -70,27 +61,19 @@ class TestProcessVirtXenGuest(unittest.TestCase):
 
     def test_success_case(self):
         """Found internal_xen_guest fact."""
-        self.assertEqual(
-            virt.ProcessVirtXenGuest.process(ansible_result("1\r\n"), {}), True
-        )
-        self.assertEqual(
-            virt.ProcessVirtXenGuest.process(ansible_result("0\r\n"), {}), False
-        )
+        assert virt.ProcessVirtXenGuest.process(ansible_result("1\r\n"), {}) is True
+        assert virt.ProcessVirtXenGuest.process(ansible_result("0\r\n"), {}) is False
 
     def test_sudo_case(self):
         """Sudo found internal_xen_guest fact."""
-        self.assertEqual(
-            virt.ProcessVirtXenGuest.process(ansible_result("\r\n1\r\n"), {}), True
-        )
-        self.assertEqual(
-            virt.ProcessVirtXenGuest.process(ansible_result("\r\n0\r\n"), {}), False
+        assert virt.ProcessVirtXenGuest.process(ansible_result("\r\n1\r\n"), {}) is True
+        assert (
+            virt.ProcessVirtXenGuest.process(ansible_result("\r\n0\r\n"), {}) is False
         )
 
     def test_not_found(self):
         """Did not find internal_xen_guest fact."""
-        self.assertEqual(
-            virt.ProcessVirtXenGuest.process(ansible_result(""), {}), False
-        )
+        assert virt.ProcessVirtXenGuest.process(ansible_result(""), {}) is False
 
 
 class TestProcessSystemManufacturer(unittest.TestCase):
@@ -98,27 +81,25 @@ class TestProcessSystemManufacturer(unittest.TestCase):
 
     def test_success_case(self):
         """Found internal_sys_manufacturer fact."""
-        self.assertEqual(
+        assert (
             virt.ProcessSystemManufacturer.process(
                 ansible_result("FooVmWareBar\r\n"), {}
-            ),
-            "FooVmWareBar",
+            )
+            == "FooVmWareBar"
         )
 
     def test_sudo_case(self):
         """Sudo found internal_sys_manufacturer fact."""
-        self.assertEqual(
+        assert (
             virt.ProcessSystemManufacturer.process(
                 ansible_result("\r\nFooVmWareBar\r\n"), {}
-            ),
-            "FooVmWareBar",
+            )
+            == "FooVmWareBar"
         )
 
     def test_not_found(self):
         """Did not find internal_sys_manufacturer fact."""
-        self.assertEqual(
-            virt.ProcessSystemManufacturer.process(ansible_result(""), {}), None
-        )
+        assert virt.ProcessSystemManufacturer.process(ansible_result(""), {}) is None
 
 
 class TestProcessVirtCpuModelNameKvm(unittest.TestCase):
@@ -126,29 +107,28 @@ class TestProcessVirtCpuModelNameKvm(unittest.TestCase):
 
     def test_success_case(self):
         """Found internal_cpu_model_name_kvm fact."""
-        self.assertEqual(
-            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("Y\r\n"), {}), True
+        assert (
+            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("Y\r\n"), {}) is True
         )
-        self.assertEqual(
-            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("N\r\n"), {}), False
+        assert (
+            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("N\r\n"), {})
+            is False
         )
 
     def test_sudo_case(self):
         """Sudo found internal_cpu_model_name_kvm fact."""
-        self.assertEqual(
-            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("\r\nY\r\n"), {}),
-            True,
+        assert (
+            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("\r\nY\r\n"), {})
+            is True
         )
-        self.assertEqual(
-            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("\r\nN\r\n"), {}),
-            False,
+        assert (
+            virt.ProcessVirtCpuModelNameKvm.process(ansible_result("\r\nN\r\n"), {})
+            is False
         )
 
     def test_not_found(self):
         """Did not find internal_cpu_model_name_kvm fact."""
-        self.assertEqual(
-            virt.ProcessVirtCpuModelNameKvm.process(ansible_result(""), {}), False
-        )
+        assert virt.ProcessVirtCpuModelNameKvm.process(ansible_result(""), {}) is False
 
 
 class TestProcessVirtType(unittest.TestCase):
@@ -164,11 +144,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_VMWARE,
+            )
+            == virt.VIRT_TYPE_VMWARE
         )
 
     def test_dmidecode_virtualbox_case(self):
@@ -181,11 +161,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_VIRTUALBOX,
+            )
+            == virt.VIRT_TYPE_VIRTUALBOX
         )
 
     def test_dmidecode_virtualpc_case(self):
@@ -198,11 +178,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_VIRTUALPC,
+            )
+            == virt.VIRT_TYPE_VIRTUALPC
         )
 
     def test_dmidecode_kvm_case(self):
@@ -215,11 +195,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_KVM,
+            )
+            == virt.VIRT_TYPE_KVM
         )
 
     def test_dmidecode_no_manu_case(self):
@@ -231,11 +211,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            None,
+            )
+            is None
         )
 
     def test_kvm_command_kvm_case(self):
@@ -248,11 +228,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": True,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_KVM,
+            )
+            == virt.VIRT_TYPE_KVM
         )
 
     def test_cpu_model_name_kvm_case(self):
@@ -265,11 +245,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_KVM,
+            )
+            == virt.VIRT_TYPE_KVM
         )
 
     def test_xen_guest_case(self):
@@ -282,11 +262,11 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_XEN,
+            )
+            == virt.VIRT_TYPE_XEN
         )
 
     def test_xen_command_case(self):
@@ -299,16 +279,16 @@ class TestProcessVirtType(unittest.TestCase):
             "internal_kvm_found": False,
             "internal_xen_privcmd_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtType.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            virt.VIRT_TYPE_XEN,
+            )
+            == virt.VIRT_TYPE_XEN
         )
 
     def test_not_found(self):
         """Did not find virt_type fact."""
-        self.assertEqual(virt.ProcessVirtType.process(ansible_result(""), {}), None)
+        assert virt.ProcessVirtType.process(ansible_result(""), {}) is None
 
 
 class TestProcessVirtVirt(unittest.TestCase):
@@ -321,11 +301,11 @@ class TestProcessVirtVirt(unittest.TestCase):
             "virt_type": virt.VIRT_TYPE_VIRTUALBOX,
             "internal_kvm_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtVirt.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            "virt-guest",
+            )
+            == "virt-guest"
         )
 
     def test_virt_virt_with_kvm_case(self):
@@ -334,11 +314,11 @@ class TestProcessVirtVirt(unittest.TestCase):
             "virt_type": virt.VIRT_TYPE_VIRTUALBOX,
             "internal_kvm_found": True,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtVirt.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            "virt-host",
+            )
+            == "virt-host"
         )
 
     def test_virt_virt_with_deps_case(self):
@@ -347,9 +327,9 @@ class TestProcessVirtVirt(unittest.TestCase):
             "virt_type": None,
             "internal_kvm_found": False,
         }
-        self.assertEqual(
+        assert (
             virt.ProcessVirtVirt.process(
                 ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
-            ),
-            None,
+            )
+            is None
         )

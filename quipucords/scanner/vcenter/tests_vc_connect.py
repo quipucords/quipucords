@@ -59,7 +59,7 @@ class ConnectTaskRunnerTest(TestCase):
         vm_names = ["vm1", "vm2"]
         # pylint: disable=protected-access
         self.runner._store_connect_data(vm_names, self.cred, self.source)
-        self.assertEqual(len(self.scan_job.connection_results.task_results.all()), 1)
+        assert len(self.scan_job.connection_results.task_results.all()) == 1
 
     def test_get_vm_names(self):
         """Test the get vm names method."""
@@ -80,8 +80,8 @@ class ConnectTaskRunnerTest(TestCase):
         content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects
 
         vm_names = get_vm_names(content)
-        self.assertTrue(isinstance(vm_names, list))
-        self.assertEqual(vm_names, ["vm1", "vm2"])
+        assert isinstance(vm_names, list)
+        assert vm_names == ["vm1", "vm2"]
 
     def test_connect(self):
         """Test the VCenter connect method."""
@@ -93,20 +93,20 @@ class ConnectTaskRunnerTest(TestCase):
                 return_value=["vm1", "vm2", "vm2"],
             ) as mock_names:
                 vm_names = self.runner.connect()
-                self.assertEqual(vm_names, ["vm1", "vm2", "vm2"])
+                assert vm_names == ["vm1", "vm2", "vm2"]
                 mock_vcenter_connect.assert_called_once_with(ANY)
                 mock_names.assert_called_once_with(ANY)
 
     def test_get_result_none(self):
         """Test get result method when no results exist."""
         results = self.scan_task.get_result().systems.first()
-        self.assertEqual(results, None)
+        assert results is None
 
     def test_get_result(self):
         """Test get result method when results exist."""
         conn_result = self.scan_task.connection_result
         results = self.scan_task.get_result()
-        self.assertEqual(results, conn_result)
+        assert results == conn_result
 
     def test_failed_run(self):
         """Test the run method."""
@@ -114,7 +114,7 @@ class ConnectTaskRunnerTest(TestCase):
             ConnectTaskRunner, "connect", side_effect=invalid_login
         ) as mock_connect:
             status = self.runner.run(Value("i", ScanJob.JOB_RUN))
-            self.assertEqual(ScanTask.FAILED, status[1])
+            assert ScanTask.FAILED == status[1]
             mock_connect.assert_called_once_with()
 
     def test_unreachable_run(self):
@@ -123,7 +123,7 @@ class ConnectTaskRunnerTest(TestCase):
             ConnectTaskRunner, "connect", side_effect=unreachable_host
         ) as mock_connect:
             status = self.runner.run(Value("i", ScanJob.JOB_RUN))
-            self.assertEqual(ScanTask.FAILED, status[1])
+            assert ScanTask.FAILED == status[1]
             mock_connect.assert_called_once_with()
 
     def test_run(self):
@@ -132,15 +132,15 @@ class ConnectTaskRunnerTest(TestCase):
             ConnectTaskRunner, "connect", return_value=["vm1", "vm2"]
         ) as mock_connect:
             status = self.runner.run(Value("i", ScanJob.JOB_RUN))
-            self.assertEqual(ScanTask.COMPLETED, status[1])
+            assert ScanTask.COMPLETED == status[1]
             mock_connect.assert_called_once_with()
 
     def test_cancel(self):
         """Test the run method with cancel."""
         status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        self.assertEqual(ScanTask.CANCELED, status[1])
+        assert ScanTask.CANCELED == status[1]
 
     def test_pause(self):
         """Test the run method with pause."""
         status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        self.assertEqual(ScanTask.PAUSED, status[1])
+        assert ScanTask.PAUSED == status[1]

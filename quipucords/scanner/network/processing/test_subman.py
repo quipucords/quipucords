@@ -12,23 +12,18 @@ class TestProcessSubmanConsumed(unittest.TestCase):
 
     def test_success_case(self):
         """Found subman_consumed."""
-        self.assertEqual(
-            subman.ProcessSubmanConsumed.process(
-                ansible_result("subnameA - 1\nsubnameB - 2\nsubnameC - 3")
-            ),
-            [
-                {"name": "subnameA", "entitlement_id": "1"},
-                {"name": "subnameB", "entitlement_id": "2"},
-                {"name": "subnameC", "entitlement_id": "3"},
-            ],
-        )
+        assert subman.ProcessSubmanConsumed.process(
+            ansible_result("subnameA - 1\nsubnameB - 2\nsubnameC - 3")
+        ) == [
+            {"name": "subnameA", "entitlement_id": "1"},
+            {"name": "subnameB", "entitlement_id": "2"},
+            {"name": "subnameC", "entitlement_id": "3"},
+        ]
 
     def test_not_found(self):
         """Did not find subman_consumed."""
-        self.assertEqual(subman.ProcessSubmanConsumed.process(ansible_result("")), [])
+        assert subman.ProcessSubmanConsumed.process(ansible_result("")) == []
 
     def test_empty_string(self):
         """Found empty string."""
-        self.assertEqual(
-            subman.ProcessSubmanConsumed.process(ansible_result("\n\r")), []
-        )
+        assert subman.ProcessSubmanConsumed.process(ansible_result("\n\r")) == []

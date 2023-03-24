@@ -71,9 +71,9 @@ class TestConnectResultCallback(TestCase):
         )
         for event in events:
             callback.event_callback(event)
-        self.assertEqual(callback.result_store.scan_task.systems_count, 3)
-        self.assertEqual(callback.result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
+        assert callback.result_store.scan_task.systems_count == 3
+        assert callback.result_store.scan_task.systems_scanned == 1
+        assert callback.result_store.scan_task.systems_failed == 0
 
     def test_task_on_failed(self):
         """Test the callback on failed."""
@@ -90,8 +90,8 @@ class TestConnectResultCallback(TestCase):
         )
         for event in events:
             callback.event_callback(event)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
-        self.assertEqual(callback.result_store.scan_task.systems_count, 3)
+        assert callback.result_store.scan_task.systems_failed == 0
+        assert callback.result_store.scan_task.systems_count == 3
 
     def test_task_on_unreachable(self):
         """Test the callback on unreachable."""
@@ -108,9 +108,9 @@ class TestConnectResultCallback(TestCase):
         )
         for event in events:
             callback.event_callback(event)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
-        self.assertEqual(callback.result_store.scan_task.systems_unreachable, 1)
-        self.assertEqual(callback.result_store.scan_task.systems_count, 3)
+        assert callback.result_store.scan_task.systems_failed == 0
+        assert callback.result_store.scan_task.systems_unreachable == 1
+        assert callback.result_store.scan_task.systems_count == 3
 
     def test_exceptions_for_tasks(self):
         """Test exception for each task."""
@@ -152,13 +152,13 @@ class TestConnectResultCallback(TestCase):
             results_store, self.cred, self.source, self.interrupt
         )
         result = callback.cancel_callback()
-        self.assertEqual(result, False)
+        assert result is False
         # Test cancel state
         for stop_value in STOP_STATES.values():
             self.interrupt = Mock(value=stop_value)
             callback = ConnectResultCallback(
                 results_store, self.cred, self.source, self.interrupt
             )
-            self.assertEqual(callback.interrupt.value, stop_value)
+            assert callback.interrupt.value == stop_value
             result = callback.cancel_callback()
-            self.assertEqual(result, True)
+            assert result is True

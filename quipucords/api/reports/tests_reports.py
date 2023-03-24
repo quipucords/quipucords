@@ -62,7 +62,7 @@ class ReportsTest(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         details_json = response.json()
         self.details_json = details_json
         return details_json
@@ -123,7 +123,7 @@ class ReportsTest(TestCase):
         if response.status_code != status.HTTP_200_OK:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         return response.json()
 
     def create_reports_dict(self, query_params=""):
@@ -131,7 +131,7 @@ class ReportsTest(TestCase):
         url = "/api/v1/reports/1/deployments/" + query_params
         self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         report = response.json()
         self.deployments_json = report
         self.details_json = self.retrieve_expect_200_details(1, query_params)
@@ -174,11 +174,11 @@ class ReportsTest(TestCase):
         tar_gz_result = renderer.render(
             reports_dict, renderer_context=self.mock_renderer_context
         )
-        self.assertNotEqual(tar_gz_result, None)
+        assert tar_gz_result is not None
         tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
         files = tar.getmembers()
         filenames = tar.getnames()
-        self.assertEqual(len(files), 5)
+        assert len(files) == 5
         # tar.getnames() always returns same order as tar.getmembers()
         for idx, file in enumerate(files):
             file_contents = tar.extractfile(file).read().decode()
@@ -193,9 +193,9 @@ class ReportsTest(TestCase):
                 tar_json = json.loads(file_contents)
                 tar_json_type = tar_json.get("report_type")
                 if tar_json_type == "details":
-                    self.assertEqual(tar_json, self.details_json)
+                    assert tar_json == self.details_json
                 elif tar_json_type == "deployments":
-                    self.assertEqual(tar_json, self.deployments_json)
+                    assert tar_json == self.deployments_json
                 else:
                     sys.exit("Could not identify .json return")
 
@@ -231,11 +231,11 @@ class ReportsTest(TestCase):
         tar_gz_result = renderer.render(
             reports_dict, renderer_context=mock_renderer_context
         )
-        self.assertNotEqual(tar_gz_result, None)
+        assert tar_gz_result is not None
         tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
         files = tar.getmembers()
         filenames = tar.getnames()
-        self.assertEqual(len(files), 5)
+        assert len(files) == 5
         # tar.getnames() always returns same order as tar.getmembers()
         for idx, file in enumerate(files):
             file_contents = tar.extractfile(file).read().decode()
@@ -250,9 +250,9 @@ class ReportsTest(TestCase):
                 tar_json = json.loads(file_contents)
                 tar_json_type = tar_json.get("report_type")
                 if tar_json_type == "details":
-                    self.assertEqual(tar_json, self.details_json)
+                    assert tar_json == self.details_json
                 elif tar_json_type == "deployments":
-                    self.assertEqual(tar_json, self.deployments_json)
+                    assert tar_json == self.deployments_json
                 else:
                     sys.exit("Could not identify .json return")
 
@@ -266,7 +266,7 @@ class ReportsTest(TestCase):
             tar_gz_result = renderer.render(
                 reports_dict, renderer_context=mock_renderer_context
             )
-            self.assertEqual(tar_gz_result, None)
+            assert tar_gz_result is None
 
     def test_sha256sum(self):
         """Ensure SHA256SUM hashes are correct."""
@@ -277,7 +277,7 @@ class ReportsTest(TestCase):
         tar_gz_result = renderer.render(
             reports_dict, renderer_context=mock_renderer_context
         )
-        self.assertNotEqual(tar_gz_result, None)
+        assert tar_gz_result is not None
         tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
         files = tar.getmembers()
         # ignore folder name

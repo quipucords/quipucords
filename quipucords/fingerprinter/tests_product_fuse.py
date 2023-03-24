@@ -37,7 +37,7 @@ class ProductFuseTest(TestCase):
                 "raw_fact_key": "eap_home_bin/jboss_activemq_ver",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     # pylint: disable=C0103
     def test_detect_jboss_fuse_potential_init(self):
@@ -59,7 +59,7 @@ class ProductFuseTest(TestCase):
                 "raw_fact_key": "jboss_fuse_systemctl_unit_files",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_fuse_potential_sub(self):
         """Test the detect_jboss_fuse method."""
@@ -80,7 +80,7 @@ class ProductFuseTest(TestCase):
                 "raw_fact_key": "subman_consumed",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_fuse_potential_ent(self):
         """Test the detect_jboss_fuse method."""
@@ -101,7 +101,7 @@ class ProductFuseTest(TestCase):
                 "raw_fact_key": "entitlements",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_fuse_absent(self):
         """Test the detect_jboss_fuse method."""
@@ -122,7 +122,7 @@ class ProductFuseTest(TestCase):
                 "raw_fact_key": None,
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_fuse_present(self):
         """Test the detect_jboss_fuse method."""
@@ -153,7 +153,7 @@ class ProductFuseTest(TestCase):
                 "jboss_fuse_on_eap_activemq_ver",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_activemq_fuse_absent(self):
         """Test the detect_jboss_fuse method with activemq version found."""
@@ -178,11 +178,11 @@ class ProductFuseTest(TestCase):
                 "raw_fact_key": None,
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_get_version(self):
         """Test the get_version method."""
         eap_camel = [{"homedir": "/foo/bin", "version": ["redhat-620133"]}]
         versions = get_version(eap_camel)
         expected = ["redhat-620133"]
-        self.assertEqual(versions, expected)
+        assert versions == expected

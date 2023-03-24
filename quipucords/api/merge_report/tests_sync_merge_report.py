@@ -49,7 +49,7 @@ class SyncMergeReports(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     ##############################################################
@@ -60,9 +60,9 @@ class SyncMergeReports(TestCase):
         # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         response = self.client.put(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_REQUIRED]})
+        assert json_response == {"reports": [messages.REPORT_MERGE_REQUIRED]}
 
     def test_sync_merge_empty_dict(self):
         """Test sync merge with empty dict."""
@@ -72,9 +72,9 @@ class SyncMergeReports(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_REQUIRED]})
+        assert json_response == {"reports": [messages.REPORT_MERGE_REQUIRED]}
 
     def test_sync_merge_jobs_not_list(self):
         """Test sync merge with not list."""
@@ -84,9 +84,9 @@ class SyncMergeReports(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_NOT_LIST]})
+        assert json_response == {"reports": [messages.REPORT_MERGE_NOT_LIST]}
 
     def test_sync_merge_jobs_list_too_short(self):
         """Test sync merge with list too short."""
@@ -96,9 +96,9 @@ class SyncMergeReports(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_TOO_SHORT]})
+        assert json_response == {"reports": [messages.REPORT_MERGE_TOO_SHORT]}
 
     def test_sync_merge_jobs_list_contains_string(self):
         """Test sync merge with containing str."""
@@ -108,9 +108,9 @@ class SyncMergeReports(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_NOT_INT]})
+        assert json_response == {"reports": [messages.REPORT_MERGE_NOT_INT]}
 
     def test_sync_merge_jobs_list_contains_duplicates(self):
         """Test sync merge with containing duplicates."""
@@ -120,9 +120,9 @@ class SyncMergeReports(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_NOT_UNIQUE]})
+        assert json_response == {"reports": [messages.REPORT_MERGE_NOT_UNIQUE]}
 
     def test_sync_merge_jobs_list_contains_invalid_job_ids(self):
         """Test sync merge with containing duplicates."""
@@ -132,11 +132,9 @@ class SyncMergeReports(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_response = response.json()
-        self.assertEqual(
-            json_response, {"reports": [messages.REPORT_MERGE_NOT_FOUND % "5, 6"]}
-        )
+        assert json_response == {"reports": [messages.REPORT_MERGE_NOT_FOUND % "5, 6"]}
 
     def test_sync_merge_jobs_success(self):
         """Test sync merge jobs success."""
@@ -164,7 +162,7 @@ class SyncMergeReports(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print(response.json())
         response_json = response.json()
-        self.assertEqual(response_json["sources"], sources1)
+        assert response_json["sources"] == sources1
         report1_id = response_json["report_id"]
 
         request_json = {"report_type": "details", "sources": sources2}
@@ -172,7 +170,7 @@ class SyncMergeReports(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print(response.json())
         response_json = response.json()
-        self.assertEqual(response_json["sources"], sources2)
+        assert response_json["sources"] == sources2
         report2_id = response_json["report_id"]
 
         url = "/api/v1/reports/merge/"
@@ -182,7 +180,7 @@ class SyncMergeReports(TestCase):
         )
         if response.status_code != status.HTTP_201_CREATED:
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         json_response = response.json()
         expected = {
             "report_id": 3,
@@ -207,4 +205,4 @@ class SyncMergeReports(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected

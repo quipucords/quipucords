@@ -116,7 +116,7 @@ class NetworkInspectScannerTest(TestCase):
             }
         }
 
-        self.assertEqual(inventory_dict[1], expected)
+        assert inventory_dict[1] == expected
 
     def test_scan_inventory_grouping(self):
         """Test construct ansible inventory dictionary."""
@@ -179,7 +179,7 @@ class NetworkInspectScannerTest(TestCase):
             }
         }
 
-        self.assertEqual(inventory_dict[1], expected)
+        assert inventory_dict[1] == expected
 
     @patch("ansible_runner.run")
     def test_inspect_scan_failure(self, mock_run):
@@ -198,7 +198,7 @@ class NetworkInspectScannerTest(TestCase):
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
         mock_scan.assert_called_with(ANY, self.host_list)
-        self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+        assert scan_task_status[1] == ScanTask.FAILED
 
     @patch("ansible_runner.run")
     def test_inspect_scan_fail_no_facts(self, mock_run):
@@ -210,7 +210,7 @@ class NetworkInspectScannerTest(TestCase):
             scanner.connect_scan_task = self.connect_scan_task
             scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
             mock_run.assert_called()
-            self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+            assert scan_task_status[1] == ScanTask.FAILED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
     def test_ssh_crash(self):
@@ -226,7 +226,7 @@ class NetworkInspectScannerTest(TestCase):
             base_ssh_executable=path,
         )
         # pylint: enable=unexpected-keyword-arg
-        self.assertEqual(result, ScanTask.COMPLETED)
+        assert result == ScanTask.COMPLETED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
     def test_ssh_hang(self):
@@ -304,7 +304,7 @@ class NetworkInspectScannerTest(TestCase):
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         terminate = Value("i", ScanJob.JOB_TERMINATE_CANCEL)
         scan_task_status = scanner.run(terminate)
-        self.assertEqual(scan_task_status[1], ScanTask.CANCELED)
+        assert scan_task_status[1] == ScanTask.CANCELED
 
     @patch("scanner.network.inspect.InspectTaskRunner._obtain_discovery_data")
     def test_no_reachable_host(self, discovery):
@@ -312,7 +312,7 @@ class NetworkInspectScannerTest(TestCase):
         discovery.return_value = [], [], [], []
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+        assert scan_task_status[1] == ScanTask.FAILED
 
     def test_cancel_inspect(self):
         """Test cancel of inspect."""
@@ -342,4 +342,4 @@ class NetworkInspectScannerTest(TestCase):
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
-        self.assertIn("verbosity=1", str(calls[0]))
+        assert "verbosity=1" in str(calls[0])

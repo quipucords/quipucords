@@ -12,13 +12,11 @@ class TestProcessDateDate(unittest.TestCase):
 
     def test_success_case(self):
         """Found date."""
-        self.assertEqual(date.ProcessDateDate.process(ansible_result("a\nb\nc")), "a")
+        assert date.ProcessDateDate.process(ansible_result("a\nb\nc")) == "a"
 
     def test_not_found(self):
         """Did not find date."""
-        self.assertEqual(
-            date.ProcessDateDate.process(ansible_result("")), process.NO_DATA
-        )
+        assert date.ProcessDateDate.process(ansible_result("")) == process.NO_DATA
 
 
 class ProcessDateFilesystemCreate(unittest.TestCase):
@@ -26,15 +24,15 @@ class ProcessDateFilesystemCreate(unittest.TestCase):
 
     def test_success_case(self):
         """Found date file system create."""
-        self.assertEqual(
-            date.ProcessDateFilesystemCreate.process(ansible_result("a\nb\nc")), "a"
+        assert (
+            date.ProcessDateFilesystemCreate.process(ansible_result("a\nb\nc")) == "a"
         )
 
     def test_not_found(self):
         """Did not find date file system create."""
-        self.assertEqual(
-            date.ProcessDateFilesystemCreate.process(ansible_result("")),
-            process.NO_DATA,
+        assert (
+            date.ProcessDateFilesystemCreate.process(ansible_result(""))
+            == process.NO_DATA
         )
 
 
@@ -43,15 +41,11 @@ class ProcessDateMachineId(unittest.TestCase):
 
     def test_success_case(self):
         """Found date machine id."""
-        self.assertEqual(
-            date.ProcessDateMachineId.process(ansible_result("a\nb\nc")), "a"
-        )
+        assert date.ProcessDateMachineId.process(ansible_result("a\nb\nc")) == "a"
 
     def test_not_found(self):
         """Did not find date file system create."""
-        self.assertEqual(
-            date.ProcessDateMachineId.process(ansible_result("")), process.NO_DATA
-        )
+        assert date.ProcessDateMachineId.process(ansible_result("")) == process.NO_DATA
 
 
 class ProcessDateYumHistory(unittest.TestCase):
@@ -59,13 +53,11 @@ class ProcessDateYumHistory(unittest.TestCase):
 
     def test_success_case(self):
         """Found date yum history."""
-        self.assertEqual(
-            date.ProcessDateYumHistory.process(ansible_result("\n2017-07-25")),
-            "2017-07-25",
+        assert (
+            date.ProcessDateYumHistory.process(ansible_result("\n2017-07-25"))
+            == "2017-07-25"
         )
 
     def test_not_found(self):
         """Did not find date yum history."""
-        self.assertEqual(
-            date.ProcessDateYumHistory.process(ansible_result("")), process.NO_DATA
-        )
+        assert date.ProcessDateYumHistory.process(ansible_result("")) == process.NO_DATA

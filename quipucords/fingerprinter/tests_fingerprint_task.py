@@ -6,6 +6,7 @@ from datetime import datetime
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from django.db import DataError
 from django.test import TestCase
 
@@ -395,140 +396,112 @@ class EngineTest(TestCase):
 
     def _validate_network_result(self, fingerprint, fact):
         """Help to validate fields."""
-        self.assertEqual(fact.get("connection_host"), fingerprint.get("name"))
+        assert fact.get("connection_host") == fingerprint.get("name")
 
-        self.assertEqual(fact.get("etc_release_name"), fingerprint.get("os_name"))
-        self.assertEqual(fact.get("etc_release_release"), fingerprint.get("os_release"))
-        self.assertEqual(fact.get("etc_release_version"), fingerprint.get("os_version"))
+        assert fact.get("etc_release_name") == fingerprint.get("os_name")
+        assert fact.get("etc_release_release") == fingerprint.get("os_release")
+        assert fact.get("etc_release_version") == fingerprint.get("os_version")
 
-        self.assertListEqual(
-            fact.get("ifconfig_ip_addresses"), fingerprint.get("ip_addresses")
-        )
-        self.assertListEqual(
-            fact.get("ifconfig_mac_addresses"), fingerprint.get("mac_addresses")
-        )
+        assert fact.get("ifconfig_ip_addresses") == fingerprint.get("ip_addresses")
+        assert fact.get("ifconfig_mac_addresses") == fingerprint.get("mac_addresses")
 
-        self.assertEqual(fact.get("cpu_count"), fingerprint.get("cpu_count"))
+        assert fact.get("cpu_count") == fingerprint.get("cpu_count")
 
-        self.assertEqual(fact.get("dmi_system_uuid"), fingerprint.get("bios_uuid"))
-        self.assertEqual(
-            fact.get("subscription_manager_id"),
-            fingerprint.get("subscription_manager_id"),
+        assert fact.get("dmi_system_uuid") == fingerprint.get("bios_uuid")
+        assert fact.get("subscription_manager_id") == fingerprint.get(
+            "subscription_manager_id"
         )
 
-        self.assertEqual(
-            fact.get("cpu_socket_count"), fingerprint.get("cpu_socket_count")
-        )
-        self.assertEqual(fact.get("cpu_core_count"), fingerprint.get("cpu_core_count"))
+        assert fact.get("cpu_socket_count") == fingerprint.get("cpu_socket_count")
+        assert fact.get("cpu_core_count") == fingerprint.get("cpu_core_count")
 
-        self.assertEqual(
-            fact.get("date_anaconda_log"), fingerprint.get("date_anaconda_log")
+        assert fact.get("date_anaconda_log") == fingerprint.get("date_anaconda_log")
+        assert fact.get("date_yum_history") == fingerprint.get("date_yum_history")
+        assert fact.get("date_machine_id") == fingerprint.get("date_machine_id")
+        assert fact.get("date_filesystem_create") == fingerprint.get(
+            "date_filesystem_create"
         )
-        self.assertEqual(
-            fact.get("date_yum_history"), fingerprint.get("date_yum_history")
-        )
-        self.assertEqual(
-            fact.get("date_machine_id"), fingerprint.get("date_machine_id")
-        )
-        self.assertEqual(
-            fact.get("date_filesystem_create"),
-            fingerprint.get("date_filesystem_create"),
-        )
-        self.assertEqual("virtualized", fingerprint.get("infrastructure_type"))
+        assert "virtualized" == fingerprint.get("infrastructure_type")
 
-        self.assertEqual(fact.get("virt_type"), fingerprint.get("virtualized_type"))
-        self.assertEqual(fact.get("uname_processor"), fingerprint.get("architecture"))
-        self.assertEqual(
-            fact.get("redhat_packages_certs"), fingerprint.get("redhat_certs")
-        )
-        self.assertEqual(
-            fact.get("redhat_packages_gpg_is_redhat"), fingerprint.get("is_redhat")
-        )
-        self.assertEqual(
-            fact.get("redhat_packages_gpg_num_rh_packages"),
-            fingerprint.get("redhat_package_count"),
+        assert fact.get("virt_type") == fingerprint.get("virtualized_type")
+        assert fact.get("uname_processor") == fingerprint.get("architecture")
+        assert fact.get("redhat_packages_certs") == fingerprint.get("redhat_certs")
+        assert fact.get("redhat_packages_gpg_is_redhat") == fingerprint.get("is_redhat")
+        assert fact.get("redhat_packages_gpg_num_rh_packages") == fingerprint.get(
+            "redhat_package_count"
         )
         system_purpose_json = fact.get("system_purpose_json", None)
         if system_purpose_json:
-            self.assertEqual(system_purpose_json, fingerprint.get("system_purpose"))
-            self.assertEqual(
-                system_purpose_json.get("role", None), fingerprint.get("system_role")
+            assert system_purpose_json == fingerprint.get("system_purpose")
+            assert system_purpose_json.get("role", None) == fingerprint.get(
+                "system_role"
             )
-            self.assertEqual(
-                system_purpose_json.get("addons", None),
-                fingerprint.get("system_addons"),
+            assert system_purpose_json.get("addons", None) == fingerprint.get(
+                "system_addons"
             )
-            self.assertEqual(
-                system_purpose_json.get("service_level_agreement", None),
-                fingerprint.get("system_service_level_agreement"),
-            )
-            self.assertEqual(
-                system_purpose_json.get("usage", None),
-                fingerprint.get("system_usage_type"),
+            assert system_purpose_json.get(
+                "service_level_agreement", None
+            ) == fingerprint.get("system_service_level_agreement")
+            assert system_purpose_json.get("usage", None) == fingerprint.get(
+                "system_usage_type"
             )
         else:
-            self.assertIsNone(fingerprint.get("system_role"))
-            self.assertIsNone(fingerprint.get("system_addons"))
-            self.assertIsNone(fingerprint.get("system_service_level_agreement"))
-            self.assertIsNone(fingerprint.get("system_usage_type"))
+            assert fingerprint.get("system_role") is None
+            assert fingerprint.get("system_addons") is None
+            assert fingerprint.get("system_service_level_agreement") is None
+            assert fingerprint.get("system_usage_type") is None
 
     def _validate_vcenter_result(self, fingerprint, fact):
         """Help to validate fields."""
         if fact.get("vm.dns_name"):
-            self.assertEqual(fact.get("vm.dns_name"), fingerprint.get("name"))
+            assert fact.get("vm.dns_name") == fingerprint.get("name")
         else:
-            self.assertEqual(fact.get("vm.name"), fingerprint.get("name"))
+            assert fact.get("vm.name") == fingerprint.get("name")
 
-        self.assertEqual(fact.get("vm.os"), fingerprint.get("os_release"))
+        assert fact.get("vm.os") == fingerprint.get("os_release")
 
-        self.assertEqual(fact.get("vm.ip_addresses"), fingerprint.get("ip_addresses"))
-        self.assertEqual(fact.get("vm.mac_addresses"), fingerprint.get("mac_addresses"))
-        self.assertEqual(fact.get("vm.cpu_count"), fingerprint.get("cpu_count"))
+        assert fact.get("vm.ip_addresses") == fingerprint.get("ip_addresses")
+        assert fact.get("vm.mac_addresses") == fingerprint.get("mac_addresses")
+        assert fact.get("vm.cpu_count") == fingerprint.get("cpu_count")
 
-        self.assertEqual(fact.get("vm.state"), fingerprint.get("vm_state"))
+        assert fact.get("vm.state") == fingerprint.get("vm_state")
 
-        self.assertEqual(fact.get("vm.uuid"), fingerprint.get("vm_uuid"))
+        assert fact.get("vm.uuid") == fingerprint.get("vm_uuid")
 
-        self.assertEqual(fact.get("vm.dns_name"), fingerprint.get("vm_dns_name"))
-        self.assertEqual(fact.get("vm.host.name"), fingerprint.get("virtual_host_name"))
+        assert fact.get("vm.dns_name") == fingerprint.get("vm_dns_name")
+        assert fact.get("vm.host.name") == fingerprint.get("virtual_host_name")
 
-        self.assertEqual(
-            fact.get("vm.host.cpu_count"), fingerprint.get("vm_host_socket_count")
-        )
-        self.assertEqual(
-            fact.get("vm.host.cpu_cores"), fingerprint.get("vm_host_core_count")
-        )
-        self.assertEqual(fact.get("vm.datacenter"), fingerprint.get("vm_datacenter"))
-        self.assertEqual(fact.get("vm.cluster"), fingerprint.get("vm_cluster"))
-        self.assertEqual(fact.get("uname_processor"), fingerprint.get("architecture"))
-        self.assertEqual(fact.get("is_redhat"), fingerprint.get("is_redhat"))
+        assert fact.get("vm.host.cpu_count") == fingerprint.get("vm_host_socket_count")
+        assert fact.get("vm.host.cpu_cores") == fingerprint.get("vm_host_core_count")
+        assert fact.get("vm.datacenter") == fingerprint.get("vm_datacenter")
+        assert fact.get("vm.cluster") == fingerprint.get("vm_cluster")
+        assert fact.get("uname_processor") == fingerprint.get("architecture")
+        assert fact.get("is_redhat") == fingerprint.get("is_redhat")
 
     def _validate_satellite_result(self, fingerprint, fact):
         """Help to validate fields."""
-        self.assertEqual(fact.get("hostname"), fingerprint.get("name"))
+        assert fact.get("hostname") == fingerprint.get("name")
 
-        self.assertEqual(fact.get("os_name"), fingerprint.get("os_name"))
-        self.assertEqual(fact.get("os_release"), fingerprint.get("os_release"))
-        self.assertEqual(fact.get("os_version"), fingerprint.get("os_version"))
+        assert fact.get("os_name") == fingerprint.get("os_name")
+        assert fact.get("os_release") == fingerprint.get("os_release")
+        assert fact.get("os_version") == fingerprint.get("os_version")
 
-        self.assertEqual(fact.get("cores"), fingerprint.get("cpu_count"))
-        self.assertEqual(fact.get("ip_addresses"), fingerprint.get("ip_addresses"))
-        self.assertEqual(fact.get("mac_addresses"), fingerprint.get("mac_addresses"))
-        self.assertEqual(
-            fact.get("registration_time"), fingerprint.get("registration_time")
-        )
-        self.assertEqual(fact.get("uuid"), fingerprint.get("subscription_manager_id"))
+        assert fact.get("cores") == fingerprint.get("cpu_count")
+        assert fact.get("ip_addresses") == fingerprint.get("ip_addresses")
+        assert fact.get("mac_addresses") == fingerprint.get("mac_addresses")
+        assert fact.get("registration_time") == fingerprint.get("registration_time")
+        assert fact.get("uuid") == fingerprint.get("subscription_manager_id")
         if fact.get("hostname", "").endswith(
             tuple("-" + str(num) for num in range(1, 10))
         ) and fact.get("hostname").startswith("virt-who-"):
-            self.assertEqual("hypervisor", fingerprint.get("infrastructure_type"))
+            assert "hypervisor" == fingerprint.get("infrastructure_type")
         else:
-            self.assertEqual("virtualized", fingerprint.get("infrastructure_type"))
+            assert "virtualized" == fingerprint.get("infrastructure_type")
 
-        self.assertEqual(fact.get("cores"), fingerprint.get("cpu_core_count"))
-        self.assertEqual(fact.get("num_sockets"), fingerprint.get("cpu_socket_count"))
-        self.assertEqual(fact.get("architecture"), fingerprint.get("architecture"))
-        self.assertEqual(fact.get("is_redhat"), fingerprint.get("is_redhat"))
+        assert fact.get("cores") == fingerprint.get("cpu_core_count")
+        assert fact.get("num_sockets") == fingerprint.get("cpu_socket_count")
+        assert fact.get("architecture") == fingerprint.get("architecture")
+        assert fact.get("is_redhat") == fingerprint.get("is_redhat")
 
     def _create_network_fingerprint(self, *args, **kwargs):
         """Create test network fingerprint."""
@@ -746,7 +719,7 @@ class EngineTest(TestCase):
         n_cpu_count = nfingerprints[0]["cpu_count"]
         v_cpu_count = vfingerprints[0]["cpu_count"]
         v_name = vfingerprints[0]["name"]
-        self.assertNotEqual(n_cpu_count, v_cpu_count)
+        assert n_cpu_count != v_cpu_count
 
         reverse_priority_keys = {"cpu_count"}
         (
@@ -758,13 +731,13 @@ class EngineTest(TestCase):
             vfingerprints,
             reverse_priority_keys=reverse_priority_keys,
         )
-        self.assertEqual(len(result_fingerprints), 3)
+        assert len(result_fingerprints) == 3
 
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get("vm_uuid") == "match":
-                self.assertEqual(result_fingerprint.get("cpu_count"), v_cpu_count)
-                self.assertNotEqual(result_fingerprint.get("cpu_count"), n_cpu_count)
-                self.assertNotEqual(result_fingerprint.get("name"), v_name)
+                assert result_fingerprint.get("cpu_count") == v_cpu_count
+                assert result_fingerprint.get("cpu_count") != n_cpu_count
+                assert result_fingerprint.get("name") != v_name
 
     def test_merge_network_and_vcenter_infrastructure_type(self):
         """Test if VCenter infrastructure_type is prefered over network."""
@@ -777,9 +750,9 @@ class EngineTest(TestCase):
         # change infrastructure_type to bypass the validation
         nfingerprints[0]["infrastructure_type"] = "unknown"
         vfingerprints[0]["infrastructure_type"] = "virtualized"
-        self.assertNotEqual(
-            nfingerprints[0]["infrastructure_type"],
-            vfingerprints[0]["infrastructure_type"],
+        assert (
+            nfingerprints[0]["infrastructure_type"]
+            != vfingerprints[0]["infrastructure_type"]
         )
 
         reverse_priority_keys = {"cpu_count", "infrastructure_type"}
@@ -794,32 +767,30 @@ class EngineTest(TestCase):
         )
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get("vm_uuid") == "match":
-                self.assertEqual(
-                    result_fingerprint.get("infrastructure_type"), "virtualized"
-                )
+                assert result_fingerprint.get("infrastructure_type") == "virtualized"
 
     def test_merge_mac_address_case_insensitive(self):
         """Test if fingerprints will be merged with mixed mac addr."""
         n_mac = ["00:50:56:A3:A2:E8", "00:50:56:c3:d2:m8"]
         v_mac = ["00:50:56:a3:a2:e8", "00:50:56:C3:D2:m8"]
         s_mac = ["00:50:56:A3:a2:E8", "00:50:56:C3:D2:M8"]
-        self.assertNotEqual(v_mac, n_mac)
-        self.assertNotEqual(v_mac, s_mac)
+        assert v_mac != n_mac
+        assert v_mac != s_mac
         nfingerprints = [self._create_network_fingerprint(ifconfig_mac_addresses=n_mac)]
         vfingerprints = [self._create_vcenter_fingerprint(vm_mac_addresses=v_mac)]
         sfingerprints = [self._create_satellite_fingerprint(mac_addresses=s_mac)]
         v_mac_addresses = vfingerprints[0]["mac_addresses"]
         n_mac_addresses = nfingerprints[0]["mac_addresses"]
         s_mac_addresses = sfingerprints[0]["mac_addresses"]
-        self.assertEqual(v_mac_addresses, n_mac_addresses)
-        self.assertEqual(v_mac_addresses, s_mac_addresses)
+        assert v_mac_addresses == n_mac_addresses
+        assert v_mac_addresses == s_mac_addresses
         (
             _,
             result_fingerprints,
         ) = self.fp_task_runner._merge_fingerprints_from_source_types(
             NETWORK_SATELLITE_MERGE_KEYS, nfingerprints, sfingerprints
         )
-        self.assertEqual(len(result_fingerprints), 1)
+        assert len(result_fingerprints) == 1
         reverse_priority_keys = {"cpu_count", "infrastructure_type"}
         (
             _,
@@ -830,7 +801,7 @@ class EngineTest(TestCase):
             vfingerprints,
             reverse_priority_keys=reverse_priority_keys,
         )
-        self.assertEqual(len(result_fingerprints), 1)
+        assert len(result_fingerprints) == 1
 
     def test_merge_net_sate_vcenter_infrastructure_type(self):
         """Test if VCenter infrastructure_type is prefered over the others."""
@@ -853,7 +824,7 @@ class EngineTest(TestCase):
         )
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get("vm_uuid") == "match":
-                self.assertEqual(result_fingerprint.get("infrastructure_type"), "test")
+                assert result_fingerprint.get("infrastructure_type") == "test"
         reverse_priority_keys = {"cpu_count", "infrastructure_type"}
         (
             _,
@@ -866,9 +837,7 @@ class EngineTest(TestCase):
         )
         for result_fingerprint in result_fingerprints:
             if result_fingerprint.get("vm_uuid") == "match":
-                self.assertEqual(
-                    result_fingerprint.get("infrastructure_type"), "virtualized"
-                )
+                assert result_fingerprint.get("infrastructure_type") == "virtualized"
 
     def test_merge_matching_fingerprints(self):
         """Test merge of two lists of fingerprints."""
@@ -979,27 +948,27 @@ class EngineTest(TestCase):
         }
 
         # merge list should always contain all nfingerprints (base_list)
-        self.assertEqual(len(merge_list), 3)
-        self.assertTrue(expected_merge_fingerprint in merge_list)
-        self.assertTrue(nfingerprint_no_match in merge_list)
-        self.assertTrue(nfingerprint_no_key in merge_list)
+        assert len(merge_list) == 3
+        assert expected_merge_fingerprint in merge_list
+        assert nfingerprint_no_match in merge_list
+        assert nfingerprint_no_key in merge_list
 
         # assert VM property merged
-        self.assertIsNotNone(expected_merge_fingerprint.get("vm_uuid"))
+        assert expected_merge_fingerprint.get("vm_uuid") is not None
 
         # assert network os_release had priority
-        self.assertEqual(expected_merge_fingerprint.get("os_release"), "RHEL 7")
-        self.assertEqual(expected_merge_fingerprint.get("sources"), merged_sources)
+        assert expected_merge_fingerprint.get("os_release") == "RHEL 7"
+        assert expected_merge_fingerprint.get("sources") == merged_sources
 
         # assert those that didn't match, don't have VM properties
-        self.assertIsNone(nfingerprint_no_match.get("vm_uuid"))
-        self.assertIsNone(nfingerprint_no_key.get("vm_uuid"))
+        assert nfingerprint_no_match.get("vm_uuid") is None
+        assert nfingerprint_no_key.get("vm_uuid") is None
 
         # no_match_found list should only contain vfingerprints
         #  with no match
-        self.assertEqual(len(no_match_found_list), 2)
-        self.assertTrue(vfingerprint_no_match in no_match_found_list)
-        self.assertTrue(vfingerprint_no_key in no_match_found_list)
+        assert len(no_match_found_list) == 2
+        assert vfingerprint_no_match in no_match_found_list
+        assert vfingerprint_no_key in no_match_found_list
 
     def test_remove_duplicate_fingerprints(self):
         """Test remove duplicate fingerprints created by index."""
@@ -1022,22 +991,22 @@ class EngineTest(TestCase):
             "mac_addresses", fingerprints
         )
 
-        self.assertEqual(len(no_key_found), 1)
-        self.assertEqual(no_key_found[0]["id"], 3)
-        self.assertIsNotNone(no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY))
-        self.assertEqual(len(index.keys()), 4)
-        self.assertIsNotNone(index.get("1234"))
-        self.assertIsNotNone(index.get("2345"))
-        self.assertIsNotNone(index.get("9876"))
-        self.assertIsNotNone(index.get("8765"))
+        assert len(no_key_found) == 1
+        assert no_key_found[0]["id"] == 3
+        assert no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY) is not None
+        assert len(index.keys()) == 4
+        assert index.get("1234") is not None
+        assert index.get("2345") is not None
+        assert index.get("9876") is not None
+        assert index.get("8765") is not None
 
         # deplicate but leave unique key
         leave_key_list = list(index.values())
         unique_list = self.fp_task_runner._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], leave_key_list
         )
-        self.assertEqual(len(unique_list), 2)
-        self.assertIsNotNone(unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY))
+        assert len(unique_list) == 2
+        assert unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY) is not None
 
         # same test, but add value that doesn't have key
         leave_key_list = list(index.values())
@@ -1045,15 +1014,15 @@ class EngineTest(TestCase):
         unique_list = self.fp_task_runner._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], leave_key_list
         )
-        self.assertEqual(len(unique_list), 3)
+        assert len(unique_list) == 3
 
         # now pass flag to strip id key
         remove_key_list = list(index.values())
         unique_list = self.fp_task_runner._remove_duplicate_fingerprints(
             [FINGERPRINT_GLOBAL_ID_KEY], remove_key_list, True
         )
-        self.assertEqual(len(unique_list), 2)
-        self.assertIsNone(unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY))
+        assert len(unique_list) == 2
+        assert unique_list[0].get(FINGERPRINT_GLOBAL_ID_KEY) is None
 
     def test_create_index_for_fingerprints(self):
         """Test create index for fingerprints."""
@@ -1067,57 +1036,57 @@ class EngineTest(TestCase):
         index, no_key_found = self.fp_task_runner._create_index_for_fingerprints(
             "bios_uuid", fingerprints, False
         )
-        self.assertIsNone(no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY))
+        assert no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY) is None
 
         # Tests with unique id in objects
         index, no_key_found = self.fp_task_runner._create_index_for_fingerprints(
             "bios_uuid", fingerprints
         )
 
-        self.assertEqual(len(no_key_found), 1)
-        self.assertEqual(no_key_found[0]["id"], 3)
-        self.assertIsNotNone(no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY))
-        self.assertEqual(len(index.keys()), 2)
-        self.assertIsNotNone(index.get("1234"))
-        self.assertIsNotNone(index.get("2345"))
+        assert len(no_key_found) == 1
+        assert no_key_found[0]["id"] == 3
+        assert no_key_found[0].get(FINGERPRINT_GLOBAL_ID_KEY) is not None
+        assert len(index.keys()) == 2
+        assert index.get("1234") is not None
+        assert index.get("2345") is not None
 
     def test_merge_fingerprint(self):
         """Test merging a vcenter and network fingerprint."""
         nfingerprint = self._create_network_fingerprint()
         vfingerprint = self._create_vcenter_fingerprint()
 
-        self.assertIsNone(nfingerprint.get("vm_state"))
-        self.assertIsNone(nfingerprint.get("vm_uuid"))
-        self.assertIsNone(nfingerprint.get("vm_dns_name"))
-        self.assertIsNone(nfingerprint.get("vm_host_socket_count"))
-        self.assertIsNone(nfingerprint.get("vm_datacenter"))
-        self.assertIsNone(nfingerprint.get("vm_cluster"))
+        assert nfingerprint.get("vm_state") is None
+        assert nfingerprint.get("vm_uuid") is None
+        assert nfingerprint.get("vm_dns_name") is None
+        assert nfingerprint.get("vm_host_socket_count") is None
+        assert nfingerprint.get("vm_datacenter") is None
+        assert nfingerprint.get("vm_cluster") is None
 
-        self.assertIsNone(vfingerprint.get("os_name"))
-        self.assertIsNone(vfingerprint.get("os_version"))
-        self.assertIsNone(vfingerprint.get("bios_uuid"))
-        self.assertIsNone(vfingerprint.get("subscription_manager_id"))
-        self.assertIsNone(vfingerprint.get("cpu_socket_count"))
-        self.assertIsNone(vfingerprint.get("cpu_core_count"))
+        assert vfingerprint.get("os_name") is None
+        assert vfingerprint.get("os_version") is None
+        assert vfingerprint.get("bios_uuid") is None
+        assert vfingerprint.get("subscription_manager_id") is None
+        assert vfingerprint.get("cpu_socket_count") is None
+        assert vfingerprint.get("cpu_core_count") is None
 
         new_fingerprint = self.fp_task_runner._merge_fingerprint(
             nfingerprint, vfingerprint
         )
 
-        self.assertIsNotNone(new_fingerprint.get("vm_state"))
-        self.assertIsNotNone(new_fingerprint.get("vm_uuid"))
-        self.assertIsNotNone(new_fingerprint.get("vm_dns_name"))
-        self.assertIsNotNone(new_fingerprint.get("vm_host_socket_count"))
-        self.assertIsNotNone(new_fingerprint.get("vm_datacenter"))
-        self.assertIsNotNone(new_fingerprint.get("vm_cluster"))
+        assert new_fingerprint.get("vm_state") is not None
+        assert new_fingerprint.get("vm_uuid") is not None
+        assert new_fingerprint.get("vm_dns_name") is not None
+        assert new_fingerprint.get("vm_host_socket_count") is not None
+        assert new_fingerprint.get("vm_datacenter") is not None
+        assert new_fingerprint.get("vm_cluster") is not None
 
-        self.assertIsNotNone(new_fingerprint.get("name"))
-        self.assertIsNotNone(new_fingerprint.get("os_name"))
-        self.assertIsNotNone(new_fingerprint.get("os_version"))
-        self.assertIsNotNone(new_fingerprint.get("bios_uuid"))
-        self.assertIsNotNone(new_fingerprint.get("subscription_manager_id"))
-        self.assertIsNotNone(new_fingerprint.get("cpu_socket_count"))
-        self.assertIsNotNone(new_fingerprint.get("cpu_core_count"))
+        assert new_fingerprint.get("name") is not None
+        assert new_fingerprint.get("os_name") is not None
+        assert new_fingerprint.get("os_version") is not None
+        assert new_fingerprint.get("bios_uuid") is not None
+        assert new_fingerprint.get("subscription_manager_id") is not None
+        assert new_fingerprint.get("cpu_socket_count") is not None
+        assert new_fingerprint.get("cpu_core_count") is not None
 
     def assert_all_fingerprints_have_sudo(self, metadata_dict):
         """
@@ -1126,14 +1095,11 @@ class EngineTest(TestCase):
         If its not True, all offending fingerprints will appear on the error log.
         """
         # fp <<< abbreviation for fingerprint
-        self.assertTrue(
-            all(fp_meta["has_sudo"] for fp_meta in metadata_dict.values()),
-            [
-                fp_name
-                for fp_name, fp_meta in metadata_dict.items()
-                if not fp_meta["has_sudo"]
-            ],
-        )
+        assert all(fp_meta["has_sudo"] for fp_meta in metadata_dict.values()), [
+            fp_name
+            for fp_name, fp_meta in metadata_dict.items()
+            if not fp_meta["has_sudo"]
+        ]
         return True
 
     def test_assert_all_fingerprints_have_sudo(self):
@@ -1141,7 +1107,7 @@ class EngineTest(TestCase):
         fake_fingerprints = {"foo": {"has_sudo": True}, "bar": {"has_sudo": True}}
         self.assert_all_fingerprints_have_sudo(fake_fingerprints)
         fake_fingerprints["foo"]["has_sudo"] = False
-        with self.assertRaisesMessage(AssertionError, "False is not true : ['foo']"):
+        with pytest.raises(AssertionError, match="['foo']"):
             self.assert_all_fingerprints_have_sudo(fake_fingerprints)
 
     def test_merge_fingerprint_sudo(self):
@@ -1158,7 +1124,7 @@ class EngineTest(TestCase):
         result = self.fp_task_runner._merge_fingerprint(
             sudo_fingerprint, regular_fingerprint
         )
-        self.assertEqual(result, sudo_fingerprint)
+        assert result == sudo_fingerprint
         self.assert_all_fingerprints_have_sudo(result["metadata"])
 
         # Test that sudo is preferred when part of to merge fingerprint
@@ -1181,13 +1147,13 @@ class EngineTest(TestCase):
         vfingerprint = self._create_vcenter_fingerprint()
 
         nfingerprint["os_release"] = "Fedora"
-        self.assertNotEqual(vfingerprint.get("os_release"), nfingerprint["os_release"])
+        assert vfingerprint.get("os_release") != nfingerprint["os_release"]
 
         new_fingerprint = self.fp_task_runner._merge_fingerprint(
             nfingerprint, vfingerprint
         )
 
-        self.assertEqual(new_fingerprint.get("os_release"), nfingerprint["os_release"])
+        assert new_fingerprint.get("os_release") == nfingerprint["os_release"]
 
     def test_source_name_in_metadata(self):
         """Test that adding facts includes source_name in metadata."""
@@ -1198,9 +1164,7 @@ class EngineTest(TestCase):
         }
         fingerprint = {"metadata": {}}
         result = self.fp_task_runner._process_network_fact(sourcetopass, fingerprint)
-        self.assertEqual(
-            result["metadata"]["infrastructure_type"]["source_name"], "source1"
-        )
+        assert result["metadata"]["infrastructure_type"]["source_name"] == "source1"
 
     def test_all_facts_with_null_value_in_process_network_scan(self):
         """Test fingerprinting method with all facts set to null value."""
@@ -1212,9 +1176,7 @@ class EngineTest(TestCase):
         facts_dict = network_template()
         result = self.fp_task_runner._process_network_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
-        self.assertEqual(
-            set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
-        )
+        assert set(metadata_dict.keys()) == set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
         assert {
             fingerprint_name: {
                 "server_id": self.server_id,
@@ -1233,7 +1195,7 @@ class EngineTest(TestCase):
         expected_fingerprints[PRODUCTS_KEY] = mock.ANY
         expected_fingerprints[ENTITLEMENTS_KEY] = []
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
-        self.assertDictEqual(result, expected_fingerprints)
+        assert result == expected_fingerprints
 
     def test_scan_all_facts_with_null_value_in_process_vcenter_scan(self):
         """Test fingerprinting method with all facts set to null value."""
@@ -1245,9 +1207,7 @@ class EngineTest(TestCase):
         facts_dict = vcenter_template()
         result = self.fp_task_runner._process_vcenter_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
-        self.assertEqual(
-            set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_VCENTER.keys())
-        )
+        assert set(metadata_dict.keys()) == set(EXPECTED_FINGERPRINT_MAP_VCENTER.keys())
         assert {
             fingerprint_name: {
                 "server_id": self.server_id,
@@ -1267,7 +1227,7 @@ class EngineTest(TestCase):
         expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
         expected_fingerprints[PRODUCTS_KEY] = []
         expected_fingerprints[ENTITLEMENTS_KEY] = []
-        self.assertDictEqual(result, expected_fingerprints)
+        assert result == expected_fingerprints
 
     def test_scan_all_facts_with_null_value_in_process_satellite_scan(self):
         """Test fingerprinting method with all facts set to null value."""
@@ -1280,23 +1240,21 @@ class EngineTest(TestCase):
         result = self.fp_task_runner._process_satellite_fact(source_dict, facts_dict)
         metadata_dict = result.pop(META_DATA_KEY)
 
-        self.assertEqual(
-            set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_SATELLITE.keys())
+        assert set(metadata_dict.keys()) == set(
+            EXPECTED_FINGERPRINT_MAP_SATELLITE.keys()
         )
 
-        self.assertDictEqual(
-            {
-                fingerprint_name: {
-                    "server_id": self.server_id,
-                    "source_name": "source3",
-                    "source_type": DataSources.SATELLITE,
-                    "has_sudo": False,
-                    "raw_fact_key": fact_name,
-                }
-                for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_SATELLITE.items()  # noqa E501
-            },
-            metadata_dict,
-        )
+        assert {
+            fingerprint_name: {
+                "server_id": self.server_id,
+                "source_name": "source3",
+                "source_type": DataSources.SATELLITE,
+                "has_sudo": False,
+                "raw_fact_key": fact_name,
+            }
+            for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_SATELLITE.items()  # noqa E501
+        } == metadata_dict
+
         expected_fingerprints = {
             fingerprint_name: None
             for fingerprint_name in EXPECTED_FINGERPRINT_MAP_SATELLITE
@@ -1335,7 +1293,7 @@ class EngineTest(TestCase):
         ) = self.fp_task_runner._merge_fingerprints_from_source_types(
             NETWORK_SATELLITE_MERGE_KEYS, nfingerprints, sfingerprints
         )
-        self.assertEqual(len(result_fingerprints), 1)
+        assert len(result_fingerprints) == 1
         fp = result_fingerprints[0]
         fp["date_yum_history"] = "2018-1-7"
         fp["date_filesystem_create"] = None
@@ -1345,9 +1303,9 @@ class EngineTest(TestCase):
         self.fp_task_runner._compute_system_creation_time(fp)
         test_date = datetime.strptime("2018-4-7", "%Y-%m-%d").date()
 
-        self.assertEqual(fp["system_creation_date"], test_date)
+        assert fp["system_creation_date"] == test_date
         metadata = fp["metadata"]["system_creation_date"]["raw_fact_key"]
-        self.assertEqual("registration_time", metadata)
+        assert "registration_time" == metadata
 
     ################################################################
     # Test multi_format_dateparse
@@ -1362,7 +1320,7 @@ class EngineTest(TestCase):
             "2018-4-7 12:45:02",
             ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"],
         )
-        self.assertEqual(date_value, test_date)
+        assert date_value == test_date
 
         date_value = self.fp_task_runner._multi_format_dateparse(
             source,
@@ -1370,12 +1328,12 @@ class EngineTest(TestCase):
             "2018-4-7 12:45:02 -0400",
             ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"],
         )
-        self.assertEqual(date_value, test_date)
+        assert date_value == test_date
 
         date_value = self.fp_task_runner._multi_format_dateparse(
             source, "fake_key", "2018-4-7 12:45:02 -0400", ["%Y-%m-%d %H:%M:%S"]
         )
-        self.assertIsNone(date_value)
+        assert date_value is None
 
     def test_process_details_report_failed(self):
         """Test processing a details report no valid fps."""
@@ -1390,8 +1348,8 @@ class EngineTest(TestCase):
                 "", details_report
             )
 
-            self.assertIn("failed", status_message.lower())
-            self.assertEqual(status, "failed")
+            assert "failed" in status_message.lower()
+            assert status == "failed"
 
     def test_process_details_report_success(self):
         """Test processing a details report success."""
@@ -1413,8 +1371,8 @@ class EngineTest(TestCase):
             status_message, status = self.fp_task_runner._process_details_report(
                 "", details_report
             )
-        self.assertIn("success", status_message.lower())
-        self.assertEqual(status, "completed")
+        assert "success" in status_message.lower()
+        assert status == "completed"
 
     def test_process_details_report_exception(self):
         """Test processing a details report with an exception."""
@@ -1438,19 +1396,19 @@ class EngineTest(TestCase):
                     "", details_report
                 )
 
-                self.assertIn("failed", status_message.lower())
-                self.assertEqual(status, "failed")
+                assert "failed" in status_message.lower()
+                assert status == "failed"
 
     def test_format_certs(self):
         """Testing the format_certs function."""
         certs = ["69.pem", "67.pem", ""]
         formatted_certs = FingerprintTaskRunner.format_certs(certs)
-        self.assertEqual([69, 67], formatted_certs)
+        assert [69, 67] == formatted_certs
         # assert empty list stays empty
         certs = []
         formatted_certs = FingerprintTaskRunner.format_certs(certs)
-        self.assertEqual([], formatted_certs)
+        assert [] == formatted_certs
         # assert exception returns empty
         certs = ["notint.pem"]
         formatted_certs = FingerprintTaskRunner.format_certs(certs)
-        self.assertEqual([], formatted_certs)
+        assert [] == formatted_certs

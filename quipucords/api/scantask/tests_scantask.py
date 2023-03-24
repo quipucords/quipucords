@@ -55,16 +55,13 @@ class ScanTaskTest(TestCase):
         )
         serializer = ScanTaskSerializer(task)
         json_task = serializer.data
-        self.assertEqual(
-            {
-                "sequence_number": 0,
-                "source": 1,
-                "scan_type": ScanTask.SCAN_TYPE_CONNECT,
-                "status": "pending",
-                "status_message": messages.ST_STATUS_MSG_PENDING,
-            },
-            json_task,
-        )
+        assert {
+            "sequence_number": 0,
+            "source": 1,
+            "scan_type": ScanTask.SCAN_TYPE_CONNECT,
+            "status": "pending",
+            "status_message": messages.ST_STATUS_MSG_PENDING,
+        } == json_task
 
     def test_successful_start(self):
         """Create a scan task and start it."""
@@ -77,10 +74,10 @@ class ScanTaskTest(TestCase):
         start_time = datetime.utcnow()
         task.start()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_RUNNING, task.status_message)
-        self.assertEqual(task.status, ScanTask.RUNNING)
-        self.assertEqual(
-            start_time.replace(microsecond=0), task.start_time.replace(microsecond=0)
+        assert messages.ST_STATUS_MSG_RUNNING == task.status_message
+        assert task.status == ScanTask.RUNNING
+        assert start_time.replace(microsecond=0) == task.start_time.replace(
+            microsecond=0
         )
 
     def test_successful_restart(self):
@@ -93,8 +90,8 @@ class ScanTaskTest(TestCase):
         )
         task.restart()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_RESTARTED, task.status_message)
-        self.assertEqual(task.status, ScanTask.PENDING)
+        assert messages.ST_STATUS_MSG_RESTARTED == task.status_message
+        assert task.status == ScanTask.PENDING
 
     def test_successful_pause(self):
         """Create a scan task and pause it."""
@@ -106,8 +103,8 @@ class ScanTaskTest(TestCase):
         )
         task.pause()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_PAUSED, task.status_message)
-        self.assertEqual(task.status, ScanTask.PAUSED)
+        assert messages.ST_STATUS_MSG_PAUSED == task.status_message
+        assert task.status == ScanTask.PAUSED
 
     def test_successful_cancel(self):
         """Create a scan task and cancel it."""
@@ -120,11 +117,9 @@ class ScanTaskTest(TestCase):
         end_time = datetime.utcnow()
         task.cancel()
         task.save()
-        self.assertEqual(messages.ST_STATUS_MSG_CANCELED, task.status_message)
-        self.assertEqual(task.status, ScanTask.CANCELED)
-        self.assertEqual(
-            end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
-        )
+        assert messages.ST_STATUS_MSG_CANCELED == task.status_message
+        assert task.status == ScanTask.CANCELED
+        assert end_time.replace(microsecond=0) == task.end_time.replace(microsecond=0)
 
     def test_successful_complete(self):
         """Create a scan task and complete it."""
@@ -137,11 +132,9 @@ class ScanTaskTest(TestCase):
         end_time = datetime.utcnow()
         task.complete("great")
         task.save()
-        self.assertEqual("great", task.status_message)
-        self.assertEqual(task.status, ScanTask.COMPLETED)
-        self.assertEqual(
-            end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
-        )
+        assert "great" == task.status_message
+        assert task.status == ScanTask.COMPLETED
+        assert end_time.replace(microsecond=0) == task.end_time.replace(microsecond=0)
 
     def test_scantask_fail(self):
         """Create a scan task and fail it."""
@@ -156,11 +149,9 @@ class ScanTaskTest(TestCase):
         end_time = datetime.utcnow()
         task.fail(MSG)
         task.save()
-        self.assertEqual(MSG, task.status_message)
-        self.assertEqual(task.status, ScanTask.FAILED)
-        self.assertEqual(
-            end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
-        )
+        assert MSG == task.status_message
+        assert task.status == ScanTask.FAILED
+        assert end_time.replace(microsecond=0) == task.end_time.replace(microsecond=0)
 
     def test_scantask_increment(self):
         """Test scan task increment feature."""
@@ -179,10 +170,10 @@ class ScanTaskTest(TestCase):
             increment_sys_failed=True,
             increment_sys_unreachable=True,
         )
-        self.assertEqual(1, task.systems_count)
-        self.assertEqual(1, task.systems_scanned)
-        self.assertEqual(1, task.systems_failed)
-        self.assertEqual(1, task.systems_unreachable)
+        assert 1 == task.systems_count
+        assert 1 == task.systems_scanned
+        assert 1 == task.systems_failed
+        assert 1 == task.systems_unreachable
         task.increment_stats(
             "foo",
             increment_sys_count=True,
@@ -190,10 +181,10 @@ class ScanTaskTest(TestCase):
             increment_sys_failed=True,
             increment_sys_unreachable=True,
         )
-        self.assertEqual(2, task.systems_count)
-        self.assertEqual(2, task.systems_scanned)
-        self.assertEqual(2, task.systems_failed)
-        self.assertEqual(2, task.systems_unreachable)
+        assert 2 == task.systems_count
+        assert 2 == task.systems_scanned
+        assert 2 == task.systems_failed
+        assert 2 == task.systems_unreachable
 
     def test_scantask_reset_stats(self):
         """Test scan task reset stat feature."""
@@ -212,15 +203,15 @@ class ScanTaskTest(TestCase):
             increment_sys_failed=True,
             increment_sys_unreachable=True,
         )
-        self.assertEqual(1, task.systems_count)
-        self.assertEqual(1, task.systems_scanned)
-        self.assertEqual(1, task.systems_failed)
-        self.assertEqual(1, task.systems_unreachable)
+        assert 1 == task.systems_count
+        assert 1 == task.systems_scanned
+        assert 1 == task.systems_failed
+        assert 1 == task.systems_unreachable
         task.reset_stats()
-        self.assertEqual(None, task.systems_count)
-        self.assertEqual(None, task.systems_scanned)
-        self.assertEqual(None, task.systems_failed)
-        self.assertEqual(None, task.systems_unreachable)
+        assert None is task.systems_count
+        assert None is task.systems_scanned
+        assert None is task.systems_failed
+        assert None is task.systems_unreachable
 
         (
             systems_count,
@@ -229,10 +220,10 @@ class ScanTaskTest(TestCase):
             systems_unreachable,
         ) = task.calculate_counts()
 
-        self.assertEqual(systems_count, 0)
-        self.assertEqual(systems_scanned, 0)
-        self.assertEqual(systems_failed, 0)
-        self.assertEqual(systems_unreachable, 0)
+        assert systems_count == 0
+        assert systems_scanned == 0
+        assert systems_failed == 0
+        assert systems_unreachable == 0
 
     def test_calculate_counts(self):
         """Test calculate counts."""
@@ -257,7 +248,7 @@ class ScanTaskTest(TestCase):
             systems_failed,
             systems_unreachable,
         ) = task.calculate_counts()
-        self.assertEqual(systems_count, 1)
-        self.assertEqual(systems_scanned, 1)
-        self.assertEqual(systems_failed, 1)
-        self.assertEqual(systems_unreachable, 1)
+        assert systems_count == 1
+        assert systems_scanned == 1
+        assert systems_failed == 1
+        assert systems_unreachable == 1

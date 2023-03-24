@@ -45,7 +45,7 @@ class VCenterUtilsTest(TestCase):
             "scanner.vcenter.utils.SmartConnectNoSSL", return_value=mock_vcenter
         ) as mock_smart_connect:
             vcenter = vcenter_connect(self.scan_task)
-            self.assertEqual(mock_vcenter, vcenter)
+            assert mock_vcenter == vcenter
             mock_smart_connect.assert_called_once_with(
                 host=ANY, user=ANY, pwd=ANY, port=ANY
             )

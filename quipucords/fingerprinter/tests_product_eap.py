@@ -17,11 +17,11 @@ class TestVersionAwareDedup(unittest.TestCase):
 
     def test_dedup(self):
         """Dedup redundant version numbers."""
-        self.assertEqual(version_aware_dedup(["1", "1.0", "1.0.1"]), {"1.0.1"})
+        assert version_aware_dedup(["1", "1.0", "1.0.1"]) == {"1.0.1"}
 
     def test_empty_input(self):
         """Return an empty set for an empty input."""
-        self.assertEqual(version_aware_dedup([]), set())
+        assert version_aware_dedup([]) == set()
 
 
 class ProductEAPTest(TestCase):
@@ -56,7 +56,7 @@ class ProductEAPTest(TestCase):
                 "raw_fact_key": "eap_home_ls/jboss_eap_jar_ver",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     # pylint: disable=C0103
     def test_detect_jboss_eap_potential_common(self):
@@ -78,7 +78,7 @@ class ProductEAPTest(TestCase):
                 "raw_fact_key": "jboss_eap_common_files",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_eap_potential_sub(self):
         """Test the detect_jboss_eap method."""
@@ -99,7 +99,7 @@ class ProductEAPTest(TestCase):
                 "raw_fact_key": "subman_consumed",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_eap_potential_ent(self):
         """Test the detect_jboss_eap method."""
@@ -120,7 +120,7 @@ class ProductEAPTest(TestCase):
                 "raw_fact_key": "entitlements",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_eap_absent(self):
         """Test the detect_jboss_eap method."""
@@ -141,7 +141,7 @@ class ProductEAPTest(TestCase):
                 "raw_fact_key": None,
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
 
 class TestVerifyClassification(unittest.TestCase):
@@ -149,12 +149,12 @@ class TestVerifyClassification(unittest.TestCase):
 
     def test_wildfly(self):
         """Test that a wildfly version returns False."""
-        self.assertEqual(verify_classification("WildFly-10"), False)
+        assert verify_classification("WildFly-10") is False
 
     def test_jbossas(self):
         """Test that a jbossas version returns False."""
-        self.assertEqual(verify_classification("JBossAS-7"), False)
+        assert verify_classification("JBossAS-7") is False
 
     def test_eap(self):
         """Test that an eap version returns True."""
-        self.assertEqual(verify_classification("6.0.1"), True)
+        assert verify_classification("6.0.1") is True

@@ -25,4 +25,4 @@ class UserTest(TestCase):
         force_authenticate(request, user=self.user)
         user_current = UserViewSet.as_view({"get": "current"})
         response = user_current(request)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK

@@ -14,10 +14,10 @@ class TestProcessFindJbossActiveMQJar(unittest.TestCase):
     def test_success_case(self):
         """Return stdout_lines in case of success."""
         in_line = "redhat-620133; redhat-630187\n"
-        self.assertEqual(
-            fuse.ProcessFindJbossActiveMQJar.process(ansible_result(in_line)),
-            ["redhat-620133", "redhat-630187"],
-        )
+        assert fuse.ProcessFindJbossActiveMQJar.process(ansible_result(in_line)) == [
+            "redhat-620133",
+            "redhat-630187",
+        ]
 
 
 class TestProcessFindJbossCamelJar(unittest.TestCase):
@@ -26,10 +26,10 @@ class TestProcessFindJbossCamelJar(unittest.TestCase):
     def test_success_case(self):
         """Return stdout_lines in case of success."""
         in_line = "redhat-620133; redhat-630187\n"
-        self.assertEqual(
-            fuse.ProcessFindJbossCamelJar.process(ansible_result(in_line)),
-            ["redhat-620133", "redhat-630187"],
-        )
+        assert fuse.ProcessFindJbossCamelJar.process(ansible_result(in_line)) == [
+            "redhat-620133",
+            "redhat-630187",
+        ]
 
 
 class TestProcessFindJbossCXFJar(unittest.TestCase):
@@ -38,7 +38,7 @@ class TestProcessFindJbossCXFJar(unittest.TestCase):
     def test_success_case(self):
         """Return stdout_lines in case of success."""
         in_line = "redhat-620133; redhat-630187\n"
-        self.assertEqual(
-            fuse.ProcessFindJbossCXFJar.process(ansible_result(in_line)),
-            ["redhat-620133", "redhat-630187"],
-        )
+        assert fuse.ProcessFindJbossCXFJar.process(ansible_result(in_line)) == [
+            "redhat-620133",
+            "redhat-630187",
+        ]

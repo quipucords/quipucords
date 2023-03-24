@@ -12,14 +12,13 @@ class TestProcessIPAddresses(unittest.TestCase):
 
     def test_success_case(self):
         """Found IP."""
-        self.assertEqual(
-            ifconfig.ProcessIPAddresses.process(ansible_result("inet addr: 1.2.3.4")),
-            ["1.2.3.4"],
-        )
+        assert ifconfig.ProcessIPAddresses.process(
+            ansible_result("inet addr: 1.2.3.4")
+        ) == ["1.2.3.4"]
 
     def test_not_found(self):
         """Did not find IP."""
-        self.assertEqual(ifconfig.ProcessIPAddresses.process(ansible_result("")), [])
+        assert ifconfig.ProcessIPAddresses.process(ansible_result("")) == []
 
 
 class TestProcessMacAddresses(unittest.TestCase):
@@ -27,11 +26,10 @@ class TestProcessMacAddresses(unittest.TestCase):
 
     def test_success_case(self):
         """Found mac address."""
-        self.assertEqual(
-            ifconfig.ProcessMacAddresses.process(ansible_result("00:10:20:3a:40:b5")),
-            ["00:10:20:3a:40:b5"],
-        )
+        assert ifconfig.ProcessMacAddresses.process(
+            ansible_result("00:10:20:3a:40:b5")
+        ) == ["00:10:20:3a:40:b5"]
 
     def test_not_found(self):
         """Did not find mac address."""
-        self.assertEqual(ifconfig.ProcessMacAddresses.process(ansible_result("")), [])
+        assert ifconfig.ProcessMacAddresses.process(ansible_result("")) == []

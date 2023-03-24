@@ -46,14 +46,14 @@ class ScanTest(TestCase):
     def create_expect_400(self, data, expected_response):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print("Cause of failure: ")
             print(f"expected: {expected_response}")
             print(f"actual: {response_json}")
 
-        self.assertEqual(response_json, expected_response)
+        assert response_json == expected_response
 
     def create_expect_201(self, data):
         """Create a scan, return the response as a dict."""
@@ -63,7 +63,7 @@ class ScanTest(TestCase):
             print("Cause of failure: ")
             print(response_json)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response_json
 
     def test_successful_create(self):
@@ -74,7 +74,7 @@ class ScanTest(TestCase):
             "scan_type": ScanTask.SCAN_TYPE_CONNECT,
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_create_no_name(self):
         """A create request must have a name."""
@@ -162,9 +162,9 @@ class ScanTest(TestCase):
             },
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
-        self.assertIn("scan_type", response)
-        self.assertEqual(response["scan_type"], ScanTask.SCAN_TYPE_INSPECT)
+        assert "id" in response
+        assert "scan_type" in response
+        assert response["scan_type"] == ScanTask.SCAN_TYPE_INSPECT
 
     def test_create_invalid_source(self):
         """The Source name must valid."""
@@ -227,7 +227,7 @@ class ScanTest(TestCase):
 
         url = reverse("scan-list")
         response = self.client.get(url, {"scan_type": ScanTask.SCAN_TYPE_CONNECT})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
         results1 = [
@@ -239,7 +239,7 @@ class ScanTest(TestCase):
             }
         ]
         expected = {"count": 1, "next": None, "previous": None, "results": results1}
-        self.assertEqual(content, expected)
+        assert content == expected
 
     def test_retrieve(self):
         """Get Scan details by primary key."""
@@ -252,19 +252,17 @@ class ScanTest(TestCase):
 
         url = reverse("scan-detail", args=(initial["id"],))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("sources", response.json())
+        assert response.status_code == status.HTTP_200_OK
+        assert "sources" in response.json()
         sources = response.json()["sources"]
 
-        self.assertEqual(
-            sources, [{"id": 1, "name": "source1", "source_type": "network"}]
-        )
+        assert sources == [{"id": 1, "name": "source1", "source_type": "network"}]
 
     def test_retrieve_bad_id(self):
         """Get Scan details by bad primary key."""
         url = reverse("scan-detail", args=("string",))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update(self):
         """Completely update a scan."""
@@ -301,11 +299,11 @@ class ScanTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_INSPECT)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertFalse(response_json.get("options").get("jboss_eap"))
-        self.assertEqual(response_json.get("sources"), [self.source2.id])
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_INSPECT
+        assert response_json.get("name") == "test2"
+        assert not response_json.get("options").get("jboss_eap")
+        assert response_json.get("sources") == [self.source2.id]
 
     def test_partial_update(self):
         """Test partial update a scan."""
@@ -330,8 +328,8 @@ class ScanTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_INSPECT)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_INSPECT
         data = {
             "name": "test2",
             "options": {
@@ -347,9 +345,9 @@ class ScanTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertFalse(response_json.get("options").get("jboss_eap"))
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("name") == "test2"
+        assert not response_json.get("options").get("jboss_eap")
 
     def test_partial_update_retains(self):
         """Test partial update retains unprovided info."""
@@ -374,8 +372,8 @@ class ScanTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_INSPECT)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_INSPECT
         data = {
             "name": "test2",
             "options": {
@@ -409,9 +407,9 @@ class ScanTest(TestCase):
                 "search_directories": ["/foo/bar/"],
             },
         }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertEqual(response_json.get("options"), options)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("name") == "test2"
+        assert response_json.get("options") == options
 
     def test_partial_update_sources(self):
         """Test partial update on sources."""
@@ -428,16 +426,16 @@ class ScanTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_INSPECT)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_INSPECT
         data = {"name": "test2", "sources": [self.source2.id]}
         response = self.client.patch(
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertEqual(response_json.get("sources"), [self.source2.id])
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("name") == "test2"
+        assert response_json.get("sources") == [self.source2.id]
 
     def test_partial_update_enabled(self):
         """Test partial update retains unprovided info."""
@@ -462,8 +460,8 @@ class ScanTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         response_json = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_INSPECT)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_INSPECT
         data = {
             "name": "test2",
             "options": {
@@ -487,9 +485,9 @@ class ScanTest(TestCase):
                 "search_directories": ["/foo/bar/"],
             },
         }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertEqual(response_json.get("options"), options)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("name") == "test2"
+        assert response_json.get("options") == options
 
     def test_partial_update_scan_type(self):
         """Test partial update retains unprovided info."""
@@ -533,10 +531,10 @@ class ScanTest(TestCase):
                 "search_directories": ["/foo/bar/"],
             },
         }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertEqual(response_json.get("options"), options)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_INSPECT)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("name") == "test2"
+        assert response_json.get("options") == options
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_INSPECT
         # test with max concurrency & scan type
         data = {
             "name": "test2",
@@ -557,10 +555,10 @@ class ScanTest(TestCase):
                 "search_directories": ["/foo/bar/"],
             },
         }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_json.get("name"), "test2")
-        self.assertEqual(response_json.get("options"), options)
-        self.assertEqual(response_json.get("scan_type"), ScanTask.SCAN_TYPE_CONNECT)
+        assert response.status_code == status.HTTP_200_OK
+        assert response_json.get("name") == "test2"
+        assert response_json.get("options") == options
+        assert response_json.get("scan_type") == ScanTask.SCAN_TYPE_CONNECT
 
     def test_expand_scan(self):
         """Test view expand_scan."""
@@ -576,16 +574,13 @@ class ScanTest(TestCase):
         json_scan = serializer.data
         json_scan = expand_scan(json_scan)
 
-        self.assertEqual(json_scan.get("sources").first().get("name"), "source1")
-        self.assertEqual(
-            json_scan.get("most_recent"),
-            {
-                "id": 1,
-                "scan_type": "inspect",
-                "status": "pending",
-                "status_details": {"job_status_message": "Job is pending."},
-            },
-        )
+        assert json_scan.get("sources").first().get("name") == "source1"
+        assert json_scan.get("most_recent") == {
+            "id": 1,
+            "scan_type": "inspect",
+            "status": "pending",
+            "status_details": {"job_status_message": "Job is pending."},
+        }
 
     def test_delete(self):
         """Delete a scan."""
@@ -606,7 +601,7 @@ class ScanTest(TestCase):
 
         url = reverse("scan-detail", args=(response["id"],))
         response = self.client.delete(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_get_extra_vars_missing_options(self):
         """Tests the get_default_extra_vars."""
@@ -622,7 +617,7 @@ class ScanTest(TestCase):
             "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
 
 class TestScanList(TestCase):
@@ -704,12 +699,12 @@ class TestScanList(TestCase):
         """List all scan objects."""
         url = reverse("scan-list")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), self.expected)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == self.expected
 
     def test_list_by_scanjob_end_time(self):
         """List all scan objects, ordered by ScanJob start time."""
         url = reverse("scan-list")
         response = self.client.get(url, {"ordering": "most_recent_scanjob__start_time"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), self.expected)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == self.expected

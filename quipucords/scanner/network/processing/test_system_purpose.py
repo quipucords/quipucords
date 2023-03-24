@@ -32,9 +32,9 @@ class TestProcessSystemPurpose(unittest.TestCase):
             "usage_type": "dev",
         }
 
-        self.assertEqual(
-            system_purpose.ProcessSystemPurpose.process(ansible_result(input_data)),
-            expected,
+        assert (
+            system_purpose.ProcessSystemPurpose.process(ansible_result(input_data))
+            == expected
         )
 
     def test_invalid_json_case(self):
@@ -52,7 +52,7 @@ class TestProcessSystemPurpose(unittest.TestCase):
 
         expected = None
 
-        self.assertEqual(
-            system_purpose.ProcessSystemPurpose.process(ansible_result(input_data)),
-            expected,
+        assert (
+            system_purpose.ProcessSystemPurpose.process(ansible_result(input_data))
+            == expected
         )

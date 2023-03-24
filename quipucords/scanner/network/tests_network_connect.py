@@ -135,7 +135,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             "ansible_become_method": "sudo",
             "ansible_become_user": "root",
         }
-        self.assertEqual(vars_dict, expected)
+        assert vars_dict == expected
 
     def test_get_exclude_host(self):
         """Test get_exclude_hosts() method."""
@@ -147,19 +147,19 @@ class NetworkConnectTaskRunnerTest(TestCase):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task)
 
-        self.assertEqual(result_store.remaining_hosts(), ["1.2.3.4"])
-        self.assertEqual(result_store.scan_task.systems_count, 1)
-        self.assertEqual(result_store.scan_task.systems_scanned, 0)
-        self.assertEqual(result_store.scan_task.systems_failed, 0)
+        assert result_store.remaining_hosts() == ["1.2.3.4"]
+        assert result_store.scan_task.systems_count == 1
+        assert result_store.scan_task.systems_scanned == 0
+        assert result_store.scan_task.systems_failed == 0
 
         result_store.record_result(
             "1.2.3.4", self.source, self.cred, SystemConnectionResult.UNREACHABLE
         )
 
-        self.assertEqual(result_store.remaining_hosts(), [])
-        self.assertEqual(result_store.scan_task.systems_count, 1)
-        self.assertEqual(result_store.scan_task.systems_scanned, 0)
-        self.assertEqual(result_store.scan_task.systems_unreachable, 1)
+        assert result_store.remaining_hosts() == []
+        assert result_store.scan_task.systems_count == 1
+        assert result_store.scan_task.systems_scanned == 0
+        assert result_store.scan_task.systems_unreachable == 1
 
     def test_connect_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -300,47 +300,47 @@ class NetworkConnectTaskRunnerTest(TestCase):
         _, result = scanner.run_with_result_store(
             Value("i", ScanJob.JOB_RUN), result_store
         )
-        self.assertEqual(result, ScanTask.COMPLETED)
+        assert result == ScanTask.COMPLETED
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
     def test_result_store_src2(self):
         """Test ConnectResultStore."""
         result_store = ConnectResultStore(self.scan_task3)
         hosts = ["1.2.3.4", "1.2.3.5", "1.2.3.6"]
-        self.assertCountEqual(result_store.remaining_hosts(), hosts)
-        self.assertEqual(result_store.scan_task.systems_count, 3)
-        self.assertEqual(result_store.scan_task.systems_scanned, 0)
-        self.assertEqual(result_store.scan_task.systems_failed, 0)
+        assert len(result_store.remaining_hosts()) == len(hosts)
+        assert result_store.scan_task.systems_count == 3
+        assert result_store.scan_task.systems_scanned == 0
+        assert result_store.scan_task.systems_failed == 0
 
         host = hosts.pop()
         result_store.record_result(
             host, self.source2, self.cred, SystemConnectionResult.SUCCESS
         )
 
-        self.assertCountEqual(result_store.remaining_hosts(), hosts)
-        self.assertEqual(result_store.scan_task.systems_count, 3)
-        self.assertEqual(result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(result_store.scan_task.systems_failed, 0)
+        assert len(result_store.remaining_hosts()) == len(hosts)
+        assert result_store.scan_task.systems_count == 3
+        assert result_store.scan_task.systems_scanned == 1
+        assert result_store.scan_task.systems_failed == 0
 
         host = hosts.pop()
         # Check failure without cred
         result_store.record_result(
             host, self.source2, None, SystemConnectionResult.FAILED
         )
-        self.assertCountEqual(result_store.remaining_hosts(), hosts)
-        self.assertEqual(result_store.scan_task.systems_count, 3)
-        self.assertEqual(result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(result_store.scan_task.systems_failed, 1)
+        assert len(result_store.remaining_hosts()) == len(hosts)
+        assert result_store.scan_task.systems_count == 3
+        assert result_store.scan_task.systems_scanned == 1
+        assert result_store.scan_task.systems_failed == 1
 
         host = hosts.pop()
         # Check failure with cred
         result_store.record_result(
             host, self.source2, self.cred, SystemConnectionResult.FAILED
         )
-        self.assertCountEqual(result_store.remaining_hosts(), hosts)
-        self.assertEqual(result_store.scan_task.systems_count, 3)
-        self.assertEqual(result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(result_store.scan_task.systems_failed, 2)
+        assert len(result_store.remaining_hosts()) == len(hosts)
+        assert result_store.scan_task.systems_count == 3
+        assert result_store.scan_task.systems_scanned == 1
+        assert result_store.scan_task.systems_failed == 2
 
     def test_connect_inventory_src2(self):
         """Test construct ansible inventory dictionary."""
@@ -372,7 +372,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
                 },
             }
         }
-        self.assertEqual(inventory_dict, expected)
+        assert inventory_dict == expected
 
     @patch("ansible_runner.run")
     @patch(
@@ -446,7 +446,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         _, result = scanner.run_with_result_store(
             Value("i", ScanJob.JOB_RUN), result_store
         )
-        self.assertEqual(result, ScanTask.COMPLETED)
+        assert result == ScanTask.COMPLETED
 
     @patch("ansible_runner.run")
     def test_connect_paramiko(self, mock_run):
@@ -488,7 +488,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
-        self.assertIn("verbosity=1", str(calls[0]))
+        assert "verbosity=1" in str(calls[0])
 
     @patch("ansible_runner.run")
     @patch("scanner.network.connect.settings.DJANGO_SECRET_PATH", "None")
@@ -520,7 +520,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         conn_dict = scanner.run_with_result_store(
             Value("i", ScanJob.JOB_RUN), result_store
         )
-        self.assertEqual(conn_dict[1], ScanTask.FAILED)
+        assert conn_dict[1] == ScanTask.FAILED
 
     @patch("scanner.network.connect.ConnectTaskRunner.run_with_result_store")
     def test_cancel_connect(self, mock_run):
@@ -544,7 +544,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.side_effect = NetworkCancelException()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(scan_result, ScanTask.CANCELED)
+        assert scan_result == ScanTask.CANCELED
 
     @patch("scanner.network.connect.ConnectTaskRunner.run_with_result_store")
     def test_pause_connect(self, mock_run):
@@ -568,13 +568,13 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.side_effect = NetworkPauseException()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(scan_result, ScanTask.PAUSED)
+        assert scan_result == ScanTask.PAUSED
 
     def test_run_manager_interupt(self):
         """Test manager interupt for run method."""
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         conn_dict = scanner.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        self.assertEqual(conn_dict[1], ScanTask.CANCELED)
+        assert conn_dict[1] == ScanTask.CANCELED
 
     @patch("scanner.network.connect.ConnectTaskRunner.run_with_result_store")
     def test_run_success_return_connect(self, mock_run):
@@ -583,7 +583,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.side_effect = [[None, ScanTask.COMPLETED]]
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(scan_result, ScanTask.COMPLETED)
+        assert scan_result == ScanTask.COMPLETED
 
     @patch("scanner.network.connect._connect")
     def test_connect_exception(self, mock_run):
@@ -592,7 +592,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         mock_run.side_effect = AnsibleRunnerException("fail")
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(scan_result, ScanTask.FAILED)
+        assert scan_result == ScanTask.FAILED
 
     @patch("ansible_runner.run")
     def test_empty_hosts(self, mock_run):
@@ -603,4 +603,4 @@ class NetworkConnectTaskRunnerTest(TestCase):
         _, result = scanner.run_with_result_store(
             Value("i", ScanJob.JOB_RUN), result_store
         )
-        self.assertEqual(result, ScanTask.COMPLETED)
+        assert result == ScanTask.COMPLETED

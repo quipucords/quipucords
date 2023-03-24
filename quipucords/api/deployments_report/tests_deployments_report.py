@@ -59,7 +59,7 @@ class DeploymentReportTest(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     def create_details_report_expect_400(self, data):
@@ -68,7 +68,7 @@ class DeploymentReportTest(TestCase):
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         return response.json()
 
     def generate_fingerprints(self, os_name="RHEL", os_versions=None):
@@ -127,12 +127,12 @@ class DeploymentReportTest(TestCase):
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         report = response.json()
-        self.assertIsInstance(report, dict)
-        self.assertEqual(
-            len(report["system_fingerprints"][0].keys()),
-            EXPECTED_NUMBER_OF_FINGERPRINTS,
+        assert isinstance(report, dict)
+        assert (
+            len(report["system_fingerprints"][0].keys())
+            == EXPECTED_NUMBER_OF_FINGERPRINTS
         )
 
     def test_get_deployments_report_masked(self):
@@ -141,18 +141,18 @@ class DeploymentReportTest(TestCase):
         # Query API
         self.generate_fingerprints()
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         report = response.json()
-        self.assertIsInstance(report, dict)
-        self.assertEqual(
-            len(report["system_fingerprints"][0].keys()),
-            EXPECTED_NUMBER_OF_FINGERPRINTS,
+        assert isinstance(report, dict)
+        assert (
+            len(report["system_fingerprints"][0].keys())
+            == EXPECTED_NUMBER_OF_FINGERPRINTS
         )
 
         # Check the masked values
         fingerprints = report.get("system_fingerprints")
         for source in fingerprints:
-            self.assertEqual(source.get("name"), str(hash("1.2.3.4")))
+            assert source.get("name") == str(hash("1.2.3.4"))
 
     def test_get_deployments_report_bad_param(self):
         """Test a bad query param returns a 400."""
@@ -160,7 +160,7 @@ class DeploymentReportTest(TestCase):
         # Query API
         self.generate_fingerprints()
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_get_deployments_report_404(self):
         """Fail to get a report for missing collection."""
@@ -171,7 +171,7 @@ class DeploymentReportTest(TestCase):
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_get_bad_deployment_report(self):
         """Test case where DetailsReport exists but no fingerprint."""
@@ -200,7 +200,7 @@ class DeploymentReportTest(TestCase):
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_424_FAILED_DEPENDENCY)
+        assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY
 
     def test_get_details_report_bad_id(self):
         """Fail to get a report for missing collection."""
@@ -208,7 +208,7 @@ class DeploymentReportTest(TestCase):
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     ##############################################################
     # Test CSV Renderer
@@ -216,9 +216,7 @@ class DeploymentReportTest(TestCase):
 
     def test_sanitize_row(self):
         """Test sanitize_row function."""
-        self.assertEqual(
-            sanitize_row(["data", None, "data,data"]), ["data", None, "data;data"]
-        )
+        assert sanitize_row(["data", None, "data,data"]) == ["data", None, "data;data"]
 
     def test_csv_renderer(self):
         """Test DeploymentCSVRenderer."""
@@ -226,18 +224,18 @@ class DeploymentReportTest(TestCase):
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json, renderer_context=self.mock_renderer_context)
-        self.assertIsNone(value)
+        assert value is None
 
         # Test doesn't exist
         test_json = {"id": 42}
         value = renderer.render(test_json, renderer_context=self.mock_renderer_context)
-        self.assertIsNone(value)
+        assert value is None
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
         url = "/api/v1/reports/1/deployments/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         report = response.json()
 
         csv_result = renderer.render(
@@ -258,7 +256,7 @@ class DeploymentReportTest(TestCase):
         # test the masked deployments report
         url = "/api/v1/reports/1/deployments/?mask=True"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         report = response.json()
 
         new_mock_req = MockRequest(mask_rep=True)
@@ -287,18 +285,18 @@ class DeploymentReportTest(TestCase):
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)
-        self.assertIsNone(value)
+        assert value is None
 
         # Test doesn't exist
         test_json = {"id": 42}
         value = renderer.render(test_json)
-        self.assertIsNone(value)
+        assert value is None
 
         # Create a system fingerprint via collection receiver
         self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
         url = "/api/v1/reports/1/deployments/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         report_dict = response.json()
 
         # Test that the data in the subfile equals the report_dict
@@ -307,4 +305,4 @@ class DeploymentReportTest(TestCase):
             json_file = tar.getmembers()[0]
             tar_info = tar.extractfile(json_file)
             tar_dict_data = json.loads(tar_info.read().decode())
-            self.assertEqual(tar_dict_data, report_dict)
+            assert tar_dict_data == report_dict

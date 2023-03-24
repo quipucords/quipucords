@@ -47,10 +47,10 @@ class DetailsReportTest(TestCase):
     def create_expect_400(self, data, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
         if expected_response:
-            self.assertEqual(response_json, expected_response)
+            assert response_json == expected_response
         return response_json
 
     def create_expect_201(self, data):
@@ -59,7 +59,7 @@ class DetailsReportTest(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     ################################################################
@@ -81,26 +81,26 @@ class DetailsReportTest(TestCase):
         }
 
         response_json = self.create_expect_201(request_json)
-        self.assertEqual(response_json["sources"], request_json["sources"])
-        self.assertEqual(DetailsReport.objects.count(), 1)
+        assert response_json["sources"] == request_json["sources"]
+        assert DetailsReport.objects.count() == 1
 
     def test_empty_request_body(self):
         """Test empty request body."""
         request_json = {}
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(response_json["report_type"], messages.FC_REQUIRED_ATTRIBUTE)
+        assert response_json["report_type"] == messages.FC_REQUIRED_ATTRIBUTE
 
     def test_missing_sources(self):
         """Test missing sources attribute."""
         request_json = {"report_type": "details"}
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(response_json["sources"], messages.FC_REQUIRED_ATTRIBUTE)
+        assert response_json["sources"] == messages.FC_REQUIRED_ATTRIBUTE
 
     def test_empty_sources(self):
         """Test empty sources attribute."""
         request_json = {"report_type": "details", "sources": []}
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(response_json["sources"], messages.FC_REQUIRED_ATTRIBUTE)
+        assert response_json["sources"] == messages.FC_REQUIRED_ATTRIBUTE
 
     def test_source_missing_report_version(self):
         """Test source missing report version."""
@@ -116,33 +116,33 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["report_version"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["report_version"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )
 
     def test_source_missing_name(self):
         """Test source is missing source_name."""
         request_json = {"report_type": "details", "sources": [{"foo": "abc"}]}
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["source_name"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["source_name"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )
 
     def test_source_empty_name(self):
         """Test source has empty source_name."""
         request_json = {"report_type": "details", "sources": [{"source_name": ""}]}
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["source_name"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["source_name"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )
 
     def test_source_name_not_string(self):
@@ -159,11 +159,11 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["source_name"],
-            messages.FC_SOURCE_NAME_NOT_STR,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["source_name"]
+            == messages.FC_SOURCE_NAME_NOT_STR
         )
 
     def test_missing_source_type(self):
@@ -179,11 +179,11 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["source_type"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["source_type"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )
 
     def test_empty_source_type(self):
@@ -200,11 +200,11 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["source_type"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["source_type"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )
 
     def test_invalid_source_type(self):
@@ -221,14 +221,14 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
 
         valid_choices = ", ".join(DataSources.values)
 
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["source_type"],
-            messages.FC_MUST_BE_ONE_OF % valid_choices,
+        assert (
+            response_json["invalid_sources"][0]["errors"]["source_type"]
+            == messages.FC_MUST_BE_ONE_OF % valid_choices
         )
 
     def test_source_missing_facts(self):
@@ -245,11 +245,11 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["facts"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["facts"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )
 
     def test_source_empty_facts(self):
@@ -266,9 +266,9 @@ class DetailsReportTest(TestCase):
             ],
         }
         response_json = self.create_expect_400(request_json)
-        self.assertEqual(len(response_json["valid_sources"]), 0)
-        self.assertEqual(len(response_json["invalid_sources"]), 1)
-        self.assertEqual(
-            response_json["invalid_sources"][0]["errors"]["facts"],
-            messages.FC_REQUIRED_ATTRIBUTE,
+        assert len(response_json["valid_sources"]) == 0
+        assert len(response_json["invalid_sources"]) == 1
+        assert (
+            response_json["invalid_sources"][0]["errors"]["facts"]
+            == messages.FC_REQUIRED_ATTRIBUTE
         )

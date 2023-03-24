@@ -13,18 +13,18 @@ class TestProcessJWSInstalledWithRpm(unittest.TestCase):
 
     def test_installed_with_rpm(self):
         """Return true if jws was installed with rpm."""
-        self.assertEqual(
+        assert (
             jws.ProcessJWSInstalledWithRpm.process(
                 ansible_result("Red Hat JBoss Web Server")
-            ),
-            True,
+            )
+            is True
         )
 
     def test_not_installed_with_rpm(self):
         """Return false if jws was not installed with rpm."""
-        self.assertEqual(
-            jws.ProcessJWSInstalledWithRpm.process(ansible_result("Not installed")),
-            False,
+        assert (
+            jws.ProcessJWSInstalledWithRpm.process(ansible_result("Not installed"))
+            is False
         )
 
 
@@ -33,13 +33,11 @@ class TestProcessHasJBossEula(unittest.TestCase):
 
     def test_has_eula_file(self):
         """Return true if jboss eula file exists."""
-        self.assertEqual(jws.ProcessHasJBossEULA.process(ansible_result("true")), True)
+        assert jws.ProcessHasJBossEULA.process(ansible_result("true")) is True
 
     def test_has_no_eula_file(self):
         """Return false if jboss eula file does not exist."""
-        self.assertEqual(
-            jws.ProcessHasJBossEULA.process(ansible_result("false")), False
-        )
+        assert jws.ProcessHasJBossEULA.process(ansible_result("false")) is False
 
 
 class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):
@@ -47,14 +45,15 @@ class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):
 
     def test_true(self):
         """Return True if tomcat was installed as part of a redhat product."""
-        self.assertEqual(
-            jws.ProcessTomcatPartOfRedhatProduct.process(ansible_result("True")), True
+        assert (
+            jws.ProcessTomcatPartOfRedhatProduct.process(ansible_result("True")) is True
         )
 
     def test_false(self):
         """Return False if tomcat is not part of a redhat product."""
-        self.assertEqual(
-            jws.ProcessTomcatPartOfRedhatProduct.process(ansible_result("False")), False
+        assert (
+            jws.ProcessTomcatPartOfRedhatProduct.process(ansible_result("False"))
+            is False
         )
 
 
@@ -63,11 +62,11 @@ class TestProcessJWSHasCert(unittest.TestCase):
 
     def test_true(self):
         """Return True if /etc/pki/product/185.pem exists."""
-        self.assertEqual(
-            jws.ProcessJWSHasCert.process(ansible_result("/etc/pki/product/185.pem")),
-            True,
+        assert (
+            jws.ProcessJWSHasCert.process(ansible_result("/etc/pki/product/185.pem"))
+            is True
         )
 
     def test_false(self):
         """Return False if /etc/pki/product/185.pem does not exist."""
-        self.assertEqual(jws.ProcessJWSHasCert.process(ansible_result("")), False)
+        assert jws.ProcessJWSHasCert.process(ansible_result("")) is False

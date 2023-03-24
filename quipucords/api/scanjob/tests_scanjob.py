@@ -76,7 +76,7 @@ class ScanJobTest(TestCase):
             print("Cause of failure: ")
             print(response_json)
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response_json
 
     def test_queue_task(self):
@@ -100,29 +100,29 @@ class ScanJobTest(TestCase):
         scan_job.save()
 
         # Job in created state
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        assert scan_job.status == ScanTask.CREATED
         tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 0)
+        assert len(tasks) == 0
 
         # Queue job to run
         scan_job.queue()
 
         # Job should be in pending state
-        self.assertEqual(scan_job.status, ScanTask.PENDING)
+        assert scan_job.status == ScanTask.PENDING
 
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all().order_by("sequence_number")
-        self.assertEqual(len(tasks), 3)
+        assert len(tasks) == 3
 
         # Validate connect task created and correct
         connect_task = tasks[0]
-        self.assertEqual(connect_task.scan_type, ScanTask.SCAN_TYPE_CONNECT)
-        self.assertEqual(connect_task.status, ScanTask.PENDING)
+        assert connect_task.scan_type == ScanTask.SCAN_TYPE_CONNECT
+        assert connect_task.status == ScanTask.PENDING
 
         # Validate inspect task created and correct
         inspect_task = tasks[1]
-        self.assertEqual(inspect_task.scan_type, ScanTask.SCAN_TYPE_INSPECT)
-        self.assertEqual(inspect_task.status, ScanTask.PENDING)
+        assert inspect_task.scan_type == ScanTask.SCAN_TYPE_INSPECT
+        assert inspect_task.status == ScanTask.PENDING
 
     def test_queue_invalid_state_changes(self):
         """Test create queue failed."""
@@ -131,33 +131,33 @@ class ScanJobTest(TestCase):
 
         # Queue job to run
         scan_job.queue()
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.complete()
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.pause()
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.start()
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.cancel()
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.restart()
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.fail("test failure")
-        self.assertEqual(scan_job.status, ScanTask.FAILED)
+        assert scan_job.status == ScanTask.FAILED
 
         scan_job.status = ScanTask.CREATED
         scan_job.fail("test failure")
-        self.assertEqual(scan_job.status, ScanTask.CREATED)
+        assert scan_job.status == ScanTask.CREATED
 
         scan_job.status = ScanTask.RUNNING
         scan_job.complete()
-        self.assertEqual(scan_job.status, ScanTask.COMPLETED)
+        assert scan_job.status == ScanTask.COMPLETED
 
     def test_start_task(self):
         """Test start pending task."""
@@ -168,11 +168,11 @@ class ScanJobTest(TestCase):
 
         # Queue job to run
         scan_job.queue()
-        self.assertEqual(scan_job.status, ScanTask.PENDING)
+        assert scan_job.status == ScanTask.PENDING
 
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 1)
+        assert len(tasks) == 1
 
         # Start job
         scan_job.start()
@@ -183,38 +183,38 @@ class ScanJobTest(TestCase):
 
         # Queue job to run
         scan_job.queue()
-        self.assertEqual(scan_job.status, ScanTask.PENDING)
+        assert scan_job.status == ScanTask.PENDING
 
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all()
-        self.assertEqual(len(tasks), 1)
+        assert len(tasks) == 1
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
-        self.assertEqual(connect_task.status, ScanTask.PENDING)
+        assert connect_task.status == ScanTask.PENDING
 
         # Start job
         scan_job.start()
-        self.assertEqual(scan_job.status, ScanTask.RUNNING)
+        assert scan_job.status == ScanTask.RUNNING
 
         scan_job.pause()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
-        self.assertEqual(scan_job.status, ScanTask.PAUSED)
-        self.assertEqual(connect_task.status, ScanTask.PAUSED)
+        assert scan_job.status == ScanTask.PAUSED
+        assert connect_task.status == ScanTask.PAUSED
 
         scan_job.restart()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
-        self.assertEqual(scan_job.status, ScanTask.PENDING)
-        self.assertEqual(connect_task.status, ScanTask.PENDING)
+        assert scan_job.status == ScanTask.PENDING
+        assert connect_task.status == ScanTask.PENDING
 
         scan_job.cancel()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
-        self.assertEqual(scan_job.status, ScanTask.CANCELED)
-        self.assertEqual(connect_task.status, ScanTask.CANCELED)
+        assert scan_job.status == ScanTask.CANCELED
+        assert connect_task.status == ScanTask.CANCELED
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_successful_create(self, start_scan):
         """A valid create request should succeed."""
         response = self.create_job_expect_201(self.connect_scan.id)
-        self.assertIn("id", response)
+        assert "id" in response
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_retrieve(self, start_scan):
@@ -223,17 +223,17 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(initial["id"],))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("scan", response.json())
+        assert response.status_code == status.HTTP_200_OK
+        assert "scan" in response.json()
         scan = response.json()["scan"]
 
-        self.assertEqual(scan, {"id": 1, "name": "connect_test"})
+        assert scan == {"id": 1, "name": "connect_test"}
 
     def test_retrieve_bad_id(self):
         """Get ScanJob details by bad primary key."""
         url = reverse("scanjob-detail", args=("string",))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_connection(self):
         """Get ScanJob connection results."""
@@ -253,7 +253,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 1,
@@ -268,7 +268,7 @@ class ScanJobTest(TestCase):
                 }
             ],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_bad_ordering_filter(self):
         """Test ScanJob connection results with bad ordering filter."""
@@ -289,7 +289,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         url += "?ordering=" + bad_param
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_connection_bad_status_filter(self):
         """Test ScanJob connection results with bad status filter."""
@@ -310,7 +310,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         url += "?status=" + bad_param
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_connection_bad_source_id_filter(self):
         """Test ScanJob connection results with bad source_id filter."""
@@ -331,7 +331,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         url += "?source_id=" + bad_param
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_connection_filter_status(self):
         """Get ScanJob connection results with a filtered status."""
@@ -352,10 +352,10 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         url += "?status=" + SystemConnectionResult.FAILED
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {"count": 0, "next": None, "previous": None, "results": []}
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_failed_success(self):
         """Get ScanJob connection results for multiple systems."""
@@ -383,7 +383,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 2,
@@ -405,7 +405,7 @@ class ScanJobTest(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_name_ordering(self):
         """Get ScanJob connection results for systems ordered by name."""
@@ -434,7 +434,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         url += "?ordering=-name"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 2,
@@ -456,7 +456,7 @@ class ScanJobTest(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_two_scan_tasks(self):
         """Get ScanJob connection results for multiple tasks."""
@@ -508,7 +508,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 4,
@@ -542,7 +542,7 @@ class ScanJobTest(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_filter_by_source_id(self):
         """Get ScanJob connection results filter by source_id."""
@@ -594,7 +594,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         url += "?source_id=" + str(source2.id)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 2,
@@ -616,7 +616,7 @@ class ScanJobTest(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_paging(self):
         """Test paging for scanjob connection results."""
@@ -667,7 +667,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/?page_size=2"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 4,
@@ -690,7 +690,7 @@ class ScanJobTest(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_results_with_none(self):
         """Test connection results with no results for one task."""
@@ -724,7 +724,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 2,
@@ -746,7 +746,7 @@ class ScanJobTest(TestCase):
             ],
         }
 
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_delete_source_and_cred(self):
         """Get ScanJob connection results after source & cred are deleted."""
@@ -778,7 +778,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 1,
@@ -786,21 +786,21 @@ class ScanJobTest(TestCase):
             "previous": None,
             "results": [{"name": "Woot", "status": "failed", "source": "deleted"}],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_connection_not_found(self):
         """Get ScanJob connection results with 404."""
         # pylint: disable=no-member
         url = reverse("scanjob-detail", args="2") + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_connection_bad_request(self):
         """Get ScanJob connection results with 400."""
         # pylint: disable=no-member
         url = reverse("scanjob-detail", args="t") + "connection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_inspection_bad_ordering_filter(self):
         """Test ScanJob inspection results with bad ordering filter."""
@@ -828,7 +828,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         url += "?ordering=" + bad_param
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_inspection_bad_status_filter(self):
         """Test ScanJob inspection results with bad status filter."""
@@ -856,7 +856,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         url += "?status=" + bad_param
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_inspection_bad_source_id_filter(self):
         """Test ScanJob inspection results with bad source_id filter."""
@@ -884,7 +884,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         url += "?source_id=" + bad_param
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_inspection_filter_status(self):
         """Get ScanJob inspection results with a filtered status."""
@@ -911,10 +911,10 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         url += "?status=" + SystemConnectionResult.FAILED
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {"count": 0, "next": None, "previous": None, "results": []}
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_inspection_paging(self):
         """Test paging of ScanJob inspection results."""
@@ -955,7 +955,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/?page_size=1"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 2,
@@ -970,7 +970,7 @@ class ScanJobTest(TestCase):
                 }
             ],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_inspection_ordering_by_name(self):
         """Tests inspection result ordering by name."""
@@ -1034,7 +1034,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         url += "?ordering=-name"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 4,
@@ -1067,7 +1067,7 @@ class ScanJobTest(TestCase):
                 },
             ],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_inspection_filter_by_source_id(self):
         """Tests inspection result filter by source_id."""
@@ -1131,7 +1131,7 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         url += "?source_id=" + str(source2.id)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_resp = response.json()
         expected = {
             "count": 2,
@@ -1153,7 +1153,7 @@ class ScanJobTest(TestCase):
             ],
         }
         diff = [x for x in expected["results"] if x not in json_resp["results"]]
-        self.assertEqual(diff, [])
+        assert diff == []
 
     def test_inspection_two_tasks(self):
         """Tests inspection result ordering across tasks."""
@@ -1216,7 +1216,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 4,
@@ -1249,7 +1249,7 @@ class ScanJobTest(TestCase):
                 },
             ],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_inspection_results_with_none(self):
         """Tests inspection results with none for one task."""
@@ -1279,7 +1279,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 1,
@@ -1294,7 +1294,7 @@ class ScanJobTest(TestCase):
                 }
             ],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_inspection_delete_source(self):
         """Get ScanJob inspection results after source has been deleted."""
@@ -1325,7 +1325,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(scan_job.id,)) + "inspection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {
             "count": 1,
@@ -1340,35 +1340,35 @@ class ScanJobTest(TestCase):
                 }
             ],
         }
-        self.assertEqual(json_response, expected)
+        assert json_response == expected
 
     def test_inspection_not_found(self):
         """Get ScanJob connection results with 404."""
         # pylint: disable=no-member
         url = reverse("scanjob-detail", args="2") + "inspection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_inspection_bad_request(self):
         """Get ScanJob connection results with 400."""
         # pylint: disable=no-member
         url = reverse("scanjob-detail", args="t") + "inspection/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_post_jobs_not_allowed(self):
         """Test post jobs not allowed."""
         url = reverse("scanjob-detail", args=(1,))
         url = url[:-2]
         response = self.client.post(url, {}, "application/json")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_list_not_allowed(self):
         """Test list all jobs not allowed."""
         url = reverse("scanjob-detail", args=(1,))
         url = url[:-2]
         response = self.client.get(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_update_not_allowed(self, start_scan):
@@ -1391,7 +1391,7 @@ class ScanJobTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_update_not_allowed_disable_optional_products(self, start_scan):
@@ -1407,7 +1407,7 @@ class ScanJobTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_partial_update(self, start_scan):
@@ -1419,7 +1419,7 @@ class ScanJobTest(TestCase):
         response = self.client.patch(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_delete(self, start_scan):
@@ -1428,7 +1428,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scanjob-detail", args=(initial["id"],))
         response = self.client.delete(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_pause_bad_state(self, start_scan):
@@ -1438,14 +1438,14 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(initial["id"],))
         pause_url = f"{url}pause/"
         response = self.client.put(pause_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_pause_bad_id(self):
         """Pause a scanjob with bad id."""
         url = reverse("scanjob-detail", args=("string",))
         pause_url = f"{url}pause/"
         response = self.client.put(pause_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_cancel(self, start_scan):
@@ -1455,14 +1455,14 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(initial["id"],))
         pause_url = f"{url}cancel/"
         response = self.client.put(pause_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_cancel_bad_id(self):
         """Cancel a scanjob with bad id."""
         url = reverse("scanjob-detail", args=("string",))
         pause_url = f"{url}cancel/"
         response = self.client.put(pause_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_restart_bad_state(self, start_scan):
@@ -1472,14 +1472,14 @@ class ScanJobTest(TestCase):
         url = reverse("scanjob-detail", args=(initial["id"],))
         pause_url = f"{url}restart/"
         response = self.client.put(pause_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_restart_bad_id(self):
         """Restart a scanjob with bad id."""
         url = reverse("scanjob-detail", args=("string",))
         pause_url = f"{url}restart/"
         response = self.client.put(pause_url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_expand_scanjob(self):
         """Test view expand_scanjob."""
@@ -1501,9 +1501,9 @@ class ScanJobTest(TestCase):
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
 
-        self.assertEqual(json_scan.get("systems_count"), 2)
-        self.assertEqual(json_scan.get("systems_failed"), 1)
-        self.assertEqual(json_scan.get("systems_scanned"), 1)
+        assert json_scan.get("systems_count") == 2
+        assert json_scan.get("systems_failed") == 1
+        assert json_scan.get("systems_scanned") == 1
 
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""
@@ -1531,7 +1531,7 @@ class ScanJobTest(TestCase):
             "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
     def test_get_extra_vars_missing_disable_product(self):
         """Tests the get_extra_vars with extended search None."""
@@ -1554,7 +1554,7 @@ class ScanJobTest(TestCase):
             "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
     def test_get_extra_vars_missing_extended_search(self):
         """Tests the get_extra_vars with disabled products None."""
@@ -1577,35 +1577,35 @@ class ScanJobTest(TestCase):
             "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
     def test_get_extra_vars_missing_search_directories_empty(self):
         """Tests the get_extra_vars with search_directories empty."""
         extended = {"search_directories": []}
         serializer = ExtendedProductSearchOptionsSerializer(data=extended)
         is_valid = serializer.is_valid()
-        self.assertTrue(is_valid)
+        assert is_valid
 
     def test_get_extra_vars_missing_search_directories_w_int(self):
         """Tests the get_extra_vars with search_directories contains int."""
         extended = {"search_directories": [1]}
         serializer = ExtendedProductSearchOptionsSerializer(data=extended)
         is_valid = serializer.is_valid()
-        self.assertFalse(is_valid)
+        assert not is_valid
 
     def test_get_extra_vars_missing_search_directories_w_not_path(self):
         """Tests the get_extra_vars with search_directories no path."""
         extended = {"search_directories": ["a"]}
         serializer = ExtendedProductSearchOptionsSerializer(data=extended)
         is_valid = serializer.is_valid()
-        self.assertFalse(is_valid)
+        assert not is_valid
 
     def test_get_extra_vars_missing_search_directories_w_path(self):
         """Tests the get_extra_vars with search_directories no path."""
         extended = {"search_directories": ["/a"]}
         serializer = ExtendedProductSearchOptionsSerializer(data=extended)
         is_valid = serializer.is_valid()
-        self.assertTrue(is_valid)
+        assert is_valid
 
     def test_get_extra_vars_extended_search(self):
         """Tests the get_extra_vars method with extended search."""
@@ -1640,7 +1640,7 @@ class ScanJobTest(TestCase):
             "jboss_ws_ext": True,
             "search_directories": "a b",
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
@@ -1670,7 +1670,7 @@ class ScanJobTest(TestCase):
             "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
@@ -1701,7 +1701,7 @@ class ScanJobTest(TestCase):
             "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
-        self.assertEqual(extra_vars, expected_vars)
+        assert extra_vars == expected_vars
 
     # ############################################################
     # # Scan Job tests /jobs path
@@ -1714,7 +1714,7 @@ class ScanJobTest(TestCase):
 
         url = reverse("scan-detail", args=(self.inspect_scan.id,)) + "jobs/"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
         results1 = [
@@ -1727,7 +1727,7 @@ class ScanJobTest(TestCase):
             }
         ]
         expected = {"count": 1, "next": None, "previous": None, "results": results1}
-        self.assertEqual(content, expected)
+        assert content == expected
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_filtered_list(self, start_scan):
@@ -1737,14 +1737,14 @@ class ScanJobTest(TestCase):
         url = reverse("scan-detail", args=(self.inspect_scan.id,)) + "jobs/"
 
         response = self.client.get(url, {"status": ScanTask.PENDING})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
         expected = {"count": 0, "next": None, "previous": None, "results": []}
-        self.assertEqual(content, expected)
+        assert content == expected
 
         response = self.client.get(url, {"status": ScanTask.CREATED})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
         results1 = [
@@ -1757,7 +1757,7 @@ class ScanJobTest(TestCase):
             }
         ]
         expected = {"count": 1, "next": None, "previous": None, "results": results1}
-        self.assertEqual(content, expected)
+        assert content == expected
 
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_delete_scan_cascade(self, start_scan):
@@ -1796,9 +1796,9 @@ class ScanJobTest(TestCase):
         scan_job.save()
 
         job_count = len(scan.jobs.all())
-        self.assertNotEqual(job_count, 0)
+        assert job_count != 0
         url = reverse("scan-detail", args=(scan_id,))
         response = self.client.delete(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
         job_count = len(scan.jobs.all())
-        self.assertEqual(job_count, 0)
+        assert job_count == 0

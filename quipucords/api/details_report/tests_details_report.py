@@ -65,7 +65,7 @@ class DetailReportTest(TestCase):
         if response.status_code != status.HTTP_201_CREATED:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     def retrieve_expect_200(self, identifier, query_param=""):
@@ -76,7 +76,7 @@ class DetailReportTest(TestCase):
         if response.status_code != status.HTTP_200_OK:
             print("Failure cause: ")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         return response.json()
 
     def test_get_details_report_404(self):
@@ -85,7 +85,7 @@ class DetailReportTest(TestCase):
 
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     ##############################################################
     # Test details endpoint
@@ -108,7 +108,7 @@ class DetailReportTest(TestCase):
         response_json = self.create_expect_201(request_json)
         identifier = response_json["report_id"]
         response_json = self.retrieve_expect_200(identifier)
-        self.assertEqual(response_json["report_id"], identifier)
+        assert response_json["report_id"] == identifier
 
     def test_details_masked(self):
         """Get details report with masked values for a report via API."""
@@ -135,7 +135,7 @@ class DetailReportTest(TestCase):
         response_json = self.create_expect_201(request_json)
         identifier = response_json["report_id"]
         response_json = self.retrieve_expect_200(identifier, query_param="?mask=True")
-        self.assertEqual(response_json["report_id"], identifier)
+        assert response_json["report_id"] == identifier
         # assert the ips/macs/hostname is masked
         source_to_check = response_json.get("sources")[0]
         facts = source_to_check.get("facts")
@@ -147,12 +147,12 @@ class DetailReportTest(TestCase):
                 "vm.name": "-2457967226571033580",
             }
         ]
-        self.assertEqual(facts, expected_facts)
+        assert facts == expected_facts
         # test bad query param
         url = "/api/v1/reports/" + str(identifier) + "/details/?mask=foo"
         # Query API
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     ##############################################################
     # Test CSV Renderer
@@ -164,12 +164,12 @@ class DetailReportTest(TestCase):
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json, renderer_context=self.mock_renderer_context)
-        self.assertIsNone(value)
+        assert value is None
 
         # Test doesn't exist
         test_json = {"id": 42}
         value = renderer.render(test_json, renderer_context=self.mock_renderer_context)
-        self.assertIsNone(value)
+        assert value is None
 
         request_json = {
             "report_type": "details",
@@ -207,7 +207,7 @@ class DetailReportTest(TestCase):
             "ip_addresses,mac_addresses,uname_hostname,vm.name\r\n"
             "[1.2.3.4],[1.2.3.5;2.4.5.6],foo,foo\r\n\r\n\r\n"
         )
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
         # Test cached works too
         test_json = copy.deepcopy(response_json)
@@ -216,7 +216,7 @@ class DetailReportTest(TestCase):
             test_json, renderer_context=self.mock_renderer_context
         )
         # These would be different if not cached
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
         # Clear cache
         details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
@@ -247,14 +247,14 @@ class DetailReportTest(TestCase):
             "[-7334718598697473719],[-7048634151319043688;-3493454847440916718],"
             "-2457967226571033580,-2457967226571033580\r\n\r\n\r\n"
         )
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
         # Test cached works too for hashed
         test_json = copy.deepcopy(response_json)
         test_json["sources"][0]["facts"] = []
         csv_result = renderer.render(test_json, renderer_context=new_renderer)
         # These would be different if not cached
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
         # Clear cache
         details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
@@ -277,7 +277,7 @@ class DetailReportTest(TestCase):
             f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
             "0\r\n"
         )
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
         # Clear cache
         details_report = DetailsReport.objects.get(id=response_json["report_id"])
@@ -295,7 +295,7 @@ class DetailReportTest(TestCase):
             f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
             "0\r\n\r\n\r\n"
         )
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
         # Clear cache
         details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
@@ -317,7 +317,7 @@ class DetailReportTest(TestCase):
             f"{self.server_id},test_source,network\r\n"
             "Facts\r\n\r\n"
         )
-        self.assertEqual(csv_result, expected)
+        assert csv_result == expected
 
     ##############################################################
     # Test Json Gzip Render
@@ -328,7 +328,7 @@ class DetailReportTest(TestCase):
         # Test no FC id
         test_json = {}
         value = renderer.render(test_json)
-        self.assertIsNone(value)
+        assert value is None
 
         request_json = {
             "report_type": "details",
@@ -351,4 +351,4 @@ class DetailReportTest(TestCase):
             json_file = tar.getmembers()[0]
             tar_info = tar.extractfile(json_file)
             tar_dict_data = json.loads(tar_info.read().decode())
-            self.assertEqual(tar_dict_data, report_dict)
+            assert tar_dict_data == report_dict

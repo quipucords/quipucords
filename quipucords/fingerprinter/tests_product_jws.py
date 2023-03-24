@@ -21,7 +21,7 @@ class ProductJWSTest(TestCase):
         versions = get_version(raw_versions)
         expected = ["JWS 3.0.3"]
 
-        self.assertEqual(versions, expected)
+        assert versions == expected
 
     # pylint: disable=unused-argument
     def test_detect_ws_present(self):
@@ -46,7 +46,7 @@ class ProductJWSTest(TestCase):
         }
         facts = {"jws_installed_with_rpm": True}
         product = detect_jboss_ws(source, facts)
-        self.assertEqual(product, expected)
+        assert product == expected
 
         # Test where jws certificate was found
         source = {
@@ -57,7 +57,7 @@ class ProductJWSTest(TestCase):
         facts = {"jws_installed_with_rpm": False, "jws_has_cert": True}
         expected["metadata"]["raw_fact_key"] = "jws_has_cert"
         product = detect_jboss_ws(source, facts)
-        self.assertEqual(product, expected)
+        assert product == expected
 
         # Test where valid version string is found
         facts = {
@@ -71,7 +71,7 @@ class ProductJWSTest(TestCase):
             "fingerprinter.jboss_web_server.get_version", return_value=["JWS 3.0.1"]
         ):
             product = detect_jboss_ws(source, facts)
-            self.assertEqual(product, expected)
+            assert product == expected
 
     # pylint: disable=unused-argument
     def test_detect_ws_potential(self):
@@ -100,14 +100,14 @@ class ProductJWSTest(TestCase):
             "tomcat_is_part_of_redhat_product": True,
         }
         product = detect_jboss_ws(source, facts)
-        self.assertEqual(product, expected)
+        assert product == expected
 
         # Test where JWS_HOME contains jboss eula file
         facts["tomcat_is_part_of_redhat_product"] = False
         facts["jws_has_eula_txt_file"] = True
         product = detect_jboss_ws(source, facts)
         expected["metadata"]["raw_fact_key"] = "jws_has_eula_txt_file"
-        self.assertEqual(product, expected)
+        assert product == expected
 
         # Test where server only has JWS entitlement
         facts["jws_has_eula_txt_file"] = False
@@ -117,7 +117,7 @@ class ProductJWSTest(TestCase):
             return_value=True,
         ):
             product = detect_jboss_ws(source, facts)
-            self.assertEqual(product, expected)
+            assert product == expected
 
         # Test where only valid EWS version is found
         expected["version"] = ["EWS 1.0.0"]
@@ -125,7 +125,7 @@ class ProductJWSTest(TestCase):
             "fingerprinter.jboss_web_server.get_version", return_value=["EWS 1.0.0"]
         ):
             product = detect_jboss_ws(source, facts)
-            self.assertEqual(product, expected)
+            assert product == expected
 
     # pylint: disable=unused-argument
     def test_detect_ws_absent(self):
@@ -153,4 +153,4 @@ class ProductJWSTest(TestCase):
             },
         }
         product = detect_jboss_ws(source, facts)
-        self.assertEqual(product, expected)
+        assert product == expected

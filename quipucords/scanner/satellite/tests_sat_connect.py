@@ -76,7 +76,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_sat5_bad_status(self):
         """Test the running connect task for Satellite 5."""
@@ -87,7 +87,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_sat6_bad_status(self):
         """Test the running connect task for Sat 6 with bad status."""
@@ -99,7 +99,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_sat6_bad_api_version(self):
         """Test the running connect task for Sat6 with bad api version."""
@@ -111,7 +111,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_with_conn_err(self):
         """Test the running connect task with connection error."""
@@ -122,7 +122,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_with_sat_err(self):
         """Test the running connect task with satellite error."""
@@ -133,7 +133,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_with_auth_err(self):
         """Test the running connect task with satellite auth error."""
@@ -145,7 +145,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_with_timeout_err(self):
         """Test the running connect task with timeout error."""
@@ -156,7 +156,7 @@ class ConnectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
     def test_run_sat6_v2(self):
         """Test the running connect task for Sat6 with api version 2."""
@@ -176,18 +176,18 @@ class ConnectTaskRunnerTest(TestCase):
                     mock_sat_status.assert_called_once_with(ANY)
                     mock_host_count.assert_called_once_with()
                     mock_hosts.assert_called_once_with()
-                    self.assertEqual(status[1], ScanTask.COMPLETED)
+                    assert status[1] == ScanTask.COMPLETED
 
     def test_run_sat6_v2_cancel(self):
         """Test the running connect task (cancel)."""
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         status = task.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        self.assertEqual(status[1], ScanTask.CANCELED)
+        assert status[1] == ScanTask.CANCELED
 
     def test_run_sat6_v2_pause(self):
         """Test the running connect task (pause)."""
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         status = task.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        self.assertEqual(status[1], ScanTask.PAUSED)
+        assert status[1] == ScanTask.PAUSED

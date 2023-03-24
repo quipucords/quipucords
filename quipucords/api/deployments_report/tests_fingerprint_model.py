@@ -31,7 +31,7 @@ class FingerprintModelTest(TestCase):
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
-        self.assertTrue(is_valid)
+        assert is_valid
         serializer.save()
 
     # pylint: disable=invalid-name
@@ -54,7 +54,7 @@ class FingerprintModelTest(TestCase):
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
-        self.assertTrue(is_valid)
+        assert is_valid
         serializer.save()
 
     def test_product_fingerprint(self):
@@ -71,7 +71,7 @@ class FingerprintModelTest(TestCase):
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
-        self.assertTrue(is_valid)
+        assert is_valid
         serializer.save()
 
     def test_entitlement_fingerprint(self):
@@ -92,5 +92,5 @@ class FingerprintModelTest(TestCase):
         is_valid = serializer.is_valid()
         if not is_valid:
             print(serializer.errors)
-        self.assertTrue(is_valid)
+        assert is_valid
         serializer.save()

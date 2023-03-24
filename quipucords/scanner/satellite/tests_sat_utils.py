@@ -67,22 +67,22 @@ class SatelliteUtilsTest(TestCase):
     def test_get_credential(self):
         """Test the method to extract credential."""
         cred = get_credential(self.scan_task)
-        self.assertEqual(cred, self.cred)
+        assert cred == self.cred
 
     def test_get_connect_data(self):
         """Test method to get connection data from task."""
         host, port, user, password = get_connect_data(self.scan_task)
-        self.assertEqual(host, "1.2.3.4")
-        self.assertEqual(port, 443)
-        self.assertEqual(user, "username")
-        self.assertEqual(password, "password")
+        assert host == "1.2.3.4"
+        assert port == 443
+        assert user == "username"
+        assert password == "password"
 
     def test_construct_url(self):
         """Test method to construct satellite url."""
         expected = "https://1.2.3.4:443/api/status"
         status_url = "https://{sat_host}:{port}/api/status"
         url = construct_url(status_url, "1.2.3.4")
-        self.assertEqual(url, expected)
+        assert url == expected
 
     def test_execute_request(self):
         """Test the method to execute a request against a satellite server."""
@@ -92,9 +92,9 @@ class SatelliteUtilsTest(TestCase):
             jsonresult = {"api_version": 2}
             mocker.get(url, status_code=200, json=jsonresult)
             response, formatted_url = execute_request(self.scan_task, status_url)
-            self.assertEqual(url, formatted_url)
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json(), jsonresult)
+            assert url == formatted_url
+            assert response.status_code == 200
+            assert response.json() == jsonresult
 
     @patch(
         "scanner.satellite.utils._status6",
@@ -103,9 +103,9 @@ class SatelliteUtilsTest(TestCase):
     def test_status_sat6(self, mock_status5):
         """Test a patched status request to Satellite 6 server."""
         status_code, api_version, satellite_version = status(self.scan_task)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(api_version, SATELLITE_VERSION_6)
-        self.assertEqual(satellite_version, SATELLITE_VERSION_6)
+        assert status_code == 200
+        assert api_version == SATELLITE_VERSION_6
+        assert satellite_version == SATELLITE_VERSION_6
         mock_status5.assert_called_once_with(ANY)
 
     @patch("xmlrpc.client.ServerProxy")
@@ -115,9 +115,9 @@ class SatelliteUtilsTest(TestCase):
         client.auth.login.return_value = "key"
         client.auth.logout.return_value = "key"
         status_code, api_version, satellite_version = _status5(self.scan_task)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(api_version, SATELLITE_VERSION_5)
-        self.assertEqual(satellite_version, SATELLITE_VERSION_5)
+        assert status_code == 200
+        assert api_version == SATELLITE_VERSION_5
+        assert satellite_version == SATELLITE_VERSION_5
 
     @patch("xmlrpc.client.ServerProxy")
     def test_status5_xmlfault(self, mock_serverproxy):
@@ -139,9 +139,9 @@ class SatelliteUtilsTest(TestCase):
             jsonresult = {"api_version": 2}
             mocker.get(url, status_code=200, json=jsonresult)
             status_code, api_version, satellite_version = status(self.scan_task)
-            self.assertEqual(status_code, 200)
-            self.assertEqual(api_version, 2)
-            self.assertEqual(satellite_version, SATELLITE_VERSION_6)
+            assert status_code == 200
+            assert api_version == 2
+            assert satellite_version == SATELLITE_VERSION_6
 
     @patch("xmlrpc.client.ServerProxy")
     def test_status_error(self, mock_serverproxy):
@@ -163,14 +163,14 @@ class SatelliteUtilsTest(TestCase):
         data = {"uuid": "100", "new::color": "blue", "key": "value"}
         expected = {"id": "100", "color": "blue"}
         mapped = data_map(map_dict, data)
-        self.assertEqual(mapped, expected)
+        assert mapped == expected
 
     def test_get_sat5_client(self):
         """Test the sat5 client helper."""
         client, user, password = get_sat5_client(self.scan_task)
-        self.assertIsNotNone(client)
-        self.assertEqual(user, "username")
-        self.assertEqual(password, "password")
+        assert client is not None
+        assert user == "username"
+        assert password == "password"
 
     def test_validate_task_stats(self):
         """Test validate task stats no errors."""

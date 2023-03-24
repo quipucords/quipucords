@@ -36,7 +36,7 @@ class TestConstructVars(unittest.TestCase):
             "ansible_become_user": "root",
             "ansible_become_method": "sudo",
         }
-        self.assertEqual(vars_dict, expected)
+        assert vars_dict == expected
 
 
 class TestExpandHostpattern(unittest.TestCase):
@@ -44,28 +44,31 @@ class TestExpandHostpattern(unittest.TestCase):
 
     def test_single_hostname(self):
         """A single hostname."""
-        self.assertEqual(utils.expand_hostpattern("domain.com"), ["domain.com"])
+        assert utils.expand_hostpattern("domain.com") == ["domain.com"]
 
     def test_single_hostname_with_port(self):
         """Users can specify a port, too."""
-        self.assertEqual(utils.expand_hostpattern("domain.com:1234"), ["domain.com"])
+        assert utils.expand_hostpattern("domain.com:1234") == ["domain.com"]
 
     def test_hostname_range(self):
         """A range of hostnames."""
-        self.assertEqual(
-            utils.expand_hostpattern("[a:c].domain.com"),
-            ["a.domain.com", "b.domain.com", "c.domain.com"],
-        )
+        assert utils.expand_hostpattern("[a:c].domain.com") == [
+            "a.domain.com",
+            "b.domain.com",
+            "c.domain.com",
+        ]
 
     def test_single_ip_address(self):
         """A single IP address."""
-        self.assertEqual(utils.expand_hostpattern("1.2.3.4"), ["1.2.3.4"])
+        assert utils.expand_hostpattern("1.2.3.4") == ["1.2.3.4"]
 
     def test_ip_range(self):
         """A range of IP addresses."""
-        self.assertEqual(
-            utils.expand_hostpattern("1.2.3.[4:6]"), ["1.2.3.4", "1.2.3.5", "1.2.3.6"]
-        )
+        assert utils.expand_hostpattern("1.2.3.[4:6]") == [
+            "1.2.3.4",
+            "1.2.3.5",
+            "1.2.3.6",
+        ]
 
 
 def test_raw_facts_template():

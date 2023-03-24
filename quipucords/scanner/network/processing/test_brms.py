@@ -23,19 +23,17 @@ Implementation-Version: 6.5.0.Final-redhat-2
 
     def test_success(self):
         """Extract the Implementation_Version from a manifest."""
-        self.assertEqual(
-            brms.ProcessJbossBRMSManifestMF.process_item(
-                ansible_item("/opt/brms/", self.MANIFEST)
-            ),
-            ("/opt/brms", "6.5.0.Final-redhat-2"),
-        )
+        assert brms.ProcessJbossBRMSManifestMF.process_item(
+            ansible_item("/opt/brms/", self.MANIFEST)
+        ) == ("/opt/brms", "6.5.0.Final-redhat-2")
 
     def test_no_version(self):
         """Don't crash if the manifest is missing a version."""
-        self.assertIsNone(
+        assert (
             brms.ProcessJbossBRMSManifestMF.process_item(
                 ansible_item("manifest", "not\na\nmanifest")
             )
+            is None
         )
 
 
@@ -44,20 +42,20 @@ class TestEnclosingWarArchive(unittest.TestCase):
 
     def test_enclosing(self):
         """Return the enclosing war archive."""
-        self.assertEqual(
-            brms.enclosing_war_archive("/foo/kie-server.war/bar/baz"),
-            "/foo/kie-server.war",
+        assert (
+            brms.enclosing_war_archive("/foo/kie-server.war/bar/baz")
+            == "/foo/kie-server.war"
         )
 
     def test_war_root(self):
         """Return the war archive when applied to just the archive."""
-        self.assertEqual(
-            brms.enclosing_war_archive("/foo/kie-server.war"), "/foo/kie-server.war"
+        assert (
+            brms.enclosing_war_archive("/foo/kie-server.war") == "/foo/kie-server.war"
         )
 
     def test_no_war_archive(self):
         """Return None when there is no war archive."""
-        self.assertIsNone(brms.enclosing_war_archive("/foo/bar/baz"))
+        assert brms.enclosing_war_archive("/foo/bar/baz") is None
 
 
 class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
@@ -73,10 +71,9 @@ class TestProcessJbossBRMSKieBusinessCentral(unittest.TestCase):
 
     def test_success_case(self):
         """Return stdout_lines in case of success."""
-        self.assertEqual(
-            set(brms.ProcessJbossBRMSKieBusinessCentral.process(self.ls_results)),
-            {("/tmp/good", "version-string")},
-        )
+        assert set(
+            brms.ProcessJbossBRMSKieBusinessCentral.process(self.ls_results)
+        ) == {("/tmp/good", "version-string")}
 
 
 class TestFindBRMSKieApiVer(unittest.TestCase):
@@ -102,13 +99,13 @@ class TestFindBRMSKieApiVer(unittest.TestCase):
 
     def test_success_case(self):
         """Return the correct (directory, version string) pairs."""
-        self.assertEqual(
+        assert (
             set(
                 brms.ProcessFindBRMSKieApiVer.process(
                     ansible_result(self.ansible_stdout)
                 )
-            ),
-            self.expected,
+            )
+            == self.expected
         )
 
 
@@ -117,10 +114,11 @@ class TestProcessFindBRMSKieWarVer(unittest.TestCase):
 
     def test_success_case(self):
         """Return stdout_lines in case of success."""
-        self.assertEqual(
-            brms.ProcessFindBRMSKieWarVer.process(ansible_result("a\nb\nc")),
-            ["a", "b", "c"],
-        )
+        assert brms.ProcessFindBRMSKieWarVer.process(ansible_result("a\nb\nc")) == [
+            "a",
+            "b",
+            "c",
+        ]
 
 
 class TestProcessJbossBRMSBusinessCentralCandidates(unittest.TestCase):
@@ -128,26 +126,23 @@ class TestProcessJbossBRMSBusinessCentralCandidates(unittest.TestCase):
 
     def test_success(self):
         """Found jboss-modules.jar."""
-        self.assertEqual(
-            brms.ProcessJbossBRMSBusinessCentralCandidates.process(
-                "QPC_FORCE_POST_PROCESS",
-                {
-                    "internal_jboss_brms_business_central_candidates": ansible_result(
-                        "a\nb\nc"
-                    )
-                },
-            ),
-            ["a", "b", "c"],
-        )
+        assert brms.ProcessJbossBRMSBusinessCentralCandidates.process(
+            "QPC_FORCE_POST_PROCESS",
+            {
+                "internal_jboss_brms_business_central_candidates": ansible_result(
+                    "a\nb\nc"
+                )
+            },
+        ) == ["a", "b", "c"]
 
     def test_not_found(self):
         """Did not find jboss-modules.jar."""
-        self.assertEqual(
+        assert (
             brms.ProcessJbossBRMSBusinessCentralCandidates.process(
                 "QPC_FORCE_POST_PROCESS",
                 {"internal_jboss_brms_business_central_candidates": ansible_result("")},
-            ),
-            [],
+            )
+            == []
         )
 
 
@@ -156,26 +151,23 @@ class TestProcessJbossBRMSDecisionCentralCandidates(unittest.TestCase):
 
     def test_success(self):
         """Found candidates."""
-        self.assertEqual(
-            brms.ProcessJbossBRMSDecisionCentralCandidates.process(
-                "QPC_FORCE_POST_PROCESS",
-                {
-                    "internal_jboss_brms_decision_central_candidates": ansible_result(
-                        "a\nb\nc"
-                    )
-                },
-            ),
-            ["a", "b", "c"],
-        )
+        assert brms.ProcessJbossBRMSDecisionCentralCandidates.process(
+            "QPC_FORCE_POST_PROCESS",
+            {
+                "internal_jboss_brms_decision_central_candidates": ansible_result(
+                    "a\nb\nc"
+                )
+            },
+        ) == ["a", "b", "c"]
 
     def test_not_found(self):
         """Did not find candidates."""
-        self.assertEqual(
+        assert (
             brms.ProcessJbossBRMSDecisionCentralCandidates.process(
                 "QPC_FORCE_POST_PROCESS",
                 {"internal_jboss_brms_decision_central_candidates": ansible_result("")},
-            ),
-            [],
+            )
+            == []
         )
 
 
@@ -184,26 +176,19 @@ class TestProcessJbossBRMSKieCentralCandidates(unittest.TestCase):
 
     def test_success(self):
         """Found candidates."""
-        self.assertEqual(
-            brms.ProcessJbossBRMSKieCentralCandidates.process(
-                "QPC_FORCE_POST_PROCESS",
-                {
-                    "internal_jboss_brms_kie_server_candidates": ansible_result(
-                        "a\nb\nc"
-                    )
-                },
-            ),
-            ["a", "b", "c"],
-        )
+        assert brms.ProcessJbossBRMSKieCentralCandidates.process(
+            "QPC_FORCE_POST_PROCESS",
+            {"internal_jboss_brms_kie_server_candidates": ansible_result("a\nb\nc")},
+        ) == ["a", "b", "c"]
 
     def test_not_found(self):
         """Did not find candidates."""
-        self.assertEqual(
+        assert (
             brms.ProcessJbossBRMSKieCentralCandidates.process(
                 "QPC_FORCE_POST_PROCESS",
                 {"internal_jboss_brms_kie_server_candidates": ansible_result("")},
-            ),
-            [],
+            )
+            == []
         )
 
 
@@ -212,24 +197,17 @@ class TestProcessKieSearchCandidates(unittest.TestCase):
 
     def test_success(self):
         """Found candidates."""
-        self.assertEqual(
-            brms.ProcessKieSearchCandidates.process(
-                "QPC_FORCE_POST_PROCESS",
-                {
-                    "internal_jboss_brms_kie_server_candidates": ansible_result(
-                        "a\nb\nc"
-                    )
-                },
-            ),
-            ["a", "b", "c"],
-        )
+        assert brms.ProcessKieSearchCandidates.process(
+            "QPC_FORCE_POST_PROCESS",
+            {"internal_jboss_brms_kie_server_candidates": ansible_result("a\nb\nc")},
+        ) == ["a", "b", "c"]
 
     def test_not_found(self):
         """Did not find candidates."""
-        self.assertEqual(
+        assert (
             brms.ProcessKieSearchCandidates.process(
                 "QPC_FORCE_POST_PROCESS",
                 {"internal_jboss_brms_kie_server_candidates": ansible_result("")},
-            ),
-            [],
+            )
+            == []
         )

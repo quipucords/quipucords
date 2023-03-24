@@ -106,8 +106,8 @@ class SatelliteSixV1Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             orgs = self.api.get_orgs()
             orgs2 = self.api.get_orgs()
-            self.assertEqual(orgs, [1, 7, 8])
-            self.assertEqual(orgs, orgs2)
+            assert orgs == [1, 7, 8]
+            assert orgs == orgs2
 
     def test_get_orgs_with_err(self):
         """Test the method to get orgs with err."""
@@ -135,7 +135,7 @@ class SatelliteSixV1Test(TestCase):
             }
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
-            self.assertEqual(systems_count, 3)
+            assert systems_count == 3
 
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_host_count_with_err(self, mock_get_orgs):
@@ -176,9 +176,9 @@ class SatelliteSixV1Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
             hosts = self.api.hosts()
-            self.assertEqual(systems_count, 3)
-            self.assertEqual(len(hosts), 3)
-            self.assertEqual(hosts, ["sys1_1", "sys2_2", "sys3_3"])
+            assert systems_count == 3
+            assert len(hosts) == 3
+            assert hosts == ["sys1_1", "sys2_2", "sys3_3"]
 
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_hosts_with_err(self, mock_get_orgs):
@@ -266,7 +266,7 @@ class SatelliteSixV1Test(TestCase):
                 "os_name": "RedHat",
                 "os_version": "7.4",
             }
-            self.assertEqual(host_info, expected)
+            assert host_info == expected
 
     def test_prepare_host_s61(self):
         """Test the prepare host method for satellite 6.1."""
@@ -312,7 +312,7 @@ class SatelliteSixV1Test(TestCase):
             return_value=connect_data_return_value,
         ) as mock_connect:
             host_params = SatelliteSixV1.prepare_host(self.api, chunk)
-            self.assertEqual(expected, host_params)
+            assert expected == host_params
             mock_connect.assert_called_once_with(ANY)
 
     def test_request_host_details_err(self):
@@ -343,9 +343,9 @@ class SatelliteSixV1Test(TestCase):
                 "host_fields_response": {},
                 "host_subscriptions_response": {},
             }
-            self.assertEqual(result, expected)
+            assert result == expected
             inspect_result = self.scan_task.inspection_result
-            self.assertEqual(len(inspect_result.systems.all()), 0)
+            assert len(inspect_result.systems.all()) == 0
 
     def test_post_processing(self):
         """Test process_results method with mock data."""
@@ -450,12 +450,12 @@ class SatelliteSixV1Test(TestCase):
                 process_results(self.api, [result], 1)
                 inspect_results = self.scan_task.inspection_result.systems.all()
                 sys_1_result = inspect_results.filter(name="sys_1").first()
-                self.assertEqual(sys_1_result.name, "sys_1")
-                self.assertEqual(sys_1_result.status, "success")
+                assert sys_1_result.name == "sys_1"
+                assert sys_1_result.status == "success"
                 result = {}
                 for fact in sys_1_result.facts.all():
                     result[fact.name] = json.loads(fact.value)
-                self.assertEqual(result, expected)
+                assert result == expected
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)
 
@@ -504,7 +504,7 @@ class SatelliteSixV1Test(TestCase):
                     mocker.get(url, status_code=200, json=jsonresult)
                     self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
                     inspect_result = self.scan_task.inspection_result
-                    self.assertEqual(len(inspect_result.systems.all()), 1)
+                    assert len(inspect_result.systems.all()) == 1
 
 
 # pylint: disable=too-many-instance-attributes
@@ -566,7 +566,7 @@ class SatelliteSixV2Test(TestCase):
             }
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
-            self.assertEqual(systems_count, 3)
+            assert systems_count == 3
 
     def test_host_count_with_err(self):
         """Test the method host_count with error."""
@@ -599,9 +599,9 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
             hosts = self.api.hosts()
-            self.assertEqual(systems_count, 3)
-            self.assertEqual(len(hosts), 3)
-            self.assertEqual(hosts, ["sys1_1", "sys2_2", "sys3_3"])
+            assert systems_count == 3
+            assert len(hosts) == 3
+            assert hosts == ["sys1_1", "sys2_2", "sys3_3"]
 
     def test_hosts_with_err(self):
         """Test the method hosts with error."""
@@ -644,12 +644,12 @@ class SatelliteSixV2Test(TestCase):
                 "host_fields_response": {},
                 "host_subscriptions_response": {},
             }
-            self.assertEqual(result, expected)
+            assert result == expected
             process_results(self.api, [result], 1)
             inspect_results = self.scan_task.inspection_result.systems.all()
             sys_1_result = inspect_results.filter(name="sys_1").first()
-            self.assertEqual(sys_1_result.name, "sys_1")
-            self.assertEqual(sys_1_result.status, "failed")
+            assert sys_1_result.name == "sys_1"
+            assert sys_1_result.status == "failed"
 
     def test_host_fields(self):
         """Test the method host_fields."""
@@ -719,7 +719,7 @@ class SatelliteSixV2Test(TestCase):
                 "os_name": "RedHat",
                 "os_version": "7.4",
             }
-            self.assertEqual(host_info, expected)
+            assert host_info == expected
 
     def test_get_https_with_err(self):
         """Test the host subscriptons method with bad status code."""
@@ -749,7 +749,7 @@ class SatelliteSixV2Test(TestCase):
                 "host_fields_response": {},
                 "host_subscriptions_response": {},
             }
-            self.assertEqual(result, expected)
+            assert result == expected
 
     def test_processing_subs_err_nojson(self):
         """Test the flow of post processing with bad code and not json."""
@@ -776,8 +776,8 @@ class SatelliteSixV2Test(TestCase):
             process_results(self.api, [result], 1)
             inspect_results = self.scan_task.inspection_result.systems.all()
             sys_1_result = inspect_results.filter(name="sys_1").first()
-            self.assertEqual(sys_1_result.name, "sys_1")
-            self.assertEqual(sys_1_result.status, "failed")
+            assert sys_1_result.name == "sys_1"
+            assert sys_1_result.status == "failed"
 
     def test_host_not_subscribed(self):
         """Test the host subscriptons method for not subscribed error."""
@@ -809,8 +809,8 @@ class SatelliteSixV2Test(TestCase):
         process_results(self.api, [result], 1)
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys_1").first()
-        self.assertEqual(sys_1_result.name, "sys_1")
-        self.assertEqual(sys_1_result.status, "failed")
+        assert sys_1_result.name == "sys_1"
+        assert sys_1_result.status == "failed"
 
     def test_host_subscriptons(self):
         """Test the host subscriptons method."""
@@ -862,7 +862,7 @@ class SatelliteSixV2Test(TestCase):
                     },
                 ]
             }
-            self.assertEqual(subs, expected)
+            assert subs == expected
 
     def test_post_processing_err(self):
         """Test error flow & check that a failed system is marked."""
@@ -875,8 +875,8 @@ class SatelliteSixV2Test(TestCase):
         process_results(self.api, [response], 1)
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys_1").first()
-        self.assertEqual(sys_1_result.name, "sys_1")
-        self.assertEqual(sys_1_result.status, "failed")
+        assert sys_1_result.name == "sys_1"
+        assert sys_1_result.status == "failed"
 
     def test_post_processing(self):
         """Test process_results method with mock data."""
@@ -978,12 +978,12 @@ class SatelliteSixV2Test(TestCase):
                 process_results(self.api, [result], 1)
                 inspect_results = self.scan_task.inspection_result.systems.all()
                 sys_1_result = inspect_results.filter(name="sys_1").first()
-                self.assertEqual(sys_1_result.name, "sys_1")
-                self.assertEqual(sys_1_result.status, "success")
+                assert sys_1_result.name == "sys_1"
+                assert sys_1_result.status == "success"
                 result = {}
                 for fact in sys_1_result.facts.all():
                     result[fact.name] = json.loads(fact.value)
-                self.assertEqual(result, expected)
+                assert result == expected
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)
                 mock_fields.assert_called_once_with(ANY, ANY)
@@ -1048,4 +1048,4 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             api.hosts_facts(Value("i", ScanJob.JOB_RUN))
             inspect_result = scan_task.inspection_result
-            self.assertEqual(len(inspect_result.systems.all()), 1)
+            assert len(inspect_result.systems.all()) == 1

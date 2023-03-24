@@ -43,32 +43,32 @@ class SatelliteFactoryTest(TestCase):
         satellite_version = None
         api_version = 1
         api = create(satellite_version, api_version, self.scan_job, self.scan_task)
-        self.assertEqual(api, None)
+        assert api is None
 
     def test_create_sat5(self):
         """Test the method to create a Sat 5 interface."""
         satellite_version = SATELLITE_VERSION_5
         api_version = 1
         api = create(satellite_version, api_version, self.scan_job, self.scan_task)
-        self.assertEqual(api.__class__, SatelliteFive)
+        assert api.__class__ == SatelliteFive
 
     def test_create_sat6_v1(self):
         """Test the method to create a Sat 6 interface."""
         satellite_version = SATELLITE_VERSION_6
         api_version = 1
         api = create(satellite_version, api_version, self.scan_job, self.scan_task)
-        self.assertEqual(api.__class__, SatelliteSixV1)
+        assert api.__class__ == SatelliteSixV1
 
     def test_create_sat6_v2(self):
         """Test the method to create a Sat 6 interface."""
         satellite_version = SATELLITE_VERSION_6
         api_version = 2
         api = create(satellite_version, api_version, self.scan_job, self.scan_task)
-        self.assertEqual(api.__class__, SatelliteSixV2)
+        assert api.__class__ == SatelliteSixV2
 
     def test_create_sat6_unknown(self):
         """Test the method to create a Sat 6 interface."""
         satellite_version = SATELLITE_VERSION_6
         api_version = 9
         api = create(satellite_version, api_version, self.scan_job, self.scan_task)
-        self.assertEqual(api, None)
+        assert api is None

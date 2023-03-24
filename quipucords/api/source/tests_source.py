@@ -83,10 +83,10 @@ class SourceTest(TestCase):
     def create_expect_400(self, data, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
         response = self.create(data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         if expected_response:
             response_json = response.json()
-            self.assertEqual(response_json, expected_response)
+            assert response_json == expected_response
 
     def create_expect_201(self, data):
         """Create a source, return the response as a dict."""
@@ -95,7 +95,7 @@ class SourceTest(TestCase):
             print("#" * 1200)
             print("Status code not 201.  See JSON response.")
             print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     # pylint: disable=unused-argument
@@ -115,17 +115,17 @@ class SourceTest(TestCase):
     def create_expect_201_with_query(self, query, data):
         """Create a valid source with a scan parameter."""
         response = self.create_with_query(query, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     # pylint: disable=no-value-for-parameter
     def create_expect_400_with_query(self, query, data, expected_response=None):
         """Create an expect HTTP 400."""
         response = self.create_with_query(query, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         if expected_response:
             response_json = response.json()
-            self.assertEqual(response_json, expected_response)
+            assert response_json == expected_response
 
     #################################################
     # Function Tests
@@ -139,7 +139,7 @@ class SourceTest(TestCase):
 
         options = {}
         SourceSerializer.validate_opts(options, source_type)
-        self.assertEqual(options["ssl_cert_verify"], True)
+        assert options["ssl_cert_verify"] is True
 
         source_type = DataSources.VCENTER
         options = {"use_paramiko": True}
@@ -148,7 +148,7 @@ class SourceTest(TestCase):
 
         options = {}
         SourceSerializer.validate_opts(options, source_type)
-        self.assertEqual(options["ssl_cert_verify"], True)
+        assert options["ssl_cert_verify"] is True
 
         source_type = DataSources.NETWORK
         options = {"disable_ssl": True}
@@ -205,7 +205,7 @@ class SourceTest(TestCase):
                 "source_systems_unreachable": 0,
             },
         }
-        self.assertEqual(out, expected)
+        assert out == expected
 
     #################################################
     # Network Tests
@@ -225,7 +225,7 @@ class SourceTest(TestCase):
             "credentials": [self.net_cred_for_upload],
         }
         response = self.create_expect_201_with_query(query, data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_source_create_with_true_scan(self):
         """Test creating source with valid scan query param of True."""
@@ -261,7 +261,7 @@ class SourceTest(TestCase):
             "credentials": [self.net_cred_for_upload],
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_successful_net_create_no_port(self):
         """A valid create request should succeed without port."""
@@ -272,7 +272,7 @@ class SourceTest(TestCase):
             "credentials": [self.net_cred_for_upload],
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_double_create(self):
         """A duplicate create should fail."""
@@ -284,7 +284,7 @@ class SourceTest(TestCase):
             "credentials": [self.net_cred_for_upload],
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
         self.create_expect_400(data)
 
     def test_create_multiple_hosts(self):
@@ -496,8 +496,8 @@ class SourceTest(TestCase):
                 "credentials": [self.net_cred_for_upload],
             }
         )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(len(response.data["hosts"]), len(hosts))
+        assert response.status_code == 400
+        assert len(response.data["hosts"]) == len(hosts)
 
     def test_create_bad_host_pattern(self):
         """Test a invalid host pattern."""
@@ -512,8 +512,8 @@ class SourceTest(TestCase):
                 "credentials": [self.net_cred_for_upload],
             }
         )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(len(response.data["hosts"]), len(hosts))
+        assert response.status_code == 400
+        assert len(response.data["hosts"]) == len(hosts)
 
     def test_create_bad_port(self):
         """-1 is not a valid ssh port."""
@@ -614,7 +614,7 @@ class SourceTest(TestCase):
 
         url = reverse("source-list")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
         results1 = [
@@ -644,7 +644,7 @@ class SourceTest(TestCase):
             },
         ]
         expected = {"count": 3, "next": None, "previous": None, "results": results1}
-        self.assertEqual(content, expected)
+        assert content == expected
 
     def test_filter_by_type_list(self):
         """List all Source objects filtered by type."""
@@ -674,7 +674,7 @@ class SourceTest(TestCase):
 
         url = reverse("source-list")
         response = self.client.get(url, {"source_type": DataSources.VCENTER})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
         results1 = [
@@ -702,7 +702,7 @@ class SourceTest(TestCase):
             },
         ]
         expected = {"count": 2, "next": None, "previous": None, "results": results1}
-        self.assertEqual(content, expected)
+        assert content == expected
 
     def test_retrieve(self):
         """Get details on a specific Source by primary key."""
@@ -719,21 +719,21 @@ class SourceTest(TestCase):
 
         url = reverse("source-detail", args=(initial["id"],))
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
-        self.assertIn("credentials", response_json)
+        assert "credentials" in response_json
         creds = response_json["credentials"]
 
-        self.assertEqual(creds, [self.net_cred_for_response])
-        self.assertIn("hosts", response_json)
-        self.assertEqual(response_json["hosts"][0], "1.2.3.4")
-        self.assertEqual(response_json["exclude_hosts"][0], "1.2.3.4")
+        assert creds == [self.net_cred_for_response]
+        assert "hosts" in response_json
+        assert response_json["hosts"][0] == "1.2.3.4"
+        assert response_json["exclude_hosts"][0] == "1.2.3.4"
 
     def test_retrieve_bad_id(self):
         """Get details on a specific Source by bad primary key."""
         url = reverse("source-detail", args=("string",))
         response = self.client.get(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     # We don't have to test that update validates fields correctly
     # because the validation code is shared between create and update.
@@ -759,7 +759,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         expected = {
             "name": "source2",
@@ -771,7 +771,7 @@ class SourceTest(TestCase):
         # data should be a strict subset of the response, because the
         # response adds an id field.
         for key, value in expected.items():
-            self.assertEqual(value, response.json()[key])
+            assert value == response.json()[key]
 
     def test_update_collide(self):
         """Fail update due to name conflict."""
@@ -805,7 +805,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_partial_update_missing_hosts(self):
         """Partial update should succeed with missing hosts."""
@@ -824,7 +824,7 @@ class SourceTest(TestCase):
         response = self.client.patch(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_partial_update_network_ssl_options_not_allowed(self):
         """Partial update should succeed with missing hosts."""
@@ -848,7 +848,7 @@ class SourceTest(TestCase):
         response = self.client.patch(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_partial_update_no_hosts_retains_initial_host(self):
         """Partial update should keep initial host if no host provided."""
@@ -868,7 +868,7 @@ class SourceTest(TestCase):
             url, json.dumps(data), content_type="application/json", format="json"
         )
         expected = ["1.2.3.4"]
-        self.assertEqual(response.data["hosts"], expected)
+        assert response.data["hosts"] == expected
 
     def test_partial_update_empty_hosts(self):
         """Partial update should succeed with missing hosts."""
@@ -892,7 +892,7 @@ class SourceTest(TestCase):
         response = self.client.patch(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_missing_hosts(self):
         """Fail update due to missing host array."""
@@ -911,7 +911,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_empty_hosts(self):
         """Fail update due to empty host array."""
@@ -935,9 +935,9 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_rsp = response.json()
-        self.assertEqual(json_rsp["hosts"][0], messages.SOURCE_HOSTS_CANNOT_BE_EMPTY)
+        assert json_rsp["hosts"][0] == messages.SOURCE_HOSTS_CANNOT_BE_EMPTY
 
     def test_update_type_passed(self):
         """Fail update due to type passed."""
@@ -962,7 +962,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_bad_cred_type(self):
         """Fail update due to bad cred type."""
@@ -987,7 +987,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_partial_update(self):
         """Partially update a Source."""
@@ -1006,9 +1006,9 @@ class SourceTest(TestCase):
         response = self.client.patch(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()["name"], "source3-new")
-        self.assertEqual(response.json()["hosts"], ["1.2.3.5"])
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["name"] == "source3-new"
+        assert response.json()["hosts"] == ["1.2.3.5"]
 
     def test_delete(self):
         """Delete a Source."""
@@ -1023,7 +1023,7 @@ class SourceTest(TestCase):
 
         url = reverse("source-detail", args=(response["id"],))
         response = self.client.delete(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_delete_with_scans(self):
         """Delete a Source used by a scan."""
@@ -1044,12 +1044,10 @@ class SourceTest(TestCase):
 
         url = reverse("source-detail", args=(source.id,))
         response = self.client.delete(url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
-        self.assertEqual(
-            response_json["detail"], messages.SOURCE_DELETE_NOT_VALID_W_SCANS
-        )
-        self.assertEqual(response_json["scans"][0]["name"], "test_scan")
+        assert response_json["detail"] == messages.SOURCE_DELETE_NOT_VALID_W_SCANS
+        assert response_json["scans"][0]["name"] == "test_scan"
 
     #################################################
     # VCenter Tests
@@ -1063,7 +1061,7 @@ class SourceTest(TestCase):
             "credentials": [self.vc_cred_for_upload],
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_create_too_many_creds(self):
         """A vcenter source and have one credential."""
@@ -1153,7 +1151,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_update_vc_more_than_one_host(self):
         """VC - Fail more than one host."""
@@ -1177,7 +1175,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_vc_with_exclude_host(self):
         """VC - Fail when excluded hosts are provided."""
@@ -1202,7 +1200,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_vc_more_than_one_cred(self):
         """VC - Fail more than one cred."""
@@ -1226,7 +1224,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_vc_range_hosts(self):
         """Fail update due to empty host array."""
@@ -1250,9 +1248,9 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_rsp = response.json()
-        self.assertEqual(json_rsp["hosts"][0], messages.SOURCE_ONE_HOST)
+        assert json_rsp["hosts"][0] == messages.SOURCE_ONE_HOST
 
     def test_create_req_type(self):
         """A vcenter source must have an type."""
@@ -1276,7 +1274,7 @@ class SourceTest(TestCase):
             "credentials": [self.sat_cred_for_upload],
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_successful_sat_create_with_options(self):
         """A valid create request should succeed."""
@@ -1288,7 +1286,7 @@ class SourceTest(TestCase):
             "options": {"ssl_cert_verify": False},
         }
         response = self.create_expect_201(data)
-        self.assertIn("id", response)
+        assert "id" in response
 
     def test_sat_too_many_creds(self):
         """A sat source and have one credential."""
@@ -1378,7 +1376,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
     def test_update_sat_with_options(self):
         """Sat - Valid full update with options."""
@@ -1403,7 +1401,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
         expected = {
             "id": 1,
             "name": "source",
@@ -1413,7 +1411,7 @@ class SourceTest(TestCase):
             "options": {"ssl_cert_verify": False},
             "credentials": [{"id": 3, "name": "sat_cred1"}],
         }
-        self.assertEqual(response.json(), expected)
+        assert response.json() == expected
 
     def test_update_sat_more_than_one_hosts(self):
         """Sat- Fail update due to multiple hosts."""
@@ -1437,7 +1435,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_sat_more_exclude_hosts(self):
         """Sat- Fail update due to including excluded hosts."""
@@ -1462,7 +1460,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_sat_more_than_one_cred(self):
         """Sat- Fail update due to multiple hosts."""
@@ -1486,7 +1484,7 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_sat_range_hosts(self):
         """Fail update due to invalid host array."""
@@ -1510,9 +1508,9 @@ class SourceTest(TestCase):
         response = self.client.put(
             url, json.dumps(data), content_type="application/json", format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         json_rsp = response.json()
-        self.assertEqual(json_rsp["hosts"][0], messages.SOURCE_ONE_HOST)
+        assert json_rsp["hosts"][0] == messages.SOURCE_ONE_HOST
 
     def test_openshift_source_create(self):
         """Ensure we can create a new openshift source."""

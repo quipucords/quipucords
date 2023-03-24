@@ -84,8 +84,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
     def test_hostcred_create_double(self):
         """Create with duplicate name should fail."""
@@ -96,8 +96,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
         self.create_expect_400(data)
 
@@ -295,14 +295,14 @@ class CredentialTest(TestCase):
         json_resp = resp.json()
         assert json_resp.get("results") is not None
         results = json_resp.get("results")
-        self.assertEqual(len(results), 2)
+        assert len(results) == 2
 
         resp = self.client.get(url, {"cred_type": DataSources.VCENTER})
         assert resp.status_code == status.HTTP_200_OK
         json_resp = resp.json()
         assert json_resp.get("results") is not None
         results = json_resp.get("results")
-        self.assertEqual(len(results), 1)
+        assert len(results) == 1
 
     def test_hostcred_update_view(self):
         """Tests the update view set of the Credential API."""
@@ -387,10 +387,8 @@ class CredentialTest(TestCase):
         resp = self.client.delete(url, format="json")
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         response_json = resp.json()
-        self.assertEqual(
-            response_json["detail"], messages.CRED_DELETE_NOT_VALID_W_SOURCES
-        )
-        self.assertEqual(response_json["sources"][0]["name"], "cred_source")
+        assert response_json["detail"] == messages.CRED_DELETE_NOT_VALID_W_SOURCES
+        assert response_json["sources"][0]["name"] == "cred_source"
 
     def test_vcentercred_create(self):
         """Ensure we can create a new vcenter credential."""
@@ -401,8 +399,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
     def test_vc_cred_create_double(self):
         """Vcenter cred with duplicate name should fail."""
@@ -413,8 +411,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
         self.create_expect_400(data)
 
@@ -469,10 +467,10 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
         self.update_credential(name="cred1", username="root")
-        self.assertEqual(Credential.objects.get().username, "root")
+        assert Credential.objects.get().username == "root"
 
     def test_hostcred_default_become_method(self):
         """Ensure we can set the default become_method via API."""
@@ -483,8 +481,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().become_method, "sudo")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().become_method == "sudo"
 
     def test_hostcred_set_become_method(self):
         """Ensure we can set the credentials become method."""
@@ -496,8 +494,8 @@ class CredentialTest(TestCase):
             "become_method": "doas",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().become_method, "doas")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().become_method == "doas"
 
     def test_hostcred_default_become_user(self):
         """Ensure we can set the default become_user via API."""
@@ -508,8 +506,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().become_user, "root")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().become_user == "root"
 
     def test_hostcred_set_become_user(self):
         """Ensure we can set the become user."""
@@ -522,8 +520,8 @@ class CredentialTest(TestCase):
             "become_user": "newuser",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().become_user, "newuser")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().become_user == "newuser"
 
     def test_hostcred_set_become_pass(self):
         """Ensure we can set the become password."""
@@ -536,9 +534,9 @@ class CredentialTest(TestCase):
             "become_password": "pass",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(
-            decrypt_data_as_unicode(Credential.objects.get().become_password), "pass"
+        assert Credential.objects.count() == 1
+        assert (
+            decrypt_data_as_unicode(Credential.objects.get().become_password) == "pass"
         )
 
     def test_vc_create_extra_keyfile_pass(self):
@@ -564,8 +562,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
     def test_sat_cred_create_double(self):
         """Satellite cred with duplicate name should fail."""
@@ -576,8 +574,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
         self.create_expect_400(data)
 
@@ -604,8 +602,8 @@ class CredentialTest(TestCase):
             "password": "pass1",
         }
         initial = self.create_expect_201(data)
-        self.assertEqual(Credential.objects.count(), 1)
-        self.assertEqual(Credential.objects.get().name, "cred1")
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "cred1"
 
         update_data = {"name": "newName", "ssh_keyfile": "random_path"}
         url = reverse("cred-detail", args=(initial["id"],))

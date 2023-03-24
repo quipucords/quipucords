@@ -36,7 +36,7 @@ class ProductBRMSTest(TestCase):
                 "raw_fact_key": "jboss_brms_kie_api_ver/" "jboss_brms_manifest_mf",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     # pylint: disable=C0103
     def test_detect_jboss_brms_potential_sub(self):
@@ -58,7 +58,7 @@ class ProductBRMSTest(TestCase):
                 "raw_fact_key": "subman_consumed",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_brms_potential_ent(self):
         """Test the detect_jboss_brms method."""
@@ -79,7 +79,7 @@ class ProductBRMSTest(TestCase):
                 "raw_fact_key": "entitlements",
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected
 
     def test_detect_jboss_brms_absent(self):
         """Test the detect_jboss_brms method."""
@@ -100,4 +100,4 @@ class ProductBRMSTest(TestCase):
                 "raw_fact_key": None,
             },
         }
-        self.assertEqual(product, expected)
+        assert product == expected

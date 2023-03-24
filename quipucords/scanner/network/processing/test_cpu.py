@@ -12,13 +12,11 @@ class TestProcessCpuModelVer(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu model ver."""
-        self.assertEqual(cpu.ProcessCpuModelVer.process(ansible_result("a\nb\nc")), "a")
+        assert cpu.ProcessCpuModelVer.process(ansible_result("a\nb\nc")) == "a"
 
     def test_not_found(self):
         """Did not find cpu model ver."""
-        self.assertEqual(
-            cpu.ProcessCpuModelVer.process(ansible_result("")), process.NO_DATA
-        )
+        assert cpu.ProcessCpuModelVer.process(ansible_result("")) == process.NO_DATA
 
 
 class TestProcessCpuCpuFamily(unittest.TestCase):
@@ -26,15 +24,11 @@ class TestProcessCpuCpuFamily(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu family."""
-        self.assertEqual(
-            cpu.ProcessCpuCpuFamily.process(ansible_result("a\nb\nc")), "a"
-        )
+        assert cpu.ProcessCpuCpuFamily.process(ansible_result("a\nb\nc")) == "a"
 
     def test__not_found(self):
         """Did not find cpu family."""
-        self.assertEqual(
-            cpu.ProcessCpuCpuFamily.process(ansible_result("")), process.NO_DATA
-        )
+        assert cpu.ProcessCpuCpuFamily.process(ansible_result("")) == process.NO_DATA
 
 
 class TestProcessCpuVendorId(unittest.TestCase):
@@ -42,13 +36,11 @@ class TestProcessCpuVendorId(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu vendor id."""
-        self.assertEqual(cpu.ProcessCpuVendorId.process(ansible_result("a\nb\nc")), "a")
+        assert cpu.ProcessCpuVendorId.process(ansible_result("a\nb\nc")) == "a"
 
     def test__not_found(self):
         """Did not find cpu vendor id."""
-        self.assertEqual(
-            cpu.ProcessCpuVendorId.process(ansible_result("")), process.NO_DATA
-        )
+        assert cpu.ProcessCpuVendorId.process(ansible_result("")) == process.NO_DATA
 
 
 class TestProcessCpuModelName(unittest.TestCase):
@@ -56,15 +48,11 @@ class TestProcessCpuModelName(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu model name."""
-        self.assertEqual(
-            cpu.ProcessCpuModelName.process(ansible_result("a\nb\nc")), "a"
-        )
+        assert cpu.ProcessCpuModelName.process(ansible_result("a\nb\nc")) == "a"
 
     def test__not_found(self):
         """Did not find cpu model name."""
-        self.assertEqual(
-            cpu.ProcessCpuModelName.process(ansible_result("")), process.NO_DATA
-        )
+        assert cpu.ProcessCpuModelName.process(ansible_result("")) == process.NO_DATA
 
 
 class TestProcessCpuBogomips(unittest.TestCase):
@@ -72,13 +60,11 @@ class TestProcessCpuBogomips(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu bogomips."""
-        self.assertEqual(cpu.ProcessCpuBogomips.process(ansible_result("a\nb\nc")), "a")
+        assert cpu.ProcessCpuBogomips.process(ansible_result("a\nb\nc")) == "a"
 
     def test__not_found(self):
         """Did not find cpu bogomips."""
-        self.assertEqual(
-            cpu.ProcessCpuBogomips.process(ansible_result("")), process.NO_DATA
-        )
+        assert cpu.ProcessCpuBogomips.process(ansible_result("")) == process.NO_DATA
 
 
 class TestProcessCpuSocketCount(unittest.TestCase):
@@ -93,8 +79,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "Status: Unpopulated\r\n"
         )
         dependencies = {"internal_cpu_socket_count_dmi": ansible_result(one_dmi_result)}
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 1
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 1
         )
 
     def test_dmiresult_contains_no_enabled_sockets(self):
@@ -109,8 +96,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_dmi": ansible_result(no_dmi_result),
             "internal_cpu_socket_count_cpuinfo": ansible_result("2"),
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 2
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 2
         )
 
     def test_dmiresult_contains_nonint_characters(self):
@@ -119,8 +107,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_dmi": ansible_result("Permission Denied."),
             "internal_cpu_socket_count_cpuinfo": ansible_result("2"),
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 2
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 2
         )
 
     def test_dmiresult_cpuinfo_fails(self):
@@ -130,15 +119,17 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result(""),
             "cpu_count": "4",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 4
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 4
         )
 
     def test_dmiresult_cpuinfo_not_in_dependencies(self):
         """Test that we use cpu count when the dependencies are None."""
         dependencies = {"cpu_count": "4"}
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 4
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 4
         )
 
     def test_dmiresult_cpuinfo_failed_tasks(self):
@@ -148,8 +139,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result("Failed", 1),
             "cpu_count": "4",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 4
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 4
         )
 
     def test_cpuinfo_failed_value_error(self):
@@ -159,8 +151,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result("Failure"),
             "cpu_count": "1",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 1
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 1
         )
 
     def test_cpuinfo_failed_return_none(self):
@@ -169,9 +162,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_dmi": ansible_result("Permission Denied."),
             "internal_cpu_socket_count_cpuinfo": ansible_result("Failure"),
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies),
-            None,
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            is None
         )
 
     def test_dmiresult_greater_than_8(self):
@@ -181,8 +174,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result("9"),
             "cpu_count": "3",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 3
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 3
         )
 
     def test_dmiresult_equal_to_8(self):
@@ -210,8 +204,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result("9"),
             "cpu_count": "3",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 8
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 8
         )
 
     def test_cpuinfo_equal_to_8(self):
@@ -221,8 +216,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result("8"),
             "cpu_count": "3",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies), 8
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 8
         )
 
     def test_cpu_count_greater_than_8(self):
@@ -232,9 +228,9 @@ class TestProcessCpuSocketCount(unittest.TestCase):
             "internal_cpu_socket_count_cpuinfo": ansible_result("9"),
             "cpu_count": "12",
         }
-        self.assertEqual(
-            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies),
-            12,
+        assert (
+            cpu.ProcessCpuSocketCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 12
         )
 
 
@@ -244,8 +240,8 @@ class TestProcessCpuCoreCount(unittest.TestCase):
     def test_core_count_success(self):
         """Test the cc when virt_type is None and cpu per socket is defined."""
         dependencies = {"cpu_core_per_socket": 2, "cpu_socket_count": 2}
-        self.assertEqual(
-            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies), 4
+        assert (
+            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies) == 4
         )
 
     def test_core_count_success_with_virt_type(self):
@@ -256,8 +252,8 @@ class TestProcessCpuCoreCount(unittest.TestCase):
             "cpu_count": 3,
             "virt_type": "vmware",
         }
-        self.assertEqual(
-            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies), 3
+        assert (
+            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies) == 3
         )
 
     def test_core_count_success_with_hyperthreading(self):
@@ -267,8 +263,9 @@ class TestProcessCpuCoreCount(unittest.TestCase):
             "cpu_count": 3,
             "cpu_hyperthreading": True,
         }
-        self.assertEqual(
-            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies), 1.5
+        assert (
+            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            == 1.5
         )
 
     def test_core_count_success_without_hyperthreading(self):
@@ -278,14 +275,14 @@ class TestProcessCpuCoreCount(unittest.TestCase):
             "cpu_count": 3,
             "cpu_hyperthreading": False,
         }
-        self.assertEqual(
-            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies), 3
+        assert (
+            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies) == 3
         )
 
     def test_core_count_return_empty_string(self):
         """Test the core count is set to '' when deps not available."""
         dependencies = {}
-        self.assertEqual(
-            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies),
-            None,
+        assert (
+            cpu.ProcessCpuCoreCount.process("QPC_FORCE_POST_PROCESS", dependencies)
+            is None
         )

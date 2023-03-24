@@ -52,8 +52,8 @@ class TestProcessEnableYumRepolist(unittest.TestCase):
             },
         ]
 
-        self.assertEqual(
-            yum.ProcessEnableYumRepolist.process(ansible_result(input_data)), expected
+        assert (
+            yum.ProcessEnableYumRepolist.process(ansible_result(input_data)) == expected
         )
 
     def test_error_occurred(self):
@@ -61,10 +61,10 @@ class TestProcessEnableYumRepolist(unittest.TestCase):
         input_data = "Loaded plugins: product-id, security, \
             subscription-manager\r\n"
         expected = []
-        self.assertEqual(
-            yum.ProcessEnableYumRepolist.process(ansible_result(input_data)), expected
+        assert (
+            yum.ProcessEnableYumRepolist.process(ansible_result(input_data)) == expected
         )
 
     def test_not_found(self):
         """Did not find yum_enabled_repolist."""
-        self.assertEqual(yum.ProcessEnableYumRepolist.process(ansible_result("")), [])
+        assert yum.ProcessEnableYumRepolist.process(ansible_result("")) == []

@@ -11,4 +11,4 @@ class FingerprinterUtilTest(TestCase):
     def test_product_entitlement_no_name(self):
         """Test product entitlement without name is false."""
         result = product_entitlement_found([{}], "Foo")
-        self.assertFalse(result)
+        assert not result
