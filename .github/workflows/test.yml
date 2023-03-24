@@ -13,20 +13,16 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Check out repository code
-      uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4.5.0
-      with:
-        python-version: "3.9"
-    - name: Install poetry
-      run: |
-        pip install -U pip
-        pip install poetry
-    - name: Check dependencies
-      run: |
-        make lock-main-requirements
-        make check-requirements
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Check dependencies
+        run: |
+          make lock-main-requirements
+          make check-requirements
   test:
     strategy:
       matrix:
@@ -56,15 +52,18 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
 
+      - name: Install poetry
+        run: pipx install poetry
+
       - name: Set up Python 3.9
         uses: actions/setup-python@v4.5.0
         with:
           python-version: "3.9"
+          cache: "poetry"
+          cache-dependency-path: "poetry.lock"
 
       - name: Install dependencies
-        run: |
-          pip install -U poetry
-          poetry install
+        run: poetry install
 
       - name: Docker Layer Caching
         if: ${{ success() && contains(matrix.type, 'test-integration') }}
