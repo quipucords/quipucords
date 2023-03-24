@@ -1,5 +1,5 @@
 DATE		= $(shell date)
-PYTHON		= $(shell poetry run which python)
+PYTHON		= $(shell poetry run which python 2>/dev/null || which python)
 
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
