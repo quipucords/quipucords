@@ -13,7 +13,8 @@ services:
       NETWORK_CONNECT_JOB_TIMEOUT: 6
       NETWORK_INSPECT_JOB_TIMEOUT: 600
       QPC_DEBUGPY: 1
-
+      REDIS_HOST: qpc-redis
+      REDIS_PASSWORD: qpc
     ports:
       - "9443:443"
       - "5678:5678"
@@ -24,6 +25,7 @@ services:
       - ./var/sshkeys/:/sshkeys
     depends_on:
       - qpc-db
+      - qpc-redis
     restart: always
     entrypoint:
       - /bin/bash
@@ -33,6 +35,14 @@ services:
         watchmedo auto-restart \
           -d quipucords -p '*.py' --recursive \
           -- bash ./deploy/docker_run.sh
+
+  qpc-redis:
+    image: registry.redhat.io/rhel9/redis-6
+    ports:
+      - 63791:6379
+    restart: always
+    environment:
+      REDIS_PASSWORD: qpc
 
   qpc-db:
     image: registry.redhat.io/rhel8/postgresql-12
@@ -49,6 +59,17 @@ services:
       interval: 10s
       retries: 10
     restart: always
+
+  qpc-celery-worker:
+    build: .
+    entrypoint: bash ./deploy/entrypoint_celery_worker.sh
+    depends_on:
+      - qpc-db
+      - qpc-redis
+    environment:
+      REDIS_HOST: qpc-redis
+      REDIS_PASSWORD: qpc
+
   scan-target:
     build:
       context: .
