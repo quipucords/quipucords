@@ -111,6 +111,8 @@ def log_all_environment_variables():
     Note: This is potentially a catastrophically bad idea and risks leaking sensitive
     values that don't contain "password" in their names. Use with extreme caution.
     """
+    if not settings.QPC_LOG_ALL_ENV_VARS_AT_STARTUP:
+        return
     env_list = []
     for key, value in os.environ.items():
         if "password" in key.lower():
