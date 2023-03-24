@@ -15,7 +15,7 @@ from api.credential.serializer import (
 )
 from api.models import Credential
 from api.vault import decrypt_data_as_unicode
-from constants import PASSWORD_MASK, DataSources
+from constants import ENCRYPTED_DATA_MASK, DataSources
 from tests.factories import CredentialFactory
 
 
@@ -570,7 +570,7 @@ class TestBaseCredentialSerializer:
 
         def _value_formatter(value):
             if isinstance(value, str) and Credential.is_encrypted(value):
-                return PASSWORD_MASK
+                return ENCRYPTED_DATA_MASK
             return value
 
         credentials = CredentialFactory.create_batch(10)

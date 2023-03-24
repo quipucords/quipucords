@@ -12,7 +12,7 @@ from rest_framework import status
 from api import messages
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
-from constants import PASSWORD_MASK, DataSources
+from constants import ENCRYPTED_DATA_MASK, DataSources
 from tests.factories import CredentialFactory, SourceFactory
 
 
@@ -711,9 +711,9 @@ INPUT_OUTPUT_ID = (
             "name": "network",
             "cred_type": DataSources.NETWORK.value,
             "username": "some-user",
-            "password": PASSWORD_MASK,
-            "become_password": PASSWORD_MASK,
-            "ssh_passphrase": PASSWORD_MASK,
+            "password": ENCRYPTED_DATA_MASK,
+            "become_password": ENCRYPTED_DATA_MASK,
+            "ssh_passphrase": ENCRYPTED_DATA_MASK,
         },
         "user-pass-become-pass",
     ),
@@ -729,7 +729,7 @@ INPUT_OUTPUT_ID = (
             "name": "satellite",
             "cred_type": DataSources.SATELLITE.value,
             "username": "some-user",
-            "password": PASSWORD_MASK,
+            "password": ENCRYPTED_DATA_MASK,
         },
         "satellite-user-pass",
     ),
@@ -745,7 +745,7 @@ INPUT_OUTPUT_ID = (
             "name": "vcenter",
             "cred_type": DataSources.VCENTER.value,
             "username": "some-user",
-            "password": PASSWORD_MASK,
+            "password": ENCRYPTED_DATA_MASK,
         },
         "vcenter-user-pass",
     ),
@@ -759,7 +759,7 @@ INPUT_OUTPUT_ID = (
             "id": mock.ANY,
             "name": "ocp",
             "cred_type": DataSources.OPENSHIFT.value,
-            "auth_token": PASSWORD_MASK,
+            "auth_token": ENCRYPTED_DATA_MASK,
         },
         "ocp-auth-token",
     ),

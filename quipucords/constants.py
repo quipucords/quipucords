@@ -12,4 +12,4 @@ class DataSources(TextChoices):
     OPENSHIFT = "openshift", "openshift"
 
 
-PASSWORD_MASK = "********"
+ENCRYPTED_DATA_MASK = "********"
