@@ -16,6 +16,7 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                 to show this message"
 	@echo "  all                  to execute all following targets (except test)"
+	@echo "  celery-worker        to run the celery worker"
 	@echo "  clean                to remove pyc/cache files"
 	@echo "  clean-db             to remove postgres docker container / sqlite db"
 	@echo "  clean-ui             to remove UI assets"
@@ -128,6 +129,9 @@ server-makemigrations:
 
 server-migrate:
 	$(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
+
+celery-worker:
+	$(PYTHON) -m celery --app quipucords --workdir quipucords worker
 
 server-set-superuser:
 	cat ./deploy/setup_user.py | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
