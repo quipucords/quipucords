@@ -9,7 +9,7 @@ from rest_framework.serializers import ValidationError, empty
 from api import messages
 from api.common.serializer import NotEmptySerializer
 from api.models import Credential, Source
-from constants import PASSWORD_MASK, DataSources
+from constants import ENCRYPTED_DATA_MASK, DataSources
 
 
 def expand_filepath(filepath):
@@ -126,7 +126,7 @@ class CredentialSerializer(NotEmptySerializer):
         _data = super().to_representation(instance)
         for field in Credential.ENCRYPTED_FIELDS:
             if field in _data:
-                _data[field] = PASSWORD_MASK
+                _data[field] = ENCRYPTED_DATA_MASK
         return _data
 
 
