@@ -7,6 +7,8 @@ import subprocess
 import sys
 from functools import cache
 
+from django.conf import settings
+
 from quipucords.release import infer_version
 
 # pylint: disable=invalid-name
@@ -87,10 +89,8 @@ def start_debugger_if_required():
         print("⏳ debugpy debugger can now be attached ⏳", flush=True)
 
 
-def startup():
-    """Log environment at startup."""
-    # pylint: disable=too-many-locals
-    start_debugger_if_required()
+def log_system_info():
+    """Log system information."""
     logger.info("Platform:")
     for name, value in platform_info().items():
         logger.info("%s - %s ", name, value)
@@ -102,6 +102,15 @@ def startup():
         module_list.append(mod)
 
     logger.info("Modules: %s", ", ".join(module_list))
+
+
+def log_all_environment_variables():
+    """
+    Log all environment variables.
+
+    Note: This is potentially a catastrophically bad idea and risks leaking sensitive
+    values that don't contain "password" in their names. Use with extreme caution.
+    """
     env_list = []
     for key, value in os.environ.items():
         if "password" in key.lower():
@@ -113,31 +122,38 @@ def startup():
     logger.info("\n".join(env_list))
     logger.info("%s END ENVIRONMENT VARIABLES %s", mark, mark)
 
-    QPC_POSTGRES_DBMS = "postgres"
-    QPC_SQLITE_DBMS = "sqlite"
-    valid_dbms = [QPC_POSTGRES_DBMS, QPC_SQLITE_DBMS]
-    qpc_dbms = os.environ.get("QPC_DBMS")
-    if qpc_dbms in valid_dbms:
-        logger.info('QPC_DBMS set to "%s".', qpc_dbms)
-        if qpc_dbms == QPC_POSTGRES_DBMS:
-            database = os.getenv("QPC_DBMS_DATABASE", "postgres")
-            user = os.getenv("QPC_DBMS_USER", "postgres")
-            host = os.getenv("QPC_DBMS_HOST", "localhost" or "::")
-            # pylint: disable=invalid-envvar-default
-            port = os.getenv("QPC_DBMS_PORT", 5432)
-            logger.info('QPC_DBMS_HOST set to "%s"', host)
-            logger.info('QPC_DBMS_PORT set to "%s"', port)
-            logger.info('QPC_DBMS_DATABASE set to "%s"', database)
-            logger.info('QPC_DBMS_USER set to "%s"', user)
-    elif not qpc_dbms:
-        logger.info('QPC_DBMS not set. Using default of "postgres".')
-    else:
-        logger.info(
-            'QPC_DBMS was set to "%s" which is not a valid option. '
-            'Using default of "postgres".',
-            (qpc_dbms),
-        )
 
+def log_database_configuration():
+    """Log settings related to the database configuration."""
+    settings_to_log = {
+        "postgres": [
+            "QPC_DBMS",
+            "QPC_DBMS_HOST",
+            "QPC_DBMS_PORT",
+            "QPC_DBMS_DATABASE",
+            "QPC_DBMS_USER",
+        ],
+        "sqlite": [
+            "QPC_DBMS",
+            "DB_PATH",
+        ]
+    }
+
+    for setting_name in settings_to_log[settings.QPC_DBMS]:
+        logger.info("%s set to %s", setting_name, repr(getattr(settings, setting_name)))
+
+
+def log_server_version():
+    """Log the server version."""
     logger.info("Server version: %s", server_version())
     logger.info("Commit: %s", commit())
     init_server_identifier()
+
+
+def startup():
+    """Log environment information at startup."""
+    start_debugger_if_required()
+    log_system_info()
+    log_all_environment_variables()
+    log_database_configuration()
+    log_server_version()
