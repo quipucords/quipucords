@@ -5,13 +5,14 @@ from urllib.parse import urljoin
 import pytest
 from pytest_docker_tools import build, container
 
+from compat.requests import Session
 from tests import constants
 from tests.utils.container_wrappers import (
     PostgresContainer,
     QuipucordsContainer,
     ScanTargetContainer,
 )
-from tests.utils.http import BaseUrlClient, QPCAuth
+from tests.utils.http import QPCAuth
 
 # pylint: disable=no-value-for-parameter
 postgres_container = container(
@@ -80,13 +81,15 @@ scan_target_container = container(
 @pytest.fixture(scope="class")
 def apiclient(qpc_server_container: QuipucordsContainer):
     """QPC api client configured make requests to containerized qpc server."""
-    client = BaseUrlClient(
+    client = Session(
         base_url=urljoin(qpc_server_container.server_url, "api/v1/"),
+        verify=False,
     )
     client.auth = QPCAuth(
         base_url=qpc_server_container.server_url,
         username=constants.QPC_SERVER_USERNAME,
         password=constants.QPC_SERVER_PASSWORD,
+        verify=False,
     )
     return client
 
@@ -94,6 +97,7 @@ def apiclient(qpc_server_container: QuipucordsContainer):
 @pytest.fixture(scope="class")
 def qpc_client(qpc_server_container: QuipucordsContainer):
     """QPC client configured make requests to containerized qpc server."""
-    return BaseUrlClient(
+    return Session(
         base_url=qpc_server_container.server_url,
+        verify=False,
     )

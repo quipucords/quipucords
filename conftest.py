@@ -10,8 +10,6 @@ from urllib.parse import urljoin
 
 import pytest
 
-from tests.utils.http import BaseUrlClient
-
 
 @pytest.fixture(autouse=True)
 def scan_manager(mocker):
@@ -31,7 +29,9 @@ def scan_manager(mocker):
 @pytest.fixture(scope="session")
 def django_client(live_server):
     """HTTP client which connects to django live server."""
-    client = BaseUrlClient(
+    from compat.requests import Session
+
+    client = Session(
         base_url=urljoin(live_server.url, "api/v1/"),
     )
     return client

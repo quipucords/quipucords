@@ -1,39 +1,18 @@
 """Http utils for quipucords testing."""
 
 from functools import cached_property
-from urllib.parse import urljoin
 
 import requests
 
-
-class BaseUrlClient(requests.Session):
-    """Specialized request session with a configurable base_url."""
-
-    def __init__(self, *, base_url=None, auth=None, verify=False, **kwargs):
-        """
-        Initialize ApiClient.
-
-        base_url: will be prepended to all requests urls
-        auth: Auth class (as specified on requests documentation)
-        verify: SSL verify (default set to False)
-        """
-        super().__init__(**kwargs)
-        self.verify = verify
-        self.base_url = base_url
-        self.auth = auth
-
-    def request(self, method, url, *args, **kwargs):
-        """Prepare a request and send it."""
-        request_url = urljoin(self.base_url, url)
-        return super().request(method, request_url, *args, **kwargs)
+from compat.requests import Session
 
 
 class QPCAuth(requests.auth.AuthBase):
     """Auth class for Quipucords server."""
 
-    def __init__(self, *, base_url, username, password):
+    def __init__(self, *, base_url, username, password, **kwargs):
         """Initialize QPCAuth."""
-        self._qpc_client = BaseUrlClient(base_url=base_url)
+        self._qpc_client = Session(base_url=base_url, **kwargs)
         self._username = username
         self._password = password
 
