@@ -138,7 +138,7 @@ def log_database_configuration():
         "sqlite": [
             "QPC_DBMS",
             "DB_PATH",
-        ]
+        ],
     }
 
     for setting_name in settings_to_log[settings.QPC_DBMS]:
