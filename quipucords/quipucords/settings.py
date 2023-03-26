@@ -33,6 +33,9 @@ PRODUCTION = env.bool("PRODUCTION", False)
 
 QPC_DISABLE_THREADED_SCAN_MANAGER = env.bool("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
 
+# This suppresses warnings for models where an explicit primary key is not defined.
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 
 def create_random_key():
     """Create a randomized string."""
