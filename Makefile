@@ -117,7 +117,7 @@ lint-flake8:
 	poetry run flakeheaven lint
 
 lint-black:
-	poetry run black --diff .
+	poetry run black . --check --diff
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
