@@ -111,13 +111,13 @@ if not is_int(NETWORK_CONNECT_JOB_TIMEOUT):
 QPC_CONNECT_TASK_TIMEOUT = int(os.getenv("QPC_CONNECT_TASK_TIMEOUT", "30"))
 QPC_INSPECT_TASK_TIMEOUT = int(os.getenv("QPC_INSPECT_TASK_TIMEOUT", "600"))
 
-ANSIBLE_LOG_LEVEL = os.getenv("ANSIBLE_LOG_LEVEL", "0")
+ANSIBLE_LOG_LEVEL = os.getenv("ANSIBLE_LOG_LEVEL", "3")
 if not is_int(ANSIBLE_LOG_LEVEL):
     logger.error(
         'ANSIBLE_LOG_LEVEL "%s" not an int.' "Setting to default of 0.",
         ANSIBLE_LOG_LEVEL,
     )
-    ANSIBLE_LOG_LEVEL = "0"
+    ANSIBLE_LOG_LEVEL = "3"
 
 if PRODUCTION:
     CSRF_COOKIE_SECURE = True
