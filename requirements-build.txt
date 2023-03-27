@@ -50,7 +50,7 @@ wheel==0.40.0
     # via -r requirements-build.in
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==67.6.0 ; python_version != "3.3"
+setuptools==67.6.1 ; python_version != "3.3"
     # via
     #   -r requirements-build.in
     #   setuptools-rust

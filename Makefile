@@ -78,7 +78,8 @@ lock-build-requirements:
 
 search-build-requirements:
 	cat requirements*.txt | grep -vE '(^ )|(#)' | awk '{print $$1}' | sed 's/==/ /' | \
-	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps 2> /dev/null >> requirements-build.in || true
+	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps 2> /dev/null | \
+	sort -u >> requirements-build.in || true
 
 update-requirements:
 	poetry update --no-cache
