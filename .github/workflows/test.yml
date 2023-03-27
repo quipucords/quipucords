@@ -33,6 +33,7 @@ jobs:
         type:
           [
             lint,
+            check-db-migrations-needed,
             test-coverage,
             test-integration,
           ]

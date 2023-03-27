@@ -14,30 +14,31 @@ QUIPUCORDS_UI_RELEASE ?= latest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
-	@echo "  help                 to show this message"
-	@echo "  all                  to execute all following targets (except test)"
-	@echo "  celery-worker        to run the celery worker"
-	@echo "  clean                to remove pyc/cache files"
-	@echo "  clean-db             to remove postgres docker container / sqlite db"
-	@echo "  clean-ui             to remove UI assets"
-	@echo "  lint                 to run all linters"
-	@echo "  lint-isort           to run the isort import order checker"
-	@echo "  lint-flake8          to run the flake8 linter"
-	@echo "  lint-black           to run the black format checker"
-	@echo "  lint-ansible         to run the ansible linter (for now only do syntax check)"
-	@echo "  lock-requirements    to lock all python dependencies"
-	@echo "  update-requirements  to update all python dependencies"
-	@echo "  check-requirements   to check python dependency files"
-	@echo "  test                 to run unit tests"
-	@echo "  test-coverage        to run unit tests and measure test coverage"
-	@echo "  swagger-valid        to run swagger-cli validation"
-	@echo "  setup-postgres       to create a default postgres container"
-	@echo "  server-init          to run server initializion steps"
-	@echo "  serve                to run the server with default db"
-	@echo "  serve-swagger        to run the openapi/swagger ui for quipucords"
-	@echo "  build-ui             to build ui and place result in django server"
-	@echo "  fetch-ui             to fetch prebuilt ui and place it in django server"
-	@echo "  build-container      to build the container image for quipucords"
+	@echo "  help                          to show this message"
+	@echo "  all                           to execute all following targets (except test)"
+	@echo "  celery-worker                 to run the celery worker"
+	@echo "  clean                         to remove pyc/cache files"
+	@echo "  clean-db                      to remove postgres docker container / sqlite db"
+	@echo "  clean-ui                      to remove UI assets"
+	@echo "  lint                          to run all linters"
+	@echo "  lint-isort                    to run the isort import order checker"
+	@echo "  lint-flake8                   to run the flake8 linter"
+	@echo "  lint-black                    to run the black format checker"
+	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
+	@echo "  lock-requirements             to lock all python dependencies"
+	@echo "  update-requirements           to update all python dependencies"
+	@echo "  check-requirements            to check python dependency files"
+	@echo "  test                          to run unit tests"
+	@echo "  test-coverage                 to run unit tests and measure test coverage"
+	@echo "  swagger-valid                 to run swagger-cli validation"
+	@echo "  setup-postgres                to create a default postgres container"
+	@echo "  server-init                   to run server initializion steps"
+	@echo "  serve                         to run the server with default db"
+	@echo "  serve-swagger                 to run the openapi/swagger ui for quipucords"
+	@echo "  build-ui                      to build ui and place result in django server"
+	@echo "  fetch-ui                      to fetch prebuilt ui and place it in django server"
+	@echo "  build-container               to build the container image for quipucords"
+	@echo "  check-db-migrations-needed    to check if new migration files are required"
 
 all: lint test-coverage
 
@@ -185,3 +186,6 @@ build-container:
 	podman build \
 		--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
 		-t quipucords .
+
+check-db-migrations-needed:
+	$(PYTHON) quipucords/manage.py makemigrations --check
