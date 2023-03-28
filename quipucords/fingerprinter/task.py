@@ -83,10 +83,6 @@ NAME_RELATED_FACTS = ["name", "vm_dns_name", "virtual_host_name"]
 
 # Fingerprint keys
 COMBINED_KEY = "combined_fingerprints"
-NETWORK_KEY = DataSources.NETWORK
-VCENTER_KEY = DataSources.VCENTER
-SATELLITE_KEY = DataSources.SATELLITE
-OPENSHIFT_KEY = DataSources.OPENSHIFT
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
@@ -309,12 +305,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         # pylint: disable=too-many-statements
         # fingerprints per source type
-        fingerprint_map = {
-            NETWORK_KEY: [],
-            VCENTER_KEY: [],
-            SATELLITE_KEY: [],
-            OPENSHIFT_KEY: [],
-        }
+        fingerprint_map = {datasource: [] for datasource in DataSources.values}
         source_list = details_report.sources
         total_source_count = len(source_list)
         self.scan_task.log_message(f"{total_source_count} sources to process")
@@ -342,40 +333,40 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task.log_message(
             "NETWORK DEDUPLICATION by keys %s" % NETWORK_IDENTIFICATION_KEYS
         )
-        before_count = len(fingerprint_map[NETWORK_KEY])
-        fingerprint_map[NETWORK_KEY] = self._remove_duplicate_fingerprints(
+        before_count = len(fingerprint_map[DataSources.NETWORK])
+        fingerprint_map[DataSources.NETWORK] = self._remove_duplicate_fingerprints(
             NETWORK_IDENTIFICATION_KEYS,
-            fingerprint_map[NETWORK_KEY],
+            fingerprint_map[DataSources.NETWORK],
         )
         self.scan_task.log_message(
-            "NETWORK DEDUPLICATION RESULT - "
-            f"(before={before_count}, after={len(fingerprint_map[NETWORK_KEY])})"
+            f"NETWORK DEDUPLICATION RESULT - (before={before_count}, "
+            f"after={len(fingerprint_map[DataSources.NETWORK])})"
         )
 
         # Deduplicate satellite fingerprints
         self.scan_task.log_message(
             f"SATELLITE DEDUPLICATION by keys {SATELLITE_IDENTIFICATION_KEYS}"
         )
-        before_count = len(fingerprint_map[SATELLITE_KEY])
-        fingerprint_map[SATELLITE_KEY] = self._remove_duplicate_fingerprints(
-            SATELLITE_IDENTIFICATION_KEYS, fingerprint_map[SATELLITE_KEY]
+        before_count = len(fingerprint_map[DataSources.SATELLITE])
+        fingerprint_map[DataSources.SATELLITE] = self._remove_duplicate_fingerprints(
+            SATELLITE_IDENTIFICATION_KEYS, fingerprint_map[DataSources.SATELLITE]
         )
         self.scan_task.log_message(
-            "SATELLITE DEDUPLICATION RESULT - "
-            f"(before={before_count}, after={len(fingerprint_map[SATELLITE_KEY])})"
+            f"SATELLITE DEDUPLICATION RESULT - (before={before_count}, "
+            f"after={len(fingerprint_map[DataSources.SATELLITE])})"
         )
 
         # Deduplicate vcenter fingerprints
         self.scan_task.log_message(
             f"VCENTER DEDUPLICATION by keys {VCENTER_IDENTIFICATION_KEYS}"
         )
-        before_count = len(fingerprint_map[VCENTER_KEY])
-        fingerprint_map[VCENTER_KEY] = self._remove_duplicate_fingerprints(
-            VCENTER_IDENTIFICATION_KEYS, fingerprint_map[VCENTER_KEY]
+        before_count = len(fingerprint_map[DataSources.VCENTER])
+        fingerprint_map[DataSources.VCENTER] = self._remove_duplicate_fingerprints(
+            VCENTER_IDENTIFICATION_KEYS, fingerprint_map[DataSources.VCENTER]
         )
         self.scan_task.log_message(
-            "VCENTER DEDUPLICATION RESULT - "
-            f"(before={before_count}, after={len(fingerprint_map[VCENTER_KEY])})"
+            f"VCENTER DEDUPLICATION RESULT - (before={before_count}, "
+            f"after={len(fingerprint_map[DataSources.VCENTER])})"
         )
 
         self._log_message_with_count("TOTAL FINGERPRINT COUNT", fingerprint_map)
@@ -393,12 +384,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         _, fingerprint_map[COMBINED_KEY] = self._merge_fingerprints_from_source_types(
             NETWORK_SATELLITE_MERGE_KEYS,
-            fingerprint_map[NETWORK_KEY],
-            fingerprint_map[SATELLITE_KEY],
+            fingerprint_map[DataSources.NETWORK],
+            fingerprint_map[DataSources.SATELLITE],
         )
         # remove keys already combined
-        fingerprint_map.pop(NETWORK_KEY)
-        fingerprint_map.pop(SATELLITE_KEY)
+        fingerprint_map.pop(DataSources.NETWORK)
+        fingerprint_map.pop(DataSources.SATELLITE)
         self._log_message_with_count(
             "NETWORK and SATELLITE DEDUPLICATION END COUNT", fingerprint_map
         )
@@ -424,18 +415,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
         _, fingerprint_map[COMBINED_KEY] = self._merge_fingerprints_from_source_types(
             NETWORK_VCENTER_MERGE_KEYS,
             fingerprint_map[COMBINED_KEY],
-            fingerprint_map[VCENTER_KEY],
+            fingerprint_map[DataSources.VCENTER],
             reverse_priority_keys=reverse_priority_keys,
         )
         # remove already combined key
-        fingerprint_map.pop(VCENTER_KEY)
+        fingerprint_map.pop(DataSources.VCENTER)
         self._log_message_with_count(
             "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT",
             fingerprint_map,
         )
 
         # openshift fingerprints - These won't be deduplicated or merged
-        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(OPENSHIFT_KEY))
+        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.OPENSHIFT))
         self._log_message_with_count(
             "COMBINE with OPENSHIFT fingerprints",
             fingerprint_map,
@@ -496,6 +487,23 @@ class FingerprintTaskRunner(ScanTaskRunner):
             system_creation_date_metadata["raw_fact_key"] = raw_fact_key
             fingerprint[META_DATA_KEY][sys_creation_key] = system_creation_date_metadata
 
+    def process_facts_for_datasource(
+        self, data_source: DataSources, source: dict, fact_dict: dict
+    ) -> dict:
+        """Process facts for a given DataSource.
+
+        :param data_source: DataSources enum
+        :param fact_dict: dict of facts to process
+        :returns: dict of fingerprints detected in fact_dict
+        """
+        try:
+            process_fn = getattr(self, f"_process_{data_source}_fact")
+        except AttributeError as err:
+            raise NotImplementedError(
+                f"No method implemented for '{data_source}'."
+            ) from err
+        return process_fn(source, fact_dict)
+
     def _process_source(self, source):
         """Process facts and convert to fingerprints.
 
@@ -503,12 +511,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :returns: fingerprints produced from facts
         """
         fingerprints = []
-        process_fact_fn = {
-            NETWORK_KEY: self._process_network_fact,
-            OPENSHIFT_KEY: self._process_openshift_fact,
-            SATELLITE_KEY: self._process_satellite_fact,
-            VCENTER_KEY: self._process_vcenter_fact,
-        }
         for fact in source["facts"]:
             fingerprint = None
             server_id = source.get("server_id")
@@ -520,7 +522,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 continue
 
             try:
-                fingerprint = process_fact_fn[source_type](source, fact)
+                fingerprint = self.process_facts_for_datasource(
+                    source_type, source, fact
+                )
             except KeyError:
                 self.scan_task.log_message.error(
                     "Could not process source, " f"unknown source type: {source_type}",
