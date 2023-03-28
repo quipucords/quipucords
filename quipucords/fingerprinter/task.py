@@ -96,6 +96,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-arguments
 
+    supports_partial_results = False
+
     @staticmethod
     def format_certs(redhat_certs):
         """Strip the .pem from each cert in the list.

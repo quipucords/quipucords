@@ -16,21 +16,25 @@ from scanner.exceptions import (
 class ScanTaskRunner(metaclass=ABCMeta):
     """ScanTaskRunner is a logical breakdown of work."""
 
-    def __init__(
-        self, scan_job: ScanJob, scan_task: ScanTask, supports_partial_results=False
-    ):
+    @classmethod
+    @property
+    @abstractmethod
+    def supports_partial_results(cls) -> bool:
+        """Indicate if task supports partial results."""
+
+    def __init__(self, scan_job: ScanJob, scan_task: ScanTask):
         """Set context for task execution.
 
         :param scan_job: the scan job that contains this task
         :param scan_task: the scan task model for this task
-        :param supports_partial_results: Indicates if task supports
-            partial results.
         """
         self.scan_job = scan_job
         self.scan_task = scan_task
-        self.supports_partial_results = supports_partial_results
+        self.cleanup_unsupported_partial_results()
 
-        if not supports_partial_results:
+    def cleanup_unsupported_partial_results(self):
+        """Clean partial results if they are unsupported."""
+        if not self.supports_partial_results:
             self.scan_task.reset_stats()
             if self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
                 self.scan_task.connection_result.systems.all().delete()
