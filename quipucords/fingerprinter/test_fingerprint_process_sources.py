@@ -141,3 +141,16 @@ def test_process_sources(
     # ocp fingerprints wont be part of deduplication/merging process
     assert fingerprints == [1, 2] + ocp_fingerprints
     assert [rec.message for rec in caplog.records] == expected_messages
+
+
+@pytest.mark.parametrize("data_source", DataSources.values)
+def test_process_facts_for_datasource(
+    task_runner: FingerprintTaskRunner, data_source, mocker
+):
+    """Test FingerprintTaskRunner.process_facts_for_datasource."""
+    mocker.patch.object(
+        task_runner, "_add_fact_to_fingerprint", side_effect=RuntimeError("STOP!!!")
+    )
+    # if the appropriate method is implemented, our error shall be raised.
+    with pytest.raises(RuntimeError, match="STOP!!!"):
+        task_runner.process_facts_for_datasource(data_source, {}, {})
