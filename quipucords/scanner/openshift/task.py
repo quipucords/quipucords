@@ -11,6 +11,8 @@ from scanner.task import ScanTaskRunner
 class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
     """Base OpenShift task runner."""
 
+    supports_partial_results = False
+
     @classmethod
     def _get_connection_info(cls, scan_task: ScanTask):
         host = scan_task.source.get_hosts()[0]

@@ -69,6 +69,8 @@ class ConnectTaskRunner(ScanTaskRunner):
     and gathers the set of available virtual systems.
     """
 
+    supports_partial_results = False
+
     def _store_connect_data(self, connected, credential, source):
         # Update the scan counts
         self.scan_task.update_stats(
