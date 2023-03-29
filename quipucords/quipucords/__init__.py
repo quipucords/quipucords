@@ -1,5 +1,8 @@
 """quipucords Django project package with various configuration modules."""
 
-from quipucords.celery import app as celery_app
+from django.conf import settings
 
-__all__ = ["celery_app"]
+if settings.QPC_CELERY_ENABLE:
+    from quipucords.celery import app as celery_app
+
+    __all__ = ["celery_app"]
