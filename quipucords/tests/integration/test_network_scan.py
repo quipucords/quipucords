@@ -466,3 +466,10 @@ class TestNetworkScan:
                 f"report_id_{report_id}/deployments.json", tarball
             )
             assert tarball_deployments_dict == deployments_response.json()
+
+    def test_insights_report(self, apiclient, report_id):
+        """Smoke test insights report."""
+        response = apiclient.get(f"reports/{report_id}/insights/")
+        assert response.ok, response.content
+        data = response.json()
+        assert data

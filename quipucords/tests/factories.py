@@ -1,5 +1,4 @@
 """factories to help testing Quipucords."""
-import json
 import random
 
 import factory
@@ -16,15 +15,13 @@ def format_sources(obj):
 
     obj has access to params defined on SystemFingerprintFactory.Params
     """
-    return json.dumps(
-        [
-            {
-                "server_id": get_server_id(),
-                "source_type": obj.source_type,
-                "source_name": "testlab",
-            }
-        ]
-    )
+    return [
+        {
+            "server_id": get_server_id(),
+            "source_type": obj.source_type,
+            "source_name": "testlab",
+        }
+    ]
 
 
 def system_fingerprint_source_types():

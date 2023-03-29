@@ -1,6 +1,5 @@
 """Models system fingerprints."""
 
-import json
 import uuid
 
 from django.db import models
@@ -187,8 +186,7 @@ class SystemFingerprint(models.Model):
 
     def source_types(self):
         """Retrieve source_types."""
-        sources = json.loads(self.sources)
-        return {s.get("source_type") for s in sources}
+        return {s.get("source_type") for s in self.sources}
 
     def __str__(self):
         """Convert to string."""
