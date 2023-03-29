@@ -804,3 +804,25 @@ def test_related_source_detail(django_client):
     resp_data = response.json()
     assert "sources" in resp_data
     assert resp_data["sources"] == [{"id": source.id, "name": source.name}]
+
+
+@pytest.mark.django_db
+def test_network_ssh_keyfile_allow_none(django_client):
+    """
+    Test if sending ssh_keyfile=None don't fail validation.
+
+    CLI is ALWAYS sending ssh_keyfile set as null [1].
+
+    [1]: https://github.com/quipucords/qpc/blob/688d63a2350ea4ebaa20c3052d18f4d1267e1191/qpc/cred/utils.py#L83-L84
+    """  # noqa: E501
+    response = django_client.post(
+        "/api/v1/credentials/",
+        json={
+            "name": "network",
+            "cred_type": "network",
+            "username": "some-user",
+            "password": "supersecretpassword",
+            "ssh_keyfile": None,
+        },
+    )
+    assert response.ok, response.json()
