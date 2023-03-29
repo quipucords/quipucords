@@ -1,6 +1,5 @@
 """Test the fact engine API."""
 
-import json
 from copy import deepcopy
 from datetime import datetime
 from unittest import mock
@@ -122,7 +121,7 @@ class EngineTest(TestCase):
         self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.source = Source(
             name="source1",
-            hosts=json.dumps(["1.2.3.4"]),
+            hosts=["1.2.3.4"],
             source_type="network",
             port=22,
         )
