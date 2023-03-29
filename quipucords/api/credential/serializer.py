@@ -195,6 +195,8 @@ class NetworkCredentialSerializer(CredentialSerializer):
 
     def validate_ssh_keyfile(self, ssh_keyfile):
         """Validate ssh_keyfile field."""
+        if ssh_keyfile is None:
+            return None
         keyfile = expand_filepath(ssh_keyfile)
         if not os.path.isfile(keyfile):
             raise ValidationError(_(messages.HC_KEY_INVALID % ssh_keyfile))
