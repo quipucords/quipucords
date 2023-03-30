@@ -64,6 +64,7 @@ pybuild-deps = "*"
 pytest-profiling = "^1.7.0"
 ipython = "^8.10.0"
 django-extensions = "^3.2.1"
+notebook = "^6.5.3"
 
 [tool.flakeheaven]
 base = "https://raw.githubusercontent.com/quipucords/linting/main/base-flakeheaven.toml"
