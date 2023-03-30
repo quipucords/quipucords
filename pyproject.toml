@@ -74,6 +74,7 @@ exclude = [
     ".idea",
     ".pytest_cache",
     "__pycache__",
+    "notebooks",
     "quipucords/client",
     "quipucords/staticfiles",
     "quipucords/templates",
