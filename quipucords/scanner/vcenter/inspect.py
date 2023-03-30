@@ -45,6 +45,8 @@ class InspectTaskRunner(ScanTaskRunner):
     and gathers the set of available virtual systems.
     """
 
+    supports_partial_results = False
+
     def execute_task(self, manager_interrupt):
         """Scan vcenter range and attempt scan."""
         source = self.scan_task.source

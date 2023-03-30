@@ -37,6 +37,8 @@ class InspectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
+    supports_partial_results = True
+
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 
@@ -44,7 +46,7 @@ class InspectTaskRunner(ScanTaskRunner):
         :param scan_task: the scan task model for this task
         to store results
         """
-        super().__init__(scan_job, scan_task, supports_partial_results=True)
+        super().__init__(scan_job, scan_task)
         self.connect_scan_task = None
 
     def execute_task(self, manager_interrupt):

@@ -121,6 +121,8 @@ class ConnectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
+    supports_partial_results = False
+
     def execute_task(self, manager_interrupt):
         """Scan network range and attempt connections."""
         result_store = ConnectResultStore(self.scan_task)
