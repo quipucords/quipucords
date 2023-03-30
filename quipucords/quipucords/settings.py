@@ -98,6 +98,9 @@ INSTALLED_APPS = [
     "api",
 ]
 
+if env.bool("QPC_ENABLE_DJANGO_EXTENSIONS", False):
+    INSTALLED_APPS.append("django_extensions")
+
 if not PRODUCTION:
     INSTALLED_APPS.append("coverage")
 
