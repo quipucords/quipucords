@@ -72,7 +72,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status", return_value=(None, None, None)
+            "scanner.satellite.runner.utils.status", return_value=(None, None, None)
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
@@ -82,7 +82,7 @@ class ConnectTaskRunnerTest(TestCase):
         """Test the running connect task for Satellite 5."""
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
         with patch(
-            "scanner.satellite.task.utils.status",
+            "scanner.satellite.runner.utils.status",
             return_value=(401, None, SATELLITE_VERSION_5),
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
@@ -94,7 +94,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status",
+            "scanner.satellite.runner.utils.status",
             return_value=(401, None, SATELLITE_VERSION_6),
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
@@ -106,7 +106,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status",
+            "scanner.satellite.runner.utils.status",
             return_value=(200, 3, SATELLITE_VERSION_6),
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
@@ -118,7 +118,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status", side_effect=mock_conn_exception
+            "scanner.satellite.runner.utils.status", side_effect=mock_conn_exception
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
@@ -129,7 +129,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status", side_effect=mock_sat_exception
+            "scanner.satellite.runner.utils.status", side_effect=mock_sat_exception
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
@@ -140,7 +140,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status",
+            "scanner.satellite.runner.utils.status",
             side_effect=mock_sat_auth_exception,
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
@@ -152,7 +152,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status", side_effect=mock_timeout_error
+            "scanner.satellite.runner.utils.status", side_effect=mock_timeout_error
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
@@ -163,7 +163,7 @@ class ConnectTaskRunnerTest(TestCase):
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.task.utils.status",
+            "scanner.satellite.runner.utils.status",
             return_value=(200, 2, SATELLITE_VERSION_6),
         ) as mock_sat_status:
             with patch.object(

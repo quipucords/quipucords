@@ -4,7 +4,7 @@ import pytest
 
 from constants import DataSources
 from scanner.get_scanner import get_scanner
-from scanner.task import ScanTaskRunner
+from scanner.runner import ScanTaskRunner
 
 
 @pytest.mark.parametrize("data_source", DataSources.values)

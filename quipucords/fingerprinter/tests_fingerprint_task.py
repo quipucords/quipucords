@@ -12,7 +12,7 @@ from api.deployments_report.model import SystemFingerprint
 from api.models import DeploymentsReport, DetailsReport, ServerInformation, Source
 from constants import DataSources
 from fingerprinter.constants import ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY
-from fingerprinter.task import (
+from fingerprinter.runner import (
     FINGERPRINT_GLOBAL_ID_KEY,
     NETWORK_SATELLITE_MERGE_KEYS,
     NETWORK_VCENTER_MERGE_KEYS,
@@ -1382,7 +1382,7 @@ class EngineTest(TestCase):
         deployments_report = DeploymentsReport(report_id=1)
         details_report = DetailsReport(deployment_report=deployments_report)
         with patch(
-            "fingerprinter.task.FingerprintTaskRunner._process_sources",
+            "fingerprinter.runner.FingerprintTaskRunner._process_sources",
             return_value=fact_collection,
         ):
             status_message, status = self.fp_task_runner._process_details_report(
@@ -1406,7 +1406,7 @@ class EngineTest(TestCase):
         deployments_report.save()
         details_report = DetailsReport(id=1, deployment_report=deployments_report)
         with patch(
-            "fingerprinter.task.FingerprintTaskRunner._process_sources",
+            "fingerprinter.runner.FingerprintTaskRunner._process_sources",
             return_value=[fact_collection],
         ):
             status_message, status = self.fp_task_runner._process_details_report(
@@ -1426,11 +1426,11 @@ class EngineTest(TestCase):
         deployments_report.save()
         details_report = DetailsReport(id=1, deployment_report=deployments_report)
         with patch(
-            "fingerprinter.task.FingerprintTaskRunner._process_sources",
+            "fingerprinter.runner.FingerprintTaskRunner._process_sources",
             return_value=[fact_collection],
         ):
             with patch(
-                "fingerprinter.task.SystemFingerprintSerializer.save",
+                "fingerprinter.runner.SystemFingerprintSerializer.save",
                 side_effect=DataError,
             ):
                 status_message, status = self.fp_task_runner._process_details_report(

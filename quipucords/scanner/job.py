@@ -12,7 +12,7 @@ from api.details_report.util import (
     validate_details_report_json,
 )
 from api.models import ScanJob, ScanTask
-from fingerprinter.task import FingerprintTaskRunner
+from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 
 logger = logging.getLogger(__name__)

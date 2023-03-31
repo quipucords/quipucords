@@ -6,7 +6,7 @@ from django.db import transaction
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
 from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPError, OCPNode
-from scanner.openshift.task import OpenShiftTaskRunner
+from scanner.openshift.runner import OpenShiftTaskRunner
 
 
 class InspectTaskRunner(OpenShiftTaskRunner):

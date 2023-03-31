@@ -1,7 +1,7 @@
 """ScanTask used for satellite connection task."""
 
 
-from scanner.satellite.task import SatelliteTaskRunner
+from scanner.satellite.runner import SatelliteTaskRunner
 
 
 class ConnectTaskRunner(SatelliteTaskRunner):
