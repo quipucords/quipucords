@@ -60,7 +60,6 @@ class Manager(Thread):
 
     def log_info(self):
         """Log the status of the scan manager."""
-        current_scan_job = None
         if self.current_job_runner:
             current_scan_job = self.current_job_runner.identifier
             scan_job_message = f"Currently running scan job {current_scan_job}"
