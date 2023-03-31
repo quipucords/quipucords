@@ -18,6 +18,30 @@ from scanner.get_scanner import get_scanner
 logger = logging.getLogger(__name__)
 
 
+def create_task_runner(scan_job: ScanJob, scan_task: ScanTask):
+    """Create ScanTaskRunner using scan_type and source_type."""
+    scan_type = scan_task.scan_type
+    if scan_type == ScanTask.SCAN_TYPE_CONNECT:
+        return create_connect_task_runner(scan_job, scan_task)
+    if scan_type == ScanTask.SCAN_TYPE_INSPECT:
+        return create_inspect_task_runner(scan_job, scan_task)
+    if scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
+        return FingerprintTaskRunner(scan_job, scan_task)
+    return None
+
+
+def create_connect_task_runner(scan_job: ScanJob, scan_task: ScanTask):
+    """Create connection TaskRunner using source_type."""
+    scanner = get_scanner(scan_task.source.source_type)
+    return scanner.ConnectTaskRunner(scan_job, scan_task)
+
+
+def create_inspect_task_runner(scan_job: ScanJob, scan_task: ScanTask):
+    """Create inspection TaskRunner using source_type."""
+    scanner = get_scanner(scan_task.source.source_type)
+    return scanner.InspectTaskRunner(scan_job, scan_task)
+
+
 class ScanJobRunner(Process):
     """ScanProcess perform a group of scan tasks."""
 
@@ -62,7 +86,7 @@ class ScanJobRunner(Process):
         ).order_by("sequence_number")
         fingerprint_task_runner = None
         for scan_task in incomplete_scan_tasks:
-            runner = self._create_task_runner(scan_task)
+            runner = create_task_runner(self.scan_job, scan_task)
             if not runner:
                 error_message = (
                     "Scan task has not recognized"
@@ -163,18 +187,6 @@ class ScanJobRunner(Process):
         self.scan_job.complete()
         return ScanTask.COMPLETED
 
-    def _create_task_runner(self, scan_task):
-        """Create ScanTaskRunner using scan_type and source_type."""
-        # pylint: disable=no-else-return
-        scan_type = scan_task.scan_type
-        if scan_type == ScanTask.SCAN_TYPE_CONNECT:
-            return self._create_connect_task_runner(scan_task)
-        elif scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            return self._create_inspect_task_runner(scan_task)
-        elif scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-            return FingerprintTaskRunner(self.scan_job, scan_task)
-        return None
-
     def _run_task(self, runner):
         """Run a single scan task.
 
@@ -229,16 +241,6 @@ class ScanJobRunner(Process):
             runner.scan_task.fail(error_message)
             task_status = ScanTask.FAILED
         return task_status
-
-    def _create_connect_task_runner(self, scan_task):
-        """Create connection TaskRunner using source_type."""
-        scanner = get_scanner(scan_task.source.source_type)
-        return scanner.ConnectTaskRunner(self.scan_job, scan_task)
-
-    def _create_inspect_task_runner(self, scan_task):
-        """Create inspection TaskRunner using source_type."""
-        scanner = get_scanner(scan_task.source.source_type)
-        return scanner.InspectTaskRunner(self.scan_job, scan_task)
 
     def _create_details_report(self):
         """Send collected host scan facts to fact endpoint.
