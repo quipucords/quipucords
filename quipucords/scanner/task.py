@@ -67,7 +67,7 @@ class ScanTaskRunner(metaclass=ABCMeta):
         before returning.
 
         :param manager_interrupt: Shared memory Value which can inform
-        a task of the need to shutdown immediately
+        a task of the need to shut down immediately
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status
         """

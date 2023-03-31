@@ -1,5 +1,7 @@
 """Queue Manager module."""
 
+from __future__ import annotations
+
 import logging
 from threading import Thread, Timer
 from time import sleep
@@ -44,9 +46,9 @@ class Manager(Thread):
     def __init__(self):
         """Initialize the manager."""
         Thread.__init__(self)
-        self.scan_queue = []
-        self.current_job_runner = None
-        self.terminated_job_runner = None
+        self.scan_queue = []  # type: list[ScanJobRunner]
+        self.current_job_runner = None  # type: ScanJobRunner | None
+        self.terminated_job_runner = None  # type: ScanJobRunner | None
         self.termination_elapsed_time = 0
         self.running = True
         logger.info("%s: Scan manager instance created.", SCAN_MANAGER_LOG_PREFIX)
@@ -101,19 +103,20 @@ class Manager(Thread):
                     error, log_level=logging.ERROR
                 )
 
-    def put(self, job):
-        """Add job to scan queue.
+    def put(self, job: ScanJobRunner):
+        """Add a ScanJobRunner to scan queue.
 
-        :param job: Job to be performed.
+        :param job: ScanJobRunner to run.
         """
         self.scan_queue.insert(0, job)
         self.log_info()
 
     # pylint: disable=inconsistent-return-statements
-    def kill(self, job, command):
-        """Kill a job or remove it from the running queue.
+    def kill(self, job: ScanJob, command: str):
+        """Kill a ScanJob or remove it from the running queue.
 
-        :param job: The job to kill.
+        :param job: The ScanJob to kill.
+        :param command: string "cancel" or "pause".
         :returns: True if killed, False otherwise.
         """
         killed = False

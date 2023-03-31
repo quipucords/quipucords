@@ -1,6 +1,7 @@
 """ScanTask used for network connection discovery."""
 import logging
 import os.path
+from multiprocessing import Value
 
 import ansible_runner
 import pexpect
@@ -123,8 +124,12 @@ class ConnectTaskRunner(ScanTaskRunner):
 
     supports_partial_results = False
 
-    def execute_task(self, manager_interrupt):
-        """Scan network range and attempt connections."""
+    def execute_task(self, manager_interrupt: Value):
+        """Scan network range and attempt connections.
+
+        :param manager_interrupt: Synchronized Value which can inform
+        a task of the need to shut down immediately
+        """
         result_store = ConnectResultStore(self.scan_task)
         scan_message, scan_result = self.run_with_result_store(
             manager_interrupt, result_store
@@ -132,8 +137,15 @@ class ConnectTaskRunner(ScanTaskRunner):
         return scan_message, scan_result
 
     # pylint: disable=too-many-locals
-    def run_with_result_store(self, manager_interrupt, result_store):
-        """Run with a given ConnectResultStore."""
+    def run_with_result_store(
+        self, manager_interrupt: Value, result_store: ConnectResultStore
+    ):
+        """Run with a given ConnectResultStore.
+
+        :param manager_interrupt: Synchronized Value which can inform
+        a task of the need to shut down immediately
+        :param result_store: ConnectResultStore
+        """
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
@@ -199,10 +211,10 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 def _connect(  # pylint: disable=too-many-arguments
-    manager_interrupt,
-    scan_task,
+    manager_interrupt: Value,
+    scan_task: ScanTask,
     hosts,
-    result_store,
+    result_store: ConnectResultStore,
     credential,
     connection_port,
     forks,
@@ -324,7 +336,7 @@ def _connect(  # pylint: disable=too-many-arguments
 
 
 def _handle_ssh_passphrase(credential):
-    """Attempt to setup login via passphrase if necessary.
+    """Attempt to set up login via passphrase if necessary.
 
     :param credential: The credential used for connections
     """

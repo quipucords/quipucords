@@ -55,7 +55,7 @@ class ScanJobRunner(Process):
             self.scan_job.fail(error_message)
             return ScanTask.FAILED
 
-        # Load tasks that have no been run or are in progress
+        # Load tasks that have not been run or are in progress
         task_runners = []
 
         incomplete_scan_tasks = self.scan_job.tasks.filter(
@@ -177,7 +177,10 @@ class ScanJobRunner(Process):
         return None
 
     def _run_task(self, runner):
-        """Run a sigle scan task."""
+        """Run a single scan task.
+
+        :param runner: ScanTaskRunner
+        """
         # pylint: disable=no-else-return
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
@@ -241,7 +244,6 @@ class ScanJobRunner(Process):
     def _create_details_report(self):
         """Send collected host scan facts to fact endpoint.
 
-        :param facts: The array of fact dictionaries
         :returns: bool indicating if there are errors and dict with result.
         """
         inspect_tasks = self.scan_job.tasks.filter(
