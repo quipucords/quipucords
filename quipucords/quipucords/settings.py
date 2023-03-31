@@ -373,3 +373,7 @@ CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", False)
 
 # Load Feature Flags
 QPC_FEATURE_FLAGS = FeatureFlag()
+
+# Old hidden/buried configurations that should be removed or renamed
+MAX_TIMEOUT_ORDERLY_SHUTDOWN = env.int("MAX_TIMEOUT_ORDERLY_SHUTDOWN", 30)
+QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)

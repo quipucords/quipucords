@@ -1,7 +1,6 @@
 """Queue Manager module."""
 
 import logging
-import os
 from threading import Thread, Timer
 from time import sleep
 
@@ -14,26 +13,8 @@ from scanner.job import ScanJobRunner
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-DEFAULT_HEARTBEAT = 60 * 15
-DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN = 30
 RUN_QUEUE_SLEEP_TIME = 5
 SCAN_MANAGER_LOG_PREFIX = "SCAN JOB MANAGER"
-
-try:
-    ORDERLY_SHUTDOWN_TIMEOUT_LENGTH = int(
-        os.environ.get(
-            "MAX_TIMEOUT_ORDERLY_SHUTDOWN", DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN
-        )
-    )
-except ValueError:
-    ORDERLY_SHUTDOWN_TIMEOUT_LENGTH = DEFAULT_MAX_TIMEOUT_ORDERLY_SHUTDOWN
-
-try:
-    HEART_BEAT_INTERVAL = int(
-        os.environ.get("QUIPUCORDS_MANAGER_HEARTBEAT", DEFAULT_HEARTBEAT)
-    )
-except ValueError:
-    HEART_BEAT_INTERVAL = DEFAULT_HEARTBEAT
 
 
 class DisabledManager:
@@ -73,7 +54,7 @@ class Manager(Thread):
     def start_log_timer(self):
         """Start log timer."""
         self.log_info()
-        heartbeat = Timer(HEART_BEAT_INTERVAL, self.start_log_timer)
+        heartbeat = Timer(settings.QUIPUCORDS_MANAGER_HEARTBEAT, self.start_log_timer)
         if self.running:
             heartbeat.start()
 
@@ -248,7 +229,10 @@ class Manager(Thread):
 
                     # After a time period terminate (will not work in gunicorn)
                     self.termination_elapsed_time += RUN_QUEUE_SLEEP_TIME
-                    if self.termination_elapsed_time == ORDERLY_SHUTDOWN_TIMEOUT_LENGTH:
+                    if (
+                        self.termination_elapsed_time
+                        == settings.MAX_TIMEOUT_ORDERLY_SHUTDOWN
+                    ):
                         self.terminated_job_runner.scan_job.log_message(
                             "FORCEFUL TERMINATION OF JOB PROCESS"
                         )
