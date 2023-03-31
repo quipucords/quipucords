@@ -27,7 +27,7 @@ def create_task_runner(scan_job: ScanJob, scan_task: ScanTask):
         return create_inspect_task_runner(scan_job, scan_task)
     if scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
         return FingerprintTaskRunner(scan_job, scan_task)
-    return None
+    raise NotImplementedError
 
 
 def create_connect_task_runner(scan_job: ScanJob, scan_task: ScanTask):
