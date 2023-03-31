@@ -79,7 +79,7 @@ class Manager(Thread):
         )
 
     def work(self):
-        """Start to excute scans in the queue."""
+        """Start to execute scans in the queue."""
         if len(self.scan_queue) > 0:  # pylint: disable=C1801
             self.current_job_runner = self.scan_queue.pop()
             if self.current_job_runner.scan_job.status in [
