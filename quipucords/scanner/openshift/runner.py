@@ -5,7 +5,7 @@ from abc import ABCMeta
 from api.models import ScanTask
 from api.vault import decrypt_data_as_unicode
 from scanner.openshift.api import OpenShiftApi
-from scanner.task import ScanTaskRunner
+from scanner.runner import ScanTaskRunner
 
 
 class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):

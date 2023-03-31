@@ -2,14 +2,14 @@
 
 import pytest
 
-from scanner.openshift.task import OpenShiftTaskRunner
+from scanner.openshift.runner import OpenShiftTaskRunner
 from tests.factories import CredentialFactory, ScanTaskFactory
 
 
 @pytest.fixture
 def patched_ocp_client(mocker):
     """OpenShiftApi mocked."""
-    _api_client = mocker.patch("scanner.openshift.task.OpenShiftApi")
+    _api_client = mocker.patch("scanner.openshift.runner.OpenShiftApi")
     yield _api_client
 
 

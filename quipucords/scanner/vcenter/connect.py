@@ -5,7 +5,7 @@ from socket import gaierror
 from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
 
 from api.models import ScanTask, SystemConnectionResult
-from scanner.task import ScanTaskRunner
+from scanner.runner import ScanTaskRunner
 from scanner.vcenter.utils import retrieve_properties, vcenter_connect
 
 # Get an instance of a logger

@@ -8,10 +8,10 @@ from requests import exceptions
 
 from api.models import ScanTask
 from scanner.exceptions import ScanFailureError
+from scanner.runner import ScanTaskRunner
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteAuthException, SatelliteException
 from scanner.satellite.factory import create
-from scanner.task import ScanTaskRunner
 
 
 class SatelliteTaskRunner(ScanTaskRunner, metaclass=ABCMeta):

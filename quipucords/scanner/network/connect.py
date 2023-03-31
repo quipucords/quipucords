@@ -26,7 +26,7 @@ from scanner.network.utils import (
     construct_inventory,
     expand_hostpattern,
 )
-from scanner.task import ScanTaskRunner
+from scanner.runner import ScanTaskRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

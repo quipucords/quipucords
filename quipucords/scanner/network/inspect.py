@@ -20,7 +20,7 @@ from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException
 from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import check_manager_interrupt, construct_inventory
-from scanner.task import ScanTaskRunner
+from scanner.runner import ScanTaskRunner
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

@@ -4,7 +4,7 @@ from requests import exceptions
 
 from api.models import ScanTask
 from scanner.satellite.api import SatelliteAuthException, SatelliteException
-from scanner.satellite.task import SatelliteTaskRunner
+from scanner.satellite.runner import SatelliteTaskRunner
 
 
 class InspectTaskRunner(SatelliteTaskRunner):

@@ -7,7 +7,7 @@ from django.db import transaction
 
 from api.models import ScanTask, SystemConnectionResult
 from scanner.openshift.entities import OCPError
-from scanner.openshift.task import OpenShiftTaskRunner
+from scanner.openshift.runner import OpenShiftTaskRunner
 
 
 class ConnectTaskRunner(OpenShiftTaskRunner):

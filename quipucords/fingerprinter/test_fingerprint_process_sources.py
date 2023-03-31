@@ -6,7 +6,7 @@ import pytest
 
 from api.models import DetailsReport, ScanJob, ScanTask
 from constants import DataSources
-from fingerprinter.task import FingerprintTaskRunner
+from fingerprinter.runner import FingerprintTaskRunner
 
 logger = logging.getLogger(__file__)
 
