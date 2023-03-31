@@ -274,6 +274,7 @@ STORAGES = {
 
 LOGGING_FORMATTER = env.str("DJANGO_LOG_FORMATTER", "simple")
 DJANGO_LOGGING_LEVEL = env.str("DJANGO_LOG_LEVEL", "INFO")
+CELERY_LOGGING_LEVEL = env.str("CELERY_LOGGING_LEVEL", "INFO")
 QUIPUCORDS_LOGGING_LEVEL = env.str("QUIPUCORDS_LOG_LEVEL", "INFO")
 LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
 VERBOSE_FORMATTING = (
@@ -304,6 +305,11 @@ LOGGING = {
         "django": {
             "handlers": LOGGING_HANDLERS,
             "level": DJANGO_LOGGING_LEVEL,
+        },
+        "celery": {
+            "handlers": LOGGING_HANDLERS,
+            "level": CELERY_LOGGING_LEVEL,
+            "propagate": False,
         },
         "api.details_report": {
             "handlers": LOGGING_HANDLERS,
