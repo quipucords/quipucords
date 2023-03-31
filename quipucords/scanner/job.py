@@ -15,8 +15,7 @@ from api.models import ScanJob, ScanTask
 from fingerprinter.task import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class ScanJobRunner(Process):

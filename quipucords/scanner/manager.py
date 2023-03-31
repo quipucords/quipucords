@@ -12,8 +12,7 @@ from django.db.models import Q
 from api.models import ScanJob, ScanTask
 from scanner.job import ScanJobRunner
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class DisabledManager:
@@ -81,7 +80,7 @@ class Manager(Thread):
 
     def work(self):
         """Start to execute scans in the queue."""
-        if len(self.scan_queue) > 0:  # pylint: disable=C1801
+        if len(self.scan_queue) > 0:
             self.current_job_runner = self.scan_queue.pop()
             if self.current_job_runner.scan_job.status in [
                 ScanTask.PENDING,
