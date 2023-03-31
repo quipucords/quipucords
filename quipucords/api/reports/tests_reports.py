@@ -1,5 +1,6 @@
 """Test the reports API."""
 
+import csv
 import hashlib
 import json
 import sys
@@ -175,7 +176,19 @@ class ReportsTest(TestCase):
             reports_dict, renderer_context=self.mock_renderer_context
         )
         self.assertNotEqual(tar_gz_result, None)
-        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
+        with tarfile.open(fileobj=tar_gz_result) as tarball:
+            self.check_tarball(deployments_csv, details_csv, tarball)
+
+    def check_tarball(
+        self, deployments_csv: str, details_csv: str, tar: tarfile.TarFile
+    ):
+        """
+        Check report tarball content.
+
+        :param deployments_csv: CSV for deployments report
+        :param details_csv: CSV for details report
+        :param tar: Tar object to examine for equality
+        """
         files = tar.getmembers()
         filenames = tar.getnames()
         self.assertEqual(len(files), 5)
@@ -184,9 +197,11 @@ class ReportsTest(TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith("csv"):
                 if "details" in file_contents:
-                    assert file_contents == details_csv
+                    assert self.parse_csv(file_contents) == self.parse_csv(details_csv)
                 elif "deployments" in file_contents:
-                    assert file_contents == deployments_csv
+                    assert self.parse_csv(file_contents) == self.parse_csv(
+                        deployments_csv
+                    )
                 else:
                     sys.exit("Could not identify .csv return.")
             elif filenames[idx].endswith("json"):
@@ -198,6 +213,14 @@ class ReportsTest(TestCase):
                     self.assertEqual(tar_json, self.deployments_json)
                 else:
                     sys.exit("Could not identify .json return")
+
+    def parse_csv(self, file_contents: str):
+        """Parse a string formatted as csv."""
+        return list(csv.reader(file_contents.splitlines()))
+
+    def test_parse_csv(self):
+        """Test parse_csv utility."""
+        assert self.parse_csv("1,2,3\na,b,c") == [list("123"), list("abc")]
 
     # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer_masked(self):
@@ -232,29 +255,8 @@ class ReportsTest(TestCase):
             reports_dict, renderer_context=mock_renderer_context
         )
         self.assertNotEqual(tar_gz_result, None)
-        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
-        files = tar.getmembers()
-        filenames = tar.getnames()
-        self.assertEqual(len(files), 5)
-        # tar.getnames() always returns same order as tar.getmembers()
-        for idx, file in enumerate(files):
-            file_contents = tar.extractfile(file).read().decode()
-            if filenames[idx].endswith("csv"):
-                if "details" in file_contents:
-                    assert file_contents == details_csv
-                elif "deployments" in file_contents:
-                    assert file_contents == deployments_csv
-                else:
-                    sys.exit("Could not identify .csv return.")
-            elif filenames[idx].endswith("json"):
-                tar_json = json.loads(file_contents)
-                tar_json_type = tar_json.get("report_type")
-                if tar_json_type == "details":
-                    self.assertEqual(tar_json, self.details_json)
-                elif tar_json_type == "deployments":
-                    self.assertEqual(tar_json, self.deployments_json)
-                else:
-                    sys.exit("Could not identify .json return")
+        with tarfile.open(fileobj=tar_gz_result) as tarball:
+            self.check_tarball(deployments_csv, details_csv, tarball)
 
     def test_reports_gzip_renderer_masked_bad_req(self):
         """Get a tar.gz return for report_id via API with a bad query param."""
