@@ -10,6 +10,7 @@ class DataSources(TextChoices):
     VCENTER = "vcenter", "vcenter"
     SATELLITE = "satellite", "satellite"
     OPENSHIFT = "openshift", "openshift"
+    ANSIBLE = "ansible", "ansible"
 
 
 ENCRYPTED_DATA_MASK = "********"

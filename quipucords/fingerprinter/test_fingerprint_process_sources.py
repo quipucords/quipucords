@@ -84,49 +84,53 @@ def task_runner(mocker, scan_task):
 def expected_messages():
     """Messages expected when mocked FingerprintTaskRunner is executed."""
     return [
-        "4 sources to process",
-        "PROCESSING Source 1 of 4 - (name=network, type=network, server=<ID>)",
+        "5 sources to process",
+        "PROCESSING Source 1 of 5 - (name=network, type=network, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 network fingerprints",
-        "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=0, satellite=0, openshift=0, total=3)",
-        "PROCESSING Source 2 of 4 - (name=vcenter, type=vcenter, server=<ID>)",
+        "TOTAL FINGERPRINT COUNT - Fingerprints "
+        "(network=3, vcenter=0, satellite=0, openshift=0, ansible=0, total=3)",
+        "PROCESSING Source 2 of 5 - (name=vcenter, type=vcenter, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 vcenter fingerprints",
-        "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=3, satellite=0, openshift=0, total=6)",
-        "PROCESSING Source 3 of 4 - (name=satellite, type=satellite, server=<ID>)",
+        "TOTAL FINGERPRINT COUNT - Fingerprints "
+        "(network=3, vcenter=3, satellite=0, openshift=0, ansible=0, total=6)",
+        "PROCESSING Source 3 of 5 - (name=satellite, type=satellite, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 satellite fingerprints",
-        "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=3, satellite=3, openshift=0, total=9)",
-        "PROCESSING Source 4 of 4 - (name=openshift, type=openshift, server=<ID>)",
+        "TOTAL FINGERPRINT COUNT - Fingerprints "
+        "(network=3, vcenter=3, satellite=3, openshift=0, ansible=0, total=9)",
+        "PROCESSING Source 4 of 5 - (name=openshift, type=openshift, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 openshift fingerprints",
-        "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=3, vcenter=3, satellite=3, openshift=3, total=12)",
+        "TOTAL FINGERPRINT COUNT - Fingerprints "
+        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=0, total=12)",
+        "PROCESSING Source 5 of 5 - (name=ansible, type=ansible, server=<ID>)",
+        "SOURCE FINGERPRINTS - 3 ansible fingerprints",
+        "TOTAL FINGERPRINT COUNT - Fingerprints "
+        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=3, total=15)",
         "NETWORK DEDUPLICATION by keys ['subscription_manager_id', 'bios_uuid']",
         "NETWORK DEDUPLICATION RESULT - (before=3, after=2)",
         "SATELLITE DEDUPLICATION by keys ['subscription_manager_id']",
         "SATELLITE DEDUPLICATION RESULT - (before=3, after=2)",
         "VCENTER DEDUPLICATION by keys ['vm_uuid']",
         "VCENTER DEDUPLICATION RESULT - (before=3, after=2)",
-        "TOTAL FINGERPRINT COUNT "
-        "- Fingerprints (network=2, vcenter=2, satellite=2, openshift=3, total=9)",
+        "TOTAL FINGERPRINT COUNT - Fingerprints "
+        "(network=2, vcenter=2, satellite=2, openshift=3, ansible=3, total=12)",
         "NETWORK and SATELLITE DEDUPLICATION by keys pairs [(network_key, "
         "satellite_key)]=[('subscription_manager_id', 'subscription_manager_id'), "
         "('mac_addresses', 'mac_addresses')]",
-        "NETWORK and SATELLITE DEDUPLICATION START COUNT "
-        "- Fingerprints (network=2, vcenter=2, satellite=2, openshift=3, total=9)",
-        "NETWORK and SATELLITE DEDUPLICATION END COUNT "
-        "- Fingerprints (vcenter=2, openshift=3, combined_fingerprints=2, total=7)",
+        "NETWORK and SATELLITE DEDUPLICATION START COUNT - Fingerprints "
+        "(network=2, vcenter=2, satellite=2, openshift=3, ansible=3, total=12)",
+        "NETWORK and SATELLITE DEDUPLICATION END COUNT - Fingerprints "
+        "(vcenter=2, openshift=3, ansible=3, combined_fingerprints=2, total=10)",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION by keys pairs "
         "[(network_satellite_key, vcenter_key)]=[('bios_uuid', 'vm_uuid'), "
         "('mac_addresses', 'mac_addresses')]",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION by reverse priority keys "
         "(we trust vcenter more than network/satellite): "
         "{'cpu_count', 'infrastructure_type'}",
-        "NETWORK-SATELLITE and VCENTER DEDUPLICATION START COUNT "
-        "- Fingerprints (vcenter=2, openshift=3, combined_fingerprints=2, total=7)",
-        "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT "
-        "- Fingerprints (openshift=3, combined_fingerprints=2, total=5)",
-        "COMBINE with OPENSHIFT fingerprints - Fingerprints (total=5)",
+        "NETWORK-SATELLITE and VCENTER DEDUPLICATION START COUNT - Fingerprints "
+        "(vcenter=2, openshift=3, ansible=3, combined_fingerprints=2, total=10)",
+        "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT - Fingerprints "
+        "(openshift=3, ansible=3, combined_fingerprints=2, total=8)",
+        "COMBINE with OPENSHIFT+ANSIBLE fingerprints - Fingerprints (total=8)",
     ]
 
 
@@ -137,9 +141,9 @@ def test_process_sources(
     caplog.set_level(logging.INFO)
 
     fingerprints = task_runner._process_sources(details_report)  # noqa: W0212
-    ocp_fingerprints = [1, 2, 2]
-    # ocp fingerprints wont be part of deduplication/merging process
-    assert fingerprints == [1, 2] + ocp_fingerprints
+    non_merged_fingerprints = [1, 2, 2]
+    # ocp/ansible fingerprints wont be part of deduplication/merging process
+    assert fingerprints == [1, 2] + 2 * non_merged_fingerprints
     assert [rec.message for rec in caplog.records] == expected_messages
 
 
