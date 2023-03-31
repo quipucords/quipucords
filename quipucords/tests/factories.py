@@ -27,8 +27,8 @@ def format_sources(obj):
 def system_fingerprint_source_types():
     """Return default source types for fingerprints."""
     all_types = set(DataSources.values)
-    # OpenShift will be ignored by default for convenience on insights tests
-    ignored_types = {DataSources.OPENSHIFT}
+    # OpenShift/Ansible will be ignored by default for convenience on insights tests
+    ignored_types = {DataSources.OPENSHIFT, DataSources.ANSIBLE}
     return all_types - ignored_types
 
 

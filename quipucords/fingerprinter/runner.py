@@ -427,10 +427,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fingerprint_map,
         )
 
-        # openshift fingerprints - These won't be deduplicated or merged
+        # openshift/ansible fingerprints - These won't be deduplicated or merged
         fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.OPENSHIFT))
+        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.ANSIBLE))
         self._log_message_with_count(
-            "COMBINE with OPENSHIFT fingerprints",
+            "COMBINE with OPENSHIFT+ANSIBLE fingerprints",
             fingerprint_map,
             total_only=True,
         )
@@ -1574,6 +1575,29 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_formatter=ocp_formatters.infer_node_role,
         )
 
+        return fingerprint
+
+    def _process_ansible_fact(self, source, fact):
+        """Generate fingerprints for ansible controller facts."""
+        fingerprint = {
+            META_DATA_KEY: {},
+            ENTITLEMENTS_KEY: [],
+            PRODUCTS_KEY: [],
+        }
+        self._add_fact_to_fingerprint(
+            source,
+            "instance_details__system_name",
+            fact,
+            "name",
+            fingerprint,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "instance_details__version",
+            fact,
+            "os_version",
+            fingerprint,
+        )
         return fingerprint
 
     def _multi_format_dateparse(self, source, raw_fact_key, date_value, patterns):
