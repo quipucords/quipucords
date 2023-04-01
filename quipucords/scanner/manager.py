@@ -10,7 +10,8 @@ from django.conf import settings
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
-from scanner.job import ProcessBasedScanJobRunner, ScanJobRunner
+from scanner import tasks
+from scanner.job import ProcessBasedScanJobRunner, ScanJobRunner, SyncScanJobRunner
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class CeleryScanManager:
 
     def put(self, scan_job_runner):
         """Process the given ScanJobRunner's job and tasks."""
-        raise NotImplementedError
+        tasks.run_scan_job_runner.delay(scan_job_runner.scan_job.id)
 
 
 class DisabledManager:
@@ -128,7 +129,7 @@ class Manager(Thread):
                     error, log_level=logging.ERROR
                 )
 
-    def put(self, scanner: ScanJobRunner):
+    def put(self, scanner: SyncScanJobRunner | ProcessBasedScanJobRunner):
         """Add a ScanJobRunner to scan queue.
 
         :param scanner: ScanJobRunner to run.
