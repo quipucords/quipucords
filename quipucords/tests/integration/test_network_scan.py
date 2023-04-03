@@ -86,6 +86,7 @@ def expected_network_scan_facts():
         "ifconfig_ip_addresses",
         "ifconfig_mac_addresses",
         "insights_client_id",
+        "installed_products",
         "instnum",
         "jboss_activemq_ver",
         "jboss_brms_business_central_candidates",
