@@ -1,0 +1,17 @@
+---
+
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "installed_products"
+
+- name: gather internal_installed_products
+  raw: find /etc/pki/product*/ -name '*pem' -exec rct cat-cert --no-content '{}' \; | grep -C2 -E '^\s+ID:'
+  register: internal_installed_products
+  ignore_errors: yes
+  when: 'internal_have_rct'
+
+- name: set installed_products fact
+  set_fact:
+    installed_products: "{{ internal_installed_products }}"
+  ignore_errors: yes
+  when: 'internal_installed_products.get("rc") == 0'

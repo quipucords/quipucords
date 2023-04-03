@@ -178,3 +178,12 @@
   set_fact:
     internal_have_unzip: "{{ internal_have_unzip_cmd.get('rc') == 0 }}"
   ignore_errors: yes
+
+- name: gather internal_have_rct_cmd
+  raw: command -v rct
+  register: internal_have_rct_cmd
+  ignore_errors: yes
+
+- name: set internal_have_rct
+  set_fact:
+    internal_have_rct: "{{ internal_have_rct_cmd.get('rc') == 0 }}"

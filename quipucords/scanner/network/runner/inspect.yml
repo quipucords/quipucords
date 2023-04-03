@@ -21,6 +21,7 @@
     - jboss_ws
     - jboss_fuse_on_karaf
     - ifconfig
+    - installed_products
     - redhat_packages
     - subman
     - uname

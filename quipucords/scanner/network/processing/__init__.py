@@ -10,6 +10,7 @@ from . import (
     eap5,
     fuse,
     ifconfig,
+    installed_products,
     jws,
     karaf,
     redhat_packages,
