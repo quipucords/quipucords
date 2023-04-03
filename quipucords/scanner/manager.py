@@ -33,7 +33,9 @@ class DisabledManager:
 
     def put(self, *args, **kwargs):
         """Log a warning message because DisabledManager does nothing."""
-        logger.warning("Cannot put a job on the scan manager because it is disabled.")
+        logger.warning(
+            "Cannot put a scanner on queue because scan manager is disabled."
+        )
 
 
 class Manager(Thread):
@@ -102,10 +104,10 @@ class Manager(Thread):
                     error, log_level=logging.ERROR
                 )
 
-    def put(self, job: ScanJobRunner):
+    def put(self, scanner: ScanJobRunner):
         """Add a ScanJobRunner to scan queue.
 
-        :param job: ScanJobRunner to run.
+        :param scanner: ScanJobRunner to run.
         """
         assert isinstance(scanner, ProcessBasedScanJobRunner), (
             "Non-multiprocessing ScanJobRunner can't be used alongside thread "
