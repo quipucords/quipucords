@@ -20,8 +20,6 @@ from pydantic import Field, validator  # pylint: disable=no-name-in-module
 
 from compat.pydantic import BaseModel, raises
 
-MEMORY_CONVERSION_ERROR = "This value couldn't be converted."
-
 
 def load_entity(data: dict) -> OCPBaseEntity:
     """Transform data into the appropriate OCP entity."""
@@ -218,30 +216,48 @@ class NodeResources(OCPBaseEntity):
 
     @validator("memory_in_bytes", pre=True)
     def _convert_memory_bytes(cls, value):  # pylint: disable=no-self-argument
-        # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory
         if isinstance(value, str):
-            resources_regex = re.compile(r"^(\d+)([kKMGTPE])(i?)$")
-            match = resources_regex.match(value)
-            if not match:
-                raise ValueError(MEMORY_CONVERSION_ERROR)
-            value = int(match.group(1))
-            power_name = match.group(2)
-            ends_with_i = match.group(3)
+            digits, power_name, ends_with_i = cls._parse_resource_string(value)
             if ends_with_i:
                 base = 1024
             else:
                 base = 1000
             power = {
+                "k": 1,
+                "m": -1,
                 "K": 1,
                 "M": 2,
                 "G": 3,
                 "T": 4,
                 "P": 5,
                 "E": 6,
-            }[power_name.upper()]
-            return value * base**power
+            }[power_name]
+            val_in_bytes = digits * base**power
+            # SystemFingerprint for "system_memory_bytes" is a PositiveIntegerField,
+            # so we round the value.
+            return round(val_in_bytes)
 
         return value
+
+    @staticmethod
+    def _parse_resource_string(value) -> tuple[int, str, bool]:
+        """
+        Parse a resource string like 1500Ki.
+
+        returns: tuple of digits, power_name and ends_with_i
+        """
+        # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-memory
+        error_message = "Value '%s' is invalid."
+        resources_regex = re.compile(r"^(\d+)([mkKMGTPE])(i?)$")
+        match = resources_regex.match(value)
+        if not match:
+            raise ValueError(error_message % value)
+        digits = int(match.group(1))
+        power_name = match.group(2)
+        ends_with_i = match.group(3)
+        if ends_with_i and power_name in ["m", "k"]:
+            raise ValueError(error_message % value)
+        return digits, power_name, ends_with_i
 
 
 # update nested model references - this should always be the last thing to run

@@ -15,7 +15,6 @@ import pytest
 from pydantic import ValidationError  # pylint: disable=no-name-in-module
 
 from scanner.openshift.entities import (
-    MEMORY_CONVERSION_ERROR,
     NodeResources,
     OCPBaseEntity,
     OCPCluster,
@@ -180,10 +179,14 @@ def test_cpu_validator_with_inappropriate_values(value):
     [
         ("1Ki", 1024),
         ("1K", 1000),
+        ("1k", 1000),
         ("10Gi", 10737418240),
         ("1P", 1_000_000_000_000_000),
         ("150Mi", 157_286_400),
         (123, 123),
+        ("700m", 1),
+        ("200m", 0),
+        ("1200m", 1),
     ],
 )
 # pylint: disable=no-value-for-parameter, protected-access
@@ -198,12 +201,12 @@ def test_memory_validator_with_convertible_values(value, expected_result):
 
 @pytest.mark.parametrize(
     "value",
-    ["15000GI", "15000L", "1500mi"],
+    ["15000GI", "15000L", "1500mi", "15ki"],
 )
 # pylint: disable=no-value-for-parameter, protected-access
 def test_memory_validator_with_uncovertible_values(value):
     """Ensure proper error is being raised for values that can't be converted."""
-    with pytest.raises(ValueError, match=MEMORY_CONVERSION_ERROR):
+    with pytest.raises(ValueError, match=r"Value \S+ is invalid."):
         NodeResources._convert_memory_bytes(value)
 
 
