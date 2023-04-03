@@ -1,8 +1,11 @@
 """ScanJobRunner runs a group of scan tasks."""
 
+from __future__ import annotations
+
 import logging
 from multiprocessing import Process, Value
 
+from django.conf import settings
 from django.db.models import Q
 
 from api.common.common_report import create_report_version
@@ -42,18 +45,52 @@ def create_inspect_task_runner(scan_job: ScanJob, scan_task: ScanTask):
     return scanner.InspectTaskRunner(scan_job, scan_task)
 
 
-class ScanJobRunner(Process):
-    """ScanProcess perform a group of scan tasks."""
+class ScanJobRunner:
+    """Proxy class to initialize the proper ScanJobRunner."""
+
+    def __new__(cls, *args, **kwargs) -> SyncScanJobRunner | ProcessBasedScanJobRunner:
+        """Initialize the appropriate ScanJobRunner."""
+        if settings.QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER:
+            return SyncScanJobRunner(*args, **kwargs)
+        return ProcessBasedScanJobRunner(*args, **kwargs)
+
+
+class ProcessBasedScanJobRunner(Process):
+    """Execute a group of scan tasks in a separate process."""
 
     def __init__(self, scan_job):
         """Create discovery scanner."""
-        Process.__init__(self)
+        super().__init__()
         self.scan_job = scan_job
         self.identifier = scan_job.id
         self.manager_interrupt = Value("i", ScanJob.JOB_RUN)
 
     def run(self):
-        """Trigger thread execution."""
+        """Trigger process execution."""
+        agnostic_runner = SyncScanJobRunner(self.scan_job, self.manager_interrupt)
+        return agnostic_runner.start()
+
+    def __str__(self):
+        """Convert to string."""
+        return f"{{scan_job:{self.scan_job.id}, }}"
+
+
+class SyncScanJobRunner:
+    """Executes a group of tasks bound to a scan_job synchronously."""
+
+    def __init__(self, scan_job: ScanJob, manager_interrupt: Value = None):
+        """Create class instance."""
+        self.scan_job = scan_job
+        self.manager_interrupt = manager_interrupt or Value("i", ScanJob.JOB_RUN)
+
+    def start(self):
+        """Execute tasks by calling "run" method."""
+        # This method only exists to mimic ProcessBasedScanJobRunner API, which has
+        # "start" implemented in its base class.
+        return self.run()
+
+    def run(self):
+        """Execute runner."""
         # pylint: disable=inconsistent-return-statements
         # pylint: disable=no-else-return
         # pylint: disable=too-many-locals,too-many-statements
@@ -278,7 +315,3 @@ class ScanJobRunner(Process):
         message = "No connection results found."
         self.scan_job.fail(message)
         return True, {}
-
-    def __str__(self):
-        """Convert to string."""
-        return f"{{scan_job:{self.scan_job.id}, }}"

@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
-from scanner.job import ScanJobRunner
+from scanner.job import ProcessBasedScanJobRunner, ScanJobRunner
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,11 @@ class Manager(Thread):
 
         :param job: ScanJobRunner to run.
         """
-        self.scan_queue.insert(0, job)
+        assert isinstance(scanner, ProcessBasedScanJobRunner), (
+            "Non-multiprocessing ScanJobRunner can't be used alongside thread "
+            "based ScanManager."
+        )
+        self.scan_queue.insert(0, scanner)
         self.log_info()
 
     # pylint: disable=inconsistent-return-statements
