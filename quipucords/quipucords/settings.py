@@ -32,6 +32,9 @@ BASE_DIR = Path(__file__).absolute().parent.parent
 PRODUCTION = env.bool("PRODUCTION", False)
 
 QPC_DISABLE_THREADED_SCAN_MANAGER = env.bool("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
+QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER = env.bool(
+    "QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER", False
+)
 
 # This suppresses warnings for models where an explicit primary key is not defined.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
