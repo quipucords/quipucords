@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
-from scanner.job import ScanJobRunner
+from scanner.job import ProcessBasedScanJobRunner, ScanJobRunner
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,9 @@ class DisabledManager:
 
     def put(self, *args, **kwargs):
         """Log a warning message because DisabledManager does nothing."""
-        logger.warning("Cannot put a job on the scan manager because it is disabled.")
+        logger.warning(
+            "Cannot put a scanner on queue because scan manager is disabled."
+        )
 
 
 class Manager(Thread):
@@ -102,12 +104,16 @@ class Manager(Thread):
                     error, log_level=logging.ERROR
                 )
 
-    def put(self, job: ScanJobRunner):
+    def put(self, scanner: ScanJobRunner):
         """Add a ScanJobRunner to scan queue.
 
-        :param job: ScanJobRunner to run.
+        :param scanner: ScanJobRunner to run.
         """
-        self.scan_queue.insert(0, job)
+        assert isinstance(scanner, ProcessBasedScanJobRunner), (
+            "Non-multiprocessing ScanJobRunner can't be used alongside thread "
+            "based ScanManager."
+        )
+        self.scan_queue.insert(0, scanner)
         self.log_info()
 
     # pylint: disable=inconsistent-return-statements

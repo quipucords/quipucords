@@ -9,6 +9,7 @@ from functools import partial
 from urllib.parse import urljoin
 
 import pytest
+from django.test import override_settings
 
 
 @pytest.fixture(autouse=True)
@@ -20,10 +21,10 @@ def scan_manager(mocker):
     _manager = DummyScanManager()
     mocker.patch("scanner.manager.Manager", DummyScanManager)
     mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    yield _manager
-    for job in _manager._queue:
-        job.kill()
-    _manager._queue = []
+    with override_settings(
+        QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER=True,
+    ):
+        yield _manager
 
 
 @pytest.fixture(scope="session")
