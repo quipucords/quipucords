@@ -21,6 +21,8 @@ RUN dnf install \
         glibc-langpack-en \
         jq \
         make \
+        man-db \
+        man \
         openssh-clients \
         python39 \
         sshpass \
