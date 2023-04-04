@@ -15,6 +15,7 @@ ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
 COPY scripts/dnf /usr/local/bin/dnf
+ARG BUILD_PACKAGES="gcc postgresql-devel python39-devel"
 RUN dnf install \
         git \
         glibc-langpack-en \
@@ -25,6 +26,7 @@ RUN dnf install \
         sshpass \
         tar \
         which \
+        ${BUILD_PACKAGES} \
         -y &&\
     dnf clean all &&\
     python3 -m venv /opt/venv
@@ -34,6 +36,8 @@ RUN pip install --upgrade pip wheel
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN dnf remove ${BUILD_PACKAGES} -y && \
+    dnf clean all
 
 # Fetch UI code
 COPY Makefile .
