@@ -1,12 +1,15 @@
 """Satellite 6 API handlers."""
+from __future__ import annotations
 
+import itertools
 import logging
+from collections.abc import Generator
 from multiprocessing import Pool
 
 import requests
 from requests.exceptions import Timeout
 
-from api.models import ScanJob, SystemInspectionResult
+from api.models import ScanJob, ScanTask, SystemInspectionResult
 from scanner.satellite import utils
 from scanner.satellite.api import (
     SatelliteCancelException,
@@ -131,6 +134,43 @@ ERRATA_MAPPING = {
     "errata_out_of_date": "total",
     "packages_out_of_date": "total",
 }
+
+
+def request_results(  # pylint: disable=too-many-arguments
+    scan_task: ScanTask,
+    url_template: str,
+    org_id=None,
+    host_id=None,
+    options=None,
+    per_page: int = 100,
+) -> Generator[dict, None, None]:
+    """
+    Request and yield results for the given scan_task and url_template.
+
+    This generator yields each result individually from the response and continues to
+    execute more requests and yield their results until pagination is exhausted.
+    """
+    for page in itertools.count(1):
+        query_params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
+        response, url = utils.execute_request(
+            scan_task,
+            url=url_template,
+            org_id=org_id,
+            host_id=host_id,
+            query_params=query_params,
+            options=options,
+        )
+        if response.status_code != requests.codes.ok:
+            raise SatelliteException(
+                f"Invalid response code {response.status_code}" f" for url: {url}"
+            )
+        response_body = response.json()
+        results = response_body.get(RESULTS, [])
+        for result in results:
+            yield result
+        expect_more_pages = len(results) == int(response_body.get(PER_PAGE, 0))
+        if not results or not expect_more_pages:
+            break
 
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
@@ -393,29 +433,11 @@ class SatelliteSixV1(SatelliteInterface):
         if self.orgs:
             return self.orgs
 
-        orgs = []
-        jsonresult = {}
-        page = 0
-        per_page = 100
-        while page == 0 or int(jsonresult.get(PER_PAGE, 0)) == len(
-            jsonresult.get(RESULTS, [])
-        ):
-            page += 1
-            params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-            response, url = utils.execute_request(
-                self.connect_scan_task, ORGS_V1_URL, params
-            )
-            # pylint: disable=no-member
-            if response.status_code != requests.codes.ok:
-                raise SatelliteException(
-                    f"Invalid response code {response.status_code} for url: {url}"
-                )
-            jsonresult = response.json()
-            for result in jsonresult.get(RESULTS, []):
-                org_id = result.get(ID)
-                if org_id is not None:
-                    orgs.append(org_id)
-        self.orgs = orgs
+        self.orgs = [
+            result.get(ID)
+            for result in request_results(self.connect_scan_task, ORGS_V1_URL)
+            if result.get(ID) is not None
+        ]
         return self.orgs
 
     def host_count(self):
@@ -444,38 +466,18 @@ class SatelliteSixV1(SatelliteInterface):
     def hosts(self):
         """Obtain the managed hosts."""
         orgs = self.get_orgs()
+        credential = utils.get_credential(self.connect_scan_task)
+
         hosts = []
         for org_id in orgs:
-            jsonresult = {}
-            page = 0
-            per_page = 100
-            credential = utils.get_credential(self.connect_scan_task)
-            while page == 0 or int(jsonresult.get(PER_PAGE, 0)) == len(
-                jsonresult.get(RESULTS, [])
-            ):
-                page += 1
-                params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-                response, url = utils.execute_request(
-                    self.connect_scan_task,
-                    url=HOSTS_V1_URL,
-                    org_id=org_id,
-                    query_params=params,
-                )
-                # pylint: disable=no-member
-                if response.status_code != requests.codes.ok:
-                    raise SatelliteException(
-                        f"Invalid response code {response.status_code}"
-                        f" for url: {url}"
-                    )
-                jsonresult = response.json()
-                for result in jsonresult.get(RESULTS, []):
-                    host_name = result.get(NAME)
-                    host_id = result.get(ID)
+            for result in request_results(self.connect_scan_task, HOSTS_V1_URL, org_id):
+                host_name = result.get(NAME)
+                host_id = result.get(ID)
 
-                    if host_name is not None and host_id is not None:
-                        unique_name = f"{host_name}_{host_id}"
-                        hosts.append(unique_name)
-                        self.record_conn_result(unique_name, credential)
+                if host_name is not None and host_id is not None:
+                    unique_name = f"{host_name}_{host_id}"
+                    hosts.append(unique_name)
+                    self.record_conn_result(unique_name, credential)
 
         return hosts
 
@@ -542,49 +544,29 @@ class SatelliteSixV1(SatelliteInterface):
         with Pool(processes=self.max_concurrency) as pool:
             orgs = self.get_orgs()
             for org_id in orgs:
-                jsonresult = {}
-                page = 0
-                per_page = 100
-                while page == 0 or int(jsonresult.get(PER_PAGE, 0)) == len(
-                    jsonresult.get(RESULTS, [])
-                ):
-                    page += 1
-                    params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-                    response, url = utils.execute_request(
-                        self.inspect_scan_task,
-                        url=HOSTS_V1_URL,
-                        org_id=org_id,
-                        query_params=params,
-                    )
-                    # pylint: disable=no-member
-                    if response.status_code != requests.codes.ok:
-                        raise SatelliteException(
-                            f"Invalid response code {response.status_code}"
-                            f" for url: {url}"
-                        )
-                    jsonresult = response.json()
+                hosts_before_dedup = request_results(
+                    self.inspect_scan_task, HOSTS_V1_URL, org_id
+                )
+                hosts_after_dedup = []
+                for host in hosts_before_dedup:
+                    if host not in deduplicated_hosts:
+                        hosts_after_dedup.append(host)
+                        deduplicated_hosts.append(host)
+                hosts = hosts_after_dedup
+                chunks = [
+                    hosts[i : i + self.max_concurrency]
+                    for i in range(0, len(hosts), self.max_concurrency)
+                ]
+                for chunk in chunks:
+                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                        raise SatelliteCancelException()
 
-                    hosts_before_dedup = jsonresult.get(RESULTS, [])
-                    hosts_after_dedup = []
-                    for host in hosts_before_dedup:
-                        if host not in deduplicated_hosts:
-                            hosts_after_dedup.append(host)
-                            deduplicated_hosts.append(host)
-                    hosts = hosts_after_dedup
-                    chunks = [
-                        hosts[i : i + self.max_concurrency]
-                        for i in range(0, len(hosts), self.max_concurrency)
-                    ]
-                    for chunk in chunks:
-                        if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                            raise SatelliteCancelException()
+                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                        raise SatellitePauseException()
 
-                        if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                            raise SatellitePauseException()
-
-                        host_params = self.prepare_host(chunk)
-                        results = pool.starmap(request_host_details, host_params)
-                        process_results(self, results, 1)
+                    host_params = self.prepare_host(chunk)
+                    results = pool.starmap(request_host_details, host_params)
+                    process_results(self, results, 1)
         utils.validate_task_stats(self.inspect_scan_task)
 
 
@@ -610,33 +592,17 @@ class SatelliteSixV2(SatelliteInterface):
 
     def hosts(self):
         """Obtain the managed hosts."""
-        hosts = []
-        jsonresult = {}
-        page = 0
-        per_page = 100
         credential = utils.get_credential(self.connect_scan_task)
-        while page == 0 or int(jsonresult.get(PER_PAGE, 0)) == len(
-            jsonresult.get(RESULTS, [])
-        ):
-            page += 1
-            params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-            response, url = utils.execute_request(
-                self.connect_scan_task, url=HOSTS_V2_URL, query_params=params
-            )
-            # pylint: disable=no-member
-            if response.status_code != requests.codes.ok:
-                raise SatelliteException(
-                    f"Invalid response code {response.status_code} for url: {url}"
-                )
-            jsonresult = response.json()
-            for result in jsonresult.get(RESULTS, []):
-                host_name = result.get(NAME)
-                host_id = result.get(ID)
 
-                if host_name is not None and host_id is not None:
-                    unique_name = f"{host_name}_{host_id}"
-                    hosts.append(unique_name)
-                    self.record_conn_result(unique_name, credential)
+        hosts = []
+        for result in request_results(self.connect_scan_task, HOSTS_V2_URL):
+            host_name = result.get(NAME)
+            host_id = result.get(ID)
+
+            if host_name is not None and host_id is not None:
+                unique_name = f"{host_name}_{host_id}"
+                hosts.append(unique_name)
+                self.record_conn_result(unique_name, credential)
 
         return hosts
 
@@ -700,43 +666,24 @@ class SatelliteSixV2(SatelliteInterface):
         deduplicated_hosts = []
 
         with Pool(processes=self.max_concurrency) as pool:
-            jsonresult = {}
-            page = 0
-            per_page = 100
-            while page == 0 or int(jsonresult.get(PER_PAGE, 0)) == len(
-                jsonresult.get(RESULTS, [])
-            ):
-                page += 1
-                params = {PAGE: page, PER_PAGE: per_page, THIN: 1}
-                response, url = utils.execute_request(
-                    self.inspect_scan_task, url=HOSTS_V2_URL, query_params=params
-                )
-                # pylint: disable=no-member
-                if response.status_code != requests.codes.ok:
-                    raise SatelliteException(
-                        f"Invalid response code {response.status_code}"
-                        f" for url: {url}"
-                    )
-                jsonresult = response.json()
+            hosts_before_dedup = request_results(self.inspect_scan_task, HOSTS_V2_URL)
+            hosts_after_dedup = []
+            for host in hosts_before_dedup:
+                if host not in deduplicated_hosts:
+                    hosts_after_dedup.append(host)
+                    deduplicated_hosts.append(host)
+            hosts = hosts_after_dedup
+            chunks = [
+                hosts[i : i + self.max_concurrency]
+                for i in range(0, len(hosts), self.max_concurrency)
+            ]
+            for chunk in chunks:
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                    raise SatelliteCancelException()
 
-                hosts_before_dedup = jsonresult.get(RESULTS, [])
-                hosts_after_dedup = []
-                for host in hosts_before_dedup:
-                    if host not in deduplicated_hosts:
-                        hosts_after_dedup.append(host)
-                        deduplicated_hosts.append(host)
-                hosts = hosts_after_dedup
-                chunks = [
-                    hosts[i : i + self.max_concurrency]
-                    for i in range(0, len(hosts), self.max_concurrency)
-                ]
-                for chunk in chunks:
-                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                        raise SatelliteCancelException()
-
-                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                        raise SatellitePauseException()
-                    host_params = self.prepare_host(chunk)
-                    results = pool.starmap(request_host_details, host_params)
-                    process_results(self, results, 2)
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                    raise SatellitePauseException()
+                host_params = self.prepare_host(chunk)
+                results = pool.starmap(request_host_details, host_params)
+                process_results(self, results, 2)
         utils.validate_task_stats(self.inspect_scan_task)
