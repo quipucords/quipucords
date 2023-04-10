@@ -394,25 +394,25 @@ class SatelliteFive(SatelliteInterface):
         hosts_before_dedup = []
         deduplicated_hosts = []
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
+        try:
+            key = client.auth.login(user, password)
+            hosts_before_dedup = client.system.list_user_systems(key)
+            client.auth.logout(key)
+        except xmlrpc.client.Fault as xml_error:
+            raise SatelliteException(str(xml_error)) from xml_error
+        virtual_hosts, virtual_guests = self.virtual_hosts()
+        physical_hosts = self.physical_hosts()
+        hosts_after_dedup = []
+        for host in hosts_before_dedup:
+            if host not in deduplicated_hosts:
+                hosts_after_dedup.append(host)
+                deduplicated_hosts.append(host)
+        hosts = hosts_before_dedup
+        chunks = [
+            hosts[i : i + self.max_concurrency]
+            for i in range(0, len(hosts), self.max_concurrency)
+        ]
         with Pool(processes=self.max_concurrency) as pool:
-            try:
-                key = client.auth.login(user, password)
-                hosts_before_dedup = client.system.list_user_systems(key)
-                client.auth.logout(key)
-            except xmlrpc.client.Fault as xml_error:
-                raise SatelliteException(str(xml_error)) from xml_error
-            virtual_hosts, virtual_guests = self.virtual_hosts()
-            physical_hosts = self.physical_hosts()
-            hosts_after_dedup = []
-            for host in hosts_before_dedup:
-                if host not in deduplicated_hosts:
-                    hosts_after_dedup.append(host)
-                    deduplicated_hosts.append(host)
-            hosts = hosts_before_dedup
-            chunks = [
-                hosts[i : i + self.max_concurrency]
-                for i in range(0, len(hosts), self.max_concurrency)
-            ]
             for chunk in chunks:
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     raise SatelliteCancelException()
