@@ -540,23 +540,26 @@ class SatelliteSixV1(SatelliteInterface):
         )
         deduplicated_hosts = []
 
-        # pylint: disable=too-many-nested-blocks
+        chunks_grouped_by_org = []
+        orgs = self.get_orgs()
+        for org_id in orgs:
+            hosts_before_dedup = request_results(
+                self.inspect_scan_task, HOSTS_V1_URL, org_id
+            )
+            hosts_after_dedup = []
+            for host in hosts_before_dedup:
+                if host not in deduplicated_hosts:
+                    hosts_after_dedup.append(host)
+                    deduplicated_hosts.append(host)
+            hosts = hosts_after_dedup
+            chunks = [
+                hosts[i : i + self.max_concurrency]
+                for i in range(0, len(hosts), self.max_concurrency)
+            ]
+            chunks_grouped_by_org.append(chunks)
+
         with Pool(processes=self.max_concurrency) as pool:
-            orgs = self.get_orgs()
-            for org_id in orgs:
-                hosts_before_dedup = request_results(
-                    self.inspect_scan_task, HOSTS_V1_URL, org_id
-                )
-                hosts_after_dedup = []
-                for host in hosts_before_dedup:
-                    if host not in deduplicated_hosts:
-                        hosts_after_dedup.append(host)
-                        deduplicated_hosts.append(host)
-                hosts = hosts_after_dedup
-                chunks = [
-                    hosts[i : i + self.max_concurrency]
-                    for i in range(0, len(hosts), self.max_concurrency)
-                ]
+            for chunks in chunks_grouped_by_org:
                 for chunk in chunks:
                     if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                         raise SatelliteCancelException()
@@ -665,18 +668,19 @@ class SatelliteSixV2(SatelliteInterface):
         )
         deduplicated_hosts = []
 
+        hosts_before_dedup = request_results(self.inspect_scan_task, HOSTS_V2_URL)
+        hosts_after_dedup = []
+        for host in hosts_before_dedup:
+            if host not in deduplicated_hosts:
+                hosts_after_dedup.append(host)
+                deduplicated_hosts.append(host)
+        hosts = hosts_after_dedup
+        chunks = [
+            hosts[i : i + self.max_concurrency]
+            for i in range(0, len(hosts), self.max_concurrency)
+        ]
+
         with Pool(processes=self.max_concurrency) as pool:
-            hosts_before_dedup = request_results(self.inspect_scan_task, HOSTS_V2_URL)
-            hosts_after_dedup = []
-            for host in hosts_before_dedup:
-                if host not in deduplicated_hosts:
-                    hosts_after_dedup.append(host)
-                    deduplicated_hosts.append(host)
-            hosts = hosts_after_dedup
-            chunks = [
-                hosts[i : i + self.max_concurrency]
-                for i in range(0, len(hosts), self.max_concurrency)
-            ]
             for chunk in chunks:
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     raise SatelliteCancelException()
