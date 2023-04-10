@@ -42,5 +42,5 @@ def paginated_results():
 def test_get_paginated_results(paginated_results):
     """Test get_paginated_results method."""
     client = AnsibleControllerApi(base_url="https://some.url/")
-    results = client.get_paginated_results("/paginated/")
-    assert list(results) == list(range(1, 12))
+    results = client.get_paginated_results("/paginated/", max_concurrency=4)
+    assert set(results) == set(range(1, 12))
