@@ -1,6 +1,7 @@
 """ansible controller api adapter."""
 
 from logging import getLogger
+from math import ceil
 
 from requests.auth import HTTPBasicAuth
 
@@ -29,3 +30,21 @@ class AnsibleControllerApi(Session):
         base_uri = f"{protocol}://{host}:{port}"
         auth = HTTPBasicAuth(username=username, password=password)
         return cls(base_url=base_uri, verify=ssl_verify, auth=auth)
+
+    def get_paginated_results(self, url, **kwargs):
+        """Get a generator with results from a paginated endpoint."""
+        # paginated responses on ansible controller api always are always like this
+        # { "count": 99, "next": null, "previous": null, "results": [ ... ] }
+        kwargs.setdefault("raise_for_status", True)
+        first_response = self.get(url, **kwargs)
+        first_page = first_response.json()
+        yield from first_page["results"]
+        if first_page["next"]:
+            page_size = len(first_page["results"])
+            total_pages = ceil(first_page["count"] / page_size)
+            for page in range(2, total_pages + 1):
+                params = {"page_size": page_size, "page": page}
+                kwargs.setdefault("params", {})
+                kwargs["params"].update(**params)
+                response = self.get(url, **kwargs)
+                yield from response.json()["results"]

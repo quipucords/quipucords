@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+from logging import getLogger
+
+from django.conf import settings
 from django.db import transaction
+from requests import RequestException
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.ansible.runner import AnsibleTaskRunner
 from scanner.exceptions import ScanFailureError
+
+logger = getLogger(__name__)
 
 
 class InspectTaskRunner(AnsibleTaskRunner):
@@ -26,6 +32,10 @@ class InspectTaskRunner(AnsibleTaskRunner):
         "name",
         "status",
     ]
+    REQUEST_KWARGS = {
+        "raise_for_status": True,
+        "timeout": settings.QPC_INSPECT_TASK_TIMEOUT,
+    }
 
     def execute_task(self, manager_interrupt):
         """
@@ -35,14 +45,23 @@ class InspectTaskRunner(AnsibleTaskRunner):
         :returns: tuple of human readable message and ScanTask.STATUS_CHOICE
         """
         self._check_prerequisites()
-        results = {
-            "instance_details": self.get_instance_details(),
-            "hosts": self.get_hosts(),
-            "jobs": self.get_jobs(),
-        }
-        results["comparison"] = self.compare_hosts(results)
-        # for now lets assume success
+        results = {}
         inspection_status = SystemInspectionResult.SUCCESS
+        collectable_facts = ("instance_details", "hosts", "jobs")
+        for fact in collectable_facts:
+            method = getattr(self, f"get_{fact}")
+            try:
+                results[fact] = method()
+            except RequestException:
+                logger.exception(
+                    "Error collecting fact '%s' for ansible host '%s'.",
+                    fact,
+                    self.system_name,
+                )
+                inspection_status = SystemInspectionResult.FAILED
+
+        if inspection_status == SystemInspectionResult.SUCCESS:
+            results["comparison"] = self.compare_hosts(results)
         self.save_results(inspection_status, results)
 
         if self.scan_task.systems_scanned:
@@ -51,13 +70,11 @@ class InspectTaskRunner(AnsibleTaskRunner):
 
     def get_hosts(self) -> list[dict]:
         """Retrieve ansible managed hosts/nodes."""
-        response = self.client.get("/api/v2/hosts/")
-        if not response.ok:
-            raise NotImplementedError()
-
-        # skipping pagination info atm
+        hosts_generator = self.client.get_paginated_results(
+            "/api/v2/hosts/", **self.REQUEST_KWARGS
+        )
         hosts = []
-        for host in response.json()["results"]:
+        for host in hosts_generator:
             parsed_host = {field: host.get(field) for field in self.HOST_FIELDS}
             hosts.append(parsed_host)
         return hosts
@@ -69,9 +86,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
         :param client: AnsibleControllerApi to use for API calls
         :returns: A list of dicts containing information about each host in.
         """
-        response = self.client.get("/api/v2/ping/")
-        if not response.ok:
-            raise NotImplementedError()
+        response = self.client.get("/api/v2/ping/", **self.REQUEST_KWARGS)
         data = response.json()
         # set "system_name" (aka connection host) for use on fingerprint phase
         data["system_name"] = data.get("active_node") or self.system_name
@@ -84,13 +99,13 @@ class InspectTaskRunner(AnsibleTaskRunner):
         :param client: AnsibleControllerApi to use for API calls
         :returns: a dictionary with job ids and unique hosts.
         """
-        jobs_response = self.client.get("/api/v2/jobs/")
-        if not jobs_response.ok:
-            raise NotImplementedError()
+        jobs_generator = self.client.get_paginated_results(
+            "/api/v2/jobs/", **self.REQUEST_KWARGS
+        )
         job_ids = []
         unique_hosts = set()
         # ignoring pagination
-        for job in jobs_response.json()["results"]:
+        for job in jobs_generator:
             job_id = job["id"]
             job_ids.append(job_id)
             unique_hosts |= self.get_hosts_from_job_events(job_id)
@@ -98,15 +113,12 @@ class InspectTaskRunner(AnsibleTaskRunner):
 
     def get_hosts_from_job_events(self, job_id) -> set:
         """Get unique hosts found in job events."""
-        response = self.client.get(
-            f"api/v2/jobs/{job_id}/job_events/?event=runner_on_start"
+        events_generator = self.client.get_paginated_results(
+            f"api/v2/jobs/{job_id}/job_events/?event=runner_on_start",
+            **self.REQUEST_KWARGS,
         )
-        if not response.ok:
-            raise NotImplementedError()
-            # ignoring pagination once again
-        events_data = response.json()
         unique_hosts = set()
-        for event in events_data["results"]:
+        for event in events_generator:
             unique_hosts.add(event["host_name"])
         # ignore garbage hosts
         unique_hosts -= {"", None}

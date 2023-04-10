@@ -1,10 +1,16 @@
 """Connect task runner."""
 
+from logging import getLogger
+
 from django.conf import settings
 from django.db import transaction
+from requests import ConnectionError as RequestConnError
+from requests import RequestException
 
 from api.models import ScanTask, SystemConnectionResult
 from scanner.ansible.runner import AnsibleTaskRunner
+
+logger = getLogger(__name__)
 
 
 class ConnectTaskRunner(AnsibleTaskRunner):
@@ -21,13 +27,20 @@ class ConnectTaskRunner(AnsibleTaskRunner):
         """
         self._init_stats()
         conn_result = SystemConnectionResult.FAILED
-        response = self.client.get(
-            "/api/v2/me/", timeout=settings.QPC_CONNECT_TASK_TIMEOUT
-        )
-        if response.ok:
+        try:
+            self.client.get(
+                "/api/v2/me/",
+                timeout=settings.QPC_CONNECT_TASK_TIMEOUT,
+                raise_for_status=True,
+            )
             conn_result = SystemConnectionResult.SUCCESS
+        except RequestException as exception:
+            logger.exception("Unable to connect to '%s'.", self.system_name)
+            if isinstance(exception, RequestConnError):
+                conn_result = SystemConnectionResult.UNREACHABLE
+            else:
+                conn_result = SystemConnectionResult.FAILED
         self._save_results(conn_result)
-
         if conn_result == SystemConnectionResult.SUCCESS:
             return self.success_message, ScanTask.COMPLETED
         return self.failure_message, ScanTask.FAILED
