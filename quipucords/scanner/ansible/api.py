@@ -1,5 +1,7 @@
 """ansible controller api adapter."""
 
+from concurrent import futures
+from copy import deepcopy
 from logging import getLogger
 from math import ceil
 
@@ -31,7 +33,7 @@ class AnsibleControllerApi(Session):
         auth = HTTPBasicAuth(username=username, password=password)
         return cls(base_url=base_uri, verify=ssl_verify, auth=auth)
 
-    def get_paginated_results(self, url, **kwargs):
+    def get_paginated_results(self, url, max_concurrency=1, **kwargs):
         """Get a generator with results from a paginated endpoint."""
         # paginated responses on ansible controller api always are always like this
         # { "count": 99, "next": null, "previous": null, "results": [ ... ] }
@@ -40,11 +42,27 @@ class AnsibleControllerApi(Session):
         first_page = first_response.json()
         yield from first_page["results"]
         if first_page["next"]:
-            page_size = len(first_page["results"])
-            total_pages = ceil(first_page["count"] / page_size)
-            for page in range(2, total_pages + 1):
-                params = {"page_size": page_size, "page": page}
-                kwargs.setdefault("params", {})
-                kwargs["params"].update(**params)
-                response = self.get(url, **kwargs)
-                yield from response.json()["results"]
+            page_kwargs = self._get_page_params(kwargs, first_page)
+            yield from self._get_pages_in_parallel(url, max_concurrency, page_kwargs)
+
+    def _get_page_params(self, kwargs, first_page):
+        page_size = len(first_page["results"])
+        total_pages = ceil(first_page["count"] / page_size)
+        for page in range(2, total_pages + 1):
+            yield self._format_page_kwargs(kwargs, page_size, page)
+
+    def _format_page_kwargs(self, kwargs, page_size, page):
+        kwargs = deepcopy(kwargs)
+        params = {"page_size": page_size, "page": page}
+        kwargs.setdefault("params", {})
+        kwargs["params"].update(**params)
+        return kwargs
+
+    def _get_pages_in_parallel(self, url, max_concurrency, page_kwargs):
+        with futures.ThreadPoolExecutor(max_workers=max_concurrency) as executor:
+            future_to_page = {
+                executor.submit(self.get, url, **kwargs) for kwargs in page_kwargs
+            }
+            for future_page in futures.as_completed(future_to_page):
+                data = future_page.result()
+                yield from data.json()["results"]
