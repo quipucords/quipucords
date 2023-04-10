@@ -92,6 +92,8 @@ class RawFactEncoder(JSONEncoder):
             return o.dict()
         if isinstance(o, datetime):
             return o.isoformat()
+        if isinstance(o, set):
+            return sorted(o)
         return super().default(o)
 
 
