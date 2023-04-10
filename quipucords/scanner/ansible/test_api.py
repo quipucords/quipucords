@@ -21,7 +21,12 @@ def paginated_results():
         httpretty.GET,
         "https://some.url/paginated/?&page=2&page_size=5",
         match_querystring=True,
-        body='{"count": 11, "next": true, "results": [6, 7, 8, 9, 10]}',
+        responses=[
+            httpretty.Response("Service temporarily unavailable", status=503),
+            httpretty.Response(
+                '{"count": 11, "next": true, "results": [6, 7, 8, 9, 10]}', status=200
+            ),
+        ],
     )
 
     httpretty.register_uri(
