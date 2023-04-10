@@ -540,7 +540,6 @@ class SatelliteSixV1(SatelliteInterface):
         )
         deduplicated_hosts = []
 
-        chunks_grouped_by_org = []
         orgs = self.get_orgs()
         for org_id in orgs:
             hosts_before_dedup = request_results(
@@ -551,25 +550,25 @@ class SatelliteSixV1(SatelliteInterface):
                 if host not in deduplicated_hosts:
                     hosts_after_dedup.append(host)
                     deduplicated_hosts.append(host)
-            hosts = hosts_after_dedup
-            chunks = [
-                hosts[i : i + self.max_concurrency]
-                for i in range(0, len(hosts), self.max_concurrency)
-            ]
-            chunks_grouped_by_org.append(chunks)
+
+        hosts = deduplicated_hosts
+
+        chunks = [
+            hosts[i : i + self.max_concurrency]
+            for i in range(0, len(hosts), self.max_concurrency)
+        ]
 
         with Pool(processes=self.max_concurrency) as pool:
-            for chunks in chunks_grouped_by_org:
-                for chunk in chunks:
-                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                        raise SatelliteCancelException()
+            for chunk in chunks:
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                    raise SatelliteCancelException()
 
-                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                        raise SatellitePauseException()
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                    raise SatellitePauseException()
 
-                    host_params = self.prepare_host(chunk)
-                    results = pool.starmap(request_host_details, host_params)
-                    process_results(self, results, 1)
+                host_params = self.prepare_host(chunk)
+                results = pool.starmap(request_host_details, host_params)
+                process_results(self, results, 1)
         utils.validate_task_stats(self.inspect_scan_task)
 
 
