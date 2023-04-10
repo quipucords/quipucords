@@ -3,6 +3,8 @@ import logging
 import xmlrpc.client
 from multiprocessing import Pool
 
+from more_itertools import chunked
+
 from api.models import ScanJob, SystemInspectionResult
 from scanner.satellite import utils
 from scanner.satellite.api import (
@@ -408,12 +410,8 @@ class SatelliteFive(SatelliteInterface):
                 hosts_after_dedup.append(host)
                 deduplicated_hosts.append(host)
         hosts = hosts_before_dedup
-        chunks = [
-            hosts[i : i + self.max_concurrency]
-            for i in range(0, len(hosts), self.max_concurrency)
-        ]
         with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunks:
+            for chunk in chunked(hosts, self.max_concurrency):
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     raise SatelliteCancelException()
 

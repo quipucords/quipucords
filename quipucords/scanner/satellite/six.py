@@ -7,6 +7,7 @@ from collections.abc import Generator
 from multiprocessing import Pool
 
 import requests
+from more_itertools import chunked
 from requests.exceptions import Timeout
 
 from api.models import ScanJob, ScanTask, SystemInspectionResult
@@ -553,13 +554,8 @@ class SatelliteSixV1(SatelliteInterface):
 
         hosts = deduplicated_hosts
 
-        chunks = [
-            hosts[i : i + self.max_concurrency]
-            for i in range(0, len(hosts), self.max_concurrency)
-        ]
-
         with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunks:
+            for chunk in chunked(hosts, self.max_concurrency):
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     raise SatelliteCancelException()
 
@@ -674,13 +670,9 @@ class SatelliteSixV2(SatelliteInterface):
                 hosts_after_dedup.append(host)
                 deduplicated_hosts.append(host)
         hosts = hosts_after_dedup
-        chunks = [
-            hosts[i : i + self.max_concurrency]
-            for i in range(0, len(hosts), self.max_concurrency)
-        ]
 
         with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunks:
+            for chunk in chunked(hosts, self.max_concurrency):
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                     raise SatelliteCancelException()
 
