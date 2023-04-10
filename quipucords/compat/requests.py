@@ -28,7 +28,9 @@ class Session(requests.Session):
         self.base_url = base_url
         self.auth = auth
 
-    def request(self, method, url, *args, **kwargs) -> requests.Response:
+    def request(  # pylint: disable=arguments-differ
+        self, method, url, *, raise_for_status=False, **kwargs
+    ) -> requests.Response:
         """
         Prepare amd send a request.
 
@@ -36,7 +38,12 @@ class Session(requests.Session):
 
         :param method: The HTTP method to use
         :param url: The URL to send the request to. This can be relative to the base URL
+        :param raise_for_status: (optional) call Response method "raise_for_status".
+        :param **kwargs: same keyword arguments used on parent class request method.
         :returns: `requests.Response`
         """
         request_url = urljoin(self.base_url, url)
-        return super().request(method, request_url, *args, **kwargs)
+        response = super().request(method, request_url, **kwargs)
+        if raise_for_status:
+            response.raise_for_status()
+        return response
