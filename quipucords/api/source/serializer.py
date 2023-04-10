@@ -77,6 +77,14 @@ class SourceSerializer(NotEmptySerializer):
     options = SourceOptionsSerializer(required=False, many=False)
     credentials = CredentialsField(many=True, queryset=Credential.objects.all())
 
+    HTTP_SOURCE_TYPES = (
+        DataSources.OPENSHIFT,
+        DataSources.SATELLITE,
+        DataSources.VCENTER,
+    )
+
+    SSH_SOURCE_TYPES = (DataSources.NETWORK,)
+
     class Meta:
         """Metadata for the serializer."""
 
@@ -90,50 +98,40 @@ class SourceSerializer(NotEmptySerializer):
         :param options: dictionary of source options
         :param source_type: string denoting source type
         """
-        valid_net_options = ["use_paramiko"]
-        valid_vc_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
-        valid_sat_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
-        valid_openshift_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
+        valid_ssh_options = ["use_paramiko"]
+        valid_http_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
-        if source_type == DataSources.SATELLITE:
+        if source_type in cls.HTTP_SOURCE_TYPES:
+            options.setdefault("ssl_cert_verify", True)
             cls._check_for_disallowed_fields(
                 options,
-                messages.SAT_INVALID_OPTIONS,
-                valid_sat_options,
+                messages.INVALID_OPTIONS,
+                valid_http_options,
+                source_type,
             )
-            if options.get("ssl_cert_verify") is None:
-                options["ssl_cert_verify"] = True
-
-        elif source_type == DataSources.VCENTER:
-            cls._check_for_disallowed_fields(
-                options,
-                messages.VC_INVALID_OPTIONS,
-                valid_vc_options,
-            )
-            if options.get("ssl_cert_verify") is None:
-                options["ssl_cert_verify"] = True
-
-        elif source_type == DataSources.NETWORK:
+        elif source_type in cls.SSH_SOURCE_TYPES:
             cls._check_for_disallowed_fields(
                 options,
                 messages.NET_SSL_OPTIONS_NOT_ALLOWED,
-                valid_net_options,
+                valid_ssh_options,
+                source_type,
             )
-        elif source_type == DataSources.OPENSHIFT:
-            cls._check_for_disallowed_fields(
-                options,
-                messages.OPENSHIFT_INVALID_OPTIONS,
-                valid_openshift_options,
-            )
-            if options.get("ssl_cert_verify") is None:
-                options["ssl_cert_verify"] = True
+        else:
+            raise NotImplementedError
 
     @classmethod
-    def _check_for_disallowed_fields(cls, options, message, valid_fields):
+    def _check_for_disallowed_fields(cls, options, message, valid_fields, source_type):
         """Verify if disallowed fields are present."""
         invalid_options = [opt for opt in options if opt not in valid_fields]
         if invalid_options:
-            error = {"options": [_(message % ", ".join(invalid_options))]}
+            error = {
+                "options": [
+                    _(message).format(
+                        source_type=source_type,
+                        options=", ".join(invalid_options),
+                    )
+                ]
+            }
             raise ValidationError(error)
 
     def _validate_number_hosts_and_credentials(
@@ -165,14 +163,10 @@ class SourceSerializer(NotEmptySerializer):
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
         source_type = get_from_object_or_dict(self.instance, attrs, "source_type")
-        if source_type == DataSources.NETWORK:
+        if source_type in self.SSH_SOURCE_TYPES:
             validated_data = self.validate_network_source(attrs, source_type)
-        elif source_type == DataSources.VCENTER:
-            validated_data = self.validate_vcenter_source(attrs, source_type)
-        elif source_type == DataSources.SATELLITE:
-            validated_data = self.validate_satellite_source(attrs, source_type)
-        elif source_type == DataSources.OPENSHIFT:
-            validated_data = self.validate_openshift_source(attrs, source_type)
+        elif source_type in self.HTTP_SOURCE_TYPES:
+            validated_data = self.validate_http_source(attrs, source_type)
         else:
             raise ValidationError({"source_type": messages.UNKNOWN_SOURCE_TYPE})
         return validated_data
@@ -202,11 +196,7 @@ class SourceSerializer(NotEmptySerializer):
             options = SourceOptions.objects.create(**options)
             options.save()
             source.options = options
-        elif not options and source_type in (
-            DataSources.SATELLITE,
-            DataSources.VCENTER,
-            DataSources.OPENSHIFT,
-        ):
+        elif not options and source_type in self.HTTP_SOURCE_TYPES:
             self._options_with_ssl_cert_verify_true(source)
 
         source.hosts = hosts_list
@@ -568,42 +558,16 @@ class SourceSerializer(NotEmptySerializer):
                 SourceSerializer.check_credential_type(source_type, cred)
         return attrs
 
-    def validate_vcenter_source(self, attrs, source_type):
+    def validate_http_source(self, attrs, source_type):
         """Validate the attributes for vcenter source."""
         credentials = attrs.get("credentials")
         hosts_list = attrs.get("hosts")
         exclude_hosts_list = attrs.get("exclude_hosts")
-        self._set_default_port(attrs, 443)
-        if credentials:
-            self._validate_number_hosts_and_credentials(
-                hosts_list,
-                source_type,
-                credentials,
-                exclude_hosts_list,
-            )
-        return attrs
-
-    def validate_satellite_source(self, attrs, source_type):
-        """Validate the attributes for Satellite source."""
-        credentials = attrs.get("credentials")
-        hosts_list = attrs.get("hosts")
-        exclude_hosts_list = attrs.get("exclude_hosts")
-        self._set_default_port(attrs, 443)
-        if credentials:
-            self._validate_number_hosts_and_credentials(
-                hosts_list,
-                source_type,
-                credentials,
-                exclude_hosts_list,
-            )
-        return attrs
-
-    def validate_openshift_source(self, attrs, source_type):
-        """Validate the attributes for OpenShift source."""
-        credentials = attrs.get("credentials")
-        hosts_list = attrs.get("hosts")
-        exclude_hosts_list = attrs.get("exclude_hosts")
-        self._set_default_port(attrs, 6443)
+        if source_type == DataSources.OPENSHIFT:
+            default_port = 6443
+        else:
+            default_port = 443
+        self._set_default_port(attrs, default_port)
         if credentials:
             self._validate_number_hosts_and_credentials(
                 hosts_list,
