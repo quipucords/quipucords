@@ -3,6 +3,8 @@
 from urllib.parse import urljoin
 
 import requests
+from django.conf import settings
+from urllib3 import Retry
 
 
 class Session(requests.Session):
@@ -13,13 +15,28 @@ class Session(requests.Session):
     for each session available in its initialization.
     """
 
-    def __init__(self, *, base_url=None, auth=None, verify=True):
+    DEFAULT_STATUS_CODE_LIST_FOR_RETRY = [429, 500, 502, 503]
+
+    def __init__(
+        self,
+        *,
+        base_url=None,
+        auth=None,
+        verify=True,
+        max_retries=None,
+        backoff_factor=None,
+        retry_on_status_code_list=None,
+    ):
         """
         Initialize the class.
 
         :param base_url: The base URL for the API
         :param auth: Auth class (as specified on requests documentation [1])
         :param verify: SSL verify
+        :param max_retries: maximum number of automatic retries
+        :param backoff_factor: backoff factor for automatic retries
+        :param retry_on_status_code_list: list of status codes eligible for automatic
+            retry. Defaults to DEFAULT_STATUS_CODE_LIST_FOR_RETRY`
 
         [1]: https://requests.readthedocs.io/en/latest/user/authentication/#authentication
         """  # noqa: E501
@@ -27,12 +44,28 @@ class Session(requests.Session):
         self.verify = verify
         self.base_url = base_url
         self.auth = auth
+        if max_retries is None:
+            max_retries = settings.QPC_HTTP_RETRY_MAX_NUMBER
+        if max_retries > 0:
+            backoff_factor = backoff_factor or settings.QPC_HTTP_RETRY_BACKOFF
+            retry_on_status_code_list = (
+                retry_on_status_code_list or self.DEFAULT_STATUS_CODE_LIST_FOR_RETRY
+            )
+            adapter = requests.adapters.HTTPAdapter(
+                max_retries=Retry(
+                    max_retries,
+                    status_forcelist=retry_on_status_code_list,
+                    backoff_factor=backoff_factor,
+                )
+            )
+            self.mount("http://", adapter)
+            self.mount("https://", adapter)
 
     def request(  # pylint: disable=arguments-differ
         self, method, url, *, raise_for_status=False, **kwargs
     ) -> requests.Response:
         """
-        Prepare amd send a request.
+        Prepare and send a request.
 
         This is a wrapper around :meth: `requests.Session.request`
 
