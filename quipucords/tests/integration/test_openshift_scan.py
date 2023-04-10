@@ -1,20 +1,10 @@
 """Integration test for OpenShift scan."""
 
-import tarfile
-from io import BytesIO
 from logging import getLogger
-from time import sleep
-from unittest import mock
 
 import pytest
 
-from api.models import ScanTask
-from fingerprinter.constants import (
-    ENTITLEMENTS_KEY,
-    META_DATA_KEY,
-    PRODUCTS_KEY,
-    SOURCES_KEY,
-)
+from constants import DataSources
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
     NodeResources,
@@ -23,8 +13,7 @@ from scanner.openshift.entities import (
     OCPProject,
     OCPWorkload,
 )
-from tests.utils.facts import RawFactComparator
-from utils import load_json_from_tarball
+from tests.integration.test_smoker import Smoker
 
 logger = getLogger(__name__)
 
@@ -152,194 +141,35 @@ def patched_openshift_client(
 
 @pytest.mark.integration
 @pytest.mark.django_db
-class TestOpenShiftScan:
+class TestOpenShiftScan(Smoker):
     """Smoke test OpenShift scan."""
 
     MAX_RETRIES = 10
     SOURCE_NAME = "testing source"
-    SOURCE_TYPE = "openshift"
+    SOURCE_TYPE = DataSources.OPENSHIFT
 
     @pytest.fixture
-    def credential_id(self, django_client):
-        """Create ocp credentials through api and return credentials identifier."""
-        response = django_client.post(
-            "credentials/",
-            json={
-                "name": "testing credential",
-                "cred_type": self.SOURCE_TYPE,
-                "auth_token": "<TOKEN>",
-            },
-        )
-        assert response.ok, response.text
-        return response.json()["id"]
-
-    @pytest.fixture
-    def source_id(self, django_client, credential_id):
-        """Register source for ocp scan through api and return its identifier."""
-        response = django_client.post(
-            "sources/",
-            json={
-                "source_type": self.SOURCE_TYPE,
-                "credentials": [credential_id],
-                "hosts": ["ocp.host"],
-                "name": self.SOURCE_NAME,
-                "port": 7891,
-            },
-        )
-        assert response.ok, response.text
-        return response.json()["id"]
-
-    @pytest.fixture
-    def scan_id(self, django_client, source_id):
-        """Create a scan and return its identifier."""
-        create_scan_response = django_client.post(
-            "scans/",
-            json={"name": "test scan", "sources": [source_id]},
-        )
-        assert create_scan_response.ok, create_scan_response.text
-        scan_id = create_scan_response.json()["id"]
-        return scan_id
-
-    @pytest.fixture
-    def scan_response(self, django_client, scan_id, scan_manager):
-        """Start a scan job and poll its results endpoint until completion."""
-        create_scan_job_response = django_client.post(f"scans/{scan_id}/jobs/")
-        assert create_scan_job_response.ok, create_scan_job_response.text
-        scan_manager.work()
-        response = django_client.get(f"scans/{scan_id}/")
-        attempts = 1
-        assert response.ok, response.text
-
-        completed_status = {ScanTask.COMPLETED, ScanTask.CANCELED, ScanTask.FAILED}
-        while (
-            scan_status := response.json()["most_recent"]["status"]
-        ) not in completed_status and attempts < self.MAX_RETRIES:
-            attempts += 1
-            backoff = 2**attempts
-            sleep(backoff)
-            response = django_client.get(f"scans/{scan_id}/")
-            assert response.ok, response.text
-
-        assert scan_status == ScanTask.COMPLETED, response.json()
-
-        return response
-
-    @pytest.fixture
-    def report_id(self, scan_response):
-        """Return the latest report id from performed scan."""
-        return scan_response.json()["most_recent"]["report_id"]
-
-    def test_details_report(
-        self,
-        django_client,
-        report_id,
-        expected_facts,
-    ):
-        """Sanity check details report."""
-        response = django_client.get(f"reports/{report_id}/details/")
-        assert response.ok, response.text
-        report_details_dict = response.json()
-        expected_details_report = {
-            "report_id": report_id,
-            "report_platform_id": mock.ANY,
-            "report_type": "details",
-            "report_version": mock.ANY,
-            SOURCES_KEY: [
-                {
-                    "facts": mock.ANY,
-                    "report_version": mock.ANY,
-                    "server_id": mock.ANY,
-                    "source_name": self.SOURCE_NAME,
-                    "source_type": self.SOURCE_TYPE,
-                }
-            ],
-        }
-        assert report_details_dict == expected_details_report
-        report_details_facts = report_details_dict[SOURCES_KEY][0]["facts"]
-        assert report_details_facts == expected_facts
-
-    @pytest.fixture
-    def expected_fingerprint_metadata(self, fingerprint_fact_map):
-        """
-        Return expected metadata dictionary.
-
-        Dict contained within deployments report > system fingerprints.
-        """
-        metadata = {}
-        for fingerprint_fact, raw_fact in fingerprint_fact_map.items():
-            metadata[fingerprint_fact] = {
-                "server_id": mock.ANY,
-                "source_name": self.SOURCE_NAME,
-                "source_type": self.SOURCE_TYPE,
-                "raw_fact_key": RawFactComparator(raw_fact),
-                "has_sudo": False,
-            }
-        return metadata
-
-    def test_deployments_report(
-        self,
-        django_client,
-        expected_fingerprint_metadata,
-        fingerprint_fact_map,
-        report_id,
-    ):
-        """Sanity check report deployments json structure."""
-        response = django_client.get(f"reports/{report_id}/deployments/")
-        assert response.ok, response.json()
-
-        report_deployments_dict = response.json()
-        assert report_deployments_dict == {
-            "report_id": report_id,
-            "status": ScanTask.COMPLETED,
-            "report_type": "deployments",
-            "report_version": mock.ANY,
-            "report_platform_id": mock.ANY,
-            "system_fingerprints": [mock.ANY],
+    def credential_payload(self):
+        """Return OCP credential payload."""
+        return {
+            "name": "testing credential",
+            "auth_token": "<TOKEN>",
         }
 
-        fingerprints_dict = report_deployments_dict["system_fingerprints"][0]
-        fingerprint_fact_names = set(fingerprints_dict[META_DATA_KEY].keys())
-        assert fingerprint_fact_names == set(fingerprint_fact_map.keys())
-        assert fingerprints_dict == {
-            "id": mock.ANY,
-            "deployment_report": mock.ANY,
-            ENTITLEMENTS_KEY: [],
-            SOURCES_KEY: [
-                {
-                    "server_id": mock.ANY,
-                    "source_name": self.SOURCE_NAME,
-                    "source_type": self.SOURCE_TYPE,
-                }
-            ],
-            PRODUCTS_KEY: [],
-            META_DATA_KEY: mock.ANY,
-            **{fingerprint: mock.ANY for fingerprint in fingerprint_fact_map.keys()},
+    @pytest.fixture
+    def source_payload(self):
+        """Return OCP source payload."""
+        return {
+            "source_type": self.SOURCE_TYPE,
+            "hosts": ["ocp.host"],
+            "port": 7891,
         }
-        assert fingerprints_dict[META_DATA_KEY] == expected_fingerprint_metadata
-        assert fingerprints_dict["architecture"] == "x86_64"
-        assert fingerprints_dict["system_role"] == "master"
-        assert fingerprints_dict["vm_cluster"] == "<CLUSTER-UUID>"
 
-    def test_compare_standalone_json_reports_with_tarball(
-        self, django_client, report_id
-    ):
-        """Compare individual reports with the ones bundled on the tarball endpoint."""
-        details_response = django_client.get(f"reports/{report_id}/details/")
-        assert details_response.ok, details_response.json()
-
-        deployments_response = django_client.get(f"reports/{report_id}/deployments/")
-        assert deployments_response.ok, deployments_response.json()
-
-        full_report_response = django_client.get(f"reports/{report_id}/")
-        assert full_report_response.ok
-
-        with tarfile.open(fileobj=BytesIO(full_report_response.content)) as tarball:
-            tarball_details_dict = load_json_from_tarball(
-                f"report_id_{report_id}/details.json", tarball
-            )
-            assert tarball_details_dict == details_response.json()
-
-            tarball_deployments_dict = load_json_from_tarball(
-                f"report_id_{report_id}/deployments.json", tarball
-            )
-            assert tarball_deployments_dict == deployments_response.json()
+    @pytest.fixture
+    def expected_fingerprints(self):
+        """Return expected fingerprint values."""
+        return {
+            "architecture": "x86_64",
+            "system_role": "master",
+            "vm_cluster": "<CLUSTER-UUID>",
+        }
