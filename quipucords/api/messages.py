@@ -65,13 +65,11 @@ NET_CIDR_RANGE = (
 NET_INVALID_PORT = "Source of type network must have ssh port in range [0, 65535]"
 NET_HC_DO_NOT_EXIST = "Host credential with id=%d could not be found in database."
 NET_SSL_OPTIONS_NOT_ALLOWED = "Invalid SSL options for network source: %s"
-VC_INVALID_OPTIONS = "Invalid options for vcenter source: %s"
-SAT_INVALID_OPTIONS = "Invalid options for satellite source: %s"
+INVALID_OPTIONS = "Invalid options for '%(source_type)s': %(options)s."
 SOURCE_ONE_HOST = "This source must have a single host."
 SOURCE_EXCLUDE_HOSTS_INCLUDED = "The exclude_hosts option is not valid for this source."
 SOURCE_ONE_CRED = "This source must have a single credential."
 UNKNOWN_SOURCE_TYPE = "Source type invalid."
-OPENSHIFT_INVALID_OPTIONS = "Invalid options for openshift source: %s"
 
 # Scan messages
 SCAN_NAME_ALREADY_EXISTS = "Scan with name=%s already exists"
