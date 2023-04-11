@@ -30,6 +30,7 @@ openshift = ">=0.13"
 pydantic = "^1.10.4"
 django-environ = "^0.10.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
+more-itertools = "^9.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
