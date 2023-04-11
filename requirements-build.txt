@@ -4,9 +4,11 @@
 #
 #    pip-compile --allow-unsafe --output-file=requirements-build.txt --resolver=backtracking requirements-build.in
 #
+calver==2022.6.26
+    # via -r requirements-build.in
 cffi==1.15.1 ; platform_python_implementation != "PyPy"
     # via -r requirements-build.in
-cython==0.29.33
+cython==0.29.34
     # via -r requirements-build.in
 docutils==0.19
     # via -r requirements-build.in
@@ -14,7 +16,7 @@ editables==0.3
     # via hatchling
 flit-core==3.8.0
     # via -r requirements-build.in
-hatchling==1.13.0
+hatchling==1.14.0
     # via -r requirements-build.in
 packaging==23.0
     # via
@@ -41,6 +43,8 @@ tomli==2.0.1
     # via
     #   hatchling
     #   setuptools-scm
+trove-classifiers==2023.3.9
+    # via hatchling
 typing-extensions==4.5.0
     # via
     #   -r requirements-build.in
