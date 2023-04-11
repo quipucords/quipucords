@@ -3,7 +3,7 @@ import logging
 import xmlrpc.client
 from multiprocessing import Pool
 
-from more_itertools import chunked
+from more_itertools import chunked, unique_everseen
 
 from api.models import ScanJob, SystemInspectionResult
 from scanner.satellite import utils
@@ -393,23 +393,16 @@ class SatelliteFive(SatelliteInterface):
             "INITIAL STATELLITE STATS", sys_count=systems_count
         )
 
-        hosts_before_dedup = []
-        deduplicated_hosts = []
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
         try:
             key = client.auth.login(user, password)
-            hosts_before_dedup = client.system.list_user_systems(key)
+            hosts = client.system.list_user_systems(key)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
             raise SatelliteException(str(xml_error)) from xml_error
         virtual_hosts, virtual_guests = self.virtual_hosts()
         physical_hosts = self.physical_hosts()
-        hosts_after_dedup = []
-        for host in hosts_before_dedup:
-            if host not in deduplicated_hosts:
-                hosts_after_dedup.append(host)
-                deduplicated_hosts.append(host)
-        hosts = hosts_before_dedup
+        hosts = unique_everseen(hosts)
         with Pool(processes=self.max_concurrency) as pool:
             for chunk in chunked(hosts, self.max_concurrency):
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:

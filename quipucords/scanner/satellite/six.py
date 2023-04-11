@@ -7,7 +7,7 @@ from collections.abc import Generator
 from multiprocessing import Pool
 
 import requests
-from more_itertools import chunked
+from more_itertools import chunked, unique_everseen
 from requests.exceptions import Timeout
 
 from api.models import ScanJob, ScanTask, SystemInspectionResult
@@ -539,20 +539,14 @@ class SatelliteSixV1(SatelliteInterface):
         self.inspect_scan_task.update_stats(
             "INITIAL STATELLITE STATS", sys_count=systems_count
         )
-        deduplicated_hosts = []
 
-        orgs = self.get_orgs()
-        for org_id in orgs:
-            hosts_before_dedup = request_results(
-                self.inspect_scan_task, HOSTS_V1_URL, org_id
+        # Get an iterable of *all* unique hosts spanning all orgs.
+        hosts = unique_everseen(
+            itertools.chain.from_iterable(
+                request_results(self.inspect_scan_task, HOSTS_V1_URL, org_id)
+                for org_id in self.get_orgs()
             )
-            hosts_after_dedup = []
-            for host in hosts_before_dedup:
-                if host not in deduplicated_hosts:
-                    hosts_after_dedup.append(host)
-                    deduplicated_hosts.append(host)
-
-        hosts = deduplicated_hosts
+        )
 
         with Pool(processes=self.max_concurrency) as pool:
             for chunk in chunked(hosts, self.max_concurrency):
@@ -661,15 +655,8 @@ class SatelliteSixV2(SatelliteInterface):
         self.inspect_scan_task.update_stats(
             "INITIAL STATELLITE STATS", sys_count=systems_count
         )
-        deduplicated_hosts = []
 
-        hosts_before_dedup = request_results(self.inspect_scan_task, HOSTS_V2_URL)
-        hosts_after_dedup = []
-        for host in hosts_before_dedup:
-            if host not in deduplicated_hosts:
-                hosts_after_dedup.append(host)
-                deduplicated_hosts.append(host)
-        hosts = hosts_after_dedup
+        hosts = unique_everseen(request_results(self.inspect_scan_task, HOSTS_V2_URL))
 
         with Pool(processes=self.max_concurrency) as pool:
             for chunk in chunked(hosts, self.max_concurrency):
