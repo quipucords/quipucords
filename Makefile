@@ -77,6 +77,7 @@ lock-build-requirements:
 	poetry run pip-compile $(PIP_COMPILE_ARGS) -r --resolver=backtracking --quiet --allow-unsafe --output-file=requirements-build.txt requirements-build.in
 
 search-build-requirements:
+	echo "setuptools<67" >> requirements-build.in # required while kombu is incompatible with it
 	cat requirements*.txt | grep -vE '(^ )|(#)' | awk '{print $$1}' | sed 's/==/ /' | \
 	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps 2> /dev/null | \
 	sort -u >> requirements-build.in || true
