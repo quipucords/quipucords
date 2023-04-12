@@ -443,8 +443,10 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "keyfile",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["ssh_keyfile"]
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.ssh_keyfile is None
 
     def test_vc_create_extra_become_pass(self):
         """Test VCenter with extra become password."""
@@ -457,8 +459,10 @@ class CredentialTest(TestCase):
             "become_password": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["become_password"]
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.become_password is None
 
     def test_vcentercred_update(self):
         """Ensure we can create and update a vcenter credential."""
@@ -552,8 +556,10 @@ class CredentialTest(TestCase):
             "ssh_passphrase": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["ssh_passphrase"]
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.ssh_passphrase is None
 
     def test_sat_cred_create(self):
         """Ensure we can create a new satellite credential."""
@@ -612,8 +618,11 @@ class CredentialTest(TestCase):
         response = self.client.patch(
             url, json.dumps(update_data), content_type="application/json", format="json"
         )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["ssh_keyfile"]
+        assert response.status_code == status.HTTP_200_OK
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.name == "newName"
+        assert cred.ssh_keyfile is None
 
     def test_sat_create_extra_keyfile(self):
         """Test Satellite without password."""
@@ -626,8 +635,10 @@ class CredentialTest(TestCase):
             "ssh_keyfile": "keyfile",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["ssh_keyfile"]
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.ssh_keyfile is None
 
     def test_sat_create_extra_becomepass(self):
         """Test Satellite with extra become password."""
@@ -640,8 +651,10 @@ class CredentialTest(TestCase):
             "become_password": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["become_password"]
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.become_password is None
 
     def test_sat_create_extra_keyfile_pass(self):
         """Test Satellite with extra keyfile passphase."""
@@ -654,8 +667,10 @@ class CredentialTest(TestCase):
             "ssh_passphrase": "pass2",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["ssh_passphrase"]
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.ssh_keyfile is None
 
     def test_openshift_cred_create(self):
         """Ensure we can create a new openshift credential."""
@@ -690,8 +705,12 @@ class CredentialTest(TestCase):
             "username": "test_username",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
-        assert response.status_code, status.HTTP_400_BAD_REQUEST
-        assert response.data["become_password"] and response.data["username"]
+        assert response.status_code
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Credential.objects.count() == 1
+        cred = Credential.objects.get()
+        assert cred.become_password is None
+        assert cred.username is None
 
 
 # tuple of triples (input, expected output, pytest-param-id)
