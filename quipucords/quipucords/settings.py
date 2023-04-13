@@ -182,7 +182,7 @@ elif QPC_DBMS == "postgres":
     QPC_DBMS_USER = env.str("QPC_DBMS_USER", "qpc")
     QPC_DBMS_PASSWORD = env.str("QPC_DBMS_PASSWORD", "qpc")
     QPC_DBMS_HOST = env.str("QPC_DBMS_HOST", "localhost")
-    QPC_DBMS_PORT = env.int("QPC_DBMS_PORT", 54321)
+    QPC_DBMS_PORT = env.int("QPC_DBMS_PORT", 5432)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
