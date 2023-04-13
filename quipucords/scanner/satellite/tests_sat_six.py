@@ -4,6 +4,7 @@ from unittest.mock import ANY, patch
 
 import requests_mock
 from django.test import TestCase
+from faker import Faker
 
 from api.models import (
     Credential,
@@ -28,6 +29,8 @@ from scanner.satellite.six import (
 )
 from scanner.satellite.utils import construct_url
 from scanner.test_util import create_scan_job
+
+fake = Faker()
 
 # pylint: disable=too-many-lines
 
@@ -504,6 +507,70 @@ class SatelliteSixV1Test(TestCase):
                     self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
                     inspect_result = self.scan_task.inspection_result
                     self.assertEqual(len(inspect_result.systems.all()), 1)
+
+    def test_hosts_facts_multiple_orgs_duplicate_hosts(self):
+        """
+        Assert hosts_facts correctly de-dupes hosts across multiple orgs.
+
+        This test assumes that the satellite system could have two orgs and that those
+        orgs may contain overlapping hosts.
+        """
+        hosts_url = (
+            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
+        )
+        org_a_id = fake.pyint()
+        org_b_id = fake.pyint()
+
+        url_org_a = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=org_a_id)
+        url_org_b = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=org_b_id)
+        unique_hosts = [
+            {"uuid": fake.uuid4(), "name": "sys1"},
+            {"uuid": fake.uuid4(), "name": "sys2"},
+            {"uuid": fake.uuid4(), "name": "sys3"},
+            {"uuid": fake.uuid4(), "name": "sys4"},
+        ]
+        org_a_hosts = unique_hosts[:3]
+        org_b_hosts = unique_hosts[1:]  # should overlap with org_a_hosts
+        jsonresults = [
+            {
+                "results": org_a_hosts,
+                "per_page": 100,
+                "total": len(org_a_hosts),
+            },
+            {
+                "results": org_b_hosts,
+                "per_page": 100,
+                "total": len(org_b_hosts),
+            },
+        ]
+
+        with patch.object(
+            SatelliteSixV1, "get_orgs", return_value=[org_a_id, org_b_id]
+        ), patch.object(SatelliteSixV1, "prepare_host") as mock_prepare_host, patch(
+            "scanner.satellite.six.request_host_details", return_value={}
+        ) as mock_request_host_details, patch(
+            "scanner.satellite.utils.validate_task_stats", return_value=True
+        ), patch(
+            "multiprocessing.pool.Pool.starmap"
+        ) as mock_pool_starmap, requests_mock.Mocker() as mocker:
+            # pylint: disable=unnecessary-lambda
+            mock_prepare_host.side_effect = lambda x: list(x)
+            # pylint: enable=unnecessary-lambda
+            mocker.get(url_org_a, status_code=200, json=jsonresults[0])
+            mocker.get(url_org_b, status_code=200, json=jsonresults[1])
+
+            self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
+
+            # This assertion warrants some explanation...
+            # For this test, we want to see if prepare_host was given a list of de-duped
+            # hosts, but it's difficult to assert equality with the generator that would
+            # normally be passed into it. So, we patch prepare_host's behavior to simply
+            # return its input cast to a list, which should match our expected list.
+            # Since the output of prepare_host goes immediately into Pool.starmap, we
+            # check that Pool.starmap is called with what we expect is the unique list.
+            mock_pool_starmap.assert_called_with(
+                mock_request_host_details, unique_hosts
+            )
 
 
 # pylint: disable=too-many-instance-attributes
