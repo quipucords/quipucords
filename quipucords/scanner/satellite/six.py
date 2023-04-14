@@ -21,8 +21,7 @@ from scanner.satellite.api import (
 )
 from scanner.satellite.utils import raw_facts_template
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 CONTENT_TYPE = "content-type"
 APP_JSON = "application/json"

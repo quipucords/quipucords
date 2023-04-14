@@ -12,8 +12,7 @@ from api.models import (
 )
 from scanner.exceptions import ScanCancelException, ScanPauseException
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 SATELLITE_VERSION_5 = "5"
 SATELLITE_VERSION_6 = "6"
