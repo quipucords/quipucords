@@ -469,6 +469,19 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
 
         return host_params
 
+    def _request_and_record_hosts(self, credential, org_id=None):
+        """Request and record hosts for the given credential and optional org filter."""
+        hosts = []
+        for result in request_results(self.connect_scan_task, self.HOSTS_URL, org_id):
+            host_name = result.get(NAME)
+            host_id = result.get(ID)
+
+            if host_name is not None and host_id is not None:
+                unique_name = f"{host_name}_{host_id}"
+                hosts.append(unique_name)
+                self.record_conn_result(unique_name, credential)
+        return hosts
+
     @abstractmethod
     def _requests_hosts_unique(self):
         """Get an iterable of all unique hosts."""
@@ -558,20 +571,14 @@ class SatelliteSixV1(SatelliteSix):
 
     def hosts(self):
         """Obtain the managed hosts."""
-        orgs = self.get_orgs()
         credential = utils.get_credential(self.connect_scan_task)
 
-        hosts = []
-        for org_id in orgs:
-            for result in request_results(self.connect_scan_task, HOSTS_V1_URL, org_id):
-                host_name = result.get(NAME)
-                host_id = result.get(ID)
-
-                if host_name is not None and host_id is not None:
-                    unique_name = f"{host_name}_{host_id}"
-                    hosts.append(unique_name)
-                    self.record_conn_result(unique_name, credential)
-
+        hosts = list(
+            itertools.chain.from_iterable(
+                self._request_and_record_hosts(credential, org_id)
+                for org_id in self.get_orgs()
+            )
+        )
         return hosts
 
     def _requests_hosts_unique(self):
@@ -613,18 +620,7 @@ class SatelliteSixV2(SatelliteSix):
     def hosts(self):
         """Obtain the managed hosts."""
         credential = utils.get_credential(self.connect_scan_task)
-
-        hosts = []
-        for result in request_results(self.connect_scan_task, HOSTS_V2_URL):
-            host_name = result.get(NAME)
-            host_id = result.get(ID)
-
-            if host_name is not None and host_id is not None:
-                unique_name = f"{host_name}_{host_id}"
-                hosts.append(unique_name)
-                self.record_conn_result(unique_name, credential)
-
-        return hosts
+        return self._request_and_record_hosts(credential)
 
     def _requests_hosts_unique(self):
         """Get an iterable of all unique hosts."""
