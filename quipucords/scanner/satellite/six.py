@@ -517,7 +517,7 @@ class SatelliteSixV1(SatelliteSix):
                 )
             systems_count += response.json().get("total", 0)
             self.connect_scan_task.update_stats(
-                "INITIAL STATELLITE STATS", sys_count=systems_count
+                "INITIAL SATELLITE STATS", sys_count=systems_count
             )
             return systems_count
 
@@ -547,7 +547,7 @@ class SatelliteSixV1(SatelliteSix):
                 "hosts_facts cannot be called for a connection scan"
             )
         self.inspect_scan_task.update_stats(
-            "INITIAL STATELLITE STATS", sys_count=systems_count
+            "INITIAL SATELLITE STATS", sys_count=systems_count
         )
 
         # Get an iterable of *all* unique hosts spanning all orgs.
@@ -619,7 +619,7 @@ class SatelliteSixV2(SatelliteSix):
                 "hosts_facts cannot be called for a connection scan"
             )
         self.inspect_scan_task.update_stats(
-            "INITIAL STATELLITE STATS", sys_count=systems_count
+            "INITIAL SATELLITE STATS", sys_count=systems_count
         )
 
         hosts = unique_everseen(request_results(self.inspect_scan_task, HOSTS_V2_URL))

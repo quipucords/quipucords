@@ -124,7 +124,7 @@ class SatelliteFive(SatelliteInterface):
         except xmlrpc.client.Fault as xml_error:
             raise SatelliteException(str(xml_error)) from xml_error
         self.connect_scan_task.update_stats(
-            "INITIAL STATELLITE STATS", sys_count=systems_count
+            "INITIAL SATELLITE STATS", sys_count=systems_count
         )
         return systems_count
 
@@ -390,7 +390,7 @@ class SatelliteFive(SatelliteInterface):
             )
         systems_count = len(self.connect_scan_task.connection_result.systems.all())
         self.inspect_scan_task.update_stats(
-            "INITIAL STATELLITE STATS", sys_count=systems_count
+            "INITIAL SATELLITE STATS", sys_count=systems_count
         )
 
         client, user, password = utils.get_sat5_client(self.inspect_scan_task)
