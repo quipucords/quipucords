@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+from abc import ABCMeta, abstractmethod
 from collections.abc import Generator
 from multiprocessing import Pool
 
@@ -413,11 +414,13 @@ def process_results(self, results, api_version):
             )
 
 
-class SatelliteSix(SatelliteInterface):
+class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     """Interact with Satellite 6."""
 
     HOSTS_FIELDS_URL: str
     HOSTS_SUBS_URL: str
+    HOSTS_URL: str
+    SATELLITE_API_VERSION: int
 
     def prepare_host(self, chunk):
         """Prepare each host with necessary information.
@@ -466,12 +469,44 @@ class SatelliteSix(SatelliteInterface):
 
         return host_params
 
+    @abstractmethod
+    def _requests_hosts_unique(self):
+        """Get an iterable of all unique hosts."""
+
+    def hosts_facts(self, manager_interrupt):
+        """Obtain the managed hosts detail raw facts."""
+        systems_count = len(self.connect_scan_task.connection_result.systems.all())
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                "hosts_facts cannot be called for a connection scan"
+            )
+        self.inspect_scan_task.update_stats(
+            "INITIAL SATELLITE STATS", sys_count=systems_count
+        )
+
+        hosts = self._requests_hosts_unique()
+
+        with Pool(processes=self.max_concurrency) as pool:
+            for chunk in chunked(hosts, self.max_concurrency):
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                    raise SatelliteCancelException()
+
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                    raise SatellitePauseException()
+
+                host_params = self.prepare_host(chunk)
+                results = pool.starmap(request_host_details, host_params)
+                process_results(self, results, self.SATELLITE_API_VERSION)
+        utils.validate_task_stats(self.inspect_scan_task)
+
 
 class SatelliteSixV1(SatelliteSix):
     """Interact with Satellite 6, API version 1."""
 
     HOSTS_FIELDS_URL: str = HOSTS_FIELDS_V1_URL
     HOSTS_SUBS_URL: str = HOSTS_SUBS_V1_URL
+    HOSTS_URL: str = HOSTS_V1_URL
+    SATELLITE_API_VERSION: int = 1
 
     def __init__(self, scan_job, scan_task):
         """Set context for Satellite Interface.
@@ -539,37 +574,15 @@ class SatelliteSixV1(SatelliteSix):
 
         return hosts
 
-    def hosts_facts(self, manager_interrupt):
-        """Obtain the managed hosts detail raw facts."""
-        systems_count = len(self.connect_scan_task.connection_result.systems.all())
-        if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "hosts_facts cannot be called for a connection scan"
-            )
-        self.inspect_scan_task.update_stats(
-            "INITIAL SATELLITE STATS", sys_count=systems_count
-        )
-
-        # Get an iterable of *all* unique hosts spanning all orgs.
+    def _requests_hosts_unique(self):
+        """Get an iterable of all unique hosts spanning all orgs."""
         hosts = unique_everseen(
             itertools.chain.from_iterable(
-                request_results(self.inspect_scan_task, HOSTS_V1_URL, org_id)
+                request_results(self.inspect_scan_task, self.HOSTS_URL, org_id)
                 for org_id in self.get_orgs()
             )
         )
-
-        with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunked(hosts, self.max_concurrency):
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                    raise SatelliteCancelException()
-
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                    raise SatellitePauseException()
-
-                host_params = self.prepare_host(chunk)
-                results = pool.starmap(request_host_details, host_params)
-                process_results(self, results, 1)
-        utils.validate_task_stats(self.inspect_scan_task)
+        return hosts
 
 
 class SatelliteSixV2(SatelliteSix):
@@ -577,6 +590,8 @@ class SatelliteSixV2(SatelliteSix):
 
     HOSTS_FIELDS_URL: str = HOSTS_FIELDS_V2_URL
     HOSTS_SUBS_URL: str = HOSTS_SUBS_V2_URL
+    HOSTS_URL: str = HOSTS_V2_URL
+    SATELLITE_API_VERSION: int = 2
 
     def host_count(self):
         """Obtain the count of managed hosts."""
@@ -611,27 +626,6 @@ class SatelliteSixV2(SatelliteSix):
 
         return hosts
 
-    def hosts_facts(self, manager_interrupt):
-        """Obtain the managed hosts detail raw facts."""
-        systems_count = len(self.connect_scan_task.connection_result.systems.all())
-        if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "hosts_facts cannot be called for a connection scan"
-            )
-        self.inspect_scan_task.update_stats(
-            "INITIAL SATELLITE STATS", sys_count=systems_count
-        )
-
-        hosts = unique_everseen(request_results(self.inspect_scan_task, HOSTS_V2_URL))
-
-        with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunked(hosts, self.max_concurrency):
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                    raise SatelliteCancelException()
-
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                    raise SatellitePauseException()
-                host_params = self.prepare_host(chunk)
-                results = pool.starmap(request_host_details, host_params)
-                process_results(self, results, 2)
-        utils.validate_task_stats(self.inspect_scan_task)
+    def _requests_hosts_unique(self):
+        """Get an iterable of all unique hosts."""
+        return unique_everseen(request_results(self.inspect_scan_task, self.HOSTS_URL))
