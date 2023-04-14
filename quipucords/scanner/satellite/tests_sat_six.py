@@ -33,23 +33,7 @@ from scanner.test_util import create_scan_job
 fake = Faker()
 
 # pylint: disable=too-many-lines
-
-
-# pylint: disable=unused-argument, too-many-arguments,
-def mock_sat_exception(
-    param1,
-    param2,
-    param3,
-    param4,
-    param5,
-    param6=None,
-    param7=None,
-    param8=None,
-    param9=None,
-    param10=None,
-):
-    """Mock method to throw satellite error."""
-    raise SatelliteException()
+# pylint: disable=unused-argument
 
 
 # pylint: disable=too-many-instance-attributes

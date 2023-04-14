@@ -29,11 +29,6 @@ def mock_sat_auth_exception(param1):  # pylint: disable=unused-argument
     raise SatelliteAuthException()
 
 
-def mock_sat_exception(param1):  # pylint: disable=unused-argument
-    """Mock method to throw satellite error."""
-    raise SatelliteException()
-
-
 def mock_timeout_error(param1):  # pylint: disable=unused-argument
     """Mock method to throw timeout error."""
     raise TimeoutError()
@@ -166,7 +161,7 @@ class InspectTaskRunnerTest(TestCase):
         task = InspectTaskRunner(scan_job, inspect_task)
 
         with patch(
-            "scanner.satellite.runner.utils.status", side_effect=mock_sat_exception
+            "scanner.satellite.runner.utils.status", side_effect=SatelliteException()
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
