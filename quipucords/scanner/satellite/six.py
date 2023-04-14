@@ -413,8 +413,65 @@ def process_results(self, results, api_version):
             )
 
 
-class SatelliteSixV1(SatelliteInterface):
+class SatelliteSix(SatelliteInterface):
+    """Interact with Satellite 6."""
+
+    HOSTS_FIELDS_URL: str
+    HOSTS_SUBS_URL: str
+
+    def prepare_host(self, chunk):
+        """Prepare each host with necessary information.
+
+        :param chunk: A list of hosts
+        :returns A list of tuples that contain information about
+            each host.
+        """
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                "host_details cannot be called for a connection scan"
+            )
+        defined_host, port, user, password = utils.get_connect_data(
+            self.inspect_scan_task
+        )
+        ssl_cert_verify = True
+        source_options = self.inspect_scan_task.source.options
+        if source_options:
+            ssl_cert_verify = source_options.ssl_cert_verify
+        request_options = {
+            "host": defined_host,
+            "port": port,
+            "user": user,
+            "password": password,
+            "ssl_cert_verify": ssl_cert_verify,
+        }
+        logging_options = {
+            "job_id": self.scan_job.id,
+            "task_sequence_number": self.inspect_scan_task.sequence_number,
+            "scan_type": self.inspect_scan_task.scan_type,
+            "source_type": self.inspect_scan_task.source.source_type,
+            "source_name": self.inspect_scan_task.source.name,
+        }
+        host_params = [
+            (
+                self.inspect_scan_task,
+                logging_options,
+                host.get(ID),
+                host.get(NAME),
+                self.HOSTS_FIELDS_URL,
+                self.HOSTS_SUBS_URL,
+                request_options,
+            )
+            for host in chunk
+        ]
+
+        return host_params
+
+
+class SatelliteSixV1(SatelliteSix):
     """Interact with Satellite 6, API version 1."""
+
+    HOSTS_FIELDS_URL: str = HOSTS_FIELDS_V1_URL
+    HOSTS_SUBS_URL: str = HOSTS_SUBS_V1_URL
 
     def __init__(self, scan_job, scan_task):
         """Set context for Satellite Interface.
@@ -482,53 +539,6 @@ class SatelliteSixV1(SatelliteInterface):
 
         return hosts
 
-    def prepare_host(self, chunk):
-        """Prepare each host with necessary information.
-
-        :param chunk: A list of hosts
-        :returns A list of tuples that contain information about
-            each host.
-        """
-        if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "host_details cannot be called for a connection scan"
-            )
-        defined_host, port, user, password = utils.get_connect_data(
-            self.inspect_scan_task
-        )
-        ssl_cert_verify = True
-        source_options = self.inspect_scan_task.source.options
-        if source_options:
-            ssl_cert_verify = source_options.ssl_cert_verify
-        request_options = {
-            "host": defined_host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "ssl_cert_verify": ssl_cert_verify,
-        }
-        logging_options = {
-            "job_id": self.scan_job.id,
-            "task_sequence_number": self.inspect_scan_task.sequence_number,
-            "scan_type": self.inspect_scan_task.scan_type,
-            "source_type": self.inspect_scan_task.source.source_type,
-            "source_name": self.inspect_scan_task.source.name,
-        }
-        host_params = [
-            (
-                self.inspect_scan_task,
-                logging_options,
-                host.get(ID),
-                host.get(NAME),
-                HOSTS_FIELDS_V1_URL,
-                HOSTS_SUBS_V1_URL,
-                request_options,
-            )
-            for host in chunk
-        ]
-
-        return host_params
-
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(self.connect_scan_task.connection_result.systems.all())
@@ -562,8 +572,11 @@ class SatelliteSixV1(SatelliteInterface):
         utils.validate_task_stats(self.inspect_scan_task)
 
 
-class SatelliteSixV2(SatelliteInterface):
+class SatelliteSixV2(SatelliteSix):
     """Interact with Satellite 6, API version 2."""
+
+    HOSTS_FIELDS_URL: str = HOSTS_FIELDS_V2_URL
+    HOSTS_SUBS_URL: str = HOSTS_SUBS_V2_URL
 
     def host_count(self):
         """Obtain the count of managed hosts."""
@@ -597,53 +610,6 @@ class SatelliteSixV2(SatelliteInterface):
                 self.record_conn_result(unique_name, credential)
 
         return hosts
-
-    def prepare_host(self, chunk):
-        """Prepare each host with necessary information.
-
-        :param chunk: A list of hosts
-        :returns A list of tuples that contain information about
-            each host.
-        """
-        if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "host_details cannot be called for a connection scan"
-            )
-        defined_host, port, user, password = utils.get_connect_data(
-            self.inspect_scan_task
-        )
-        ssl_cert_verify = True
-        source_options = self.inspect_scan_task.source.options
-        if source_options:
-            ssl_cert_verify = source_options.ssl_cert_verify
-        request_options = {
-            "host": defined_host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "ssl_cert_verify": ssl_cert_verify,
-        }
-        logging_options = {
-            "job_id": self.scan_job.id,
-            "task_sequence_number": self.inspect_scan_task.sequence_number,
-            "scan_type": self.inspect_scan_task.scan_type,
-            "source_type": self.inspect_scan_task.source.source_type,
-            "source_name": self.inspect_scan_task.source.name,
-        }
-        host_params = [
-            (
-                self.inspect_scan_task,
-                logging_options,
-                host.get(ID),
-                host.get(NAME),
-                HOSTS_FIELDS_V2_URL,
-                HOSTS_SUBS_V2_URL,
-                request_options,
-            )
-            for host in chunk
-        ]
-
-        return host_params
 
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
