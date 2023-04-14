@@ -11,6 +11,7 @@ from api.models import (
     SystemInspectionResult,
 )
 from scanner.exceptions import ScanCancelException, ScanPauseException
+from scanner.satellite import utils
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +102,35 @@ class SatelliteInterface:
             self.inspect_scan_task.increment_stats(name, increment_sys_unreachable=True)
         else:
             self.inspect_scan_task.increment_stats(name, increment_sys_failed=True)
+
+    def _prepare_host_request_options(self):
+        if self.inspect_scan_task is None:
+            raise SatelliteException(
+                "host_details cannot be called for a connection scan"
+            )
+        host, port, user, password = utils.get_connect_data(self.inspect_scan_task)
+
+        source_options = self.inspect_scan_task.source.options
+        ssl_cert_verify = source_options.ssl_cert_verify if source_options else True
+
+        request_options = {
+            "host": host,
+            "port": port,
+            "user": user,
+            "password": password,
+            "ssl_cert_verify": ssl_cert_verify,
+        }
+        return request_options
+
+    def _prepare_host_logging_options(self):
+
+        return {
+            "job_id": self.scan_job.id,
+            "task_sequence_number": self.inspect_scan_task.sequence_number,
+            "scan_type": self.inspect_scan_task.scan_type,
+            "source_type": self.inspect_scan_task.source.source_type,
+            "source_name": self.inspect_scan_task.source.name,
+        }
 
     def host_count(self):
         """Obtain the count of managed hosts."""
