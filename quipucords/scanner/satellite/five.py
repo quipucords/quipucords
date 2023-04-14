@@ -158,37 +158,14 @@ class SatelliteFive(SatelliteInterface):
         :returns A list of tuples that contain information about
             each host.
         """
-        if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "host_details cannot be called for a connection scan"
-            )
-        ssl_cert_verify = True
-        source_options = self.inspect_scan_task.source.options
-        if source_options:
-            ssl_cert_verify = source_options.ssl_cert_verify
-        host, port, user, password = utils.get_connect_data(self.inspect_scan_task)
-        logging_options = {
-            "job_id": self.scan_job.id,
-            "task_sequence_number": self.inspect_scan_task.sequence_number,
-            "scan_type": self.inspect_scan_task.scan_type,
-            "source_type": self.inspect_scan_task.source.source_type,
-            "source_name": self.inspect_scan_task.source.name,
-        }
-        request_options = {
-            "host": host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "ssl_cert_verify": ssl_cert_verify,
-        }
         host_params = [
             (
                 host.get(ID),
                 host.get(NAME),
                 str(host.get(LAST_CHECKIN, "")),
                 self.inspect_scan_task,
-                request_options,
-                logging_options,
+                self._prepare_host_request_options(),
+                self._prepare_host_logging_options(),
             )
             for host in chunk
         ]

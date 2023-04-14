@@ -428,40 +428,15 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
         :returns A list of tuples that contain information about
             each host.
         """
-        if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "host_details cannot be called for a connection scan"
-            )
-        defined_host, port, user, password = utils.get_connect_data(
-            self.inspect_scan_task
-        )
-        ssl_cert_verify = True
-        source_options = self.inspect_scan_task.source.options
-        if source_options:
-            ssl_cert_verify = source_options.ssl_cert_verify
-        request_options = {
-            "host": defined_host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "ssl_cert_verify": ssl_cert_verify,
-        }
-        logging_options = {
-            "job_id": self.scan_job.id,
-            "task_sequence_number": self.inspect_scan_task.sequence_number,
-            "scan_type": self.inspect_scan_task.scan_type,
-            "source_type": self.inspect_scan_task.source.source_type,
-            "source_name": self.inspect_scan_task.source.name,
-        }
         host_params = [
             (
                 self.inspect_scan_task,
-                logging_options,
+                self._prepare_host_logging_options(),
                 host.get(ID),
                 host.get(NAME),
                 self.HOSTS_FIELDS_URL,
                 self.HOSTS_SUBS_URL,
-                request_options,
+                self._prepare_host_request_options(),
             )
             for host in chunk
         ]
