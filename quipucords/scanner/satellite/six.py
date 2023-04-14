@@ -557,7 +557,6 @@ class SatelliteSixV1(SatelliteSix):
                 org_id=org_id,
                 query_params=params,
             )
-            # pylint: disable=no-member
             if response.status_code != requests.codes.ok:
                 raise SatelliteException(
                     f"Invalid response code {response.status_code} for url: {url}"
@@ -605,7 +604,6 @@ class SatelliteSixV2(SatelliteSix):
         response, url = utils.execute_request(
             self.connect_scan_task, url=HOSTS_V2_URL, query_params=params
         )
-        # pylint: disable=no-member
         if response.status_code != requests.codes.ok:
             raise SatelliteException(
                 f"Invalid response code {response.status_code} for url: {url}"
