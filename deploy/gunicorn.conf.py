@@ -2,8 +2,14 @@
 
 import os
 
+import environ
+
+env = environ.Env()
+
+QPC_SERVER_PORT = env.int("QPC_SERVER_PORT", 443)
+
 # pylint: disable=invalid-name
-bind = "0.0.0.0:443"
+bind = f"0.0.0.0:{QPC_SERVER_PORT}"
 backlog = 2048
 workers = 1
 worker_class = "sync"
