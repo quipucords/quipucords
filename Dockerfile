@@ -22,6 +22,7 @@ RUN dnf install \
         jq \
         make \
         openssh-clients \
+        procps-ng \
         python39 \
         sshpass \
         tar \
