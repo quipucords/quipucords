@@ -108,6 +108,19 @@ class CredentialSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE))
         return cred_type
 
+    def validate(self, attrs):
+        """Validate if fields received are appropriate for each credential."""
+        errors = {}
+        if hasattr(self, "initial_data"):
+            unknown_keys = set(self.initial_data.keys()) - set(self.fields.keys())
+            for key in unknown_keys:
+                errors[key] = (
+                    messages.FIELD_NOT_ALLOWED_FOR_DATA_SOURCE % attrs["cred_type"]
+                )
+        if errors:
+            raise ValidationError(errors)
+        return attrs
+
     def to_representation(self, instance):
         """Overload DRF representation method to mask encrypted fields."""
         _data = super().to_representation(instance)
