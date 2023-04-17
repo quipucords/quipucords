@@ -114,9 +114,10 @@ class CredentialSerializer(NotEmptySerializer):
         if hasattr(self, "initial_data"):
             unknown_keys = set(self.initial_data.keys()) - set(self.fields.keys())
             for key in unknown_keys:
-                errors[key] = (
-                    messages.FIELD_NOT_ALLOWED_FOR_DATA_SOURCE % attrs["cred_type"]
-                )
+                if self.initial_data.get(key) is not None:
+                    errors[key] = (
+                        messages.FIELD_NOT_ALLOWED_FOR_DATA_SOURCE % attrs["cred_type"]
+                    )
         if errors:
             raise ValidationError(errors)
         return attrs
