@@ -105,11 +105,11 @@ def test_openshift_cred_correct_fields():
         ),
     ),
 )
-def test_improper_fields(input_data, improper_fields):
-    """Test if serializer is invalid when passing improper fields."""
+def test_openshift_cred_unallowed_fields(input_data, improper_fields):
+    """Test if serializer is invalid when passing unallowed fields."""
     serializer = CredentialSerializer(data=input_data)
-    assert serializer.is_valid()
-    assert all(serializer.data.get(field) is None for field in improper_fields)
+    assert not serializer.is_valid()
+    assert improper_fields == set(serializer.errors.keys())
 
 
 @pytest.mark.django_db
