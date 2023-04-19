@@ -127,10 +127,11 @@ class SourceSerializer(NotEmptySerializer):
         if invalid_options:
             error = {
                 "options": [
-                    _(message).format(
-                        source_type=source_type,
-                        options=", ".join(invalid_options),
-                    )
+                    _(message)
+                    % {
+                        "source_type": source_type,
+                        "options": ", ".join(invalid_options),
+                    }
                 ]
             }
             raise ValidationError(error)
@@ -569,11 +570,10 @@ class SourceSerializer(NotEmptySerializer):
         else:
             default_port = 443
         self._set_default_port(attrs, default_port)
-        if credentials:
-            self._validate_number_hosts_and_credentials(
-                hosts_list,
-                source_type,
-                credentials,
-                exclude_hosts_list,
-            )
+        self._validate_number_hosts_and_credentials(
+            hosts_list,
+            source_type,
+            credentials,
+            exclude_hosts_list,
+        )
         return attrs
