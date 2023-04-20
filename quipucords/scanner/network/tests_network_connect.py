@@ -5,11 +5,11 @@ from multiprocessing import Value
 from unittest.mock import Mock, patch
 
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.forms import model_to_dict
 from django.test import TestCase
 
 from api.connresult.model import SystemConnectionResult
 from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source, SourceOptions
-from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
 from api.serializers import SourceSerializer
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
@@ -123,8 +123,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
+        cred = model_to_dict(self.cred)
         vars_dict = _construct_vars(22, cred)
         expected = {
             "ansible_become_pass": "become",
@@ -168,8 +167,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         hosts = source["hosts"]
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
+        cred = model_to_dict(self.cred)
         _, inventory_dict = construct_inventory(
             hosts=hosts,
             credential=cred,
@@ -348,8 +346,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
         source = serializer.data
         hosts = source["hosts"]
         connection_port = source["port"]
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
+        cred = model_to_dict(self.cred)
         _, inventory_dict = construct_inventory(
             hosts=hosts,
             credential=cred,

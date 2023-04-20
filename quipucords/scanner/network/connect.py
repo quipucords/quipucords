@@ -8,6 +8,7 @@ import pexpect
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.conf import settings
 from django.db import transaction
+from django.forms import model_to_dict
 
 import log_messages
 from api.models import (
@@ -17,7 +18,6 @@ from api.models import (
     ScanTask,
     SystemConnectionResult,
 )
-from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
 from api.serializers import SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
 from scanner.network.connect_callback import ConnectResultCallback
@@ -236,7 +236,7 @@ def _connect(  # pylint: disable=too-many-arguments
             list of host that failed connection
     """
     # pylint: disable=too-many-locals, disable=too-many-statements, too-many-branches
-    cred_data = CredentialSerializer(credential).data
+    cred_data = model_to_dict(credential)
     group_names, inventory = construct_inventory(
         hosts=hosts,
         credential=cred_data,

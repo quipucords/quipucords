@@ -6,6 +6,7 @@ from unittest.mock import ANY, Mock, patch
 import pytest
 import requests_mock
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 
@@ -19,7 +20,6 @@ from api.models import (
     SourceOptions,
     SystemConnectionResult,
 )
-from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
 from api.serializers import SourceSerializer
 from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
@@ -47,8 +47,7 @@ class NetworkInspectScannerTest(TestCase):
         )
         self.cred.save()
 
-        hc_serializer = CredentialSerializer(self.cred)
-        self.cred_data = hc_serializer.data
+        self.cred_data = model_to_dict(self.cred)
 
         # setup source for scan
         self.source = Source(name="source1", port=22, hosts=["1.2.3.4"])
@@ -123,14 +122,12 @@ class NetworkInspectScannerTest(TestCase):
         serializer = SourceSerializer(self.source)
         source = serializer.data
         connection_port = source["port"]
-        hc_serializer = CredentialSerializer(self.cred)
-        cred = hc_serializer.data
         inventory_dict = construct_inventory(
             [
-                ("1.2.3.1", cred),
-                ("1.2.3.2", cred),
-                ("1.2.3.3", cred),
-                ("1.2.3.4", cred),
+                ("1.2.3.1", self.cred_data),
+                ("1.2.3.2", self.cred_data),
+                ("1.2.3.3", self.cred_data),
+                ("1.2.3.4", self.cred_data),
             ],
             connection_port,
             1,
