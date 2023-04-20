@@ -5,6 +5,7 @@ import os.path
 import ansible_runner
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.conf import settings
+from django.forms import model_to_dict
 
 import log_messages
 from api.models import (
@@ -14,7 +15,6 @@ from api.models import (
     SystemConnectionResult,
     SystemInspectionResult,
 )
-from api.serializers import ReadOnlyCredentialSerializer as CredentialSerializer
 from api.vault import write_to_yaml
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException
@@ -289,8 +289,8 @@ class InspectTaskRunner(ScanTaskRunner):
         for result in self.connect_scan_task.connection_result.systems.all():
             if result.status == SystemConnectionResult.SUCCESS:
                 host_cred = result.credential
-                serializer = CredentialSerializer(host_cred)
-                connected.append((result.name, serializer.data))
+                cred_data = model_to_dict(host_cred)
+                connected.append((result.name, cred_data))
 
         for result in self.scan_task.inspection_result.systems.all():
             if result.status == SystemInspectionResult.SUCCESS:
