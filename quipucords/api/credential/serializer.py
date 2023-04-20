@@ -65,9 +65,13 @@ class CredentialSerializer(NotEmptySerializer):
         cls, instance=None, data=empty, **kwargs
     ):  # pylint: disable=arguments-differ
         """Overloaded __new__ to return the appropriate serializer."""
+        if cls != CredentialSerializer:
+            # shortcut for subclasses - if we already know the subclass, no need to
+            # go through the subclassing logic below.
+            return super().__new__(cls, instance=instance, data=data, **kwargs)
         cred_type = cls._get_cred_type(instance, data)
-        klass = cls._get_serializer_class(cred_type)
-        return super().__new__(klass, instance=instance, data=data, **kwargs)
+        subclass = cls._get_serializer_class(cred_type)
+        return super().__new__(subclass, instance=instance, data=data, **kwargs)
 
     @classmethod
     def _get_serializer_class(cls, cred_type):
