@@ -96,9 +96,7 @@ class SyncScanJobRunner:
 
     def run(self):
         """Execute runner."""
-        # pylint: disable=inconsistent-return-statements
-        # pylint: disable=no-else-return
-        # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-statements
         # pylint: disable=too-many-return-statements,too-many-branches
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
@@ -180,7 +178,7 @@ class SyncScanJobRunner:
                 raise error
             if task_status in [ScanTask.CANCELED, ScanTask.PAUSED]:
                 return task_status
-            elif task_status != ScanTask.COMPLETED:
+            if task_status != ScanTask.COMPLETED:
                 # Task did not complete successfully
                 failed_tasks.append(fingerprint_task_runner.scan_task)
                 fingerprint_task_runner.scan_task.log_message(
@@ -217,7 +215,6 @@ class SyncScanJobRunner:
 
         :param runner: ScanTaskRunner
         """
-        # pylint: disable=no-else-return
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
         runner.scan_task.start()
