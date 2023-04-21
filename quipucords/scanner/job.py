@@ -25,24 +25,14 @@ def create_task_runner(scan_job: ScanJob, scan_task: ScanTask):
     """Create ScanTaskRunner using scan_type and source_type."""
     scan_type = scan_task.scan_type
     if scan_type == ScanTask.SCAN_TYPE_CONNECT:
-        return create_connect_task_runner(scan_job, scan_task)
+        scanner = get_scanner(scan_task.source.source_type)
+        return scanner.ConnectTaskRunner(scan_job, scan_task)
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        return create_inspect_task_runner(scan_job, scan_task)
+        scanner = get_scanner(scan_task.source.source_type)
+        return scanner.InspectTaskRunner(scan_job, scan_task)
     if scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
         return FingerprintTaskRunner(scan_job, scan_task)
     raise NotImplementedError
-
-
-def create_connect_task_runner(scan_job: ScanJob, scan_task: ScanTask):
-    """Create connection TaskRunner using source_type."""
-    scanner = get_scanner(scan_task.source.source_type)
-    return scanner.ConnectTaskRunner(scan_job, scan_task)
-
-
-def create_inspect_task_runner(scan_job: ScanJob, scan_task: ScanTask):
-    """Create inspection TaskRunner using source_type."""
-    scanner = get_scanner(scan_task.source.source_type)
-    return scanner.InspectTaskRunner(scan_job, scan_task)
 
 
 class ScanJobRunner:
