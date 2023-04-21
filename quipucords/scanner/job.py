@@ -17,6 +17,7 @@ from api.details_report.util import (
 from api.models import ScanJob, ScanTask
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
+from scanner.runner import ScanTaskRunner
 
 logger = logging.getLogger(__name__)
 
@@ -111,12 +112,13 @@ class SyncScanJobRunner:
             return ScanTask.FAILED
 
         # Load tasks that have not been run or are in progress
-        task_runners = []
-
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by("sequence_number")
-        fingerprint_task_runner = None
+
+        fingerprint_task_runner: FingerprintTaskRunner | None = None
+        task_runners: list[ScanTaskRunner] = []
+
         for scan_task in incomplete_scan_tasks:
             runner_class = get_task_runner_class(scan_task)
             runner = runner_class(self.scan_job, scan_task)
@@ -210,7 +212,7 @@ class SyncScanJobRunner:
         self.scan_job.complete()
         return ScanTask.COMPLETED
 
-    def _run_task(self, runner):
+    def _run_task(self, runner: ScanTaskRunner):
         """Run a single scan task.
 
         :param runner: ScanTaskRunner
