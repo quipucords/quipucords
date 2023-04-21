@@ -116,16 +116,6 @@ class SyncScanJobRunner:
         for scan_task in incomplete_scan_tasks:
             runner_class = get_task_runner_class(scan_task)
             runner = runner_class(self.scan_job, scan_task)
-            if not runner:
-                error_message = (
-                    "Scan task has not recognized"
-                    f" type/source combination: {scan_task}"
-                )
-
-                scan_task.fail(error_message)
-                self.scan_job.fail(error_message)
-                return ScanTask.FAILED
-
             if isinstance(runner, FingerprintTaskRunner):
                 fingerprint_task_runner = runner
             else:
