@@ -84,7 +84,7 @@ class ScanTaskRunner(metaclass=ABCMeta):
     def check_for_interrupt(self, manager_interrupt: Value):
         """Check if task runner should stop.
 
-        This method should preferably be called after long running commands.
+        This method should preferably be called after long-running commands.
 
         :param manager_interrupt: Signal to indicate job is canceled
         """
@@ -111,7 +111,7 @@ class ScanTaskRunner(metaclass=ABCMeta):
         Actual logic for each implementation of ScanTaskRunner.
 
         :param manager_interrupt: Shared memory Value which can inform
-        a task of the need to shutdown immediately
+        a task of the need to shut down immediately
 
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status

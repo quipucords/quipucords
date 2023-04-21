@@ -102,8 +102,7 @@ class SyncScanJobRunner:
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
 
-        # Job is not running so start
-        self.scan_job.start()
+        self.scan_job.start()  # Only updates the ScanJob model in the database.
         if self.scan_job.status != ScanTask.RUNNING:
             error_message = (
                 "Job could not transition to running state.  See error logs."
@@ -111,7 +110,7 @@ class SyncScanJobRunner:
             self.scan_job.fail(error_message)
             return ScanTask.FAILED
 
-        # Load tasks that have not been run or are in progress
+        # Find all tasks that need to run for this job.
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by("sequence_number")
@@ -133,8 +132,6 @@ class SyncScanJobRunner:
 
         failed_tasks = []
         for runner in task_runners:
-            # Mark runner as running
-
             task_status = self._run_task(runner)
 
             if task_status == ScanTask.FAILED:
@@ -219,8 +216,8 @@ class SyncScanJobRunner:
         """
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
-        runner.scan_task.start()
-        # run runner
+
+        runner.scan_task.start()  # Only updates the ScanTask model in the database.
         try:
             status_message, task_status = runner.run(self.manager_interrupt)
         except Exception as error:
