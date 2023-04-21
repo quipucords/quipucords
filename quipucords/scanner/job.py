@@ -21,17 +21,18 @@ from scanner.get_scanner import get_scanner
 logger = logging.getLogger(__name__)
 
 
-def create_task_runner(scan_job: ScanJob, scan_task: ScanTask):
-    """Create ScanTaskRunner using scan_type and source_type."""
+def get_task_runner_class(scan_task: ScanTask):
+    """Get the appropriate ScanTaskRunner class for the ScanTask."""
     scan_type = scan_task.scan_type
+    source_type = scan_task.source.source_type if scan_task.source else None
     if scan_type == ScanTask.SCAN_TYPE_CONNECT:
-        scanner = get_scanner(scan_task.source.source_type)
-        return scanner.ConnectTaskRunner(scan_job, scan_task)
+        scanner = get_scanner(source_type)
+        return scanner.ConnectTaskRunner
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        scanner = get_scanner(scan_task.source.source_type)
-        return scanner.InspectTaskRunner(scan_job, scan_task)
+        scanner = get_scanner(source_type)
+        return scanner.InspectTaskRunner
     if scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-        return FingerprintTaskRunner(scan_job, scan_task)
+        return FingerprintTaskRunner
     raise NotImplementedError
 
 
@@ -113,7 +114,8 @@ class SyncScanJobRunner:
         ).order_by("sequence_number")
         fingerprint_task_runner = None
         for scan_task in incomplete_scan_tasks:
-            runner = create_task_runner(self.scan_job, scan_task)
+            runner_class = get_task_runner_class(scan_task)
+            runner = runner_class(self.scan_job, scan_task)
             if not runner:
                 error_message = (
                     "Scan task has not recognized"
