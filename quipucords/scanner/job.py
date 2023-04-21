@@ -95,22 +95,8 @@ class SyncScanJobRunner:
 
         return None
 
-    def run(self):
-        """Execute runner."""
-        # pylint: disable=too-many-statements
-        # pylint: disable=too-many-return-statements,too-many-branches
-        if interrupt_status := self.check_manager_interrupt():
-            return interrupt_status
-
-        self.scan_job.start()  # Only updates the ScanJob model in the database.
-        if self.scan_job.status != ScanTask.RUNNING:
-            error_message = (
-                "Job could not transition to running state.  See error logs."
-            )
-            self.scan_job.fail(error_message)
-            return ScanTask.FAILED
-
-        # Find all tasks that need to run for this job.
+    def _get_runners(self) -> tuple[list[ScanTaskRunner], FingerprintTaskRunner | None]:
+        """Get ScanTaskRunners for all the tasks that need to run for this job."""
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
         ).order_by("sequence_number")
@@ -129,6 +115,23 @@ class SyncScanJobRunner:
         self.scan_job.log_message(
             f"Job has {len(incomplete_scan_tasks):d} remaining tasks"
         )
+        return task_runners, fingerprint_task_runner
+
+    def run(self):
+        """Execute runner."""
+        # pylint: disable=too-many-return-statements,too-many-branches
+        if interrupt_status := self.check_manager_interrupt():
+            return interrupt_status
+
+        self.scan_job.start()  # Only updates the ScanJob model in the database.
+        if self.scan_job.status != ScanTask.RUNNING:
+            error_message = (
+                "Job could not transition to running state.  See error logs."
+            )
+            self.scan_job.fail(error_message)
+            return ScanTask.FAILED
+
+        task_runners, fingerprint_task_runner = self._get_runners()
 
         failed_tasks = []
         for runner in task_runners:
