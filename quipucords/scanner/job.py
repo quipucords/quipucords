@@ -80,13 +80,8 @@ class SyncScanJobRunner:
         # "start" implemented in its base class.
         return self.run()
 
-    def run(self):
-        """Execute runner."""
-        # pylint: disable=inconsistent-return-statements
-        # pylint: disable=no-else-return
-        # pylint: disable=too-many-locals,too-many-statements
-        # pylint: disable=too-many-return-statements,too-many-branches
-        # check to see if manager killed job
+    def check_manager_interrupt(self) -> str | None:
+        """Check if this job is being interrupted, and handle it if necessary."""
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             self.scan_job.cancel()
@@ -96,6 +91,17 @@ class SyncScanJobRunner:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             self.scan_job.pause()
             return ScanTask.PAUSED
+
+        return None
+
+    def run(self):
+        """Execute runner."""
+        # pylint: disable=inconsistent-return-statements
+        # pylint: disable=no-else-return
+        # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-return-statements,too-many-branches
+        if interrupt_status := self.check_manager_interrupt():
+            return interrupt_status
 
         # Job is not running so start
         self.scan_job.start()
@@ -212,13 +218,8 @@ class SyncScanJobRunner:
         :param runner: ScanTaskRunner
         """
         # pylint: disable=no-else-return
-        if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return ScanTask.CANCELED
-
-        if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            return ScanTask.PAUSED
+        if interrupt_status := self.check_manager_interrupt():
+            return interrupt_status
         runner.scan_task.start()
         # run runner
         try:
