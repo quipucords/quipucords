@@ -18,7 +18,7 @@ flit-core==3.8.0
     # via -r requirements-build.in
 hatchling==1.14.0
     # via -r requirements-build.in
-packaging==23.0
+packaging==23.1
     # via
     #   -r requirements-build.in
     #   hatchling
@@ -43,7 +43,7 @@ tomli==2.0.1
     # via
     #   hatchling
     #   setuptools-scm
-trove-classifiers==2023.3.9
+trove-classifiers==2023.4.22
     # via hatchling
 typing-extensions==4.5.0
     # via
