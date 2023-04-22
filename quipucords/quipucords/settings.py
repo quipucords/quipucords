@@ -71,12 +71,22 @@ if PRODUCTION:
     SESSION_COOKIE_SECURE = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-DJANGO_SECRET_PATH = Path(env.str("DJANGO_SECRET_PATH", str(BASE_DIR / "secret.txt")))
-if not DJANGO_SECRET_PATH.exists():
-    SECRET_KEY = create_random_key()
-    DJANGO_SECRET_PATH.write_text(SECRET_KEY, encoding="utf-8")
+# We need to support DJANGO_SECRET_KEY from the Environment.
+# This is necessary when the application keys are coming from
+# OpenShift project secrets through the environment.
+DJANGO_SECRET_KEY = env("DJANGO_SECRET_KEY", default=None)
+
+if DJANGO_SECRET_KEY:
+    SECRET_KEY = DJANGO_SECRET_KEY
 else:
-    SECRET_KEY = DJANGO_SECRET_PATH.read_text(encoding="utf-8").strip()
+    DJANGO_SECRET_PATH = Path(
+        env.str("DJANGO_SECRET_PATH", str(BASE_DIR / "secret.txt"))
+    )
+    if not DJANGO_SECRET_PATH.exists():
+        SECRET_KEY = create_random_key()
+        DJANGO_SECRET_PATH.write_text(SECRET_KEY, encoding="utf-8")
+    else:
+        SECRET_KEY = DJANGO_SECRET_PATH.read_text(encoding="utf-8").strip()
 
 # SECURITY WARNING: Running with DEBUG=True is a *BAD IDEA*, but this is unfortunately
 # necessary because in some cases we still need to serve static files through Django.
