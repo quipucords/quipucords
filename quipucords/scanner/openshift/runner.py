@@ -19,20 +19,27 @@ class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         port = scan_task.source.port
         ssl_enabled, ssl_verify = cls._ssl_options(scan_task)
         credential = scan_task.source.single_credential
-
-        return {
+        conn_info = {
             "host": host,
             "port": port,
             "protocol": "https" if ssl_enabled else "http",
-            "auth_token": decrypt_data_as_unicode(credential.auth_token),
             "ssl_verify": ssl_verify,
         }
+        if credential.auth_token:
+            conn_info.update(auth_token=decrypt_data_as_unicode(credential.auth_token))
+        else:
+            conn_info.update(
+                username=credential.username,
+                password=decrypt_data_as_unicode(credential.password),
+            )
+
+        return conn_info
 
     @classmethod
     def get_ocp_client(cls, scan_task: ScanTask) -> OpenShiftApi:
         """Get an OpenShiftApi properly initialized with source/credential info."""
         ocp_kwargs = cls._get_connection_info(scan_task)
-        return OpenShiftApi.from_auth_token(**ocp_kwargs)
+        return OpenShiftApi.with_config_info(**ocp_kwargs)
 
     @classmethod
     def _ssl_options(cls, scan_task: ScanTask):

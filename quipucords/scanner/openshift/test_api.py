@@ -73,7 +73,7 @@ def ocp_client(request, discoverer_cache):
     # pylint: disable=protected-access
     ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
     auth_token = getattr(request, "param", ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value)
-    client = OpenShiftApi.from_auth_token(
+    client = OpenShiftApi.with_config_info(
         auth_token=auth_token,
         host=ocp_uri.host,
         port=ocp_uri.port,
@@ -156,11 +156,11 @@ def test_retrieve_node(ocp_client: OpenShiftApi):
         assert node.name
 
 
-def test_from_auth_token(mocker):
-    """Test factory method from_auth_token."""
-    patched_kube_config = mocker.patch("scanner.openshift.api.Configuration")
+def test_with_config_info_using_auth_token(mocker):
+    """Test factory method with_config_info with auth_token."""
+    patched_kube_config = mocker.patch("scanner.openshift.api.KubeConfig")
     patched_api_client = mocker.patch("scanner.openshift.api.ApiClient")
-    client = OpenShiftApi.from_auth_token(
+    client = OpenShiftApi.with_config_info(
         host="HOST", protocol="PROT", port="PORT", auth_token="TOKEN"
     )
     assert isinstance(client, OpenShiftApi)

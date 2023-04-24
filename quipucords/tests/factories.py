@@ -200,7 +200,10 @@ class CredentialFactory(DjangoModelFactory):
     @factory.lazy_attribute
     def auth_token(self):
         """Set auth_token lazily."""
-        if self.cred_type == DataSources.OPENSHIFT:
+        has_user_or_pass = bool(
+            getattr(self, "username", None) or getattr(self, "password", None)
+        )
+        if self.cred_type == DataSources.OPENSHIFT and not has_user_or_pass:
             return Faker().password()
         return None
 
