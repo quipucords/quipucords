@@ -15,6 +15,12 @@ HC_PWD_OR_KEYFILE = "A host credential must have either a password or an ssh_key
 HC_NOT_BOTH = (
     "A host credential must have either a password or an ssh_keyfile, not both."
 )
+TOKEN_OR_USER_PASS = (
+    "A host credential must have either a username+password or auth_token."
+)
+TOKEN_OR_USER_PASS_NOT_BOTH = (
+    "A host credential must have either a username+password or auth_token, not both."
+)
 HC_KEY_INVALID = "ssh_keyfile, %s, is not a valid file on the system."
 HC_NO_KEY_W_PASS = (
     "A host credential must have an ssh_keyfile provided if"

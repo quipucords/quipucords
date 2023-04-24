@@ -8,7 +8,7 @@ from rest_framework.serializers import ListSerializer
 
 from api import messages
 from api.credential.serializer import (
-    AuthTokenSerializer,
+    AuthTokenOrUserPassSerializer,
     CredentialSerializer,
     NetworkCredentialSerializer,
     UsernamePasswordSerializer,
@@ -60,9 +60,13 @@ def test_openshift_cred_correct_fields():
         "cred_type": DataSources.OPENSHIFT,
         "auth_token": "test_auth_token",
     }
+    expected_validated_data = data.copy()
+    # expected validated contains username/password to enforce only auth_token is set
+    # on updates
+    expected_validated_data.update(username=None, password=None)
     serializer = CredentialSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
-    assert serializer.validated_data == data
+    assert serializer.validated_data == expected_validated_data
 
 
 @pytest.mark.django_db
@@ -74,10 +78,9 @@ def test_openshift_cred_correct_fields():
                 "name": "cred",
                 "cred_type": DataSources.OPENSHIFT,
                 "auth_token": "test_auth_token",
-                "password": "test_password",
                 "become_password": "test_become_password",
             },
-            {"password", "become_password"},
+            {"become_password"},
             id="1",
         ),
         pytest.param(
@@ -134,7 +137,7 @@ def test_openshift_cred_absent_auth_token():
     }
     serializer = CredentialSerializer(data=data)
     assert not serializer.is_valid(), serializer.errors
-    assert serializer.errors["auth_token"]
+    assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
 
 
 @pytest.mark.django_db
@@ -154,7 +157,7 @@ def test_openshift_cred_update(ocp_credential):
 @pytest.mark.django_db
 def test_openshift_cred_update_no_token(ocp_credential):
     """Test if serializer updates fields correctly."""
-    original_auth_token = ocp_credential.auth_token
+    original_auth_token = decrypt_data_as_unicode(ocp_credential.auth_token)
     updated_data = {
         "name": "cred2",
     }
@@ -166,7 +169,7 @@ def test_openshift_cred_update_no_token(ocp_credential):
     assert serializer.is_valid()
     assert ocp_credential.name == "cred2"
     assert ocp_credential.cred_type == DataSources.OPENSHIFT
-    assert ocp_credential.auth_token == original_auth_token
+    assert decrypt_data_as_unicode(ocp_credential.auth_token) == original_auth_token
 
 
 @pytest.mark.django_db
@@ -521,7 +524,7 @@ class TestNetworkCredential:
     "cred_type, expected_class",
     (
         (DataSources.NETWORK, NetworkCredentialSerializer),
-        (DataSources.OPENSHIFT, AuthTokenSerializer),
+        (DataSources.OPENSHIFT, AuthTokenOrUserPassSerializer),
         (DataSources.SATELLITE, UsernamePasswordSerializer),
         (DataSources.VCENTER, UsernamePasswordSerializer),
         (DataSources.ANSIBLE, UsernamePasswordSerializer),
@@ -588,3 +591,72 @@ class TestBaseCredentialSerializer:
             }
             expected_data.append(cred_dict)
         assert serializer.data == expected_data
+
+
+class TestOCPSerializer:
+    """Test Serializers for OpenShift."""
+
+    @pytest.mark.django_db
+    def test_from_authtoken_to_userpass(self):
+        """Test updating a ocp auth token credential to username+password."""
+        credential = CredentialFactory(
+            cred_type=DataSources.OPENSHIFT,
+            auth_token="<TOKEN>",
+        )
+        serializer = CredentialSerializer(
+            instance=credential,
+            data={"username": "<USER>", "password": "<PASS>"},
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+
+        assert credential.auth_token is None
+        assert credential.username == "<USER>"
+        assert decrypt_data_as_unicode(credential.password) == "<PASS>"
+
+    @pytest.mark.django_db
+    def test_from_userpass_to_authtoken(self, faker):
+        """Test updating a ocp username+password credential to auth token."""
+        credential = CredentialFactory(
+            cred_type=DataSources.OPENSHIFT,
+            username=faker.user_name(),
+            password=faker.password(),
+        )
+        serializer = CredentialSerializer(
+            instance=credential,
+            data={"auth_token": "<TOKEN>"},
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors
+        serializer.save()
+
+        assert credential.username is None
+        assert credential.password is None
+        assert decrypt_data_as_unicode(credential.auth_token) == "<TOKEN>"
+
+    @pytest.mark.django_db
+    def test_no_auth(self, faker):
+        """Test error when no auth is provided."""
+        serializer = CredentialSerializer(
+            data={"cred_type": DataSources.OPENSHIFT, "name": faker.slug()}
+        )
+        assert not serializer.is_valid()
+        assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
+
+    @pytest.mark.django_db
+    def test_all_auth(self, faker):
+        """Test error when both auth methods are provided."""
+        serializer = CredentialSerializer(
+            data={
+                "cred_type": DataSources.OPENSHIFT,
+                "name": faker.slug(),
+                "auth_token": faker.md5(),
+                "username": faker.user_name(),
+                "password": faker.password(),
+            }
+        )
+        assert not serializer.is_valid()
+        assert serializer.errors["non_field_errors"] == [
+            messages.TOKEN_OR_USER_PASS_NOT_BOTH
+        ]

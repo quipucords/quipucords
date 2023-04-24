@@ -677,7 +677,7 @@ class CredentialTest(TestCase):
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data["auth_token"]
+        assert response.data["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
 
     def test_openshift_extra_unallowed_fields(self):
         """Ensure unallowed fields are not accepted when creating openshift cred."""
@@ -687,11 +687,10 @@ class CredentialTest(TestCase):
             "cred_type": DataSources.OPENSHIFT,
             "auth_token": "test_token",
             "become_password": "test_become_password",
-            "username": "test_username",
         }
         response = self.client.post(url, json.dumps(data), "application/json")
         assert response.status_code, status.HTTP_400_BAD_REQUEST
-        assert response.data["become_password"] and response.data["username"]
+        assert response.data["become_password"]
 
 
 # tuple of triples (input, expected output, pytest-param-id)
