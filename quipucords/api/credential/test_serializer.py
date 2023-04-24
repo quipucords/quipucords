@@ -524,6 +524,7 @@ class TestNetworkCredential:
         (DataSources.OPENSHIFT, AuthTokenSerializer),
         (DataSources.SATELLITE, UsernamePasswordSerializer),
         (DataSources.VCENTER, UsernamePasswordSerializer),
+        (DataSources.ANSIBLE, UsernamePasswordSerializer),
     ),
 )
 class TestSerializerPolymorphism:

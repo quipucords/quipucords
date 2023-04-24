@@ -83,6 +83,7 @@ class CredentialSerializer(NotEmptySerializer):
                 DataSources.OPENSHIFT: AuthTokenSerializer,
                 DataSources.VCENTER: UsernamePasswordSerializer,
                 DataSources.SATELLITE: UsernamePasswordSerializer,
+                DataSources.ANSIBLE: UsernamePasswordSerializer,
             },
         )
 
@@ -114,6 +115,10 @@ class CredentialSerializer(NotEmptySerializer):
 
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
+        if self.__class__ == CredentialSerializer:
+            # Vanilla CredentialSerializer is not supposed to perform validation and
+            # write data. This must be done only via specialized serializers
+            raise NotImplementedError
         errors = {}
         if hasattr(self, "initial_data"):
             unknown_keys = set(self.initial_data.keys()) - set(self.fields.keys())
