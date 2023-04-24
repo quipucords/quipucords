@@ -80,7 +80,7 @@ class CredentialSerializer(NotEmptySerializer):
             lambda: CredentialSerializer,
             {
                 DataSources.NETWORK: NetworkCredentialSerializer,
-                DataSources.OPENSHIFT: AuthTokenSerializer,
+                DataSources.OPENSHIFT: AuthTokenOrUserPassSerializer,
                 DataSources.VCENTER: UsernamePasswordSerializer,
                 DataSources.SATELLITE: UsernamePasswordSerializer,
                 DataSources.ANSIBLE: UsernamePasswordSerializer,
@@ -244,3 +244,80 @@ class NetworkCredentialSerializer(CredentialSerializer):
             data["ssh_keyfile"] = None
         elif ssh_keyfile:
             data["password"] = None
+
+
+class AuthTokenOrUserPassSerializer(CredentialSerializer):
+    """Serialize credentials that require username+password or auth token."""
+
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = [
+            "cred_type",
+            "id",
+            "name",
+            "password",
+            "username",
+            "auth_token",
+            "sources",
+        ]
+        extra_kwargs = {
+            "password": {**ENCRYPTED_FIELD_KWARGS},
+            "auth_token": {**ENCRYPTED_FIELD_KWARGS},
+        }
+
+    def validate(self, attrs: dict):
+        """Run validations that require more than one field."""
+        attrs = super().validate(attrs)
+        has_user_or_pass, has_auth_token = self._get_user_pass_or_auth_token(attrs)
+
+        if not has_auth_token and not has_user_or_pass:
+            raise ValidationError(_(messages.TOKEN_OR_USER_PASS))
+
+        if has_auth_token and has_user_or_pass:
+            raise ValidationError(_(messages.TOKEN_OR_USER_PASS_NOT_BOTH))
+        # defer the rest of the validation to specialized serializers
+        if has_auth_token:
+            none_fields = {"username": None, "password": None}
+            validator_class = AuthTokenSerializer
+        else:
+            none_fields = {"auth_token": None}
+            validator_class = UsernamePasswordSerializer
+        self._setup_default_data(attrs)
+        # force values to some fields to None to ensure non-sense combinations (like
+        # auth_token + username) can't happen
+        attrs.update(**none_fields)
+        validator = validator_class(self.instance, data=attrs, partial=False)
+        validator.is_valid(raise_exception=True)
+        data = validator.validated_data
+        # add none fields again since specialized validators will remove them
+        data.update(**none_fields)
+        return data
+
+    def _get_user_pass_or_auth_token(self, attrs):
+        """
+        Detect if input data has username/password and/or auth token.
+
+        Returns a tuple of booleans: has_user_or_pass and has_auth_token in this order.
+        """
+        has_user_or_pass = bool(attrs.get("password") or attrs.get("username"))
+        has_auth_token = bool(attrs.get("auth_token"))
+        # self.partial means PATCH, so it's OK to infer from instance
+        if self.partial and not has_auth_token and not has_user_or_pass:
+            has_user_or_pass = bool(
+                getattr(self.instance, "password") or getattr(self.instance, "username")
+            )
+            has_auth_token = bool(getattr(self.instance, "auth_token"))
+        return has_user_or_pass, has_auth_token
+
+    def _setup_default_data(self, attrs):
+        """Set default data for partial updates."""
+        # we can't pass partial=True to validator_class, otherwise required fields
+        # would not be validated. This isn't a issue on most DRF use cases because
+        # the same serializer class is used for everything. Because of that we simulate
+        # "partial=True" behavior by setting all non-defined fields to what's on the
+        # model instance
+        if self.instance and self.partial:
+            for field in self.Meta.fields:
+                attrs.setdefault(field, getattr(self.instance, field))
