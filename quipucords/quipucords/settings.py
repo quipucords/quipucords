@@ -52,6 +52,30 @@ def create_random_key():
     )
 
 
+def app_secret_key_and_path():
+    """Return the SECRET_KEY and related DJANGO_SECRET_PATH to use."""
+    # We need to support DJANGO_SECRET_KEY from the Environment.
+    # This is necessary when the application keys are coming from
+    # OpenShift project secrets through the environment.
+    #
+    # We also update the DJANGO_SECRET_PATH file accordingly
+    # as it is also used as the Ansible password vault.
+    django_secret_path = Path(
+        env.str("DJANGO_SECRET_PATH", str(BASE_DIR / "secret.txt"))
+    )
+
+    django_secret_key = env("DJANGO_SECRET_KEY", default=None)
+
+    if django_secret_key:
+        django_secret_path.write_text(django_secret_key, encoding="utf-8")
+    elif not django_secret_path.exists():
+        django_secret_key = create_random_key()
+        django_secret_path.write_text(django_secret_key, encoding="utf-8")
+    else:
+        django_secret_key = django_secret_path.read_text(encoding="utf-8").strip()
+    return django_secret_key, django_secret_path
+
+
 QPC_SSH_CONNECT_TIMEOUT = env.int("QPC_SSH_CONNECT_TIMEOUT", 60)
 QPC_SSH_INSPECT_TIMEOUT = env.int("QPC_SSH_INSPECT_TIMEOUT", 120)
 
@@ -71,22 +95,7 @@ if PRODUCTION:
     SESSION_COOKIE_SECURE = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# We need to support DJANGO_SECRET_KEY from the Environment.
-# This is necessary when the application keys are coming from
-# OpenShift project secrets through the environment.
-DJANGO_SECRET_KEY = env("DJANGO_SECRET_KEY", default=None)
-
-if DJANGO_SECRET_KEY:
-    SECRET_KEY = DJANGO_SECRET_KEY
-else:
-    DJANGO_SECRET_PATH = Path(
-        env.str("DJANGO_SECRET_PATH", str(BASE_DIR / "secret.txt"))
-    )
-    if not DJANGO_SECRET_PATH.exists():
-        SECRET_KEY = create_random_key()
-        DJANGO_SECRET_PATH.write_text(SECRET_KEY, encoding="utf-8")
-    else:
-        SECRET_KEY = DJANGO_SECRET_PATH.read_text(encoding="utf-8").strip()
+SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
 
 # SECURITY WARNING: Running with DEBUG=True is a *BAD IDEA*, but this is unfortunately
 # necessary because in some cases we still need to serve static files through Django.
