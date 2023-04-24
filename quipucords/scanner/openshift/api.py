@@ -4,8 +4,11 @@ from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
 
-from kubernetes.client import ApiClient, ApiException, Configuration, CoreV1Api
+from kubernetes.client import ApiClient, ApiException
+from kubernetes.client import Configuration as KubeConfig
+from kubernetes.client import CoreV1Api
 from openshift.dynamic import DynamicClient
+from openshift.helper.userpassauth import OCPLoginConfiguration
 from urllib3.exceptions import MaxRetryError
 
 from scanner.openshift.entities import (
@@ -55,12 +58,11 @@ class OpenShiftApi:
 
     def __init__(
         self,
-        configuration: Configuration,
-        ssl_verify: bool = True,
+        configuration: KubeConfig,
     ):
         """Initialize OpenShiftApi."""
-        configuration.verify_ssl = ssl_verify
-        self._api_client = ApiClient(configuration=configuration)
+        self._configuration = configuration
+        self._api_client = ApiClient(configuration=self._configuration)
         # discoverer cache is used to cache resources for dynamic client
         self._discoverer_cache_file = None
 
@@ -74,15 +76,47 @@ class OpenShiftApi:
         )
 
     @classmethod
-    def from_auth_token(
-        cls, *, host, protocol, port, auth_token, ssl_verify: bool = True
+    def with_config_info(
+        cls, *, host, protocol, port, ssl_verify: bool = True, **kwargs
     ):
-        """Initialize OpenShiftApi with auth token."""
-        kube_config_object = Configuration(
-            host=f"{protocol}://{host}:{port}",
+        """Initialize OpenShiftApi without providing a KubeConfig object."""
+        host_uri = f"{protocol}://{host}:{port}"
+        if kwargs.get("auth_token"):
+            kube_config = cls._init_kube_config(
+                host_uri, ssl_verify=ssl_verify, **kwargs
+            )
+        else:
+            kube_config = cls._init_ocp_login_config(
+                host_uri, ssl_verify=ssl_verify, **kwargs
+            )
+        return cls(configuration=kube_config)
+
+    @classmethod
+    def _init_kube_config(cls, host, *, ssl_verify, auth_token):
+        kube_config = KubeConfig(
+            host=host,
             api_key={"authorization": f"bearer {auth_token}"},
         )
-        return cls(configuration=kube_config_object, ssl_verify=ssl_verify)
+        kube_config.verify_ssl = ssl_verify
+        return kube_config
+
+    @classmethod
+    def _init_ocp_login_config(
+        cls,
+        host,
+        username,
+        password,
+        ssl_verify,
+    ):
+        """Start a specialized KubeConfig that uses OCP username+password."""
+        config = OCPLoginConfiguration(
+            host=host,
+            ocp_username=username,
+            ocp_password=password,
+        )
+        config.verify_ssl = ssl_verify
+        config.get_token()
+        return config
 
     def can_connect(self, raise_exception=False, **kwargs):
         """Check if it's possible to connect to OCP host."""
