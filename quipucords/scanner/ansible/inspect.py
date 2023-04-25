@@ -86,6 +86,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
         hosts = []
         for host in hosts_generator:
             parsed_host = {field: host.get(field) for field in self.HOST_FIELDS}
+            parsed_host["host_id"] = parsed_host.pop("id")
             hosts.append(parsed_host)
         return hosts
 
@@ -121,7 +122,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
             job_id = job["id"]
             job_ids.append(job_id)
             unique_hosts |= self.get_hosts_from_job_events(job_id)
-        return {"ids": job_ids, "unique_hosts": unique_hosts}
+        return {"job_ids": job_ids, "unique_hosts": unique_hosts}
 
     def get_hosts_from_job_events(self, job_id) -> set:
         """Get unique hosts found in job events."""
