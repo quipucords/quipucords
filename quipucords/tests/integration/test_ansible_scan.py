@@ -90,7 +90,7 @@ def expected_facts():
             "hosts": [
                 {
                     "created": "<CREATED_DATE>",
-                    "id": 1,
+                    "host_id": 1,
                     "last_job": None,
                     "modified": "<MODIFIED_DATE>",
                     "name": "<LISTED_HOST>",
@@ -102,7 +102,7 @@ def expected_facts():
                 "version": "<ANSIBLE_CONTROLLER_VERSION>",
             },
             "jobs": {
-                "ids": [1, 2],
+                "job_ids": [1, 2],
                 "unique_hosts": ["<DELETED_HOST>", "<LISTED_HOST>"],
             },
         },
