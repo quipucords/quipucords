@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quipucords"
-version = "1.2.3"
+version = "1.2.4"
 description = "Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment."
 authors = ["Quipucords Dev Team <quipucords@redhat.com>"]
 readme = "README.md"
