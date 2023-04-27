@@ -12,4 +12,8 @@ RUN sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/s
     systemctl enable sshd; \
     useradd --user-group --system --create-home -G wheel -p "$(openssl passwd -1 ${PASSWORD})" ${USERNAME};
 
+# Install additional packages
+RUN dnf -y install rct; \
+    dnf clean all
+
 EXPOSE ${SSH_PORT}

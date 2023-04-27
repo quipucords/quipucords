@@ -6,7 +6,7 @@ from scanner.network.processing import installed_products
 
 
 @pytest.mark.parametrize(
-    "stdout_lines",
+    "stdout",
     [
         """Product:
         \tID: 69
@@ -20,9 +20,9 @@ from scanner.network.processing import installed_products
     """,
     ],
 )
-def test_success_found_id_and_name(stdout_lines):
+def test_success_found_id_and_name(stdout):
     """ID and Name match expected format."""
-    cmd_output = {"rc": 0, "stdout_lines": stdout_lines}
+    cmd_output = {"rc": 0, "stdout": stdout}
     expected_fact = [{"id": "69", "name": "Red Hat Enterprise Linux Server"}]
     assert (
         installed_products.ProcessInstalledProducts.process(cmd_output) == expected_fact
@@ -30,7 +30,7 @@ def test_success_found_id_and_name(stdout_lines):
 
 
 @pytest.mark.parametrize(
-    "stdout_lines",
+    "stdout",
     [
         """Product:
         \tName: Red Hat Enterprise Linux Server
@@ -43,13 +43,13 @@ def test_success_found_id_and_name(stdout_lines):
     """,
     ],
 )
-def test_failure_no_relevant_info(caplog, stdout_lines):
+def test_failure_no_relevant_info(caplog, stdout):
     """Output either doesn't match any required info or don't have id."""
     caplog.set_level("ERROR")
-    cmd_output = {"rc": 0, "stdout_lines": stdout_lines}
+    cmd_output = {"rc": 0, "stdout": stdout}
     err_msg = (
         "Unable to parse relevant product information from the following "
-        f" input\n{stdout_lines}"
+        f" input\n{stdout}"
     )
     assert installed_products.ProcessInstalledProducts.process(cmd_output) == []
     assert caplog.messages[-1] == err_msg
@@ -57,7 +57,7 @@ def test_failure_no_relevant_info(caplog, stdout_lines):
 
 def test_success_multiple_products():
     """ID and Name match expected format for multiple products."""
-    stdout_lines = """\nProduct:
+    stdout = """\nProduct:
         \tID: 479
         \tName: Red Hat Enterprise Linux for x86_64
         \tVersion: 8.6
@@ -77,7 +77,7 @@ def test_success_multiple_products():
         {"id": "69", "name": "Red Hat Enterprise Linux Server"},
         {"id": "81", "name": "Red Hat Enterprise Linux Server"},
     ]
-    cmd_output = {"rc": 0, "stdout_lines": stdout_lines}
+    cmd_output = {"rc": 0, "stdout": stdout}
     assert (
         installed_products.ProcessInstalledProducts.process(cmd_output) == expected_fact
     )
