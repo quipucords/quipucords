@@ -16,7 +16,7 @@ class ProcessInstalledProducts(process.Processor):
     def process(output, dependencies=None):
         """Process installed_product fact output."""
         products = []
-        installed_products_cmd_output = output.get("stdout_lines", "")
+        installed_products_cmd_output = output.get("stdout", "")
         # since the command is using grep with surrounding context (-C), we expect each
         # result to be delimited by --
         grep_separator = "--"
