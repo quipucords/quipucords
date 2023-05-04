@@ -175,16 +175,17 @@ class ScanSerializer(NotEmptySerializer):
                 optional_products = DisabledOptionalProductsOptions.objects.create(
                     **optional_products
                 )
-                optional_products.save()
                 options.disabled_optional_products = optional_products
 
             if extended_search:
                 extended_search = ExtendedProductSearchOptions.objects.create(
                     **extended_search
                 )
-                extended_search.save()
                 options.enabled_extended_product_search = extended_search
-            options.save()
+
+            if optional_products or extended_search:
+                options.save()
+
             scan.options = options
             scan.save()
 
@@ -227,16 +228,17 @@ class ScanSerializer(NotEmptySerializer):
                 optional_products = DisabledOptionalProductsOptions.objects.create(
                     **optional_products
                 )
-                optional_products.save()
                 options.disabled_optional_products = optional_products
 
             if extended_search:
                 extended_search = ExtendedProductSearchOptions.objects.create(
                     **extended_search
                 )
-                extended_search.save()
                 options.enabled_extended_product_search = extended_search
-            options.save()
+
+            if optional_products or extended_search:
+                options.save()
+
             instance.options = options
 
         instance.save()
@@ -272,7 +274,6 @@ class ScanSerializer(NotEmptySerializer):
             options_instance = instance.options
             if not options_instance:
                 options_instance = ScanOptions.objects.create(**options)
-                options_instance.save()
                 instance.options = options_instance
                 instance.save()
             else:
@@ -292,7 +293,6 @@ class ScanSerializer(NotEmptySerializer):
                 optional_products_instance = (
                     DisabledOptionalProductsOptions.objects.create(**optional_products)
                 )
-                optional_products_instance.save()
                 instance.options.disabled_optional_products = optional_products_instance
                 instance.options.save()
             else:
@@ -323,7 +323,6 @@ class ScanSerializer(NotEmptySerializer):
                 extended_search_instance = ExtendedProductSearchOptions.objects.create(
                     **extended_search
                 )
-                extended_search_instance.save()
                 instance.options.enabled_extended_product_search = (
                     extended_search_instance
                 )
