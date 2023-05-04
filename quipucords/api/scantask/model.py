@@ -89,7 +89,11 @@ class ScanTask(models.Model):
     def __init__(self, *args, **kwargs):
         """Initialize a ScanTask."""
         super().__init__(*args, **kwargs)
-        self.scan_job_task_count = None
+
+        # `_scan_job_task_count` is not a Django model field and does not persist.
+        # We use it during the runtime of an instance to hold a copy of the task count.
+        # This avoids unnecessary lookups since we may frequently log this value.
+        self._scan_job_task_count = None
 
     def __str__(self):
         """Convert to string."""
@@ -187,8 +191,8 @@ class ScanTask(models.Model):
         if exception:
             logger.exception("Got an exception.")
 
-        if self.scan_job_task_count is None:
-            self.scan_job_task_count = self.job.tasks.all().count()
+        if self._scan_job_task_count is None:
+            self._scan_job_task_count = self.job.tasks.all().count()
         if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             self._log_fingerprint_message(message, log_level)
         else:
@@ -201,14 +205,14 @@ class ScanTask(models.Model):
         if static_options is not None:
             actual_message = (
                 f"Job {self.job_id:d},"
-                f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
+                f" Task {self.sequence_number:d} of {self._scan_job_task_count:d}"
                 f" ({self.scan_type}, {self.source.source_type}, {self.source.name}) - "
             )
         else:
             elapsed_time = self._compute_elapsed_time()
             actual_message = (
                 f"Job {self.job_id:d},"
-                f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
+                f" Task {self.sequence_number:d} of {self._scan_job_task_count:d}"
                 f" ({self.scan_type}, {self.source.source_type}, {self.source.name},"
                 f" elapsed_time: {elapsed_time:.0f}s) - "
             )
@@ -225,7 +229,7 @@ class ScanTask(models.Model):
             details_report_id = self.details_report.id
         actual_message = (
             f"Job {self.job.id:d},"
-            f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
+            f" Task {self.sequence_number:d} of {self._scan_job_task_count:d}"
             f" ({self.scan_type}, details_report={details_report_id},"
             f" elapsed_time: {elapsed_time:.0f}s) - "
         )
@@ -390,7 +394,7 @@ class ScanTask(models.Model):
         self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
         self.save()
         # pylint: disable=no-member
-        self.scan_job_task_count = self.job.tasks.all().count()
+        self._scan_job_task_count = self.job.tasks.all().count()
         self.log_current_status()
 
     # All task types
