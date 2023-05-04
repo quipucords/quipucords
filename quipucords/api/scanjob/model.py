@@ -448,10 +448,7 @@ class ScanJob(models.Model):
             self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
     def start(self):
-        """Start a job.
-
-        Change job state from PENDING TO RUNNING.
-        """
+        """Change status from PENDING to RUNNING."""
         self.start_time = datetime.utcnow()
         target_status = ScanTask.RUNNING
         has_error = self.validate_status_change(target_status, [ScanTask.PENDING])
@@ -464,11 +461,7 @@ class ScanJob(models.Model):
         self.log_current_status()
 
     def restart(self):
-        """Restart a job.
-
-        Change job state from PENDING, PAUSED OR RUNNING
-        TO PENDING status.
-        """
+        """Change status from PENDING/PAUSED/RUNNING to PENDING."""
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(
             target_status, [ScanTask.PENDING, ScanTask.PAUSED, ScanTask.RUNNING]
@@ -488,10 +481,7 @@ class ScanJob(models.Model):
 
     @transaction.atomic
     def pause(self):
-        """Pause a job.
-
-        Change job state from PENDING/RUNNING TO PAUSED.
-        """
+        """Change status from PENDING/RUNNING to PAUSED."""
         target_status = ScanTask.PAUSED
         has_error = self.validate_status_change(
             target_status, [ScanTask.PENDING, ScanTask.RUNNING]
@@ -516,11 +506,7 @@ class ScanJob(models.Model):
 
     @transaction.atomic
     def cancel(self):
-        """Cancel a job.
-
-        Change job state from CREATED, PENDING, RUNNING, or
-        PAUSED to CANCELED.
-        """
+        """Change status from CREATED/PENDING/RUNNING/PAUSED to CANCELED."""
         self.end_time = datetime.utcnow()
         target_status = ScanTask.CANCELED
         has_error = self.validate_status_change(
@@ -546,10 +532,7 @@ class ScanJob(models.Model):
         self.log_current_status()
 
     def complete(self):
-        """Complete a job.
-
-        Change job state from RUNNING TO COMPLETE.
-        """
+        """Change status from RUNNING to COMPLETE."""
         self.end_time = datetime.utcnow()
         target_status = ScanTask.COMPLETED
         has_error = self.validate_status_change(target_status, [ScanTask.RUNNING])
@@ -563,9 +546,8 @@ class ScanJob(models.Model):
         self.log_current_status()
 
     def fail(self, message):
-        """Fail a job.
+        """Change status from RUNNING to FAILED.
 
-        Change job state from RUNNING TO COMPLETE.
         :param message: The error message associated with failure
         """
         self.end_time = datetime.utcnow()

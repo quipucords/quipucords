@@ -384,7 +384,7 @@ class ScanTask(models.Model):
 
     # All task types
     def start(self):
-        """Start a task."""
+        """Change status to RUNNING."""
         self.start_time = datetime.utcnow()
         self.status = ScanTask.RUNNING
         self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
@@ -395,7 +395,7 @@ class ScanTask(models.Model):
 
     # All task types
     def restart(self):
-        """Start a task."""
+        """Change status to PENDING."""
         self.status = ScanTask.PENDING
         self.status_message = _(messages.ST_STATUS_MSG_RESTARTED)
         self.save()
@@ -403,7 +403,7 @@ class ScanTask(models.Model):
 
     # All task types
     def pause(self):
-        """Pause a task."""
+        """Change status to PAUSED."""
         self.status = ScanTask.PAUSED
         self.status_message = _(messages.ST_STATUS_MSG_PAUSED)
         self.save()
@@ -411,7 +411,7 @@ class ScanTask(models.Model):
 
     # All task types
     def cancel(self):
-        """Cancel a task."""
+        """Change status to CANCELED."""
         self.end_time = datetime.utcnow()
         self.status = ScanTask.CANCELED
         self.status_message = _(messages.ST_STATUS_MSG_CANCELED)
