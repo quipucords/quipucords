@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from multiprocessing import Process, Value
 
+from celery import chain
 from django.conf import settings
 from django.db.models import Q
 
@@ -42,9 +43,67 @@ class ScanJobRunner:
 
     def __new__(cls, *args, **kwargs) -> SyncScanJobRunner | ProcessBasedScanJobRunner:
         """Initialize the appropriate ScanJobRunner."""
+        if settings.QPC_ENABLE_CELERY_SCAN_MANAGER:
+            return CeleryBasedScanJobRunner(*args, **kwargs)
         if settings.QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER:
             return SyncScanJobRunner(*args, **kwargs)
         return ProcessBasedScanJobRunner(*args, **kwargs)
+
+
+class CeleryBasedScanJobRunner:
+    def __init__(self, scan_job: ScanJob, *args, **kwargs):
+        self.scan_job = scan_job
+
+    def start(self):
+        return self.run()
+
+    def _get_task_runner_signatures(self):
+        incomplete_scan_tasks = self.scan_job.tasks.filter(
+            Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
+        ).order_by("sequence_number")
+
+        task_runner_signatures = []
+        fingerprint_runner_signature = None
+
+        from scanner.tasks import run_scan_runner  # local import to avoid import loop
+
+        for scan_task in incomplete_scan_tasks:
+            runner_class = get_task_runner_class(scan_task)
+
+            runner_module_name = runner_class.__module__
+            runner_class_name = runner_class.__name__
+            signature = run_scan_runner.s(
+                runner_module_name,
+                runner_class_name,
+                self.scan_job.id,
+                scan_task.id,
+                immutable=True,
+            )
+
+            if runner_class == FingerprintTaskRunner:
+                fingerprint_runner_signature = signature
+            else:
+                task_runner_signatures.append(signature)
+
+        self.scan_job.log_message(
+            f"Job has {len(incomplete_scan_tasks):d} remaining tasks"
+        )
+
+        return task_runner_signatures, fingerprint_runner_signature
+
+    def run(self):
+        (
+            task_runner_signatures,
+            fingerprint_runner_signature,
+        ) = self._get_task_runner_signatures()
+
+        chain(*task_runner_signatures, fingerprint_runner_signature)
+        # reimplement _get_runners
+        # but instead of instantiating each class,
+        # pass the class and ids into a celery task,
+        # and chain/chord them together
+        # does anything actually use the return value from SyncScanJobRunner.run?
+        # old code may rely on Process.status which is set by run return value.
 
 
 class ProcessBasedScanJobRunner(Process):
