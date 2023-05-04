@@ -143,8 +143,7 @@ class ScanJob(models.Model):
         # pylint: disable=no-member
         scan = self.scan
         if scan is not None:
-            for source in scan.sources.all():
-                self.sources.add(source)
+            self.sources.add(*scan.sources.all())
             self.scan_type = scan.scan_type
             if scan.options is not None:
                 disable_options = self.copy_scan_disabled_product_options()
@@ -444,9 +443,7 @@ class ScanJob(models.Model):
                 status_message=_(messages.ST_STATUS_MSG_PENDING),
                 sequence_number=count,
             )
-
-            for prerequisite in prerequisites:
-                fingerprint_task.prerequisites.add(prerequisite)
+            fingerprint_task.prerequisites.set(prerequisites)
 
             self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
