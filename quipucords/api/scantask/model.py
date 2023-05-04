@@ -87,7 +87,7 @@ class ScanTask(models.Model):
     objects = ScanTaskQuerySet.as_manager()
 
     def __init__(self, *args, **kwargs):
-        """Constructore for ScanTask."""
+        """Initialize a ScanTask."""
         super().__init__(*args, **kwargs)
         self.scan_job_task_count = None
 
