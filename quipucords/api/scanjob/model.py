@@ -106,13 +106,14 @@ class ScanJob(models.Model):
             old_disabled_optional_products = (
                 self.scan.options.disabled_optional_products
             )
-            new_disabled_optional_products = DisabledOptionalProductsOptions(
-                jboss_eap=old_disabled_optional_products.jboss_eap,
-                jboss_fuse=old_disabled_optional_products.jboss_fuse,
-                jboss_brms=old_disabled_optional_products.jboss_brms,
-                jboss_ws=old_disabled_optional_products.jboss_ws,
+            new_disabled_optional_products = (
+                DisabledOptionalProductsOptions.objects.create(
+                    jboss_eap=old_disabled_optional_products.jboss_eap,
+                    jboss_fuse=old_disabled_optional_products.jboss_fuse,
+                    jboss_brms=old_disabled_optional_products.jboss_brms,
+                    jboss_ws=old_disabled_optional_products.jboss_ws,
+                )
             )
-            new_disabled_optional_products.save()
         return new_disabled_optional_products
 
     def copy_scan_extended_product_options(self):
@@ -124,7 +125,7 @@ class ScanJob(models.Model):
             and self.scan.options.enabled_extended_product_search
         ):
             old_extended_products = self.scan.options.enabled_extended_product_search
-            new_extended_products = ExtendedProductSearchOptions(
+            new_extended_products = ExtendedProductSearchOptions.objects.create(
                 jboss_eap=old_extended_products.jboss_eap,
                 jboss_fuse=old_extended_products.jboss_fuse,
                 jboss_brms=old_extended_products.jboss_brms,
@@ -135,7 +136,6 @@ class ScanJob(models.Model):
                     old_extended_products.search_directories
                 )
 
-            new_extended_products.save()
         return new_extended_products
 
     def copy_scan_options(self):
@@ -149,12 +149,11 @@ class ScanJob(models.Model):
             if scan.options is not None:
                 disable_options = self.copy_scan_disabled_product_options()
                 extended_search = self.copy_scan_extended_product_options()
-                scan_job_options = ScanOptions(
+                scan_job_options = ScanOptions.objects.create(
                     max_concurrency=scan.options.max_concurrency,
                     disabled_optional_products=disable_options,
                     enabled_extended_product_search=extended_search,
                 )
-                scan_job_options.save()
                 self.options = scan_job_options
             self.save()
 
@@ -314,16 +313,14 @@ class ScanJob(models.Model):
             return
 
         if self.connection_results is None:
-            job_conn_result = JobConnectionResult()
-            job_conn_result.save()
+            job_conn_result = JobConnectionResult.objects.create()
             self.connection_results = job_conn_result
             self.save()
         if (
             self.inspection_results is None
             and self.scan_type == ScanTask.SCAN_TYPE_INSPECT
         ):
-            job_inspect_result = JobInspectionResult()
-            job_inspect_result.save()
+            job_inspect_result = JobInspectionResult.objects.create()
             self.inspection_results = job_inspect_result
             self.save()
 
@@ -370,7 +367,7 @@ class ScanJob(models.Model):
             count = 1
             for source in self.sources.all():
                 # Create connect tasks
-                conn_task = ScanTask(
+                conn_task = ScanTask.objects.create(
                     job=self,
                     source=source,
                     scan_type=ScanTask.SCAN_TYPE_CONNECT,
@@ -378,15 +375,13 @@ class ScanJob(models.Model):
                     status_message=_(messages.ST_STATUS_MSG_PENDING),
                     sequence_number=count,
                 )
-                conn_task.save()
                 self.tasks.add(conn_task)  # pylint: disable=no-member
                 conn_tasks.append(conn_task)
 
                 # Create task result
-                conn_task_result = TaskConnectionResult(
+                conn_task_result = TaskConnectionResult.objects.create(
                     job_connection_result=self.connection_results
                 )
-                conn_task_result.save()
 
                 # Add the task result to task
                 conn_task.connection_result = conn_task_result
@@ -407,7 +402,7 @@ class ScanJob(models.Model):
             count = len(conn_tasks) + 1
             for conn_task in conn_tasks:
                 # Create inspect tasks
-                inspect_task = ScanTask(
+                inspect_task = ScanTask.objects.create(
                     job=self,
                     source=conn_task.source,
                     scan_type=ScanTask.SCAN_TYPE_INSPECT,
@@ -415,17 +410,14 @@ class ScanJob(models.Model):
                     status_message=_(messages.ST_STATUS_MSG_PENDING),
                     sequence_number=count,
                 )
-                inspect_task.save()
                 inspect_task.prerequisites.add(conn_task)
-                inspect_task.save()
                 self.tasks.add(inspect_task)  # pylint: disable=no-member
                 inspect_tasks.append(conn_task)  # pylint: disable=no-member
 
                 # Create task result
-                inspect_task_result = TaskInspectionResult(
+                inspect_task_result = TaskInspectionResult.objects.create(
                     job_inspection_result=self.inspection_results
                 )
-                inspect_task_result.save()
 
                 # Add the inspect task result to task
                 inspect_task.inspection_result = inspect_task_result
@@ -444,7 +436,7 @@ class ScanJob(models.Model):
             prerequisites = conn_tasks + inspect_tasks
             count = len(prerequisites) + 1
             # Create a single fingerprint task with dependencies
-            fingerprint_task = ScanTask(
+            fingerprint_task = ScanTask.objects.create(
                 job=self,
                 scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                 details_report=self.details_report,
@@ -452,12 +444,10 @@ class ScanJob(models.Model):
                 status_message=_(messages.ST_STATUS_MSG_PENDING),
                 sequence_number=count,
             )
-            fingerprint_task.save()
 
             for prerequisite in prerequisites:
                 fingerprint_task.prerequisites.add(prerequisite)
 
-            fingerprint_task.save()
             self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
     def start(self):
