@@ -210,7 +210,7 @@ class ScanSerializer(NotEmptySerializer):
 
     @staticmethod
     def _do_full_update(instance, validated_data):
-        """Peform full update of scan."""
+        """Perform full update of scan."""
         name = validated_data.pop("name", None)
         scan_type = validated_data.pop("scan_type", None)
         sources = validated_data.pop("sources", None)
