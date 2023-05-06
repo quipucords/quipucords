@@ -37,6 +37,10 @@ class ProcessInstalledProducts(process.Processor):
                     product,
                 )
                 continue
+
+            product_id = product_dict["id"]
+            if any(p["id"] == product_id for p in products):
+                continue
             products.append(product_dict)
 
         return products
