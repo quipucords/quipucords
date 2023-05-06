@@ -68,6 +68,16 @@ def test_success_multiple_products():
         \tVersion: 8.7
     --
     Product:
+        \tID: 69
+        \tName: Red Hat Enterprise Linux Server
+        \tVersion: 8.7
+    --
+    Product:
+        \tID: 81
+        \tName: Red Hat Enterprise Linux Server
+        \tVersion: 6.6
+    --
+    Product:
         \tID: 81
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 6.6
