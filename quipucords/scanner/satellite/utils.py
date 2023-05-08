@@ -237,13 +237,13 @@ def validate_task_stats(task):
     :param task: ScanTask to evaluate
     :throws: SatelliteException if task stats are not valid
     """
-    (
-        systems_count,
-        systems_scanned,
-        systems_failed,
-        systems_unreachable,
-    ) = task.calculate_counts()
-    totals = +systems_scanned + systems_failed + systems_unreachable
+    (systems_count, systems_scanned, systems_failed, systems_unreachable) = (
+        task.systems_count,
+        task.systems_scanned,
+        task.systems_failed,
+        task.systems_unreachable,
+    )
+    totals = systems_scanned + systems_failed + systems_unreachable
     if totals != systems_count:
         missing_sys = systems_count - totals
         error = f"Scan failed to inspect {missing_sys:d} systems."

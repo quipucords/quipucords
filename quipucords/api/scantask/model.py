@@ -334,20 +334,6 @@ class ScanTask(models.Model):
         )
 
     # All task types
-    def calculate_counts(self):
-        """Calculate scan counts for task.
-
-        :return: systems_count, systems_scanned,
-        systems_failed, systems_unreachable
-        """
-        return (
-            self.systems_count,
-            self.systems_scanned,
-            self.systems_failed,
-            self.systems_unreachable,
-        )
-
-    # All task types
     def start(self):
         """Change status to RUNNING."""
         self.start_time = datetime.utcnow()
