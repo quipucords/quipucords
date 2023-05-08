@@ -49,29 +49,12 @@ def format_source(json_source):
         task_for_source = scan_job.tasks.filter(source=source_id).first()
 
         if task_for_source is not None:
-            if task_for_source.systems_count is not None:
-                json_scan_job["source_systems_count"] = task_for_source.systems_count
-            else:
-                json_scan_job["source_systems_count"] = 0
-
-            if task_for_source.systems_scanned is not None:
-                json_scan_job[
-                    "source_systems_scanned"
-                ] = task_for_source.systems_scanned
-            else:
-                json_scan_job["source_systems_scanned"] = 0
-
-            if task_for_source.systems_failed is not None:
-                json_scan_job["source_systems_failed"] = task_for_source.systems_failed
-            else:
-                json_scan_job["source_systems_failed"] = 0
-
-            if task_for_source.systems_unreachable is not None:
-                json_scan_job[
-                    "source_systems_unreachable"
-                ] = task_for_source.systems_unreachable
-            else:
-                json_scan_job["source_systems_unreachable"] = 0
+            json_scan_job["source_systems_count"] = task_for_source.systems_count
+            json_scan_job["source_systems_scanned"] = task_for_source.systems_scanned
+            json_scan_job["source_systems_failed"] = task_for_source.systems_failed
+            json_scan_job[
+                "source_systems_unreachable"
+            ] = task_for_source.systems_unreachable
 
         json_source["connection"] = json_scan_job
     return json_source

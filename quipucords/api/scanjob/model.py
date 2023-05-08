@@ -251,22 +251,10 @@ class ScanJob(models.Model):
         systems_unreachable = 0
         tasks = self.tasks.filter(scan_type=scan_type).order_by("sequence_number")
         for task in tasks:
-            if task.systems_count is not None:
-                if systems_count is None:
-                    systems_count = 0
-                systems_count += task.systems_count
-            if task.systems_scanned is not None:
-                if systems_scanned is None:
-                    systems_scanned = 0
-                systems_scanned += task.systems_scanned
-            if task.systems_failed is not None:
-                if systems_failed is None:
-                    systems_failed = 0
-                systems_failed += task.systems_failed
-            if task.systems_unreachable is not None:
-                if systems_unreachable is None:
-                    systems_unreachable = 0
-                systems_unreachable += task.systems_unreachable
+            systems_count += task.systems_count
+            systems_scanned += task.systems_scanned
+            systems_failed += task.systems_failed
+            systems_unreachable += task.systems_unreachable
         return systems_count, systems_scanned, systems_failed, systems_unreachable
 
     def _log_stats(self, prefix):
