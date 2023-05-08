@@ -191,10 +191,6 @@ class ScanJob(models.Model):
         if self.status in (ScanTask.CREATED, ScanTask.PENDING):
             return None, None, None, None, None
 
-        systems_count = 0
-        systems_scanned = 0
-        systems_failed = 0
-        systems_unreachable = 0
         system_fingerprint_count = 0
 
         (
