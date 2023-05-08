@@ -62,6 +62,10 @@ class ScanTaskTest(TestCase):
                 "scan_type": ScanTask.SCAN_TYPE_CONNECT,
                 "status": "pending",
                 "status_message": messages.ST_STATUS_MSG_PENDING,
+                "systems_count": 0,
+                "systems_scanned": 0,
+                "systems_failed": 0,
+                "systems_unreachable": 0,
             },
             json_task,
         )
@@ -217,10 +221,10 @@ class ScanTaskTest(TestCase):
         self.assertEqual(1, task.systems_failed)
         self.assertEqual(1, task.systems_unreachable)
         task.reset_stats()
-        self.assertEqual(None, task.systems_count)
-        self.assertEqual(None, task.systems_scanned)
-        self.assertEqual(None, task.systems_failed)
-        self.assertEqual(None, task.systems_unreachable)
+        self.assertEqual(0, task.systems_count)
+        self.assertEqual(0, task.systems_scanned)
+        self.assertEqual(0, task.systems_failed)
+        self.assertEqual(0, task.systems_unreachable)
 
         (
             systems_count,

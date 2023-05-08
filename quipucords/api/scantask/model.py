@@ -58,10 +58,10 @@ class ScanTask(models.Model):
     )
     prerequisites = models.ManyToManyField("ScanTask")
     job = models.ForeignKey("api.ScanJob", models.CASCADE, related_name="tasks")
-    systems_count = models.PositiveIntegerField(null=True)
-    systems_scanned = models.PositiveIntegerField(null=True)
-    systems_failed = models.PositiveIntegerField(null=True)
-    systems_unreachable = models.PositiveIntegerField(null=True)
+    systems_count = models.PositiveIntegerField(default=0)
+    systems_scanned = models.PositiveIntegerField(default=0)
+    systems_failed = models.PositiveIntegerField(default=0)
+    systems_unreachable = models.PositiveIntegerField(default=0)
     sequence_number = models.PositiveIntegerField(default=0)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
@@ -154,24 +154,12 @@ class ScanTask(models.Model):
     # connect/inspect task types
     def _log_scan_stats(self, prefix):
         """Log stats for scan."""
-        sys_count = self.systems_count
-        sys_failed = self.systems_failed
-        sys_unreachable = self.systems_unreachable
-        sys_scanned = self.systems_scanned
-        if sys_count is None:
-            sys_count = 0
-        if sys_scanned is None:
-            sys_scanned = 0
-        if sys_failed is None:
-            sys_failed = 0
-        if sys_unreachable is None:
-            sys_unreachable = 0
         message = (
             f"{prefix} Stats:"
-            f" systems_count={sys_count},"
-            f" systems_scanned={sys_scanned},"
-            f" systems_failed={sys_failed},"
-            f" systems_unreachable={sys_unreachable}"
+            f" systems_count={self.systems_count},"
+            f" systems_scanned={self.systems_scanned},"
+            f" systems_failed={self.systems_failed},"
+            f" systems_unreachable={self.systems_unreachable}"
         )
         self.log_message(message)
 
@@ -293,10 +281,10 @@ class ScanTask(models.Model):
         """Reset scan task stats default state."""
         # pylint: disable=too-many-arguments
         self.refresh_from_db()
-        self.systems_count = None
-        self.systems_scanned = None
-        self.systems_failed = None
-        self.systems_unreachable = None
+        self.systems_count = 0
+        self.systems_scanned = 0
+        self.systems_failed = 0
+        self.systems_unreachable = 0
 
         self.save()
         self._log_stats("INITIALIZING SYSTEM COUNTS - default all to 0")
@@ -324,33 +312,17 @@ class ScanTask(models.Model):
         """
         # pylint: disable=too-many-arguments
         self.refresh_from_db()
-        sys_count = None
-        sys_failed = None
-        sys_unreachable = None
-        sys_scanned = None
+        sys_count = self.systems_count
+        sys_failed = self.systems_failed
+        sys_unreachable = self.systems_unreachable
+        sys_scanned = self.systems_scanned
         if increment_sys_count:
-            if self.systems_count is None:
-                sys_count = 0
-            else:
-                sys_count = self.systems_count
             sys_count += 1
         if increment_sys_scanned:
-            if self.systems_scanned is None:
-                sys_scanned = 0
-            else:
-                sys_scanned = self.systems_scanned
             sys_scanned += 1
         if increment_sys_failed:
-            if self.systems_failed is None:
-                sys_failed = 0
-            else:
-                sys_failed = self.systems_failed
             sys_failed += 1
         if increment_sys_unreachable:
-            if self.systems_unreachable is None:
-                sys_unreachable = 0
-            else:
-                sys_unreachable = self.systems_unreachable
             sys_unreachable += 1
         stat_string = f"{prefix} {name}."
         self.update_stats(
@@ -368,28 +340,12 @@ class ScanTask(models.Model):
         :return: systems_count, systems_scanned,
         systems_failed, systems_unreachable
         """
-        systems_count = 0
-        systems_scanned = 0
-        systems_failed = 0
-        systems_unreachable = 0
-        if self.systems_count is not None:
-            if systems_count is None:
-                systems_count = 0
-            systems_count += self.systems_count
-        if self.systems_scanned is not None:
-            if systems_scanned is None:
-                systems_scanned = 0
-            systems_scanned += self.systems_scanned
-        if self.systems_failed is not None:
-            if systems_failed is None:
-                systems_failed = 0
-            systems_failed += self.systems_failed
-        if self.systems_unreachable is not None:
-            if systems_unreachable is None:
-                systems_unreachable = 0
-            systems_unreachable += self.systems_unreachable
-
-        return systems_count, systems_scanned, systems_failed, systems_unreachable
+        return (
+            self.systems_count,
+            self.systems_scanned,
+            self.systems_failed,
+            self.systems_unreachable,
+        )
 
     # All task types
     def start(self):
@@ -439,13 +395,6 @@ class ScanTask(models.Model):
         else:
             self.status_message = _(messages.ST_STATUS_MSG_COMPLETED)
 
-        if self.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
-            if self.systems_count is None:
-                self.systems_count = 0
-            if self.systems_scanned is None:
-                self.systems_scanned = 0
-            if self.systems_failed is None:
-                self.systems_failed = 0
         self.save()
         self._log_stats("COMPLETION STATS.")
         self.log_current_status()
