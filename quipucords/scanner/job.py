@@ -204,7 +204,25 @@ class SyncScanJobRunner:
         return None
 
     def run(self):
-        """Execute runner."""
+        """Execute runner.
+
+        Since this function is moderately complex, here is a summary of its operations:
+
+        - early return if interrupted or task is not running
+        - get list of task runners for this job ordered by sequence created
+        - run the connection tasks (typically 1 per source)
+        - run the inspection tasks (typically 0 or 1 per source)
+        - check status for each task
+            - remember any that failed to be logged later
+            - early return if any are not failed or complete
+        - attempt to get/create the details report
+            - save a reference of it to both the job and the fingerprint task
+            - early return if this fails
+        - run the fingerprint task (only one per job)
+        - log individual IDs of any failed tasks
+
+        :returns: str value from ScanTask.STATUS_CHOICES, usually COMPLETED or FAILED.
+        """
         # pylint: disable=too-many-return-statements,too-many-branches
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
