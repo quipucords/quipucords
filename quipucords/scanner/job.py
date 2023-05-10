@@ -103,6 +103,9 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
     try:
         status_message, task_status = runner.run(*run_args)
     except Exception as error:
+        # Note: It should be very unlikely for this exception handling to be triggered.
+        # runner.run should already handle *most* exception types, and only a bug or
+        # truly unforeseen exception type should end up in here.
         failed_task = runner.scan_task
         context_message = (
             "Unexpected failure occurred. See context below.\n"
