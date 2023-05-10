@@ -227,10 +227,7 @@ class SyncScanJobRunner:
                 # something went wrong or cancel/pause
                 return task_status
 
-        if self.scan_job.scan_type in [
-            ScanTask.SCAN_TYPE_INSPECT,
-            ScanTask.SCAN_TYPE_FINGERPRINT,
-        ]:
+        if self.scan_job.scan_type != ScanTask.SCAN_TYPE_CONNECT:
             if not (details_report := fingerprint_task_runner.scan_task.details_report):
                 details_report, error_message = create_details_report_for_scan_job(
                     self.scan_job
