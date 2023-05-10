@@ -35,15 +35,15 @@ class ScanTaskTest(TestCase):
         self.source.credentials.add(self.cred)
 
         # Create scan configuration
-        scan = Scan(name="scan_name", scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        scan.save()
+        scan = Scan.objects.create(
+            name="scan_name", scan_type=ScanTask.SCAN_TYPE_CONNECT
+        )
 
         # Add source to scan
         scan.sources.add(self.source)
 
         # Create Job
-        self.scan_job = ScanJob(scan=scan)
-        self.scan_job.save()
+        self.scan_job = ScanJob.objects.create(scan=scan)
 
     def test_successful_create(self):
         """Create a scan task and serialize it."""

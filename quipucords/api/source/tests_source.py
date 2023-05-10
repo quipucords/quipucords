@@ -1038,8 +1038,9 @@ class SourceTest(TestCase):
         source.credentials.add(cred)
         source.save()
 
-        scan = Scan(name="test_scan", scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        scan.save()
+        scan = Scan.objects.create(
+            name="test_scan", scan_type=ScanTask.SCAN_TYPE_CONNECT
+        )
         scan.sources.add(source)
 
         url = reverse("source-detail", args=(source.id,))

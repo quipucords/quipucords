@@ -55,17 +55,13 @@ class ScanJobTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.connect_scan = Scan(
+        self.connect_scan = Scan.objects.create(
             name="connect_test", scan_type=ScanTask.SCAN_TYPE_CONNECT
         )
-        self.connect_scan.save()
         self.connect_scan.sources.add(self.source)
-        self.connect_scan.save()
 
-        self.inspect_scan = Scan(name="inspect_test")
-        self.inspect_scan.save()
+        self.inspect_scan = Scan.objects.create(name="inspect_test")
         self.inspect_scan.sources.add(self.source)
-        self.inspect_scan.save()
 
     def create_job_expect_201(self, scan_id):
         """Create a scan, return the response as a dict."""
@@ -83,21 +79,18 @@ class ScanJobTest(TestCase):
         """Test create queue state change."""
         # Cannot use util because its testing queue
         # Create scan configuration
-        scan = Scan(name="test", scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan.save()
+        scan = Scan.objects.create(name="test", scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
         # Add source to scan
         scan.sources.add(self.source)
 
-        options_to_use = ScanOptions()
-        options_to_use.save()
+        options_to_use = ScanOptions.objects.create()
 
         scan.options = options_to_use
         scan.save()
 
         # Create Job
-        scan_job = ScanJob(scan=scan)
-        scan_job.save()
+        scan_job = ScanJob.objects.create(scan=scan)
 
         # Job in created state
         self.assertEqual(scan_job.status, ScanTask.CREATED)
@@ -1507,15 +1500,12 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""
-        extended = ExtendedProductSearchOptions()
-        extended.save()
-        disabled = DisabledOptionalProductsOptions()
-        disabled.save()
-        scan_options = ScanOptions(
+        extended = ExtendedProductSearchOptions.objects.create()
+        disabled = DisabledOptionalProductsOptions.objects.create()
+        scan_options = ScanOptions.objects.create(
             disabled_optional_products=disabled,
             enabled_extended_product_search=extended,
         )
-        scan_options.save()
         scan_job, _ = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
@@ -1535,10 +1525,8 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_missing_disable_product(self):
         """Tests the get_extra_vars with extended search None."""
-        disabled = DisabledOptionalProductsOptions()
-        disabled.save()
-        scan_options = ScanOptions(disabled_optional_products=disabled)
-        scan_options.save()
+        disabled = DisabledOptionalProductsOptions.objects.create()
+        scan_options = ScanOptions.objects.create(disabled_optional_products=disabled)
         scan_job, _ = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
@@ -1558,10 +1546,10 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_missing_extended_search(self):
         """Tests the get_extra_vars with disabled products None."""
-        extended = ExtendedProductSearchOptions()
-        extended.save()
-        scan_options = ScanOptions(enabled_extended_product_search=extended)
-        scan_options.save()
+        extended = ExtendedProductSearchOptions.objects.create()
+        scan_options = ScanOptions.objects.create(
+            enabled_extended_product_search=extended
+        )
         scan_job, _ = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
@@ -1609,21 +1597,18 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_extended_search(self):
         """Tests the get_extra_vars method with extended search."""
-        extended = ExtendedProductSearchOptions(
+        extended = ExtendedProductSearchOptions.objects.create(
             jboss_eap=True,
             jboss_fuse=True,
             jboss_brms=True,
             jboss_ws=True,
             search_directories=["a", "b"],
         )
-        extended.save()
-        disabled = DisabledOptionalProductsOptions()
-        disabled.save()
-        scan_options = ScanOptions(
+        disabled = DisabledOptionalProductsOptions.objects.create()
+        scan_options = ScanOptions.objects.create(
             disabled_optional_products=disabled,
             enabled_extended_product_search=extended,
         )
-        scan_options.save()
         scan_job, _ = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
@@ -1644,17 +1629,14 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
-        extended = ExtendedProductSearchOptions()
-        extended.save()
-        disabled = DisabledOptionalProductsOptions(
+        extended = ExtendedProductSearchOptions.objects.create()
+        disabled = DisabledOptionalProductsOptions.objects.create(
             jboss_eap=True, jboss_fuse=True, jboss_brms=False, jboss_ws=False
         )
-        disabled.save()
-        scan_options = ScanOptions(
+        scan_options = ScanOptions.objects.create(
             disabled_optional_products=disabled,
             enabled_extended_product_search=extended,
         )
-        scan_options.save()
         scan_job, _ = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
@@ -1674,17 +1656,14 @@ class ScanJobTest(TestCase):
 
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
-        extended = ExtendedProductSearchOptions()
-        extended.save()
-        disabled = DisabledOptionalProductsOptions(
+        extended = ExtendedProductSearchOptions.objects.create()
+        disabled = DisabledOptionalProductsOptions.objects.create(
             jboss_eap=True, jboss_fuse=True, jboss_brms=True, jboss_ws=True
         )
-        disabled.save()
-        scan_options = ScanOptions(
+        scan_options = ScanOptions.objects.create(
             disabled_optional_products=disabled,
             enabled_extended_product_search=extended,
         )
-        scan_options.save()
         scan_job, _ = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
@@ -1772,26 +1751,23 @@ class ScanJobTest(TestCase):
 
         # Create a connection system result
         conn_result = scan_task.prerequisites.first().connection_result
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name="Foo",
             credential=self.cred,
             status=SystemConnectionResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
         # Create an inspection system result
         inspect_result = scan_task.inspection_result
-        sys_result = SystemInspectionResult(
+        sys_result = SystemInspectionResult.objects.create(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             task_inspection_result=inspect_result,
         )
-        sys_result.save()
 
-        fact = RawFact(
+        RawFact.objects.create(
             name="fact_key", value="fact_value", system_inspection_result=sys_result
         )
-        fact.save()
 
         scan_job.save()
 

@@ -14,8 +14,7 @@ def create_scan_job(
     :return: the scan job and task
     """
     # Create scan configuration
-    scan = Scan(name=scan_name, scan_type=scan_type)
-    scan.save()
+    scan = Scan.objects.create(name=scan_name, scan_type=scan_type)
 
     # Add source to scan
     if source is not None:
@@ -27,8 +26,7 @@ def create_scan_job(
         scan.save()
 
     # Create Job
-    scan_job = ScanJob(scan=scan)
-    scan_job.save()
+    scan_job = ScanJob.objects.create(scan=scan)
 
     scan_job.queue()
 
@@ -57,8 +55,7 @@ def create_scan_job_two_tasks(
     :return: the scan job and task
     """
     # Create scan configuration
-    scan = Scan(name=scan_name, scan_type=scan_type)
-    scan.save()
+    scan = Scan.objects.create(name=scan_name, scan_type=scan_type)
 
     # Add source to scan
     if source is not None:
@@ -72,8 +69,7 @@ def create_scan_job_two_tasks(
         scan.save()
 
     # Create Job
-    scan_job = ScanJob(scan=scan)
-    scan_job.save()
+    scan_job = ScanJob.objects.create(scan=scan)
 
     scan_job.queue()
 

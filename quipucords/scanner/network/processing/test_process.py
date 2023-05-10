@@ -114,7 +114,7 @@ class TestProcess(TestCase):
 
     def setUp(self):
         """Create test case setup."""
-        self.cred = Credential(
+        self.cred = Credential.objects.create(
             name="cred1",
             username="username",
             password="password",
@@ -123,30 +123,27 @@ class TestProcess(TestCase):
             become_user="root",
             become_password="become",
         )
-        self.cred.save()
 
-        self.source = Source(name="source1", port=22)
-        self.source.save()
+        self.source = Source.objects.create(name="source1", port=22)
         self.source.credentials.add(self.cred)
 
         self.source.hosts = ["1.2.3.4"]
         self.source.save()
 
         # Create scan configuration
-        scan = Scan(name="scan_name", scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        scan.save()
+        scan = Scan.objects.create(
+            name="scan_name", scan_type=ScanTask.SCAN_TYPE_INSPECT
+        )
 
         # Add source to scan
         scan.sources.add(self.source)
 
         # Create Job
-        self.scan_job = ScanJob(scan=scan)
-        self.scan_job.save()
+        self.scan_job = ScanJob.objects.create(scan=scan)
 
-        self.scan_task = ScanTask(
+        self.scan_task = ScanTask.objects.create(
             job=self.scan_job, source=self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT
         )
-        self.scan_task.save()
 
     def test_not_result_no_processing(self):
         """Test a value that is not a task result, and needs no processing."""
