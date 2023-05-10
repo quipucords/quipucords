@@ -60,6 +60,40 @@ def get_task_runners_for_job(
     return task_runners, fingerprint_task_runner
 
 
+def create_details_report_for_scan_job(scan_job: ScanJob):
+    """Create and save a DetailsReport if the ScanJob's ScanTasks have valid Sources.
+
+    :returns: tuple[DetailsReport,str] with the created DetailsReport (if successful)
+        and error string (if not successful)
+    """
+    inspect_tasks = scan_job.tasks.filter(
+        scan_type=ScanTask.SCAN_TYPE_INSPECT
+    ).order_by("sequence_number")
+    sources = build_sources_from_tasks(inspect_tasks.filter(status=ScanTask.COMPLETED))
+
+    if not sources:
+        return None, "No connection results found."
+
+    details_report_json = {
+        "sources": sources,
+        "report_type": "details",
+        "report_version": create_report_version(),
+    }
+    has_errors, validation_result = validate_details_report_json(
+        details_report_json, False
+    )
+
+    if has_errors:
+        return None, f"Scan produced invalid details report JSON: {validation_result}"
+
+    if details_report := create_details_report(
+        create_report_version(), details_report_json
+    ):
+        return details_report, None
+
+    return None, "No facts gathered from scan."
+
+
 class ScanJobRunner:
     """Proxy class to initialize the proper ScanJobRunner."""
 
@@ -149,17 +183,13 @@ class SyncScanJobRunner:
             ScanTask.SCAN_TYPE_INSPECT,
             ScanTask.SCAN_TYPE_FINGERPRINT,
         ]:
-            details_report = fingerprint_task_runner.scan_task.details_report
-
-            if not details_report:
-                # Create the details report
-                has_errors, details_report = self._create_details_report()
-                if has_errors:
+            if not (details_report := fingerprint_task_runner.scan_task.details_report):
+                details_report, error_message = create_details_report_for_scan_job(
+                    self.scan_job
+                )
+                if not details_report:
+                    self.scan_job.fail(error_message)
                     return ScanTask.FAILED
-
-            if not details_report:
-                self.scan_job.fail("No facts gathered from scan.")
-                return ScanTask.FAILED
 
             # Associate details report with scan job
             self.scan_job.details_report = details_report
@@ -262,40 +292,3 @@ class SyncScanJobRunner:
             runner.scan_task.fail(error_message)
             task_status = ScanTask.FAILED
         return task_status
-
-    def _create_details_report(self):
-        """Send collected host scan facts to fact endpoint.
-
-        :returns: bool indicating if there are errors and dict with result.
-        """
-        inspect_tasks = self.scan_job.tasks.filter(
-            scan_type=ScanTask.SCAN_TYPE_INSPECT
-        ).order_by("sequence_number")
-        sources = build_sources_from_tasks(
-            inspect_tasks.filter(status=ScanTask.COMPLETED)
-        )
-        if bool(sources):
-            details_report_json = {
-                "sources": sources,
-                "report_type": "details",
-                "report_version": create_report_version(),
-            }
-            has_errors, validation_result = validate_details_report_json(
-                details_report_json, False
-            )
-
-            if has_errors:
-                message = (
-                    f"Scan produced invalid details report JSON: {validation_result}"
-                )
-                self.scan_job.fail(message)
-                return True, {}
-
-            # Create FC model and save data to JSON file
-            details_report = create_details_report(
-                create_report_version(), details_report_json
-            )
-            return False, details_report
-        message = "No connection results found."
-        self.scan_job.fail(message)
-        return True, {}
