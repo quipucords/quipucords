@@ -94,6 +94,52 @@ def create_details_report_for_scan_job(scan_job: ScanJob):
     return None, "No facts gathered from scan."
 
 
+def run_task_runner(runner: ScanTaskRunner, *run_args):
+    """Run a single scan task.
+
+    :param runner: ScanTaskRunner
+    """
+    runner.scan_task.start()  # Only updates the ScanTask model in the database.
+    try:
+        status_message, task_status = runner.run(*run_args)
+    except Exception as error:
+        failed_task = runner.scan_task
+        context_message = (
+            "Unexpected failure occurred. See context below.\n"
+            f"SCAN JOB: {runner.scan_job}\nTASK: {failed_task}\n"
+        )
+        if failed_task.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
+            creds = [str(cred) for cred in failed_task.source.credentials.all()]
+            context_message += f"SOURCE: {failed_task.source}\nCREDENTIALS: [{creds}]"
+        failed_task.fail(context_message)
+
+        message = f"FATAL ERROR. {str(error)}"
+        runner.scan_job.fail(message)
+        raise error
+
+    # Save Task status
+    if task_status == ScanTask.CANCELED:
+        runner.scan_task.cancel()
+        runner.scan_job.cancel()
+    elif task_status == ScanTask.PAUSED:
+        runner.scan_task.pause()
+        runner.scan_job.pause()
+    elif task_status == ScanTask.COMPLETED:
+        runner.scan_task.complete(status_message)
+    elif task_status == ScanTask.FAILED:
+        runner.scan_task.fail(status_message)
+    else:
+        error_message = (
+            f"ScanTask {runner.scan_task.sequence_number:d} failed."
+            " Scan task must return"
+            " ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned"
+            f' "{task_status}" and the following status message: {status_message}'
+        )
+        runner.scan_task.fail(error_message)
+        task_status = ScanTask.FAILED
+    return task_status
+
+
 class ScanJobRunner:
     """Proxy class to initialize the proper ScanJobRunner."""
 
@@ -170,7 +216,9 @@ class SyncScanJobRunner:
 
         failed_tasks = []
         for runner in task_runners:
-            task_status = self._run_task(runner)
+            if interrupt_status := self.check_manager_interrupt():
+                return interrupt_status
+            task_status = run_task_runner(runner, self.manager_interrupt)
 
             if task_status == ScanTask.FAILED:
                 # Task did not complete successfully
@@ -199,7 +247,11 @@ class SyncScanJobRunner:
             fingerprint_task_runner.scan_task.details_report = details_report
             fingerprint_task_runner.scan_task.save()
             try:
-                task_status = self._run_task(fingerprint_task_runner)
+                if interrupt_status := self.check_manager_interrupt():
+                    return interrupt_status
+                task_status = run_task_runner(
+                    fingerprint_task_runner, self.manager_interrupt
+                )
             except Exception as error:
                 fingerprint_task_runner.scan_task.log_message(
                     "DETAILS REPORT - "
@@ -242,53 +294,3 @@ class SyncScanJobRunner:
 
         self.scan_job.complete()
         return ScanTask.COMPLETED
-
-    def _run_task(self, runner: ScanTaskRunner):
-        """Run a single scan task.
-
-        :param runner: ScanTaskRunner
-        """
-        if interrupt_status := self.check_manager_interrupt():
-            return interrupt_status
-
-        runner.scan_task.start()  # Only updates the ScanTask model in the database.
-        try:
-            status_message, task_status = runner.run(self.manager_interrupt)
-        except Exception as error:
-            failed_task = runner.scan_task
-            context_message = (
-                "Unexpected failure occurred. See context below.\n"
-                f"SCAN JOB: {self.scan_job}\nTASK: {failed_task}\n"
-            )
-            if failed_task.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
-                creds = [str(cred) for cred in failed_task.source.credentials.all()]
-                context_message += (
-                    f"SOURCE: {failed_task.source}\nCREDENTIALS: [{creds}]"
-                )
-            failed_task.fail(context_message)
-
-            message = f"FATAL ERROR. {str(error)}"
-            self.scan_job.fail(message)
-            raise error
-
-        # Save Task status
-        if task_status == ScanTask.CANCELED:
-            runner.scan_task.cancel()
-            runner.scan_job.cancel()
-        elif task_status == ScanTask.PAUSED:
-            runner.scan_task.pause()
-            runner.scan_job.pause()
-        elif task_status == ScanTask.COMPLETED:
-            runner.scan_task.complete(status_message)
-        elif task_status == ScanTask.FAILED:
-            runner.scan_task.fail(status_message)
-        else:
-            error_message = (
-                f"ScanTask {runner.scan_task.sequence_number:d} failed."
-                " Scan task must return"
-                " ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned"
-                f' "{task_status}" and the following status message: {status_message}'
-            )
-            runner.scan_task.fail(error_message)
-            task_status = ScanTask.FAILED
-        return task_status
