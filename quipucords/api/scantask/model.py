@@ -182,7 +182,6 @@ class ScanTask(models.Model):
         self, message, log_level=logging.INFO, static_options=None, exception=None
     ):
         """Log a message for this task."""
-        # pylint: disable=no-member
         if exception:
             logger.exception("Got an exception.")
 
@@ -194,7 +193,6 @@ class ScanTask(models.Model):
     # All scan task types
     def _log_scan_message(self, message, log_level=logging.INFO, static_options=None):
         """Log a message for this task."""
-        # pylint: disable=no-member
         if static_options is not None:
             actual_message = (
                 f"Job {self.job_id:d},"
@@ -216,7 +214,6 @@ class ScanTask(models.Model):
     def _log_fingerprint_message(self, message, log_level=logging.INFO):
         """Log a message for this task."""
         elapsed_time = self._compute_elapsed_time()
-        # pylint: disable=no-member
         details_report_id = None
         if self.details_report:
             details_report_id = self.details_report.id
