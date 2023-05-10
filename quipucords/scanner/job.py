@@ -225,14 +225,15 @@ class SyncScanJobRunner:
             status_message, task_status = runner.run(self.manager_interrupt)
         except Exception as error:
             failed_task = runner.scan_task
-            context_message = "Unexpected failure occurred."
-            context_message += "See context below.\n"
-            context_message += f"SCAN JOB: {self.scan_job}\n"
-            context_message += f"TASK: {failed_task}\n"
+            context_message = (
+                "Unexpected failure occurred. See context below.\n"
+                f"SCAN JOB: {self.scan_job}\nTASK: {failed_task}\n"
+            )
             if failed_task.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
-                context_message += f"SOURCE: {failed_task.source}\n"
                 creds = [str(cred) for cred in failed_task.source.credentials.all()]
-                context_message += f"CREDENTIALS: [{creds}]"
+                context_message += (
+                    f"SOURCE: {failed_task.source}\nCREDENTIALS: [{creds}]"
+                )
             failed_task.fail(context_message)
 
             message = f"FATAL ERROR. {str(error)}"
