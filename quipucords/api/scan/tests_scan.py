@@ -644,30 +644,27 @@ class TestScanList(TestCase):
             become_password=None,
             ssh_keyfile=None,
         )
-        self.cred.save()
         self.cred_for_upload = self.cred.id
 
-        self.source = Source(name="source1", source_type="network", port=22)
-        self.source.save()
+        self.source = Source.objects.create(
+            name="source1", source_type="network", port=22
+        )
         self.source.credentials.add(self.cred)
-        self.source.save()
 
-        self.test1 = Scan(name="test1", scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        self.test1.save()
+        self.test1 = Scan.objects.create(
+            name="test1", scan_type=ScanTask.SCAN_TYPE_INSPECT
+        )
         self.test1.sources.add(self.source)
-        self.test1.save()
 
-        self.test2 = Scan(name="test2", scan_type=ScanTask.SCAN_TYPE_CONNECT)
-        self.test2.save()
+        self.test2 = Scan.objects.create(
+            name="test2", scan_type=ScanTask.SCAN_TYPE_CONNECT
+        )
         self.test2.sources.add(self.source)
-        self.test2.save()
 
         # self.test1 will not have a most_recent_scanjob, self.test2
         # will.
-        job = ScanJob(scan=self.test2)
-        job.save()
+        job = ScanJob.objects.create(scan=self.test2)
         job.sources.add(self.source)
-        job.save()
 
         self.test2.most_recent_scanjob = job
         self.test2.save()

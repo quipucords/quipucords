@@ -103,10 +103,9 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
         # Create FC model and save data
         details_report = create_details_report(create_report_version(), request.data)
-        scan_job = ScanJob(
+        scan_job = ScanJob.objects.create(
             scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
         )
-        scan_job.save()
         if warn_deprecated:
             scan_job.log_message(
                 _(messages.FC_MISSING_REPORT_VERSION), log_level=logging.WARNING

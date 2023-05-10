@@ -143,12 +143,12 @@ class SourceViewSet(ModelViewSet):
                     source_id = response.data["id"]
 
                     # Create the scan job
-                    scan_job = ScanJob(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-                    scan_job.save()
+                    scan_job = ScanJob.objects.create(
+                        scan_type=ScanTask.SCAN_TYPE_CONNECT
+                    )
 
                     # Add the source
                     scan_job.sources.add(source_id)
-                    scan_job.save()
                     json_source["most_recent_connect_scan"] = scan_job.id
 
                     # Start the scan

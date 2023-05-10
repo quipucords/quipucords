@@ -59,10 +59,9 @@ def sync_merge_reports(request):
     details_report_json = _reconcile_source_versions(details_report_json)
     report_version = details_report_json.get("report_version", None)
     details_report = create_details_report(report_version, details_report_json)
-    merge_job = ScanJob(
+    merge_job = ScanJob.objects.create(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
     )
-    merge_job.save()
     merge_job.queue()
     runner = ScanJobRunner(merge_job)
     runner.run()
@@ -159,10 +158,9 @@ def _create_async_merge_report_job(details_report_data):
 
     # Create new job to run
 
-    merge_job = ScanJob(
+    merge_job = ScanJob.objects.create(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
     )
-    merge_job.save()
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
     response_data = job_serializer.data
