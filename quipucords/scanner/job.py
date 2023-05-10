@@ -37,6 +37,29 @@ def get_task_runner_class(scan_task: ScanTask):
     raise NotImplementedError
 
 
+def get_task_runners_for_job(
+    scan_job: ScanJob,
+) -> tuple[list[ScanTaskRunner], FingerprintTaskRunner | None]:
+    """Get ScanTaskRunners for all the tasks that need to run for this job."""
+    incomplete_scan_tasks = scan_job.tasks.filter(
+        Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
+    ).order_by("sequence_number")
+
+    fingerprint_task_runner: FingerprintTaskRunner | None = None
+    task_runners: list[ScanTaskRunner] = []
+
+    for scan_task in incomplete_scan_tasks:
+        runner_class = get_task_runner_class(scan_task)
+        runner = runner_class(scan_job, scan_task)
+        if isinstance(runner, FingerprintTaskRunner):
+            fingerprint_task_runner = runner
+        else:
+            task_runners.append(runner)
+
+    scan_job.log_message(f"Job has {len(incomplete_scan_tasks):d} remaining tasks")
+    return task_runners, fingerprint_task_runner
+
+
 class ScanJobRunner:
     """Proxy class to initialize the proper ScanJobRunner."""
 
@@ -95,28 +118,6 @@ class SyncScanJobRunner:
 
         return None
 
-    def _get_runners(self) -> tuple[list[ScanTaskRunner], FingerprintTaskRunner | None]:
-        """Get ScanTaskRunners for all the tasks that need to run for this job."""
-        incomplete_scan_tasks = self.scan_job.tasks.filter(
-            Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
-        ).order_by("sequence_number")
-
-        fingerprint_task_runner: FingerprintTaskRunner | None = None
-        task_runners: list[ScanTaskRunner] = []
-
-        for scan_task in incomplete_scan_tasks:
-            runner_class = get_task_runner_class(scan_task)
-            runner = runner_class(self.scan_job, scan_task)
-            if isinstance(runner, FingerprintTaskRunner):
-                fingerprint_task_runner = runner
-            else:
-                task_runners.append(runner)
-
-        self.scan_job.log_message(
-            f"Job has {len(incomplete_scan_tasks):d} remaining tasks"
-        )
-        return task_runners, fingerprint_task_runner
-
     def run(self):
         """Execute runner."""
         # pylint: disable=too-many-return-statements,too-many-branches
@@ -131,7 +132,7 @@ class SyncScanJobRunner:
             self.scan_job.fail(error_message)
             return ScanTask.FAILED
 
-        task_runners, fingerprint_task_runner = self._get_runners()
+        task_runners, fingerprint_task_runner = get_task_runners_for_job(self.scan_job)
 
         failed_tasks = []
         for runner in task_runners:
