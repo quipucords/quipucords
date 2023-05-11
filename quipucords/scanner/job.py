@@ -6,7 +6,6 @@ import logging
 from multiprocessing import Process, Value
 
 from django.conf import settings
-from django.db.models import Q
 
 from api.common.common_report import create_report_version
 from api.details_report.util import (
@@ -42,7 +41,7 @@ def get_task_runners_for_job(
 ) -> tuple[list[ScanTaskRunner], FingerprintTaskRunner | None]:
     """Get ScanTaskRunners for all the tasks that need to run for this job."""
     incomplete_scan_tasks = scan_job.tasks.filter(
-        Q(status=ScanTask.RUNNING) | Q(status=ScanTask.PENDING)
+        status__in=[ScanTask.RUNNING, ScanTask.PENDING]
     ).order_by("sequence_number")
 
     fingerprint_task_runner: FingerprintTaskRunner | None = None
