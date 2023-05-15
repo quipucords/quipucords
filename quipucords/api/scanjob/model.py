@@ -489,7 +489,7 @@ class ScanJob(models.Model):
         self.log_current_status()
 
     @transaction.atomic
-    def cancel(self):
+    def status_cancel(self):
         """Change status from CREATED/PENDING/RUNNING/PAUSED to CANCELED."""
         self.end_time = datetime.utcnow()
         target_status = ScanTask.CANCELED
