@@ -253,7 +253,7 @@ class ScanViewSet(ModelViewSet):
                 )
                 if jobs_to_cancel:
                     for job in jobs_to_cancel:
-                        job.cancel()
+                        job.status_cancel()
                         cancel_scan.send(sender=self.__class__, instance=job)
 
                 for job in scan.jobs.all():

@@ -122,7 +122,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
     # Save Task status
     if task_status == ScanTask.CANCELED:
         runner.scan_task.cancel()
-        runner.scan_job.cancel()
+        runner.scan_job.status_cancel()
     elif task_status == ScanTask.PAUSED:
         runner.scan_task.pause()
         runner.scan_job.status_pause()
@@ -190,7 +190,7 @@ class SyncScanJobRunner:
         """Check if this job is being interrupted, and handle it if necessary."""
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            self.scan_job.cancel()
+            self.scan_job.status_cancel()
             return ScanTask.CANCELED
 
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
