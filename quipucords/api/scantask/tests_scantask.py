@@ -79,7 +79,7 @@ class ScanTaskTest(TestCase):
             status=ScanTask.PENDING,
         )
         start_time = datetime.utcnow()
-        task.start()
+        task.status_start()
         task.save()
         self.assertEqual(messages.ST_STATUS_MSG_RUNNING, task.status_message)
         self.assertEqual(task.status, ScanTask.RUNNING)

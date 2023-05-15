@@ -98,7 +98,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
 
     :param runner: ScanTaskRunner
     """
-    runner.scan_task.start()  # Only updates the ScanTask model in the database.
+    runner.scan_task.status_start()  # Only updates the ScanTask model in the database.
     try:
         status_message, task_status = runner.run(*run_args)
     except Exception as error:

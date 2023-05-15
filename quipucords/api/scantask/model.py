@@ -331,7 +331,7 @@ class ScanTask(models.Model):
         )
 
     # All task types
-    def start(self):
+    def status_start(self):
         """Change status to RUNNING."""
         self.start_time = datetime.utcnow()
         self.status = ScanTask.RUNNING
