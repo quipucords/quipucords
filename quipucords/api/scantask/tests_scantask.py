@@ -101,7 +101,7 @@ class ScanTaskTest(TestCase):
         self.assertEqual(task.status, ScanTask.PENDING)
 
     def test_successful_pause(self):
-        """Create a scan task and pause it."""
+        """Create a scan task and status_pause it."""
         task = ScanTask.objects.create(
             job=self.scan_job,
             source=self.source,

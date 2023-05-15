@@ -246,7 +246,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         if scan.status == ScanTask.RUNNING:
             # Kill job before changing job state
             pause_scan.send(sender=self.__class__, instance=scan)
-            scan.pause()
+            scan.status_pause()
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
             json_scan = expand_scanjob(json_scan)
