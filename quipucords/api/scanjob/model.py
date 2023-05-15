@@ -456,7 +456,7 @@ class ScanJob(models.Model):
         paused_tasks = self.tasks.filter(Q(status=ScanTask.PAUSED))
         if paused_tasks:
             for task in paused_tasks:
-                task.restart()
+                task.status_restart()
 
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
