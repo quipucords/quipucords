@@ -515,7 +515,7 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    def complete(self):
+    def status_complete(self):
         """Change status from RUNNING to COMPLETE."""
         self.end_time = datetime.utcnow()
         target_status = ScanTask.COMPLETED
