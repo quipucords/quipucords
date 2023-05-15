@@ -132,7 +132,7 @@ class ScanJobTest(TestCase):
         scan_job.pause()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.start()
+        scan_job.status_start()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
         scan_job.cancel()
@@ -168,7 +168,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(len(tasks), 1)
 
         # Start job
-        scan_job.start()
+        scan_job.status_start()
 
     def test_pause_restart_task(self):
         """Test pause and restart task."""
@@ -185,7 +185,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         # Start job
-        scan_job.start()
+        scan_job.status_start()
         self.assertEqual(scan_job.status, ScanTask.RUNNING)
 
         scan_job.pause()

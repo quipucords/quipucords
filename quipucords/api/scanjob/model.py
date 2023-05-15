@@ -431,7 +431,7 @@ class ScanJob(models.Model):
 
             self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
-    def start(self):
+    def status_start(self):
         """Change status from PENDING to RUNNING."""
         self.start_time = datetime.utcnow()
         target_status = ScanTask.RUNNING
