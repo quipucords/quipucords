@@ -138,7 +138,7 @@ class ScanJobTest(TestCase):
         scan_job.cancel()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.restart()
+        scan_job.status_restart()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
         scan_job.fail("test failure")
@@ -193,7 +193,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(scan_job.status, ScanTask.PAUSED)
         self.assertEqual(connect_task.status, ScanTask.PAUSED)
 
-        scan_job.restart()
+        scan_job.status_restart()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.PENDING)
         self.assertEqual(connect_task.status, ScanTask.PENDING)

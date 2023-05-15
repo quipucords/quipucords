@@ -287,7 +287,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         # pylint: disable=no-else-return
         if scan.status == ScanTask.PAUSED:
             # Update job state before starting job
-            scan.restart()
+            scan.status_restart()
             restart_scan.send(sender=self.__class__, instance=scan)
             serializer = ScanJobSerializer(scan)
             json_scan = serializer.data
