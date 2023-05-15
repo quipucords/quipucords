@@ -444,7 +444,7 @@ class ScanJob(models.Model):
         self.save()
         self.log_current_status()
 
-    def restart(self):
+    def status_restart(self):
         """Change status from PENDING/PAUSED/RUNNING to PENDING."""
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(
