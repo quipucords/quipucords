@@ -464,7 +464,7 @@ class ScanJob(models.Model):
         self.log_current_status()
 
     @transaction.atomic
-    def pause(self):
+    def status_pause(self):
         """Change status from PENDING/RUNNING to PAUSED."""
         target_status = ScanTask.PAUSED
         has_error = self.validate_status_change(

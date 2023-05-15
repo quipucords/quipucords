@@ -125,7 +125,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
         runner.scan_job.cancel()
     elif task_status == ScanTask.PAUSED:
         runner.scan_task.pause()
-        runner.scan_job.pause()
+        runner.scan_job.status_pause()
     elif task_status == ScanTask.COMPLETED:
         runner.scan_task.complete(status_message)
     elif task_status == ScanTask.FAILED:
@@ -195,7 +195,7 @@ class SyncScanJobRunner:
 
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
-            self.scan_job.pause()
+            self.scan_job.status_pause()
             return ScanTask.PAUSED
 
         return None
