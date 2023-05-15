@@ -139,7 +139,7 @@ class ScanTaskTest(TestCase):
             status=ScanTask.PENDING,
         )
         end_time = datetime.utcnow()
-        task.complete("great")
+        task.status_complete("great")
         task.save()
         self.assertEqual("great", task.status_message)
         self.assertEqual(task.status, ScanTask.COMPLETED)

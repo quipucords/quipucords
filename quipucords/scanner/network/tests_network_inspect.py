@@ -82,7 +82,7 @@ class NetworkInspectScannerTest(TestCase):
         self.connect_scan_task.update_stats(
             "TEST_VC.", sys_count=2, sys_failed=1, sys_scanned=1
         )
-        self.connect_scan_task.complete()
+        self.connect_scan_task.status_complete()
 
         self.scan_task.update_stats("TEST NETWORK INSPECT.", sys_failed=0)
 
