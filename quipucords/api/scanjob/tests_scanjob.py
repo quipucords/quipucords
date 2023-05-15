@@ -126,7 +126,7 @@ class ScanJobTest(TestCase):
         scan_job.queue()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.complete()
+        scan_job.status_complete()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
         scan_job.status_pause()
@@ -149,7 +149,7 @@ class ScanJobTest(TestCase):
         self.assertEqual(scan_job.status, ScanTask.CREATED)
 
         scan_job.status = ScanTask.RUNNING
-        scan_job.complete()
+        scan_job.status_complete()
         self.assertEqual(scan_job.status, ScanTask.COMPLETED)
 
     def test_start_task(self):

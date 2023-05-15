@@ -291,5 +291,5 @@ class SyncScanJobRunner:
             self.scan_job.fail(error_message)
             return ScanTask.FAILED
 
-        self.scan_job.complete()
+        self.scan_job.status_complete()
         return ScanTask.COMPLETED
