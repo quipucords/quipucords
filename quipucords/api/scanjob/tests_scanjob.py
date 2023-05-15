@@ -141,11 +141,11 @@ class ScanJobTest(TestCase):
         scan_job.status_restart()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.fail("test failure")
+        scan_job.status_fail("test failure")
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
         scan_job.status = ScanTask.CREATED
-        scan_job.fail("test failure")
+        scan_job.status_fail("test failure")
         self.assertEqual(scan_job.status, ScanTask.CREATED)
 
         scan_job.status = ScanTask.RUNNING

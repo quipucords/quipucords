@@ -116,7 +116,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
         failed_task.fail(context_message)
 
         message = f"FATAL ERROR. {str(error)}"
-        runner.scan_job.fail(message)
+        runner.scan_job.status_fail(message)
         raise error
 
     # Save Task status
@@ -211,7 +211,7 @@ class SyncScanJobRunner:
             error_message = (
                 "Job could not transition to running state.  See error logs."
             )
-            self.scan_job.fail(error_message)
+            self.scan_job.status_fail(error_message)
             return ScanTask.FAILED
 
         task_runners, fingerprint_task_runner = get_task_runners_for_job(self.scan_job)
@@ -235,7 +235,7 @@ class SyncScanJobRunner:
                     self.scan_job
                 )
                 if not details_report:
-                    self.scan_job.fail(error_message)
+                    self.scan_job.status_fail(error_message)
                     return ScanTask.FAILED
 
             # Associate details report with scan job
@@ -288,7 +288,7 @@ class SyncScanJobRunner:
                 [str(task.sequence_number) for task in failed_tasks]
             )
             error_message = f"The following tasks failed: {failed_task_ids}"
-            self.scan_job.fail(error_message)
+            self.scan_job.status_fail(error_message)
             return ScanTask.FAILED
 
         self.scan_job.status_complete()
