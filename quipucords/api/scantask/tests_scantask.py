@@ -158,7 +158,7 @@ class ScanTaskTest(TestCase):
         # pylint: disable=invalid-name
         MSG = "Test Fail."
         end_time = datetime.utcnow()
-        task.fail(MSG)
+        task.status_fail(MSG)
         task.save()
         self.assertEqual(MSG, task.status_message)
         self.assertEqual(task.status, ScanTask.FAILED)

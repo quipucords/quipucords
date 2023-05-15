@@ -113,7 +113,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
         if failed_task.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
             creds = [str(cred) for cred in failed_task.source.credentials.all()]
             context_message += f"SOURCE: {failed_task.source}\nCREDENTIALS: [{creds}]"
-        failed_task.fail(context_message)
+        failed_task.status_fail(context_message)
 
         message = f"FATAL ERROR. {str(error)}"
         runner.scan_job.status_fail(message)
@@ -129,7 +129,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
     elif task_status == ScanTask.COMPLETED:
         runner.scan_task.status_complete(status_message)
     elif task_status == ScanTask.FAILED:
-        runner.scan_task.fail(status_message)
+        runner.scan_task.status_fail(status_message)
     else:
         error_message = (
             f"ScanTask {runner.scan_task.sequence_number:d} failed."
@@ -137,7 +137,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
             " ScanTask.COMPLETED or ScanTask.FAILED. ScanTask returned"
             f' "{task_status}" and the following status message: {status_message}'
         )
-        runner.scan_task.fail(error_message)
+        runner.scan_task.status_fail(error_message)
         task_status = ScanTask.FAILED
     return task_status
 

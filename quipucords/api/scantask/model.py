@@ -383,8 +383,8 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    def fail(self, message):
-        """Fail a task.
+    def status_fail(self, message):
+        """Change status to FAILED.
 
         :param message: The error message associated with failure
         """
