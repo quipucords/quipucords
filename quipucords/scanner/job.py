@@ -206,7 +206,7 @@ class SyncScanJobRunner:
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
 
-        self.scan_job.start()  # Only updates the ScanJob model in the database.
+        self.scan_job.status_start()
         if self.scan_job.status != ScanTask.RUNNING:
             error_message = (
                 "Job could not transition to running state.  See error logs."
