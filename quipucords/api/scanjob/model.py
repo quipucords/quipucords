@@ -529,7 +529,7 @@ class ScanJob(models.Model):
         self._log_stats("COMPLETION STATS.")
         self.log_current_status()
 
-    def fail(self, message):
+    def status_fail(self, message):
         """Change status from RUNNING to FAILED.
 
         :param message: The error message associated with failure
