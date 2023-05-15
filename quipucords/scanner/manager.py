@@ -256,7 +256,7 @@ class Manager(Thread):
                                 f"{self.log_prefix}:"
                                 " scan job has unexpectedly failed."
                             )
-                            terminated_job.fail(
+                            terminated_job.status_fail(
                                 "Scan manager failed job due to unexpected error."
                             )
                         else:
