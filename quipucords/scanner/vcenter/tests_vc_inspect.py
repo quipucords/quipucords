@@ -45,7 +45,7 @@ class InspectTaskRunnerTest(TestCase):
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
         self.connect_scan_task.update_stats("TEST_VC.", sys_count=5)
-        self.connect_scan_task.complete()
+        self.connect_scan_task.status_complete()
 
         # Create task runner
         self.runner = InspectTaskRunner(

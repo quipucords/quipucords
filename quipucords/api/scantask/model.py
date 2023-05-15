@@ -367,8 +367,8 @@ class ScanTask(models.Model):
 
     # All task types
     @transaction.atomic
-    def complete(self, message=None):
-        """Complete a task."""
+    def status_complete(self, message=None):
+        """Change status to COMPLETED."""
         self.refresh_from_db()
         self.end_time = datetime.utcnow()
         self.status = ScanTask.COMPLETED

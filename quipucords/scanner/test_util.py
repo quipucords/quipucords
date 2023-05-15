@@ -33,7 +33,7 @@ def create_scan_job(
     # pylint: disable=no-member
     scan_task = scan_job.tasks.first()
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        scan_task.complete()
+        scan_task.status_complete()
         scan_task = scan_job.tasks.filter(scan_type=ScanTask.SCAN_TYPE_INSPECT).first()
 
     return scan_job, scan_task
@@ -77,6 +77,6 @@ def create_scan_job_two_tasks(
     scan_tasks = scan_job.tasks.all().order_by("sequence_number")
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         for task in scan_tasks:
-            task.complete()
+            task.status_complete()
 
     return scan_job, scan_tasks

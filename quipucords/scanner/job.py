@@ -127,7 +127,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
         runner.scan_task.status_pause()
         runner.scan_job.status_pause()
     elif task_status == ScanTask.COMPLETED:
-        runner.scan_task.complete(status_message)
+        runner.scan_task.status_complete(status_message)
     elif task_status == ScanTask.FAILED:
         runner.scan_task.fail(status_message)
     else:
