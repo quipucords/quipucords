@@ -108,7 +108,7 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING,
         )
-        task.pause()
+        task.status_pause()
         task.save()
         self.assertEqual(messages.ST_STATUS_MSG_PAUSED, task.status_message)
         self.assertEqual(task.status, ScanTask.PAUSED)

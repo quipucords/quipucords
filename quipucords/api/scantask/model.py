@@ -349,7 +349,7 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    def pause(self):
+    def status_pause(self):
         """Change status to PAUSED."""
         self.status = ScanTask.PAUSED
         self.status_message = _(messages.ST_STATUS_MSG_PAUSED)
