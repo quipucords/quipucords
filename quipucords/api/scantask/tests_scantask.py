@@ -122,7 +122,7 @@ class ScanTaskTest(TestCase):
             status=ScanTask.PENDING,
         )
         end_time = datetime.utcnow()
-        task.cancel()
+        task.status_cancel()
         task.save()
         self.assertEqual(messages.ST_STATUS_MSG_CANCELED, task.status_message)
         self.assertEqual(task.status, ScanTask.CANCELED)

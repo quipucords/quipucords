@@ -357,7 +357,7 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    def cancel(self):
+    def status_cancel(self):
         """Change status to CANCELED."""
         self.end_time = datetime.utcnow()
         self.status = ScanTask.CANCELED
