@@ -481,7 +481,7 @@ class ScanJob(models.Model):
         )
         if tasks_to_pause:
             for task in tasks_to_pause:
-                task.pause()
+                task.status_pause()
 
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_PAUSED)
