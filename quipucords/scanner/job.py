@@ -121,7 +121,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
 
     # Save Task status
     if task_status == ScanTask.CANCELED:
-        runner.scan_task.cancel()
+        runner.scan_task.status_cancel()
         runner.scan_job.status_cancel()
     elif task_status == ScanTask.PAUSED:
         runner.scan_task.status_pause()

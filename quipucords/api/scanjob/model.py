@@ -508,7 +508,7 @@ class ScanJob(models.Model):
         )
         if tasks_to_cancel:
             for task in tasks_to_cancel:
-                task.cancel()
+                task.status_cancel()
 
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_CANCELED)
