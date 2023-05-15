@@ -341,7 +341,7 @@ class ScanTask(models.Model):
         self.log_current_status()
 
     # All task types
-    def restart(self):
+    def status_restart(self):
         """Change status to PENDING."""
         self.status = ScanTask.PENDING
         self.status_message = _(messages.ST_STATUS_MSG_RESTARTED)
