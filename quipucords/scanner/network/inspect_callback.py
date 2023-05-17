@@ -210,6 +210,8 @@ class InspectResultCallback:
         """Control the cancel callback for runner."""
         if self.stopped:
             return True
+        if not self.interrupt:
+            return False
         for stop_type, stop_value in STOP_STATES.items():
             if self.interrupt.value == stop_value:
                 self.scan_task.log_message(

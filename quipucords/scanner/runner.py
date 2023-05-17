@@ -88,6 +88,8 @@ class ScanTaskRunner(metaclass=ABCMeta):
 
         :param manager_interrupt: Signal to indicate job is canceled
         """
+        if not manager_interrupt:
+            return
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             raise ScanCancelException()
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:

@@ -198,7 +198,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
-            check_manager_interrupt(manager_interrupt.value)
+            check_manager_interrupt(manager_interrupt)
             log_message = (
                 "START INSPECT PROCESSING GROUP"
                 f" {(idx + 1):d} of {len(group_names):d}"
@@ -250,9 +250,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
             final_status = runner_obj.status
             if final_status != "successful":
-                if final_status == "canceled":
-                    interrupt = manager_interrupt.value
-                    if interrupt == ScanJob.JOB_TERMINATE_CANCEL:
+                if final_status == "canceled" and manager_interrupt:
+                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
                         msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
                             "INSPECT",
                             "canceled",
@@ -263,7 +262,7 @@ class InspectTaskRunner(ScanTaskRunner):
                             "paused",
                         )
                     self.scan_task.log_message(msg)
-                    check_manager_interrupt(interrupt)
+                    check_manager_interrupt(manager_interrupt)
                 if final_status not in ["unreachable", "failed"]:
                     if final_status == "timeout":
                         error_msg = log_messages.NETWORK_TIMEOUT_ERR
