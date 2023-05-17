@@ -1,7 +1,6 @@
 """Describes the views associated with the API models."""
 
 import logging
-import os
 
 from django.db import transaction
 from django.db.models import Q
@@ -66,14 +65,9 @@ JOB_VALID_STATUS = [
     ScanTask.FAILED,
 ]
 
-authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
 
-if authentication_enabled:
-    auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
-    perm_classes = (IsAuthenticated,)
-else:
-    auth_classes = ()
-    perm_classes = ()
+auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
+perm_classes = (IsAuthenticated,)
 
 
 @api_view(["get", "post"])
@@ -173,13 +167,11 @@ class ScanFilter(FilterSet):
 class ScanViewSet(ModelViewSet):
     """A view set for Scan."""
 
-    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-    if authentication_enabled:
-        authentication_classes = (
-            QuipucordsExpiringTokenAuthentication,
-            SessionAuthentication,
-        )
-        permission_classes = (IsAuthenticated,)
+    authentication_classes = (
+        QuipucordsExpiringTokenAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
 
     queryset = Scan.objects.all()
     serializer_class = ScanSerializer
