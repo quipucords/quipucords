@@ -88,6 +88,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     network_interfaces = NetworkInterfaceSerializer(
         source="as_list", many=True, **default_kwargs
     )
+    last_boot_time = fields.CharField(max_length=50, **default_kwargs)
 
 
 class YupanaHostSerializer(NotEmptyMixin, Serializer):

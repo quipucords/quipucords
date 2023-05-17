@@ -63,6 +63,9 @@ class HostEntity:
         # (e.g.: Hosts.facts, SystemProfile.network_interfaces)
         return [self]
 
+    def last_boot_time(self):
+        return self._raw_facts.get("last_booted_at")
+
     @property
     def number_of_cpus(self):
         """Retrieve number of cpus."""
@@ -294,6 +297,7 @@ class ReportEntity:
         hosts = []
         for fingerprint in fingerprints:
             matching_facts = next((f for f in raw_facts if f.get('etc_machine_id') == fingerprint.etc_machine_id), None)
+            # idea here was comparing a fact I know has unique value
             host = HostEntity(fingerprint, matching_facts, deployment_report.last_discovered)
             hosts.append(host)
         if skip_non_canonical:
@@ -331,6 +335,7 @@ class ReportEntity:
             .all()
         )
         raw_facts = deployment_report.details_report.sources[0]["facts"]
+        # problem: what if there are multiple sources? still didnt do a scan with multiple
         return deployment_report, fingerprints, raw_facts
 
     @cached_property
