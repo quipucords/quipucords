@@ -40,6 +40,7 @@ class HostEntity:
     """A proxy over SystemFingerprint with some extra steps."""
 
     _fingerprints: SystemFingerprint
+    _raw_facts: dict
     last_discovered: datetime
 
     def __getattr__(self, attr):
@@ -51,7 +52,9 @@ class HostEntity:
         """
         with suppress(AttributeError):
             return super().__getattribute__(attr)
-        return getattr(self._fingerprints, attr)
+        if hasattr(self._fingerprints, attr):
+            return getattr(self._fingerprints, attr)
+        return self._raw_facts.get(attr)
 
     def as_list(self):
         """Return a list containing this instance."""
@@ -287,8 +290,12 @@ class ReportEntity:
     @classmethod
     def from_report_id(cls, report_id, skip_non_canonical=True):
         """Create a Report from a report_id."""
-        deployment_report, fingerprints = cls._get_deployment_report(report_id)
-        hosts = [HostEntity(f, deployment_report.last_discovered) for f in fingerprints]
+        deployment_report, fingerprints, raw_facts = cls._get_deployment_report(report_id)
+        hosts = []
+        for fingerprint in fingerprints:
+            matching_facts = next((f for f in raw_facts if f.get('etc_machine_id') == fingerprint.etc_machine_id), None)
+            host = HostEntity(fingerprint, matching_facts, deployment_report.last_discovered)
+            hosts.append(host)
         if skip_non_canonical:
             hosts = list(filter(cls._has_canonical_facts, hosts))
         cls._validate_hosts_qty(report_id, hosts)
@@ -323,7 +330,8 @@ class ReportEntity:
             )
             .all()
         )
-        return deployment_report, fingerprints
+        raw_facts = deployment_report.details_report.sources[0]["facts"]
+        return deployment_report, fingerprints, raw_facts
 
     @cached_property
     def slices(self) -> Dict[str, "ReportSlice"]:
