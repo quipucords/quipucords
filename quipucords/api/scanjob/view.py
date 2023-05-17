@@ -1,7 +1,6 @@
 """Describes the views associated with the API models."""
 
 import logging
-import os
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -92,13 +91,11 @@ class ScanJobFilter(FilterSet):
 class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
-    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-    if authentication_enabled:
-        authentication_classes = (
-            QuipucordsExpiringTokenAuthentication,
-            SessionAuthentication,
-        )
-        permission_classes = (IsAuthenticated,)
+    authentication_classes = (
+        QuipucordsExpiringTokenAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializer

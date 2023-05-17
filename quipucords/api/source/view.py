@@ -1,6 +1,5 @@
 """Describes the views associated with the API models."""
 
-import os
 
 from django.db import transaction
 from django.http import Http404
@@ -82,13 +81,11 @@ class SourceFilter(FilterSet):
 class SourceViewSet(ModelViewSet):
     """A view set for Sources."""
 
-    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-    if authentication_enabled:
-        authentication_classes = (
-            QuipucordsExpiringTokenAuthentication,
-            SessionAuthentication,
-        )
-        permission_classes = (IsAuthenticated,)
+    authentication_classes = (
+        QuipucordsExpiringTokenAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
 
     queryset = Source.objects.all()
     serializer_class = SourceSerializer

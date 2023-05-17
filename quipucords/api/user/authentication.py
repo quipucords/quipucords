@@ -1,7 +1,6 @@
 """Expiring token authorization."""
 
 import datetime
-import os
 
 from django.conf import settings
 from rest_framework import exceptions
@@ -13,10 +12,6 @@ class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
 
     def authenticate_credentials(self, key):
         """Authenticate token."""
-        authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-        if not authentication_enabled:
-            # skip this without authentication
-            return None
         try:
             token = self.get_model().objects.get(key=key)
         except self.get_model().DoesNotExist as exception:

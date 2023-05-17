@@ -1,7 +1,6 @@
 """Viewset for system facts models."""
 
 import logging
-import os
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
@@ -36,14 +35,9 @@ from scanner.job import ScanJobRunner
 # Get an instance of a logger
 # pylint: disable=invalid-name
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
-authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
 
-if authentication_enabled:
-    auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
-    perm_classes = (IsAuthenticated,)
-else:
-    auth_classes = ()
-    perm_classes = ()
+auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
+perm_classes = (IsAuthenticated,)
 
 
 @api_view(["GET"])
@@ -76,13 +70,11 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     This is internal API for a sync way to create a report.
     """
 
-    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-    if authentication_enabled:
-        authentication_classes = (
-            QuipucordsExpiringTokenAuthentication,
-            SessionAuthentication,
-        )
-        permission_classes = (IsAuthenticated,)
+    authentication_classes = (
+        QuipucordsExpiringTokenAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
 
     queryset = DetailsReport.objects.all()
     serializer_class = DetailsReportSerializer

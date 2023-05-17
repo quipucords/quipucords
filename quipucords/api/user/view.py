@@ -1,6 +1,5 @@
 """Viewset for user function."""
 import logging
-import os
 
 from django.contrib.auth import logout
 from rest_framework import viewsets
@@ -19,13 +18,11 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 class UserViewSet(viewsets.GenericViewSet):
     """User view for logout and user data."""
 
-    authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-    if authentication_enabled:
-        authentication_classes = (
-            QuipucordsExpiringTokenAuthentication,
-            SessionAuthentication,
-        )
-        permission_classes = (IsAuthenticated,)
+    authentication_classes = (
+        QuipucordsExpiringTokenAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
 
     @action(detail=False, methods=["get"])
     def current(self, request):
@@ -35,9 +32,6 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=["put"])
     def logout(self, request):
         """Log out the current authenticated user."""
-        authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
-        if not authentication_enabled:
-            return Response()
         instance = request.user
         logout(request)
         token = Token.objects.filter(user=instance).first()

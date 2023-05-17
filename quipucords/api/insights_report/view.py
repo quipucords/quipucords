@@ -1,6 +1,5 @@
 """View for system reports."""
 import logging
-import os
 
 from django.shortcuts import get_object_or_404
 from rest_framework.authentication import SessionAuthentication
@@ -25,14 +24,9 @@ from api.user.authentication import QuipucordsExpiringTokenAuthentication
 # pylint: disable=invalid-name
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-authentication_enabled = os.getenv("QPC_DISABLE_AUTHENTICATION") != "True"
 
-if authentication_enabled:
-    auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
-    perm_classes = (IsAuthenticated,)
-else:
-    auth_classes = ()
-    perm_classes = ()
+auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
+perm_classes = (IsAuthenticated,)
 
 
 @api_view(["GET"])
