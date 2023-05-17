@@ -188,6 +188,9 @@ class SyncScanJobRunner:
 
     def check_manager_interrupt(self) -> str | None:
         """Check if this job is being interrupted, and handle it if necessary."""
+        if not self.manager_interrupt:
+            return None
+
         if self.manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
             self.manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK
             self.scan_job.status_cancel()

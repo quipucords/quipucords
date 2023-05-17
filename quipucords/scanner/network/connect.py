@@ -165,7 +165,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         remaining_hosts = result_store.remaining_hosts()
 
         for cred_id in credentials:
-            check_manager_interrupt(manager_interrupt.value)
+            check_manager_interrupt(manager_interrupt)
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
                 message = f"Skipping credential {credential.name}. No remaining hosts."
@@ -253,7 +253,7 @@ def _connect(  # pylint: disable=too-many-arguments
     )
     scan_task.log_message(log_message)
     for idx, group_name in enumerate(group_names):
-        check_manager_interrupt(manager_interrupt.value)
+        check_manager_interrupt(manager_interrupt)
         group_ips = (
             inventory.get("all").get("children").get(group_name).get("hosts").keys()
         )
@@ -309,7 +309,10 @@ def _connect(  # pylint: disable=too-many-arguments
         final_status = runner_obj.status
         if final_status != "successful":
             if final_status == "canceled":
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                if (
+                    manager_interrupt
+                    and manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL
+                ):
                     msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
                         "CONNECT",
                         "canceled",

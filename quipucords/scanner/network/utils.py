@@ -1,6 +1,7 @@
 """Scanner used for host connection discovery."""
 
 from functools import cache
+from multiprocessing import Value
 
 import yaml
 from ansible.parsing.utils.addresses import parse_address
@@ -18,11 +19,13 @@ STOP_STATES = {
 }
 
 
-def check_manager_interrupt(interrupt_value):
+def check_manager_interrupt(interrupt: Value):
     """Check if cancel & pause exception should be raised."""
-    if interrupt_value == ScanJob.JOB_TERMINATE_CANCEL:
+    if not interrupt:
+        return
+    if interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
         raise NetworkCancelException()
-    if interrupt_value == ScanJob.JOB_TERMINATE_PAUSE:
+    if interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
         raise NetworkPauseException()
 
 
