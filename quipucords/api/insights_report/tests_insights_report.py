@@ -18,7 +18,7 @@ from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
 class TestInsightsReport:
     """Tests against the Insights reports function."""
 
-    def test_get_insights_report_200_exists(self, client):
+    def test_get_insights_report_200_exists(self, django_client):
         """Retrieve insights report."""
         deployment_report = DeploymentReportFactory(
             number_of_fingerprints=3,
@@ -27,12 +27,12 @@ class TestInsightsReport:
         url = f"/api/v1/reports/{deployment_report.id}/insights/"
         # mock slice size so we can expect 2 slices on this test
         with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=2):
-            response = client.get(url)
+            response = django_client.get(url)
         assert response.status_code == 200, response.json()
         response_json = response.json()
         self.validate_data(response_json, deployment_report)
 
-    def test_get_insights_report_tarball_200_exists(self, client):
+    def test_get_insights_report_tarball_200_exists(self, django_client):
         """Retrieve insights report."""
         deployments_report = DeploymentReportFactory(
             number_of_fingerprints=11,
@@ -41,7 +41,7 @@ class TestInsightsReport:
         url = f"/api/v1/reports/{deployments_report.id}/insights/?format=tar.gz"
         # mock slice size so we can expect 2 slices on this test
         with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
-            response = client.get(url)
+            response = django_client.get(url)
         assert response.status_code == 200
         # reformat tarball to match json report
         with tarfile.open(fileobj=BytesIO(response.content)) as tar:
@@ -86,13 +86,13 @@ class TestInsightsReport:
         # the total number of host (before call)
         assert total_returned_hosts_num == len(expected_host_names)
 
-    def test_get_insights_report_200_generate_exists(self, client):
+    def test_get_insights_report_200_generate_exists(self, django_client):
         """Retrieve insights report."""
         deployment_report = DeploymentReportFactory(
             status=DeploymentsReport.STATUS_COMPLETE,
         )
         url = f"/api/v1/reports/{deployment_report.id}/insights/"
-        response = client.get(url)
+        response = django_client.get(url)
         assert response.status_code == 200
         response_json = response.json()
 
@@ -103,7 +103,7 @@ class TestInsightsReport:
         for key in response_json:
             assert f"report_id_{deployment_report.id}/" in key
 
-    def test_get_insights_report_404_no_canonical(self, client):
+    def test_get_insights_report_404_no_canonical(self, django_client):
         """Retrieve insights report."""
         deployment_report = DeploymentReportFactory.create(
             number_of_fingerprints=0,
@@ -122,21 +122,21 @@ class TestInsightsReport:
         )
         assert deployment_report.system_fingerprints.count() == 1
         url = f"/api/v1/reports/{deployment_report.id}/insights/"
-        response = client.get(url)
+        response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_get_insights_report_bad_id(self, client):
+    def test_get_insights_report_bad_id(self, django_client):
         """Fail to get a report for bad id."""
         url = "/api/v1/reports/string/insights/"
 
         # Query API
-        response = client.get(url)
+        response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_get_insights_nonexistent(self, client):
+    def test_get_insights_nonexistent(self, django_client):
         """Fail to get a report for report id that doesn't exist."""
         url = "/api/v1/reports/999/insights/"
 
         # Query API
-        response = client.get(url)
+        response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
