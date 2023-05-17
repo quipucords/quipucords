@@ -141,10 +141,10 @@ class DetailReportTest(TestCase):
         facts = source_to_check.get("facts")
         expected_facts = [
             {
-                "ip_addresses": ["-7334718598697473719"],
-                "mac_addresses": ["-7048634151319043688", "-3493454847440916718"],
-                "uname_hostname": "-2457967226571033580",
-                "vm.name": "-2457967226571033580",
+                "ip_addresses": ["-7888362299591329248"],
+                "mac_addresses": ["6525295348555872214", "7654177207575092742"],
+                "uname_hostname": "7664243301495174138",
+                "vm.name": "7664243301495174138",
             }
         ]
         self.assertEqual(facts, expected_facts)
@@ -244,8 +244,8 @@ class DetailReportTest(TestCase):
             f"{self.server_id},test_source,network\r\n"
             "Facts\r\n"
             "ip_addresses,mac_addresses,uname_hostname,vm.name\r\n"
-            "[-7334718598697473719],[-7048634151319043688;-3493454847440916718],"
-            "-2457967226571033580,-2457967226571033580\r\n\r\n\r\n"
+            "[-7888362299591329248],[6525295348555872214;7654177207575092742],"
+            "7664243301495174138,7664243301495174138\r\n\r\n\r\n"
         )
         self.assertEqual(csv_result, expected)
 
