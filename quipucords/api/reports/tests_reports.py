@@ -24,7 +24,7 @@ from tests.utils import patch_mask_value
 class ReportsTest(LoggedUserMixin, TestCase):
     """Tests against the Reports function."""
 
-    # pylint: disable=invalid-name,too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")

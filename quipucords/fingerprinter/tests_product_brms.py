@@ -38,7 +38,6 @@ class ProductBRMSTest(TestCase):
         }
         self.assertEqual(product, expected)
 
-    # pylint: disable=C0103
     def test_detect_jboss_brms_potential_sub(self):
         """Test the detect_jboss_brms method."""
         source = {

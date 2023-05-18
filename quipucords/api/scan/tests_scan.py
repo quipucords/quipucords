@@ -13,7 +13,7 @@ from api.scan.view import expand_scan
 from scanner.test_util import create_scan_job
 from tests.mixins import LoggedUserMixin
 
-# pylint: disable=unused-argument,invalid-name
+# pylint: disable=unused-argument
 
 
 class ScanTest(LoggedUserMixin, TestCase):

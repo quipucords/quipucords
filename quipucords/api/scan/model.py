@@ -49,7 +49,6 @@ class ExtendedProductSearchOptions(models.Model):
 class DisabledOptionalProductsOptions(models.Model):
     """The disable optional products options of a scan."""
 
-    # pylint: disable=invalid-name
     MODEL_OPT_JBOSS_EAP = False
     EXTRA_VAR_OPT_JBOSS_EAP = not MODEL_OPT_JBOSS_EAP
 

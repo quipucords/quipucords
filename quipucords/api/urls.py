@@ -30,7 +30,6 @@ ROUTER.register(r"scans", ScanViewSet, basename="scan")
 ROUTER.register(r"jobs", ScanJobViewSet, basename="scanjob")
 ROUTER.register(r"users", UserViewSet, basename="users")
 
-# pylint: disable=invalid-name
 urlpatterns = [
     path("reports/<int:report_id>/details/", details),
     path("reports/<int:report_id>/deployments/", deployments),

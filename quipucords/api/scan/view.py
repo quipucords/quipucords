@@ -33,7 +33,7 @@ from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=too-many-branches,invalid-name
+# pylint: disable=too-many-branches
 
 SOURCES_KEY = "sources"
 MOST_RECENT = "most_recent"
@@ -74,7 +74,6 @@ perm_classes = (IsAuthenticated,)
 @permission_classes(perm_classes)
 def jobs(request, scan_id=None):
     """Get the jobs of a scan."""
-    # pylint: disable=invalid-name
     if scan_id is not None:
         if not is_int(scan_id):
             return Response(status=status.HTTP_404_NOT_FOUND)

@@ -103,7 +103,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     ordering_fields = ("id", "scan_type", "status", "start_time", "end_time")
     ordering = ("id",)
 
-    # pylint: disable=unused-argument, arguments-differ,invalid-name
+    # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
         """Get a scan job."""
         if not pk or (pk and not is_int(pk)):
@@ -154,7 +154,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         return (ordering_filter, status_filter, source_id_filter)
 
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,invalid-name
     @action(detail=True, methods=["get"])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""

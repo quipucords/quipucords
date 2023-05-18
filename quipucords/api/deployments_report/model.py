@@ -158,7 +158,6 @@ class SystemFingerprint(models.Model):
     # Red Hat facts
     is_redhat = models.BooleanField(null=True)
     redhat_certs = models.TextField(unique=False, blank=True, null=True)
-    # pylint: disable=invalid-name
     redhat_package_count = models.PositiveIntegerField(
         unique=False, blank=True, null=True
     )

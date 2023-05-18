@@ -117,7 +117,6 @@ class SystemFingerprintSerializer(ModelSerializer):
     # Red Hat facts
     is_redhat = BooleanField(**default_args)
     redhat_certs = CharField(**default_args)
-    # pylint: disable=invalid-name
     redhat_package_count = IntegerField(min_value=0, **default_args)
 
     metadata = JSONField(required=True)

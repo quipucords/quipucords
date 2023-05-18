@@ -23,7 +23,7 @@ def dummy_start():
     """Create a dummy method for testing."""
 
 
-# pylint: disable=too-many-instance-attributes,invalid-name,R0904,C0302
+# pylint: disable=too-many-instance-attributes,R0904,C0302
 class SourceTest(LoggedUserMixin, TestCase):
     """Test the basic Source infrastructure."""
 

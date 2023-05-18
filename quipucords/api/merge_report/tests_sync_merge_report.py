@@ -17,7 +17,6 @@ from tests.mixins import LoggedUserMixin
 class SyncMergeReports(LoggedUserMixin, TestCase):
     """Tests merging reports synchronously."""
 
-    # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")

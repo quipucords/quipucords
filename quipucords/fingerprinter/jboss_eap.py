@@ -336,13 +336,13 @@ def call_or_value(obj, argument):
 PRESENCE_ORDER = [Product.UNKNOWN, Product.ABSENT, Product.POTENTIAL, Product.PRESENT]
 
 
-# pylint: disable=invalid-name
-def presence_ge(a, b):
+def presence_ge(value_a, value_b):
     """Compare two presence values, like >= for numbers.
 
-    :returns: True if a is as or more "sure" of presence than b, False if not.
+    :returns: True if value_a is as or more "sure" of presence than value_b,
+              False if not.
     """
-    return PRESENCE_ORDER.index(a) >= PRESENCE_ORDER.index(b)
+    return PRESENCE_ORDER.index(value_a) >= PRESENCE_ORDER.index(value_b)
 
 
 def version_aware_dedup(versions):

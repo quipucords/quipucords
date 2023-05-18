@@ -1,6 +1,6 @@
 """Test the API application."""
 
-# pylint: disable=unused-argument,invalid-name,too-many-lines
+# pylint: disable=unused-argument,too-many-lines
 
 import json
 from unittest.mock import patch

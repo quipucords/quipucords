@@ -24,14 +24,14 @@ from scanner.openshift.entities import (
 logger = getLogger(__name__)
 
 
-def catch_k8s_exception(fn):  # pylint: disable=invalid-name
+def catch_k8s_exception(func):
     """Capture Kubernetes exception and reraise as OCPError."""
 
-    @wraps(fn)
+    @wraps(func)
     def _decorator(*args, **kwargs):
         _normalize_kwargs(kwargs)
         try:
-            return fn(*args, **kwargs)
+            return func(*args, **kwargs)
         except ApiException as api_exception:
             ocp_error = OCPError.from_api_exception(api_exception)
             raise ocp_error from api_exception
