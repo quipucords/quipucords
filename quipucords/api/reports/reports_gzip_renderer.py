@@ -10,8 +10,7 @@ from api.common.common_report import create_filename, create_tar_buffer, encode_
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class ReportsGzipRenderer(renderers.BaseRenderer):

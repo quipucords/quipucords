@@ -21,8 +21,6 @@ from api.insights_report.serializers import YupanaPayloadSerializer
 from api.models import DeploymentsReport, SystemFingerprint
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-# pylint: disable=invalid-name
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)

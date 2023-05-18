@@ -7,8 +7,7 @@ import log_messages
 from api.connresult.model import SystemConnectionResult
 from scanner.network.utils import STOP_STATES
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class ConnectResultCallback:

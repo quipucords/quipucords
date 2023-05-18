@@ -11,8 +11,7 @@ from rest_framework.response import Response
 
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class UserViewSet(viewsets.GenericViewSet):

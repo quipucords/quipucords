@@ -27,8 +27,7 @@ from api.serializers import (
 from api.signal.scanjob_signal import cancel_scan, pause_scan, restart_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 RESULTS_KEY = "task_results"
 

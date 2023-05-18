@@ -9,8 +9,7 @@ from rest_framework.serializers import ValidationError
 from api import messages
 from api.scantask.model import ScanTask
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 def is_int(value):

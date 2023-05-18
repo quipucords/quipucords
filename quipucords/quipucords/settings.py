@@ -21,8 +21,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from .featureflag import FeatureFlag
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 env = environ.Env()
 

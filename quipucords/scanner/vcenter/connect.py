@@ -8,8 +8,7 @@ from api.models import ScanTask, SystemConnectionResult
 from scanner.runner import ScanTaskRunner
 from scanner.vcenter.utils import retrieve_properties, vcenter_connect
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 def get_vm_names(content):

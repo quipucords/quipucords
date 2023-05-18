@@ -16,8 +16,7 @@ from api.inspectresult.model import TaskInspectionResult
 from api.scantask.queryset import ScanTaskQuerySet
 from api.source.model import Source
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class ScanTask(models.Model):

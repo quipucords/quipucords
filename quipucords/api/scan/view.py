@@ -31,8 +31,7 @@ from api.serializers import ScanJobSerializer, ScanSerializer
 from api.signal.scanjob_signal import cancel_scan, start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 # pylint: disable=too-many-branches,invalid-name
 

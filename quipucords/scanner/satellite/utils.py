@@ -16,8 +16,7 @@ from scanner.satellite.api import (
     SatelliteException,
 )
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 # Disable warnings for satellite requests
 requests.packages.urllib3.disable_warnings()  # pylint: disable=no-member

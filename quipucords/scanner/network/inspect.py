@@ -22,8 +22,7 @@ from scanner.network.inspect_callback import InspectResultCallback
 from scanner.network.utils import check_manager_interrupt, construct_inventory
 from scanner.runner import ScanTaskRunner
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 DEFAULT_SCAN_DIRS = ["/", "/opt", "/app", "/home", "/usr"]
 NETWORK_SCAN_IDENTITY_KEY = "connection_host"

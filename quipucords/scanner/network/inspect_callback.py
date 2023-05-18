@@ -11,8 +11,7 @@ from api.models import RawFact, SystemInspectionResult
 from scanner.network.processing import process
 from scanner.network.utils import STOP_STATES, raw_facts_template
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 STARTED_PROCESSING_ROLE = "internal_host_started_processing_role"
 HOST_DONE = "host_done"
