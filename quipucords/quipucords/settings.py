@@ -401,3 +401,5 @@ QPC_FEATURE_FLAGS = FeatureFlag()
 # Old hidden/buried configurations that should be removed or renamed
 MAX_TIMEOUT_ORDERLY_SHUTDOWN = env.int("MAX_TIMEOUT_ORDERLY_SHUTDOWN", 30)
 QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
+DEBUG_PY = env.bool("QPC_DEBUGPY", False)
+DEBUG_PY_PORT = env.int("QPC_DEBUGPY_PORT", 5678)
