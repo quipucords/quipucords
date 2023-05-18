@@ -75,14 +75,14 @@ def sync_merge_reports(request):
 @api_view(["get", "put", "post"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
-def async_merge_reports(request, pk=None):
+def async_merge_reports(request, scan_job_id=None):
     """Merge reports asynchronously."""
     # pylint: disable=invalid-name
     if request.method == "GET":
-        return _get_async_merge_report_status(pk)
+        return _get_async_merge_report_status(scan_job_id)
 
     # is POST
-    if pk is not None:
+    if scan_job_id is not None:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     if request.method == "PUT":

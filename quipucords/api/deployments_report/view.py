@@ -36,13 +36,13 @@ perm_classes = (IsAuthenticated,)
 @renderer_classes(
     (JSONRenderer, BrowsableAPIRenderer, DeploymentCSVRenderer, ReportJsonGzipRenderer)
 )
-def deployments(request, pk=None):
+def deployments(request, report_id=None):
     """Lookup and return a deployment system report."""
-    if not is_int(pk):
+    if not is_int(report_id):
         error = {"report_id": [_(messages.COMMON_ID_INV)]}
         raise ValidationError(error)
     mask_report = request.query_params.get("mask", False)
-    report = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
+    report = get_object_or_404(DeploymentsReport.objects.all(), report_id=report_id)
     if report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response(
             {
