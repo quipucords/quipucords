@@ -8,7 +8,7 @@ from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
 from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
 from utils import default_getter
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 PRODUCT = "JBoss BRMS"
 VERSION_KEY = "version"

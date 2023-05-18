@@ -5,7 +5,7 @@ import uuid
 
 from django.db import models, transaction
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class ServerInformation(models.Model):

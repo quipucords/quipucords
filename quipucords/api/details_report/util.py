@@ -27,7 +27,7 @@ SOURCE_TYPE_KEY = "source_type"
 SOURCE_NAME_KEY = "source_name"
 FACTS_KEY = "facts"
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 def build_sources_from_tasks(tasks):
