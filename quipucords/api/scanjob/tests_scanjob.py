@@ -159,9 +159,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
         """Test start pending task."""
         scan_job, _ = create_scan_job(self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
 
-        # Job in created state
-        tasks = scan_job.tasks.all()
-
         # Queue job to run
         scan_job.queue()
         self.assertEqual(scan_job.status, ScanTask.PENDING)
