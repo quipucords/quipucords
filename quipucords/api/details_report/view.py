@@ -44,13 +44,13 @@ perm_classes = (IsAuthenticated,)
 @renderer_classes(
     (JSONRenderer, BrowsableAPIRenderer, DetailsCSVRenderer, ReportJsonGzipRenderer)
 )
-def details(request, pk=None):
+def details(request, report_id=None):
     """Lookup and return a details system report."""
-    if pk is not None:
-        if not is_int(pk):
+    if report_id is not None:
+        if not is_int(report_id):
             error = {"report_id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
-    detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
+    detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
     serializer = DetailsReportSerializer(detail_data)
     json_details = serializer.data
     mask_report = request.query_params.get("mask", False)

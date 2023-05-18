@@ -31,10 +31,10 @@ perm_classes = (IsAuthenticated,)
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, InsightsGzipRenderer, BrowsableAPIRenderer))
-def insights(request, pk=None):
+def insights(request, report_id=None):
     """Lookup and return a insights system report."""
     deployment_report = get_object_or_404(
-        DeploymentsReport.objects.only("id", "status"), pk=pk
+        DeploymentsReport.objects.only("id", "status"), pk=report_id
     )
     _validate_deployment_report_status(deployment_report)
     report = _get_report(deployment_report)

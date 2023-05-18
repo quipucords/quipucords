@@ -35,17 +35,17 @@ perm_classes = (IsAuthenticated,)
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((ReportsGzipRenderer,))
-def reports(request, pk=None):
+def reports(request, report_id=None):
     """Lookup and return reports."""
     reports_dict = {}
     mask_report = request.query_params.get("mask", False)
-    if pk is not None:
-        if not is_int(pk):
+    if report_id is not None:
+        if not is_int(report_id):
             error = {"report_id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
-    reports_dict["report_id"] = pk
+    reports_dict["report_id"] = report_id
     # details
-    details_data = get_object_or_404(DetailsReport.objects.all(), report_id=pk)
+    details_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
     serializer = DetailsReportSerializer(details_data)
     json_details = serializer.data
     if validate_query_param_bool(mask_report):
@@ -53,7 +53,9 @@ def reports(request, pk=None):
     json_details.pop("cached_csv", None)
     reports_dict["details_json"] = json_details
     # deployments
-    deployments_data = get_object_or_404(DeploymentsReport.objects.all(), report_id=pk)
+    deployments_data = get_object_or_404(
+        DeploymentsReport.objects.all(), report_id=report_id
+    )
     if deployments_data.status != DeploymentsReport.STATUS_COMPLETE:
         deployments_id = deployments_data.details_report.id
         return Response(
@@ -68,7 +70,7 @@ def reports(request, pk=None):
         reports_dict["deployments_json"] = deployments_report
         return Response(reports_dict)
     error = {
-        "detail": f"Deployments report {pk} could not be masked."
+        "detail": f"Deployments report {report_id} could not be masked."
         " Rerun the scan to generate a masked deployments report."
     }
     return Response(error, status=status.HTTP_428_PRECONDITION_REQUIRED)

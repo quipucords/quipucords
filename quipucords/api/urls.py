@@ -32,14 +32,14 @@ ROUTER.register(r"users", UserViewSet, basename="users")
 
 # pylint: disable=invalid-name
 urlpatterns = [
-    path("reports/<int:pk>/details/", details),
-    path("reports/<int:pk>/deployments/", deployments),
-    path("reports/<int:pk>/insights/", insights),
-    path("reports/<int:pk>/", reports),
+    path("reports/<int:report_id>/details/", details),
+    path("reports/<int:report_id>/deployments/", deployments),
+    path("reports/<int:report_id>/insights/", insights),
+    path("reports/<int:report_id>/", reports),
     path("reports/merge/", sync_merge_reports),
     path("reports/merge/jobs/", async_merge_reports),
-    path("reports/merge/jobs/<int:pk>/", async_merge_reports),
-    path("scans/<int:pk>/jobs/", jobs),
+    path("reports/merge/jobs/<int:scan_job_id>/", async_merge_reports),
+    path("scans/<int:scan_id>/jobs/", jobs),
 ]
 
 urlpatterns += [path("token/", QuipucordsExpiringAuthTokenView)]

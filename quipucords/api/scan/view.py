@@ -72,14 +72,14 @@ perm_classes = (IsAuthenticated,)
 @api_view(["get", "post"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
-def jobs(request, pk=None):
+def jobs(request, scan_id=None):
     """Get the jobs of a scan."""
     # pylint: disable=invalid-name
-    if pk is not None:
-        if not is_int(pk):
+    if scan_id is not None:
+        if not is_int(scan_id):
             return Response(status=status.HTTP_404_NOT_FOUND)
     result = []
-    scan = get_object_or_404(Scan.objects.all(), pk=pk)
+    scan = get_object_or_404(Scan.objects.all(), pk=scan_id)
     if request.method == "GET":
         job_queryset = get_job_queryset_query_set(scan, request.query_params)
         paginator = StandardResultsSetPagination()
@@ -99,7 +99,7 @@ def jobs(request, pk=None):
             result.append(job_json)
         return Response(result)
     job_data = {}
-    job_data["scan"] = pk
+    job_data["scan"] = scan_id
     job_serializer = ScanJobSerializer(data=job_data)
     job_serializer.is_valid(raise_exception=True)
     job_serializer.save()
