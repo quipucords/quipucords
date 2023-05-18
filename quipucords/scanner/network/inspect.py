@@ -249,26 +249,28 @@ class InspectTaskRunner(ScanTaskRunner):
                 raise AnsibleRunnerException(str(error)) from error
 
             final_status = runner_obj.status
-            if final_status != "successful":
-                if final_status == "canceled" and manager_interrupt:
-                    if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                        msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                            "INSPECT",
-                            "canceled",
-                        )
-                    else:
-                        msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                            "INSPECT",
-                            "paused",
-                        )
-                    self.scan_task.log_message(msg)
-                    check_manager_interrupt(manager_interrupt)
-                if final_status not in ["unreachable", "failed"]:
-                    if final_status == "timeout":
-                        error_msg = log_messages.NETWORK_TIMEOUT_ERR
-                    else:
-                        error_msg = log_messages.NETWORK_UNKNOWN_ERR
-                    scan_result = ScanTask.FAILED
+            if final_status == "canceled":
+                if (
+                    manager_interrupt
+                    and manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL
+                ):
+                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                        "INSPECT",
+                        "canceled",
+                    )
+                else:
+                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                        "INSPECT",
+                        "paused",
+                    )
+                self.scan_task.log_message(msg)
+                check_manager_interrupt(manager_interrupt)
+            if final_status not in ["successful", "unreachable", "failed"]:
+                if final_status == "timeout":
+                    error_msg = log_messages.NETWORK_TIMEOUT_ERR
+                else:
+                    error_msg = log_messages.NETWORK_UNKNOWN_ERR
+                scan_result = ScanTask.FAILED
 
             # Always run this as our scans are more tolerant of errors
             call.finalize_failed_hosts()
