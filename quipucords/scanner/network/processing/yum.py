@@ -4,7 +4,7 @@ import logging
 
 from scanner.network.processing import process
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 # #### Processors ####
 

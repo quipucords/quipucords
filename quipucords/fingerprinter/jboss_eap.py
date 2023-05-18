@@ -7,7 +7,7 @@ from api.models import Product
 from fingerprinter.constants import META_DATA_KEY
 from fingerprinter.utils import product_entitlement_found
 
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 NAME = "name"
 PRODUCT = "JBoss EAP"
