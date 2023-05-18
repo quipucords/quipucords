@@ -34,6 +34,7 @@ from tests.mixins import LoggedUserMixin
 
 def dummy_start():
     """Create a dummy method for testing."""
+    return True
 
 
 class ScanJobTest(LoggedUserMixin, TestCase):
@@ -128,30 +129,30 @@ class ScanJobTest(LoggedUserMixin, TestCase):
         scan_job.queue()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.status_complete()
+        assert not scan_job.status_complete()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.status_pause()
+        assert not scan_job.status_pause()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.status_start()
+        assert not scan_job.status_start()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.status_cancel()
+        assert not scan_job.status_cancel()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.status_restart()
+        assert not scan_job.status_restart()
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
-        scan_job.status_fail("test failure")
+        assert scan_job.status_fail("test failure")
         self.assertEqual(scan_job.status, ScanTask.FAILED)
 
         scan_job.status = ScanTask.CREATED
-        scan_job.status_fail("test failure")
+        assert not scan_job.status_fail("test failure")
         self.assertEqual(scan_job.status, ScanTask.CREATED)
 
         scan_job.status = ScanTask.RUNNING
-        scan_job.status_complete()
+        assert scan_job.status_complete()
         self.assertEqual(scan_job.status, ScanTask.COMPLETED)
 
     def test_start_task(self):
@@ -170,7 +171,7 @@ class ScanJobTest(LoggedUserMixin, TestCase):
         self.assertEqual(len(tasks), 1)
 
         # Start job
-        scan_job.status_start()
+        assert scan_job.status_start()
 
     def test_pause_restart_task(self):
         """Test pause and restart task."""
@@ -187,20 +188,20 @@ class ScanJobTest(LoggedUserMixin, TestCase):
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         # Start job
-        scan_job.status_start()
+        assert scan_job.status_start()
         self.assertEqual(scan_job.status, ScanTask.RUNNING)
 
-        scan_job.status_pause()
+        assert scan_job.status_pause()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.PAUSED)
         self.assertEqual(connect_task.status, ScanTask.PAUSED)
 
-        scan_job.status_restart()
+        assert scan_job.status_restart()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.PENDING)
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
-        scan_job.status_cancel()
+        assert scan_job.status_cancel()
         connect_task = scan_job.tasks.first()  # pylint: disable=no-member
         self.assertEqual(scan_job.status, ScanTask.CANCELED)
         self.assertEqual(connect_task.status, ScanTask.CANCELED)
