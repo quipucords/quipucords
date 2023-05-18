@@ -307,34 +307,33 @@ def _connect(  # pylint: disable=too-many-arguments
             raise AnsibleRunnerException(err_msg) from err_msg
 
         final_status = runner_obj.status
-        if final_status != "successful":
-            if final_status == "canceled":
-                if (
-                    manager_interrupt
-                    and manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL
-                ):
-                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                        "CONNECT",
-                        "canceled",
-                    )
-                    return msg, scan_task.CANCELED
-                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % ("CONNECT", "paused")
-                return msg, scan_task.PAUSED
-            if final_status not in ["unreachable", "failed", "canceled"]:
-                if final_status == "timeout":
-                    error = log_messages.NETWORK_TIMEOUT_ERR
-                else:
-                    error = log_messages.NETWORK_UNKNOWN_ERR
-                if scan_task.systems_scanned:
-                    msg = log_messages.NETWORK_CONNECT_CONTINUE % (
-                        final_status,
-                        str(scan_task.systems_scanned),
-                        error,
-                    )
-                    scan_task.log_message(msg, log_level=logging.ERROR)
-                else:
-                    msg = log_messages.NETWORK_CONNECT_FAIL % (final_status, error)
-                    return msg, scan_task.FAILED
+        if final_status == "canceled":
+            if (
+                manager_interrupt
+                and manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL
+            ):
+                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                    "CONNECT",
+                    "canceled",
+                )
+                return msg, scan_task.CANCELED
+            msg = log_messages.NETWORK_PLAYBOOK_STOPPED % ("CONNECT", "paused")
+            return msg, scan_task.PAUSED
+        if final_status not in ["successful", "unreachable", "failed", "canceled"]:
+            if final_status == "timeout":
+                error = log_messages.NETWORK_TIMEOUT_ERR
+            else:
+                error = log_messages.NETWORK_UNKNOWN_ERR
+            if scan_task.systems_scanned:
+                msg = log_messages.NETWORK_CONNECT_CONTINUE % (
+                    final_status,
+                    str(scan_task.systems_scanned),
+                    error,
+                )
+                scan_task.log_message(msg, log_level=logging.ERROR)
+            else:
+                msg = log_messages.NETWORK_CONNECT_FAIL % (final_status, error)
+                return msg, scan_task.FAILED
     return None, scan_task.COMPLETED
 
 
