@@ -14,14 +14,16 @@ from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
 from constants import ENCRYPTED_DATA_MASK, DataSources
 from tests.factories import CredentialFactory, SourceFactory
+from tests.mixins import LoggedUserMixin
 
 
-class CredentialTest(TestCase):
+class CredentialTest(LoggedUserMixin, TestCase):
     """Tests against the Credential model and view set."""
 
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
 
     # pylint: disable=invalid-name
     def create_credential(

@@ -14,6 +14,7 @@ from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.models import Credential, DetailsReport, ServerInformation, Source
 from constants import DataSources
+from tests.mixins import LoggedUserMixin
 
 
 class MockRequest:
@@ -24,12 +25,13 @@ class MockRequest:
         self.query_params = {"mask": mask_rep}
 
 
-class DetailReportTest(TestCase):
+class DetailReportTest(LoggedUserMixin, TestCase):
     """Tests against the Detail reports function."""
 
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )

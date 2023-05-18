@@ -11,16 +11,18 @@ from api.models import Credential, Scan, ScanJob, ScanOptions, ScanTask, Source
 from api.scan.serializer import ScanSerializer
 from api.scan.view import expand_scan
 from scanner.test_util import create_scan_job
+from tests.mixins import LoggedUserMixin
 
 # pylint: disable=unused-argument,invalid-name
 
 
-class ScanTest(TestCase):
+class ScanTest(LoggedUserMixin, TestCase):
     """Test the basic ScanJob infrastructure."""
 
     def setUp(self):
         """Create test setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.cred = Credential.objects.create(
             name="cred1",
             username="username",
@@ -625,7 +627,7 @@ class ScanTest(TestCase):
         self.assertEqual(extra_vars, expected_vars)
 
 
-class TestScanList(TestCase):
+class TestScanList(LoggedUserMixin, TestCase):
     """Tests for the List method.
 
     These are separate from the other Scan tests because they have
@@ -637,6 +639,7 @@ class TestScanList(TestCase):
     def setUp(self):
         """Create test setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.cred = Credential.objects.create(
             name="cred1",
             username="username",

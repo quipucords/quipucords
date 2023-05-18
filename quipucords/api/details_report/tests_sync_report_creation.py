@@ -10,9 +10,10 @@ from api import messages
 from api.common.common_report import create_report_version
 from api.models import Credential, DetailsReport, ServerInformation, Source
 from constants import DataSources
+from tests.mixins import LoggedUserMixin
 
 
-class DetailsReportTest(TestCase):
+class DetailsReportTest(LoggedUserMixin, TestCase):
     """Tests against the DetailsReport model and view set."""
 
     # pylint: disable=too-many-arguments,invalid-name
@@ -20,6 +21,7 @@ class DetailsReportTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
+        super().setUp()
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )

@@ -13,19 +13,21 @@ from api.common.common_report import create_report_version
 from api.models import Credential, ScanTask, ServerInformation, Source
 from constants import DataSources
 from scanner.test_util import create_scan_job
+from tests.mixins import LoggedUserMixin
 
 
 def dummy_start():
     """Create a dummy method for testing."""
 
 
-class AsyncMergeReports(TestCase):
+class AsyncMergeReports(LoggedUserMixin, TestCase):
     """Tests against the Deployment reports function."""
 
     # pylint: disable=invalid-name,too-many-public-methods
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )

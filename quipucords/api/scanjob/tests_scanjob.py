@@ -29,18 +29,20 @@ from api.scan.serializer import ExtendedProductSearchOptionsSerializer
 from api.scanjob.serializer import ScanJobSerializer
 from api.scanjob.view import expand_scanjob
 from scanner.test_util import create_scan_job, create_scan_job_two_tasks
+from tests.mixins import LoggedUserMixin
 
 
 def dummy_start():
     """Create a dummy method for testing."""
 
 
-class ScanJobTest(TestCase):
+class ScanJobTest(LoggedUserMixin, TestCase):
     """Test the basic ScanJob infrastructure."""
 
     def setUp(self):
         """Create test setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.cred = Credential.objects.create(
             name="cred1",

@@ -11,15 +11,17 @@ from api import messages
 from api.common.common_report import create_report_version
 from api.models import Credential, ServerInformation, Source
 from constants import DataSources
+from tests.mixins import LoggedUserMixin
 
 
-class SyncMergeReports(TestCase):
+class SyncMergeReports(LoggedUserMixin, TestCase):
     """Tests merging reports synchronously."""
 
     # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )
