@@ -17,15 +17,17 @@ from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from constants import DataSources
+from tests.mixins import LoggedUserMixin
 
 
-class ReportsTest(TestCase):
+class ReportsTest(LoggedUserMixin, TestCase):
     """Tests against the Reports function."""
 
     # pylint: disable=invalid-name,too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )

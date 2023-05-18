@@ -16,6 +16,7 @@ from api.serializers import SourceSerializer
 from api.source.view import format_source
 from constants import DataSources
 from scanner.test_util import create_scan_job
+from tests.mixins import LoggedUserMixin
 
 
 def dummy_start():
@@ -23,12 +24,13 @@ def dummy_start():
 
 
 # pylint: disable=too-many-instance-attributes,invalid-name,R0904,C0302
-class SourceTest(TestCase):
+class SourceTest(LoggedUserMixin, TestCase):
     """Test the basic Source infrastructure."""
 
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.net_cred = Credential.objects.create(
             name="net_cred1",
             cred_type=DataSources.NETWORK,

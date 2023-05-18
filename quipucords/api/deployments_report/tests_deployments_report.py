@@ -16,17 +16,19 @@ from api.deployments_report.util import sanitize_row
 from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
 from constants import DataSources
+from tests.mixins import LoggedUserMixin
 
 EXPECTED_NUMBER_OF_FINGERPRINTS = 38
 
 
-class DeploymentReportTest(TestCase):
+class DeploymentReportTest(LoggedUserMixin, TestCase):
     """Tests against the Deployment reports function."""
 
     # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
+        super().setUp()
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )
