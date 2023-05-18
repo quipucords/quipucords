@@ -107,7 +107,7 @@ class ConnectResultStore:
 
     def remaining_hosts(self):
         """Get the set of hosts that are left to scan."""
-        # Need to return a list becuase the caller can iterate over
+        # Need to return a list because the caller can iterate over
         # our return value and call record_result repeatedly. If we
         # returned the actual list, then they would get a 'set changed
         # size during iteration' error.
