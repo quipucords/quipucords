@@ -15,8 +15,7 @@ from scanner.vcenter.utils import (
     vcenter_connect,
 )
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 def get_nics(guest_net):

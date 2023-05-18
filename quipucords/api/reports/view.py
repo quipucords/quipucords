@@ -25,9 +25,7 @@ from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import DetailsReportSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-# Get an instance of a logger
-# pylint: disable=invalid-name
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)

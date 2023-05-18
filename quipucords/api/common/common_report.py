@@ -11,8 +11,7 @@ from rest_framework.renderers import JSONRenderer
 
 from quipucords.environment import server_version
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 REPORT_TYPE_DETAILS = "details"

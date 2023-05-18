@@ -6,8 +6,7 @@ from rest_framework import renderers
 
 from api.common.common_report import create_tar_buffer, encode_content
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class InsightsGzipRenderer(renderers.BaseRenderer):

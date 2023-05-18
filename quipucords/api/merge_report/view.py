@@ -23,8 +23,6 @@ from api.signal.scanjob_signal import start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 from scanner.job import ScanJobRunner
 
-# pylint: disable=invalid-name
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)

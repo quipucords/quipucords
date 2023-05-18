@@ -41,8 +41,7 @@ from utils import deepget, default_getter
 
 # pylint: disable=too-many-lines
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 # Keys used to de-duplicate against other network sources
 NETWORK_IDENTIFICATION_KEYS = ["subscription_manager_id", "bios_uuid"]

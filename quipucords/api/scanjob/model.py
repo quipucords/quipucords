@@ -22,8 +22,7 @@ from api.scan.model import (
 from api.scantask.model import ScanTask
 from api.source.model import Source
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 
 class ScanJob(models.Model):

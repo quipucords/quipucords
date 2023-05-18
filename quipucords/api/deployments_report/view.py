@@ -23,8 +23,6 @@ from api.deployments_report.csv_renderer import DeploymentCSVRenderer
 from api.models import DeploymentsReport
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
-# pylint: disable=invalid-name
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)

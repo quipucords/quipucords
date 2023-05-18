@@ -11,8 +11,7 @@ from api import messages
 from api.scantask.model import ScanTask
 from api.source.model import Source
 
-# Get an instance of a logger
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 DEFAULT_MAX_CONCURRENCY = 25
 
 

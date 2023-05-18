@@ -11,8 +11,6 @@ from django.conf import settings
 
 from quipucords.release import infer_version
 
-# pylint: disable=invalid-name
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
