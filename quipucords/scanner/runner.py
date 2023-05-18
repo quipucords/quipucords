@@ -59,14 +59,14 @@ class ScanTaskRunner(metaclass=ABCMeta):
                         details_report.save()
                         deployment_report.delete()
 
-    def run(self, manager_interrupt: Value):
+    def run(self, manager_interrupt: Value = None):
         """Block that will be executed.
 
         Results are expected to be persisted.  The state of
         self.scan_task should be updated with status COMPLETE/FAILED
         before returning.
 
-        :param manager_interrupt: Shared memory Value which can inform
+        :param manager_interrupt: Optional shared memory Value which can inform
         a task of the need to shut down immediately
         :returns: Returns a status message to be saved/displayed and
         the ScanTask.STATUS_CHOICES status
