@@ -432,26 +432,33 @@ class ScanJob(models.Model):
             self.tasks.add(fingerprint_task)  # pylint: disable=no-member
 
     def status_start(self):
-        """Change status from PENDING to RUNNING."""
+        """Change status from PENDING to RUNNING.
+
+        :returns: bool True if successfully updated, else False
+        """
         self.start_time = datetime.utcnow()
         target_status = ScanTask.RUNNING
         has_error = self.validate_status_change(target_status, [ScanTask.PENDING])
         if has_error:
-            return
+            return False
 
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
         self.log_current_status()
+        return True
 
     def status_restart(self):
-        """Change status from PENDING/PAUSED/RUNNING to PENDING."""
+        """Change status from PENDING/PAUSED/RUNNING to PENDING.
+
+        :returns: bool True if successfully updated, else False
+        """
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(
             target_status, [ScanTask.PENDING, ScanTask.PAUSED, ScanTask.RUNNING]
         )
         if has_error:
-            return
+            return False
         # Update tasks
         paused_tasks = self.tasks.filter(Q(status=ScanTask.PAUSED))
         if paused_tasks:
@@ -462,16 +469,20 @@ class ScanJob(models.Model):
         self.status_message = _(messages.SJ_STATUS_MSG_RUNNING)
         self.save()
         self.log_current_status()
+        return True
 
     @transaction.atomic
     def status_pause(self):
-        """Change status from PENDING/RUNNING to PAUSED."""
+        """Change status from PENDING/RUNNING to PAUSED.
+
+        :returns: bool True if successfully updated, else False
+        """
         target_status = ScanTask.PAUSED
         has_error = self.validate_status_change(
             target_status, [ScanTask.PENDING, ScanTask.RUNNING]
         )
         if has_error:
-            return
+            return False
 
         # Update tasks
         tasks_to_pause = self.tasks.exclude(
@@ -487,10 +498,14 @@ class ScanJob(models.Model):
         self.status_message = _(messages.SJ_STATUS_MSG_PAUSED)
         self.save()
         self.log_current_status()
+        return True
 
     @transaction.atomic
     def status_cancel(self):
-        """Change status from CREATED/PENDING/RUNNING/PAUSED to CANCELED."""
+        """Change status from CREATED/PENDING/RUNNING/PAUSED to CANCELED.
+
+        :returns: bool True if successfully updated, else False
+        """
         self.end_time = datetime.utcnow()
         target_status = ScanTask.CANCELED
         has_error = self.validate_status_change(
@@ -498,7 +513,7 @@ class ScanJob(models.Model):
             [ScanTask.CREATED, ScanTask.PENDING, ScanTask.RUNNING, ScanTask.PAUSED],
         )
         if has_error:
-            return
+            return False
 
         # Update tasks
         tasks_to_cancel = self.tasks.exclude(
@@ -514,31 +529,37 @@ class ScanJob(models.Model):
         self.status_message = _(messages.SJ_STATUS_MSG_CANCELED)
         self.save()
         self.log_current_status()
+        return True
 
     def status_complete(self):
-        """Change status from RUNNING to COMPLETE."""
+        """Change status from RUNNING to COMPLETE.
+
+        :returns: bool True if successfully updated, else False
+        """
         self.end_time = datetime.utcnow()
         target_status = ScanTask.COMPLETED
         has_error = self.validate_status_change(target_status, [ScanTask.RUNNING])
         if has_error:
-            return
+            return False
 
         self.status = target_status
         self.status_message = _(messages.SJ_STATUS_MSG_COMPLETED)
         self.save()
         self._log_stats("COMPLETION STATS.")
         self.log_current_status()
+        return True
 
     def status_fail(self, message):
         """Change status from RUNNING to FAILED.
 
         :param message: The error message associated with failure
+        :returns: bool True if successfully updated, else False
         """
         self.end_time = datetime.utcnow()
         target_status = ScanTask.FAILED
         has_error = self.validate_status_change(target_status, [ScanTask.RUNNING])
         if has_error:
-            return
+            return False
 
         self.status = target_status
         self.status_message = message
@@ -546,6 +567,7 @@ class ScanJob(models.Model):
         self.save()
         self._log_stats("FAILURE STATS.")
         self.log_current_status(show_status_message=True, log_level=logging.ERROR)
+        return True
 
     def validate_status_change(self, target_status, valid_current_status):
         """Validate and transition job status.
