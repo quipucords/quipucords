@@ -25,11 +25,10 @@ from api.models import (
 )
 from api.scantask.serializer import SourceField
 
-# pylint: disable=invalid-name
 try:
-    json_exception_class = json.decoder.JSONDecodeError
+    JsonExceptionClass = json.decoder.JSONDecodeError
 except AttributeError:
-    json_exception_class = ValueError
+    JsonExceptionClass = ValueError
 
 
 class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
@@ -72,7 +71,7 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
                 raise ValidationError(
                     _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
                 )
-        except json_exception_class as exception:
+        except JsonExceptionClass as exception:
             raise ValidationError(
                 _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
             ) from exception

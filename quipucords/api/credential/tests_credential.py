@@ -25,7 +25,6 @@ class CredentialTest(LoggedUserMixin, TestCase):
         management.call_command("flush", "--no-input")
         super().setUp()
 
-    # pylint: disable=invalid-name
     def create_credential(
         self,
         name="test_cred",

@@ -314,7 +314,6 @@ class TestProcessVirtType(unittest.TestCase):
 class TestProcessVirtVirt(unittest.TestCase):
     """Test ProcessVirtVirt."""
 
-    # pylint: disable=invalid-name
     def test_virt_virt_with_virt_type_case(self):
         """Found virt_virt using virt_type fact."""
         dependencies = {

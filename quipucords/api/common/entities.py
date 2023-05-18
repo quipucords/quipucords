@@ -127,10 +127,10 @@ class HostEntity:
         ip_addresses = self.ip_addresses
         ipv4_addresses = []
         if ip_addresses:
-            for ip in ip_addresses:  # pylint: disable=invalid-name
+            for ip_address in ip_addresses:
                 try:
-                    if ipaddress.ip_address(ip).version == 4:
-                        ipv4_addresses.append(ip)
+                    if ipaddress.ip_address(ip_address).version == 4:
+                        ipv4_addresses.append(ip_address)
                 except ValueError:
                     continue
         return ipv4_addresses

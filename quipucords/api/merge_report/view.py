@@ -77,7 +77,6 @@ def sync_merge_reports(request):
 @permission_classes(perm_classes)
 def async_merge_reports(request, scan_job_id=None):
     """Merge reports asynchronously."""
-    # pylint: disable=invalid-name
     if request.method == "GET":
         return _get_async_merge_report_status(scan_job_id)
 

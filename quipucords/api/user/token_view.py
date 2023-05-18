@@ -34,5 +34,4 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
         return Response({"token": auth_token.key})
 
 
-# pylint: disable=invalid-name
 QuipucordsExpiringAuthTokenView = QuipucordsExpiringAuthToken.as_view()

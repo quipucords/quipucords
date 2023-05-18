@@ -155,12 +155,11 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING,
         )
-        # pylint: disable=invalid-name
-        MSG = "Test Fail."
+        msg = "Test Fail."
         end_time = datetime.utcnow()
-        task.status_fail(MSG)
+        task.status_fail(msg)
         task.save()
-        self.assertEqual(MSG, task.status_message)
+        self.assertEqual(msg, task.status_message)
         self.assertEqual(task.status, ScanTask.FAILED)
         self.assertEqual(
             end_time.replace(microsecond=0), task.end_time.replace(microsecond=0)
@@ -174,7 +173,6 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING,
         )
-        # pylint: disable=invalid-name
         task.save()
         task.increment_stats(
             "foo",
@@ -207,7 +205,6 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING,
         )
-        # pylint: disable=invalid-name
         task.save()
         task.increment_stats(
             "foo",

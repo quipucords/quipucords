@@ -25,7 +25,6 @@ EXPECTED_NUMBER_OF_FINGERPRINTS = 38
 class DeploymentReportTest(LoggedUserMixin, TestCase):
     """Tests against the Deployment reports function."""
 
-    # pylint: disable=invalid-name
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")

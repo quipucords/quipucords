@@ -58,7 +58,6 @@ class ProductEAPTest(TestCase):
         }
         self.assertEqual(product, expected)
 
-    # pylint: disable=C0103
     def test_detect_jboss_eap_potential_common(self):
         """Test the detect_jboss_eap method."""
         source = {

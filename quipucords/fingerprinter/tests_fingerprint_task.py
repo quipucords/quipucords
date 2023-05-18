@@ -131,7 +131,7 @@ class EngineTest(TestCase):
         self.fp_task_runner = FingerprintTaskRunner(scan_job, self.fp_task)
 
     # pylint: disable=too-many-arguments,too-many-lines
-    # pylint: disable=too-many-locals,too-many-branches,invalid-name
+    # pylint: disable=too-many-locals,too-many-branches
     # pylint: disable=protected-access, W0102
 
     ################################################################
@@ -1335,17 +1335,17 @@ class EngineTest(TestCase):
             NETWORK_SATELLITE_MERGE_KEYS, nfingerprints, sfingerprints
         )
         self.assertEqual(len(result_fingerprints), 1)
-        fp = result_fingerprints[0]
-        fp["date_yum_history"] = "2018-1-7"
-        fp["date_filesystem_create"] = None
-        fp["date_anaconda_log"] = "201837"
-        fp["registration_time"] = "2018-4-7 12:45:02"
-        fp["date_machine_id"] = None
-        self.fp_task_runner._compute_system_creation_time(fp)
+        rfp = result_fingerprints[0]
+        rfp["date_yum_history"] = "2018-1-7"
+        rfp["date_filesystem_create"] = None
+        rfp["date_anaconda_log"] = "201837"
+        rfp["registration_time"] = "2018-4-7 12:45:02"
+        rfp["date_machine_id"] = None
+        self.fp_task_runner._compute_system_creation_time(rfp)
         test_date = datetime.strptime("2018-4-7", "%Y-%m-%d").date()
 
-        self.assertEqual(fp["system_creation_date"], test_date)
-        metadata = fp["metadata"]["system_creation_date"]["raw_fact_key"]
+        self.assertEqual(rfp["system_creation_date"], test_date)
+        metadata = rfp["metadata"]["system_creation_date"]["raw_fact_key"]
         self.assertEqual("registration_time", metadata)
 
     ################################################################

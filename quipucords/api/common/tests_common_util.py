@@ -18,7 +18,7 @@ from api.common.common_report import (
 class CommonUtilTest(TestCase):
     """Tests common util functions."""
 
-    # pylint: disable=too-many-arguments,invalid-name
+    # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals,too-many-branches
 
     def setUp(self):
