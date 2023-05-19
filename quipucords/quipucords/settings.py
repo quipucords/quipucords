@@ -30,11 +30,6 @@ BASE_DIR = Path(__file__).absolute().parent.parent
 
 PRODUCTION = env.bool("PRODUCTION", False)
 
-QPC_DISABLE_THREADED_SCAN_MANAGER = env.bool("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
-QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER = env.bool(
-    "QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER", False
-)
-
 # This suppresses warnings for models where an explicit primary key is not defined.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
@@ -405,6 +400,13 @@ CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", False)
 
 # Load Feature Flags
 QPC_FEATURE_FLAGS = FeatureFlag()
+
+# Enable or disable various behaviors
+QPC_DISABLE_THREADED_SCAN_MANAGER = env.bool("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
+QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER = env.bool(
+    "QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER", False
+)
+QPC_ENABLE_CELERY_SCAN_MANAGER = env.bool("QPC_ENABLE_CELERY_SCAN_MANAGER", False)
 
 # Old hidden/buried configurations that should be removed or renamed
 MAX_TIMEOUT_ORDERLY_SHUTDOWN = env.int("MAX_TIMEOUT_ORDERLY_SHUTDOWN", 30)

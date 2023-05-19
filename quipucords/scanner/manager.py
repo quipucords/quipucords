@@ -10,9 +10,40 @@ from django.conf import settings
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
-from scanner.job import ProcessBasedScanJobRunner, ScanJobRunner
+from scanner.job import (
+    CeleryBasedScanJobRunner,
+    ProcessBasedScanJobRunner,
+    ScanJobRunner,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class CeleryScanManager:
+    """Drop-in replacement for Manager that uses Celery tasks instead of Processes."""
+
+    def __init__(self):
+        """Log a warning about this scan manager being incomplete."""
+        logger.warning("%s is not yet fully functional.", __class__.__name__)
+
+    def is_alive(self):
+        """Return true to make the common manager interface happy."""
+        return True
+
+    def kill(self, *args, **kwargs):
+        """Raise an exception because Celery-based killing is not yet implemented."""
+        raise NotImplementedError
+
+    def start(self):
+        """Return true to make the common manager interface happy."""
+        return True
+
+    def put(self, scan_job_runner: CeleryBasedScanJobRunner):
+        """Process the given CeleryBasedScanJobRunner's job and tasks."""
+        assert isinstance(
+            scan_job_runner, CeleryBasedScanJobRunner
+        ), "CeleryScanManager only accepts CeleryBasedScanJobRunner runners."
+        scan_job_runner.run()
 
 
 class DisabledManager:
@@ -277,7 +308,9 @@ class Manager(Thread):
 
 def reinitialize():
     """Reinitialize the SCAN_MANAGER module variable."""
-    if settings.QPC_DISABLE_THREADED_SCAN_MANAGER:
+    if settings.QPC_ENABLE_CELERY_SCAN_MANAGER:
+        manager_class = CeleryScanManager
+    elif settings.QPC_DISABLE_THREADED_SCAN_MANAGER:
         manager_class = DisabledManager
     else:
         manager_class = Manager
