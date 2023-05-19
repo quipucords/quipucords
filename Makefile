@@ -95,7 +95,6 @@ else
 endif
 
 test:
-	PYTHONHASHSEED=0 QUIPUCORDS_MANAGER_HEARTBEAT=1 PYTHONPATH=`pwd`/quipucords \
 	poetry run pytest $(TEST_OPTS)
 
 test-case:
