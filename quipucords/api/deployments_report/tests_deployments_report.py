@@ -17,6 +17,7 @@ from api.details_report.tests_details_report import MockRequest
 from api.models import Credential, ServerInformation, Source
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
+from tests.utils import patch_mask_value
 
 EXPECTED_NUMBER_OF_FINGERPRINTS = 38
 
@@ -236,7 +237,8 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
         self.assertIsNone(value)
 
         # Create a system fingerprint via collection receiver
-        self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
+        with patch_mask_value({"1.2.3.4": "<MASKED>"}):
+            self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
         url = "/api/v1/reports/1/deployments/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -272,9 +274,9 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
         # pylint: disable=line-too-long
         data_rows = [
             "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-ansible,detection-network,detection-openshift,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid",  # noqa: E501
-            ",,,2,2,,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7888362299591329248,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
-            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7888362299591329248,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
-            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,-7888362299591329248,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
+            ",,,2,2,,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
+            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
+            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
         ]
         assert len(csv_lines) == len(data_rows)
         for expected_row, csv_row in zip(data_rows, csv_result.splitlines()[5:]):
