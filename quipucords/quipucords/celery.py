@@ -18,7 +18,8 @@ app = Celery("quipucords")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Load task modules from all registered Django apps.
-app.autodiscover_tasks()
+task_packages = ["scanner"]
+app.autodiscover_tasks(task_packages)
 
 if env.bool("QPC_DISABLE_CELERY_LOGGING_HIJACK", True):
 
