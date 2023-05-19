@@ -15,6 +15,7 @@ from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.models import Credential, DetailsReport, ServerInformation, Source
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
+from tests.utils import patch_mask_value
 
 
 class MockRequest:
@@ -134,19 +135,30 @@ class DetailReportTest(LoggedUserMixin, TestCase):
             ],
         }
 
+        mask_map = {
+            "1.2.3.4": "MASK1",
+            "1.2.3.5": "MASK2",
+            "2.4.5.6": "MASK3",
+            "foo": "MASK4",
+        }
+
         response_json = self.create_expect_201(request_json)
         identifier = response_json["report_id"]
-        response_json = self.retrieve_expect_200(identifier, query_param="?mask=True")
+
+        with patch_mask_value(mask_map):
+            response_json = self.retrieve_expect_200(
+                identifier, query_param="?mask=True"
+            )
         self.assertEqual(response_json["report_id"], identifier)
         # assert the ips/macs/hostname is masked
         source_to_check = response_json.get("sources")[0]
         facts = source_to_check.get("facts")
         expected_facts = [
             {
-                "ip_addresses": ["-7888362299591329248"],
-                "mac_addresses": ["6525295348555872214", "7654177207575092742"],
-                "uname_hostname": "7664243301495174138",
-                "vm.name": "7664243301495174138",
+                "ip_addresses": ["MASK1"],
+                "mac_addresses": ["MASK2", "MASK3"],
+                "uname_hostname": "MASK4",
+                "vm.name": "MASK4",
             }
         ]
         self.assertEqual(facts, expected_facts)
@@ -225,13 +237,13 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         details_report.cached_csv = None
         details_report.save()
 
-        # Test with hashing
+        # Test with masked data
         test_json["sources"][0]["facts"] = [
             {
-                "ip_addresses": [str(hash("1.2.3.4"))],
-                "mac_addresses": [str(hash("1.2.3.5")), str(hash("2.4.5.6"))],
-                "uname_hostname": str(hash("foo")),
-                "vm.name": str(hash("foo")),
+                "ip_addresses": ["MASK1"],
+                "mac_addresses": ["MASK2", "MASK3"],
+                "uname_hostname": "MASK4",
+                "vm.name": "MASK4",
             }
         ]
         new_mock_req = MockRequest(mask_rep=True)
@@ -246,8 +258,8 @@ class DetailReportTest(LoggedUserMixin, TestCase):
             f"{self.server_id},test_source,network\r\n"
             "Facts\r\n"
             "ip_addresses,mac_addresses,uname_hostname,vm.name\r\n"
-            "[-7888362299591329248],[6525295348555872214;7654177207575092742],"
-            "7664243301495174138,7664243301495174138\r\n\r\n\r\n"
+            "[MASK1],[MASK2;MASK3],"
+            "MASK4,MASK4\r\n\r\n\r\n"
         )
         self.assertEqual(csv_result, expected)
 

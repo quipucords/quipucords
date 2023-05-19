@@ -228,10 +228,16 @@ def mask_data_general(report, mac_and_ip_facts, name_related_facts):
             addrs_to_mask = system.get(address_list)
             if addrs_to_mask:
                 for addr in addrs_to_mask:
-                    new_addrs.append(str(hash(addr)))
+                    new_addrs.append(mask_value(addr))
                 system[address_list] = new_addrs
         for name in name_related_facts:
             name_to_change = system.get(name)
             if name_to_change:
-                system[name] = str(hash(name_to_change))
+                system[name] = mask_value(name_to_change)
     return report
+
+
+def mask_value(value):
+    """Mask a value."""
+    # should we really rely on hash for masking values?
+    return str(hash(value))

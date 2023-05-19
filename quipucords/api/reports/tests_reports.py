@@ -18,6 +18,7 @@ from api.models import Credential, ServerInformation, Source
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
+from tests.utils import patch_mask_value
 
 
 class ReportsTest(LoggedUserMixin, TestCase):
@@ -227,8 +228,8 @@ class ReportsTest(LoggedUserMixin, TestCase):
     # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer_masked(self):
         """Get a tar.gz return for report_id via API with masked values."""
-        # pylint: disable=line-too-long
-        reports_dict = self.create_reports_dict(query_params="?mask=True")
+        with patch_mask_value({"1.2.3.4": "<MASKED>"}):
+            reports_dict = self.create_reports_dict(query_params="?mask=True")
         deployments_csv = (
             "Report ID,Report Type,Report Version,Report Platform ID\r\n"
             f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
@@ -236,14 +237,14 @@ class ReportsTest(LoggedUserMixin, TestCase):
             "\r\n"
             "System Fingerprints:\r\n"
             "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-ansible,detection-network,detection-openshift,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
-            ",,,2,2,,2,False,True,False,False,False,,,virtualized,,[-7888362299591329248],,absent,absent,absent,absent,,-7888362299591329248,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[-7888362299591329248],,absent,absent,absent,absent,,-7888362299591329248,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[-7888362299591329248],,absent,absent,absent,absent,,-7888362299591329248,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
+            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
             "\r\n"
         )
         # pylint: disable=line-too-long, consider-using-f-string
         details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7888362299591329248],-7888362299591329248,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[-7888362299591329248],-7888362299591329248,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[-7888362299591329248],-7888362299591329248,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
+            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
             % (
                 self.report_version,
                 reports_dict.get("details_json").get("report_platform_id"),
