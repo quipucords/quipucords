@@ -144,6 +144,7 @@ def test_process_sources(
     non_merged_fingerprints = [1, 2, 2]
     # ocp/ansible fingerprints wont be part of deduplication/merging process
     assert fingerprints == [1, 2] + 2 * non_merged_fingerprints
+    print("Testing exepected_messages against caplog.records")
     assert [rec.message for rec in caplog.records] == expected_messages
 
 
