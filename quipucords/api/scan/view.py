@@ -127,7 +127,6 @@ def get_job_queryset_query_set(scan, query_params):
 
 def expand_scan(json_scan):
     """Expand the scan object's sources."""
-    # pylint: disable=too-many-locals
     source_ids = json_scan.get(SOURCES_KEY, [])
     slim_sources = Source.objects.filter(pk__in=source_ids).values(
         "id", "name", "source_type"
