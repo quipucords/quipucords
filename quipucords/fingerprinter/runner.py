@@ -396,7 +396,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
 
         # Merge network and vcenter fingerprints
-        reverse_priority_keys = {"cpu_count", "infrastructure_type"}
+        reverse_priority_keys = ("cpu_count", "infrastructure_type")
         self.scan_task.log_message(
             "NETWORK-SATELLITE and VCENTER DEDUPLICATION"
             " by keys pairs "
