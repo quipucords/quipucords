@@ -125,7 +125,7 @@ def expected_messages():
         "('mac_addresses', 'mac_addresses')]",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION by reverse priority keys "
         "(we trust vcenter more than network/satellite): "
-        "{'cpu_count', 'infrastructure_type'}",
+        "('cpu_count', 'infrastructure_type')",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION START COUNT - Fingerprints "
         "(vcenter=2, openshift=3, ansible=3, combined_fingerprints=2, total=10)",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT - Fingerprints "
