@@ -1,6 +1,7 @@
 """Test the API application."""
 
 from datetime import datetime
+from unittest.mock import patch
 
 from django.core import management
 from django.test import TestCase
@@ -196,6 +197,37 @@ class ScanTaskTest(TestCase):
         self.assertEqual(2, task.systems_scanned)
         self.assertEqual(2, task.systems_failed)
         self.assertEqual(2, task.systems_unreachable)
+
+    def test_scantask_increment_stats_multiple_in_parallel(self):
+        """Test scan task increment two instances in parallel.
+
+        This is a special case test to help ensure that increment_stats is thread-safe.
+        We patch `refresh_from_db` with a mock object here because we don't want the
+        underlying functionality to rely on `refresh_from_db` completing immediately
+        before the update/save.
+        """
+        task_instance_a = ScanTask.objects.create(
+            job=self.scan_job,
+            source=self.source,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            status=ScanTask.PENDING,
+        )
+        task_instance_b = ScanTask.objects.get(id=task_instance_a.id)
+
+        self.assertEqual(0, task_instance_a.systems_count)
+        self.assertEqual(0, task_instance_b.systems_count)
+
+        with patch.object(task_instance_a, "refresh_from_db"), patch.object(
+            task_instance_b, "refresh_from_db"
+        ):
+            task_instance_a.increment_stats("foo", increment_sys_count=True)
+            task_instance_b.increment_stats("foo", increment_sys_count=True)
+
+        task_instance_a.refresh_from_db()
+        task_instance_b.refresh_from_db()
+
+        self.assertEqual(2, task_instance_a.systems_count)
+        self.assertEqual(2, task_instance_b.systems_count)
 
     def test_scantask_reset_stats(self):
         """Test scan task reset stat feature."""

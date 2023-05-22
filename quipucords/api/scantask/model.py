@@ -7,6 +7,7 @@ from datetime import datetime
 from functools import cached_property
 
 from django.db import models, transaction
+from django.db.models import F
 from django.utils.translation import gettext as _
 
 from api import messages
@@ -307,27 +308,21 @@ class ScanTask(models.Model):
         :param increment_sys_unreachable: True if should be incremented.
         """
         # pylint: disable=too-many-arguments
-        self.refresh_from_db()
-        sys_count = self.systems_count
-        sys_failed = self.systems_failed
-        sys_unreachable = self.systems_unreachable
-        sys_scanned = self.systems_scanned
+        update_kwargs = {}
         if increment_sys_count:
-            sys_count += 1
+            update_kwargs["systems_count"] = F("systems_count") + 1
         if increment_sys_scanned:
-            sys_scanned += 1
+            update_kwargs["systems_scanned"] = F("systems_scanned") + 1
         if increment_sys_failed:
-            sys_failed += 1
+            update_kwargs["systems_failed"] = F("systems_failed") + 1
         if increment_sys_unreachable:
-            sys_unreachable += 1
-        stat_string = f"{prefix} {name}."
-        self.update_stats(
-            stat_string,
-            sys_count=sys_count,
-            sys_scanned=sys_scanned,
-            sys_failed=sys_failed,
-            sys_unreachable=sys_unreachable,
-        )
+            update_kwargs["systems_unreachable"] = F("systems_unreachable") + 1
+
+        if update_kwargs:
+            ScanTask.objects.filter(id=self.id).update(**update_kwargs)
+            self.refresh_from_db()
+            description = f"{prefix} {name}."
+            self._log_stats(description)
 
     # All task types
     def status_start(self):
