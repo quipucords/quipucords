@@ -3,6 +3,8 @@ import logging
 from collections.abc import Callable, Iterable
 from multiprocessing import Pool, Value
 
+import celery
+from django.conf import settings
 from django.db import transaction
 from more_itertools import chunked
 
@@ -126,7 +128,62 @@ class SatelliteInterface:
         }
         return request_options
 
-    def _process_hosts_using_multiprocessing(
+    def _prepare_and_process_hosts(
+        self,
+        hosts: Iterable[dict],
+        request_host_details: Callable,
+        process_results: Callable,
+        manager_interrupt: Value = None,
+    ):
+        if settings.QPC_ENABLE_CELERY_SCAN_MANAGER:
+            self._prepare_and_process_hosts_using_celery(
+                hosts, request_host_details, process_results
+            )
+        else:
+            self._prepare_and_process_hosts_using_multiprocessing(
+                hosts, request_host_details, process_results, manager_interrupt
+            )
+
+    def _prepare_and_process_hosts_using_celery(
+        self,
+        hosts: Iterable[dict],
+        request_host_details: Callable,
+        process_results: Callable,
+    ):
+        """Prepare and process hosts using Celery tasks.
+
+        Calling this function may result in a large number of Celery tasks, 1:1 with the
+        number of hosts known by the Satellite server, and will synchronously block
+        until all those tasks complete. This behavior does not follow Celery best
+        practices and should be revised in the future.
+
+        :param hosts: iterable of host dicts
+        :param request_host_details: API version-specific function to get host details,
+            must also be a registered Celery task
+        :param process_results: API version-specific function to process results
+        """
+        all_prepared_hosts = self.prepare_host(hosts, ids_only=True)
+        # At the time of implementation, we don't know if it's okay to create many
+        # tasks (one per hosts) in a group like this. If this proves problematic, we
+        # should consider replacing `group` with `chunks` and calculate a reasonable
+        # size to limit parallel load. For example:
+        #     chunk_size = ceil(len(all_prepared_hosts) / self.max_concurrency)
+        #     request_host_details.chunks(all_prepared_hosts, chunk_size)().get()
+        #     results = list(itertools.chain.from_iterable(results))
+        # FIXME We SHOULD NOT use disable_sync_subtasks=False.
+        # Although unlikely in this case, this option in general may lead to deadlocks
+        # if there aren't enough available Celery workers.
+        results = (
+            celery.group(
+                request_host_details.s(*host_params)
+                for host_params in all_prepared_hosts
+            )
+            .apply_async()
+            .get(disable_sync_subtasks=False)
+        )
+        process_results(results=results)
+
+    def _prepare_and_process_hosts_using_multiprocessing(
         self,
         hosts: Iterable[dict],
         request_host_details: Callable,
