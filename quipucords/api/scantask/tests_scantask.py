@@ -31,8 +31,9 @@ class ScanTaskTest(TestCase):
         )
         self.cred_for_upload = self.cred.id
 
-        self.source = Source(name="source1", source_type="network", port=22)
-        self.source.save()
+        self.source = Source.objects.create(
+            name="source1", source_type="network", port=22
+        )
         self.source.credentials.add(self.cred)
 
         # Create scan configuration
@@ -81,7 +82,6 @@ class ScanTaskTest(TestCase):
         )
         start_time = datetime.utcnow()
         task.status_start()
-        task.save()
         self.assertEqual(messages.ST_STATUS_MSG_RUNNING, task.status_message)
         self.assertEqual(task.status, ScanTask.RUNNING)
         self.assertEqual(
@@ -97,7 +97,6 @@ class ScanTaskTest(TestCase):
             status=ScanTask.PENDING,
         )
         task.status_restart()
-        task.save()
         self.assertEqual(messages.ST_STATUS_MSG_RESTARTED, task.status_message)
         self.assertEqual(task.status, ScanTask.PENDING)
 
@@ -110,7 +109,6 @@ class ScanTaskTest(TestCase):
             status=ScanTask.PENDING,
         )
         task.status_pause()
-        task.save()
         self.assertEqual(messages.ST_STATUS_MSG_PAUSED, task.status_message)
         self.assertEqual(task.status, ScanTask.PAUSED)
 
@@ -124,7 +122,6 @@ class ScanTaskTest(TestCase):
         )
         end_time = datetime.utcnow()
         task.status_cancel()
-        task.save()
         self.assertEqual(messages.ST_STATUS_MSG_CANCELED, task.status_message)
         self.assertEqual(task.status, ScanTask.CANCELED)
         self.assertEqual(
@@ -141,7 +138,6 @@ class ScanTaskTest(TestCase):
         )
         end_time = datetime.utcnow()
         task.status_complete("great")
-        task.save()
         self.assertEqual("great", task.status_message)
         self.assertEqual(task.status, ScanTask.COMPLETED)
         self.assertEqual(
@@ -159,7 +155,6 @@ class ScanTaskTest(TestCase):
         msg = "Test Fail."
         end_time = datetime.utcnow()
         task.status_fail(msg)
-        task.save()
         self.assertEqual(msg, task.status_message)
         self.assertEqual(task.status, ScanTask.FAILED)
         self.assertEqual(
@@ -174,7 +169,6 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING,
         )
-        task.save()
         task.increment_stats(
             "foo",
             increment_sys_count=True,
@@ -237,7 +231,6 @@ class ScanTaskTest(TestCase):
             scan_type=ScanTask.SCAN_TYPE_CONNECT,
             status=ScanTask.PENDING,
         )
-        task.save()
         task.increment_stats(
             "foo",
             increment_sys_count=True,
