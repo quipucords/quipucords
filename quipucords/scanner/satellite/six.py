@@ -5,20 +5,15 @@ import itertools
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Generator
-from multiprocessing import Pool
+from functools import partial
 
 import requests
-from more_itertools import chunked, unique_everseen
+from more_itertools import unique_everseen
 from requests.exceptions import Timeout
 
-from api.models import ScanJob, ScanTask, SystemInspectionResult
+from api.models import ScanTask, SystemInspectionResult
 from scanner.satellite import utils
-from scanner.satellite.api import (
-    SatelliteCancelException,
-    SatelliteException,
-    SatelliteInterface,
-    SatellitePauseException,
-)
+from scanner.satellite.api import SatelliteException, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
 
 logger = logging.getLogger(__name__)
@@ -473,17 +468,14 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
 
         hosts = self._requests_hosts_unique()
 
-        with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunked(hosts, self.max_concurrency):
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                    raise SatelliteCancelException()
+        _process_results = partial(
+            process_results, self=self, api_version=self.SATELLITE_API_VERSION
+        )
 
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                    raise SatellitePauseException()
+        self._process_hosts_using_multiprocessing(
+            hosts, request_host_details, _process_results, manager_interrupt
+        )
 
-                host_params = self.prepare_host(chunk)
-                results = pool.starmap(request_host_details, host_params)
-                process_results(self, results, self.SATELLITE_API_VERSION)
         utils.validate_task_stats(self.inspect_scan_task)
 
 

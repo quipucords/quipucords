@@ -1,18 +1,13 @@
 """Satellite 5 API handlers."""
 import logging
 import xmlrpc.client
-from multiprocessing import Pool
+from functools import partial
 
-from more_itertools import chunked, unique_everseen
+from more_itertools import unique_everseen
 
-from api.models import ScanJob, SystemInspectionResult
+from api.models import SystemInspectionResult
 from scanner.satellite import utils
-from scanner.satellite.api import (
-    SatelliteCancelException,
-    SatelliteException,
-    SatelliteInterface,
-    SatellitePauseException,
-)
+from scanner.satellite.api import SatelliteException, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
 
 logger = logging.getLogger(__name__)
@@ -379,17 +374,16 @@ class SatelliteFive(SatelliteInterface):
         virtual_hosts, virtual_guests = self.virtual_hosts()
         physical_hosts = self.physical_hosts()
         hosts = unique_everseen(hosts)
-        with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunked(hosts, self.max_concurrency):
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                    raise SatelliteCancelException()
 
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                    raise SatellitePauseException()
-                host_params = self.prepare_host(chunk)
-                results = pool.starmap(request_host_details, host_params)
-                self.process_results(
-                    results, virtual_hosts, virtual_guests, physical_hosts
-                )
+        _process_results = partial(
+            self.process_results,
+            virtual_hosts=virtual_hosts,
+            virtual_guests=virtual_guests,
+            physical_hosts=physical_hosts,
+        )
+
+        self._process_hosts_using_multiprocessing(
+            hosts, request_host_details, _process_results, manager_interrupt
+        )
 
         utils.validate_task_stats(self.inspect_scan_task)
