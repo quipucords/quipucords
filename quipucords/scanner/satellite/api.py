@@ -1,7 +1,10 @@
 """Satellite API Interface."""
 import logging
+from collections.abc import Callable, Iterable
+from multiprocessing import Pool, Value
 
 from django.db import transaction
+from more_itertools import chunked
 
 from api.models import (
     RawFact,
@@ -10,6 +13,7 @@ from api.models import (
     SystemConnectionResult,
     SystemInspectionResult,
 )
+from api.scanjob.model import ScanJob
 from scanner.exceptions import ScanCancelException, ScanPauseException
 from scanner.satellite import utils
 
@@ -121,6 +125,31 @@ class SatelliteInterface:
             "ssl_cert_verify": ssl_cert_verify,
         }
         return request_options
+
+    def _process_hosts_using_multiprocessing(
+        self,
+        hosts: Iterable[dict],
+        request_host_details: Callable,
+        process_results: Callable,
+        manager_interrupt: Value,
+    ):
+        """Prepare and process hosts using multiprocessing.Pool.
+
+        :param hosts: iterable of host dicts
+        :param request_host_details: API version-specific function to get host details
+        :param process_results: API version-specific function to process results
+        :param manager_interrupt: shared multiprocessing value with possible interrupt
+        """
+        with Pool(processes=self.max_concurrency) as pool:
+            for chunk in chunked(hosts, self.max_concurrency):
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
+                    raise SatelliteCancelException()
+
+                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
+                    raise SatellitePauseException()
+                host_params = self.prepare_host(chunk)
+                results = pool.starmap(request_host_details, host_params)
+                process_results(results=results)
 
     def _prepare_host_logging_options(self):
 
