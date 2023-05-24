@@ -1,5 +1,6 @@
 """Satellite API Interface."""
 import logging
+from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from multiprocessing import Pool, Value
 
@@ -41,7 +42,7 @@ class SatellitePauseException(ScanPauseException):
     """Exception for Satellite Pause interrupt."""
 
 
-class SatelliteInterface:
+class SatelliteInterface(ABC):
     """Generic interface for dealing with Satellite."""
 
     def __init__(self, scan_job, scan_task):
@@ -218,11 +219,18 @@ class SatelliteInterface:
             "source_name": self.inspect_scan_task.source.name,
         }
 
+    @abstractmethod
+    def prepare_host(self, hosts: Iterable[dict], ids_only=False) -> Iterable[tuple]:
+        """Prepare each host with necessary information."""
+
+    @abstractmethod
     def host_count(self):
         """Obtain the count of managed hosts."""
 
+    @abstractmethod
     def hosts(self):
         """Obtain the managed hosts."""
 
+    @abstractmethod
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
