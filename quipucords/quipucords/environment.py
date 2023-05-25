@@ -18,13 +18,10 @@ def commit():
     """Collect the commit for the server."""
     commit_info = os.environ.get("QUIPUCORDS_COMMIT", "").strip()
     if not commit_info:
-        try:
-            commit_info = subprocess.check_output(
-                ["git", "rev-parse", "--verify", "HEAD"]
-            ).strip()
-            commit_info = commit_info.decode("utf-8")
-        except Exception:  # pylint: disable=broad-except
-            pass
+        commit_info = subprocess.check_output(
+            ["git", "rev-parse", "--verify", "HEAD"]
+        ).strip()
+        commit_info = commit_info.decode("utf-8")
     return commit_info
 
 
