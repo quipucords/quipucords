@@ -1,5 +1,6 @@
 """Test the environment utility."""
 
+import os
 from collections import namedtuple
 from importlib.metadata import PackageNotFoundError
 from unittest.mock import ANY, Mock, patch
@@ -27,13 +28,18 @@ class EnvironmentTest(TestCase):
         result = environment.commit()
         self.assertEqual(result, expected)
 
-    @patch("subprocess.check_output")
-    def test_commit_with_subprocess(self, mock_subprocess):
+    @patch("subprocess.check_output", return_value="buildnum".encode("utf-8"))
+    def test_commit_with_subprocess(self, _patched_subprocess):
         """Test the commit method via subprocess."""
-        expected = "buildnum"
-        mock_subprocess.return_value = expected
         result = environment.commit()
-        self.assertEqual(result, expected)
+        self.assertEqual(result, "buildnum")
+
+    @patch.dict(os.environ, {"QUIPUCORDS_COMMIT": "dummy-commit"})
+    @patch("subprocess.check_output", side_effect=RuntimeError("STOP!"))
+    def test_commit_with_envvar(self, _patched_subprocess):
+        """Test the commit function using envvar."""
+        result = environment.commit()
+        self.assertEqual(result, "dummy-commit")
 
     @patch("platform.uname")
     def test_platform_info(self, mock_platform):
