@@ -82,7 +82,7 @@ def test_server_fallback_version(package_version):
     else:
         mock_kwargs = {"return_value": package_version}
 
-    expected = f"0.0.0.{environment.commit()}"
+    expected = f"0.0.0+{environment.commit()}"
 
     with patch.object(release, "version", **mock_kwargs):
         assert expected == environment.server_version()

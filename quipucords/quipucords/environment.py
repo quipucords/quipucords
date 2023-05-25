@@ -31,7 +31,7 @@ def commit():
 @cache
 def server_version():
     """Return server version."""
-    return f"{infer_version()}.{commit()}"
+    return f"{infer_version()}+{commit()}"
 
 
 def platform_info():
