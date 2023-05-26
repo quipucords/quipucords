@@ -127,9 +127,3 @@ addopts = [
     "--block-network",
     "--allowed-hosts=127.0.0.1,::1",
 ]
-python_files = [
-    "tests.py",
-    "test_*.py",
-    "*_tests.py",
-    "tests_*.py",
-]
