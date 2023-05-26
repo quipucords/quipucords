@@ -1,6 +1,7 @@
 """Test the API application."""
 
 import json
+import random
 from unittest import mock
 
 import pytest
@@ -357,30 +358,6 @@ class CredentialTest(LoggedUserMixin, TestCase):
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_hostcred_update_cred_type_fails(self):
-        """Update Network credential to different credential type should fail."""
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.NETWORK,
-            "username": "user1",
-            "password": "pass1",
-        }
-        network_cred = self.create_expect_201(data)
-
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.OPENSHIFT,
-            "username": "user1",
-        }
-        url = reverse("cred-detail", args=(network_cred["id"],))
-        resp = self.client.put(
-            url, json.dumps(data), content_type="application/json", format="json"
-        )
-        assert resp.status_code == status.HTTP_400_BAD_REQUEST
-        assert resp.data == {
-            "cred_type": ["cred_type is invalid for credential update"]
-        }
-
     def test_hostcred_get_bad_id(self):
         """Tests the get view set of the Credential API with a bad id."""
         url = reverse("cred-detail", args=("string",))
@@ -498,31 +475,6 @@ class CredentialTest(LoggedUserMixin, TestCase):
         self.assertEqual(Credential.objects.get().name, "cred1")
         self.update_credential(name="cred1", username="root")
         self.assertEqual(Credential.objects.get().username, "root")
-
-    def test_vcentercred_update_cred_type_fails(self):
-        """Update vCenter credential to different credential type should fail."""
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.VCENTER,
-            "username": "user1",
-            "password": "pass1",
-        }
-        vcenter_cred = self.create_expect_201(data)
-
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.NETWORK,
-            "username": "user2",
-            "password": "pass2",
-        }
-        url = reverse("cred-detail", args=(vcenter_cred["id"],))
-        resp = self.client.put(
-            url, json.dumps(data), content_type="application/json", format="json"
-        )
-        assert resp.status_code == status.HTTP_400_BAD_REQUEST
-        assert resp.data == {
-            "cred_type": ["cred_type is invalid for credential update"]
-        }
 
     def test_hostcred_default_become_method(self):
         """Ensure we can set the default become_method via API."""
@@ -875,3 +827,37 @@ def test_network_ssh_keyfile_allow_none(django_client):
         },
     )
     assert response.ok, response.json()
+
+
+# Given a credential type, return an alternate random one
+def alt_cred_type(cred_type):
+    """Given a credential type, return an alternate random one."""
+    cred_types = DataSources.values.copy()
+    cred_types.remove(cred_type)
+    return random.choice(cred_types)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "orig_type, new_type",
+    (
+        pytest.param(cred_type, alt_cred_type(cred_type), id=f"{cred_type}")
+        for cred_type in DataSources.values
+    ),
+)
+def test_hostcred_cred_type_update_fails(orig_type, new_type, django_client):
+    """Updating a credential type to a different credential type should fail."""
+    credentials = {
+        "name": "cred1",
+        "cred_type": orig_type,
+        "username": "user1",
+        "password": "pass1",
+    }
+    response = django_client.post(reverse("cred-list"), json=credentials)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    credentials["cred_type"] = new_type
+    url = reverse("cred-detail", args=(response.json()["id"],))
+    resp = django_client.put(url, json=credentials)
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json() == {"cred_type": ["cred_type is invalid for credential update"]}
