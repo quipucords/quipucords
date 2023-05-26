@@ -1,10 +1,7 @@
 **.pyc
 **/*.log
-**/*_tests.py
 **/conftest.py
 **/test_*.py
-**/tests.py
-**/tests_*.py
 .DS_Store
 .dockerignore
 .egg
