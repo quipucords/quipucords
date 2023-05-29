@@ -129,9 +129,12 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
         }
         # this differ from actual HBI format due to yupana constraints
         # yupana will format this accordingly
-        # https://github.com/quipucords/yupana/blob/961b376ff80f835203097c43bbf6239a1bc6afbc/yupana/processor/report_slice_processor.py#L226-L252
+        # https://github.com/quipucords/yupana/blob/961b376ff80f835203097c43bbf6239a1bc6afbc/yupana/processor/report_slice_processor.py#L226-L252  # noqa: E501
+        # ---
+        # namespace SHOULD be qpc, because rhsm-subscriptions look specifically for it
+        # in its queries (like https://github.com/RedHatInsights/rhsm-subscriptions/blob/706979cd1a44e76bec00ff237bf8727fa7df0dd6/src/main/java/org/candlepin/subscriptions/inventory/db/model/InventoryHost.java#L93-L138) # noqa: E501
         return [
-            {"namespace": data_collector, "key": key, "value": value}
+            {"namespace": "qpc", "key": key, "value": value}
             for key, value in tags.items()
         ]
 
