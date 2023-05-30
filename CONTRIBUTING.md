@@ -94,4 +94,4 @@ make test-coverage
 
 -----
 
-See [Makefile](https://github.com/quipucords/quipucords/blob/master/Makefile) for additional development utilities.
+See [Makefile](https://github.com/quipucords/quipucords/blob/main/Makefile) for additional development utilities.

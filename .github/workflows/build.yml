@@ -2,11 +2,11 @@ name: Build Container Image
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     tags:
       - "*"
   pull_request:
-    branches: [master, "release/*"]
+    branches: [main, "release/*"]
 
 jobs:
   build:
