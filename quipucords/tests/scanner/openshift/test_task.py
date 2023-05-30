@@ -59,7 +59,7 @@ class TestGetOcpClient:
     """Test if OpenShiftApi is properly receiving its initialization arguments."""
 
     @pytest.mark.parametrize("auth_token", ["qwe", "zxc"])
-    def test_with_auth_token(
+    def test_with_auth_token(  # noqa: PLR0913
         self,
         mocker,
         auth_token,
@@ -90,7 +90,7 @@ class TestGetOcpClient:
         patched_kube_config.assert_called_once()
         assert patched_kube_config.call_args == expected_kube_config_call
 
-    def test_with_user_pass(
+    def test_with_user_pass(  # noqa: PLR0913
         self,
         mocker,
         host,

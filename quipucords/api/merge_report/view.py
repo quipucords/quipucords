@@ -194,7 +194,7 @@ def _validate_merge_report(data):
         raise ValidationError(error)
 
     report_id_count = len(report_ids)
-    if report_id_count < 2:
+    if report_id_count < 2:  # noqa: PLR2004
         error.get("reports").append(_(messages.REPORT_MERGE_TOO_SHORT))
         raise ValidationError(error)
 

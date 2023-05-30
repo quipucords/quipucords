@@ -59,7 +59,9 @@ def is_ansible_task_result(value):
     )
 
 
-def process(scan_task, previous_host_facts, fact_key, fact_value, host):
+def process(  # noqa: PLR0911, PLR0912, C901
+    scan_task, previous_host_facts, fact_key, fact_value, host
+):
     """Do initial processing of the given facts.
 
     :param scan_task: scan_task for context and logging

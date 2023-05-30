@@ -17,7 +17,7 @@ class Session(requests.Session):
 
     DEFAULT_STATUS_CODE_LIST_FOR_RETRY = [429, 500, 502, 503]
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         base_url=None,

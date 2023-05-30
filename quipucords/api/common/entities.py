@@ -129,7 +129,7 @@ class HostEntity:
         if ip_addresses:
             for ip_address in ip_addresses:
                 try:
-                    if ipaddress.ip_address(ip_address).version == 4:
+                    if ipaddress.ip_address(ip_address).version == 4:  # noqa: PLR2004
                         ipv4_addresses.append(ip_address)
                 except ValueError:
                     continue
@@ -207,7 +207,11 @@ class HostEntity:
         annotated query.
         """
         try:
-            return {p for p in self._fingerprints.product_names.split(",") if p != ""}
+            return {
+                product_name
+                for product_name in self._fingerprints.product_names.split(",")
+                if product_name != ""  # noqa: PLC1901
+            }
         except AttributeError as err:
             raise NotImplementedError(
                 "Host wasn't properly initialized to list products"

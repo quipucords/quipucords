@@ -58,7 +58,7 @@ def get_version(eap_version):
     return new_versions
 
 
-def detect_jboss_fuse(source, facts):
+def detect_jboss_fuse(source, facts):  # noqa: PLR0915
     """Detect if JBoss Fuse is present based on system facts.
 
     :param source: The source of the facts

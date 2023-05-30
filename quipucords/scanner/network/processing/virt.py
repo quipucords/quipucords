@@ -102,7 +102,7 @@ class ProcessVirtType(process.Processor):
     ]
 
     @staticmethod
-    def process(output, dependencies):
+    def process(output, dependencies):  # noqa: PLR0911, C901
         """Process virt_type output."""
         if dependencies is not None and bool(dependencies):
             if dependencies.get("internal_have_dmidecode") and dependencies.get(

@@ -23,7 +23,7 @@ class ProcessDmiChassisAssetTag(process.Processor):
         if dmi_chassis_asset_tag and dmi_chassis_asset_tag.get("rc") == 0:
             result = dmi_chassis_asset_tag.get("stdout_lines")
             if result:
-                if result[0] == "" and len(result) > 1:
+                if result[0] == "" and len(result) > 1:  # noqa: PLC1901
                     return result[1]
                 return result[0]
         return ""
@@ -44,7 +44,7 @@ class ProcessDmiSystemProductName(process.Processor):
         if dmi_system_product_name and dmi_system_product_name.get("rc") == 0:
             result = dmi_system_product_name.get("stdout_lines")
             if result:
-                if result[0] == "" and len(result) > 1:
+                if result[0] == "" and len(result) > 1:  # noqa: PLC1901
                     return result[1].strip()
                 return result[0].strip()
         return ""

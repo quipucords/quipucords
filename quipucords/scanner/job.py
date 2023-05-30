@@ -203,7 +203,7 @@ class SyncScanJobRunner:
 
         return None
 
-    def run(self):
+    def run(self):  # noqa: PLR0911, PLR0912, C901
         """Execute runner.
 
         Since this function is moderately complex, here is a summary of its operations:

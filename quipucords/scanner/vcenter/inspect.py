@@ -134,7 +134,7 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
-    def parse_vm_props(self, props, host_dict):
+    def parse_vm_props(self, props, host_dict):  # noqa: PLR0912, C901
         """Parse Virtual Machine properties.
 
         :param props: Array of Dynamic Properties
@@ -208,7 +208,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)
 
-    def retrieve_properties(self, content):
+    def retrieve_properties(self, content):  # noqa: C901
         """Retrieve properties from all VirtualMachines.
 
         :param content: ServiceInstanceContent from the vCenter connection

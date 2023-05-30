@@ -223,7 +223,7 @@ class ScanViewSet(ModelViewSet):
         return Response(json_scan)
 
     @transaction.atomic
-    def destroy(self, request, pk):
+    def destroy(self, request, pk):  # noqa: C901
         """Delete a scan, its jobs, and the results."""
         try:
             scan = Scan.objects.get(pk=pk)

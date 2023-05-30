@@ -278,7 +278,7 @@ class ScanJob(models.Model):
         return elapsed_time
 
     @transaction.atomic
-    def queue(self):
+    def queue(self):  # noqa: C901
         """Queue the job to run.
 
         Change job state from CREATED TO PENDING.

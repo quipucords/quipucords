@@ -155,7 +155,7 @@ class Smoker:
             }
         return metadata
 
-    def test_deployments_report(
+    def test_deployments_report(  # noqa: PLR0913
         self,
         django_client,
         expected_fingerprint_metadata,

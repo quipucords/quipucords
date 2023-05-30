@@ -240,7 +240,7 @@ def convert_credential_to_dict(credential: Credential):
             continue
         # decrypt data to allow easy comparison between stored data vs expected
         if isinstance(value, str) and value.startswith("$ANSIBLE_VAULT"):
-            value = decrypt_data_as_unicode(value)
+            value = decrypt_data_as_unicode(value)  # noqa: PLW2901
         cred_as_dict[key] = value
     return cred_as_dict
 

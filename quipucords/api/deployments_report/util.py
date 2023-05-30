@@ -40,7 +40,9 @@ def compute_source_info(sources):
     return result
 
 
-def create_deployments_csv(deployments_report_dict, request):
+def create_deployments_csv(  # noqa: PLR0912, PLR0915, C901
+    deployments_report_dict, request
+):
     """Create deployments report csv."""
     deployments_report_dict = deepcopy(deployments_report_dict)
     mask_report = request.query_params.get("mask", False)

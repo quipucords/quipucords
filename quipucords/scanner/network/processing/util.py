@@ -64,7 +64,7 @@ class FindJarVer(process.Processor):
         """Return the command's output."""
         versions = []
         for line in output["stdout_lines"]:
-            if line == "":
+            if line == "":  # noqa: PLC1901
                 continue
             line_data = line.split("; ")
             for version_stamp in line_data:
@@ -84,7 +84,7 @@ class FindJar(process.Processor):
         """Return the command's output."""
         versions = []
         for line in output["stdout_lines"]:
-            if line.strip() == "":
+            if line.strip() == "":  # noqa: PLC1901
                 continue
             line_data = line.split("; ")
             versions += line_data

@@ -16,7 +16,7 @@ class AnsibleControllerApi(Session):
     """Specialized Session for ansible controller."""
 
     @classmethod
-    def from_connection_info(
+    def from_connection_info(  # noqa: PLR0913
         cls, *, host, protocol, port, username, password, ssl_verify: bool = True
     ):
         """

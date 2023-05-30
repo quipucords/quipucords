@@ -47,7 +47,7 @@ VIRTUAL_HOST_NAME = "virtual_host_name"
 HYPERVISOR = "hypervisor"
 
 
-def request_host_details(
+def request_host_details(  # noqa: PLR0913
     host_id, host_name, last_checkin, scan_task, request_options, logging_options
 ):
     """Execute http responses to gather satellite data.
@@ -164,7 +164,9 @@ class SatelliteFive(SatelliteInterface):
         ]
         return host_params
 
-    def process_results(self, results, virtual_hosts, virtual_guests, physical_hosts):
+    def process_results(  # noqa: PLR0912, PLR0915, C901
+        self, results, virtual_hosts, virtual_guests, physical_hosts
+    ):
         """Process & record the list of responses returned from sat5 endpoint.
 
         :param results: A list of responses
@@ -191,7 +193,7 @@ class SatelliteFive(SatelliteInterface):
                 network_devices = raw_result["network_devices"]
                 registration_date = raw_result["registration_date"]
 
-                if uuid is None or uuid == "":
+                if uuid is None or uuid == "":  # noqa: PLC1901
                     uuid = host_id
                 arch = cpu.get(ARCH, UNKNOWN)
                 cpu_count = cpu.get(COUNT)
@@ -306,7 +308,7 @@ class SatelliteFive(SatelliteInterface):
                 virt_host_id = virt_host.get(ID)
                 virt_host_name = virt_host.get(NAME)
                 uuid = client.system.get_uuid(key, virt_host_id)
-                if uuid is None or uuid == "":
+                if uuid is None or uuid == "":  # noqa: PLC1901
                     uuid = virt_host_id
                 virtual_host = {ID: virt_host_id, NAME: virt_host_name, UUID: uuid}
                 virtual_hosts[virt_host_id] = virtual_host

@@ -22,9 +22,9 @@ class ProcessDmiSystemUuid(process.Processor):
             result = dmi_system_uuid.get("stdout_lines")
             if result:
                 dmi_system_uuid = result[0]
-                if result[0] == "" and len(result) > 1:
+                if result[0] == "" and len(result) > 1:  # noqa: PLC1901
                     dmi_system_uuid = result[1]
-                if len(dmi_system_uuid) <= 36:
+                if len(dmi_system_uuid) <= 36:  # noqa: PLR2004
                     return dmi_system_uuid
                 logger.warning(
                     "dmi_system_uuid is invalid because "

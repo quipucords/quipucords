@@ -12,6 +12,6 @@ def create(satellite_version, api_version, scan_job, scan_task):
         return SatelliteFive(scan_job, scan_task)
     if api_version == 1:
         return SatelliteSixV1(scan_job, scan_task)
-    if api_version == 2:
+    if api_version == 2:  # noqa: PLR2004
         return SatelliteSixV2(scan_job, scan_task)
     return None

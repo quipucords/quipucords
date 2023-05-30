@@ -407,7 +407,7 @@ class TestNetworkScan:
             }
         return metadata
 
-    def test_deployments_report(
+    def test_deployments_report(  # noqa: PLR0913
         self,
         apiclient,
         expected_fingerprint_metadata,

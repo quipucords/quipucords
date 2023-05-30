@@ -102,7 +102,7 @@ class ProcessCpuSocketCount(process.Processor):
             if is_int(cpuinfo_count):
                 if (
                     convert_to_int(cpuinfo_count) != 0
-                    and convert_to_int(cpuinfo_count) <= 8
+                    and convert_to_int(cpuinfo_count) <= 8  # noqa: PLR2004
                 ):
                     return convert_to_int(cpuinfo_count)
 

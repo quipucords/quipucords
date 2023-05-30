@@ -16,7 +16,7 @@ class ValidStringChoiceField(ChoiceField):
         values_str = ",".join(valid_values)
         if not isinstance(data, str):
             raise ValidationError(messages.COMMON_CHOICE_STR % (values_str))
-        if data == "":
+        if data == "":  # noqa: PLC1901
             raise ValidationError(messages.COMMON_CHOICE_BLANK % (values_str))
         if data not in valid_values:
             raise ValidationError(messages.COMMON_CHOICE_INV % (data, values_str))

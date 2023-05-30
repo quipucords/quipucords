@@ -42,7 +42,9 @@ class ProcessUserLoginHistory(process.Processor):
         user_login_history = dependencies.get("internal_user_login_history")
         if user_login_history and user_login_history.get("rc") == 0:
             result = [
-                line for line in user_login_history.get("stdout_lines") if line != ""
+                line
+                for line in user_login_history.get("stdout_lines")
+                if line != ""  # noqa: PLC1901
             ]
             return result
         return ""

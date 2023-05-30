@@ -107,7 +107,7 @@ def log_all_environment_variables():
     env_list = []
     for key, value in os.environ.items():
         if "password" in key.lower():
-            value = "*" * 8
+            value = "*" * 8  # noqa: PLW2901
         env = f"{key} - {value}"
         env_list.append(env)
     mark = "-" * 20

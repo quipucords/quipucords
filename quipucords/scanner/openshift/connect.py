@@ -36,7 +36,7 @@ class ConnectTaskRunner(OpenShiftTaskRunner):
         return self.FAILURE_MESSAGE, ScanTask.FAILED
 
     def _handle_ocp_error(self, error: OCPError):
-        if error.status == 401:
+        if error.status == 401:  # noqa: PLR2004
             self.log(
                 "Unable to Login to OpenShift host with credentials provided.",
                 log_level=logging.ERROR,
