@@ -1,7 +1,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](/LICENSE)
-[![Build Status](https://github.com/quipucords/quipucords/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/quipucords/quipucords/actions?query=branch%3Amaster)
-[![Test Status](https://github.com/quipucords/quipucords/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/quipucords/quipucords/actions?query=branch%3Amaster)
-[![Code Coverage](https://codecov.io/gh/quipucords/quipucords/branch/master/graph/badge.svg)](https://codecov.io/gh/quipucords/quipucords)
+[![Build Status](https://github.com/quipucords/quipucords/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/quipucords/quipucords/actions?query=branch%3Amain)
+[![Test Status](https://github.com/quipucords/quipucords/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/quipucords/quipucords/actions?query=branch%3Amain)
+[![Code Coverage](https://codecov.io/gh/quipucords/quipucords/branch/main/graph/badge.svg)](https://codecov.io/gh/quipucords/quipucords)
 [![Documentation Status](https://readthedocs.org/projects/quipucords/badge/)](https://quipucords.readthedocs.io/en/latest/)
 
 
