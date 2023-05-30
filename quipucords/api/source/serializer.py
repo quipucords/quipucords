@@ -305,7 +305,7 @@ class SourceSerializer(NotEmptySerializer):
         return name
 
     @staticmethod
-    def validate_ipaddr_list(hosts):
+    def validate_ipaddr_list(hosts):  # noqa: PLR0912, PLR0915, C901
         """Make sure the hosts list is present and has valid IP addresses."""
         ipaddr_list = hosts
         if isinstance(ipaddr_list, list):
@@ -444,7 +444,7 @@ class SourceSerializer(NotEmptySerializer):
         return SourceSerializer.validate_ipaddr_list(exclude_hosts)
 
     @staticmethod
-    def cidr_to_ansible(ip_range):
+    def cidr_to_ansible(ip_range):  # noqa: C901
         """Convert an IP address range from CIDR to Ansible notation.
 
         :param ip_range: the IP range, as a string
@@ -471,7 +471,7 @@ class SourceSerializer(NotEmptySerializer):
 
         prefix_bits = int(prefix_bits)
 
-        if prefix_bits < 0 or prefix_bits > 32:
+        if prefix_bits < 0 or prefix_bits > 32:  # noqa: PLR2004
             err_msg = _(
                 messages.NET_CIDR_BIT_MASK
                 % {"ip_range": ip_range, "prefix_bits": prefix_bits}
@@ -479,7 +479,7 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError(err_msg)
 
         octet_strings = base_address.split(".")
-        if len(octet_strings) != 4:
+        if len(octet_strings) != 4:  # noqa: PLR2004
             err_msg = _(messages.NET_FOUR_OCTETS % (ip_range,))
             raise ValidationError(err_msg)
 
@@ -490,7 +490,7 @@ class SourceSerializer(NotEmptySerializer):
                 raise ValidationError(err_msg)
 
             val = int(octet_strings[i])
-            if val < 0 or val > 255:
+            if val < 0 or val > 255:  # noqa: PLR2004
 
                 err_msg = _(
                     messages.NET_CIDR_RANGE % {"ip_range": ip_range, "octet": val}
@@ -513,7 +513,7 @@ class SourceSerializer(NotEmptySerializer):
                 # The number of bits of this octet that we want to
                 # preserve
                 this_octet_bits = prefix_bits - 8 * i
-                assert 0 < this_octet_bits < 8
+                assert 0 < this_octet_bits < 8  # noqa: PLR2004
                 # mask is this_octet_bits 1's followed by (8 -
                 # this_octet_bits) 0's.
                 mask = -1 << (8 - this_octet_bits)
@@ -529,7 +529,7 @@ class SourceSerializer(NotEmptySerializer):
         """Validate the port."""
         if not port:
             pass
-        elif port < 0 or port > 65536:
+        elif port < 0 or port > 65536:  # noqa: PLR2004
             raise ValidationError(_(messages.NET_INVALID_PORT))
 
         return port

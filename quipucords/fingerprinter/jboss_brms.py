@@ -66,7 +66,7 @@ def classify_version_string(version_string):
     return None
 
 
-def detect_jboss_brms(source, facts):
+def detect_jboss_brms(source, facts):  # noqa: C901
     """Detect if JBoss BRMS is present based on system facts.
 
     :param source: The source of the facts

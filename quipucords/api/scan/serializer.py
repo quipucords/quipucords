@@ -244,7 +244,7 @@ class ScanSerializer(NotEmptySerializer):
         return instance
 
     @staticmethod
-    def _do_partial_update(instance, validated_data):
+    def _do_partial_update(instance, validated_data):  # noqa: PLR0912, PLR0915, C901
         """Peform partial update of a scan."""
         name = validated_data.pop("name", None)
         scan_type = validated_data.pop("scan_type", None)

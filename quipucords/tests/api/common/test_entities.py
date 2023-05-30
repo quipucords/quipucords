@@ -259,7 +259,7 @@ class TestHostEntity:
             (None, None, None, None),
         ),
     )
-    def test_cores_per_socket(
+    def test_cores_per_socket(  # noqa: PLR0913
         self,
         mocker,
         cpu_core_per_socket,

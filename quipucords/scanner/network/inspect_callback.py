@@ -146,7 +146,7 @@ class InspectResultCallback:
         # Generate facts for host
         for result_key, result_value in results.items():
             if result_value == process.NO_DATA:
-                result_value = None
+                result_value = None  # noqa: PLW2901
 
             stored_fact = RawFact(
                 name=result_key, value=result_value, system_inspection_result=sys_result
@@ -165,7 +165,7 @@ class InspectResultCallback:
         self.scan_task.log_message(message, log_level=logging.ERROR)
         self._finalize_host(host, SystemInspectionResult.UNREACHABLE)
 
-    def event_callback(self, event_dict=None):
+    def event_callback(self, event_dict=None):  # noqa: C901
         """Control the event callback for Ansible Runner."""
         try:
             okay = ["runner_on_ok", "runner_item_on_ok"]
@@ -189,7 +189,7 @@ class InspectResultCallback:
                     elif event in unreachable:
                         self.task_on_unreachable(event_dict)
                     else:
-                        if event not in runner_ignore:
+                        if event not in runner_ignore:  # noqa: PLR5501
                             self.scan_task.log_message(
                                 log_messages.TASK_UNEXPECTED_FAILURE
                                 % ("event_callback", event, event_dict),

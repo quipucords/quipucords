@@ -152,7 +152,7 @@ def check_path_validity(path_list):
     return invalid_paths
 
 
-def expand_scanjob_with_times(scanjob, connect_only=False):
+def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C901
     """Expand a scanjob object into a JSON dict to send to the user.
 
     :param scanjob: a ScanJob.

@@ -137,7 +137,9 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             sys_result.save()
 
-    def _inspect_scan(self, manager_interrupt, connected):
+    def _inspect_scan(  # noqa: PLR0912, PLR0915, C901
+        self, manager_interrupt, connected
+    ):
         """Execute the host scan with the initialized source.
 
         :param manager_interrupt: Signal used to communicate termination

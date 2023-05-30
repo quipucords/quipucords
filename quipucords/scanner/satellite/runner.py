@@ -34,7 +34,7 @@ class SatelliteTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
                 "Unknown satellite version is not supported"
             )
             raise ScanFailureError(error_message)
-        if status_code == 200:
+        if status_code == 200:  # noqa: PLR2004
             api = create(satellite_version, api_version, self.scan_job, self.scan_task)
             if not api:
                 error_message = self._format_error_message(

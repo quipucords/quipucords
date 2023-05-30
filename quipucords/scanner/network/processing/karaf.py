@@ -123,7 +123,7 @@ class FuseVersionProcessor(process.Processor):
                 if item.get("rc", True):
                     pass
                 else:
-                    if item.get("stdout", "").strip() != "":
+                    if item.get("stdout", "").strip() != "":  # noqa: PLR5501, PLC1901
                         value = [
                             version
                             for version in item.get("stdout_lines", [])

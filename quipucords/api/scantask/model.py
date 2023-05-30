@@ -235,7 +235,7 @@ class ScanTask(models.Model):
 
     # All task types
     @transaction.atomic
-    def update_stats(
+    def update_stats(  # noqa: PLR0913
         self,
         description,
         sys_count=None,
@@ -285,7 +285,7 @@ class ScanTask(models.Model):
 
     # All task types
     @transaction.atomic
-    def increment_stats(
+    def increment_stats(  # noqa: PLR0913
         self,
         name,
         increment_sys_count=False,
@@ -408,7 +408,7 @@ class ScanTask(models.Model):
                 for system_result in system_results.systems.all():
                     fact = {}
                     for raw_fact in system_result.facts.all():
-                        if not raw_fact.value or raw_fact.value == "":
+                        if not raw_fact.value or raw_fact.value == "":  # noqa: PLC1901
                             continue
                         # Load values as JSON
                         fact[raw_fact.name] = raw_fact.value

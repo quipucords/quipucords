@@ -133,7 +133,7 @@ class EngineTest(TestCase):
     ################################################################
     # Helper functions
     ################################################################
-    def _create_network_fc_json(
+    def _create_network_fc_json(  # noqa: PLR0913, PLR0912, PLR0915, C901
         self,
         report_id=1,
         source_name="source1",
@@ -248,7 +248,7 @@ class EngineTest(TestCase):
         details_report = {"id": report_id, "facts": [fact]}
         return details_report
 
-    def _create_vcenter_fc_json(
+    def _create_vcenter_fc_json(  # noqa: PLR0913, PLR0912, C901
         self,
         report_id=1,
         source_name="source2",
@@ -315,7 +315,7 @@ class EngineTest(TestCase):
         details_report = {"id": report_id, "facts": [fact]}
         return details_report
 
-    def _create_satellite_fc_json(
+    def _create_satellite_fc_json(  # noqa: PLR0913, PLR0912, C901
         self,
         report_id=1,
         source_name="source3",

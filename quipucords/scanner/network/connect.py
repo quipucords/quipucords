@@ -208,7 +208,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-def _connect(
+def _connect(  # noqa: PLR0913, PLR0912, PLR0915
     manager_interrupt: Value,
     scan_task: ScanTask,
     hosts,

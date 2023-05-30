@@ -147,7 +147,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
             raise error
 
-    def _process_details_report(self, manager_interrupt, details_report):
+    def _process_details_report(  # noqa: PLR0915
+        self, manager_interrupt, details_report
+    ):
         """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled
@@ -577,7 +579,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         result = result + to_merge
         return number_merged, result
 
-    def _merge_matching_fingerprints(
+    def _merge_matching_fingerprints(  # noqa: PLR0913
         self,
         base_key,
         base_list,
@@ -729,7 +731,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                         else:
                             number_duplicates += 1
                 else:
-                    if result_by_key.get(id_key_value) is None:
+                    if result_by_key.get(id_key_value) is None:  # noqa: PLR5501
                         result_by_key[id_key_value] = value_dict
                     else:
                         number_duplicates += 1
@@ -744,7 +746,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
         return result_by_key, key_not_found_list
 
-    def _merge_fingerprint(
+    def _merge_fingerprint(  # noqa: PLR0912, C901
         self, priority_fingerprint, to_merge_fingerprint, reverse_priority_keys=None
     ):
         """Merge two fingerprints.
@@ -864,7 +866,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         return priority_fingerprint
 
-    def _add_fact_to_fingerprint(
+    def _add_fact_to_fingerprint(  # noqa: PLR0913
         self,
         source,
         raw_fact_key,
@@ -971,7 +973,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         else:
             fingerprint[ENTITLEMENTS_KEY] = entitlements
 
-    def _process_network_fact(self, source, fact):
+    def _process_network_fact(self, source, fact):  # noqa: PLR0915
         """Process a fact and convert to a fingerprint.
 
         :param source: The source that provided this fact.
@@ -1329,7 +1331,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         return fingerprint
 
-    def _process_satellite_fact(self, source, fact):
+    def _process_satellite_fact(self, source, fact):  # noqa: PLR0915
         """Process a fact and convert to a fingerprint.
 
         :param source: The source that provided this fact.

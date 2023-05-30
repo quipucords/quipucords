@@ -132,7 +132,7 @@ ERRATA_MAPPING = {
 }
 
 
-def request_results(
+def request_results(  # noqa: PLR0913
     scan_task: ScanTask,
     url_template: str,
     org_id=None,
@@ -169,7 +169,7 @@ def request_results(
             break
 
 
-def host_fields(api_version, response):
+def host_fields(api_version, response):  # noqa: PLR0912, PLR0915, C901
     """Obtain the fields for a given host id.
 
     :param api_version: The version of the Satellite api
@@ -290,7 +290,7 @@ def host_subscriptions(response):
     return subs_dict
 
 
-def request_host_details(
+def request_host_details(  # noqa: PLR0913
     scan_task,
     logging_options,
     host_id,

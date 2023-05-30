@@ -95,7 +95,7 @@ def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
     return url.format(sat_host=sat_host, port=port, org_id=org_id, host_id=host_id)
 
 
-def execute_request(
+def execute_request(  # noqa: PLR0913
     scan_task, url, org_id=None, host_id=None, query_params=None, options=None
 ):
     """Execute a request to the Satellite server.

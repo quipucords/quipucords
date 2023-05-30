@@ -198,7 +198,7 @@ class Manager(Thread):
         if restarted_scan_count == 0:
             logger.info("%s: No running or pending scan jobs to start", self.log_prefix)
 
-    def run(self):
+    def run(self):  # noqa: PLR0912, C901
         """Trigger thread execution."""
         self.restart_incomplete_scansjobs()
         logger.info("%s: Started run loop.", self.log_prefix)
@@ -282,7 +282,7 @@ def reinitialize():
     else:
         manager_class = Manager
 
-    global SCAN_MANAGER
+    global SCAN_MANAGER  # noqa: PLW0603
     SCAN_MANAGER = manager_class()
 
 
