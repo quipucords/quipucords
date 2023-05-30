@@ -113,7 +113,7 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 
 @pytest.mark.django_db
-def test_inspect_with_success(  # pylint: disable=too-many-arguments
+def test_inspect_with_success(
     mocker, scan_task: ScanTask, project, cluster, node_ok, workload
 ):
     """Test connecting to OpenShift host with success."""
@@ -133,7 +133,7 @@ def test_inspect_with_success(  # pylint: disable=too-many-arguments
 
 
 @pytest.mark.django_db
-def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
+def test_inspect_with_partial_success(
     mocker,
     scan_task: ScanTask,
     project,
@@ -161,7 +161,7 @@ def test_inspect_with_partial_success(  # pylint: disable=too-many-arguments
 
 
 @pytest.mark.django_db
-def test_inspect_with_failure(  # pylint: disable=too-many-arguments
+def test_inspect_with_failure(
     mocker,
     scan_task: ScanTask,
     project,

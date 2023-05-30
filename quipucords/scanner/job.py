@@ -223,7 +223,6 @@ class SyncScanJobRunner:
 
         :returns: str value from ScanTask.STATUS_CHOICES, usually COMPLETED or FAILED.
         """
-        # pylint: disable=too-many-return-statements,too-many-branches
         if interrupt_status := self.check_manager_interrupt():
             return interrupt_status
 

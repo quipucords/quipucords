@@ -23,7 +23,6 @@ def dummy_start():
     """Create a dummy method for testing."""
 
 
-# pylint: disable=too-many-instance-attributes,R0904,C0302
 class SourceTest(LoggedUserMixin, TestCase):
     """Test the basic Source infrastructure."""
 
@@ -100,7 +99,6 @@ class SourceTest(LoggedUserMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    # pylint: disable=unused-argument
     @patch("api.source.view.start_scan", side_effect=dummy_start)
     def create_with_query(self, query, data, start_scan):
         """Create a source with query param.
@@ -113,14 +111,12 @@ class SourceTest(LoggedUserMixin, TestCase):
         url += query
         return self.client.post(url, json.dumps(data), "application/json")
 
-    # pylint: disable=no-value-for-parameter
     def create_expect_201_with_query(self, query, data):
         """Create a valid source with a scan parameter."""
         response = self.create_with_query(query, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    # pylint: disable=no-value-for-parameter
     def create_expect_400_with_query(self, query, data, expected_response=None):
         """Create an expect HTTP 400."""
         response = self.create_with_query(query, data)
@@ -183,7 +179,6 @@ class SourceTest(LoggedUserMixin, TestCase):
         json_source = serializer.data
         out = format_source(json_source)
 
-        # pylint: disable=line-too-long
         expected = {
             "id": 1,
             "name": "source1",

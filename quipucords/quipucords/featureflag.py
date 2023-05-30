@@ -25,7 +25,7 @@ class FeatureFlag:
         except KeyError:
             return super().__getattribute__(item)
 
-    def is_feature_active(self, feature_name):  # pylint: disable=no-member
+    def is_feature_active(self, feature_name):
         """Return attribute value."""
         try:
             return getattr(self, feature_name)

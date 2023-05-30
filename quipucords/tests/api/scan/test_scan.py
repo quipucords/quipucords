@@ -13,8 +13,6 @@ from api.scan.view import expand_scan
 from tests.mixins import LoggedUserMixin
 from tests.scanner.test_util import create_scan_job
 
-# pylint: disable=unused-argument
-
 
 class ScanTest(LoggedUserMixin, TestCase):
     """Test the basic ScanJob infrastructure."""

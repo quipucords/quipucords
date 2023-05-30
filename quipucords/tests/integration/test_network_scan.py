@@ -407,7 +407,7 @@ class TestNetworkScan:
             }
         return metadata
 
-    def test_deployments_report(  # pylint: disable=too-many-arguments
+    def test_deployments_report(
         self,
         apiclient,
         expected_fingerprint_metadata,

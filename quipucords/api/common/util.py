@@ -161,7 +161,6 @@ def expand_scanjob_with_times(scanjob, connect_only=False):
 
     :returns: a JSON dict with some of the ScanJob's fields.
     """
-    # pylint: disable=too-many-locals,too-many-branches
     (
         systems_count,
         systems_scanned,

@@ -190,7 +190,7 @@ class TestHostEntity:
         """Ensure only properly initialized host have products."""
         host = HostEntity(fingerprint, last_discovered=None)
         with pytest.raises(NotImplementedError):
-            host.products  # pylint: disable=pointless-statement  # false positive
+            host.products
 
     @pytest.mark.parametrize(
         "fingerprint,expected_product_names,expected_rh_products_installed",
@@ -259,7 +259,7 @@ class TestHostEntity:
             (None, None, None, None),
         ),
     )
-    def test_cores_per_socket(  # pylint: disable=too-many-arguments
+    def test_cores_per_socket(
         self,
         mocker,
         cpu_core_per_socket,

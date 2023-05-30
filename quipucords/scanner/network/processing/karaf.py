@@ -154,7 +154,7 @@ class FuseVersionProcessorLocate(process.Processor):
         """
         results = []
         if output.get("rc", 1) == 0 and output.get("stdout", "").strip() != [""]:
-            # pylint: disable=consider-using-set-comprehension
+
             results = list(
                 set([line for line in output.get("stdout_lines", []) if line.strip()])
             )

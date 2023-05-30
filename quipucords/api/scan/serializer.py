@@ -246,7 +246,6 @@ class ScanSerializer(NotEmptySerializer):
     @staticmethod
     def _do_partial_update(instance, validated_data):
         """Peform partial update of a scan."""
-        # pylint: disable=too-many-branches,too-many-statements
         name = validated_data.pop("name", None)
         scan_type = validated_data.pop("scan_type", None)
         sources = validated_data.pop("sources", None)

@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 class ScanJob(models.Model):
     """The scan job captures all sources and scan tasks for a scan."""
 
-    # pylint: disable=too-many-instance-attributes
     JOB_RUN = 0
     JOB_TERMINATE_PAUSE = 1
     JOB_TERMINATE_CANCEL = 2
@@ -139,7 +138,6 @@ class ScanJob(models.Model):
 
     def copy_scan_options(self):
         """Copy scan options to the job."""
-        # pylint: disable=no-member
         scan = self.scan
         if scan is not None:
             self.sources.add(*scan.sources.all())
@@ -185,7 +183,6 @@ class ScanJob(models.Model):
         :return: systems_count, systems_scanned,
         systems_failed, systems_unreachable
         """
-        # pylint: disable=too-many-locals
         self.refresh_from_db()
         if self.status in (ScanTask.CREATED, ScanTask.PENDING):
             return None, None, None, None, None
@@ -219,9 +216,9 @@ class ScanJob(models.Model):
         self.refresh_from_db()
         if self.report_id and self.details_report:
             self.details_report.refresh_from_db()
-            # pylint: disable=using-constant-test
+
             if self.details_report.deployment_report:
-                # pylint: disable=no-member
+
                 system_fingerprint_count = (
                     self.details_report.deployment_report.system_fingerprints.count()
                 )
@@ -286,7 +283,6 @@ class ScanJob(models.Model):
 
         Change job state from CREATED TO PENDING.
         """
-        # pylint: disable=no-member,too-many-statements
         self.copy_scan_options()
 
         target_status = ScanTask.PENDING
@@ -357,7 +353,7 @@ class ScanJob(models.Model):
                     status_message=_(messages.ST_STATUS_MSG_PENDING),
                     sequence_number=count,
                 )
-                self.tasks.add(conn_task)  # pylint: disable=no-member
+                self.tasks.add(conn_task)
                 conn_tasks.append(conn_task)
 
                 # Create task result
@@ -393,8 +389,8 @@ class ScanJob(models.Model):
                     sequence_number=count,
                 )
                 inspect_task.prerequisites.add(conn_task)
-                self.tasks.add(inspect_task)  # pylint: disable=no-member
-                inspect_tasks.append(conn_task)  # pylint: disable=no-member
+                self.tasks.add(inspect_task)
+                inspect_tasks.append(conn_task)
 
                 # Create task result
                 inspect_task_result = TaskInspectionResult.objects.create(
@@ -428,7 +424,7 @@ class ScanJob(models.Model):
             )
             fingerprint_task.prerequisites.set(prerequisites)
 
-            self.tasks.add(fingerprint_task)  # pylint: disable=no-member
+            self.tasks.add(fingerprint_task)
 
     def status_start(self):
         """Change status from PENDING to RUNNING.

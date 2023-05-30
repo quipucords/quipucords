@@ -71,7 +71,6 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
     :returns: processed fact value
     """
-    # pylint: disable=too-many-return-statements
     # Note: we do NOT support transitive dependencies. If those are
     # needed, this is the place to change.
     if is_sudo_error_value(fact_value):
@@ -143,7 +142,7 @@ def process(scan_task, previous_host_facts, fact_key, fact_value, host):
 
     try:
         processor_out = processor.process(fact_value, dependencies)
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         log_message = (
             f"FAILED POST PROCESSING {host}."
             f" Processor for {fact_key} got value {fact_value},"
@@ -161,7 +160,7 @@ class ProcessorMeta(abc.ABCMeta):
     def __init__(cls, name, bases, dct):
         """Register cls in the PROCESSORS dictionary."""
         if "KEY" not in dct:
-            # pylint: disable=broad-exception-raised
+
             raise Exception(f"Processor {name} does not have a KEY")
             # pylint: enable=broad-exception-raised
 

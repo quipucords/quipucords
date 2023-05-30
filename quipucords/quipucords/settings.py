@@ -102,7 +102,7 @@ SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
 # > This view will only work if DEBUG is True.
 # > That’s because this view is grossly inefficient and probably insecure. This is only
 # > intended for local development, and should never be used in production.
-# TODO FIXME Remove this dangerous default.  # pylint: disable=fixme
+# TODO FIXME Remove this dangerous default.
 DEBUG = env.bool("DJANGO_DEBUG", True)
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOST_LIST", default=["*"])

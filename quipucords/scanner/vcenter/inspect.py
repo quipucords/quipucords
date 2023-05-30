@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 
 from django.db import transaction
-from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
+from pyVmomi import vim, vmodl
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.runner import ScanTaskRunner
@@ -134,7 +134,6 @@ class InspectTaskRunner(ScanTaskRunner):
         return facts
 
     @transaction.atomic
-    # pylint: disable=too-many-branches,too-many-locals
     def parse_vm_props(self, props, host_dict):
         """Parse Virtual Machine properties.
 
@@ -389,7 +388,6 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return filter_spec
 
-    # pylint: disable=too-many-locals
     def inspect(self):
         """Execute the inspection scan with the initialized source."""
         # Save counts

@@ -29,7 +29,6 @@ auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
 
 
-# pylint: disable=inconsistent-return-statements
 @api_view(["GET"])
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)

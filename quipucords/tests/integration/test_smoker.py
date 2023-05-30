@@ -155,7 +155,7 @@ class Smoker:
             }
         return metadata
 
-    def test_deployments_report(  # pylint: disable=too-many-arguments
+    def test_deployments_report(
         self,
         django_client,
         expected_fingerprint_metadata,

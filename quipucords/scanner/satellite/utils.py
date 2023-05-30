@@ -19,7 +19,7 @@ from scanner.satellite.api import (
 logger = logging.getLogger(__name__)
 
 # Disable warnings for satellite requests
-requests.packages.urllib3.disable_warnings()  # pylint: disable=no-member
+requests.packages.urllib3.disable_warnings()
 
 
 def get_credential(scan_task):
@@ -95,7 +95,6 @@ def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
     return url.format(sat_host=sat_host, port=port, org_id=org_id, host_id=host_id)
 
 
-# pylint: disable=too-many-arguments
 def execute_request(
     scan_task, url, org_id=None, host_id=None, query_params=None, options=None
 ):
@@ -185,7 +184,7 @@ def _status5(scan_task):
         raise SatelliteException(str(protocol_error)) from protocol_error
 
     api_version = SATELLITE_VERSION_5
-    status_code = codes.HTTP_200_OK  # pylint: disable=no-member
+    status_code = codes.HTTP_200_OK
     return (status_code, api_version, SATELLITE_VERSION_5)
 
 

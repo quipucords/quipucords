@@ -27,7 +27,7 @@ from scanner.satellite.utils import (
 from tests.scanner.test_util import create_scan_job
 
 
-def mock_xml_fault(param1, param2):  # pylint: disable=unused-argument
+def mock_xml_fault(param1, param2):
     """Mock method to throw connection error."""
     raise xmlrpc.client.Fault(faultCode=500, faultString="fault")
 

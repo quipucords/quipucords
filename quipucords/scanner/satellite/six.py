@@ -132,7 +132,7 @@ ERRATA_MAPPING = {
 }
 
 
-def request_results(  # pylint: disable=too-many-arguments
+def request_results(
     scan_task: ScanTask,
     url_template: str,
     org_id=None,
@@ -169,7 +169,6 @@ def request_results(  # pylint: disable=too-many-arguments
             break
 
 
-# pylint: disable=too-many-locals,too-many-statements,too-many-branches
 def host_fields(api_version, response):
     """Obtain the fields for a given host id.
 
@@ -291,7 +290,6 @@ def host_subscriptions(response):
     return subs_dict
 
 
-# pylint: disable=too-many-arguments
 def request_host_details(
     scan_task,
     logging_options,
@@ -330,7 +328,7 @@ def request_host_details(
             query_params=QUERY_PARAMS_FIELDS,
             options=request_options,
         )
-        # pylint: disable=no-member
+
         if host_fields_response.status_code != requests.codes.ok:
             raise SatelliteException(
                 f"Invalid response code {host_fields_response.status_code}"
@@ -343,7 +341,7 @@ def request_host_details(
             host_id=host_id,
             options=request_options,
         )
-        # pylint: disable=no-member
+
         if host_subscriptions_response.status_code in (400, 404):
             content_type = host_subscriptions_response.headers.get(CONTENT_TYPE)
             if content_type and APP_JSON in content_type:

@@ -56,8 +56,6 @@ class InspectTaskRunner(ScanTaskRunner):
         failures (host/ip). Runs a host scan on the set of systems that are
         reachable. Collects the associated facts for the scanned systems
         """
-        # pylint: disable=too-many-locals
-
         self.connect_scan_task = self.scan_task.prerequisites.first()
         if self.connect_scan_task.status != ScanTask.COMPLETED:
             error_message = (
@@ -105,7 +103,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         except (AnsibleRunnerException, AssertionError, ScannerException) as error:
             error_message = f"Scan task encountered error: {error}"
-            raise ScanFailureError(error_message)  # pylint: disable=raise-missing-from
+            raise ScanFailureError(error_message)
 
         if self.scan_task.systems_failed > 0:
             scan_message = (
@@ -123,7 +121,7 @@ class InspectTaskRunner(ScanTaskRunner):
         connected_hosts = self.connect_scan_task.connection_result.systems.filter(
             status=SystemConnectionResult.SUCCESS
         ).values("name")
-        # pylint: disable=consider-using-set-comprehension
+
         connected_hosts = set([system.get("name") for system in connected_hosts])
         scanned_hosts = set(
             [system.get(NETWORK_SCAN_IDENTITY_KEY) for system in systems_list]
@@ -155,8 +153,6 @@ class InspectTaskRunner(ScanTaskRunner):
         Note: base_ssh_executable & ssh_timeout are parameters that
         are only used for testing.
         """
-        # pylint: disable=too-many-locals,too-many-arguments
-        # pylint: disable=too-many-branches,too-many-statements
         connection_port = self.scan_task.source.port
 
         if self.scan_task.source.options is not None:

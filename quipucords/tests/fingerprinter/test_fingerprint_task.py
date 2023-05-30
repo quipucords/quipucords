@@ -127,12 +127,8 @@ class EngineTest(TestCase):
         )
         self.source.save()
         scan_job, _ = create_scan_job(self.source)
-        self.fp_task = scan_job.tasks.last()  # pylint: disable=no-member
+        self.fp_task = scan_job.tasks.last()
         self.fp_task_runner = FingerprintTaskRunner(scan_job, self.fp_task)
-
-    # pylint: disable=too-many-arguments,too-many-lines
-    # pylint: disable=too-many-locals,too-many-branches
-    # pylint: disable=protected-access, W0102
 
     ################################################################
     # Helper functions
@@ -174,7 +170,6 @@ class EngineTest(TestCase):
         user_has_sudo=True,
     ):
         """Create an in memory DetailsReport for tests."""
-        # pylint: disable=too-many-statements
         fact = network_template()
         if source_name:
             fact["source_name"] = source_name

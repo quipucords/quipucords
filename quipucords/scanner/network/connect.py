@@ -135,7 +135,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         )
         return scan_message, scan_result
 
-    # pylint: disable=too-many-locals
     def run_with_result_store(
         self, manager_interrupt: Value, result_store: ConnectResultStore
     ):
@@ -209,7 +208,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-def _connect(  # pylint: disable=too-many-arguments
+def _connect(
     manager_interrupt: Value,
     scan_task: ScanTask,
     hosts,
@@ -234,7 +233,6 @@ def _connect(  # pylint: disable=too-many-arguments
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
-    # pylint: disable=too-many-locals, disable=too-many-statements, too-many-branches
     cred_data = model_to_dict(credential)
     group_names, inventory = construct_inventory(
         hosts=hosts,

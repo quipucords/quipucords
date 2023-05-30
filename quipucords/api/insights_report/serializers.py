@@ -15,7 +15,7 @@ from quipucords.environment import server_version
 
 default_kwargs = {"required": False}
 
-# pylint: disable=abstract-method,fixme
+
 # Serializer has update/create as pseudo-abstract methods we don't need to implement
 # disable complaints about 'fixme' until DISCOVERY-130 is done
 

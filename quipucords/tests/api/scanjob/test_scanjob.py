@@ -1,6 +1,5 @@
 """Test the API application."""
 
-# pylint: disable=unused-argument,too-many-lines
 
 import json
 from unittest.mock import patch
@@ -181,7 +180,7 @@ class ScanJobTest(LoggedUserMixin, TestCase):
         # Queue should have created scan tasks
         tasks = scan_job.tasks.all()
         self.assertEqual(len(tasks), 1)
-        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
+        connect_task = scan_job.tasks.first()
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         # Start job
@@ -189,17 +188,17 @@ class ScanJobTest(LoggedUserMixin, TestCase):
         self.assertEqual(scan_job.status, ScanTask.RUNNING)
 
         assert scan_job.status_pause()
-        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
+        connect_task = scan_job.tasks.first()
         self.assertEqual(scan_job.status, ScanTask.PAUSED)
         self.assertEqual(connect_task.status, ScanTask.PAUSED)
 
         assert scan_job.status_restart()
-        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
+        connect_task = scan_job.tasks.first()
         self.assertEqual(scan_job.status, ScanTask.PENDING)
         self.assertEqual(connect_task.status, ScanTask.PENDING)
 
         assert scan_job.status_cancel()
-        connect_task = scan_job.tasks.first()  # pylint: disable=no-member
+        connect_task = scan_job.tasks.first()
         self.assertEqual(scan_job.status, ScanTask.CANCELED)
         self.assertEqual(connect_task.status, ScanTask.CANCELED)
 
@@ -230,7 +229,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection(self):
         """Get ScanJob connection results."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
@@ -265,7 +263,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_bad_ordering_filter(self):
         """Test ScanJob connection results with bad ordering filter."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
@@ -286,7 +283,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_bad_status_filter(self):
         """Test ScanJob connection results with bad status filter."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
@@ -307,7 +303,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_bad_source_id_filter(self):
         """Test ScanJob connection results with bad source_id filter."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
@@ -328,7 +323,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_filter_status(self):
         """Get ScanJob connection results with a filtered status."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create a connection system result
@@ -352,7 +346,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_failed_success(self):
         """Get ScanJob connection results for multiple systems."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create two connection system results one failure & one success
@@ -402,7 +395,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_name_ordering(self):
         """Get ScanJob connection results for systems ordered by name."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create two connection system results one failure & one success
@@ -453,7 +445,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_two_scan_tasks(self):
         """Get ScanJob connection results for multiple tasks."""
-        # pylint: disable=no-member
         # create a second source:
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
@@ -539,7 +530,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_filter_by_source_id(self):
         """Get ScanJob connection results filter by source_id."""
-        # pylint: disable=no-member
         # create a second source:
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
@@ -613,7 +603,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_paging(self):
         """Test paging for scanjob connection results."""
-        # pylint: disable=no-member
         # create a second source:
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
@@ -687,7 +676,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_results_with_none(self):
         """Test connection results with no results for one task."""
-        # pylint: disable=no-member
         # create a second source:
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
@@ -743,7 +731,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_delete_source_and_cred(self):
         """Get ScanJob connection results after source & cred are deleted."""
-        # pylint: disable=no-member
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
         cred2 = Credential.objects.create(
@@ -783,21 +770,18 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_connection_not_found(self):
         """Get ScanJob connection results with 404."""
-        # pylint: disable=no-member
         url = reverse("scanjob-detail", args="2") + "connection/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_connection_bad_request(self):
         """Get ScanJob connection results with 400."""
-        # pylint: disable=no-member
         url = reverse("scanjob-detail", args="t") + "connection/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_inspection_bad_ordering_filter(self):
         """Test ScanJob inspection results with bad ordering filter."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
@@ -825,7 +809,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_bad_status_filter(self):
         """Test ScanJob inspection results with bad status filter."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
@@ -853,7 +836,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_bad_source_id_filter(self):
         """Test ScanJob inspection results with bad source_id filter."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
@@ -881,7 +863,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_filter_status(self):
         """Get ScanJob inspection results with a filtered status."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
@@ -911,7 +892,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_paging(self):
         """Test paging of ScanJob inspection results."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         # Create an inspection system result
@@ -967,7 +947,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_ordering_by_name(self):
         """Tests inspection result ordering by name."""
-        # pylint: disable=too-many-locals
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
         source2.credentials.add(self.cred)
@@ -1064,7 +1043,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_filter_by_source_id(self):
         """Tests inspection result filter by source_id."""
-        # pylint: disable=too-many-locals
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
         source2.credentials.add(self.cred)
@@ -1150,7 +1128,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_two_tasks(self):
         """Tests inspection result ordering across tasks."""
-        # pylint: disable=too-many-locals
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
         source2.credentials.add(self.cred)
@@ -1291,7 +1268,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_delete_source(self):
         """Get ScanJob inspection results after source has been deleted."""
-        # pylint: disable=no-member
         source2 = Source(name="source2", source_type="network", port=22)
         source2.save()
         source2.credentials.add(self.cred)
@@ -1337,14 +1313,12 @@ class ScanJobTest(LoggedUserMixin, TestCase):
 
     def test_inspection_not_found(self):
         """Get ScanJob connection results with 404."""
-        # pylint: disable=no-member
         url = reverse("scanjob-detail", args="2") + "inspection/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_inspection_bad_request(self):
         """Get ScanJob connection results with 400."""
-        # pylint: disable=no-member
         url = reverse("scanjob-detail", args="t") + "inspection/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -1741,7 +1715,6 @@ class ScanJobTest(LoggedUserMixin, TestCase):
     @patch("api.scan.view.start_scan", side_effect=dummy_start)
     def test_delete_scan_cascade(self, start_scan):
         """Delete a scan and its related data."""
-        # pylint: disable=no-member
         scan_job, scan_task = create_scan_job(self.source, ScanTask.SCAN_TYPE_INSPECT)
 
         scan = scan_job.scan

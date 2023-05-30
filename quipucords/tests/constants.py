@@ -62,9 +62,7 @@ class VCRPath:
     def __set_name__(self, obj, name):
         """Create VCRPath file based on its parent attribute name."""
         folder_name, file_name = name.lower().split("_", 1)
-        self._path = (  # pylint: disable=attribute-defined-outside-init
-            VCR_CASSETTES_DIR / f"{folder_name}/{file_name}.yaml"
-        )
+        self._path = VCR_CASSETTES_DIR / f"{folder_name}/{file_name}.yaml"
 
 
 class VCRCassettes:

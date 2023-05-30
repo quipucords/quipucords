@@ -21,12 +21,11 @@ from scanner.satellite.five import SatelliteFive, request_host_details
 from tests.scanner.test_util import create_scan_job
 
 
-def mock_xml_fault(param1, param2):  # pylint: disable=unused-argument
+def mock_xml_fault(param1, param2):
     """Mock method to throw connection error."""
     raise xmlrpc.client.Fault(faultCode=500, faultString="fault")
 
 
-# pylint: disable=too-many-instance-attributes
 class SatelliteFiveTest(TestCase):
     """Tests Satellite 5 functions."""
 
@@ -390,7 +389,6 @@ class SatelliteFiveTest(TestCase):
     @patch("xmlrpc.client.ServerProxy")
     def test_hosts_facts(self, mock_serverproxy, mock_pool):
         """Test the hosts_facts method."""
-        # pylint: disable=unused-argument
         systems = [{"id": 1, "name": "sys1"}]
         client = mock_serverproxy.return_value
         client.auth.login.return_value = "key"

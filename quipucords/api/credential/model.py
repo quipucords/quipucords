@@ -72,7 +72,6 @@ class Credential(models.Model):
                 encrypted_value = encrypt_data_as_unicode(field_value)
                 setattr(self, field_name, encrypted_value)
 
-    # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
         """Save the model object."""
         self.encrypt_fields()

@@ -23,7 +23,6 @@ class ProductJWSTest(TestCase):
 
         self.assertEqual(versions, expected)
 
-    # pylint: disable=unused-argument
     def test_detect_ws_present(self):
         """Test the detect_jboss_ws method."""
         expected = {
@@ -73,7 +72,6 @@ class ProductJWSTest(TestCase):
             product = detect_jboss_ws(source, facts)
             self.assertEqual(product, expected)
 
-    # pylint: disable=unused-argument
     def test_detect_ws_potential(self):
         """Test the detect_jboss_ws method."""
         expected = {
@@ -127,7 +125,6 @@ class ProductJWSTest(TestCase):
             product = detect_jboss_ws(source, facts)
             self.assertEqual(product, expected)
 
-    # pylint: disable=unused-argument
     def test_detect_ws_absent(self):
         """Test the detect_jboss_ws method."""
         # Test where tomcat is part of red hat product

@@ -15,8 +15,6 @@ PAUSE = "pause"
 CANCEL = "cancel"
 RESTART = "restart"
 
-# pylint: disable=W0613
-
 
 def handle_scan(sender, instance, **kwargs):
     """Handle incoming scan.

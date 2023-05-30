@@ -77,7 +77,6 @@ class SourceFilter(FilterSet):
         fields = ["name", "source_type", "search_by_name", "search_credentials_by_name"]
 
 
-# pylint: disable=too-many-ancestors
 class SourceViewSet(ModelViewSet):
     """A view set for Sources."""
 
@@ -94,7 +93,6 @@ class SourceViewSet(ModelViewSet):
     ordering_fields = ("name", "source_type", "most_recent_connect_scan__start_time")
     ordering = ("name",)
 
-    # pylint: disable=unused-argument,arguments-differ
     def list(self, request):
         """List the sources."""
         # List objects
@@ -120,7 +118,6 @@ class SourceViewSet(ModelViewSet):
             result.append(json_source)
         return Response(result)
 
-    # pylint: disable=unused-argument
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Create a source."""
@@ -159,7 +156,7 @@ class SourceViewSet(ModelViewSet):
 
         return response
 
-    def retrieve(self, request, pk=None):  # pylint: disable=unused-argument
+    def retrieve(self, request, pk=None):
         """Get a source."""
         if not pk or (pk and not is_int(pk)):
             error = {"id": [_(messages.COMMON_ID_INV)]}
@@ -174,7 +171,6 @@ class SourceViewSet(ModelViewSet):
 
         return Response(json_source)
 
-    # pylint: disable=unused-argument
     def update(self, request, *args, **kwargs):
         """Update a source."""
         # Note: This method's implementation is basically a straight copy of
@@ -195,7 +191,7 @@ class SourceViewSet(ModelViewSet):
         return Response(json_source)
 
     @transaction.atomic
-    def destroy(self, request, pk):  # pylint: disable=arguments-differ
+    def destroy(self, request, pk):
         """Delete a cred."""
         try:
             source = Source.objects.get(pk=pk)

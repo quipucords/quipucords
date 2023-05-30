@@ -28,7 +28,6 @@ class InspectResultCallback:
     or writing your own custom callback plugin
     """
 
-    # pylint: disable=protected-access
     def __init__(self, scan_task, manager_interrupt):
         """Create result callback."""
         self.scan_task = scan_task

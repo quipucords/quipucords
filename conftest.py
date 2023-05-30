@@ -4,7 +4,7 @@ pytest config for quipucords.
 IMPORTANT: Don't import aplication code on toplevel as this can influence
 the proper patching.
 """
-# pylint: disable=import-outside-toplevel
+
 from functools import partial
 from urllib.parse import urljoin
 
@@ -16,7 +16,6 @@ from django.test import override_settings
 @pytest.fixture(autouse=True)
 def scan_manager(mocker):
     """return a DummyScanManager instance."""
-    # pylint: disable=protected-access
     from tests.dummy_scan_manager import DummyScanManager
 
     _manager = DummyScanManager()

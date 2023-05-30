@@ -30,7 +30,6 @@ def create_scan_job(
 
     scan_job.queue()
 
-    # pylint: disable=no-member
     scan_task = scan_job.tasks.first()
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         scan_task.status_complete()

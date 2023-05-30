@@ -5,7 +5,7 @@ from django.db import connection
 from django.db.models import Aggregate, CharField
 
 
-class SQLiteStringAgg(Aggregate):  # pylint: disable=abstract-method # false positive
+class SQLiteStringAgg(Aggregate):
     """StringAgg for sqlite based on GROUP_CONCAT function.
 
     Aims to be compatible with StringAgg for postgres.
@@ -26,9 +26,7 @@ class SQLiteStringAgg(Aggregate):  # pylint: disable=abstract-method # false pos
             **extra,
         )
 
-    def convert_value(
-        self, value, expression, connection
-    ):  # pylint: disable=arguments-differ,unused-argument,redefined-outer-name
+    def convert_value(self, value, expression, connection):
         """Convert NULL value to default_value."""
         # arguments-differ is a false positive here - see how django sql compiler
         # handles this https://github.com/django/django/blob/f6f0699d01f5840437bfd236c76c797943ef8edc/django/db/models/sql/compiler.py#L1105-L1124 # noqa: 501

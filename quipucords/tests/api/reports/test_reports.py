@@ -24,7 +24,6 @@ from tests.utils import patch_mask_value
 class ReportsTest(LoggedUserMixin, TestCase):
     """Tests against the Reports function."""
 
-    # pylint: disable=too-many-instance-attributes
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
@@ -146,10 +145,8 @@ class ReportsTest(LoggedUserMixin, TestCase):
         reports_dict["deployments_json"] = self.deployments_json
         return reports_dict
 
-    # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer(self):
         """Get a tar.gz return for report_id via API."""
-        # pylint: disable=line-too-long
         reports_dict = self.create_reports_dict()
         deployments_csv = (
             "Report ID,Report Type,Report Version,Report Platform ID\r\n"
@@ -164,7 +161,6 @@ class ReportsTest(LoggedUserMixin, TestCase):
             "\r\n"
         )
 
-        # pylint: disable=line-too-long, consider-using-f-string
         details_csv = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
             % (
@@ -225,7 +221,6 @@ class ReportsTest(LoggedUserMixin, TestCase):
         """Test parse_csv utility."""
         assert self.parse_csv("1,2,3\na,b,c") == [list("123"), list("abc")]
 
-    # pylint: disable=too-many-locals, too-many-branches
     def test_reports_gzip_renderer_masked(self):
         """Get a tar.gz return for report_id via API with masked values."""
         with patch_mask_value({"1.2.3.4": "<MASKED>"}):
@@ -242,7 +237,7 @@ class ReportsTest(LoggedUserMixin, TestCase):
             ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
             "\r\n"
         )
-        # pylint: disable=line-too-long, consider-using-f-string
+
         details_csv = (
             "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
             % (
@@ -283,7 +278,7 @@ class ReportsTest(LoggedUserMixin, TestCase):
             reports_dict, renderer_context=mock_renderer_context
         )
         self.assertNotEqual(tar_gz_result, None)
-        tar = tarfile.open(fileobj=tar_gz_result)  # pylint: disable=consider-using-with
+        tar = tarfile.open(fileobj=tar_gz_result)
         files = tar.getmembers()
         # ignore folder name
         filenames = [file.rsplit("/", 1)[1] for file in tar.getnames()]

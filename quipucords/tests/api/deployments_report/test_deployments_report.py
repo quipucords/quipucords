@@ -248,7 +248,7 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
         )
         # skip csv headers and last line
         csv_lines = csv_result.splitlines()[5:-1]
-        # pylint: disable=line-too-long
+
         data_rows = [
             "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-ansible,detection-network,detection-openshift,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid",  # noqa: E501
             ",,,2,2,,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501
@@ -270,7 +270,7 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
         csv_result = renderer.render(report, renderer_context=new_mock_renderer)
         # skip csv headers and last line
         csv_lines = csv_result.splitlines()[5:-1]
-        # pylint: disable=line-too-long
+
         data_rows = [
             "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-ansible,detection-network,detection-openshift,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid",  # noqa: E501
             ",,,2,2,,2,False,True,False,False,False,,,virtualized,,,,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,",  # noqa: E501

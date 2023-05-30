@@ -34,7 +34,6 @@ perm_classes = (IsAuthenticated,)
 @permission_classes(perm_classes)
 def sync_merge_reports(request):
     """Merge reports synchronously."""
-    # pylint: disable=too-many-locals
     error = {"reports": []}
 
     details_report_json = _convert_ids_to_json(request.data)
@@ -59,7 +58,7 @@ def sync_merge_reports(request):
     runner.run()
 
     if merge_job.status != ScanTask.COMPLETED:
-        # pylint: disable=broad-exception-raised
+
         raise Exception(merge_job.status_message)
         # pylint: enable=broad-exception-raised
 

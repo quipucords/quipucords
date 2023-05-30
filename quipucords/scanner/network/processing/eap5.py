@@ -105,7 +105,6 @@ class ProcessRunJarManifest(util.PerItemProcessor):
 
     VERSION_REGEXP = re.compile(r"Implementation-Version:.*(CVS|SVN)Tag=(\S+)\s*.*")
 
-    # pylint: disable=inconsistent-return-statements
     @classmethod
     def process_item(cls, item):
         """Look for an EAP version in a MANIFEST.MF file."""

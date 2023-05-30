@@ -36,7 +36,6 @@ class CredentialFilter(FilterSet):
         fields = ["name", "cred_type", "search_by_name"]
 
 
-# pylint: disable=too-many-ancestors
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model."""
 
@@ -53,7 +52,7 @@ class CredentialViewSet(ModelViewSet):
     ordering_fields = ("name", "cred_type")
     ordering = ("name",)
 
-    def retrieve(self, request, pk=None):  # pylint: disable=arguments-differ
+    def retrieve(self, request, pk=None):
         """Get a host credential."""
         if not pk or not is_int(pk):
             error = {"id": [_(messages.COMMON_ID_INV)]}
@@ -61,7 +60,7 @@ class CredentialViewSet(ModelViewSet):
         return super().retrieve(request, pk=pk)
 
     @transaction.atomic
-    def destroy(self, request, pk):  # pylint: disable=arguments-differ
+    def destroy(self, request, pk):
         """Delete a cred."""
         try:
             cred = Credential.objects.get(pk=pk)

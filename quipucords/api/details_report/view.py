@@ -79,7 +79,6 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create a details report."""
-        # pylint: disable=unused-argument
         # Validate incoming request body
         has_errors, validation_result = validate_details_report_json(request.data, True)
         if has_errors:
@@ -106,7 +105,7 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         runner.run()
 
         if scan_job.status != ScanTask.COMPLETED:
-            # pylint: disable=no-member
+
             error_json = {"error": scan_job.tasks.first().status_message}
             return Response(error_json, status=status.HTTP_400_BAD_REQUEST)
 

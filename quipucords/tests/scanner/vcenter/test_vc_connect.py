@@ -4,7 +4,7 @@ from socket import gaierror
 from unittest.mock import ANY, Mock, patch
 
 from django.test import TestCase
-from pyVmomi import vim  # pylint: disable=no-name-in-module
+from pyVmomi import vim
 
 from api.models import Credential, ScanJob, ScanTask, Source
 from scanner.vcenter.connect import ConnectTaskRunner, get_vm_names
@@ -57,7 +57,7 @@ class ConnectTaskRunnerTest(TestCase):
     def test_store_connect_data(self):
         """Test the connection data method."""
         vm_names = ["vm1", "vm2"]
-        # pylint: disable=protected-access
+
         self.runner._store_connect_data(vm_names, self.cred, self.source)
         self.assertEqual(len(self.scan_job.connection_results.task_results.all()), 1)
 

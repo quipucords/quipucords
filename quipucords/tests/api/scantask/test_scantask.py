@@ -15,7 +15,6 @@ def dummy_start():
     """Create a dummy method for testing."""
 
 
-# pylint: disable=unused-argument
 class ScanTaskTest(TestCase):
     """Test the basic ScanJob infrastructure."""
 

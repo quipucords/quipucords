@@ -281,7 +281,7 @@ class ReportEntity:
         try:
             return self._deployment_report.last_discovered
         except AttributeError:
-            # pylint: disable=no-member
+
             return self._deployment_report.details_report.scanjob.end_time
 
     @classmethod
