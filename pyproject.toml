@@ -46,12 +46,7 @@ pytest-xdist = "^3.1.0"
 requests-mock = "^1.10.0"
 httpretty = "^1.1.4"
 black = "^22.12.0"
-flake8-docstrings = "^1.6.0"
-flake8-quotes = "^3.3.2"
-flake8 = "*"
-flakeheaven = "^3.2.1"
 isort = "^5.11.4"
-pydocstyle = "^6.3.0"
 pylint-django = "^2.5.3"
 pylint-plugin-utils = "^0.7"
 pylint-pytest = "^1.1.2"
@@ -66,31 +61,6 @@ pytest-profiling = "^1.7.0"
 ipython = "^8.10.0"
 django-extensions = "^3.2.1"
 notebook = "^6.5.3"
-
-[tool.flakeheaven]
-base = "https://raw.githubusercontent.com/quipucords/linting/main/base-flakeheaven.toml"
-exclude = [
-    ".coverage*",
-    ".git",
-    ".idea",
-    ".pytest_cache",
-    "__pycache__",
-    "notebooks",
-    "quipucords/client",
-    "quipucords/staticfiles",
-    "quipucords/templates",
-]
-
-[tool.flakeheaven.exceptions."quipucords/api/migrations/*.py"]
-"flake8-*" = [
-    "-D100",
-    "-D101",
-]
-pylint = [
-    "-C0103", # invalid-name
-    "-C0114", # missing-module-docstring
-    "-C0115", # missing-class-docstring
-]
 
 [tool.black]
 target-version = ['py39']
@@ -107,17 +77,6 @@ known_first_party = [
     "scanner",
     "tests",
     "utils",
-]
-
-[tool.pylint.basic]
-good-names = ["db", "i", "j", "k", "ex", "Run", "_"]
-
-[tool.pylint.master]
-init-hook = "import sys; sys.path.append('./quipucords')"
-django-settings-module = "quipucords.settings"
-load-plugins = [
-    "pylint_django",
-    "pylint_pytest",
 ]
 
 [tool.pytest.ini_options]

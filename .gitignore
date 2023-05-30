@@ -131,8 +131,5 @@ quipucords/roles/
 # asdf
 .tool-versions
 
-# flakeheaven
-.flakeheaven_cache
-
 # local files
 var/

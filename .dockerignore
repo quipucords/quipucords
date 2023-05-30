@@ -5,7 +5,6 @@
 .DS_Store
 .dockerignore
 .egg
-.flakeheaven-baseline
 .github
 .gitignore
 .pytest_cache
