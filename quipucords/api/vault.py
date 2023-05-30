@@ -71,10 +71,9 @@ class Vault:
         self.password = password
         pass_bytes = to_bytes(password, encoding="utf-8", errors="strict")
         secrets = [("password", VaultSecret(_bytes=pass_bytes))]
-        # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
+
         self.vault = VaultLib(secrets=secrets)
 
-    # pylint: disable=inconsistent-return-statements
     def dump(self, data, stream=None):
         """Encrypt data and print stdout or write to stream.
 

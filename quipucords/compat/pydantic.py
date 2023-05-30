@@ -6,8 +6,8 @@
 # Why make this choice then? well, naming things is hard. Calling this module
 # "compat.pydantic" makes sense and makes it easy to find.
 
-# pylint: disable=import-self
-from pydantic import BaseModel as _BaseModel  # pylint: disable=no-name-in-module
+
+from pydantic import BaseModel as _BaseModel
 
 
 class PydanticErrorProxy:
@@ -43,7 +43,6 @@ def raises(error: Exception):
     Highly based on this suggestion:
     https://github.com/pydantic/pydantic/issues/1875#issuecomment-783459329
     """
-    # pylint: disable=missing-class-docstring
 
     def wrap(model_class: type):
 

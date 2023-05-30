@@ -42,7 +42,6 @@ def compute_source_info(sources):
 
 def create_deployments_csv(deployments_report_dict, request):
     """Create deployments report csv."""
-    # pylint: disable=too-many-branches, too-many-locals, too-many-statements
     deployments_report_dict = deepcopy(deployments_report_dict)
     mask_report = request.query_params.get("mask", False)
     source_headers = {SOURCES_KEY, *_get_detection_keys()}

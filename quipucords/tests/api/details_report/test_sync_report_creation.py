@@ -16,9 +16,6 @@ from tests.mixins import LoggedUserMixin
 class DetailsReportTest(LoggedUserMixin, TestCase):
     """Tests against the DetailsReport model and view set."""
 
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-locals,too-many-branches
-
     def setUp(self):
         """Create test case setup."""
         super().setUp()

@@ -17,7 +17,6 @@ class ConnectResultCallback:
     scan, as we scan it.
     """
 
-    # pylint: disable=protected-access,too-many-arguments
     def __init__(self, result_store, credential, source, manager_interrupt):
         """Create result callback."""
         self.result_store = result_store
@@ -78,7 +77,6 @@ class ConnectResultCallback:
 
     def task_on_failed(self, event_data, host, task_result):
         """Print a json representation of the event_data on failed."""
-        # pylint: disable=protected-access
         try:
             result_message = task_result.get(
                 "stderr", "No information given on failure."

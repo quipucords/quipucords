@@ -86,7 +86,6 @@ class ScanJobFilter(FilterSet):
         fields = ["status", "scan_type"]
 
 
-# pylint: disable=too-many-ancestors
 class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
@@ -103,7 +102,6 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     ordering_fields = ("id", "scan_type", "status", "start_time", "end_time")
     ordering = ("id",)
 
-    # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
         """Get a scan job."""
         if not pk or (pk and not is_int(pk)):
@@ -154,7 +152,6 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         return (ordering_filter, status_filter, source_id_filter)
 
-    # pylint: disable=too-many-locals,invalid-name
     @action(detail=True, methods=["get"])
     def connection(self, request, pk=None):
         """Get the connection results of a scan job."""
@@ -193,7 +190,6 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             return paginator.get_paginated_response(serializer.data)
         return Response(status=404)
 
-    # pylint: disable=too-many-locals
     @action(detail=True, methods=["get"])
     def inspection(self, request, pk=None):
         """Get the inspection results of a scan job."""
@@ -238,7 +234,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
-        # pylint: disable=no-else-return
+
         if scan.status == ScanTask.RUNNING:
             # Kill job before changing job state
             pause_scan.send(sender=self.__class__, instance=scan)
@@ -280,7 +276,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
         scan = get_object_or_404(self.queryset, pk=pk)
-        # pylint: disable=no-else-return
+
         if scan.status == ScanTask.PAUSED:
             # Update job state before starting job
             scan.status_restart()

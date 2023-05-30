@@ -58,7 +58,6 @@ def get_version(eap_version):
     return new_versions
 
 
-# pylint: disable=R0914, too-many-statements
 def detect_jboss_fuse(source, facts):
     """Detect if JBoss Fuse is present based on system facts.
 

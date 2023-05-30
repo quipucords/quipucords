@@ -32,11 +32,7 @@ from tests.scanner.test_util import create_scan_job
 
 fake = Faker()
 
-# pylint: disable=too-many-lines
-# pylint: disable=unused-argument
 
-
-# pylint: disable=too-many-instance-attributes
 class SatelliteSixV1Test(TestCase):
     """Tests Satellite 6 v1 functions."""
 
@@ -537,7 +533,7 @@ class SatelliteSixV1Test(TestCase):
         ), patch(
             "multiprocessing.pool.Pool.starmap"
         ) as mock_pool_starmap, requests_mock.Mocker() as mocker:
-            # pylint: disable=unnecessary-lambda
+
             mock_prepare_host.side_effect = lambda x: list(x)
             # pylint: enable=unnecessary-lambda
             mocker.get(url_org_a, status_code=200, json=jsonresults[0])
@@ -557,7 +553,6 @@ class SatelliteSixV1Test(TestCase):
             )
 
 
-# pylint: disable=too-many-instance-attributes
 class SatelliteSixV2Test(TestCase):
     """Tests Satellite 6 v2 functions."""
 

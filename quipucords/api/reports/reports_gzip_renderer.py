@@ -22,7 +22,6 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render all reports as gzip."""
-        # pylint: disable=too-many-locals
         request = renderer_context.get("request")
         reports_dict = data
         if not bool(reports_dict):

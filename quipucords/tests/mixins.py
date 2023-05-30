@@ -16,7 +16,7 @@ class LoggedUserMixin:
         user.save()
         return user
 
-    def setUp(self):  # pylint: disable=invalid-name
+    def setUp(self):
         """Set up data for test case."""
         self.user = self._create_user()
         self.client.force_login(self.user)

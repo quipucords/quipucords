@@ -75,7 +75,7 @@ class TestInsightsReport:
         # no hosts lost
         returned_host_names = {
             host["bios_uuid"]
-            for slice_key in report_slices  # pylint: disable=consider-using-dict-items
+            for slice_key in report_slices
             for host in report_slices[slice_key]["hosts"]
         }
         expected_host_names = {

@@ -23,7 +23,6 @@ def dummy_start():
 class AsyncMergeReports(LoggedUserMixin, TestCase):
     """Tests against the Deployment reports function."""
 
-    # pylint: disable=too-many-public-methods
     def setUp(self):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
@@ -76,7 +75,6 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
     @patch("api.merge_report.view.start_scan", side_effect=dummy_start)
     def test_greenpath_create(self, start_scan):
         """Create report merge job object via API."""
-        # pylint: disable=unused-argument
         request_json = {
             "report_type": "details",
             "sources": [
@@ -152,7 +150,6 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_source_missing_report_version(self):
         """Test source missing report version."""
-        # pylint: disable=unused-argument
         request_json = {
             "report_type": "details",
             "sources": [
@@ -351,49 +348,42 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_empty_body(self):
         """Test report merge by id with empty body."""
-        # pylint: disable=no-member
         data = None
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_REQUIRED]})
 
     def test_by_id_merge_empty_dict(self):
         """Test report merge by id with empty dict."""
-        # pylint: disable=no-member
         data = {}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_REQUIRED]})
 
     def test_by_id_merge_jobs_not_list(self):
         """Test report merge by id with not list."""
-        # pylint: disable=no-member
         data = {"reports": 5}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_NOT_LIST]})
 
     def test_by_id_merge_jobs_list_too_short(self):
         """Test report merge by id with list too short."""
-        # pylint: disable=no-member
         data = {"reports": [5]}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_TOO_SHORT]})
 
     def test_by_id_merge_jobs_list_contains_string(self):
         """Test report merge by id with containing str."""
-        # pylint: disable=no-member
         data = {"reports": [5, "hello"]}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_NOT_INT]})
 
     def test_by_id_merge_jobs_list_contains_duplicates(self):
         """Test report merge by id with containing duplicates."""
-        # pylint: disable=no-member
         data = {"reports": [5, 5]}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_NOT_UNIQUE]})
 
     def test_by_id_merge_jobs_list_contains_invalid_job_ids(self):
         """Test report merge by id with containing duplicates."""
-        # pylint: disable=no-member
         data = {"reports": [5, 6]}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(
@@ -403,7 +393,6 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
     @patch("api.merge_report.view.start_scan", side_effect=dummy_start)
     def test_by_id_merge_jobs_success(self, mock_dummy_start):
         """Test report merge by id jobs success."""
-        # pylint: disable=unused-argument
         url = reverse("reports-list")
         sources1 = [
             {

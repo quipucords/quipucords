@@ -58,7 +58,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
     ##############################################################
     def test_sync_merge_empty_body(self):
         """Test sync merge with empty body."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         response = self.client.put(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -67,7 +66,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_empty_dict(self):
         """Test sync merge with empty dict."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         data = {}
         response = self.client.put(
@@ -79,7 +77,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_jobs_not_list(self):
         """Test sync merge with not list."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         data = {"reports": 5}
         response = self.client.put(
@@ -91,7 +88,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_jobs_list_too_short(self):
         """Test sync merge with list too short."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         data = {"reports": [5]}
         response = self.client.put(
@@ -103,7 +99,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_jobs_list_contains_string(self):
         """Test sync merge with containing str."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         data = {"reports": [5, "hello"]}
         response = self.client.put(
@@ -115,7 +110,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_jobs_list_contains_duplicates(self):
         """Test sync merge with containing duplicates."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         data = {"reports": [5, 5]}
         response = self.client.put(
@@ -127,7 +121,6 @@ class SyncMergeReports(LoggedUserMixin, TestCase):
 
     def test_sync_merge_jobs_list_contains_invalid_job_ids(self):
         """Test sync merge with containing duplicates."""
-        # pylint: disable=no-member
         url = "/api/v1/reports/merge/"
         data = {"reports": [5, 6]}
         response = self.client.put(

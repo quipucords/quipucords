@@ -42,7 +42,7 @@ class InitLineFinder(process.Processor):
                 continue
 
             start = line.split()[0]
-            # pylint: disable=not-an-iterable
+
             if any((keyword in start for keyword in cls.KEYWORDS)):
                 if cls.IGNORE_WORDS and not any(
                     (ignore in start for ignore in cls.IGNORE_WORDS)
@@ -115,7 +115,7 @@ class PerItemProcessor(process.Processor):
             if item_name:
                 try:
                     val = cls.process_item(item)
-                except Exception as ex:  # pylint: disable=broad-except
+                except Exception as ex:
                     logger.debug("Processor for %s hit error on %s", cls.KEY, item)
                     logger.exception(ex)
                     val = None
@@ -150,7 +150,7 @@ class IndicatorFileFinder(PerItemProcessor):
             return []
 
         files = item["stdout_lines"]
-        # pylint: disable=no-member
+
         found_in_dir = [
             filename for filename in cls.INDICATOR_FILES if filename in files
         ]

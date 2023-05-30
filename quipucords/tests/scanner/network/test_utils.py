@@ -10,7 +10,6 @@ from scanner.network import utils
 class TestConstructVars(unittest.TestCase):
     """Test _construct_vars."""
 
-    # pylint: disable=protected-access
     @mock.patch("scanner.network.utils.decrypt_data_as_unicode")
     def test_construct_vars(self, decrypt_data):
         """Test constructing ansible vars dictionary."""

@@ -14,7 +14,6 @@ from tests.utils.container_wrappers import (
 )
 from tests.utils.http import QPCAuth
 
-# pylint: disable=no-value-for-parameter
 postgres_container = container(
     environment={
         "POSTGRES_USER": constants.POSTGRES_USER,

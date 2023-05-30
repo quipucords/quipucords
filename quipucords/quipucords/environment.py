@@ -61,7 +61,6 @@ def modules():
 
 def init_server_identifier():
     """Create or retrieve server's global identifier."""
-    # pylint: disable=import-outside-toplevel
     from api.status.model import ServerInformation
 
     server_id = ServerInformation.create_or_retrieve_server_id()
@@ -70,7 +69,6 @@ def init_server_identifier():
 
 def start_debugger_if_required():
     """Start a debugger session if QPC_DEBUGPY envvar is set."""
-    # pylint: disable=import-outside-toplevel
     if settings.DEBUG_PY:
         try:
             import debugpy

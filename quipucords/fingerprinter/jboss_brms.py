@@ -66,7 +66,6 @@ def classify_version_string(version_string):
     return None
 
 
-# pylint: disable=R0912,R0914,R0915
 def detect_jboss_brms(source, facts):
     """Detect if JBoss BRMS is present based on system facts.
 

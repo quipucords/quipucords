@@ -7,20 +7,19 @@ import json
 import re
 from typing import Dict, List
 
-from pydantic import Field, validator  # pylint: disable=no-name-in-module
+from pydantic import Field, validator
 
 from compat.pydantic import BaseModel, raises
 
 
 def load_entity(data: dict) -> OCPBaseEntity:
     """Transform data into the appropriate OCP entity."""
-    # pylint: disable=protected-access
     kind = data["kind"]
     return OCPBaseEntity._OCP_ENTITIES[kind](**data)
 
 
 def _update_model_refs():
-    # pylint: disable=protected-access
+
     for model in OCPBaseEntity._OCP_ENTITIES.values():
         model.update_forward_refs()
 
@@ -54,7 +53,7 @@ class OCPBaseEntity(BaseModel):
         try:
             kind = cls._kind
         except AttributeError:
-            raise NotImplementedError(  # pylint: disable=raise-missing-from
+            raise NotImplementedError(
                 f"{cls.__name__} MUST implement an attribute '_kind'."
             )
         assert isinstance(kind, str), "'_kind' attribute should be a str."
@@ -198,7 +197,7 @@ class NodeResources(OCPBaseEntity):
     _kind = "node-resources"
 
     @validator("cpu", pre=True)
-    def _convert_cpu_value(cls, value):  # pylint: disable=no-self-argument
+    def _convert_cpu_value(cls, value):
         # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu
         millicore_suffix = re.compile(r"^\d+m$")
         if isinstance(value, str) and millicore_suffix.match(value):
@@ -206,7 +205,7 @@ class NodeResources(OCPBaseEntity):
         return value
 
     @validator("memory_in_bytes", pre=True)
-    def _convert_memory_bytes(cls, value):  # pylint: disable=no-self-argument
+    def _convert_memory_bytes(cls, value):
         if isinstance(value, str):
             digits, power_name, ends_with_i = cls._parse_resource_string(value)
             if ends_with_i:

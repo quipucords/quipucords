@@ -47,8 +47,6 @@ VIRTUAL_HOST_NAME = "virtual_host_name"
 HYPERVISOR = "hypervisor"
 
 
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
-# pylint: disable=too-many-arguments
 def request_host_details(
     host_id, host_name, last_checkin, scan_task, request_options, logging_options
 ):
@@ -166,7 +164,6 @@ class SatelliteFive(SatelliteInterface):
         ]
         return host_params
 
-    # pylint: disable=too-many-locals
     def process_results(self, results, virtual_hosts, virtual_guests, physical_hosts):
         """Process & record the list of responses returned from sat5 endpoint.
 
@@ -291,7 +288,6 @@ class SatelliteFive(SatelliteInterface):
 
         return (virtual_guests, len(virt_guests))
 
-    # pylint: disable=too-many-locals
     def virtual_hosts(self):
         """Obtain the virtual host data.
 

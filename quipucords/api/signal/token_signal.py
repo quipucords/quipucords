@@ -5,7 +5,6 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 
-# pylint: disable=unused-argument
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     """Create auth tokens for new users."""

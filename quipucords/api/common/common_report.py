@@ -55,7 +55,7 @@ def extract_tar_gz(file_like_obj):
         tar_name = f"/tmp/api_tmp_{time.strftime('%Y%m%d_%H%M%S')}.tar.gz"
         with open(tar_name, "wb") as out_file:
             out_file.write(file_like_obj)
-        tar = tarfile.open(tar_name)  # pylint: disable=consider-using-with
+        tar = tarfile.open(tar_name)
         os.remove(tar_name)
 
     file_data_list = []
@@ -123,7 +123,6 @@ class CSVHelper:
 
     def serialize_value(self, header, fact_value):
         """Serialize a fact value to a CSV value."""
-        # pylint: disable=no-else-return
         if isinstance(fact_value, dict):
             return self.serialize_dict(header, fact_value)
         elif isinstance(fact_value, list):
@@ -174,7 +173,6 @@ class CSVHelper:
     @staticmethod
     def generate_headers(fact_list, exclude=None):
         """Generate column headers from fact list."""
-        # pylint: disable=too-many-nested-blocks
         headers = set()
         for fact in fact_list:
             fact_addon = {}

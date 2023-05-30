@@ -147,7 +147,7 @@ class ScanOptions(models.Model):
         vars for the ansibile task runner
         """
         extra_vars = self.get_default_extra_vars()
-        # pylint: disable=no-member
+
         disable_products = self.disabled_optional_products
         # when making the disabled products dictionary we have to
         # consider that the roles see True as 'search for product'

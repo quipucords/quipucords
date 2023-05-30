@@ -8,7 +8,7 @@ env = environ.Env()
 
 QPC_SERVER_PORT = env.int("QPC_SERVER_PORT", 443)
 
-# pylint: disable=invalid-name
+
 bind = f"0.0.0.0:{QPC_SERVER_PORT}"
 backlog = 2048
 workers = 1
@@ -65,7 +65,7 @@ def worker_int(worker):
     worker.log.info("worker received INT or QUIT signal")
 
     # get traceback info
-    # pylint: disable=import-outside-toplevel
+
     import sys
     import threading
     import traceback
@@ -77,7 +77,7 @@ def worker_int(worker):
     for (
         thread_id,
         stack,
-    ) in sys._current_frames().items():  # pylint: disable=protected-access
+    ) in sys._current_frames().items():
         code.append(f"\n# Thread: {id2name.get(thread_id, '')}({thread_id})")
         for filename, lineno, name, line in traceback.extract_stack(stack):
             code.append(f'File: "{filename}", line {lineno}, in {name}')

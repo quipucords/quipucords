@@ -104,7 +104,6 @@ class ProcessVirtType(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process virt_type output."""
-        # pylint: disable=too-many-return-statements
         if dependencies is not None and bool(dependencies):
             if dependencies.get("internal_have_dmidecode") and dependencies.get(
                 "internal_sys_manufacturer"

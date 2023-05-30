@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 class ScanTask(models.Model):
     """The scan task captures a single source for a scan."""
 
-    # pylint: disable=too-many-instance-attributes
     SCAN_TYPE_CONNECT = "connect"
     SCAN_TYPE_INSPECT = "inspect"
     SCAN_TYPE_FINGERPRINT = "fingerprint"
@@ -168,9 +167,9 @@ class ScanTask(models.Model):
         system_fingerprint_count = 0
         if self.details_report:
             self.details_report.refresh_from_db()
-            # pylint: disable=using-constant-test
+
             if self.details_report.deployment_report:
-                # pylint: disable=no-member
+
                 system_fingerprint_count = (
                     self.details_report.deployment_report.system_fingerprints.count()
                 )
@@ -252,7 +251,6 @@ class ScanTask(models.Model):
         :param sys_failed: Systems failed during scan.
         :param sys_unreachable: Systems unreachable during scan.
         """
-        # pylint: disable=too-many-arguments
         self.refresh_from_db()
         stats_changed = False
         if sys_count is not None and sys_count != self.systems_count:
@@ -276,7 +274,6 @@ class ScanTask(models.Model):
     @transaction.atomic
     def reset_stats(self):
         """Reset scan task stats default state."""
-        # pylint: disable=too-many-arguments
         self.refresh_from_db()
         self.systems_count = 0
         self.systems_scanned = 0
@@ -307,7 +304,6 @@ class ScanTask(models.Model):
         :param increment_sys_failed: True if should be incremented.
         :param increment_sys_unreachable: True if should be incremented.
         """
-        # pylint: disable=too-many-arguments
         update_kwargs = {}
         if increment_sys_count:
             update_kwargs["systems_count"] = F("systems_count") + 1
@@ -405,7 +401,6 @@ class ScanTask(models.Model):
         :param identity_key: A key that identifies the system.  If
         key not present, the system is discarded.
         """
-        # pylint: disable=too-many-nested-blocks
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             system_results = self.get_result()
             if system_results:
@@ -423,7 +418,7 @@ class ScanTask(models.Model):
                         system_result.delete()
 
     # all tasks
-    # pylint: disable=no-else-return
+
     def get_result(self):
         """Access results from ScanTask.
 

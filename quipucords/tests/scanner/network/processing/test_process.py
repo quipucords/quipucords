@@ -104,7 +104,6 @@ class MyErroringProcessor(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Uh oh, this processor doesn't work."""
-        # pylint: disable=broad-exception-raised
         raise Exception("Something went wrong!")
         # pylint: enable=broad-exception-raised
 

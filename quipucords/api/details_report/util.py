@@ -182,7 +182,6 @@ def create_details_report(report_version, json_details_report):
 
 def create_details_csv(details_report_dict, request):
     """Create details csv."""
-    # pylint: disable=too-many-locals
     report_id = details_report_dict.get("report_id")
     if report_id is None:
         return None

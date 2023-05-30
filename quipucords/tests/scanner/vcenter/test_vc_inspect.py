@@ -5,7 +5,7 @@ from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
 from django.test import TestCase
-from pyVmomi import vim  # pylint: disable=no-name-in-module
+from pyVmomi import vim
 
 from api.models import Credential, ScanJob, ScanTask, Source
 from scanner.vcenter.inspect import InspectTaskRunner, get_nics
@@ -17,7 +17,6 @@ def invalid_login():
     raise vim.fault.InvalidLogin()
 
 
-# pylint: disable=too-many-instance-attributes
 class InspectTaskRunnerTest(TestCase):
     """Tests against the InspectTaskRunner class and functions."""
 
@@ -161,7 +160,6 @@ class InspectTaskRunnerTest(TestCase):
         results = self.runner.parse_host_props(props, cluster_dict)
         self.assertEqual(results, expected_facts)
 
-    # pylint: disable=too-many-locals
     @patch("scanner.vcenter.inspect.datetime")
     def test_parse_vm_props(self, mock_dt):
         """Test the parse_vm_props method."""
@@ -242,7 +240,6 @@ class InspectTaskRunnerTest(TestCase):
             self.assertEqual("vm1", sys_results.first().name)
             self.assertEqual(expected_facts, sys_fact)
 
-    # pylint: disable=too-many-locals
     def test_retrieve_properties(self):
         """Test the retrieve_properties method."""
         content = Mock()

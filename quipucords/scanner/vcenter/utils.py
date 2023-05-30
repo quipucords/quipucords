@@ -3,7 +3,7 @@ import atexit
 import ssl
 
 from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
-from pyVmomi import vmodl  # pylint: disable=no-name-in-module
+from pyVmomi import vmodl
 
 from api.vault import decrypt_data_as_unicode
 

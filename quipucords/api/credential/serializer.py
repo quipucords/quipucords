@@ -61,9 +61,7 @@ class CredentialSerializer(NotEmptySerializer):
     # [1]: https://docs.python.org/3/reference/datamodel.html#object.__new__
     # [2]: https://github.com/encode/django-rest-framework/blob/3.14.0/rest_framework/serializers.py#L121  # noqa: E501
 
-    def __new__(
-        cls, instance=None, data=empty, **kwargs
-    ):  # pylint: disable=arguments-differ
+    def __new__(cls, instance=None, data=empty, **kwargs):
         """Overloaded __new__ to return the appropriate serializer."""
         if cls != CredentialSerializer:
             # shortcut for subclasses - if we already know the subclass, no need to

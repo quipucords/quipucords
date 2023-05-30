@@ -1,6 +1,5 @@
 """Unit tests for initial processing."""
 
-# pylint: disable=missing-docstring
 
 import unittest
 

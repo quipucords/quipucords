@@ -1,6 +1,6 @@
 """Test the discovery scanner capabilities."""
 
-# pylint: disable=ungrouped-imports
+
 from multiprocessing import Value
 from unittest.mock import Mock, patch
 
@@ -18,7 +18,7 @@ from scanner.network.utils import _construct_vars
 from tests.scanner.test_util import create_scan_job
 
 
-def mock_handle_ssh(cred):  # pylint: disable=unused-argument
+def mock_handle_ssh(cred):
     """Mock for handling ssh passphrase setting."""
 
 
@@ -47,7 +47,6 @@ class MockResultStore:
         return list(self._remaining_hosts)
 
 
-# pylint: disable=too-many-instance-attributes
 class NetworkConnectTaskRunnerTest(TestCase):
     """Tests against the ConnectTaskRunner class and functions."""
 
@@ -175,7 +174,7 @@ class NetworkConnectTaskRunnerTest(TestCase):
             concurrency_count=1,
             exclude_hosts=exclude_hosts,
         )
-        # pylint: disable=line-too-long
+
         expected = {
             "all": {
                 "children": {

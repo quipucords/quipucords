@@ -1,6 +1,6 @@
 """Test the connect callback capabilities."""
 
-# pylint: disable=ungrouped-imports
+
 from unittest.mock import Mock
 
 from django.test import TestCase
@@ -24,7 +24,6 @@ def build_event(host, return_code=0, stderr=False, msg=False, event=False):
     return event_dict
 
 
-# pylint: disable=too-many-instance-attributes
 class TestConnectResultCallback(TestCase):
     """Test ConnectResultCallback."""
 

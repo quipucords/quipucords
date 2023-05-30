@@ -41,7 +41,7 @@ class EnvVar:
         """Set env var name."""
         self.env_var = name
         # coerce value/fallback value to validate'em
-        self.value and self.fallback_value  # pylint: disable=pointless-statement
+        self.value and self.fallback_value
 
     def __str__(self):
         """Return str representation."""
@@ -100,7 +100,7 @@ class BaseURI:
     def urlparse(cls, base_uri: str):
         """Parse a string representing a BaseURI."""
         parsed_uri = urlparse(base_uri)
-        protocol, host, *other_parts = parsed_uri  # pylint: disable=unused-variable
+        protocol, host, *other_parts = parsed_uri
         if other_parts != [""] * 4:
             raise ValueError(
                 f"BaseURI ({base_uri}) should contain only schema, hostname and port"
@@ -109,7 +109,7 @@ class BaseURI:
 
     def replace_base_uri(self, uri: str):
         """Replace protocol, host and port from an uri with this instance values."""
-        protocol, host, *other_parts = urlparse(uri)  # pylint: disable=unused-variable
+        protocol, host, *other_parts = urlparse(uri)
         return urlunparse((self.protocol, f"{self.host}:{self.port}", *other_parts))
 
 

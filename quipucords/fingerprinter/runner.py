@@ -39,8 +39,6 @@ from scanner.runner import ScanTaskRunner
 from scanner.vcenter.utils import VcenterRawFacts
 from utils import deepget, default_getter
 
-# pylint: disable=too-many-lines
-
 logger = logging.getLogger(__name__)
 
 # Keys used to de-duplicate against other network sources
@@ -92,9 +90,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-arguments
-
     supports_partial_results = False
 
     @staticmethod
@@ -106,7 +101,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         try:
             return [int(cert.strip(".pem")) for cert in redhat_certs if cert]
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             return []
 
     def execute_task(self, manager_interrupt):
@@ -152,7 +147,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
             raise error
 
-    # pylint: disable=too-many-branches, too-many-nested-blocks
     def _process_details_report(self, manager_interrupt, details_report):
         """Process the details report.
 
@@ -161,7 +155,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param scan_task: Task that is running this merge
         :returns: Status message and status
         """
-        # pylint: disable=unused-argument,too-many-statements
         self.scan_task.log_message("START DEDUPLICATION")
 
         # Invoke ENGINE to create fingerprints from facts
@@ -304,7 +297,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param details_report: DetailsReport containing raw facts
         :returns: list of fingerprints for all systems (all scans)
         """
-        # pylint: disable=too-many-statements
         # fingerprints per source type
         fingerprint_map = {datasource: [] for datasource in DataSources.values}
         source_list = details_report.sources
@@ -609,7 +601,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         of to_merge_fingerprint should be used instead of the
         priority_fingerprint value.
         """
-        # pylint: disable=too-many-locals,consider-iterating-dictionary
         base_dict, base_no_key = self._create_index_for_fingerprints(
             base_key, base_list
         )
@@ -753,8 +744,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
         return result_by_key, key_not_found_list
 
-    # pylint: disable=too-many-branches, too-many-locals
-    # pylint: disable=too-many-statements
     def _merge_fingerprint(
         self, priority_fingerprint, to_merge_fingerprint, reverse_priority_keys=None
     ):
@@ -898,7 +887,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param fact_formatter: A function that will format the fact - it should expect
         the raw fact in its signature.
         """
-        # pylint: disable=too-many-arguments
         actual_fact_value = None
         raw_fact_value = deepget(raw_fact, raw_fact_key)
         if fact_value is not None and fact_formatter is not None:
@@ -956,7 +944,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param fingerprint: dict containing all fingerprint facts
         this fact.
         """
-        # pylint: disable=too-many-arguments
         actual_fact_value = None
         if raw_fact.get(raw_fact_key) is not None:
             actual_fact_value = raw_fact.get(raw_fact_key)
@@ -984,7 +971,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         else:
             fingerprint[ENTITLEMENTS_KEY] = entitlements
 
-    # pylint: disable=R0915
     def _process_network_fact(self, source, fact):
         """Process a fact and convert to a fingerprint.
 
@@ -1238,8 +1224,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param facts: fact to process
         :returns: fingerprint produced from fact
         """
-        # pylint: disable=too-many-branches
-
         fingerprint = {META_DATA_KEY: {}}
 
         # Common facts
@@ -1352,7 +1336,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param facts: fact to process
         :returns: fingerprint produced from fact
         """
-        # pylint: disable=too-many-branches
         rhel_versions = {
             "4Server": "Red Hat Enterprise Linux 4 Server",
             "5Server": "Red Hat Enterprise Linux 5 Server",
@@ -1458,7 +1441,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
         else:
             infrastructure_type = SystemFingerprint.UNKNOWN
         if name.startswith("virt-who-") and name.endswith(
-            # pylint: disable=consider-using-generator
             tuple(["-" + str(num) for num in range(1, 10)])
         ):
             infrastructure_type = SystemFingerprint.HYPERVISOR

@@ -33,7 +33,6 @@ from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=too-many-branches
 
 SOURCES_KEY = "sources"
 MOST_RECENT = "most_recent"
@@ -160,7 +159,6 @@ class ScanFilter(FilterSet):
         fields = ["name", "scan_type", "search_by_name", "search_sources_by_name"]
 
 
-# pylint: disable=too-many-ancestors
 class ScanViewSet(ModelViewSet):
     """A view set for Scan."""
 
@@ -183,7 +181,6 @@ class ScanViewSet(ModelViewSet):
     )
     ordering = ("name",)
 
-    # pylint: disable=unused-argument
     def create(self, request, *args, **kwargs):
         """Create a scan."""
         serializer = self.get_serializer(data=request.data)
@@ -194,7 +191,6 @@ class ScanViewSet(ModelViewSet):
         json_scan = expand_scan(json_scan)
         return Response(json_scan, status=status.HTTP_201_CREATED, headers=headers)
 
-    # pylint: disable=unused-argument,no-member,arguments-differ
     def list(self, request):
         """List the collection of scan."""
         result = []
@@ -214,7 +210,6 @@ class ScanViewSet(ModelViewSet):
             result.append(json_scan)
         return Response(result)
 
-    # pylint: disable=unused-argument, arguments-differ
     def retrieve(self, request, pk=None):
         """Get a scan."""
         if not pk or (pk and not is_int(pk)):
@@ -230,7 +225,6 @@ class ScanViewSet(ModelViewSet):
     @transaction.atomic
     def destroy(self, request, pk):
         """Delete a scan, its jobs, and the results."""
-        # pylint: disable=too-many-nested-blocks
         try:
             scan = Scan.objects.get(pk=pk)
             logger.info("Deleting scan jobs associated with scan %s", pk)

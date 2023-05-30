@@ -19,27 +19,26 @@ from scanner.satellite.six import SatelliteSixV2
 from tests.scanner.test_util import create_scan_job
 
 
-def mock_conn_exception(param1):  # pylint: disable=unused-argument
+def mock_conn_exception(param1):
     """Mock method to throw connection error."""
     raise exceptions.ConnectionError()
 
 
-def mock_sat_auth_exception(param1):  # pylint: disable=unused-argument
+def mock_sat_auth_exception(param1):
     """Mock method to throw satellite auth error."""
     raise SatelliteAuthException()
 
 
-def mock_timeout_error(param1):  # pylint: disable=unused-argument
+def mock_timeout_error(param1):
     """Mock method to throw timeout error."""
     raise TimeoutError()
 
 
-def mock_exception(param1, param2):  # pylint: disable=unused-argument
+def mock_exception(param1, param2):
     """Mock method to throw exception."""
-    raise Exception()  # pylint: disable=broad-exception-raised
+    raise Exception()
 
 
-# pylint: disable=too-many-instance-attributes
 class InspectTaskRunnerTest(TestCase):
     """Tests Satellite connect capabilities."""
 

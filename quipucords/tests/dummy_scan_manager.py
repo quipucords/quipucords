@@ -41,5 +41,5 @@ class DummyScanManager(metaclass=SingletonMeta):
             job_runner: ScanJobRunner = self._queue.pop()
             job_runner.start()
 
-    def kill(self, job, command):  # pylint: disable=unused-argument
+    def kill(self, job, command):
         """Mimic ScanManager kill method signature."""

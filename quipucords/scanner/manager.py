@@ -116,7 +116,6 @@ class Manager(Thread):
         self.scan_queue.insert(0, scanner)
         self.log_info()
 
-    # pylint: disable=inconsistent-return-statements
     def kill(self, job: ScanJob, command: str):
         """Kill a ScanJob or remove it from the running queue.
 
@@ -201,7 +200,6 @@ class Manager(Thread):
 
     def run(self):
         """Trigger thread execution."""
-        # pylint: disable=too-many-branches
         self.restart_incomplete_scansjobs()
         logger.info("%s: Started run loop.", self.log_prefix)
         self.start_log_timer()
@@ -284,7 +282,7 @@ def reinitialize():
     else:
         manager_class = Manager
 
-    global SCAN_MANAGER  # pylint: disable=W0603
+    global SCAN_MANAGER
     SCAN_MANAGER = manager_class()
 
 

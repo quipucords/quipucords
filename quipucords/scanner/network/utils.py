@@ -132,9 +132,9 @@ def expand_hostpattern(hostpattern):
     """
     # Can the given hostpattern be parsed as a host with an optional port
     # specification?
-    # pylint: disable=bare-except
+
     try:
-        # pylint: disable=unused-variable
+
         (pattern, port) = parse_address(hostpattern, allow_ranges=True)
     except:  # noqa
         # not a recognizable host pattern

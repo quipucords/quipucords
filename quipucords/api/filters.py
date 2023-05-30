@@ -16,5 +16,4 @@ class ListFilter(Filter):
         self.lookup_expr = "in"
         values = value.split(",")
 
-        # pylint: disable=super-with-arguments
         return super(ListFilter, self).filter(qs, values)

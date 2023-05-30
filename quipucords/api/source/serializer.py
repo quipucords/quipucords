@@ -173,7 +173,6 @@ class SourceSerializer(NotEmptySerializer):
             raise ValidationError({"source_type": messages.UNKNOWN_SOURCE_TYPE})
         return validated_data
 
-    # pylint: disable=too-many-branches,too-many-statements
     @transaction.atomic
     def create(self, validated_data):
         """Create a source."""
@@ -305,8 +304,6 @@ class SourceSerializer(NotEmptySerializer):
 
         return name
 
-    # pylint: disable=too-many-locals, too-many-branches, too-many-statements
-    # pylint: disable=consider-using-f-string
     @staticmethod
     def validate_ipaddr_list(hosts):
         """Make sure the hosts list is present and has valid IP addresses."""
@@ -446,7 +443,6 @@ class SourceSerializer(NotEmptySerializer):
         """Validate exclude_hosts list."""
         return SourceSerializer.validate_ipaddr_list(exclude_hosts)
 
-    # pylint: disable=too-many-locals
     @staticmethod
     def cidr_to_ansible(ip_range):
         """Convert an IP address range from CIDR to Ansible notation.
@@ -495,7 +491,7 @@ class SourceSerializer(NotEmptySerializer):
 
             val = int(octet_strings[i])
             if val < 0 or val > 255:
-                # pylint: disable=too-many-locals
+
                 err_msg = _(
                     messages.NET_CIDR_RANGE % {"ip_range": ip_range, "octet": val}
                 )

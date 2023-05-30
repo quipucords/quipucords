@@ -129,7 +129,7 @@ class OpenShiftApi:
                 raise err
             logger.error("Unable to connect to OCP/K8S api (status=%s)", err.status)
             return False
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             if raise_exception:
                 raise
             logger.exception("Got an unexpected exception. Check system logs.")

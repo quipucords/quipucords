@@ -61,7 +61,7 @@ class Session(requests.Session):
             self.mount("http://", adapter)
             self.mount("https://", adapter)
 
-    def request(  # pylint: disable=arguments-differ
+    def request(
         self, method, url, *, raise_for_status=False, **kwargs
     ) -> requests.Response:
         """

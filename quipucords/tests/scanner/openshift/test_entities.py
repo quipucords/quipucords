@@ -3,7 +3,7 @@
 from copy import deepcopy
 
 import pytest
-from pydantic import ValidationError  # pylint: disable=no-name-in-module
+from pydantic import ValidationError
 
 from scanner.openshift.entities import (
     NodeResources,
@@ -69,7 +69,7 @@ def test_load_nested(cluster_data):
     entity = load_entity(cluster_data)
     assert isinstance(entity, OCPCluster)
     assert isinstance(entity.errors, dict)
-    # pylint: disable=protected-access
+
     assert isinstance(entity.errors["foo"], OCPError._model_class)
 
 
@@ -89,7 +89,7 @@ def test_load_entity(data, expected_class):
     assert expected_data == entity.dict()
 
 
-class TestOCPBaseEntity:  # pylint: disable=missing-class-docstring, unused-variable
+class TestOCPBaseEntity:
     """Test OCPBaseEntity and its inheritance side effects."""
 
     def test_kind_isnt_overridable(self):
@@ -147,7 +147,6 @@ class TestOCPBaseEntity:  # pylint: disable=missing-class-docstring, unused-vari
         ("2", "2", 2.0),
     ],
 )
-# pylint: disable=no-value-for-parameter, protected-access
 def test_cpu_validator_with_convertible_values(value, expected_result, attr_value):
     """Ensure cpu data is being converted appropriately."""
     converted_value = NodeResources._convert_cpu_value(value)
@@ -183,7 +182,6 @@ def test_cpu_validator_with_inappropriate_values(value):
         ("1200m", 1),
     ],
 )
-# pylint: disable=no-value-for-parameter, protected-access
 def test_memory_validator_with_convertible_values(value, expected_result):
     """Ensure memory data is being converted appropriately."""
     converted_value = NodeResources._convert_memory_bytes(value)
@@ -197,7 +195,6 @@ def test_memory_validator_with_convertible_values(value, expected_result):
     "value",
     ["15000GI", "15000L", "1500mi", "15ki"],
 )
-# pylint: disable=no-value-for-parameter, protected-access
 def test_memory_validator_with_uncovertible_values(value):
     """Ensure proper error is being raised for values that can't be converted."""
     with pytest.raises(ValueError, match=r"Value \S+ is invalid."):

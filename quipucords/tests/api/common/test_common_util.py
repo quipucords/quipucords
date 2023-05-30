@@ -18,9 +18,6 @@ from api.common.common_report import (
 class CommonUtilTest(TestCase):
     """Tests common util functions."""
 
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-locals,too-many-branches
-
     def setUp(self):
         """Create test case setup."""
         self.csv_helper = CSVHelper()

@@ -46,7 +46,7 @@ def patch_ocp_api(path, **kwargs):
     )
 
 
-def dynamic_scope(fixture_name, config):  # pylint: disable=unused-argument
+def dynamic_scope(fixture_name, config):
     """Set scope to session when running with --refresh-cassettes."""
     if config.getoption("--refresh-cassettes", None):
         return "session"
@@ -70,7 +70,6 @@ def discoverer_cache(request, testrun_uid):
 @pytest.fixture(scope=dynamic_scope)
 def ocp_client(request, discoverer_cache):
     """OCP client for testing."""
-    # pylint: disable=protected-access
     ocp_uri = ConstantsFromEnv.TEST_OCP_URI.value
     auth_token = getattr(request, "param", ConstantsFromEnv.TEST_OCP_AUTH_TOKEN.value)
     client = OpenShiftApi.with_config_info(
@@ -90,7 +89,6 @@ def ocp_client(request, discoverer_cache):
 @pytest.mark.parametrize("api_method", ["_list_projects", "_dynamic_client"])
 def test_unauthorized_token(ocp_client: OpenShiftApi, api_method):
     """Test calling OCP with an invalid token."""
-    # pylint: disable=protected-access
     with pytest.raises(OCPError) as exc_info:
         client_attr = getattr(ocp_client, api_method)
         # if error wasn't thrown in previous line, let's assume attribute is a callable
@@ -107,7 +105,6 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     Everytime a new "api resource" is added to ocp_client we need to add it to this test
     and run `pytest --refresh-cassettes` using a valid OCP connection.
     """
-    # pylint: disable=protected-access,pointless-statement
     assert (
         not ocp_client._discoverer_cache_file.exists()
     ), "Cache file exists prior to test excecution!"
@@ -123,7 +120,6 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
 @pytest.mark.vcr_primer(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_cluster_api(ocp_client: OpenShiftApi):
     """Test _cluster_api."""
-    # pylint: disable=protected-access
     clusters = ocp_client._list_clusters()
     assert clusters
 
@@ -140,7 +136,6 @@ def test_retrieve_cluster(ocp_client: OpenShiftApi):
 @pytest.mark.vcr_primer(VCRCassettes.OCP_NODE, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_node_api(ocp_client: OpenShiftApi):
     """Test _node_api."""
-    # pylint: disable=protected-access
     nodes = ocp_client._list_nodes()
     assert nodes
 
@@ -173,9 +168,7 @@ def test_with_config_info_using_auth_token(mocker):
     assert patched_api_client.mock_calls == [
         mocker.call(configuration=patched_kube_config()),
     ]
-    assert (  # pylint: disable=protected-access
-        client._api_client == patched_api_client()
-    )
+    assert client._api_client == patched_api_client()
 
 
 @httpretty.activate
@@ -206,7 +199,6 @@ def test_cannot_connect(
 @pytest.mark.vcr_primer(VCRCassettes.OCP_NAMESPACES, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_namespaces_api(ocp_client: OpenShiftApi):
     """Test/record namespaces api interaction."""
-    # pylint: disable=protected-access
     projects = ocp_client._list_projects()
     assert projects
 
@@ -221,7 +213,6 @@ def test_retrieve_projects(ocp_client: OpenShiftApi):
 @pytest.mark.vcr_primer(VCRCassettes.OCP_PODS, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_pods_api(ocp_client: OpenShiftApi):
     """Test pods api."""
-    # pylint: disable=protected-access
     pods = ocp_client._list_pods()
     assert pods
 

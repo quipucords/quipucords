@@ -2,7 +2,7 @@
 import logging
 from socket import gaierror
 
-from pyVmomi import vim, vmodl  # pylint: disable=no-name-in-module
+from pyVmomi import vim, vmodl
 
 from api.models import ScanTask, SystemConnectionResult
 from scanner.runner import ScanTaskRunner
@@ -110,7 +110,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         return None, ScanTask.COMPLETED
 
-    # pylint: disable=too-many-locals
     def connect(self):
         """Execute the connect scan with the initialized source.
 
