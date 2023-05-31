@@ -300,7 +300,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
                 cmdline=all_commands,
                 verbosity=verbosity_lvl,
             )
-        except Exception as err_msg:
+        except Exception as err_msg:  # noqa: BLE001
             raise AnsibleRunnerException(err_msg) from err_msg
 
         final_status = runner_obj.status

@@ -201,7 +201,7 @@ class InspectResultCallback:
                         event_role = event_data.get("role")
                         if event_role != self.last_role:
                             self.last_role = event_role
-        except Exception as err_msg:
+        except Exception as err_msg:  # noqa: BLE001
             raise AnsibleRunnerException(err_msg) from err_msg
 
     def cancel_callback(self):

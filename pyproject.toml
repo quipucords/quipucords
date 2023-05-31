@@ -97,6 +97,7 @@ select = [
     "Q",   # flake8-quotes
     "W",   # pycodestyle
     "PL",  # Pylint
+    "BLE", # flake8-blind-except
 ]
 ignore = [
     "D203", 
