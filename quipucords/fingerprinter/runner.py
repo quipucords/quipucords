@@ -101,7 +101,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         try:
             return [int(cert.strip(".pem")) for cert in redhat_certs if cert]
-        except Exception:
+        except Exception:  # noqa: BLE001
             return []
 
     def execute_task(self, manager_interrupt):

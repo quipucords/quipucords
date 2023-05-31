@@ -144,7 +144,7 @@ def process(  # noqa: PLR0911, PLR0912, C901
 
     try:
         processor_out = processor.process(fact_value, dependencies)
-    except Exception:
+    except Exception:  # noqa: BLE001
         log_message = (
             f"FAILED POST PROCESSING {host}."
             f" Processor for {fact_key} got value {fact_value},"
