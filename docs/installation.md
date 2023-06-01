@@ -150,30 +150,3 @@ Both projects need to be on the same root folder, like shown below:
     kill -9 PID PID
     ```
     _NOTE:_ There are usually multiple gunicorn processes running. You can kill them all at once by listing PIDs as shown in the example above.
-
-## Running quipucords server in gunicorn
-You can run the server locally inside of gunicorn.  This can be a useful way to debug.
-
-1. Clone the repository:
-    ```
-    git clone git@github.com:quipucords/quipucords.git
-    cd quipucords
-    ```
-2. Switch to quipucords django app module:
-    ```
-    cd quipucords
-    ```
-
-3. Make symbolic link to ansible roles:
-    ```
-    ln -s ../roles/ roles
-    ```
-4. Start gunicorn:
-    ```
-    gunicorn quipucords.wsgi -c ./local_gunicorn.conf.py
-    ```
-5. Configure the CLI by using the following commands:
-    ```
-    qpc server config --host 127.0.0.1 --port 8000
-    qpc server login
-    ```
