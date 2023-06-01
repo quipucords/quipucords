@@ -68,5 +68,8 @@ RUN pip install -v -e .
 # Collect static files
 RUN make server-static
 
+# Allow git to run in /app
+RUN git config --file /.gitconfig --add safe.directory /app
+
 EXPOSE 443
 CMD ["/bin/bash", "/deploy/docker_run.sh"]
