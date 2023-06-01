@@ -11,13 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      IMAGE_NAME: quipucords
-      RELEASE_INFO_FILE: release_info.json
-      RELEASE_PY_FILE: quipucords/quipucords/release.py
-      TARFILE: quipucords_server_image.tar
 
     steps:
       - name: Clone repository
@@ -31,13 +24,8 @@ jobs:
         run: |
           pip install poetry
           BUILD_VERSION=$(poetry version -s)
-          echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
-          echo "IMAGE_NAME_WITH_TAG=$IMAGE_NAME:$BUILD_VERSION" >> $GITHUB_ENV
-          echo "TARGZFILE=${TARFILE}.gz" >> $GITHUB_ENV
-
-      - name: Bump version
-        run: |
-            sed -i 's/BUILD_VERSION_PLACEHOLDER/${{ env.BUILD_VERSION }}/g' ${{ env.RELEASE_INFO_FILE }}
+          echo "BUILD_VERSION=$BUILD_VERSION+$GITHUB_SHA" >> $GITHUB_ENV
+          echo "IMAGE_NAME_WITH_TAG=quipucords:$BUILD_VERSION" >> $GITHUB_ENV
 
       - name: Docker Layer Caching
         uses: satackey/action-docker-layer-caching@v0.0.11
@@ -47,25 +35,3 @@ jobs:
       - name: Build quipucords image
         run: docker build --build-arg BUILD_COMMIT=$GITHUB_SHA . -t $IMAGE_NAME_WITH_TAG
 
-      - name: Export image
-        if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          docker save -o ${TARFILE} ${IMAGE_NAME_WITH_TAG}
-          chmod 755 ${TARFILE}
-          gzip -f --best ${TARFILE}
-          chmod 755 ${TARGZFILE}
-
-      - name: Release artifacts
-        uses: ncipollo/release-action@v1
-        if: ${{ success() && startsWith(github.ref, 'refs/tags/') }}
-        with:
-          prerelease: true
-          artifacts: "${{ env.TARGZFILE }},${{ env.RELEASE_INFO_FILE }}"
-          # set allow updates so we can create releases to trigger this
-          allowUpdates: true
-          # don't override what's set on the release
-          omitBodyDuringUpdate: true
-          omitNameDuringUpdate: true
-          omitPrereleaseDuringUpdate: true
-          # required for publishing artifacts and updating the release
-          token: ${{ secrets.GITHUB_TOKEN }}
