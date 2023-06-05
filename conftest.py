@@ -67,12 +67,12 @@ def vcr_config(_vcr_uri_map):
     https://github.com/kiwicom/pytest-recording#configuration
     https://vcrpy.readthedocs.io/en/latest/configuration.html
     """
-    replace_cassete_uri = partial(_replace_cassete_uri, uri_map=_vcr_uri_map)
+    replace_cassette_uri = partial(_replace_cassette_uri, uri_map=_vcr_uri_map)
     return {
         "filter_headers": [
             ("authorization", "<AUTH_TOKEN>"),
         ],
-        "before_record_request": replace_cassete_uri,
+        "before_record_request": replace_cassette_uri,
     }
 
 
@@ -96,7 +96,7 @@ def _vcr_uri_map():
     return uri_map
 
 
-def _replace_cassete_uri(vcr_request, uri_map: dict):
+def _replace_cassette_uri(vcr_request, uri_map: dict):
     """
     Replace recorded request URI with its equivalent fallback URI.
 
@@ -134,7 +134,7 @@ def pytest_configure(config):
         num_processes = config.option.numprocesses or 1
         if num_processes > 1:
             raise UsageError(
-                "--refresh-cassetes option should not run with multiple processes"
+                "--refresh-cassettes option should not run with multiple processes"
                 " UNLESS the implementation of OCP api tests that depend on"
                 " dynamic client are adapted."
             )
