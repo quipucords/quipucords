@@ -266,7 +266,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "client"),
 ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    }
+}
 
 LOGGING_FORMATTER = env.str("DJANGO_LOG_FORMATTER", "simple")
 DJANGO_LOGGING_LEVEL = env.str("DJANGO_LOG_LEVEL", "INFO")
