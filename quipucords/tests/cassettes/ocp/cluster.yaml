@@ -7,38 +7,63 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAPI-Generator/25.3.0/python
+      - OpenAPI-Generator/26.1.0/python
       authorization:
       - <AUTH_TOKEN>
     method: GET
     uri: https://fake.ocp.host:9872/apis/config.openshift.io/v1/clusterversions
   response:
     body:
-      string: '{"apiVersion":"config.openshift.io/v1","items":[{"apiVersion":"config.openshift.io/v1","kind":"ClusterVersion","metadata":{"creationTimestamp":"2023-01-12T15:34:39Z","generation":2,"managedFields":[{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{".":{},"f:channel":{},"f:clusterID":{}}},"manager":"cluster-bootstrap","operation":"Update","time":"2023-01-12T15:34:39Z"},{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:availableUpdates":{},"f:capabilities":{".":{},"f:enabledCapabilities":{},"f:knownCapabilities":{}},"f:conditions":{},"f:desired":{".":{},"f:channels":{},"f:image":{},"f:url":{},"f:version":{}},"f:history":{},"f:observedGeneration":{},"f:versionHash":{}}},"manager":"cluster-version-operator","operation":"Update","subresource":"status","time":"2023-01-15T10:53:32Z"}],"name":"version","resourceVersion":"15391831","uid":"bcf723f0-5f02-4557-9612-9995bf6082cf"},"spec":{"channel":"stable-4.11","clusterID":"92e2cebc-71cd-4972-a8ee-7daad3e0960c"},"status":{"availableUpdates":[{"channels":["candidate-4.11","candidate-4.12","fast-4.11","fast-4.12","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:6e16fe4b05385d8422529c0120aff73f55a55eff57581a0714443d92a87f1ce9","url":"https://access.redhat.com/errata/RHBA-2023:0027","version":"4.11.22"},{"channels":["candidate-4.11","candidate-4.12","fast-4.11","fast-4.12","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:860cc37824074671c4cf76e02d224d243e670d2298e6dab8923ee391fbd0ae1c","url":"https://access.redhat.com/errata/RHSA-2022:9107","version":"4.11.21"}],"capabilities":{"enabledCapabilities":["baremetal","marketplace","openshift-samples"],"knownCapabilities":["baremetal","marketplace","openshift-samples"]},"conditions":[{"lastTransitionTime":"2023-01-15T10:53:32Z","status":"True","type":"RetrievedUpdates"},{"lastTransitionTime":"2023-01-12T15:34:43Z","message":"Kubernetes
-        1.25 and therefore OpenShift 4.12 remove several APIs which require admin
-        consideration. Please see the knowledge article https://access.redhat.com/articles/6955381
-        for details and instructions.","reason":"AdminAckRequired","status":"False","type":"Upgradeable"},{"lastTransitionTime":"2023-01-12T15:34:43Z","message":"Capabilities
-        match configured spec","reason":"AsExpected","status":"False","type":"ImplicitlyEnabledCapabilities"},{"lastTransitionTime":"2023-01-12T15:34:43Z","message":"Payload
-        loaded version=\"4.11.20\" image=\"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3\"","reason":"PayloadLoaded","status":"True","type":"ReleaseAccepted"},{"lastTransitionTime":"2023-01-12T17:55:44Z","message":"Done
-        applying 4.11.20","status":"True","type":"Available"},{"lastTransitionTime":"2023-01-18T11:53:18Z","status":"False","type":"Failing"},{"lastTransitionTime":"2023-01-12T17:55:44Z","message":"Cluster
-        version is 4.11.20","status":"False","type":"Progressing"}],"desired":{"channels":["candidate-4.11","candidate-4.12","fast-4.11","fast-4.12","stable-4.11"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3","url":"https://access.redhat.com/errata/RHSA-2022:8893","version":"4.11.20"},"history":[{"completionTime":"2023-01-12T17:55:44Z","image":"quay.io/openshift-release-dev/ocp-release@sha256:e86e058f7f66a687e273792f2e4ec70f3cc43ec9d2894bebee5caf5c4d4851a3","startedTime":"2023-01-12T15:34:43Z","state":"Completed","verified":false,"version":"4.11.20"}],"observedGeneration":2,"versionHash":"E59dB0eLHfk="}}],"kind":"ClusterVersionList","metadata":{"continue":"","resourceVersion":"18544380"}}
+      string: '{"apiVersion":"config.openshift.io/v1","items":[{"apiVersion":"config.openshift.io/v1","kind":"ClusterVersion","metadata":{"creationTimestamp":"2023-03-28T06:47:27Z","generation":4,"managedFields":[{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{".":{},"f:capabilities":{".":{},"f:additionalEnabledCapabilities":{},"f:baselineCapabilitySet":{}},"f:channel":{}}},"manager":"cluster-bootstrap","operation":"Update","time":"2023-03-28T06:47:27Z"},{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{"f:clusterID":{},"f:overrides":{}}},"manager":"kubectl-patch","operation":"Update","time":"2023-04-25T20:42:50Z"},{"apiVersion":"config.openshift.io/v1","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:availableUpdates":{},"f:capabilities":{".":{},"f:enabledCapabilities":{},"f:knownCapabilities":{}},"f:conditionalUpdates":{},"f:conditions":{},"f:desired":{".":{},"f:image":{},"f:url":{},"f:version":{}},"f:history":{},"f:observedGeneration":{},"f:versionHash":{}}},"manager":"cluster-version-operator","operation":"Update","subresource":"status","time":"2023-06-05T17:05:12Z"}],"name":"version","resourceVersion":"176264","uid":"4cae1a30-c50f-434e-b650-b800d19ee412"},"spec":{"capabilities":{"additionalEnabledCapabilities":["openshift-samples","marketplace","Console"],"baselineCapabilitySet":"None"},"channel":"stable-4.12","clusterID":"5f5d1766-3f5b-47af-91ca-76740e47cb89","overrides":[{"group":"apps","kind":"Deployment","name":"cluster-monitoring-operator","namespace":"openshift-monitoring","unmanaged":true},{"group":"config.openshift.io","kind":"ClusterOperator","name":"monitoring","namespace":"","unmanaged":true},{"group":"apps","kind":"Deployment","name":"cloud-credential-operator","namespace":"openshift-cloud-credential-operator","unmanaged":true},{"group":"config.openshift.io","kind":"ClusterOperator","name":"cloud-credential","namespace":"","unmanaged":true},{"group":"apps","kind":"Deployment","name":"cluster-autoscaler-operator","namespace":"openshift-machine-api","unmanaged":true},{"group":"config.openshift.io","kind":"ClusterOperator","name":"cluster-autoscaler","namespace":"","unmanaged":true},{"group":"apps","kind":"Deployment","name":"cluster-cloud-controller-manager-operator","namespace":"openshift-cloud-controller-manager-operator","unmanaged":true},{"group":"config.openshift.io","kind":"ClusterOperator","name":"cloud-controller-manager","namespace":"","unmanaged":true}]},"status":{"availableUpdates":[{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:8465e416a403cec2e6887c8aebe783b976f46f81d513890f17037b652b143de5","url":"https://access.redhat.com/errata/RHBA-2023:3208","version":"4.12.18"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:7ca5f8aa44bbc537c5a985a523d87365eab3f6e72abc50b7be4caae741e093f4","url":"https://access.redhat.com/errata/RHBA-2023:2699","version":"4.12.17"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:5339b3c4686010dc42990e0addce5aa4fddd071d6d9504dffe08a4b5059f6f38","url":"https://access.redhat.com/errata/RHSA-2023:2110","version":"4.12.16"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:0e0e42534fd5c999daf0377dec44e739e212dbad876937c6b816c2f3d1552208","url":"https://access.redhat.com/errata/RHBA-2023:2037","version":"4.12.15"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:157cc02d63bfe67988429fd803da632e495e230d811759b1aed1e6ffa7a3f31a","url":"https://access.redhat.com/errata/RHBA-2023:1858","version":"4.12.14"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:af5e923e8e1c1e67e22c8d037a247b678ae6da220de4a5191729a9bed00be041","url":"https://access.redhat.com/errata/RHBA-2023:1750","version":"4.12.13"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:0398462b1c54758fe83619022a98bbe65f6deed71663b6665224d3ba36e43f03","url":"https://access.redhat.com/errata/RHBA-2023:1645","version":"4.12.11"},{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:db976910d909373b1136261a5479ed18ec08c93971285ff760ce75c6217d3943","url":"https://access.redhat.com/errata/RHBA-2023:1508","version":"4.12.10"}],"capabilities":{"enabledCapabilities":["Console","marketplace","openshift-samples"],"knownCapabilities":["CSISnapshot","Console","Insights","Storage","baremetal","marketplace","openshift-samples"]},"conditionalUpdates":[{"conditions":[{"lastTransitionTime":"2023-06-05T17:03:48Z","message":"The
+        4.12.12 release only resolves an installation issue https://issues.redhat.com//browse/OCPBUGS-11662
+        , which does not affect already running clusters. 4.12.12 does not include
+        fixes delivered in recent 4.11.z and 4.12.z releases and therefore upgrading
+        from these versions would cause fixed bugs to reappear. Red Hat does not recommend
+        upgrading clusters to 4.12.12 version for this reason. https://access.redhat.com/solutions/7007136","reason":"PatchesOlderRelease","status":"False","type":"Recommended"}],"release":{"channels":["candidate-4.12","candidate-4.13","eus-4.12","fast-4.12","fast-4.13","stable-4.12"],"image":"quay.io/openshift-release-dev/ocp-release@sha256:b9d6ccb5ba5a878141e468e56fa62912ad7c04864acfec0c0056d2b41e3259cc","url":"https://access.redhat.com/errata/RHBA-2023:1734","version":"4.12.12"},"risks":[{"matchingRules":[{"type":"Always"}],"message":"The
+        4.12.12 release only resolves an installation issue https://issues.redhat.com//browse/OCPBUGS-11662
+        , which does not affect already running clusters. 4.12.12 does not include
+        fixes delivered in recent 4.11.z and 4.12.z releases and therefore upgrading
+        from these versions would cause fixed bugs to reappear. Red Hat does not recommend
+        upgrading clusters to 4.12.12 version for this reason.","name":"PatchesOlderRelease","url":"https://access.redhat.com/solutions/7007136"}]}],"conditions":[{"lastTransitionTime":"2023-04-25T20:49:07Z","status":"True","type":"RetrievedUpdates"},{"lastTransitionTime":"2023-03-28T06:47:32Z","message":"Cluster
+        should not be upgraded between minor versions for multiple reasons: ClusterVersionOverridesSet,AdminAckRequired\n*
+        Disabling ownership via cluster version overrides prevents upgrades. Please
+        remove overrides before continuing.\n* Kubernetes 1.26 and therefore OpenShift
+        4.13 remove several APIs which require admin consideration. Please see the
+        knowledge article https://access.redhat.com/articles/6958394 for details and
+        instructions.","reason":"MultipleReasons","status":"False","type":"Upgradeable"},{"lastTransitionTime":"2023-03-28T06:47:32Z","message":"Capabilities
+        match configured spec","reason":"AsExpected","status":"False","type":"ImplicitlyEnabledCapabilities"},{"lastTransitionTime":"2023-03-28T06:47:32Z","message":"Payload
+        loaded version=\"4.12.9\" image=\"quay.io/crcont/ocp-release@sha256:56877e108e443490ed5b3da6935cf5efc24732cfe69555ed0b633785d93b3a67\"
+        architecture=\"amd64\"","reason":"PayloadLoaded","status":"True","type":"ReleaseAccepted"},{"lastTransitionTime":"2023-03-28T07:10:11Z","message":"Done
+        applying 4.12.9","status":"True","type":"Available"},{"lastTransitionTime":"2023-06-05T17:05:11Z","message":"Multiple
+        errors are preventing progress:\n* Cluster operator openshift-apiserver is
+        not available\n* Could not update imagestream \"openshift/cli\" (521 of 888):
+        the server is down or not responding\n* Could not update imagestream \"openshift/driver-toolkit\"
+        (613 of 888): the server is down or not responding","reason":"MultipleErrors","status":"True","type":"Failing"},{"lastTransitionTime":"2023-03-28T07:10:11Z","message":"Error
+        while reconciling 4.12.9: an unknown error has occurred: MultipleErrors","reason":"MultipleErrors","status":"False","type":"Progressing"},{"lastTransitionTime":"2023-03-28T06:48:17Z","message":"Kubernetes
+        1.26 and therefore OpenShift 4.13 remove several APIs which require admin
+        consideration. Please see the knowledge article https://access.redhat.com/articles/6958394
+        for details and instructions.","reason":"AdminAckRequired","status":"False","type":"UpgradeableAdminAckRequired"},{"lastTransitionTime":"2023-03-28T06:48:17Z","message":"Disabling
+        ownership via cluster version overrides prevents upgrades. Please remove overrides
+        before continuing.","reason":"ClusterVersionOverridesSet","status":"False","type":"UpgradeableClusterVersionOverrides"}],"desired":{"image":"quay.io/crcont/ocp-release@sha256:56877e108e443490ed5b3da6935cf5efc24732cfe69555ed0b633785d93b3a67","url":"https://access.redhat.com/errata/RHSA-2023:1409","version":"4.12.9"},"history":[{"completionTime":"2023-03-28T07:10:11Z","image":"quay.io/crcont/ocp-release@sha256:56877e108e443490ed5b3da6935cf5efc24732cfe69555ed0b633785d93b3a67","startedTime":"2023-03-28T06:47:32Z","state":"Completed","verified":false,"version":"4.12.9"}],"observedGeneration":4,"versionHash":"8rNiRdlhauI="}}],"kind":"ClusterVersionList","metadata":{"continue":"","resourceVersion":"176465"}}
 
         '
     headers:
       Audit-Id:
-      - 11186880-4036-4ff6-a4c8-a14f57b299d0
+      - 91f00adb-3d82-4d44-bece-3fde353628db
       Cache-Control:
       - no-cache, private
       Content-Type:
       - application/json
       Date:
-      - Tue, 24 Jan 2023 22:45:54 GMT
+      - Mon, 05 Jun 2023 17:05:48 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:
       - chunked
       X-Kubernetes-Pf-Flowschema-Uid:
-      - dc5f54d8-61c7-4078-be42-b2ae14cafe79
+      - d12c0ebf-7a55-4056-970d-2ab7db5a637f
       X-Kubernetes-Pf-Prioritylevel-Uid:
-      - ee8439fa-db58-4921-a40d-640133815212
+      - 690a59e4-7e86-45a5-a2d7-b14879f21d90
     status:
       code: 200
       message: OK

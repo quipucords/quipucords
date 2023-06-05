@@ -7,7 +7,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - OpenAPI-Generator/25.3.0/python
+      - OpenAPI-Generator/26.1.0/python
       authorization:
       - <AUTH_TOKEN>
     method: GET
@@ -19,7 +19,7 @@ interactions:
         '
     headers:
       Audit-Id:
-      - cf6941e6-8592-45eb-bd99-5f154b5a116e
+      - 1f9970a8-d685-4f85-ab13-23a2c27e0c65
       Cache-Control:
       - no-cache, private
       Content-Length:
@@ -27,7 +27,9 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 24 Jan 2023 22:45:18 GMT
+      - Mon, 05 Jun 2023 17:05:30 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
     status:
       code: 401
       message: Unauthorized
