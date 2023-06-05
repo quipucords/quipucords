@@ -108,7 +108,10 @@ def test_openshift_source_default_port(openshift_cred_id):
     assert serializer.validated_data["port"] == 6443
 
 
-@pytest.mark.xfail(reason="hosts ('5.4.3.2.1') is clearly invalid in this case")
+@pytest.mark.skip(
+    "The code being tested is broken. '5.4.3.2.1' should not be a valid host address. "
+    "See also: https://issues.redhat.com/browse/DISCOVERY-352"
+)
 @pytest.mark.django_db
 def test_openshift_source_update(openshift_source, openshift_cred_id):
     """Test if serializer updates fields correctly."""
