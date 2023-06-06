@@ -65,20 +65,6 @@ ruff = "^0.0.270"
 [tool.black]
 target-version = ['py311']
 
-[tool.isort]
-profile = "black"
-known_first_party = [
-    "api",
-    "compat",
-    "constants",
-    "fingerprinter",
-    "log_messages",
-    "quipucords",
-    "scanner",
-    "tests",
-    "utils",
-]
-
 [tool.pytest.ini_options]
 pythonpath = "quipucords/"
 addopts = [
