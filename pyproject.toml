@@ -92,6 +92,19 @@ ignore = [
 src = ["quipucords"]
 target-version = "py311"
 
+[tool.ruff.isort]
+known-first-party = [
+    "api",
+    "compat",
+    "constants",
+    "fingerprinter",
+    "log_messages",
+    "quipucords",
+    "scanner",
+    "tests",
+    "utils",
+]
+
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401", "D104"]
 "**/test_*.py" = [
