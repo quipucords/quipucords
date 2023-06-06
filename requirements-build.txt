@@ -16,7 +16,7 @@ editables==0.3
     # via hatchling
 flit-core==3.9.0
     # via -r requirements-build.in
-hatchling==1.17.0
+hatchling==1.17.1
     # via -r requirements-build.in
 packaging==23.1
     # via
@@ -41,7 +41,7 @@ setuptools-scm==7.1.0
     # via -r requirements-build.in
 trove-classifiers==2023.5.24
     # via hatchling
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via
     #   -r requirements-build.in
     #   setuptools-rust
