@@ -1,7 +1,7 @@
+Cython
 calver
 cffi>=1.12;platform_python_implementation!='PyPy'
 cffi>=1.4.1;python_implementation!='PyPy'
-Cython
 docutils
 flit_core>=2,<4
 flit_core>=3.2,<4
@@ -14,9 +14,14 @@ pbr
 pbr>=1.8
 poetry-core>=1.0.0
 setuptools
+setuptools-rust
+setuptools-rust>=0.11.4
+setuptools-scm
+setuptools;python_version!='3.3'
+setuptools<40.0;python_version=='3.3'
+setuptools<67
 setuptools>=36.2.2
 setuptools>=39.2.0
-setuptools<40.0;python_version=='3.3'
 setuptools>=40.8.0
 setuptools>=42
 setuptools>=42.0.0
@@ -25,11 +30,6 @@ setuptools>=46.4.0
 setuptools>=61.0.0
 setuptools>=62.4
 setuptools>=62.4.0
-setuptools<67
-setuptools;python_version!='3.3'
-setuptools-rust
-setuptools-rust>=0.11.4
-setuptools-scm
 setuptools_scm
 typing_extensions
 wheel
