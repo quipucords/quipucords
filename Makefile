@@ -22,7 +22,6 @@ help:
 	@echo "  clean-ui                      to remove UI assets"
 	@echo "  lint                          to run all linters"
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
-	@echo "  lint-isort                    to run the isort import order checker"
 	@echo "  lint-black                    to run the black format checker"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
 	@echo "  lock-requirements             to lock all python dependencies"
@@ -111,13 +110,10 @@ test-integration:
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
-lint: lint-ruff lint-isort lint-black lint-ansible
+lint: lint-ruff lint-black lint-ansible
 
 lint-ruff:
 	poetry run ruff .
-
-lint-isort:
-	poetry run isort . --check --diff
 
 lint-black:
 	poetry run black . --check --diff
