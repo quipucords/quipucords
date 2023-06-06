@@ -46,7 +46,6 @@ pytest-xdist = "^3.1.0"
 requests-mock = "^1.10.0"
 httpretty = "^1.1.4"
 black = "^22.12.0"
-isort = "^5.11.4"
 pylint-django = "^2.5.3"
 pylint-plugin-utils = "^0.7"
 pylint-pytest = "^1.1.2"
@@ -94,6 +93,7 @@ select = [
     "D",   # pydocstyle
     "E",   # pycodestyle
     "F",   # pyflakes
+    "I",   # isort
     "Q",   # flake8-quotes
     "W",   # pycodestyle
     "PL",  # Pylint

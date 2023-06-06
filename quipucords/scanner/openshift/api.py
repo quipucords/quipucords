@@ -4,9 +4,8 @@ from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
 
-from kubernetes.client import ApiClient, ApiException
+from kubernetes.client import ApiClient, ApiException, CoreV1Api
 from kubernetes.client import Configuration as KubeConfig
-from kubernetes.client import CoreV1Api
 from openshift.dynamic import DynamicClient
 from openshift.helper.userpassauth import OCPLoginConfiguration
 from urllib3.exceptions import MaxRetryError
