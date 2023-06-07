@@ -39,6 +39,7 @@ class Credential(models.Model):
     password = models.CharField(max_length=1024, null=True)
     auth_token = models.CharField(max_length=1024, null=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True)
+    ssh_keyvalue = models.CharField(max_length=65536, null=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True)
     become_method = models.CharField(
         max_length=6, choices=BECOME_METHOD_CHOICES, null=True
@@ -49,6 +50,7 @@ class Credential(models.Model):
     ENCRYPTED_FIELDS = [
         "password",
         "ssh_passphrase",
+        "ssh_keyvalue",
         "become_password",
         "auth_token",
     ]
