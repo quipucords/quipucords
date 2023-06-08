@@ -48,6 +48,7 @@ class CredentialSerializer(NotEmptySerializer):
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,
             "auth_token": ENCRYPTED_FIELD_KWARGS,
+            "ssh_keyvalue": ENCRYPTED_FIELD_KWARGS,
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "become_password": ENCRYPTED_FIELD_KWARGS,
         }
@@ -188,6 +189,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             "cred_type",
             "password",
             "ssh_keyfile",
+            "ssh_keyvalue",
             "ssh_passphrase",
             "username",
             "sources",
@@ -197,6 +199,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             "become_password": ENCRYPTED_FIELD_KWARGS,
             "become_user": {"default": Credential.BECOME_USER_DEFAULT},
             "password": ENCRYPTED_FIELD_KWARGS,
+            "ssh_keyvalue": ENCRYPTED_FIELD_KWARGS,
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "username": {"required": True},
         }
