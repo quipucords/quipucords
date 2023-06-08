@@ -1,9 +1,11 @@
 """Integration test for OpenShift scan."""
 
+import json
 from logging import getLogger
 
 import pytest
 
+from api.inspectresult.model import RawFactEncoder
 from constants import DataSources
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
@@ -47,23 +49,21 @@ def node_resources():
 
 @pytest.fixture
 def expected_node(node_resources):
-    """Return a list with OCP node."""
-    return [
-        OCPNode(
-            name="node name",
-            errors={},
-            labels={"node-role.kubernetes.io/master": ""},
-            taints=[{"key": "some", "effect": "some"}],
-            capacity=node_resources,
-            addresses=[{"type": "ip", "address": "1.2.3.4"}],
-            machine_id="<MACHINE-ID>",
-            allocatable=node_resources,
-            architecture="amd64",
-            kernel_version="4.18.0-305.65.1.el8_4.x86_64",
-            operating_system="linux",
-            creation_timestamp="2022-12-18T03:56:20Z",
-        )
-    ]
+    """Return a OCPNode."""
+    return OCPNode(
+        name="node name",
+        errors={},
+        labels={"node-role.kubernetes.io/master": ""},
+        taints=[{"key": "some", "effect": "some"}],
+        capacity=node_resources,
+        addresses=[{"type": "ip", "address": "1.2.3.4"}],
+        machine_id="<MACHINE-ID>",
+        allocatable=node_resources,
+        architecture="amd64",
+        kernel_version="4.18.0-305.65.1.el8_4.x86_64",
+        operating_system="linux",
+        creation_timestamp="2022-12-18T03:56:20Z",
+    )
 
 
 @pytest.fixture
@@ -92,21 +92,24 @@ def expected_workloads():
     return [OCPWorkload(name="workload-name", container_images=["some-image"])]
 
 
+def _formatter(entity):
+    """Format OCP entities as they should appear on details report."""
+    encoded_data = json.dumps(entity, cls=RawFactEncoder)
+    return json.loads(encoded_data)
+
+
 @pytest.fixture
 def expected_facts(
     expected_projects, expected_node, expected_cluster, expected_workloads
 ):
     """Return a list of expected raw facts on OCP scans."""
-    projects_list = [p.dict() for p in expected_projects]
-    _node = expected_node[0].dict()
-    _node["creation_timestamp"] = _node["creation_timestamp"].isoformat()
-    _node["cluster_uuid"] = expected_cluster.uuid
+    expected_node.cluster_uuid = expected_cluster.uuid
     return [
-        {"node": _node},
+        {"node": _formatter(expected_node)},
         {
-            "cluster": expected_cluster.dict(),
-            "projects": projects_list,
-            "workloads": expected_workloads,
+            "cluster": _formatter(expected_cluster),
+            "projects": _formatter(expected_projects),
+            "workloads": _formatter(expected_workloads),
         },
     ]
 
@@ -125,7 +128,7 @@ def patched_openshift_client(
     mocker.patch.object(
         OpenShiftApi,
         "retrieve_nodes",
-        return_value=expected_node,
+        return_value=[expected_node],
     )
     mocker.patch.object(
         OpenShiftApi,
