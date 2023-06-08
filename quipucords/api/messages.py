@@ -11,9 +11,17 @@ FC_MISSING_REPORT_VERSION = (
 
 # host credential messages
 PLURAL_HOST_CREDENTIALS_MSG = "Credentials"
-HC_PWD_OR_KEYFILE = "A host credential must have either a password or an ssh_keyfile."
-HC_NOT_BOTH = (
+HC_KEYFILE_OR_KEYVALUE = (
+    "A host credential must have either an ssh_keyfile or an ssh_keyvalue, not both."
+)
+HC_PWD_OR_KEYFILE_OR_KEYVALUE = (
+    "A host credential must have either a password, ssh_keyfile or an ssh_keyvalue."
+)
+HC_PWD_NOT_WITH_KEYFILE = (
     "A host credential must have either a password or an ssh_keyfile, not both."
+)
+HC_PWD_NOT_WITH_KEYVALUE = (
+    "A host credential must have either a password or an ssh_keyvalue, not both."
 )
 TOKEN_OR_USER_PASS = (
     "A host credential must have either a username+password or auth_token."
@@ -23,8 +31,8 @@ TOKEN_OR_USER_PASS_NOT_BOTH = (
 )
 HC_KEY_INVALID = "ssh_keyfile, %s, is not a valid file on the system."
 HC_NO_KEY_W_PASS = (
-    "A host credential must have an ssh_keyfile provided if"
-    " a ssh_passphrase is provided."
+    "A host credential must have an ssh_keyfile or ssh_keyvalue provided if"
+    " an ssh_passphrase is provided."
 )
 HC_NAME_ALREADY_EXISTS = "Host credential with name=%s already exists"
 CRED_TYPE_REQUIRED_CREATED = "cred_type is required for credential creation"
