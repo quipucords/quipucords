@@ -219,14 +219,23 @@ class NetworkCredentialSerializer(CredentialSerializer):
         errors = defaultdict(list)
         password = data.get("password")
         ssh_keyfile = data.get("ssh_keyfile")
+        ssh_keyvalue = data.get("ssh_keyvalue")
         ssh_passphrase = data.get("ssh_passphrase")
-        instance_ssh_key = getattr(self.instance, "ssh_keyfile", None)
+        instance_ssh_keyfile = getattr(self.instance, "ssh_keyfile", None)
+        instance_ssh_keyvalue = getattr(self.instance, "ssh_keyvalue", None)
 
-        if password and ssh_keyfile:
-            errors["non_field_errors"].append(_(messages.HC_NOT_BOTH))
-        if not self.partial and not (password or ssh_keyfile):
-            errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE))
-        if ssh_passphrase and not (ssh_keyfile or instance_ssh_key):
+        if ssh_keyfile and ssh_keyvalue:
+            errors["non_field_errors"].append(_(messages.HC_KEYFILE_OR_KEYVALUE))
+        if password:
+            if ssh_keyfile:
+                errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEYFILE))
+            if ssh_keyvalue:
+                errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEYVALUE))
+        if not self.partial and not (password or ssh_keyfile or ssh_keyvalue):
+            errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE_OR_KEYVALUE))
+        if ssh_passphrase and not (
+            ssh_keyfile or instance_ssh_keyfile or ssh_keyvalue or instance_ssh_keyvalue
+        ):
             errors["ssh_passphrase"].append(_(messages.HC_NO_KEY_W_PASS))
         if errors:
             raise ValidationError(errors)
@@ -239,12 +248,18 @@ class NetworkCredentialSerializer(CredentialSerializer):
         """Transform validated data prior to an update."""
         password = data.get("password")
         ssh_keyfile = data.get("ssh_keyfile")
-        # a credential should have either password or ssh_key
+        ssh_keyvalue = data.get("ssh_keyvalue")
+        # a credential should have either password, ssh_keyvalue or ssh_keyfile
         # (this method assumes the premise that data is properly validated)
         if password:
             data["ssh_keyfile"] = None
+            data["ssh_keyvalue"] = None
+        elif ssh_keyvalue:
+            data["password"] = None
+            data["ssh_keyfile"] = None
         elif ssh_keyfile:
             data["password"] = None
+            data["ssh_keyvalue"] = None
 
 
 class AuthTokenOrUserPassSerializer(CredentialSerializer):

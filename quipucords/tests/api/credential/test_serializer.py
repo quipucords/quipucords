@@ -411,7 +411,9 @@ class TestNetworkCredential:
             }
         )
         assert not serializer.is_valid()
-        assert serializer.errors == {"non_field_errors": [messages.HC_NOT_BOTH]}
+        assert serializer.errors == {
+            "non_field_errors": [messages.HC_PWD_NOT_WITH_KEYFILE]
+        }
 
     def test_neither_password_or_ssh_key(self):
         """Test validation of a payload without password and ssh_key."""
@@ -423,7 +425,9 @@ class TestNetworkCredential:
             }
         )
         assert not serializer.is_valid()
-        assert serializer.errors == {"non_field_errors": [messages.HC_PWD_OR_KEYFILE]}
+        assert serializer.errors == {
+            "non_field_errors": [messages.HC_PWD_OR_KEYFILE_OR_KEYVALUE]
+        }
 
     def test_replace_password(self, credential_with_ssh_key):
         """Test replacing password with ssh_keyfile."""
