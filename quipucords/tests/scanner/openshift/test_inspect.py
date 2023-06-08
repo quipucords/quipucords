@@ -1,6 +1,7 @@
 """Test OpenShift InspectTaskRunner."""
 
 import pytest
+from kubernetes.client import ApiException
 
 from api.models import ScanTask
 from constants import DataSources
@@ -182,3 +183,55 @@ def test_inspect_with_failure(  # noqa: PLR0913
     assert scan_task.systems_scanned == 0
     assert scan_task.systems_failed == 2
     assert scan_task.systems_unreachable == 0
+
+
+EXTRA_CLUSTER_FACTS = {"projects", "workloads"}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("extra_fact_with_error", sorted(EXTRA_CLUSTER_FACTS))
+def test_inspect_errors_on_extra_cluster_facts(
+    mocker,
+    scan_task: ScanTask,
+    cluster,
+    node_ok,
+    extra_fact_with_error,
+):
+    """Test connecting to OpenShift host with errors collecting extra cluster facts."""
+    mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
+    mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
+    # leave non-error extra facts empty (since this won't be considered an error and is
+    # easier to test)
+    for extra_fact in EXTRA_CLUSTER_FACTS - {extra_fact_with_error}:
+        mocker.patch.object(OpenShiftApi, f"retrieve_{extra_fact}", return_value=[])
+    teapot_response = mocker.Mock(status=418, reason="🫖", data=b"I'm a teapot")
+    # simulate an OCP API error for the collection of 'fact with error'
+    teapot_exc = OCPError.from_api_exception(ApiException(http_resp=teapot_response))
+    mocker.patch.object(
+        OpenShiftApi,
+        f"retrieve_{extra_fact_with_error}",
+        side_effect=teapot_exc,
+    )
+    runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
+    message, status = runner.execute_task(mocker.Mock())
+    assert message == InspectTaskRunner.PARTIAL_SUCCESS_MESSAGE
+    assert status == ScanTask.COMPLETED
+    assert scan_task.systems_count == 2
+    assert scan_task.systems_scanned == 1
+    assert scan_task.systems_failed == 1
+    assert scan_task.systems_unreachable == 0
+
+    raw_facts = scan_task.get_facts()
+    # sanity check cluster fact
+    cluster = raw_facts[-1]
+    assert isinstance(cluster, dict)
+    assert "cluster" in cluster.keys()
+    # check errors
+    assert cluster["cluster"]["errors"] == {
+        extra_fact_with_error: {
+            "kind": "error",
+            "status": teapot_response.status,
+            "reason": teapot_response.reason,
+            "message": teapot_response.data.decode(),
+        }
+    }

@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.source.model import Source
-from compat.pydantic import BaseModel
+from compat.pydantic import BaseModel, PydanticErrorProxy
 
 
 class JobInspectionResult(models.Model):
@@ -85,7 +85,7 @@ class RawFactEncoder(JSONEncoder):
 
     def default(self, o):
         """Update the default Encoder to handle types beyond just the basic ones."""
-        if isinstance(o, BaseModel):
+        if isinstance(o, (BaseModel, PydanticErrorProxy)):
             return o.dict()
         if isinstance(o, datetime):
             return o.isoformat()

@@ -5,6 +5,7 @@ from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
+from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPError, OCPNode
 from scanner.openshift.runner import OpenShiftTaskRunner
 
@@ -56,7 +57,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             return self.SUCCESS_MESSAGE, ScanTask.COMPLETED
         return self.FAILURE_MESSAGE, ScanTask.FAILED
 
-    def _extra_cluster_facts(self, manager_interrupt, ocp_client, cluster):
+    def _extra_cluster_facts(
+        self, manager_interrupt, ocp_client: OpenShiftApi, cluster
+    ):
         """Retrieve extra cluster facts."""
         fact2method = (
             ("projects", ocp_client.retrieve_projects),
