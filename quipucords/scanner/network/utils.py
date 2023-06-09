@@ -1,5 +1,7 @@
 """Scanner used for host connection discovery."""
 
+import os
+import tempfile
 from functools import cache
 from multiprocessing import Value
 
@@ -35,6 +37,7 @@ def _credential_vars(credential):
     username = credential.get("username")
     password = credential.get("password")
     ssh_keyfile = credential.get("ssh_keyfile")
+    ssh_keyvalue = credential.get("ssh_keyvalue")
     become_method = credential.get("become_method")
     become_user = credential.get("become_user")
     become_password = credential.get("become_password")
@@ -44,6 +47,16 @@ def _credential_vars(credential):
         ansible_dict["ansible_ssh_pass"] = decrypt_data_as_unicode(password)
     if ssh_keyfile:
         ansible_dict["ansible_ssh_private_key_file"] = ssh_keyfile
+    if ssh_keyvalue:
+        private_key_file = os.path.join(
+            tempfile.mkdtemp(), f"credential_ssh_private_key_{credential.get('id')}"
+        )
+        private_key_fp = open(private_key_file, "w+")
+        private_key_fp.write(decrypt_data_as_unicode(ssh_keyvalue))
+        private_key_fp.write("\n")
+        private_key_fp.close()
+        os.chmod(private_key_file, 0o600)
+        ansible_dict["ansible_ssh_private_key_file"] = private_key_file
     if become_password:
         ansible_dict["ansible_become_pass"] = decrypt_data_as_unicode(become_password)
     if become_method:
