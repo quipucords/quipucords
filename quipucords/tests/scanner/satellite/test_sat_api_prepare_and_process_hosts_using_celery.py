@@ -33,8 +33,8 @@ def fake_six_request_host_details(  # noqa: PLR0913
     }
 
 
-def fake_prepare_host(hosts, *args, **kwargs):
-    """Prepare a minimally-populated object to mimic SatelliteSix.prepare_host."""
+def fake_prepare_hosts(hosts, *args, **kwargs):
+    """Prepare a minimally-populated object to mimic SatelliteSix.prepare_hosts."""
     return [(None, None, name, None, None, None, {}) for name in hosts]
 
 
@@ -47,11 +47,11 @@ def mock__request_host_details():
 
 
 @pytest.fixture
-def mock_prepare_host():
-    """Patch SatelliteSix.prepare_host to return fake prepared hosts test data."""
-    with patch.object(six.SatelliteSix, "prepare_host") as prepare_host:
-        prepare_host.side_effect = fake_prepare_host
-        yield prepare_host
+def mock_prepare_hosts():
+    """Patch SatelliteSix.prepare_hosts to return fake prepared hosts test data."""
+    with patch.object(six.SatelliteSix, "prepare_hosts") as prepare_hosts:
+        prepare_hosts.side_effect = fake_prepare_hosts
+        yield prepare_hosts
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def inspect_scan_job():
 @override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test__prepare_and_process_hosts_using_celery(
-    mock_prepare_host, mock__request_host_details, celery_worker, inspect_scan_job
+    mock_prepare_hosts, mock__request_host_details, celery_worker, inspect_scan_job
 ):
     """Test SatelliteInterface._prepare_and_process_hosts Celery task interaction.
 
@@ -104,6 +104,6 @@ def test__prepare_and_process_hosts_using_celery(
         hosts, six.request_host_details, mock_process_results, None
     )
 
-    mock_prepare_host.assert_called_once()
+    mock_prepare_hosts.assert_called_once()
     assert mock__request_host_details.call_count == len(hosts)
     mock_process_results.assert_called_once_with(results=expected_prepare_host_return)
