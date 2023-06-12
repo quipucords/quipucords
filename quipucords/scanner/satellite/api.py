@@ -163,7 +163,7 @@ class SatelliteInterface(ABC):
             must also be a registered Celery task
         :param process_results: API version-specific function to process results
         """
-        all_prepared_hosts = self.prepare_host(hosts, ids_only=True)
+        all_prepared_hosts = self.prepare_hosts(hosts, ids_only=True)
         # At the time of implementation, we don't know if it's okay to create many
         # tasks (one per hosts) in a group like this. If this proves problematic, we
         # should consider replacing `group` with `chunks` and calculate a reasonable
@@ -205,7 +205,7 @@ class SatelliteInterface(ABC):
 
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
                     raise SatellitePauseException()
-                host_params = self.prepare_host(chunk)
+                host_params = self.prepare_hosts(chunk)
                 results = pool.starmap(request_host_details, host_params)
                 process_results(results=results)
 
@@ -220,7 +220,7 @@ class SatelliteInterface(ABC):
         }
 
     @abstractmethod
-    def prepare_host(self, hosts: Iterable[dict], ids_only=False) -> Iterable[tuple]:
+    def prepare_hosts(self, hosts: Iterable[dict], ids_only=False) -> Iterable[tuple]:
         """Prepare each host with necessary information."""
 
     @abstractmethod

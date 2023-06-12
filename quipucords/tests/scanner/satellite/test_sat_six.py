@@ -250,8 +250,8 @@ class SatelliteSixV1Test(TestCase):
             }
             self.assertEqual(host_info, expected)
 
-    def test_prepare_host_s61(self):
-        """Test the prepare host method for satellite 6.1."""
+    def test_prepare_hosts_s61(self):
+        """Test the prepare_hosts method for satellite 6.1."""
         url1 = (
             "https://{sat_host}:{port}/katello/api"
             "/v2/organizations/{org_id}/systems/{host_id}"
@@ -293,7 +293,7 @@ class SatelliteSixV1Test(TestCase):
             "scanner.satellite.utils.get_connect_data",
             return_value=connect_data_return_value,
         ) as mock_connect:
-            host_params = SatelliteSixV1.prepare_host(self.api, chunk)
+            host_params = SatelliteSixV1.prepare_hosts(self.api, chunk)
             self.assertEqual(expected, host_params)
             mock_connect.assert_called_once_with(ANY)
 
@@ -526,27 +526,27 @@ class SatelliteSixV1Test(TestCase):
 
         with patch.object(
             SatelliteSixV1, "get_orgs", return_value=[org_a_id, org_b_id]
-        ), patch.object(SatelliteSixV1, "prepare_host") as mock_prepare_host, patch(
+        ), patch.object(SatelliteSixV1, "prepare_hosts") as mock_prepare_hosts, patch(
             "scanner.satellite.six.request_host_details", return_value={}
         ) as mock_request_host_details, patch(
             "scanner.satellite.utils.validate_task_stats", return_value=True
         ), patch(
             "multiprocessing.pool.Pool.starmap"
         ) as mock_pool_starmap, requests_mock.Mocker() as mocker:
-
-            mock_prepare_host.side_effect = lambda x: list(x)
+            mock_prepare_hosts.side_effect = lambda x: list(x)
             mocker.get(url_org_a, status_code=200, json=jsonresults[0])
             mocker.get(url_org_b, status_code=200, json=jsonresults[1])
 
             self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
             # This assertion warrants some explanation...
-            # For this test, we want to see if prepare_host was given a list of de-duped
-            # hosts, but it's difficult to assert equality with the generator that would
-            # normally be passed into it. So, we patch prepare_host's behavior to simply
-            # return its input cast to a list, which should match our expected list.
-            # Since the output of prepare_host goes immediately into Pool.starmap, we
-            # check that Pool.starmap is called with what we expect is the unique list.
+            # For this test, we want to see if prepare_hosts was given a list of de-
+            # duped hosts, but it's difficult to assert equality with the generator that
+            # would normally be passed into it. So, we patch prepare_hosts's behavior to
+            # simply return its input cast to a list, which should match our expected
+            # list. Since the output of prepare_hosts goes immediately into
+            # Pool.starmap, we check that Pool.starmap is called with what we expect is
+            # the unique list.
             mock_pool_starmap.assert_called_with(
                 mock_request_host_details, unique_hosts
             )

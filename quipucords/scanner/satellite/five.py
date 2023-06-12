@@ -169,7 +169,7 @@ class SatelliteFive(SatelliteInterface):
 
         return hosts
 
-    def prepare_host(self, hosts: Iterable[dict], ids_only=False):
+    def prepare_hosts(self, hosts: Iterable[dict], ids_only=False):
         """Prepare each host with necessary information.
 
         :param hosts: an iterable of dicts that each contain information about one host

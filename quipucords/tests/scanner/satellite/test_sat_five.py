@@ -234,8 +234,8 @@ class SatelliteFiveTest(TestCase):
             result[fact.name] = fact.value
         self.assertEqual(result, expected)
 
-    def test_prepare_host_s5(self):
-        """Test the prepare host method for satellite 5."""
+    def test_prepare_hosts_s5(self):
+        """Test the prepare_hosts method for satellite 5."""
         expected = [
             (
                 1,
@@ -268,7 +268,7 @@ class SatelliteFiveTest(TestCase):
             "scanner.satellite.utils.get_connect_data",
             return_value=connect_data_return_value,
         ) as mock_connect:
-            host_params = self.api.prepare_host(chunk)
+            host_params = self.api.prepare_hosts(chunk)
             self.assertEqual(expected, host_params)
             mock_connect.assert_called_once_with(ANY)
 
