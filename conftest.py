@@ -14,6 +14,12 @@ from django.test import override_settings
 
 
 @pytest.fixture(autouse=True)
+def disable_celery_until_we_are_ready(settings):
+    """Disable Celery scan manager in tests until we are ready to switch everything."""
+    settings.QPC_ENABLE_CELERY_SCAN_MANAGER = False
+
+
+@pytest.fixture(autouse=True)
 def scan_manager(mocker):
     """return a DummyScanManager instance."""
     from tests.dummy_scan_manager import DummyScanManager
@@ -21,9 +27,7 @@ def scan_manager(mocker):
     _manager = DummyScanManager()
     mocker.patch("scanner.manager.Manager", DummyScanManager)
     mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    with override_settings(
-        QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER=True,
-    ):
+    with override_settings(QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER=True):
         yield _manager
 
 
