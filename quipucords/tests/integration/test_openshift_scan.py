@@ -9,6 +9,8 @@ from api.inspectresult.model import RawFactEncoder
 from constants import DataSources
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
+    ClusterOperator,
+    LifecycleOperator,
     NodeResources,
     OCPCluster,
     OCPNode,
@@ -87,6 +89,25 @@ def expected_projects():
 
 
 @pytest.fixture
+def expected_operators(faker):
+    """Return a list operators."""
+    return [
+        ClusterOperator(
+            name=faker.slug(),
+            version="1.2.3",
+            created_at=faker.date_time(),
+            updated_at=faker.date_time(),
+        ),
+        LifecycleOperator(
+            name=faker.slug(),
+            version="3.2.1",
+            created_at=faker.date_time(),
+            updated_at=faker.date_time(),
+        ),
+    ]
+
+
+@pytest.fixture
 def expected_workloads():
     """Return a list of OCP workloads."""
     return [OCPWorkload(name="workload-name", container_images=["some-image"])]
@@ -100,7 +121,11 @@ def _formatter(entity):
 
 @pytest.fixture
 def expected_facts(
-    expected_projects, expected_node, expected_cluster, expected_workloads
+    expected_projects,
+    expected_node,
+    expected_cluster,
+    expected_workloads,
+    expected_operators,
 ):
     """Return a list of expected raw facts on OCP scans."""
     expected_node.cluster_uuid = expected_cluster.uuid
@@ -110,13 +135,19 @@ def expected_facts(
             "cluster": _formatter(expected_cluster),
             "projects": _formatter(expected_projects),
             "workloads": _formatter(expected_workloads),
+            "operators": _formatter(expected_operators),
         },
     ]
 
 
 @pytest.fixture(autouse=True)
-def patched_openshift_client(
-    mocker, expected_projects, expected_node, expected_cluster, expected_workloads
+def patched_openshift_client(  # noqa: PLR0913
+    mocker,
+    expected_projects,
+    expected_node,
+    expected_cluster,
+    expected_workloads,
+    expected_operators,
 ):
     """Mock OpenShiftApi forcing it to return expected entities."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
@@ -139,6 +170,11 @@ def patched_openshift_client(
         OpenShiftApi,
         "retrieve_workloads",
         return_value=expected_workloads,
+    )
+    mocker.patch.object(
+        OpenShiftApi,
+        "retrieve_operators",
+        return_value=expected_operators,
     )
 
 

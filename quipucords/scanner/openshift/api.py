@@ -1,5 +1,7 @@
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
 
+from __future__ import annotations
+
 from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
@@ -11,6 +13,8 @@ from openshift.helper.userpassauth import OCPLoginConfiguration
 from urllib3.exceptions import MaxRetryError
 
 from scanner.openshift.entities import (
+    ClusterOperator,
+    LifecycleOperator,
     NodeResources,
     OCPCluster,
     OCPError,
@@ -182,6 +186,16 @@ class OpenShiftApi:
             workload_list.append(OCPWorkload(**data))
         return workload_list
 
+    def retrieve_operators(self, **kwargs) -> List[ClusterOperator | LifecycleOperator]:
+        """Retrieve cluster and "olm" operators."""
+        return [
+            ClusterOperator.from_raw_object(operator)
+            for operator in self._list_cluster_operators(**kwargs).items
+        ] + [
+            LifecycleOperator.from_raw_object(operator)
+            for operator in self._list_subscriptions(**kwargs).items
+        ]
+
     @cached_property
     def _core_api(self):
         return CoreV1Api(api_client=self._api_client)
@@ -204,6 +218,18 @@ class OpenShiftApi:
     def _pod_api(self):
         return self._dynamic_client.resources.get(api_version="v1", kind="Pod")
 
+    @cached_property
+    def _cluster_operator_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="config.openshift.io/v1", kind="ClusterOperator"
+        )
+
+    @cached_property
+    def _subscription_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="operators.coreos.com/v1alpha1", kind="Subscription"
+        )
+
     @catch_k8s_exception
     def _list_projects(self, **kwargs):
         return self._namespace_api.get(**kwargs)
@@ -219,6 +245,14 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_pods(self, **kwargs):
         return self._pod_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_cluster_operators(self, **kwargs):
+        return self._cluster_operator_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_subscriptions(self, **kwargs):
+        return self._subscription_api.get(**kwargs)
 
     def _init_ocp_project(self, raw_project) -> OCPProject:
         ocp_project = OCPProject(

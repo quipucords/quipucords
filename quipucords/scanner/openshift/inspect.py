@@ -64,6 +64,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         fact2method = (
             ("projects", ocp_client.retrieve_projects),
             ("workloads", ocp_client.retrieve_workloads),
+            ("operators", ocp_client.retrieve_operators),
         )
         extra_facts = {}
         for fact_name, api_method in fact2method:

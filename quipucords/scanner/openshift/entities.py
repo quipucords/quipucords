@@ -250,5 +250,58 @@ class NodeResources(OCPBaseEntity):
         return digits, power_name, ends_with_i
 
 
+class ClusterOperator(OCPBaseEntity):
+    """OCP Cluster Operator."""
+
+    _kind = "cluster-operator"
+    name: str
+    version: str = None
+    created_at: datetime.datetime = None
+    updated_at: datetime.datetime = None
+
+    @classmethod
+    def from_raw_object(cls, raw_object):
+        """Instantiate ClusterOperator using its equivalent api object."""
+
+        def _get_version(raw_object):
+            for version in raw_object.status.versions:
+                if version.name == "operator":
+                    return version.version
+            return None
+
+        return ClusterOperator(
+            name=raw_object.metadata.name,
+            created_at=raw_object.metadata.creationTimestamp,
+            updated_at=raw_object.status.conditions[0].lastTransitionTime,
+            version=_get_version(raw_object),
+        )
+
+
+class LifecycleOperator(ClusterOperator):
+    """Operator managed by Operator Lifecycle Manager (OLM)."""
+
+    _kind = "olm-operator"
+    package: str = None
+    source: str = None
+    channel: str = None
+    namespace: str = None
+
+    @classmethod
+    def from_raw_object(cls, raw_object):
+        """Instantiate OLM operator using its equivalent api object."""
+        installed_version = raw_object.status.currentCSV
+        package, version = installed_version.split(".", 1)
+        return LifecycleOperator(
+            name=raw_object.metadata.name,
+            created_at=raw_object.metadata.creationTimestamp,
+            updated_at=raw_object.status.lastUpdated,
+            namespace=raw_object.metadata.namespace,
+            source=raw_object.spec.source,
+            channel=raw_object.spec.channel,
+            package=package,
+            version=version,
+        )
+
+
 # update nested model references - this should always be the last thing to run
 _update_model_refs()
