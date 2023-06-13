@@ -102,13 +102,13 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     """
     Test dynamic_client cache.
 
-    Everytime a new "api resource" is added to ocp_client we need to add it to this test
+    Whenever a new "api resource" is added to ocp_client we need to add it to this test
     and run `pytest --refresh-cassettes` using a valid OCP connection.
     """
     assert (
         not ocp_client._discoverer_cache_file.exists()
     ), "Cache file exists prior to test excecution!"
-    # just acessing the attribute will trigger "introspection" requests at ocp
+    # just accessing the attribute will trigger "introspection" requests at ocp
     ocp_client._dynamic_client
     ocp_client._cluster_api
     ocp_client._node_api

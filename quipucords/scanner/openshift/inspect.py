@@ -13,7 +13,7 @@ from scanner.openshift.runner import OpenShiftTaskRunner
 class InspectTaskRunner(OpenShiftTaskRunner):
     """OpenShift inspect task runner."""
 
-    SUCCESS_MESSAGE = "Inspected OpenShift host succesfully."
+    SUCCESS_MESSAGE = "Inspected OpenShift host successfully."
     PARTIAL_SUCCESS_MESSAGE = (
         "Inspected some data from OpenShift host. Check details report for errors."
     )
