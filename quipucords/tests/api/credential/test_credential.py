@@ -8,6 +8,7 @@ import pytest
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
+from faker import Faker
 from rest_framework import status
 
 from api import messages
@@ -861,3 +862,32 @@ def test_hostcred_cred_type_update_fails(orig_type, new_type, django_client):
     resp = django_client.put(url, json=credentials)
     assert resp.status_code == status.HTTP_400_BAD_REQUEST
     assert resp.json() == {"cred_type": ["cred_type is invalid for credential update"]}
+
+
+@pytest.mark.django_db
+def test_hostcred_update_ssh_keyfile(tmp_path, django_client):
+    """Verify it is possible to change SSH key path of existing credential."""
+    fake = Faker()
+    credential_name = "credential"
+    ssh_keyfile1 = tmp_path / fake.file_name(extension="pem")
+    ssh_keyfile1.touch()
+    data = {
+        "name": credential_name,
+        "cred_type": DataSources.NETWORK,
+        "username": "some-user",
+        "ssh_keyfile": str(ssh_keyfile1),
+    }
+    response = django_client.post(reverse("cred-list"), json=data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    ssh_keyfile2 = tmp_path / fake.file_name(extension="pem")
+    ssh_keyfile2.touch()
+    cred_id = response.json().get("id")
+    url = reverse("cred-detail", args=(cred_id,))
+    data = {"name": credential_name, "ssh_keyfile": str(ssh_keyfile2)}
+    response = django_client.patch(url, json=data)
+
+    assert response.status_code == status.HTTP_200_OK
+    response_ssh_keyfile = response.json().get("ssh_keyfile")
+    assert response_ssh_keyfile == str(ssh_keyfile2)
+    assert response_ssh_keyfile != str(ssh_keyfile1)
