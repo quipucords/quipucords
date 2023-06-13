@@ -1,0 +1,41 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/26.1.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/operators.coreos.com/v1alpha1/subscriptions
+  response:
+    body:
+      string: '{"apiVersion":"operators.coreos.com/v1alpha1","items":[{"apiVersion":"operators.coreos.com/v1alpha1","kind":"Subscription","metadata":{"creationTimestamp":"2023-06-08T14:47:08Z","generation":1,"labels":{"operators.coreos.com/advanced-cluster-management.open-cluster-management":""},"managedFields":[{"apiVersion":"operators.coreos.com/v1alpha1","fieldsType":"FieldsV1","fieldsV1":{"f:spec":{".":{},"f:channel":{},"f:installPlanApproval":{},"f:name":{},"f:source":{},"f:sourceNamespace":{},"f:startingCSV":{}}},"manager":"Mozilla","operation":"Update","time":"2023-06-08T14:47:08Z"},{"apiVersion":"operators.coreos.com/v1alpha1","fieldsType":"FieldsV1","fieldsV1":{"f:metadata":{"f:labels":{".":{},"f:operators.coreos.com/advanced-cluster-management.open-cluster-management":{}}}},"manager":"olm","operation":"Update","time":"2023-06-08T14:47:08Z"},{"apiVersion":"operators.coreos.com/v1alpha1","fieldsType":"FieldsV1","fieldsV1":{"f:status":{".":{},"f:catalogHealth":{},"f:conditions":{},"f:currentCSV":{},"f:installPlanGeneration":{},"f:installPlanRef":{".":{},"f:apiVersion":{},"f:kind":{},"f:name":{},"f:namespace":{},"f:resourceVersion":{},"f:uid":{}},"f:installedCSV":{},"f:installplan":{".":{},"f:apiVersion":{},"f:kind":{},"f:name":{},"f:uuid":{}},"f:lastUpdated":{},"f:state":{}}},"manager":"catalog","operation":"Update","subresource":"status","time":"2023-06-08T14:47:47Z"}],"name":"advanced-cluster-management","namespace":"open-cluster-management","resourceVersion":"294709","uid":"13af308b-faa2-47db-a4b6-2d128751b573"},"spec":{"channel":"release-2.7","installPlanApproval":"Automatic","name":"advanced-cluster-management","source":"redhat-operators","sourceNamespace":"openshift-marketplace","startingCSV":"advanced-cluster-management.v2.7.4"},"status":{"catalogHealth":[{"catalogSourceRef":{"apiVersion":"operators.coreos.com/v1alpha1","kind":"CatalogSource","name":"certified-operators","namespace":"openshift-marketplace","resourceVersion":"294459","uid":"03cca4dd-19d3-4c57-8c66-00d1bfc4a3b4"},"healthy":true,"lastUpdated":"2023-06-08T14:47:21Z"},{"catalogSourceRef":{"apiVersion":"operators.coreos.com/v1alpha1","kind":"CatalogSource","name":"community-operators","namespace":"openshift-marketplace","resourceVersion":"293231","uid":"a63e4c49-ba7e-44cc-96c6-0196e1269068"},"healthy":true,"lastUpdated":"2023-06-08T14:47:21Z"},{"catalogSourceRef":{"apiVersion":"operators.coreos.com/v1alpha1","kind":"CatalogSource","name":"redhat-marketplace","namespace":"openshift-marketplace","resourceVersion":"292772","uid":"81b12f54-4e0b-4a68-92a8-47b8cbcc94b5"},"healthy":true,"lastUpdated":"2023-06-08T14:47:21Z"},{"catalogSourceRef":{"apiVersion":"operators.coreos.com/v1alpha1","kind":"CatalogSource","name":"redhat-operators","namespace":"openshift-marketplace","resourceVersion":"293989","uid":"557f3d6a-98fd-45ba-b01c-aee4c0d905db"},"healthy":true,"lastUpdated":"2023-06-08T14:47:21Z"}],"conditions":[{"lastTransitionTime":"2023-06-08T14:47:21Z","message":"all
+        available catalogsources are healthy","reason":"AllCatalogSourcesHealthy","status":"False","type":"CatalogSourcesUnhealthy"}],"currentCSV":"advanced-cluster-management.v2.7.4","installPlanGeneration":1,"installPlanRef":{"apiVersion":"operators.coreos.com/v1alpha1","kind":"InstallPlan","name":"install-mm6wx","namespace":"open-cluster-management","resourceVersion":"294406","uid":"430f479e-c226-49ab-bd82-1ea52808a7d7"},"installedCSV":"advanced-cluster-management.v2.7.4","installplan":{"apiVersion":"operators.coreos.com/v1alpha1","kind":"InstallPlan","name":"install-mm6wx","uuid":"430f479e-c226-49ab-bd82-1ea52808a7d7"},"lastUpdated":"2023-06-08T14:47:46Z","state":"AtLatestKnown"}}],"kind":"SubscriptionList","metadata":{"continue":"","resourceVersion":"298580"}}
+
+        '
+    headers:
+      Audit-Id:
+      - c7fb7aa3-6097-4a34-b9d8-334deaa823ad
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 08 Jun 2023 15:00:42 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - bce71a98-55fb-4340-8e8c-88b8d9396a6d
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 22e80a00-bef7-48ad-8fd7-75c127d1cae9
+    status:
+      code: 200
+      message: OK
+version: 1
