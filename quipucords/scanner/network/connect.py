@@ -24,6 +24,7 @@ from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
     check_manager_interrupt,
     construct_inventory,
+    delete_ssh_keyfiles,
     expand_hostpattern,
 )
 from scanner.runner import ScanTaskRunner
@@ -301,7 +302,11 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
                 verbosity=verbosity_lvl,
             )
         except Exception as err_msg:  # noqa: BLE001
+            delete_ssh_keyfiles(inventory)
             raise AnsibleRunnerException(err_msg) from err_msg
+
+        # Let's delete any private ssh key files that we generated
+        delete_ssh_keyfiles(inventory)
 
         final_status = runner_obj.status
         if final_status == "canceled":
