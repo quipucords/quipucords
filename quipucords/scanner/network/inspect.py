@@ -19,7 +19,11 @@ from api.vault import write_to_yaml
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException
 from scanner.network.inspect_callback import InspectResultCallback
-from scanner.network.utils import check_manager_interrupt, construct_inventory
+from scanner.network.utils import (
+    check_manager_interrupt,
+    construct_inventory,
+    delete_ssh_keyfiles,
+)
 from scanner.runner import ScanTaskRunner
 
 logger = logging.getLogger(__name__)
@@ -242,7 +246,11 @@ class InspectTaskRunner(ScanTaskRunner):
                 )
             except Exception as error:
                 logger.exception("Unexpected error")
+                delete_ssh_keyfiles(inventory)
                 raise AnsibleRunnerException(str(error)) from error
+
+            # Let's delete any private ssh key files that we generated
+            delete_ssh_keyfiles(inventory)
 
             final_status = runner_obj.status
             if final_status == "canceled":
