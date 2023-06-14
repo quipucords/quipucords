@@ -188,13 +188,24 @@ class OpenShiftApi:
 
     def retrieve_operators(self, **kwargs) -> List[ClusterOperator | LifecycleOperator]:
         """Retrieve cluster and "olm" operators."""
-        return [
+        cluster_operators = [
             ClusterOperator.from_raw_object(operator)
             for operator in self._list_cluster_operators(**kwargs).items
-        ] + [
+        ]
+        olm_operators = [
             LifecycleOperator.from_raw_object(operator)
             for operator in self._list_subscriptions(**kwargs).items
         ]
+        # Use CSV api to enhance olm operators with extra metadata
+        csv_map = {
+            csv.metadata.name: csv
+            for csv in self._list_cluster_service_versions(**kwargs).items
+        }
+        for operator in olm_operators:
+            csv = csv_map[operator.cluster_service_version]
+            operator.display_name = csv.spec.displayName
+
+        return cluster_operators + olm_operators
 
     @cached_property
     def _core_api(self):
