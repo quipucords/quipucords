@@ -80,13 +80,11 @@ class Credential(models.Model):
     def update(self, request, *args, **kwargs):
         """Update the model object."""
         self.encrypt_fields()
-        # pylint:disable=no-member
         super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         """Update the model object."""
         self.encrypt_fields()
-        # pylint:disable=no-member
         super().partial_update(request, *args, **kwargs)
 
     class Meta:

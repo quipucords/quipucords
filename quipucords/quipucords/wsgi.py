@@ -15,11 +15,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quipucords.settings")
 
 application = get_wsgi_application()
 
-from . import environment  # noqa: E402 pylint: disable=C0413
+from . import environment  # noqa: E402
 
 environment.startup()
 
-from scanner import manager  # noqa: E402 pylint: disable=C0413
+from scanner import manager  # noqa: E402
 
 if not manager.SCAN_MANAGER:
     manager.reinitialize()

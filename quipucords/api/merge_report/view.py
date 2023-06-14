@@ -60,7 +60,6 @@ def sync_merge_reports(request):
     if merge_job.status != ScanTask.COMPLETED:
 
         raise Exception(merge_job.status_message)
-        # pylint: enable=broad-exception-raised
 
     merge_job.refresh_from_db()
     details_report = DetailsReport.objects.get(pk=details_report.id)

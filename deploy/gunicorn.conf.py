@@ -38,7 +38,6 @@ keyfile = "/etc/ssl/qpc/server.key"
 certfile = "/etc/ssl/qpc/server.crt"
 
 proc_name = None
-# pylint: enable=invalid-name
 
 
 def post_fork(server, worker):
@@ -69,8 +68,6 @@ def worker_int(worker):
     import sys
     import threading
     import traceback
-
-    # pylint: enable=import-outside-toplevel
 
     id2name = {th.ident: th.name for th in threading.enumerate()}
     code = []

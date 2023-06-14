@@ -164,7 +164,6 @@ class ProcessorMeta(abc.ABCMeta):
         if "KEY" not in dct:
 
             raise Exception(f"Processor {name} does not have a KEY")
-            # pylint: enable=broad-exception-raised
 
         # Setting a falsey KEY means "yes, I did this on purpose, I
         # really don't want this class registered."

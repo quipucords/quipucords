@@ -74,7 +74,6 @@ scan_target_container = container(
     timeout=constants.READINESS_TIMEOUT_SECONDS,
     wrapper_class=ScanTargetContainer,
 )
-# pylint: enable=no-value-for-parameter
 
 
 @pytest.fixture(scope="class")
