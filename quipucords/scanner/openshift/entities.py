@@ -281,6 +281,7 @@ class LifecycleOperator(ClusterOperator):
     """Operator managed by Operator Lifecycle Manager (OLM)."""
 
     _kind = "olm-operator"
+    display_name: str = None
     package: str = None
     source: str = None
     channel: str = None
@@ -301,6 +302,11 @@ class LifecycleOperator(ClusterOperator):
             package=package,
             version=version,
         )
+
+    @property
+    def cluster_service_version(self):
+        """Return currentCSV metadata."""
+        return f"{self.package}.{self.version}"
 
 
 # update nested model references - this should always be the last thing to run

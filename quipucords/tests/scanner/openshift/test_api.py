@@ -166,6 +166,7 @@ def test_retrieve_cluster(ocp_client: OpenShiftApi):
 @pytest.mark.vcr(
     VCRCassettes.OCP_CLUSTER_OPERATORS,
     VCRCassettes.OCP_SUBSCRIPTIONS,
+    VCRCassettes.OCP_CSV,
     VCRCassettes.OCP_DISCOVERER_CACHE,
 )
 def test_retrieve_operators(ocp_client: OpenShiftApi):
@@ -176,6 +177,42 @@ def test_retrieve_operators(ocp_client: OpenShiftApi):
     # OCP instance used on VCR preparation should have at least one lifecycle operator
     # installed (doesn't matter which one)
     assert isinstance(operators[-1], LifecycleOperator)
+
+
+def test_olm_operator_construction(ocp_client: OpenShiftApi, mocker, faker):
+    """Test logic creating LifecycleOperator."""
+    operator_csv = "papaya_operator.v1.2.3"
+    operator_display_name = "Papaya Operator"
+
+    subscription = mocker.Mock()
+    subscription.status.currentCSV = operator_csv
+    subscription.metadata.name = faker.slug()
+    subscription.metadata.creationTimestamp = faker.date_time()
+    subscription.status.lastUpdated = faker.date_time()
+    subscription.metadata.namespace = faker.slug()
+    subscription.spec.channel = faker.slug()
+    subscription.spec.source = faker.slug()
+
+    csv = mocker.Mock()
+    csv.metadata.name = operator_csv
+    csv.spec.displayName = operator_display_name
+
+    mocker.patch.object(OpenShiftApi, "_list_cluster_operators")
+    mocker.patch.object(
+        OpenShiftApi,
+        "_list_subscriptions",
+        return_value=mocker.Mock(items=[subscription]),
+    )
+    mocker.patch.object(
+        OpenShiftApi,
+        "_list_cluster_service_versions",
+        return_value=mocker.Mock(items=[csv]),
+    )
+
+    operators = ocp_client.retrieve_operators()
+    assert len(operators) == 1
+    assert operators[0].display_name == operator_display_name
+    assert operators[0].cluster_service_version == operator_csv
 
 
 @pytest.mark.vcr_primer(VCRCassettes.OCP_NODE, VCRCassettes.OCP_DISCOVERER_CACHE)
