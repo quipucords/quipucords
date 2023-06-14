@@ -535,7 +535,6 @@ class SatelliteSixV1Test(TestCase):
         ) as mock_pool_starmap, requests_mock.Mocker() as mocker:
 
             mock_prepare_host.side_effect = lambda x: list(x)
-            # pylint: enable=unnecessary-lambda
             mocker.get(url_org_a, status_code=200, json=jsonresults[0])
             mocker.get(url_org_b, status_code=200, json=jsonresults[1])
 

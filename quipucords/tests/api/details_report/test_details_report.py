@@ -172,7 +172,7 @@ class DetailReportTest(LoggedUserMixin, TestCase):
     # Test CSV Renderer
     ##############################################################
 
-    def test_csv_renderer(self):  # pylint:disable=too-many-statements  # noqa: PLR0915
+    def test_csv_renderer(self):  # noqa: PLR0915
         """Test DetailsCSVRenderer."""
         renderer = DetailsCSVRenderer()
         # Test no FC id
