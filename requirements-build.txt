@@ -16,7 +16,7 @@ editables==0.3
     # via hatchling
 flit-core==3.9.0
     # via -r requirements-build.in
-hatchling==1.17.1
+hatchling==1.18.0
     # via -r requirements-build.in
 packaging==23.1
     # via
