@@ -118,6 +118,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     ocp_client._pod_api
     ocp_client._cluster_operator_api
     ocp_client._subscription_api
+    ocp_client._cluster_service_version_api
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
@@ -144,6 +145,13 @@ def test_subscriptions_api(ocp_client: OpenShiftApi):
     """Test _cluster_api."""
     subscriptions = ocp_client._list_subscriptions()
     assert subscriptions
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_CSV, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_csv_api(ocp_client: OpenShiftApi):
+    """Test _list_cluster_service_versions."""
+    csv_list = ocp_client._list_cluster_service_versions()
+    assert csv_list
 
 
 @pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)

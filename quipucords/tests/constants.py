@@ -76,3 +76,4 @@ class VCRCassettes:
     OCP_PODS = VCRPath()
     OCP_CLUSTER_OPERATORS = VCRPath()
     OCP_SUBSCRIPTIONS = VCRPath()
+    OCP_CSV = VCRPath()
