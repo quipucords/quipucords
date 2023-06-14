@@ -230,6 +230,12 @@ class OpenShiftApi:
             api_version="operators.coreos.com/v1alpha1", kind="Subscription"
         )
 
+    @cached_property
+    def _cluster_service_version_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="operators.coreos.com/v1alpha1", kind="ClusterServiceVersion"
+        )
+
     @catch_k8s_exception
     def _list_projects(self, **kwargs):
         return self._namespace_api.get(**kwargs)
@@ -253,6 +259,10 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_subscriptions(self, **kwargs):
         return self._subscription_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_cluster_service_versions(self, **kwargs):
+        return self._cluster_service_version_api.get(**kwargs)
 
     def _init_ocp_project(self, raw_project) -> OCPProject:
         ocp_project = OCPProject(
