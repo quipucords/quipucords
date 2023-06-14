@@ -172,8 +172,15 @@ class SatelliteInterface(ABC):
         #     request_host_details.chunks(all_prepared_hosts, chunk_size)().get()
         #     results = list(itertools.chain.from_iterable(results))
         # FIXME We SHOULD NOT use disable_sync_subtasks=False.
-        # Although unlikely in this case, this option in general may lead to deadlocks
-        # if there aren't enough available Celery workers.
+        # Calling `get` blocks the current process, and if you do this from within a
+        # running task, Celery normally raises `RuntimeError(E_WOULDBLOCK)` to
+        # discourage that behavior. Although unlikely in *this* case, calling `get`
+        # from inside a task may lead to deadlocks if there are not available Celery
+        # workers; the blocking task may never complete and return its result to the
+        # blocked task's `get` call. Setting `disable_sync_subtasks=False` bypasses
+        # this internal Celery check, allowing the `get` to execute despite the risk.
+        # See this discussion for more details:
+        # https://github.com/quipucords/quipucords/pull/2364#discussion_r1229832809
         results = (
             celery.group(
                 request_host_details.s(*host_params)
