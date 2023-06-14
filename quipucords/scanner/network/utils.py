@@ -1,6 +1,7 @@
 """Scanner used for host connection discovery."""
 
 import os
+import re
 import tempfile
 from functools import cache
 from multiprocessing import Value
@@ -48,15 +49,9 @@ def _credential_vars(credential):
     if ssh_keyfile:
         ansible_dict["ansible_ssh_private_key_file"] = ssh_keyfile
     if ssh_keyvalue:
-        private_key_file = os.path.join(
-            tempfile.mkdtemp(), f"credential_ssh_private_key_{credential.get('id')}"
+        ansible_dict["ansible_ssh_private_key_file"] = generate_ssh_keyfile(
+            credential, decrypt_data_as_unicode(ssh_keyvalue)
         )
-        private_key_fp = open(private_key_file, "w+")
-        private_key_fp.write(decrypt_data_as_unicode(ssh_keyvalue))
-        private_key_fp.write("\n")
-        private_key_fp.close()
-        os.chmod(private_key_file, 0o600)
-        ansible_dict["ansible_ssh_private_key_file"] = private_key_file
     if become_password:
         ansible_dict["ansible_become_pass"] = decrypt_data_as_unicode(become_password)
     if become_method:
@@ -186,3 +181,54 @@ def get_fact_names():
 def raw_facts_template():
     """Results template for fact collection on network scans."""
     return {fact_name: None for fact_name in get_fact_names()}
+
+
+GEN_KEYFILES_DIRECTORY_PREFIX = "quipucords_ssh_private_key_files_"
+GEN_KEYFILE_PREFIX = "ssh_private_key_file_credential_"
+
+
+def generate_ssh_keyfile(credential, ssh_keyvalue):
+    """Generate an ssh private keyfile for the ssh key content specified."""
+    private_keyfile_path = os.path.join(
+        tempfile.mkdtemp(prefix=GEN_KEYFILES_DIRECTORY_PREFIX),
+        f"{GEN_KEYFILE_PREFIX}{credential.get('id')}",
+    )
+    private_key_fp = open(private_keyfile_path, "w+")
+    private_key_fp.write(ssh_keyvalue)
+    private_key_fp.write("\n")
+    private_key_fp.close()
+    os.chmod(private_keyfile_path, 0o600)
+    return private_keyfile_path
+
+
+def delete_ssh_keyfiles(inventory):
+    """Delete all generated ansible_ssh_private_key_files."""
+    if not inventory:
+        return
+
+    # Defined during connects
+    ansible_vars = inventory.get("all", {}).get("vars", {})
+    ssh_pkf = ansible_vars.get("ansible_ssh_private_key_file")
+    if ssh_pkf:
+        delete_ssh_keyfile(ssh_pkf)
+    # Defined during inspects
+    children = inventory.get("all", {}).get("children", {})
+    for group in children.keys():
+        hosts = children.get(group).get("hosts", {})
+        for host in hosts.keys():
+            ssh_pkf = hosts.get(host).get("ansible_ssh_private_key_file")
+            if ssh_pkf:
+                delete_ssh_keyfile(ssh_pkf)
+
+
+def delete_ssh_keyfile(private_keyfile_path):
+    """Remove a generated ssh_keyfile and delete its empty parent directory."""
+    keyfile_pattern = (
+        f"^/.*/{GEN_KEYFILES_DIRECTORY_PREFIX}.*/{GEN_KEYFILE_PREFIX}[0-9]+$"
+    )
+    if re.match(keyfile_pattern, private_keyfile_path):
+        if os.path.isfile(private_keyfile_path):
+            os.remove(private_keyfile_path)
+            parent_dir = os.path.abspath(os.path.join(private_keyfile_path, os.pardir))
+            if not os.listdir(parent_dir):
+                os.rmdir(parent_dir)

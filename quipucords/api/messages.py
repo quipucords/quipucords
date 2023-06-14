@@ -31,7 +31,7 @@ TOKEN_OR_USER_PASS_NOT_BOTH = (
 )
 HC_KEY_INVALID = "ssh_keyfile, %s, is not a valid file on the system."
 HC_NO_KEY_W_PASS = (
-    "A host credential must have an ssh_keyfile or ssh_keyvalue provided if"
+    "A host credential must have an ssh_keyfile or an ssh_keyvalue provided if"
     " an ssh_passphrase is provided."
 )
 HC_NAME_ALREADY_EXISTS = "Host credential with name=%s already exists"
