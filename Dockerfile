@@ -71,5 +71,5 @@ RUN make server-static
 # Allow git to run in /app
 RUN git config --file /.gitconfig --add safe.directory /app
 
-EXPOSE 443
+EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
