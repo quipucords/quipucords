@@ -16,6 +16,7 @@ services:
       QPC_LOG_ALL_ENV_VARS_AT_STARTUP:
       REDIS_HOST: qpc-redis
       REDIS_PASSWORD: qpc
+      QPC_ENABLE_CELERY_SCAN_MANAGER: 1
     ports:
       - "9443:443"
       - "5678:5678"
@@ -60,13 +61,37 @@ services:
 
   qpc-celery-worker:
     build: .
-    entrypoint: bash ./deploy/entrypoint_celery_worker.sh
+    entrypoint:
+      - /bin/bash
+      - -c
+      - >-
+        pip install debugpy;
+        bash ./deploy/entrypoint_celery_worker.sh
     depends_on:
       - qpc-db
       - qpc-redis
+    volumes:
+      - ./quipucords/secret.txt:/var/data/secret.txt
+      - .:/app
+      - ./deploy:/deploy
+      - ./var/sshkeys/:/sshkeys
     environment:
+      ANSIBLE_LOG_LEVEL: 3
+      NETWORK_CONNECT_JOB_TIMEOUT: 6
+      NETWORK_INSPECT_JOB_TIMEOUT: 600
+      QPC_DBMS: postgres
+      QPC_DBMS_DATABASE: qpc
+      QPC_DBMS_HOST: qpc-db
+      QPC_DBMS_PASSWORD: qpc
+      QPC_DBMS_PORT: 5432
+      QPC_DBMS_USER: qpc
+      QPC_DEBUGPY: 1
+      QPC_DEBUGPY_PORT: 56789
+      QPC_LOG_ALL_ENV_VARS_AT_STARTUP:
+      QPC_SERVER_TIMEOUT: 5
       REDIS_HOST: qpc-redis
       REDIS_PASSWORD: qpc
+      QPC_ENABLE_CELERY_SCAN_MANAGER: 1
 
   scan-target:
     build:
