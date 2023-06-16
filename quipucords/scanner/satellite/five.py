@@ -1,11 +1,14 @@
 """Satellite 5 API handlers."""
 import logging
 import xmlrpc.client
+from collections.abc import Iterable
 from functools import partial
 
+import celery
 from more_itertools import unique_everseen
 
 from api.models import SystemInspectionResult
+from api.scantask.model import ScanTask
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
@@ -47,20 +50,42 @@ VIRTUAL_HOST_NAME = "virtual_host_name"
 HYPERVISOR = "hypervisor"
 
 
+@celery.shared_task(name="request_host_details_sat_five")
 def request_host_details(  # noqa: PLR0913
-    host_id, host_name, last_checkin, scan_task, request_options, logging_options
+    host_id,
+    host_name,
+    last_checkin,
+    scan_task: ScanTask | int,
+    request_options,
+    logging_options,
 ):
-    """Execute http responses to gather satellite data.
+    """Wrap _request_host_details to call it as an async Celery task."""
+    return _request_host_details(
+        host_id, host_name, last_checkin, scan_task, request_options, logging_options
+    )
+
+
+def _request_host_details(  # noqa: PLR0913
+    host_id,
+    host_name,
+    last_checkin,
+    scan_task: ScanTask | int,
+    request_options,
+    logging_options,
+):
+    """Request detailed data about a specific host from the Satellite server.
 
     :param host_id: The identifier of the host
     :param host_name: The name of the host
     :param last_checkin: The date of last checkin
-    :param scan_task: The current scan task
+    :param scan_task: The current scan task or its ID
     :param request_options: A dictionary containing the host, port,
         user, and password for the source
     :param: logging_options: A dictionary containing the scan_task type,
         scan_task id, and source_type, and the source_name
     """
+    if isinstance(scan_task, int):
+        scan_task = ScanTask.objects.get(id=scan_task)
     unique_name = f"{host_name}_{host_id}"
     results = raw_facts_template()
     client, user, password = utils.get_sat5_client(scan_task, request_options)
@@ -144,23 +169,23 @@ class SatelliteFive(SatelliteInterface):
 
         return hosts
 
-    def prepare_host(self, chunk):
+    def prepare_hosts(self, hosts: Iterable[dict], ids_only=False):
         """Prepare each host with necessary information.
 
-        :param chunk: A list of hosts
-        :returns A list of tuples that contain information about
-            each host.
+        :param hosts: an iterable of dicts that each contain information about one host
+        :param ids_only: bool to determine inclusion of ids or whole ScanTask objects
+        :return: A list of tuples that contain information about each host.
         """
         host_params = [
             (
                 host.get(ID),
                 host.get(NAME),
                 str(host.get(LAST_CHECKIN, "")),
-                self.inspect_scan_task,
+                self.inspect_scan_task.id if ids_only else self.inspect_scan_task,
                 self._prepare_host_request_options(),
                 self._prepare_host_logging_options(),
             )
-            for host in chunk
+            for host in hosts
         ]
         return host_params
 
@@ -380,7 +405,7 @@ class SatelliteFive(SatelliteInterface):
             physical_hosts=physical_hosts,
         )
 
-        self._process_hosts_using_multiprocessing(
+        self._prepare_and_process_hosts(
             hosts, request_host_details, _process_results, manager_interrupt
         )
 

@@ -4,9 +4,10 @@ from __future__ import annotations
 import itertools
 import logging
 from abc import ABCMeta, abstractmethod
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from functools import partial
 
+import celery
 import requests
 from more_itertools import unique_everseen
 from requests.exceptions import Timeout
@@ -290,8 +291,9 @@ def host_subscriptions(response):
     return subs_dict
 
 
+@celery.shared_task(name="request_host_details_sat_six")
 def request_host_details(  # noqa: PLR0913
-    scan_task,
+    scan_task: ScanTask | int,
     logging_options,
     host_id,
     host_name,
@@ -299,11 +301,32 @@ def request_host_details(  # noqa: PLR0913
     subs_url,
     request_options,
 ):
-    """Execute both http responses to gather satallite data.
+    """Wrap _request_host_details to call it as an async Celery task."""
+    return _request_host_details(
+        scan_task,
+        logging_options,
+        host_id,
+        host_name,
+        fields_url,
+        subs_url,
+        request_options,
+    )
+
+
+def _request_host_details(  # noqa: PLR0913
+    scan_task: ScanTask | int,
+    logging_options,
+    host_id,
+    host_name,
+    fields_url,
+    subs_url,
+    request_options,
+):
+    """Request detailed data about a specific host from the Satellite server.
 
     :param scan_task: The current scan task
     :param logging_options: The metadata for logging
-    :param host_id: The id of the host we're inspecting
+    :param host_id: The id of the host we're inspecting or its ID
     :param host_name: The name of the host we're inspecting
     :param fields_url: The sat61 or sat62 fields url
     :param subs_url: The sat61 or sat62 subs url
@@ -313,6 +336,8 @@ def request_host_details(  # noqa: PLR0913
         the response & url for host_fields request, and the
         response & url for the host_subs request.
     """
+    if isinstance(scan_task, int):
+        scan_task = ScanTask.objects.get(id=scan_task)
     unique_name = f"{host_name}_{host_id}"
     host_fields_json = {}
     host_subscriptions_json = {}
@@ -414,16 +439,16 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     HOSTS_URL: str
     SATELLITE_API_VERSION: int
 
-    def prepare_host(self, chunk):
+    def prepare_hosts(self, hosts: Iterable[dict], ids_only=False):
         """Prepare each host with necessary information.
 
-        :param chunk: A list of hosts
-        :returns A list of tuples that contain information about
-            each host.
+        :param hosts: an iterable of dicts that each contain information about one host
+        :param ids_only: bool to determine inclusion of ids or whole ScanTask objects
+        :return: A list of tuples that contain information about each host.
         """
         host_params = [
             (
-                self.inspect_scan_task,
+                self.inspect_scan_task.id if ids_only else self.inspect_scan_task,
                 self._prepare_host_logging_options(),
                 host.get(ID),
                 host.get(NAME),
@@ -431,7 +456,7 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
                 self.HOSTS_SUBS_URL,
                 self._prepare_host_request_options(),
             )
-            for host in chunk
+            for host in hosts
         ]
 
         return host_params
@@ -470,7 +495,7 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
             process_results, self=self, api_version=self.SATELLITE_API_VERSION
         )
 
-        self._process_hosts_using_multiprocessing(
+        self._prepare_and_process_hosts(
             hosts, request_host_details, _process_results, manager_interrupt
         )
 

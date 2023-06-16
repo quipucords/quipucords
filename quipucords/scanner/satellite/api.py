@@ -1,8 +1,11 @@
 """Satellite API Interface."""
 import logging
+from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from multiprocessing import Pool, Value
 
+import celery
+from django.conf import settings
 from django.db import transaction
 from more_itertools import chunked
 
@@ -39,7 +42,7 @@ class SatellitePauseException(ScanPauseException):
     """Exception for Satellite Pause interrupt."""
 
 
-class SatelliteInterface:
+class SatelliteInterface(ABC):
     """Generic interface for dealing with Satellite."""
 
     def __init__(self, scan_job, scan_task):
@@ -126,7 +129,69 @@ class SatelliteInterface:
         }
         return request_options
 
-    def _process_hosts_using_multiprocessing(
+    def _prepare_and_process_hosts(
+        self,
+        hosts: Iterable[dict],
+        request_host_details: Callable,
+        process_results: Callable,
+        manager_interrupt: Value = None,
+    ):
+        if settings.QPC_ENABLE_CELERY_SCAN_MANAGER:
+            self._prepare_and_process_hosts_using_celery(
+                hosts, request_host_details, process_results
+            )
+        else:
+            self._prepare_and_process_hosts_using_multiprocessing(
+                hosts, request_host_details, process_results, manager_interrupt
+            )
+
+    def _prepare_and_process_hosts_using_celery(
+        self,
+        hosts: Iterable[dict],
+        request_host_details: Callable,
+        process_results: Callable,
+    ):
+        """Prepare and process hosts using Celery tasks.
+
+        Calling this function may result in a large number of Celery tasks, 1:1 with the
+        number of hosts known by the Satellite server, and will synchronously block
+        until all those tasks complete. This behavior does not follow Celery best
+        practices and should be revised in the future.
+
+        :param hosts: iterable of host dicts
+        :param request_host_details: API version-specific function to get host details,
+            must also be a registered Celery task
+        :param process_results: API version-specific function to process results
+        """
+        all_prepared_hosts = self.prepare_hosts(hosts, ids_only=True)
+        # At the time of implementation, we don't know if it's okay to create many
+        # tasks (one per hosts) in a group like this. If this proves problematic, we
+        # should consider replacing `group` with `chunks` and calculate a reasonable
+        # size to limit parallel load. For example:
+        #     chunk_size = ceil(len(all_prepared_hosts) / self.max_concurrency)
+        #     request_host_details.chunks(all_prepared_hosts, chunk_size)().get()
+        #     results = list(itertools.chain.from_iterable(results))
+        # FIXME We SHOULD NOT use disable_sync_subtasks=False.
+        # Calling `get` blocks the current process, and if you do this from within a
+        # running task, Celery normally raises `RuntimeError(E_WOULDBLOCK)` to
+        # discourage that behavior. Although unlikely in *this* case, calling `get`
+        # from inside a task may lead to deadlocks if there are not available Celery
+        # workers; the blocking task may never complete and return its result to the
+        # blocked task's `get` call. Setting `disable_sync_subtasks=False` bypasses
+        # this internal Celery check, allowing the `get` to execute despite the risk.
+        # See this discussion for more details:
+        # https://github.com/quipucords/quipucords/pull/2364#discussion_r1229832809
+        results = (
+            celery.group(
+                request_host_details.s(*host_params)
+                for host_params in all_prepared_hosts
+            )
+            .apply_async()
+            .get(disable_sync_subtasks=False)
+        )
+        process_results(results=results)
+
+    def _prepare_and_process_hosts_using_multiprocessing(
         self,
         hosts: Iterable[dict],
         request_host_details: Callable,
@@ -147,7 +212,7 @@ class SatelliteInterface:
 
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
                     raise SatellitePauseException()
-                host_params = self.prepare_host(chunk)
+                host_params = self.prepare_hosts(chunk)
                 results = pool.starmap(request_host_details, host_params)
                 process_results(results=results)
 
@@ -161,11 +226,18 @@ class SatelliteInterface:
             "source_name": self.inspect_scan_task.source.name,
         }
 
+    @abstractmethod
+    def prepare_hosts(self, hosts: Iterable[dict], ids_only=False) -> Iterable[tuple]:
+        """Prepare each host with necessary information."""
+
+    @abstractmethod
     def host_count(self):
         """Obtain the count of managed hosts."""
 
+    @abstractmethod
     def hosts(self):
         """Obtain the managed hosts."""
 
+    @abstractmethod
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
