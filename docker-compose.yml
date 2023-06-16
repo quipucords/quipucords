@@ -18,7 +18,7 @@ services:
       REDIS_PASSWORD: qpc
       QPC_ENABLE_CELERY_SCAN_MANAGER: 1
     ports:
-      - "9443:443"
+      - "9443:8000"
       - "5678:5678"
     volumes:
       - ./quipucords/secret.txt:/var/data/secret.txt
