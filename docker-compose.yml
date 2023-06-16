@@ -105,6 +105,7 @@ services:
     image: docker.io/nginx
     volumes:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./quipucords/staticfiles:/staticfiles
     ports:
       - 8080:80
     depends_on:
