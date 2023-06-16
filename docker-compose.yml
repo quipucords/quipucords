@@ -32,7 +32,7 @@ services:
       - -c
       - >-
         pip install debugpy;
-        bash ./deploy/docker_run.sh
+        bash ./deploy/entrypoint_web.sh
 
   qpc-redis:
     image: registry.redhat.io/rhel9/redis-6
