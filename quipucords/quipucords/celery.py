@@ -5,6 +5,8 @@ import os
 import environ
 from celery import Celery, signals
 
+from quipucords.environment import start_debugger_if_required
+
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "quipucords.settings")
 
@@ -20,6 +22,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # Load task modules from all registered Django apps.
 task_packages = ["scanner", "scanner.satellite.five", "scanner.satellite.six"]
 app.autodiscover_tasks(task_packages)
+start_debugger_if_required()
 
 if env.bool("QPC_DISABLE_CELERY_LOGGING_HIJACK", True):
 

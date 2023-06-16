@@ -75,6 +75,8 @@ services:
       - .:/app
       - ./deploy:/deploy
       - ./var/sshkeys/:/sshkeys
+    ports:
+      - "56789:5678"
     environment:
       ANSIBLE_LOG_LEVEL: 3
       NETWORK_CONNECT_JOB_TIMEOUT: 6
@@ -86,7 +88,6 @@ services:
       QPC_DBMS_PORT: 5432
       QPC_DBMS_USER: qpc
       QPC_DEBUGPY: 1
-      QPC_DEBUGPY_PORT: 56789
       QPC_LOG_ALL_ENV_VARS_AT_STARTUP:
       QPC_SERVER_TIMEOUT: 5
       REDIS_HOST: qpc-redis
