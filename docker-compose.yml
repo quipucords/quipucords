@@ -32,7 +32,7 @@ services:
       - /bin/bash
       - -c
       - >-
-        pip install debugpy;
+        pip install debugpy &&
         bash ./deploy/entrypoint_web.sh
 
   qpc-redis:
@@ -65,7 +65,7 @@ services:
       - /bin/bash
       - -c
       - >-
-        pip install debugpy;
+        pip install debugpy &&
         bash ./deploy/entrypoint_celery_worker.sh
     depends_on:
       - qpc-db
