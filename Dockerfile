@@ -72,4 +72,4 @@ RUN make server-static
 RUN git config --file /.gitconfig --add safe.directory /app
 
 EXPOSE 443
-CMD ["/bin/bash", "/deploy/docker_run.sh"]
+CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
