@@ -27,15 +27,12 @@ services:
     depends_on:
       - qpc-db
       - qpc-redis
-    restart: always
     entrypoint:
       - /bin/bash
       - -c
       - >-
-        pip install "watchdog[watchmedo]" debugpy &&
-        watchmedo auto-restart \
-          -d quipucords -p '*.py' --recursive \
-          -- bash ./deploy/docker_run.sh
+        pip install debugpy;
+        bash ./deploy/docker_run.sh
 
   qpc-redis:
     image: registry.redhat.io/rhel9/redis-6
