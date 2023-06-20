@@ -21,9 +21,9 @@ services:
       - "5678:5678"
     volumes:
       - ./quipucords/secret.txt:/var/data/secret.txt
-      - .:/app
-      - ./deploy:/deploy
-      - ./var/sshkeys/:/sshkeys
+      - .:/app:z
+      - ./deploy:/deploy:ro
+      - ./var/sshkeys/:/sshkeys:ro
     depends_on:
       - qpc-db
       - qpc-redis
@@ -71,9 +71,9 @@ services:
       - qpc-redis
     volumes:
       - ./quipucords/secret.txt:/var/data/secret.txt
-      - .:/app
-      - ./deploy:/deploy
-      - ./var/sshkeys/:/sshkeys
+      - .:/app:ro
+      - ./deploy:/deploy:ro
+      - ./var/sshkeys/:/sshkeys:ro
     ports:
       - "56789:5678"
     environment:
@@ -104,8 +104,8 @@ services:
   proxy:
     image: docker.io/nginx
     volumes:
-      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./quipucords/staticfiles:/staticfiles
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./quipucords/staticfiles:/staticfiles:z
     ports:
       - 8080:80
     depends_on:
