@@ -67,19 +67,6 @@ def init_server_identifier():
     logger.info("Server ID: %s", server_id)
 
 
-def start_debugger_if_required():
-    """Start a debugger session if QPC_DEBUGPY envvar is set."""
-    if settings.DEBUG_PY:
-        try:
-            import debugpy
-        except ImportError:
-            logger.exception("debugpy is not installed, can't start debugger.")
-            return
-
-        debugpy.listen(("0.0.0.0", settings.DEBUG_PY_PORT))
-        print("⏳ debugpy debugger can now be attached ⏳", flush=True)
-
-
 def log_system_info():
     """Log system information."""
     logger.info("Platform:")
@@ -152,7 +139,6 @@ def log_server_version():
 
 def startup():
     """Log environment information at startup."""
-    start_debugger_if_required()
     log_system_info()
     log_all_environment_variables()
     log_database_configuration()
