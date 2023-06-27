@@ -62,7 +62,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
     ):
         """Retrieve extra cluster facts."""
         fact2method = (
-            ("projects", ocp_client.retrieve_projects),
             ("workloads", ocp_client.retrieve_workloads),
             ("operators", ocp_client.retrieve_operators),
         )

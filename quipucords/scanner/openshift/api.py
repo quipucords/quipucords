@@ -20,7 +20,6 @@ from scanner.openshift.entities import (
     OCPError,
     OCPNode,
     OCPPod,
-    OCPProject,
     OCPWorkload,
 )
 
@@ -139,14 +138,6 @@ class OpenShiftApi:
             return False
         return True
 
-    def retrieve_projects(self, **kwargs) -> List[OCPProject]:
-        """Retrieve projects/namespaces under OCP host."""
-        project_list = []
-        for project in self._list_projects(**kwargs).items:
-            ocp_project = self._init_ocp_project(project)
-            project_list.append(ocp_project)
-        return project_list
-
     def retrieve_nodes(self, **kwargs) -> List[OCPNode]:
         """Retrieve nodes under OCP host."""
         node_list = []
@@ -248,10 +239,6 @@ class OpenShiftApi:
         )
 
     @catch_k8s_exception
-    def _list_projects(self, **kwargs):
-        return self._namespace_api.get(**kwargs)
-
-    @catch_k8s_exception
     def _list_nodes(self, **kwargs):
         return self._node_api.get(**kwargs)
 
@@ -274,13 +261,6 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_cluster_service_versions(self, **kwargs):
         return self._cluster_service_version_api.get(**kwargs)
-
-    def _init_ocp_project(self, raw_project) -> OCPProject:
-        ocp_project = OCPProject(
-            name=raw_project.metadata.name,
-            labels=raw_project.metadata.labels,
-        )
-        return ocp_project
 
     def _init_ocp_nodes(self, node) -> OCPNode:
         return OCPNode(

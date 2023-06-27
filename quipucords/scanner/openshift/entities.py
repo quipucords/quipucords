@@ -94,14 +94,6 @@ class OCPNode(OCPBaseEntity):
     _kind = "node"
 
 
-class OCPProject(OCPBaseEntity):
-    """Entity representing OpenShift Projects/Namespaces."""
-
-    name: str
-    labels: Dict[str, str]
-    _kind = "namespace"
-
-
 class OCPWorkload(OCPBaseEntity):
     """
     Entity representing ocp/k8s "Workloads".

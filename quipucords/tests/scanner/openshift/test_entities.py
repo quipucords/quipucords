@@ -10,7 +10,6 @@ from scanner.openshift.entities import (
     OCPBaseEntity,
     OCPCluster,
     OCPError,
-    OCPProject,
     load_entity,
 )
 
@@ -34,16 +33,6 @@ def test_message_parsing(mocker, error_body, expected_message, status, reason):
     assert error.status == status
     assert error.reason == reason
     assert error.message == expected_message
-
-
-@pytest.fixture
-def project_data():
-    """Return data representing a Project."""
-    return {
-        "name": "some project",
-        "kind": "namespace",
-        "labels": {"foo": "bar"},
-    }
 
 
 @pytest.fixture
@@ -77,7 +66,6 @@ def test_load_nested(cluster_data):
     "data,expected_class",
     [
         (pytest.lazy_fixture("cluster_data"), OCPCluster),
-        (pytest.lazy_fixture("project_data"), OCPProject),
     ],
 )
 def test_load_entity(data, expected_class):

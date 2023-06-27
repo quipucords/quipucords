@@ -15,7 +15,6 @@ from scanner.openshift.entities import (
     OCPError,
     OCPNode,
     OCPPod,
-    OCPProject,
     OCPWorkload,
 )
 from tests.asserts import assert_elements_type
@@ -88,7 +87,7 @@ def ocp_client(request, discoverer_cache):
 @pytest.mark.vcr_primer(VCRCassettes.OCP_UNAUTHORIZED)
 @pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "query"])
 @pytest.mark.parametrize("ocp_client", ["<INVALID_AUTH_TOKEN>"], indirect=True)
-@pytest.mark.parametrize("api_method", ["_list_projects", "_dynamic_client"])
+@pytest.mark.parametrize("api_method", ["_dynamic_client"])
 def test_unauthorized_token(ocp_client: OpenShiftApi, api_method):
     """Test calling OCP with an invalid token."""
     with pytest.raises(OCPError) as exc_info:
@@ -276,20 +275,6 @@ def test_cannot_connect(
     )
     assert not ocp_client.can_connect()
     assert caplog.messages[-1] == "Unable to connect to OCP/K8S api (status=401)"
-
-
-@pytest.mark.vcr_primer(VCRCassettes.OCP_NAMESPACES, VCRCassettes.OCP_DISCOVERER_CACHE)
-def test_namespaces_api(ocp_client: OpenShiftApi):
-    """Test/record namespaces api interaction."""
-    projects = ocp_client._list_projects()
-    assert projects
-
-
-@pytest.mark.vcr(VCRCassettes.OCP_NAMESPACES, VCRCassettes.OCP_DISCOVERER_CACHE)
-def test_retrieve_projects(ocp_client: OpenShiftApi):
-    """Test retrieving projects."""
-    projects = ocp_client.retrieve_projects()
-    assert_elements_type(projects, OCPProject)
 
 
 @pytest.mark.vcr_primer(VCRCassettes.OCP_PODS, VCRCassettes.OCP_DISCOVERER_CACHE)
