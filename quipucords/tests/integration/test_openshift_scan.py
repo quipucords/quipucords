@@ -14,7 +14,6 @@ from scanner.openshift.entities import (
     NodeResources,
     OCPCluster,
     OCPNode,
-    OCPProject,
     OCPWorkload,
 )
 from tests.integration.test_smoker import Smoker
@@ -78,17 +77,6 @@ def expected_cluster():
 
 
 @pytest.fixture
-def expected_projects():
-    """Return a list with OCP projects."""
-    return [
-        OCPProject(
-            name="project name",
-            labels={"some": "label"},
-        ),
-    ]
-
-
-@pytest.fixture
 def expected_operators(faker):
     """Return a list operators."""
     return [
@@ -121,7 +109,6 @@ def _formatter(entity):
 
 @pytest.fixture
 def expected_facts(
-    expected_projects,
     expected_node,
     expected_cluster,
     expected_workloads,
@@ -133,7 +120,6 @@ def expected_facts(
         {"node": _formatter(expected_node)},
         {
             "cluster": _formatter(expected_cluster),
-            "projects": _formatter(expected_projects),
             "workloads": _formatter(expected_workloads),
             "operators": _formatter(expected_operators),
         },
@@ -143,7 +129,6 @@ def expected_facts(
 @pytest.fixture(autouse=True)
 def patched_openshift_client(  # noqa: PLR0913
     mocker,
-    expected_projects,
     expected_node,
     expected_cluster,
     expected_workloads,
@@ -151,11 +136,6 @@ def patched_openshift_client(  # noqa: PLR0913
 ):
     """Mock OpenShiftApi forcing it to return expected entities."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
-    mocker.patch.object(
-        OpenShiftApi,
-        "retrieve_projects",
-        return_value=expected_projects,
-    )
     mocker.patch.object(
         OpenShiftApi,
         "retrieve_nodes",

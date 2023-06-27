@@ -15,7 +15,6 @@ from scanner.openshift.entities import (
     OCPCluster,
     OCPError,
     OCPNode,
-    OCPProject,
     OCPWorkload,
 )
 from tests.factories import ScanTaskFactory
@@ -58,12 +57,6 @@ def operators(faker):
             updated_at=faker.date_time(),
         ),
     ]
-
-
-@pytest.fixture
-def project():
-    """Return OCPProject entity."""
-    return OCPProject(name="project", labels={"project": "ok"})
 
 
 @pytest.fixture
@@ -136,10 +129,9 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 @pytest.mark.django_db
 def test_inspect_with_success(  # noqa: PLR0913
-    mocker, scan_task: ScanTask, project, cluster, node_ok, workload, operators
+    mocker, scan_task: ScanTask, cluster, node_ok, workload, operators
 ):
     """Test connecting to OpenShift host with success."""
-    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
@@ -159,7 +151,6 @@ def test_inspect_with_success(  # noqa: PLR0913
 def test_inspect_with_partial_success(  # noqa: PLR0913
     mocker,
     scan_task: ScanTask,
-    project,
     cluster,
     node_ok,
     node_err,
@@ -167,7 +158,6 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
     operators,
 ):
     """Test connecting to OpenShift host with success."""
-    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(
         OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
@@ -189,14 +179,12 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
 def test_inspect_with_failure(  # noqa: PLR0913
     mocker,
     scan_task: ScanTask,
-    project,
     cluster_err,
     node_err,
     workload,
     operators,
 ):
     """Test connecting to OpenShift host with success."""
-    mocker.patch.object(OpenShiftApi, "retrieve_projects", return_value=[project])
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
     mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
@@ -212,7 +200,7 @@ def test_inspect_with_failure(  # noqa: PLR0913
     assert scan_task.systems_unreachable == 0
 
 
-EXTRA_CLUSTER_FACTS = {"operators", "projects", "workloads"}
+EXTRA_CLUSTER_FACTS = {"operators", "workloads"}
 
 
 @pytest.mark.django_db
