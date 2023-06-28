@@ -15,7 +15,7 @@ HC_KEYFILE_OR_KEYVALUE = (
     "A host credential must have either an ssh_keyfile or an ssh_keyvalue, not both."
 )
 HC_PWD_OR_KEYFILE_OR_KEYVALUE = (
-    "A host credential must have either a password, ssh_keyfile or an ssh_keyvalue."
+    "A host credential must have a password, ssh_keyfile, or ssh_keyvalue exclusively."
 )
 HC_PWD_NOT_WITH_KEYFILE = (
     "A host credential must have either a password or an ssh_keyfile, not both."

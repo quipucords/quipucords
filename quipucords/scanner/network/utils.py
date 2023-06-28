@@ -193,10 +193,9 @@ def generate_ssh_keyfile(credential, ssh_keyvalue):
         tempfile.mkdtemp(prefix=GEN_KEYFILES_DIRECTORY_PREFIX),
         f"{GEN_KEYFILE_PREFIX}{credential.get('id')}",
     )
-    private_key_fp = open(private_keyfile_path, "w+")
-    private_key_fp.write(ssh_keyvalue)
-    private_key_fp.write("\n")
-    private_key_fp.close()
+    with open(private_keyfile_path, "w+") as private_key_fp:
+        private_key_fp.write(ssh_keyvalue)
+        private_key_fp.write("\n")
     os.chmod(private_keyfile_path, 0o600)
     return private_keyfile_path
 
