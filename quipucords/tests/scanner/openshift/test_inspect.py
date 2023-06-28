@@ -1,10 +1,13 @@
 """Test OpenShift InspectTaskRunner."""
+import os
+from unittest import mock
 
 import pytest
 from kubernetes.client import ApiException
 
 from api.models import ScanTask
 from constants import DataSources
+from quipucords.featureflag import FeatureFlag
 from scanner.exceptions import ScanFailureError
 from scanner.openshift import InspectTaskRunner
 from scanner.openshift.api import OpenShiftApi
@@ -115,6 +118,14 @@ def cluster_err(error):
     return OCPCluster(uuid="yet-another-not-uuid", errors={"some-error": error.dict()})
 
 
+@pytest.fixture
+def workloads_enabled(settings):
+    """Set QPC_FEATURE_FLAGS with enabled workloads."""
+    with mock.patch.dict(os.environ, {"QPC_FEATURE_OCP_WORKLOADS": "1"}):
+        feature_flag = FeatureFlag()
+    settings.QPC_FEATURE_FLAGS = feature_flag
+
+
 @pytest.mark.django_db
 def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
     """Test Inspect scan prerequisite failure."""
@@ -129,12 +140,11 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 @pytest.mark.django_db
 def test_inspect_with_success(  # noqa: PLR0913
-    mocker, scan_task: ScanTask, cluster, node_ok, workload, operators
+    mocker, scan_task: ScanTask, cluster, node_ok, operators
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
-    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
@@ -154,7 +164,6 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
     cluster,
     node_ok,
     node_err,
-    workload,
     operators,
 ):
     """Test connecting to OpenShift host with success."""
@@ -162,7 +171,6 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
     mocker.patch.object(
         OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
     )
-    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
@@ -181,13 +189,11 @@ def test_inspect_with_failure(  # noqa: PLR0913
     scan_task: ScanTask,
     cluster_err,
     node_err,
-    workload,
     operators,
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
-    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
@@ -205,12 +211,13 @@ EXTRA_CLUSTER_FACTS = {"operators", "workloads"}
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("extra_fact_with_error", sorted(EXTRA_CLUSTER_FACTS))
-def test_inspect_errors_on_extra_cluster_facts(
+def test_inspect_errors_on_extra_cluster_facts(  # noqa: PLR0913
     mocker,
     scan_task: ScanTask,
     cluster,
     node_ok,
     extra_fact_with_error,
+    workloads_enabled,
 ):
     """Test connecting to OpenShift host with errors collecting extra cluster facts."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
@@ -250,3 +257,49 @@ def test_inspect_errors_on_extra_cluster_facts(
             "message": teapot_response.data.decode(),
         }
     }
+
+
+@pytest.mark.django_db
+def test_inspect_with_enabled_workloads(  # noqa: PLR0913
+    mocker,
+    scan_task: ScanTask,
+    cluster,
+    node_ok,
+    workload,
+    operators,
+    workloads_enabled,
+):
+    """Test connecting to OpenShift host with enabled workloads."""
+    mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
+    mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
+    mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+
+    runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
+    runner.execute_task(mocker.Mock())
+
+    raw_facts = scan_task.get_facts()
+    cluster = raw_facts[-1]
+    assert "workloads" in cluster.keys()
+
+
+@pytest.mark.django_db
+def test_inspect_with_disabled_workloads(  # noqa: PLR0913
+    mocker, scan_task: ScanTask, cluster, node_ok, operators
+):
+    """Test connecting to OpenShift host with workloads default behavior."""
+    mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
+    mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
+    mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+    mock_retrieve_workloads = mocker.patch.object(
+        OpenShiftApi, "retrieve_workloads", return_value=[workload]
+    )
+
+    runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
+    runner.execute_task(mocker.Mock())
+
+    mock_retrieve_workloads.assert_not_called()
+    raw_facts = scan_task.get_facts()
+    cluster = raw_facts[-1]
+    assert "workloads" not in cluster.keys()
+    assert set(("cluster", "operators")).issubset(cluster.keys())

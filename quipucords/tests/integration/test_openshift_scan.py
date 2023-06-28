@@ -14,7 +14,6 @@ from scanner.openshift.entities import (
     NodeResources,
     OCPCluster,
     OCPNode,
-    OCPWorkload,
 )
 from tests.integration.test_smoker import Smoker
 
@@ -95,12 +94,6 @@ def expected_operators(faker):
     ]
 
 
-@pytest.fixture
-def expected_workloads():
-    """Return a list of OCP workloads."""
-    return [OCPWorkload(name="workload-name", container_images=["some-image"])]
-
-
 def _formatter(entity):
     """Format OCP entities as they should appear on details report."""
     encoded_data = json.dumps(entity, cls=RawFactEncoder)
@@ -111,7 +104,6 @@ def _formatter(entity):
 def expected_facts(
     expected_node,
     expected_cluster,
-    expected_workloads,
     expected_operators,
 ):
     """Return a list of expected raw facts on OCP scans."""
@@ -120,7 +112,6 @@ def expected_facts(
         {"node": _formatter(expected_node)},
         {
             "cluster": _formatter(expected_cluster),
-            "workloads": _formatter(expected_workloads),
             "operators": _formatter(expected_operators),
         },
     ]
@@ -131,7 +122,6 @@ def patched_openshift_client(  # noqa: PLR0913
     mocker,
     expected_node,
     expected_cluster,
-    expected_workloads,
     expected_operators,
 ):
     """Mock OpenShiftApi forcing it to return expected entities."""
@@ -145,11 +135,6 @@ def patched_openshift_client(  # noqa: PLR0913
         OpenShiftApi,
         "retrieve_cluster",
         return_value=expected_cluster,
-    )
-    mocker.patch.object(
-        OpenShiftApi,
-        "retrieve_workloads",
-        return_value=expected_workloads,
     )
     mocker.patch.object(
         OpenShiftApi,

@@ -61,6 +61,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         self, manager_interrupt, ocp_client: OpenShiftApi, cluster
     ):
         """Retrieve extra cluster facts."""
+        collect_ocp_workloads_enabled = settings.QPC_FEATURE_FLAGS.is_feature_active(
+            "OCP_WORKLOADS"
+        )
         fact2method = (
             ("workloads", ocp_client.retrieve_workloads),
             ("operators", ocp_client.retrieve_operators),
@@ -69,6 +72,8 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         for fact_name, api_method in fact2method:
             self.check_for_interrupt(manager_interrupt)
             try:
+                if fact_name == "workloads" and not collect_ocp_workloads_enabled:
+                    continue
                 extra_facts[fact_name] = api_method(
                     timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT
                 )
