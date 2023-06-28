@@ -149,6 +149,11 @@ def test_is_feature_active(setup_feature_flag_instance_for_tests):
         setup_feature_flag_instance_for_tests.is_feature_active("OVERALL_STATUS")
         is True
     )
+    assert (
+        setup_feature_flag_instance_for_tests.is_feature_active("OCP_WORKLOADS")
+        is False
+    )
+
     with pytest.raises(ValueError):
         setup_feature_flag_instance_for_tests.is_feature_active("FALSE_ATTRIBUTE")
 
