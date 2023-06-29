@@ -4,9 +4,15 @@ on:
   push:
     branches: [ main ]
     tags:
-      - "*"
+      - '*'
   pull_request:
-    branches: [main, "release/*"]
+    branches: [main, 'release/*']
+
+env:
+  STABLE_TAG: ${{ github.event_name == 'push' && github.ref_name || format('pr-{0}', github.event.pull_request.number) }}
+  # We had a problem with GitHub setting quay expiration label also during
+  # merge to main, so we just set meaningless value as a workaround.
+  EXPIRATION_LABEL: ${{ github.event_name == 'push' && 'quipucords.source=github' || 'quay.expires-after=3d' }}
 
 jobs:
   build:
@@ -18,20 +24,23 @@ jobs:
         with:
           fetch-depth: 0  # fetches all commits/tags
 
-      - name: Set dynamic variables
-        # this might seem odd but is the recommended way to set variables
-        # reference: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
-        run: |
-          pip install poetry
-          BUILD_VERSION=$(poetry version -s)
-          echo "BUILD_VERSION=$BUILD_VERSION+$GITHUB_SHA" >> $GITHUB_ENV
-          echo "IMAGE_NAME_WITH_TAG=quipucords:$BUILD_VERSION" >> $GITHUB_ENV
-
-      - name: Docker Layer Caching
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
-
       - name: Build quipucords image
-        run: docker build --build-arg BUILD_COMMIT=$GITHUB_SHA . -t $IMAGE_NAME_WITH_TAG
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: quipucords/quipucords
+          tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }}
+          containerfiles: |
+            ./Dockerfile
+          labels: |
+            ${{ env.EXPIRATION_LABEL }}
+            quipucords.backend.git_sha=${{ github.sha }}
 
+      - name: Push To quay.io
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: quipucords/quipucords
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
