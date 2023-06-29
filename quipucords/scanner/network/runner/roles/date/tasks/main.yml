@@ -23,8 +23,6 @@
   set_fact:
     last_booted_at: "{{ internal_uptime_utc_cmd['stdout'] | trim}}"
   ignore_errors: yes
-  when:
-    - "{{ QPC_FEATURE_FLAGS.UPTIME }}"
 
 - name: gather date.anaconda_log fact
   raw: ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'

@@ -174,7 +174,6 @@ class InspectTaskRunner(ScanTaskRunner):
                 DEFAULT_SCAN_DIRS
             )
 
-        extra_vars["QPC_FEATURE_FLAGS"] = settings.QPC_FEATURE_FLAGS.as_dict()
         extra_vars["ansible_ssh_timeout"] = settings.QPC_SSH_INSPECT_TIMEOUT
 
         group_names, inventory = construct_inventory(

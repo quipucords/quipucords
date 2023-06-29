@@ -96,7 +96,6 @@
   when:
     - user_has_sudo
     - internal_have_subscription_manager
-    - "{{ QPC_FEATURE_FLAGS.OVERALL_STATUS }}"
 
 - name: extract result value for subman.overall.status
   set_fact:
