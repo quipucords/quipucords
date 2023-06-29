@@ -27,16 +27,16 @@ def test_if_returns_default_value_if_another_env_set():
     """Tests if function also returns variables in default dict."""
     with mock.patch.dict(os.environ, ({"QPC_FEATURE_TEST": "0"})):
         dict_with_test_flags = FeatureFlag.get_feature_flags_from_env()
-        assert "OVERALL_STATUS" in dict_with_test_flags
+        assert "OCP_WORKLOADS" in dict_with_test_flags
         assert "TEST" in dict_with_test_flags
-        assert dict_with_test_flags["OVERALL_STATUS"] is True
+        assert dict_with_test_flags["OCP_WORKLOADS"] is False
         assert dict_with_test_flags["TEST"] is False
 
 
 @pytest.mark.parametrize(
     "env_name,env_value,feature_name,feature_value",
     (
-        ("QPC_FEATURE_OVERALL_STATUS", "1", "OVERALL_STATUS", True),
+        ("QPC_FEATURE_OCP_WORKLOADS", "1", "OCP_WORKLOADS", True),
         ("QPC_FEATURE_TEST", "0", "TEST", False),
     ),
 )
@@ -131,7 +131,7 @@ def test_if_instance_contains_all_attributes(
 ):
     """Tests if the constructor loads all attributes correctly."""
     assert hasattr(setup_feature_flag_instance_for_tests, "TEST")
-    assert hasattr(setup_feature_flag_instance_for_tests, "OVERALL_STATUS")
+    assert hasattr(setup_feature_flag_instance_for_tests, "OCP_WORKLOADS")
 
 
 def test_if_instance_attributes_values_are_correct(
@@ -139,16 +139,12 @@ def test_if_instance_attributes_values_are_correct(
 ):
     """Tests if the right values are attributed to attribute."""
     assert setup_feature_flag_instance_for_tests.TEST is True
-    assert setup_feature_flag_instance_for_tests.OVERALL_STATUS is True
+    assert setup_feature_flag_instance_for_tests.OCP_WORKLOADS is False
 
 
 def test_is_feature_active(setup_feature_flag_instance_for_tests):
     """Tests method is_feature_active."""
     assert setup_feature_flag_instance_for_tests.is_feature_active("TEST") is True
-    assert (
-        setup_feature_flag_instance_for_tests.is_feature_active("OVERALL_STATUS")
-        is True
-    )
     assert (
         setup_feature_flag_instance_for_tests.is_feature_active("OCP_WORKLOADS")
         is False
@@ -161,5 +157,5 @@ def test_is_feature_active(setup_feature_flag_instance_for_tests):
 def test_as_dict(setup_feature_flag_instance_for_tests):
     """Tests method as_dict."""
     assert isinstance(setup_feature_flag_instance_for_tests.as_dict(), dict)
-    assert setup_feature_flag_instance_for_tests.as_dict()["OVERALL_STATUS"] is True
+    assert setup_feature_flag_instance_for_tests.as_dict()["OCP_WORKLOADS"] is False
     assert setup_feature_flag_instance_for_tests.as_dict()["TEST"] is True
