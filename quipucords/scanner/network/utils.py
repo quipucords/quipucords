@@ -5,6 +5,7 @@ import re
 import tempfile
 from functools import cache
 from multiprocessing import Value
+from pathlib import Path
 
 import yaml
 from ansible.parsing.utils.addresses import parse_address
@@ -183,16 +184,17 @@ def raw_facts_template():
     return {fact_name: None for fact_name in get_fact_names()}
 
 
-GEN_KEYFILES_DIRECTORY_PREFIX = "quipucords_ssh_private_key_files_"
-GEN_KEYFILE_PREFIX = "ssh_private_key_file_credential_"
+GEN_KEYFILES_DIRECTORY = "quipucords_generated_ssh_private_keys"
+GEN_KEYFILE_PREFIX = "quipucords_ssh_private_key_credential"
 
 
 def generate_ssh_keyfile(credential, ssh_keyvalue):
     """Generate an ssh private keyfile for the ssh key content specified."""
-    private_keyfile_path = os.path.join(
-        tempfile.mkdtemp(prefix=GEN_KEYFILES_DIRECTORY_PREFIX),
-        f"{GEN_KEYFILE_PREFIX}{credential.get('id')}",
-    )
+    ssh_pkey_dir = os.path.join(tempfile.gettempdir(), GEN_KEYFILES_DIRECTORY)
+    Path(ssh_pkey_dir).mkdir(parents=True, exist_ok=True)
+    private_keyfile_path = tempfile.NamedTemporaryFile(
+        prefix=f"{GEN_KEYFILE_PREFIX}_{credential.get('id')}_", dir=ssh_pkey_dir
+    ).name
     with open(private_keyfile_path, "w+") as private_key_fp:
         private_key_fp.write(ssh_keyvalue)
         private_key_fp.write("\n")
@@ -220,14 +222,20 @@ def delete_ssh_keyfiles(inventory):
                 delete_ssh_keyfile(ssh_pkf)
 
 
-def delete_ssh_keyfile(private_keyfile_path):
-    """Remove a generated ssh_keyfile and delete its empty parent directory."""
+def is_gen_ssh_keyfile(private_keyfile_path):
+    """Return True if the file path exists and is a generated ssh keyfile."""
     keyfile_pattern = (
-        f"^/.*/{GEN_KEYFILES_DIRECTORY_PREFIX}.*/{GEN_KEYFILE_PREFIX}[0-9]+$"
+        f"^{tempfile.gettempdir()}"
+        f"/{GEN_KEYFILES_DIRECTORY}/{GEN_KEYFILE_PREFIX}_[0-9]+_.*$"
     )
-    if re.match(keyfile_pattern, private_keyfile_path):
-        if os.path.isfile(private_keyfile_path):
-            os.remove(private_keyfile_path)
-            parent_dir = os.path.abspath(os.path.join(private_keyfile_path, os.pardir))
-            if not os.listdir(parent_dir):
-                os.rmdir(parent_dir)
+    if re.match(keyfile_pattern, private_keyfile_path) and os.path.isfile(
+        private_keyfile_path
+    ):
+        return True
+    return False
+
+
+def delete_ssh_keyfile(private_keyfile_path):
+    """Remove a generated ssh_keyfile."""
+    if is_gen_ssh_keyfile(private_keyfile_path):
+        os.remove(private_keyfile_path)
