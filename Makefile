@@ -186,3 +186,9 @@ build-container:
 
 check-db-migrations-needed:
 	$(PYTHON) quipucords/manage.py makemigrations --check
+
+generate-sudo-list:
+	@$(PYTHON) scripts/generate_sudo_list.py docs "docs/sudo_cmd_list.txt"
+
+test-sudo-list:
+	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1

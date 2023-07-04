@@ -1,0 +1,77 @@
+/sbin/chkconfig --list
+/sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+/usr/bin/systemctl list-unit-files --no-pager
+/usr/sbin/dmidecode -s bios-vendor 2>/dev/null
+/usr/sbin/dmidecode -s bios-version 2>/dev/null
+/usr/sbin/dmidecode -s processor-family 2>/dev/null
+/usr/sbin/dmidecode -s system-uuid 2>/dev/null
+/usr/sbin/dmidecode -t 4 | egrep 'Designation|Status'
+/usr/sbin/dmidecode -t chassis 2>/dev/null | grep "Asset Tag"
+/usr/sbin/dmidecode -t system 2>/dev/null | grep "Product Name"
+/usr/sbin/dmidecode 2>/dev/null | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+/usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*activemq-\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
+FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*camel-core\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
+FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*cxf-rt\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
+FOUND=""; for jar in `find {{search_directories}} -xdev -name 'jboss-modules.jar' 2>/dev/null | grep -v '\.installation/patches'`; do VERSION=$(java -jar ${jar} -version 2> /dev/null | grep version | sed 's/.*version\s//g'); inode=$(stat -c '%i' "${jar}"); fs=$(df  -T "${jar}" | grep "/dev" | sed 's/ .*//'); ctime=$(stat ${jar} | grep 'Change' | grep -oP '[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]'); if [ ! -z "${VERSION}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $VERSION**$ctime"; else FOUND=${VERSION}'**'${ctime}; fi; fi; done; echo ${FOUND}
+FOUND=""; for jar in `find {{search_directories}} -xdev -name 'run.jar' 2>/dev/null`; do VERSION=$(java -jar ${jar} --version 2> /dev/null | grep build  | sed 's/.*[CS]V[NS]Tag.//g' | sed 's/\sdate.*//g'); inode=$(stat -c '%i' "${jar}"); fs=$(df  -T "${jar}" | tail -1 | sed 's/ .*//'); ctime=$(stat ${jar} | grep 'Change' | grep -oP '[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]'); if [ ! -z "${VERSION}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $VERSION**${ctime}"; else FOUND=${VERSION}'**'${ctime}; fi; fi; done; echo ${FOUND};
+LANG=C subscription-manager status | grep -e 'Overall Status:'| cut -d ":" -f2
+OIFS="$IFS"; IFS=$'\n'; for war in $(find {{search_directories}} -xdev -name kie*.war 2> /dev/null); do if [[ -d  "$war" ]]; then cat "$war"/META-INF/MANIFEST.MF 2> /dev/null | grep Implementation-Version | sed "s/Implementation-Version://g" | sed "s/ //g" | sed 's/\r$//' | sort -u; else fgrep -irsal kie-api "$war" | egrep -o "[0-9]\.[0-9]\.[0-9].*-" | sed "s/-$//g" | sed 's/\r$//' | sort -u; fi; done; IFS="$OIFS"
+cat '{{ item }}/META-INF/MANIFEST.MF' 2>/dev/null
+cat '{{ item }}/README.txt' 2>/dev/null
+cat '{{ item }}/modules/layers.conf' 2>/dev/null
+cat '{{ item }}/version.txt' 2>/dev/null
+cat /etc/passwd
+command -v /usr/sbin/dmidecode
+command -v subscription-manager
+echo "user has sudo" 2>/dev/null
+find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sort -u
+find {{search_directories}} -xdev -name kie*.war 2> /dev/null
+find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sort -u
+find {{search_directories}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 --no-run-if-empty dirname | sort -u
+find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
+for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
+if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
+java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
+java -jar '{{ item }}/jboss-as/bin/run.jar' --version
+last -25
+locate --basename 'kie-api*'
+locate --basename 'kie-server*' | egrep --invert-match '(.*.xml)|(.*.jar)'
+locate --basename business-central | egrep '.*/business-central(.war)?/?$'
+locate --basename decision-central | egrep '.*/decision-central(.war)?/?$'
+locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
+locate activemq | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+locate camel-core | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
+locate cxf-rt | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+locate jboss-modules.jar | xargs -n 1 --no-run-if-empty dirname
+locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize
+ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+ls -1 "{{ item }}" 2>/dev/null
+ls -1 "{{ item }}"/WEB-INF/lib/kie-api* 2>/dev/null
+ls -1 "{{ item }}"/bin 2>/dev/null
+ls -1 "{{ item }}"/bin/fuse 2>/dev/null
+ls -1 "{{ item }}"/modules/system/layers 2>/dev/null
+ls -1 "{{ item }}"/system/org/jboss 2>/dev/null
+ls -1 '{{ item }}/modules/system/layers/base/org/apache/cxf/impl/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/activemq/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p' | sed 's/\n//'
+ls -1 '{{ item }}/modules/system/layers/fuse/org/apache/camel/core/main' 2>/dev/null | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | grep fuse |sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+ps -A -o comm -o args e --columns 10000 | egrep '^java.*(eap|jboss).*' | tr -s ' =:' '\n' | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
+subscription-manager facts --list 2>/dev/null | grep '^virt.uuid.' | sed -n -e 's/^.*virt.uuid.\s*//p'
+subscription-manager facts --list | grep '^cpu.core(s)_per_socket.' | sed -n -e 's/^.*cpu.core(s)_per_socket.\s*//p'
+subscription-manager facts --list | grep '^cpu.cpu(s).' | sed -n -e 's/^.*cpu.cpu(s).\s*//p'
+subscription-manager facts --list | grep '^cpu.cpu_socket(s).' | sed -n -e 's/^.*cpu.cpu_socket(s).\s*//p'
+subscription-manager facts --list | grep '^virt.host_type.' | sed -n -e 's/^.*virt.host_type.\s*//p'
+subscription-manager facts --list | grep '^virt.is_guest.' | sed -n -e 's/^.*virt.is_guest.\s*//p'
+subscription-manager identity 2>/dev/null | 
+grep 'system identity:' |
+sed 's/system identity:\s*//'
+subscription-manager list --consumed 2>/dev/null | grep -e '^SKU' -e '^Subscription Name' | sed -n -e 's/SKU\s*.\s*//p' -e 's/Subscription Name\s*.\s*//p' | awk '{ ORS = (NR%2 ? " - " {{":"}} RS) } 1'
+test -e "{{ item }}"
+unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF 2>/dev/null
+unzip -p '{{ item }}/jboss-as/bin/run.jar' META-INF/MANIFEST.MF
+virt-what;echo $?
+yum history 2>/dev/null  | tail -n 2 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
+yum repolist enabled 2> /dev/null
