@@ -15,7 +15,7 @@ ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 
 COPY scripts/dnf /usr/local/bin/dnf
-ARG BUILD_PACKAGES="gcc postgresql-devel python3.11-devel"
+ARG BUILD_PACKAGES="crypto-policies-scripts gcc postgresql-devel python3.11-devel"
 RUN dnf install \
         git \
         glibc-langpack-en \
@@ -32,6 +32,9 @@ RUN dnf install \
         -y &&\
     dnf clean all &&\
     python3.11 -m venv /opt/venv
+
+# set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
+RUN update-crypto-policies --set LEGACY
 
 RUN pip install --upgrade pip wheel
 
