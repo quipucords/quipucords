@@ -61,7 +61,19 @@ def _construct_vars(connection_port, credential=None):
     :returns: a dict that can be used as the host variables in an
         Ansible inventory.
     """
-    ansible_vars = {"ansible_port": connection_port}
+    # ssh arguments for compatibility with defaults for older systems (like RHEL 5&6)
+    # (this is only meant to help quipucords running on baremetal since the container
+    # is setup for using a "legacy" configuration for ssh)
+    legacy_ssh_args = (
+        "-o 'KexAlgorithms=diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1'"  # noqa: E501
+        " -o 'HostKeyAlgorithms=+ssh-rsa,ssh-dss'"
+        " -o 'PubkeyAcceptedKeyTypes=+ssh-rsa,ssh-dss'"
+    )
+
+    ansible_vars = {
+        "ansible_port": connection_port,
+        "ansible_ssh_common_args": legacy_ssh_args,
+    }
 
     if credential is not None:
         ansible_dict = _credential_vars(credential)
