@@ -1,4 +1,4 @@
-FROM redhat/ubi8-init
+FROM redhat/ubi9-init
 
 RUN dnf -y install openssh-server openssl sudo; \
     dnf clean all
