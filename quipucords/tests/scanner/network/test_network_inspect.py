@@ -7,7 +7,6 @@ import pytest
 import requests_mock
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
-from django.test import TestCase
 from django.urls import reverse
 
 from api.models import (
@@ -25,15 +24,18 @@ from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.inspect import construct_inventory
 from scanner.network.inspect_callback import InspectResultCallback
+from scanner.network.utils import delete_ssh_keyfiles, is_gen_ssh_keyfile
+from tests.api.credential.test_credential import generate_openssh_pkey
 from tests.scanner.test_util import create_scan_job
 
 ANSIBLE_FACTS = "ansible_facts"
 
 
-class NetworkInspectScannerTest(TestCase):
+@pytest.mark.django_db
+class TestNetworkInspectScanner:
     """Tests network inspect scan task class."""
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
@@ -114,7 +116,62 @@ class NetworkInspectScannerTest(TestCase):
             }
         }
 
-        self.assertEqual(inventory_dict[1], expected)
+        assert inventory_dict[1] == expected
+
+    @pytest.fixture
+    def openssh_key(self, faker):
+        """Return an openssh_key random OpenSSH private key."""
+        return generate_openssh_pkey(faker)
+
+    @pytest.fixture
+    def cred_ssh(self, openssh_key):
+        """Return a Credential with an ssh_keyvalue."""
+        return Credential.objects.create(
+            name="cred_ssh",
+            username="username_ssh",
+            ssh_keyvalue=openssh_key,
+        )
+
+    @pytest.fixture
+    def source_ssh(self, cred_ssh):
+        """Return a Source with an SSH Credential for scan."""
+        source_ssh = Source.objects.create(
+            name="source_ssh", port=22, hosts=["1.2.3.5"]
+        )
+        source_ssh.credentials.add(cred_ssh)
+        return source_ssh
+
+    @pytest.fixture
+    def host_ssh_list(self, cred_ssh):
+        """Return the Host list for the SSH Credential."""
+        return [("1.2.3.5", model_to_dict(cred_ssh))]
+
+    def test_scan_inventory_with_valid_ssh_keyvalue(self, source_ssh, host_ssh_list):
+        """Test construct ansible inventory dictionary with ssh_keyvalue."""
+        serializer = SourceSerializer(source_ssh)
+        source_ssh = serializer.data
+        connection_port = source_ssh["port"]
+        _, inventory_dict = construct_inventory(host_ssh_list, connection_port, 50)
+
+        ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"]["1.2.3.5"][
+            "ansible_ssh_private_key_file"
+        ]
+        assert is_gen_ssh_keyfile(ssh_keyfile)
+        os.remove(ssh_keyfile)
+
+    def test_scan_inventory_with_ssh_keyvalue_delete(self, source_ssh, host_ssh_list):
+        """Test ansible inventory dictionary with ssh_keyvalue are deleted."""
+        serializer = SourceSerializer(source_ssh)
+        source_ssh = serializer.data
+        connection_port = source_ssh["port"]
+        _, inventory_dict = construct_inventory(host_ssh_list, connection_port, 50)
+
+        ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"]["1.2.3.5"][
+            "ansible_ssh_private_key_file"
+        ]
+        assert os.path.exists(ssh_keyfile)
+        delete_ssh_keyfiles(inventory_dict)
+        assert os.path.exists(ssh_keyfile) is False
 
     def test_scan_inventory_grouping(self):
         """Test construct ansible inventory dictionary."""
@@ -175,7 +232,7 @@ class NetworkInspectScannerTest(TestCase):
             }
         }
 
-        self.assertEqual(inventory_dict[1], expected)
+        assert inventory_dict[1] == expected
 
     @patch("ansible_runner.run")
     def test_inspect_scan_failure(self, mock_run):
@@ -183,7 +240,7 @@ class NetworkInspectScannerTest(TestCase):
         mock_run.side_effect = AnsibleRunnerException()
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scanner.connect_scan_task = self.connect_scan_task
-        with self.assertRaises(AnsibleRunnerException):
+        with pytest.raises(AnsibleRunnerException):
             scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
             mock_run.assert_called()
 
@@ -194,7 +251,7 @@ class NetworkInspectScannerTest(TestCase):
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
         mock_scan.assert_called_with(ANY, self.host_list)
-        self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+        assert scan_task_status[1] == ScanTask.FAILED
 
     @patch("ansible_runner.run")
     def test_inspect_scan_fail_no_facts(self, mock_run):
@@ -206,7 +263,7 @@ class NetworkInspectScannerTest(TestCase):
             scanner.connect_scan_task = self.connect_scan_task
             scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
             mock_run.assert_called()
-            self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+            assert scan_task_status[1] == ScanTask.FAILED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
     def test_ssh_crash(self):
@@ -221,7 +278,7 @@ class NetworkInspectScannerTest(TestCase):
             self.host_list,
             base_ssh_executable=path,
         )
-        self.assertEqual(result, ScanTask.COMPLETED)
+        assert result == ScanTask.COMPLETED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
     def test_ssh_hang(self):
@@ -298,7 +355,7 @@ class NetworkInspectScannerTest(TestCase):
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         terminate = Value("i", ScanJob.JOB_TERMINATE_CANCEL)
         scan_task_status = scanner.run(terminate)
-        self.assertEqual(scan_task_status[1], ScanTask.CANCELED)
+        assert scan_task_status[1] == ScanTask.CANCELED
 
     @patch("scanner.network.inspect.InspectTaskRunner._obtain_discovery_data")
     def test_no_reachable_host(self, discovery):
@@ -306,12 +363,12 @@ class NetworkInspectScannerTest(TestCase):
         discovery.return_value = [], [], [], []
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(scan_task_status[1], ScanTask.FAILED)
+        assert scan_task_status[1] == ScanTask.FAILED
 
     def test_cancel_inspect(self):
         """Test cancel of inspect."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with self.assertRaises(NetworkCancelException):
+        with pytest.raises(NetworkCancelException):
             scanner.connect_scan_task = self.connect_scan_task
             scanner._inspect_scan(
                 Value("i", ScanJob.JOB_TERMINATE_CANCEL), self.host_list
@@ -320,7 +377,7 @@ class NetworkInspectScannerTest(TestCase):
     def test_pause_inspect(self):
         """Test pause of inspect."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with self.assertRaises(NetworkPauseException):
+        with pytest.raises(NetworkPauseException):
             scanner.connect_scan_task = self.connect_scan_task
             scanner._inspect_scan(
                 Value("i", ScanJob.JOB_TERMINATE_PAUSE), self.host_list
@@ -336,4 +393,4 @@ class NetworkInspectScannerTest(TestCase):
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
-        self.assertIn("verbosity=1", str(calls[0]))
+        assert "verbosity=1" in str(calls[0])

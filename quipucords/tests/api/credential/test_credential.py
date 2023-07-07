@@ -1,11 +1,9 @@
 """Test the API application."""
 
 import random
-import tempfile
 from unittest import mock
 
 import pytest
-from django.core import management
 from django.urls import reverse
 from rest_framework import status
 
@@ -14,7 +12,6 @@ from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
 from constants import ENCRYPTED_DATA_MASK, DataSources
 from tests.factories import CredentialFactory, SourceFactory
-from tests.mixins import LoggedUserMixin
 
 ACCEPT_JSON_HEADER = {"Accept": "application/json"}
 
@@ -26,13 +23,18 @@ def alt_cred_type(cred_type):
     return random.choice(cred_types)
 
 
-@pytest.mark.django_db
-class TestCredential(LoggedUserMixin):
-    """Tests against the Credential model and view set."""
+def generate_openssh_pkey(faker):
+    """Generate a random OpenSSH private key."""
+    pkey = "-----BEGIN OPENSSH EXAMPLE KEY-----\n"
+    for _ in range(5):
+        pkey += f"{faker.lexify('?' * 70)}\n"
+    pkey += "-----END OPENSSH EXAMPLE KEY-----"
+    return pkey
 
-    def setup_method(self, _test_method):
-        """Create test case setup."""
-        management.call_command("flush", "--no-input")
+
+@pytest.mark.django_db
+class TestCredential:
+    """Tests against the Credential model and view set."""
 
     def create_credential(
         self,
@@ -97,33 +99,41 @@ class TestCredential(LoggedUserMixin):
         assert Credential.objects.count() == 1
         assert Credential.objects.get().name == "cred1"
 
-    def test_hostcred_create_with_ssh_keyvalue(self, django_client):
+    @pytest.fixture
+    def openssh_key(self, faker):
+        """Return an openssh_key random OpenSSH private key."""
+        return generate_openssh_pkey(faker)
+
+    @pytest.fixture
+    def updated_openssh_key(self, faker):
+        """Return an openssh_key random OpenSSH private key."""
+        return generate_openssh_pkey(faker)
+
+    def test_hostcred_create_with_ssh_keyvalue(self, django_client, openssh_key):
         """Ensure we can create a new host credential object with an ssh_keyvalue."""
-        ssh_keyvalue = "29AC" * 256
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
             "username": "user1",
-            "ssh_keyvalue": ssh_keyvalue,
+            "ssh_keyvalue": openssh_key,
         }
         self.create_expect_201(data, django_client)
         assert Credential.objects.count() == 1
 
         cred = Credential.objects.get()
         assert cred.name == "cred1"
-        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == ssh_keyvalue
+        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == openssh_key
 
     def test_hostcred_create_with_ssh_keyvalue_and_passphrase(
-        self, django_client, faker
+        self, django_client, faker, openssh_key
     ):
         """Ensure we create a new credential with an ssh_keyvalue with a passphrase."""
         ssh_passphrase = faker.password(length=32)
-        ssh_keyvalue = "28AB" * 256
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
             "username": "user1",
-            "ssh_keyvalue": ssh_keyvalue,
+            "ssh_keyvalue": openssh_key,
             "ssh_passphrase": ssh_passphrase,
         }
         self.create_expect_201(data, django_client)
@@ -131,7 +141,7 @@ class TestCredential(LoggedUserMixin):
 
         cred = Credential.objects.get()
         assert cred.name == "cred1"
-        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == ssh_keyvalue
+        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == openssh_key
         assert decrypt_data_as_unicode(cred.ssh_passphrase) == ssh_passphrase
 
     def test_hostcred_create_double(self, django_client):
@@ -215,28 +225,30 @@ class TestCredential(LoggedUserMixin):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_keyfile"]
 
-    def test_hc_create_err_ssh_keyfile_and_keyvalue(self, django_client):
+    def test_hc_create_err_ssh_keyfile_and_keyvalue(
+        self, tmp_path, django_client, faker, openssh_key
+    ):
         """Test API with both ssh_keyfile and ssh_keyvalue.
 
         Ensure we cannot create a new host credential object with both
         an ssh_keyfile and ssh_keyvalue specified.
         """
         url = reverse("cred-list")
-        with tempfile.NamedTemporaryFile() as ssh_keyfile:
-            ssh_keyfile.write(b"\n")
-            data = {
-                "name": "cred1",
-                "username": "user1",
-                "cred_type": DataSources.NETWORK,
-                "ssh_keyfile": str(ssh_keyfile.name),
-                "ssh_keyvalue": "A" * 2048,
-            }
-            response = django_client.post(url, json=data)
+        ssh_keyfile = tmp_path / faker.file_name(extension="pem")
+        ssh_keyfile.touch()
+        data = {
+            "name": "cred1",
+            "username": "user1",
+            "cred_type": DataSources.NETWORK,
+            "ssh_keyfile": str(ssh_keyfile),
+            "ssh_keyvalue": openssh_key,
+        }
+        response = django_client.post(url, json=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["non_field_errors"] == [messages.HC_KEYFILE_OR_KEYVALUE]
 
-    def test_hc_create_err_pwd_and_ssh_keyvalue(self, django_client):
+    def test_hc_create_err_pwd_and_ssh_keyvalue(self, django_client, openssh_key):
         """Test API with both password and ssh_keyvalue.
 
         Ensure we cannot create a new host credential object with both
@@ -248,7 +260,7 @@ class TestCredential(LoggedUserMixin):
             "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
-            "ssh_keyvalue": "A" * 2048,
+            "ssh_keyvalue": openssh_key,
         }
         response = django_client.post(url, json=data)
 
@@ -418,7 +430,6 @@ class TestCredential(LoggedUserMixin):
 
     def test_hostcred_update_view(self, django_client):
         """Tests the update view set of the Credential API."""
-        url = reverse("cred-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
@@ -433,16 +444,15 @@ class TestCredential(LoggedUserMixin):
             "username": "user2",
             "password": "pass2",
         }
-        self.create_expect_201(data, django_client)
+        resp2 = self.create_expect_201(data, django_client)
 
         data = {"name": "cred2", "username": "user23", "password": "pass2"}
-        url = reverse("cred-detail", args=(2,))
+        url = reverse("cred-detail", args=(resp2["id"],))
         resp = django_client.put(url, json=data)
         assert resp.status_code == status.HTTP_200_OK
 
     def test_hostcred_update_double(self, django_client):
         """Update to new name that conflicts with other should fail."""
-        url = reverse("cred-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
@@ -457,10 +467,10 @@ class TestCredential(LoggedUserMixin):
             "username": "user2",
             "password": "pass2",
         }
-        self.create_expect_201(data, django_client)
+        resp2 = self.create_expect_201(data, django_client)
 
         data = {"name": "cred1", "username": "user2", "password": "pass2"}
-        url = reverse("cred-detail", args=(2,))
+        url = reverse("cred-detail", args=(resp2["id"],))
         resp = django_client.put(url, json=data)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -868,16 +878,17 @@ class TestCredential(LoggedUserMixin):
         assert response_ssh_keyfile == str(ssh_keyfile2)
         assert response_ssh_keyfile != str(ssh_keyfile1)
 
-    def test_hostcred_update_ssh_value(self, django_client):
+    def test_hostcred_update_ssh_value(
+        self, django_client, faker, openssh_key, updated_openssh_key
+    ):
         """Verify it is possible to change ssh_keyvalue."""
         cred_name = "cred1"
         cred_username = "user1"
-        updated_ssh_keyvalue = "22AA" * 256
         data = {
             "name": cred_name,
             "username": cred_username,
             "cred_type": DataSources.NETWORK,
-            "ssh_keyvalue": "34AF" * 256,
+            "ssh_keyvalue": openssh_key,
         }
         response = django_client.post(reverse("cred-list"), json=data)
         assert response.status_code == status.HTTP_201_CREATED
@@ -885,7 +896,7 @@ class TestCredential(LoggedUserMixin):
         cred_id = response.json()["id"]
         url = reverse("cred-detail", args=(cred_id,))
         updated_data = {
-            "ssh_keyvalue": updated_ssh_keyvalue,
+            "ssh_keyvalue": updated_openssh_key,
         }
         response = django_client.patch(url, json=updated_data)
         assert response.status_code == status.HTTP_200_OK
@@ -893,7 +904,7 @@ class TestCredential(LoggedUserMixin):
         cred = Credential.objects.get(id=cred_id)
         assert cred.name == cred_name
         assert cred.username == cred_username
-        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == updated_ssh_keyvalue
+        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == updated_openssh_key
 
     def test_related_source_detail(self, django_client):
         """Test if related sources are included in the output."""
