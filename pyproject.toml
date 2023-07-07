@@ -13,7 +13,7 @@ requires = ["poetry-core"]
 [tool.poetry.dependencies]
 python = "^3.9"
 ansible = ">=6,<7"
-django = "^4.2.1"
+django = "^4.2.3"
 django-filter = ">=22.1"
 djangorestframework = "^3.14"
 jmespath = "^1.0.1"
