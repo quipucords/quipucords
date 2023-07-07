@@ -20,6 +20,7 @@ from scanner.network.utils import (
     delete_ssh_keyfiles,
     is_gen_ssh_keyfile,
 )
+from tests.api.credential.test_credential import generate_openssh_pkey
 from tests.scanner.test_util import create_scan_job
 
 
@@ -126,14 +127,6 @@ class TestNetworkConnectTaskRunner:
         self.scan_task3.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
         self.concurrency = ScanOptions.get_default_forks()
 
-        self.cred2_keyvalue = ("ABE9" * 12 + "\n") * 48
-        self.cred2 = Credential(
-            name="cred2",
-            username="username2",
-            ssh_keyvalue=self.cred2_keyvalue,
-        )
-        self.cred2.save()
-
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
         cred = model_to_dict(self.cred)
@@ -149,28 +142,42 @@ class TestNetworkConnectTaskRunner:
         }
         assert vars_dict == expected
 
-    def test_construct_vars_keyvalue(self):
+    @pytest.fixture
+    def openssh_key(self, faker):
+        """Return a fake OpenSSH private key."""
+        return generate_openssh_pkey(faker)
+
+    @pytest.fixture
+    def cred_ssh(self, openssh_key):
+        """Return a credential with an SSH key."""
+        return Credential.objects.create(
+            name="cred_ssh",
+            username="username2",
+            ssh_keyvalue=openssh_key,
+        )
+
+    def test_construct_vars_keyvalue(self, cred_ssh):
         """Test constructing ansible vars dictionary for ssh_keyvalue credentials."""
-        cred2 = model_to_dict(self.cred2)
-        vars_dict = _construct_vars(22, cred2)
+        cred_ssh = model_to_dict(cred_ssh)
+        vars_dict = _construct_vars(22, cred_ssh)
         expected = {
             "ansible_ssh_private_key_file": Mock(),
             "ansible_user": "username2",
         }
         assert set(expected).issubset(set(vars_dict))
+        os.remove(vars_dict["ansible_ssh_private_key_file"])
 
-    def test_construct_vars_keyvalue_to_keyfile(self):
+    def test_construct_vars_keyvalue_to_keyfile(self, cred_ssh):
         """Test constructing ansible vars dictionary generates a real keyfile."""
-        cred2 = model_to_dict(self.cred2)
-        vars_dict = _construct_vars(22, cred2)
+        vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
         ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
 
         assert is_gen_ssh_keyfile(ssh_keyfile)
+        os.remove(ssh_keyfile)
 
-    def test_construct_vars_keyvalue_to_valid_keyfile(self):
+    def test_construct_vars_keyvalue_to_valid_keyfile(self, openssh_key, cred_ssh):
         """Test constructing ansible vars dictionary generates a valid keyfile."""
-        cred2 = model_to_dict(self.cred2)
-        vars_dict = _construct_vars(22, cred2)
+        vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
         ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
 
         assert os.path.isfile(ssh_keyfile)
@@ -179,7 +186,8 @@ class TestNetworkConnectTaskRunner:
             key_value = fd.read()
             fd.close()
 
-        assert key_value == f"{self.cred2_keyvalue}\n"
+        assert key_value == f"{openssh_key}\n"
+        os.remove(ssh_keyfile)
 
     def test_get_exclude_host(self):
         """Test get_exclude_hosts() method."""
@@ -245,17 +253,16 @@ class TestNetworkConnectTaskRunner:
         }
         assert inventory_dict == expected
 
-    def test_connect_ssh_keyvalue_inventory_delete(self):
+    def test_connect_ssh_keyvalue_inventory_delete(self, cred_ssh):
         """Test ssh_keyvalue support deletes generated ssh_keyvalue files."""
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source["hosts"]
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
-        cred2 = model_to_dict(self.cred2)
         _, inventory_dict = construct_inventory(
             hosts=hosts,
-            credential=cred2,
+            credential=model_to_dict(cred_ssh),
             connection_port=connection_port,
             concurrency_count=1,
             exclude_hosts=exclude_hosts,

@@ -190,8 +190,8 @@ GEN_KEYFILE_PREFIX = "quipucords_ssh_private_key_credential"
 
 def generate_ssh_keyfile(credential, ssh_keyvalue):
     """Generate an ssh private keyfile for the ssh key content specified."""
-    ssh_pkey_dir = os.path.join(tempfile.gettempdir(), GEN_KEYFILES_DIRECTORY)
-    Path(ssh_pkey_dir).mkdir(parents=True, exist_ok=True)
+    ssh_pkey_dir = Path(tempfile.gettempdir()) / GEN_KEYFILES_DIRECTORY
+    ssh_pkey_dir.mkdir(parents=True, exist_ok=True)
     private_keyfile_path = tempfile.NamedTemporaryFile(
         prefix=f"{GEN_KEYFILE_PREFIX}_{credential.get('id')}_", dir=ssh_pkey_dir
     ).name
