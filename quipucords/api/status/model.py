@@ -13,10 +13,6 @@ class ServerInformation(models.Model):
 
     global_identifier = models.CharField(max_length=36, null=False)
 
-    def __str__(self):
-        """Convert to string."""
-        return f"{{id:{self.id}, global_identifier:{self.global_identifier}}}"
-
     @staticmethod
     @transaction.atomic
     def create_or_retrieve_server_id():

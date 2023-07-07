@@ -70,23 +70,6 @@ class ScanJob(models.Model):
         DetailsReport, null=True, on_delete=models.CASCADE
     )
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" scan:{self.scan_id},"
-            f" scan_type:{self.scan_type},"
-            f" status:{self.status},"
-            f" options: {self.options_id},"
-            f" report_id: {self.report_id},"
-            f" start_time: {self.start_time},"
-            f" end_time: {self.end_time},"
-            f" connection_results: {self.connection_results_id},"
-            f" inspection_results: {self.inspection_results_id}"
-            "}"
-        )
-
     class Meta:
         """Metadata for model."""
 

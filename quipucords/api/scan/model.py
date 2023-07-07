@@ -28,19 +28,6 @@ class ExtendedProductSearchOptions(models.Model):
     jboss_ws = models.BooleanField(null=False, default=EXT_JBOSS_WS)
     search_directories = models.JSONField(null=True)
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" jboss_eap: {self.jboss_eap},"
-            f" jboss_fuse: {self.jboss_fuse},"
-            f" jboss_brms: {self.jboss_brms},"
-            f" jboss_ws: {self.jboss_ws},"
-            f" search_directories: {self.get_search_directories()}"
-            "}"
-        )
-
     def get_search_directories(self):
         """Load JSON search directory."""
         return self.search_directories or []
@@ -66,18 +53,6 @@ class DisabledOptionalProductsOptions(models.Model):
     jboss_brms = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_BRMS)
     jboss_ws = models.BooleanField(null=False, default=MODEL_OPT_JBOSS_WS)
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" jboss_eap: {self.jboss_eap},"
-            f" jboss_fuse: {self.jboss_fuse},"
-            f" jboss_brms: {self.jboss_brms},"
-            f" jboss_ws: {self.jboss_ws}"
-            "}"
-        )
-
 
 class ScanOptions(models.Model):
     """The scan options allows configuration of a scan."""
@@ -100,17 +75,6 @@ class ScanOptions(models.Model):
     enabled_extended_product_search = models.OneToOneField(
         ExtendedProductSearchOptions, on_delete=models.CASCADE, null=True
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" max_concurrency: {self.max_concurrency},"
-            f" disabled_optional_products: {self.disabled_optional_products},"
-            f" enabled_extended_product_search: {self.enabled_extended_product_search}"
-            "}"
-        )
 
     @staticmethod
     def get_default_forks():
@@ -202,18 +166,6 @@ class Scan(models.Model):
     most_recent_scanjob = models.ForeignKey(
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" name:{self.name},"
-            f" sources:{self.sources},"
-            f" scan_type:{self.scan_type},"
-            f" options: {self.options}"
-            "}"
-        )
 
     class Meta:
         """Metadata for model."""

@@ -22,13 +22,3 @@ class DetailsReport(models.Model):
     )
     cached_csv = models.TextField(null=True)
     cached_masked_csv = models.TextField(null=True)
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f'"id":{self.id},'
-            ' "report_type":"details", '
-            f' "sources":{self.sources}'
-            "}"
-        )

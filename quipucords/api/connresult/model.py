@@ -13,10 +13,6 @@ from api.source.model import Source
 class JobConnectionResult(models.Model):
     """The results of a connection scan."""
 
-    def __str__(self):
-        """Convert to string."""
-        return f"{{ id:{self.id},task_results:{self.task_results} }}"
-
     class Meta:
         """Metadata for model."""
 
@@ -29,10 +25,6 @@ class TaskConnectionResult(models.Model):
     job_connection_result = models.ForeignKey(
         JobConnectionResult, on_delete=models.CASCADE, related_name="task_results"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return f"{{ id:{self.id}, systems:{self.systems} }}"
 
     class Meta:
         """Metadata for model."""
@@ -59,18 +51,6 @@ class SystemConnectionResult(models.Model):
     task_connection_result = models.ForeignKey(
         TaskConnectionResult, on_delete=models.CASCADE, related_name="systems"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f" id:{self.id},"
-            f" name:{self.name},"
-            f" status:{self.status},"
-            f" source:{self.source},"
-            f" credential:{self.credential} "
-            "}"
-        )
 
     class Meta:
         """Metadata for model."""
