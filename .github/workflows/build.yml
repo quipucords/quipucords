@@ -38,7 +38,7 @@ jobs:
 
       - name: Push To quay.io
         # Forks don't have access to secrets and can't complete this step
-        if: ${{ github.repository_owner == 'quipucords' }}
+        if: ${{ github.repository == github.event.pull_request.head.repo.full_name }}
         uses: redhat-actions/push-to-registry@v2
         with:
           image: quipucords/quipucords
