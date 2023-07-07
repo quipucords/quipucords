@@ -40,16 +40,6 @@ class DeploymentsReport(models.Model):
     cached_csv = models.TextField(null=True)
     cached_masked_csv = models.TextField(null=True)
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" report_id:{self.report_id},"
-            f" status:{self.status}"
-            "}"
-        )
-
 
 class SystemFingerprint(models.Model):
     """Represents system fingerprint."""
@@ -187,10 +177,6 @@ class SystemFingerprint(models.Model):
         """Retrieve source_types."""
         return {s.get("source_type") for s in self.sources}
 
-    def __str__(self):
-        """Convert to string."""
-        return f"{{id:{self.id}, name:{self.name}}}"
-
 
 class Product(models.Model):
     """Represents a product."""
@@ -215,19 +201,6 @@ class Product(models.Model):
 
     metadata = models.JSONField(unique=False, null=False, default=dict)
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" fingerprint:{self.fingerprint.id},"
-            f" name:{self.name},"
-            f" version:{self.version},"
-            f" presence:{self.presence},"
-            f" metadata:{self.metadata} "
-            "}"
-        )
-
 
 class Entitlement(models.Model):
     """Represents a Entitlement."""
@@ -239,15 +212,3 @@ class Entitlement(models.Model):
     entitlement_id = models.CharField(max_length=256, unique=False, null=True)
 
     metadata = models.JSONField(unique=False, null=False, default=dict)
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" fingerprint:{self.fingerprint.id},"
-            f" name:{self.name},"
-            f" entitlement_id:{self.entitlement_id},"
-            f" metadata:{self.metadata} "
-            "}"
-        )

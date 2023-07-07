@@ -101,28 +101,6 @@ class ScanTask(models.Model):
         if hasattr(self, "scan_job_task_count"):
             del self.scan_job_task_count
 
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f"id:{self.id},"
-            f" job:{self.job_id},"
-            f" scan_type:{self.scan_type},"
-            f" status:{self.status},"
-            f" source:{self.source_id},"
-            f" sequence_number:{self.sequence_number},"
-            f" systems_count: {self.systems_count},"
-            f" systems_scanned: {self.systems_scanned},"
-            f" systems_failed: {self.systems_failed},"
-            f" systems_unreachable: {self.systems_unreachable},"
-            f" start_time: {self.start_time}"
-            f" end_time: {self.end_time},"
-            f" connection_result: {self.connection_result_id},"
-            f" inspection_result: {self.inspection_result_id},"
-            f" details_report: {self.details_report_id}"
-            "}"
-        )
-
     class Meta:
         """Metadata for model."""
 

@@ -16,10 +16,6 @@ from compat.pydantic import BaseModel, PydanticErrorProxy
 class JobInspectionResult(models.Model):
     """The results of a inspection scan."""
 
-    def __str__(self):
-        """Convert to string."""
-        return f"{{ id:{self.id}, task_results:{self.task_results} }}"
-
     class Meta:
         """Metadata for model."""
 
@@ -32,10 +28,6 @@ class TaskInspectionResult(models.Model):
     job_inspection_result = models.ForeignKey(
         JobInspectionResult, on_delete=models.CASCADE, related_name="task_results"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return f"{{ id:{self.id}, systems:{self.systems} }}"
 
     class Meta:
         """Metadata for model."""
@@ -61,18 +53,6 @@ class SystemInspectionResult(models.Model):
     task_inspection_result = models.ForeignKey(
         TaskInspectionResult, on_delete=models.CASCADE, related_name="systems"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return (
-            "{"
-            f" id:{self.id},"
-            f" name:{self.name},"
-            f" status:{self.status},"
-            f" facts:{self.facts},"
-            f" source:{self.source} "
-            "}"
-        )
 
     class Meta:
         """Metadata for model."""
@@ -102,10 +82,6 @@ class RawFact(models.Model):
     system_inspection_result = models.ForeignKey(
         SystemInspectionResult, on_delete=models.CASCADE, related_name="facts"
     )
-
-    def __str__(self):
-        """Convert to string."""
-        return f"{{ id:{self.id}, name:{self.name}, value:{self.value} }}"
 
     class Meta:
         """Metadata for model."""
