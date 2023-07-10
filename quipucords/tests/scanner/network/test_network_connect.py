@@ -153,11 +153,11 @@ class TestNetworkConnectTaskRunner:
         return Credential.objects.create(
             name="cred_ssh",
             username="username2",
-            ssh_keyvalue=openssh_key,
+            ssh_key=openssh_key,
         )
 
-    def test_construct_vars_keyvalue(self, cred_ssh):
-        """Test constructing ansible vars dictionary for ssh_keyvalue credentials."""
+    def test_construct_vars_key(self, cred_ssh):
+        """Test constructing ansible vars dictionary for ssh_key credentials."""
         cred_ssh = model_to_dict(cred_ssh)
         vars_dict = _construct_vars(22, cred_ssh)
         expected = {
@@ -167,7 +167,7 @@ class TestNetworkConnectTaskRunner:
         assert set(expected).issubset(set(vars_dict))
         os.remove(vars_dict["ansible_ssh_private_key_file"])
 
-    def test_construct_vars_keyvalue_to_keyfile(self, cred_ssh):
+    def test_construct_vars_key_to_keyfile(self, cred_ssh):
         """Test constructing ansible vars dictionary generates a real keyfile."""
         vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
         ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
@@ -175,7 +175,7 @@ class TestNetworkConnectTaskRunner:
         assert is_gen_ssh_keyfile(ssh_keyfile)
         os.remove(ssh_keyfile)
 
-    def test_construct_vars_keyvalue_to_valid_keyfile(self, openssh_key, cred_ssh):
+    def test_construct_vars_key_to_valid_keyfile(self, openssh_key, cred_ssh):
         """Test constructing ansible vars dictionary generates a valid keyfile."""
         vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
         ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
@@ -253,8 +253,8 @@ class TestNetworkConnectTaskRunner:
         }
         assert inventory_dict == expected
 
-    def test_connect_ssh_keyvalue_inventory_delete(self, cred_ssh):
-        """Test ssh_keyvalue support deletes generated ssh_keyvalue files."""
+    def test_connect_ssh_key_inventory_delete(self, cred_ssh):
+        """Test ssh_key support deletes generated ssh_key files."""
         serializer = SourceSerializer(self.source)
         source = serializer.data
         hosts = source["hosts"]

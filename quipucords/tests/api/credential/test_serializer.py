@@ -426,7 +426,7 @@ class TestNetworkCredential:
         )
         assert not serializer.is_valid()
         assert serializer.errors == {
-            "non_field_errors": [messages.HC_PWD_OR_KEYFILE_OR_KEYVALUE]
+            "non_field_errors": [messages.HC_PWD_OR_KEYFILE_OR_KEY]
         }
 
     def test_replace_password(self, credential_with_ssh_key):

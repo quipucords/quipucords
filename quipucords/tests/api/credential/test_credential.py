@@ -109,31 +109,31 @@ class TestCredential:
         """Return an openssh_key random OpenSSH private key."""
         return generate_openssh_pkey(faker)
 
-    def test_hostcred_create_with_ssh_keyvalue(self, django_client, openssh_key):
-        """Ensure we can create a new host credential object with an ssh_keyvalue."""
+    def test_hostcred_create_with_ssh_key(self, django_client, openssh_key):
+        """Ensure we can create a new host credential object with an ssh_key."""
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
             "username": "user1",
-            "ssh_keyvalue": openssh_key,
+            "ssh_key": openssh_key,
         }
         self.create_expect_201(data, django_client)
         assert Credential.objects.count() == 1
 
         cred = Credential.objects.get()
         assert cred.name == "cred1"
-        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == openssh_key
+        assert decrypt_data_as_unicode(cred.ssh_key) == openssh_key
 
-    def test_hostcred_create_with_ssh_keyvalue_and_passphrase(
+    def test_hostcred_create_with_ssh_key_and_passphrase(
         self, django_client, faker, openssh_key
     ):
-        """Ensure we create a new credential with an ssh_keyvalue with a passphrase."""
+        """Ensure we create a new credential with an ssh_key with a passphrase."""
         ssh_passphrase = faker.password(length=32)
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
             "username": "user1",
-            "ssh_keyvalue": openssh_key,
+            "ssh_key": openssh_key,
             "ssh_passphrase": ssh_passphrase,
         }
         self.create_expect_201(data, django_client)
@@ -141,7 +141,7 @@ class TestCredential:
 
         cred = Credential.objects.get()
         assert cred.name == "cred1"
-        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == openssh_key
+        assert decrypt_data_as_unicode(cred.ssh_key) == openssh_key
         assert decrypt_data_as_unicode(cred.ssh_passphrase) == ssh_passphrase
 
     def test_hostcred_create_double(self, django_client):
@@ -191,10 +191,10 @@ class TestCredential:
         assert response.json()["username"]
 
     def test_hc_create_err_p_or_ssh(self, django_client):
-        """Test API without password, ssh_keyfile or ssh_keyvalue.
+        """Test API without password, ssh_keyfile or ssh_key.
 
         Ensure we cannot create a new host credential object without a password,
-        an ssh_keyfile, or an ssh_keyvalue.
+        an ssh_keyfile, or an ssh_key.
         """
         url = reverse("cred-list")
         data = {
@@ -205,7 +205,7 @@ class TestCredential:
         response = django_client.post(url, json=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
         assert response.json()["non_field_errors"] == [
-            messages.HC_PWD_OR_KEYFILE_OR_KEYVALUE
+            messages.HC_PWD_OR_KEYFILE_OR_KEY
         ]
 
     def test_hc_create_err_ssh_bad(self, django_client):
@@ -225,13 +225,13 @@ class TestCredential:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_keyfile"]
 
-    def test_hc_create_err_ssh_keyfile_and_keyvalue(
+    def test_hc_create_err_ssh_keyfile_and_key(
         self, tmp_path, django_client, faker, openssh_key
     ):
-        """Test API with both ssh_keyfile and ssh_keyvalue.
+        """Test API with both ssh_keyfile and ssh_key.
 
         Ensure we cannot create a new host credential object with both
-        an ssh_keyfile and ssh_keyvalue specified.
+        an ssh_keyfile and ssh_key specified.
         """
         url = reverse("cred-list")
         ssh_keyfile = tmp_path / faker.file_name(extension="pem")
@@ -241,18 +241,18 @@ class TestCredential:
             "username": "user1",
             "cred_type": DataSources.NETWORK,
             "ssh_keyfile": str(ssh_keyfile),
-            "ssh_keyvalue": openssh_key,
+            "ssh_key": openssh_key,
         }
         response = django_client.post(url, json=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["non_field_errors"] == [messages.HC_KEYFILE_OR_KEYVALUE]
+        assert response.json()["non_field_errors"] == [messages.HC_KEYFILE_OR_KEY]
 
-    def test_hc_create_err_pwd_and_ssh_keyvalue(self, django_client, openssh_key):
-        """Test API with both password and ssh_keyvalue.
+    def test_hc_create_err_pwd_and_ssh_key(self, django_client, openssh_key):
+        """Test API with both password and ssh_key.
 
         Ensure we cannot create a new host credential object with both
-        a password and ssh_keyvalue specified.
+        a password and ssh_key specified.
         """
         url = reverse("cred-list")
         data = {
@@ -260,22 +260,18 @@ class TestCredential:
             "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
-            "ssh_keyvalue": openssh_key,
+            "ssh_key": openssh_key,
         }
         response = django_client.post(url, json=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["non_field_errors"] == [
-            messages.HC_PWD_NOT_WITH_KEYVALUE
-        ]
+        assert response.json()["non_field_errors"] == [messages.HC_PWD_NOT_WITH_KEY]
 
-    def test_hc_create_err_passphrase_and_no_keyfile_or_keyvalue(
-        self, django_client, faker
-    ):
-        """Test API with a passphrase and no ssh_keyfile or ssh_keyvalue.
+    def test_hc_create_err_passphrase_and_no_keyfile_or_key(self, django_client, faker):
+        """Test API with a passphrase and no ssh_keyfile or ssh_key.
 
         Ensure we cannot create a new host credential object with a passphrase
-        and no ssh_keyfile or ssh_keyvalue.
+        and no ssh_keyfile or ssh_key.
         """
         url = reverse("cred-list")
         data = {
@@ -881,14 +877,14 @@ class TestCredential:
     def test_hostcred_update_ssh_value(
         self, django_client, faker, openssh_key, updated_openssh_key
     ):
-        """Verify it is possible to change ssh_keyvalue."""
+        """Verify it is possible to change ssh_key."""
         cred_name = "cred1"
         cred_username = "user1"
         data = {
             "name": cred_name,
             "username": cred_username,
             "cred_type": DataSources.NETWORK,
-            "ssh_keyvalue": openssh_key,
+            "ssh_key": openssh_key,
         }
         response = django_client.post(reverse("cred-list"), json=data)
         assert response.status_code == status.HTTP_201_CREATED
@@ -896,7 +892,7 @@ class TestCredential:
         cred_id = response.json()["id"]
         url = reverse("cred-detail", args=(cred_id,))
         updated_data = {
-            "ssh_keyvalue": updated_openssh_key,
+            "ssh_key": updated_openssh_key,
         }
         response = django_client.patch(url, json=updated_data)
         assert response.status_code == status.HTTP_200_OK
@@ -904,7 +900,7 @@ class TestCredential:
         cred = Credential.objects.get(id=cred_id)
         assert cred.name == cred_name
         assert cred.username == cred_username
-        assert decrypt_data_as_unicode(cred.ssh_keyvalue) == updated_openssh_key
+        assert decrypt_data_as_unicode(cred.ssh_key) == updated_openssh_key
 
     def test_related_source_detail(self, django_client):
         """Test if related sources are included in the output."""
@@ -946,37 +942,37 @@ class TestCredentialSerialization:
         ),
         (
             {
-                "name": "network-ssh-keyvalue",
+                "name": "network-ssh-key",
                 "cred_type": DataSources.NETWORK.value,
                 "username": "some-user",
-                "ssh_keyvalue": "some private SSH Keyvalue",
+                "ssh_key": "some private SSH Key",
             },
             {
                 "id": mock.ANY,
-                "name": "network-ssh-keyvalue",
+                "name": "network-ssh-key",
                 "cred_type": DataSources.NETWORK.value,
                 "username": "some-user",
-                "ssh_keyvalue": ENCRYPTED_DATA_MASK,
+                "ssh_key": ENCRYPTED_DATA_MASK,
             },
-            "network-ssh-keyvalue",
+            "network-ssh-key",
         ),
         (
             {
-                "name": "network-ssh-keyvalue-passphrase",
+                "name": "network-ssh-key-passphrase",
                 "cred_type": DataSources.NETWORK.value,
                 "username": "some-user",
-                "ssh_keyvalue": "some private SSH Keyvalue",
+                "ssh_key": "some private SSH Key",
                 "ssh_passphrase": "some private SSH Key passphrase",
             },
             {
                 "id": mock.ANY,
-                "name": "network-ssh-keyvalue-passphrase",
+                "name": "network-ssh-key-passphrase",
                 "cred_type": DataSources.NETWORK.value,
                 "username": "some-user",
-                "ssh_keyvalue": ENCRYPTED_DATA_MASK,
+                "ssh_key": ENCRYPTED_DATA_MASK,
                 "ssh_passphrase": ENCRYPTED_DATA_MASK,
             },
-            "network-ssh-keyvalue-with-passphrase",
+            "network-ssh-key-with-passphrase",
         ),
         (
             {
