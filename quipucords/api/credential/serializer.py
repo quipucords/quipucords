@@ -23,6 +23,10 @@ def expand_filepath(filepath):
 
 
 ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
+NO_TRIM_ENCRYPTED_FIELD_KWARGS = {
+    **ENCRYPTED_FIELD_KWARGS,
+    **{"trim_whitespace": False},
+}
 
 
 class RelatedSourceSerializer(NotEmptySerializer):
@@ -48,7 +52,7 @@ class CredentialSerializer(NotEmptySerializer):
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,
             "auth_token": ENCRYPTED_FIELD_KWARGS,
-            "ssh_keyvalue": ENCRYPTED_FIELD_KWARGS,
+            "ssh_keyvalue": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "become_password": ENCRYPTED_FIELD_KWARGS,
         }
@@ -199,7 +203,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             "become_password": ENCRYPTED_FIELD_KWARGS,
             "become_user": {"default": Credential.BECOME_USER_DEFAULT},
             "password": ENCRYPTED_FIELD_KWARGS,
-            "ssh_keyvalue": ENCRYPTED_FIELD_KWARGS,
+            "ssh_keyvalue": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "username": {"required": True},
         }
