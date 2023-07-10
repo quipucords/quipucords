@@ -97,9 +97,7 @@ def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
         scan_task.log_message(
             f"Task {scan_task.sequence_number} failed.", log_level=logging.ERROR
         )
-        scan_task.log_message(
-            f"Details failed to fingerprint: {details_report}", log_level=logging.ERROR
-        )
+        scan_task.log_raw_facts(log_level=logging.ERROR)
 
     return success, scan_task_id, task_status
 

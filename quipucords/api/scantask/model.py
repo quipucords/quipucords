@@ -436,3 +436,17 @@ class ScanTask(models.Model):
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             return self.details_report
         return None
+
+    def log_raw_facts(self, log_level=logging.INFO):
+        """Log raw facts stored on details report."""
+        if not self.details_report:
+            self.log_message(
+                "Missing details report - Impossible to log raw facts.",
+                log_level=max(logging.ERROR, log_level),
+            )
+            return
+        # Using a pure logger to avoid the extra context information added
+        # by log_message method.
+        logger.log(log_level, f"{'raw facts':-^50}")
+        logger.log(log_level, self.details_report.sources)
+        logger.log(log_level, "-" * 50)
