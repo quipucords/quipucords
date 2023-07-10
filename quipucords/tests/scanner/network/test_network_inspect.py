@@ -125,11 +125,11 @@ class TestNetworkInspectScanner:
 
     @pytest.fixture
     def cred_ssh(self, openssh_key):
-        """Return a Credential with an ssh_keyvalue."""
+        """Return a Credential with an ssh_key."""
         return Credential.objects.create(
             name="cred_ssh",
             username="username_ssh",
-            ssh_keyvalue=openssh_key,
+            ssh_key=openssh_key,
         )
 
     @pytest.fixture
@@ -146,8 +146,8 @@ class TestNetworkInspectScanner:
         """Return the Host list for the SSH Credential."""
         return [("1.2.3.5", model_to_dict(cred_ssh))]
 
-    def test_scan_inventory_with_valid_ssh_keyvalue(self, source_ssh, host_ssh_list):
-        """Test construct ansible inventory dictionary with ssh_keyvalue."""
+    def test_scan_inventory_with_valid_ssh_key(self, source_ssh, host_ssh_list):
+        """Test construct ansible inventory dictionary with ssh_key."""
         serializer = SourceSerializer(source_ssh)
         source_ssh = serializer.data
         connection_port = source_ssh["port"]
@@ -159,8 +159,8 @@ class TestNetworkInspectScanner:
         assert is_gen_ssh_keyfile(ssh_keyfile)
         os.remove(ssh_keyfile)
 
-    def test_scan_inventory_with_ssh_keyvalue_delete(self, source_ssh, host_ssh_list):
-        """Test ansible inventory dictionary with ssh_keyvalue are deleted."""
+    def test_scan_inventory_with_ssh_key_delete(self, source_ssh, host_ssh_list):
+        """Test ansible inventory dictionary with ssh_key are deleted."""
         serializer = SourceSerializer(source_ssh)
         source_ssh = serializer.data
         connection_port = source_ssh["port"]

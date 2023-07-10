@@ -39,7 +39,7 @@ def _credential_vars(credential):
     username = credential.get("username")
     password = credential.get("password")
     ssh_keyfile = credential.get("ssh_keyfile")
-    ssh_keyvalue = credential.get("ssh_keyvalue")
+    ssh_key = credential.get("ssh_key")
     become_method = credential.get("become_method")
     become_user = credential.get("become_user")
     become_password = credential.get("become_password")
@@ -49,9 +49,9 @@ def _credential_vars(credential):
         ansible_dict["ansible_ssh_pass"] = decrypt_data_as_unicode(password)
     if ssh_keyfile:
         ansible_dict["ansible_ssh_private_key_file"] = ssh_keyfile
-    if ssh_keyvalue:
+    if ssh_key:
         ansible_dict["ansible_ssh_private_key_file"] = generate_ssh_keyfile(
-            credential, decrypt_data_as_unicode(ssh_keyvalue)
+            credential, decrypt_data_as_unicode(ssh_key)
         )
     if become_password:
         ansible_dict["ansible_become_pass"] = decrypt_data_as_unicode(become_password)
@@ -188,7 +188,7 @@ GEN_KEYFILES_DIRECTORY = "quipucords_generated_ssh_private_keys"
 GEN_KEYFILE_PREFIX = "quipucords_ssh_private_key_credential"
 
 
-def generate_ssh_keyfile(credential, ssh_keyvalue):
+def generate_ssh_keyfile(credential, ssh_key):
     """Generate an ssh private keyfile for the ssh key content specified."""
     ssh_pkey_dir = Path(tempfile.gettempdir()) / GEN_KEYFILES_DIRECTORY
     ssh_pkey_dir.mkdir(parents=True, exist_ok=True)
@@ -196,7 +196,7 @@ def generate_ssh_keyfile(credential, ssh_keyvalue):
         prefix=f"{GEN_KEYFILE_PREFIX}_{credential.get('id')}_", dir=ssh_pkey_dir
     ).name
     with open(private_keyfile_path, "w+") as private_key_fp:
-        private_key_fp.write(ssh_keyvalue)
+        private_key_fp.write(ssh_key)
         private_key_fp.write("\n")
     os.chmod(private_keyfile_path, 0o600)
     return private_keyfile_path

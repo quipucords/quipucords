@@ -52,7 +52,7 @@ class CredentialSerializer(NotEmptySerializer):
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,
             "auth_token": ENCRYPTED_FIELD_KWARGS,
-            "ssh_keyvalue": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
+            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "become_password": ENCRYPTED_FIELD_KWARGS,
         }
@@ -193,7 +193,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             "cred_type",
             "password",
             "ssh_keyfile",
-            "ssh_keyvalue",
+            "ssh_key",
             "ssh_passphrase",
             "username",
             "sources",
@@ -203,7 +203,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             "become_password": ENCRYPTED_FIELD_KWARGS,
             "become_user": {"default": Credential.BECOME_USER_DEFAULT},
             "password": ENCRYPTED_FIELD_KWARGS,
-            "ssh_keyvalue": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
+            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "username": {"required": True},
         }
@@ -223,22 +223,22 @@ class NetworkCredentialSerializer(CredentialSerializer):
         errors = defaultdict(list)
         password = data.get("password")
         ssh_keyfile = data.get("ssh_keyfile")
-        ssh_keyvalue = data.get("ssh_keyvalue")
+        ssh_key = data.get("ssh_key")
         ssh_passphrase = data.get("ssh_passphrase")
         instance_ssh_keyfile = getattr(self.instance, "ssh_keyfile", None)
-        instance_ssh_keyvalue = getattr(self.instance, "ssh_keyvalue", None)
+        instance_ssh_key = getattr(self.instance, "ssh_key", None)
 
-        if ssh_keyfile and ssh_keyvalue:
-            errors["non_field_errors"].append(_(messages.HC_KEYFILE_OR_KEYVALUE))
+        if ssh_keyfile and ssh_key:
+            errors["non_field_errors"].append(_(messages.HC_KEYFILE_OR_KEY))
         if password:
             if ssh_keyfile:
                 errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEYFILE))
-            if ssh_keyvalue:
-                errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEYVALUE))
-        if not self.partial and not (password or ssh_keyfile or ssh_keyvalue):
-            errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE_OR_KEYVALUE))
+            if ssh_key:
+                errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEY))
+        if not self.partial and not (password or ssh_keyfile or ssh_key):
+            errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE_OR_KEY))
         if ssh_passphrase and not (
-            ssh_keyfile or instance_ssh_keyfile or ssh_keyvalue or instance_ssh_keyvalue
+            ssh_keyfile or instance_ssh_keyfile or ssh_key or instance_ssh_key
         ):
             errors["ssh_passphrase"].append(_(messages.HC_NO_KEY_W_PASS))
         if errors:
@@ -252,18 +252,18 @@ class NetworkCredentialSerializer(CredentialSerializer):
         """Transform validated data prior to an update."""
         password = data.get("password")
         ssh_keyfile = data.get("ssh_keyfile")
-        ssh_keyvalue = data.get("ssh_keyvalue")
-        # a credential should have either password, ssh_keyvalue or ssh_keyfile
+        ssh_key = data.get("ssh_key")
+        # a credential should have either password, ssh_key or ssh_keyfile
         # (this method assumes the premise that data is properly validated)
         if password:
             data["ssh_keyfile"] = None
-            data["ssh_keyvalue"] = None
-        elif ssh_keyvalue:
+            data["ssh_key"] = None
+        elif ssh_key:
             data["password"] = None
             data["ssh_keyfile"] = None
         elif ssh_keyfile:
             data["password"] = None
-            data["ssh_keyvalue"] = None
+            data["ssh_key"] = None
 
 
 class AuthTokenOrUserPassSerializer(CredentialSerializer):

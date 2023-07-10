@@ -345,17 +345,17 @@ def _handle_ssh_passphrase(credential):
     :param credential: The credential used for connections
     """
     ssh_keyfile = credential.get("ssh_keyfile")
-    ssh_keyvalue = credential.get("ssh_keyvalue")
+    ssh_key = credential.get("ssh_key")
 
     if credential.get("ssh_passphrase") is not None and (
-        ssh_keyfile is not None or ssh_keyvalue is not None
+        ssh_keyfile is not None or ssh_key is not None
     ):
         passphrase = decrypt_data_as_unicode(credential["ssh_passphrase"])
         if ssh_keyfile is not None:
             cmd_string = f'ssh-add "{ssh_keyfile}"'
         else:
-            ssh_keyvalue = decrypt_data_as_unicode(ssh_keyvalue)
-            cmd_string = f"/bin/bash -c 'echo \"{ssh_keyvalue}\n\" | ssh-add -'"
+            ssh_key = decrypt_data_as_unicode(ssh_key)
+            cmd_string = f"/bin/bash -c 'echo \"{ssh_key}\n\" | ssh-add -'"
 
         try:
             child = pexpect.spawn(cmd_string, timeout=12)
