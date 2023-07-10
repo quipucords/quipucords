@@ -310,9 +310,7 @@ class SyncScanJobRunner:
 
         self.scan_job.status_start()
         if self.scan_job.status != ScanTask.RUNNING:
-            error_message = (
-                "Job could not transition to running state.  See error logs."
-            )
+            error_message = "Job could not transition to running state. See error logs."
             self.scan_job.status_fail(error_message)
             return ScanTask.FAILED
 
@@ -355,12 +353,11 @@ class SyncScanJobRunner:
                 )
             except Exception as error:
                 fingerprint_task_runner.scan_task.log_message(
-                    "DETAILS REPORT - "
-                    "The following details report failed to generate a"
-                    f" deployments report: {details_report}",
+                    f"Task {fingerprint_task_runner.scan_task.sequence_number} failed.",
                     log_level=logging.ERROR,
                     exception=error,
                 )
+                self._log_details_report_error(fingerprint_task_runner, details_report)
                 raise error
             if task_status in [ScanTask.CANCELED, ScanTask.PAUSED]:
                 return task_status
@@ -371,12 +368,7 @@ class SyncScanJobRunner:
                     f"Task {fingerprint_task_runner.scan_task.sequence_number} failed.",
                     log_level=logging.ERROR,
                 )
-                fingerprint_task_runner.scan_task.log_message(
-                    "DETAILS REPORT - "
-                    "The following details report failed to generate a"
-                    f" deployments report: {details_report}",
-                    log_level=logging.ERROR,
-                )
+                self._log_details_report_error(fingerprint_task_runner, details_report)
             else:
                 # Record results for successful tasks
                 self.scan_job.report_id = details_report.deployment_report.id
@@ -395,3 +387,14 @@ class SyncScanJobRunner:
 
         self.scan_job.status_complete()
         return ScanTask.COMPLETED
+
+    def _log_details_report_error(self, runner_instance, details_report):
+        runner_instance.scan_task.log_message(
+            (
+                "DETAILS REPORT - It wasn't possible to generate a deployments"
+                f" report from details report {details_report.id}. See it's raw"
+                " facts below."
+            ),
+            log_level=logging.ERROR,
+        )
+        runner_instance.scan_task.log_raw_facts(log_level=logging.ERROR)
