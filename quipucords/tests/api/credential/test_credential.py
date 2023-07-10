@@ -28,7 +28,7 @@ def generate_openssh_pkey(faker):
     pkey = "-----BEGIN OPENSSH EXAMPLE KEY-----\n"
     for _ in range(5):
         pkey += f"{faker.lexify('?' * 70)}\n"
-    pkey += "-----END OPENSSH EXAMPLE KEY-----"
+    pkey += "-----END OPENSSH EXAMPLE KEY-----\n"
     return pkey
 
 
