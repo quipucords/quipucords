@@ -9,7 +9,6 @@ flit_core>=3.3
 flit_core>=3.4,<4
 flit_core>=3.8,<4
 hatchling>=0.25.1
-packaging>=20.0
 pbr
 pbr>=1.8
 poetry-core>=1.0.0
@@ -28,10 +27,11 @@ setuptools>=42.0.0
 setuptools>=45
 setuptools>=45.0
 setuptools>=46.4.0
+setuptools>=56
 setuptools>=61.0.0
 setuptools>=62.4
 setuptools>=62.4.0
 setuptools_scm
-typing_extensions
+setuptools_scm[toml]>=3.4.1
 wheel
 wheel>=0.28.0
