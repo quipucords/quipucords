@@ -1,6 +1,5 @@
 """ScanTask used for network connection discovery."""
 import logging
-import os.path
 from multiprocessing import Value
 
 import ansible_runner
@@ -272,9 +271,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
             "variable_host": group_name,
             "ansible_ssh_timeout": settings.QPC_SSH_CONNECT_TIMEOUT,
         }
-        playbook_path = os.path.join(
-            settings.BASE_DIR, "scanner/network/runner/connect.yml"
-        )
+        playbook_path = str(settings.BASE_DIR / "scanner/network/runner/connect.yml")
         cmdline_list = []
         vault_file_path = f"--vault-password-file={settings.DJANGO_SECRET_PATH}"
         cmdline_list.append(vault_file_path)

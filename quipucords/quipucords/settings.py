@@ -179,8 +179,8 @@ if QPC_DBMS not in allowed_db_engines:
 
 if QPC_DBMS == "sqlite":
     # If user enters an invalid QPC_DBMS, use default postgresql
-    DEV_DB = os.path.join(BASE_DIR, "db.sqlite3")
-    PROD_DB = os.path.join(env.str("DJANGO_DB_PATH", str(BASE_DIR)), "db.sqlite3")
+    DEV_DB = BASE_DIR / "db.sqlite3"
+    PROD_DB = Path(env.str("DJANGO_DB_PATH", str(BASE_DIR))) / "db.sqlite3"
     DB_PATH = PROD_DB if PRODUCTION else DEV_DB
     DATABASES = {
         "default": {
@@ -253,13 +253,11 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATIC_URL = "/client/"
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "client"),
-]
+STATICFILES_DIRS = [BASE_DIR / "client"]
 
 STORAGES = {
     "staticfiles": {

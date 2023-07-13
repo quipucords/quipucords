@@ -1,7 +1,7 @@
 """Util for common operations."""
 
 import logging
-import os
+from pathlib import Path
 
 from django.utils.translation import gettext as _
 from rest_framework.serializers import ValidationError
@@ -147,7 +147,7 @@ def check_path_validity(path_list):
     """
     invalid_paths = []
     for a_path in path_list:
-        if not os.path.isabs(a_path):
+        if not Path(a_path).is_absolute():
             invalid_paths.append(a_path)
     return invalid_paths
 

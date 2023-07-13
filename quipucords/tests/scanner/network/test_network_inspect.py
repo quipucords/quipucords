@@ -1,6 +1,6 @@
 """Test the inspect scanner capabilities."""
-import os.path
 from multiprocessing import Value
+from pathlib import Path
 from unittest.mock import ANY, Mock, patch
 
 import pytest
@@ -157,7 +157,7 @@ class TestNetworkInspectScanner:
             "ansible_ssh_private_key_file"
         ]
         assert is_gen_ssh_keyfile(ssh_keyfile)
-        os.remove(ssh_keyfile)
+        Path(ssh_keyfile).unlink()
 
     def test_scan_inventory_with_ssh_key_delete(self, source_ssh, host_ssh_list):
         """Test ansible inventory dictionary with ssh_key are deleted."""
@@ -169,9 +169,9 @@ class TestNetworkInspectScanner:
         ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"]["1.2.3.5"][
             "ansible_ssh_private_key_file"
         ]
-        assert os.path.exists(ssh_keyfile)
+        assert Path(ssh_keyfile).exists()
         delete_ssh_keyfiles(inventory_dict)
-        assert os.path.exists(ssh_keyfile) is False
+        assert not Path(ssh_keyfile).exists()
 
     def test_scan_inventory_grouping(self):
         """Test construct ansible inventory dictionary."""
@@ -269,9 +269,7 @@ class TestNetworkInspectScanner:
     def test_ssh_crash(self):
         """Simulate an ssh crash."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "test_util/crash.py")
-        )
+        path = Path(__file__).absolute().parent / "test_util/crash.py"
 
         _, result = scanner._inspect_scan(
             Value("i", ScanJob.JOB_RUN),
@@ -284,9 +282,7 @@ class TestNetworkInspectScanner:
     def test_ssh_hang(self):
         """Simulate an ssh hang."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "test_util/hang.py")
-        )
+        path = Path(__file__).absolute().parent / "test_util/hang.py"
 
         scanner._inspect_scan(
             Value("i", ScanJob.JOB_RUN),

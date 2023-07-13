@@ -1,5 +1,7 @@
 """Test the API application."""
 
+from pathlib import Path
+
 import yaml
 from django.test import TestCase
 
@@ -33,10 +35,10 @@ class VaultTest(TestCase):
                 },
             }
         }
-        temp_yaml = vault.write_to_yaml(data)
-        self.assertTrue("yaml" in temp_yaml)
+        temp_yaml = Path(vault.write_to_yaml(data))
+        assert temp_yaml.name.endswith(".yaml")
 
-        with open(temp_yaml, "r", encoding="utf-8") as temp_file:
+        with temp_yaml.open("r", encoding="utf-8") as temp_file:
             encrypted = temp_file.read()
             decrypted = vault.decrypt_data_as_unicode(encrypted)
             obj = yaml.load(decrypted, Loader=yaml.SafeLoader)

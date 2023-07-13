@@ -1,4 +1,5 @@
 """Tests for generate sudo list script."""
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -80,10 +81,8 @@ def return_playbook_path(
     role_dir = path / "roles" / "roles1" / "tasks"
     role_dir.mkdir(parents=True, exist_ok=True)
 
-    main_yml_path = role_dir / "main.yml"
-    with open(main_yml_path, "w") as f:
-        f.write(playbook)
-
+    main_yml_path = Path(role_dir / "main.yml")
+    main_yml_path.write_text(playbook)
     yield path
 
 
@@ -136,7 +135,7 @@ def test_file_creation(tmp_path, generated_document_mock):
     assert file_path.exists()
     expected = ["sudo command 1\n", "sudo command 2"]
 
-    with open(file_path, "r") as f:
+    with file_path.open("r") as f:
         lines = f.readlines()
     assert lines == expected
     file_path.unlink()
