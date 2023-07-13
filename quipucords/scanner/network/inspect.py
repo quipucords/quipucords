@@ -1,6 +1,5 @@
 """ScanTask used for network connection discovery."""
 import logging
-import os.path
 
 import ansible_runner
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -212,8 +211,8 @@ class InspectTaskRunner(ScanTaskRunner):
                 "job_timeout": int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
                 "pexpect_timeout": 5,
             }
-            playbook_path = os.path.join(
-                settings.BASE_DIR, "scanner/network/runner/inspect.yml"
+            playbook_path = str(
+                settings.BASE_DIR / "scanner/network/runner/inspect.yml"
             )
             extra_vars["variable_host"] = group_name
             cmdline_list = []

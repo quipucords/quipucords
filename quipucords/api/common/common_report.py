@@ -1,11 +1,10 @@
 """Util for common report operations."""
-
 import io
 import json
 import logging
-import os
 import tarfile
 import time
+from pathlib import Path
 
 from rest_framework.renderers import JSONRenderer
 
@@ -53,10 +52,11 @@ def extract_tar_gz(file_like_obj):
         if not isinstance(file_like_obj, (bytes, bytearray)):
             return None
         tar_name = f"/tmp/api_tmp_{time.strftime('%Y%m%d_%H%M%S')}.tar.gz"
-        with open(tar_name, "wb") as out_file:
+        path_to_tar = Path(tar_name)
+        with path_to_tar.open("wb") as out_file:
             out_file.write(file_like_obj)
         tar = tarfile.open(tar_name)
-        os.remove(tar_name)
+        path_to_tar.unlink()
 
     file_data_list = []
     files = tar.getmembers()

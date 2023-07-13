@@ -1,8 +1,8 @@
 """Test the discovery scanner capabilities."""
 
 
-import os
 from multiprocessing import Value
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -165,7 +165,7 @@ class TestNetworkConnectTaskRunner:
             "ansible_user": "username2",
         }
         assert set(expected).issubset(set(vars_dict))
-        os.remove(vars_dict["ansible_ssh_private_key_file"])
+        Path(vars_dict["ansible_ssh_private_key_file"]).unlink()
 
     def test_construct_vars_key_to_keyfile(self, cred_ssh):
         """Test constructing ansible vars dictionary generates a real keyfile."""
@@ -173,21 +173,19 @@ class TestNetworkConnectTaskRunner:
         ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
 
         assert is_gen_ssh_keyfile(ssh_keyfile)
-        os.remove(ssh_keyfile)
+        Path(ssh_keyfile).unlink()
 
     def test_construct_vars_key_to_valid_keyfile(self, openssh_key, cred_ssh):
         """Test constructing ansible vars dictionary generates a valid keyfile."""
         vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
-        ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
+        ssh_keyfile = Path(vars_dict["ansible_ssh_private_key_file"])
 
-        assert os.path.isfile(ssh_keyfile)
+        assert ssh_keyfile.is_file()
         # File content should be the un-encrypted SSH Key value.
-        with open(ssh_keyfile, "r") as fd:
-            key_value = fd.read()
-            fd.close()
+        key_value = ssh_keyfile.read_text()
 
         assert key_value == f"{openssh_key}\n"
-        os.remove(ssh_keyfile)
+        ssh_keyfile.unlink()
 
     def test_get_exclude_host(self):
         """Test get_exclude_hosts() method."""
@@ -274,7 +272,7 @@ class TestNetworkConnectTaskRunner:
         assert is_gen_ssh_keyfile(ssh_keyfile)
 
         delete_ssh_keyfiles(inventory_dict)
-        assert os.path.exists(ssh_keyfile) is False
+        assert not Path(ssh_keyfile).exists()
 
     @patch("ansible_runner.run")
     @patch(

@@ -2,6 +2,7 @@
 
 import os
 from collections import defaultdict
+from pathlib import Path
 
 from django.utils.translation import gettext as _
 from rest_framework.serializers import ValidationError, empty
@@ -15,10 +16,8 @@ from constants import ENCRYPTED_DATA_MASK, DataSources
 def expand_filepath(filepath):
     """Expand the ssh_keyfile filepath if necessary."""
     if filepath is not None:
-        expanded = os.path.abspath(
-            os.path.normpath(os.path.expanduser(os.path.expandvars(filepath)))
-        )
-        return expanded
+        expanded = Path(os.path.expandvars(filepath)).expanduser().absolute()
+        return str(expanded)
     return filepath
 
 
@@ -213,7 +212,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
         if ssh_keyfile is None:
             return None
         keyfile = expand_filepath(ssh_keyfile)
-        if not os.path.isfile(keyfile):
+        if not Path(keyfile).is_file():
             raise ValidationError(_(messages.HC_KEY_INVALID % ssh_keyfile))
         return keyfile
 

@@ -81,6 +81,7 @@ select = [
     "W",   # pycodestyle
     "PL",  # Pylint
     "BLE", # flake8-blind-except
+    "PTH", # flake8-use-pathlib
 ]
 ignore = [
     "D203", 

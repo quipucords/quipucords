@@ -1,6 +1,5 @@
 """Scanner used for host connection discovery."""
 
-import os
 import re
 import tempfile
 from functools import cache
@@ -192,14 +191,15 @@ def generate_ssh_keyfile(credential, ssh_key):
     """Generate an ssh private keyfile for the ssh key content specified."""
     ssh_pkey_dir = Path(tempfile.gettempdir()) / GEN_KEYFILES_DIRECTORY
     ssh_pkey_dir.mkdir(parents=True, exist_ok=True)
-    private_keyfile_path = tempfile.NamedTemporaryFile(
-        prefix=f"{GEN_KEYFILE_PREFIX}_{credential.get('id')}_", dir=ssh_pkey_dir
-    ).name
-    with open(private_keyfile_path, "w+") as private_key_fp:
-        private_key_fp.write(ssh_key)
-        private_key_fp.write("\n")
-    os.chmod(private_keyfile_path, 0o600)
-    return private_keyfile_path
+    private_keyfile_path = Path(
+        tempfile.NamedTemporaryFile(
+            prefix=f"{GEN_KEYFILE_PREFIX}_{credential.get('id')}_",
+            dir=ssh_pkey_dir,
+        ).name
+    )
+    private_keyfile_path.write_text(f"{ssh_key}\n")
+    private_keyfile_path.chmod(0o600)
+    return str(private_keyfile_path)
 
 
 def delete_ssh_keyfiles(inventory):
@@ -228,8 +228,9 @@ def is_gen_ssh_keyfile(private_keyfile_path):
         f"^{tempfile.gettempdir()}"
         f"/{GEN_KEYFILES_DIRECTORY}/{GEN_KEYFILE_PREFIX}_[0-9]+_.*$"
     )
-    if re.match(keyfile_pattern, private_keyfile_path) and os.path.isfile(
-        private_keyfile_path
+    if (
+        re.match(keyfile_pattern, private_keyfile_path)
+        and Path(private_keyfile_path).is_file()
     ):
         return True
     return False
@@ -238,4 +239,4 @@ def is_gen_ssh_keyfile(private_keyfile_path):
 def delete_ssh_keyfile(private_keyfile_path):
     """Remove a generated ssh_keyfile."""
     if is_gen_ssh_keyfile(private_keyfile_path):
-        os.remove(private_keyfile_path)
+        Path(private_keyfile_path).unlink()
