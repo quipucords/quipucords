@@ -125,7 +125,11 @@ def test_openshift_cred_empty_auth_token():
     }
     serializer = CredentialSerializer(data=data)
     assert not serializer.is_valid(), serializer.errors
-    assert serializer.errors["auth_token"]
+    assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
+    # The above assertion is technically correct but maybe misleading. We allow the
+    # `auth_token` field to be blank; so, technically there is no error on that field.
+    # Instead, we rely on the serializer's `validate` method to identify the problem
+    # and raise the non-field-error TOKEN_OR_USER_PASS.
 
 
 @pytest.mark.django_db

@@ -35,17 +35,22 @@ class Credential(models.Model):
 
     name = models.CharField(max_length=64, unique=True)
     cred_type = models.CharField(max_length=9, choices=DataSources.choices, null=False)
-    username = models.CharField(max_length=64, null=True)
-    password = models.CharField(max_length=1024, null=True)
-    auth_token = models.CharField(max_length=1024, null=True)
-    ssh_keyfile = models.CharField(max_length=1024, null=True)
-    ssh_key = models.CharField(max_length=65536, null=True)
-    ssh_passphrase = models.CharField(max_length=1024, null=True)
+    # Important note: we allow `null=True` and `blank=True` for most of the fields
+    # because this model is overloaded, conditionally expecting values in some fields
+    # but not others based on cred_type and other runtime conditions. Input validation
+    # exists elsewhere to enforce not-blank values in specific fields when applicable.
+    # Future refactoring idea: implement different credential types in separate models.
+    username = models.CharField(max_length=64, null=True, blank=True)
+    password = models.CharField(max_length=1024, null=True, blank=True)
+    auth_token = models.CharField(max_length=1024, null=True, blank=True)
+    ssh_keyfile = models.CharField(max_length=1024, null=True, blank=True)
+    ssh_key = models.CharField(max_length=65536, null=True, blank=True)
+    ssh_passphrase = models.CharField(max_length=1024, null=True, blank=True)
     become_method = models.CharField(
-        max_length=6, choices=BECOME_METHOD_CHOICES, null=True
+        max_length=6, choices=BECOME_METHOD_CHOICES, null=True, blank=True
     )
-    become_user = models.CharField(max_length=64, null=True)
-    become_password = models.CharField(max_length=1024, null=True)
+    become_user = models.CharField(max_length=64, null=True, blank=True)
+    become_password = models.CharField(max_length=1024, null=True, blank=True)
 
     ENCRYPTED_FIELDS = [
         "password",
