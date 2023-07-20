@@ -37,8 +37,7 @@ jobs:
             quipucords.backend.git_sha=${{ github.sha }}
 
       - name: Push To quay.io
-        # Forks don't have access to secrets and can't complete this step
-        if: ${{ github.repository == github.event.pull_request.head.repo.full_name }}
+        # Forks that do not set these secrets and may fail this step.
         uses: redhat-actions/push-to-registry@v2
         with:
           image: quipucords/quipucords
