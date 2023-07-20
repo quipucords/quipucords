@@ -13,6 +13,8 @@ env:
   # We had a problem with GitHub setting quay expiration label also during
   # merge to main, so we just set meaningless value as a workaround.
   EXPIRATION_LABEL: ${{ github.event_name == 'push' && 'quipucords.source=github' || 'quay.expires-after=3d' }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME || 'quipucords/quipucords' }}
+  REGISTRY: ${{ vars.REGISTRY || 'quay.io' }}
 
 jobs:
   build:
@@ -28,7 +30,7 @@ jobs:
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          image: quipucords/quipucords
+          image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }}
           containerfiles: |
             ./Dockerfile
@@ -37,11 +39,11 @@ jobs:
             quipucords.backend.git_sha=${{ github.sha }}
 
       - name: Push To quay.io
-        # Forks that do not set these secrets and may fail this step.
+        # Forks that do not set secrets and override the variables may fail this step.
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: quipucords/quipucords
+          image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: quay.io/
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
