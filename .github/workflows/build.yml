@@ -12,7 +12,7 @@ env:
   STABLE_TAG: ${{ github.event_name == 'push' && github.ref_name || format('pr-{0}', github.event.pull_request.number) }}
   # We had a problem with GitHub setting quay expiration label also during
   # merge to main, so we just set meaningless value as a workaround.
-  EXPIRATION_LABEL: ${{ github.event_name == 'push' && 'quipucords.source=github' || 'quay.expires-after=3d' }}
+  EXPIRATION_LABEL: ${{ github.event_name == 'push' && 'quipucords.source=github' || 'quay.expires-after=5d' }}
   IMAGE_NAME: ${{ vars.IMAGE_NAME || 'quipucords/quipucords' }}
   REGISTRY: ${{ vars.REGISTRY || 'quay.io' }}
 
