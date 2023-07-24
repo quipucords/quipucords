@@ -19,7 +19,6 @@ setuptools-scm
 setuptools-scm[toml]>=6.2.3
 setuptools;python_version!='3.3'
 setuptools<40.0;python_version=='3.3'
-setuptools<67
 setuptools>=36.2.2
 setuptools>=39.2.0
 setuptools>=40.8.0
