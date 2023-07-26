@@ -1,4 +1,4 @@
-Cython
+Cython<3.0
 calver
 cffi>=1.12;platform_python_implementation!='PyPy'
 cffi>=1.4.1;python_implementation!='PyPy'

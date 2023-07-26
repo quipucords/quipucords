@@ -8,7 +8,7 @@ calver==2022.6.26
     # via -r requirements-build.in
 cffi==1.15.1 ; platform_python_implementation != "PyPy"
     # via -r requirements-build.in
-cython==3.0.0
+cython==0.29.36
     # via -r requirements-build.in
 docutils==0.20.1
     # via -r requirements-build.in
