@@ -76,9 +76,13 @@ lock-build-requirements:
 	poetry run pip-compile $(PIP_COMPILE_ARGS) -r --resolver=backtracking --quiet --allow-unsafe --output-file=requirements-build.txt requirements-build.in
 
 search-build-requirements:
-	cat requirements*.txt | grep -vE '(^ )|(#)' | awk '{print $$1}' | sed 's/==/ /' | \
-	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps 2> /dev/null | \
-	sort -u >> requirements-build.in || true
+	# Note: this removes all [extras] from package names due to
+	# pybuild-deps not handling them as expected.
+	cat requirements*.txt | grep -vE '(^ )|(#)' | awk '{print $$1}' | \
+	sed 's/==/ /;s/\[[^\]*\]//' | sort -u | awk 'NF' | \
+	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps | \
+	sort -u >> requirements-build.in
+
 
 update-requirements:
 	poetry update --no-cache

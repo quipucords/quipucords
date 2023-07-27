@@ -20,6 +20,7 @@ hatchling==1.18.0
     # via -r requirements-build.in
 packaging==23.1
     # via
+    #   -r requirements-build.in
     #   hatchling
     #   setuptools-scm
 pathspec==0.11.1
@@ -42,6 +43,7 @@ trove-classifiers==2023.7.6
     # via hatchling
 typing-extensions==4.7.1
     # via
+    #   -r requirements-build.in
     #   setuptools-rust
     #   setuptools-scm
 wheel==0.41.0
