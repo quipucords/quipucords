@@ -69,6 +69,24 @@ def workload():
 
 
 @pytest.fixture
+def acm_metrics():
+    """Return list of ACM metrics."""
+    return [
+        {
+            "vendor": "Openshift",
+            "cloud": "Other",
+            "version": "1.2.3",
+            "managed_cluster_id": "not-a-uuid",
+            "available": True,
+            "core_worker": 4,
+            "socket_worker": 4,
+            "created_via": "Other",
+            "hub_cluster_id": "not-a-uuid",
+        }
+    ]
+
+
+@pytest.fixture
 def node_resources():
     """Return Node Resources entity."""
     return NodeResources(cpu="350m", memory_in_bytes="15252796Ki", pods="250")
@@ -140,12 +158,18 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
 @pytest.mark.django_db
 def test_inspect_with_success(  # noqa: PLR0913
-    mocker, scan_task: ScanTask, cluster, node_ok, operators
+    mocker,
+    scan_task: ScanTask,
+    cluster,
+    node_ok,
+    operators,
+    acm_metrics,
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+    mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -165,6 +189,7 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
     node_ok,
     node_err,
     operators,
+    acm_metrics,
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
@@ -172,6 +197,7 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
         OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
     )
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+    mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -190,11 +216,13 @@ def test_inspect_with_failure(  # noqa: PLR0913
     cluster_err,
     node_err,
     operators,
+    acm_metrics,
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+    mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -206,7 +234,7 @@ def test_inspect_with_failure(  # noqa: PLR0913
     assert scan_task.systems_unreachable == 0
 
 
-EXTRA_CLUSTER_FACTS = {"operators", "workloads"}
+EXTRA_CLUSTER_FACTS = {"operators", "workloads", "acm_metrics"}
 
 
 @pytest.mark.django_db
@@ -268,12 +296,14 @@ def test_inspect_with_enabled_workloads(  # noqa: PLR0913
     workload,
     operators,
     workloads_enabled,
+    acm_metrics,
 ):
     """Test connecting to OpenShift host with enabled workloads."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+    mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     runner.execute_task(mocker.Mock())
@@ -285,7 +315,7 @@ def test_inspect_with_enabled_workloads(  # noqa: PLR0913
 
 @pytest.mark.django_db
 def test_inspect_with_disabled_workloads(  # noqa: PLR0913
-    mocker, scan_task: ScanTask, cluster, node_ok, operators
+    mocker, scan_task: ScanTask, cluster, node_ok, operators, acm_metrics
 ):
     """Test connecting to OpenShift host with workloads default behavior."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
@@ -294,6 +324,7 @@ def test_inspect_with_disabled_workloads(  # noqa: PLR0913
     mock_retrieve_workloads = mocker.patch.object(
         OpenShiftApi, "retrieve_workloads", return_value=[workload]
     )
+    mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     runner.execute_task(mocker.Mock())

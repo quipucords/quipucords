@@ -118,6 +118,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     ocp_client._cluster_operator_api
     ocp_client._subscription_api
     ocp_client._cluster_service_version_api
+    ocp_client._managed_cluster_api
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
@@ -153,6 +154,13 @@ def test_csv_api(ocp_client: OpenShiftApi):
     assert csv_list
 
 
+@pytest.mark.vcr_primer(VCRCassettes.OCP_ACM, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_cluster_acm_api(ocp_client: OpenShiftApi):
+    """Test _managed_cluster_api."""
+    acm_metrics = ocp_client._list_managed_clusters()
+    assert acm_metrics
+
+
 @pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_retrieve_cluster(ocp_client: OpenShiftApi):
     """Test retrieve cluster method."""
@@ -176,6 +184,18 @@ def test_retrieve_operators(ocp_client: OpenShiftApi):
     # OCP instance used on VCR preparation should have at least one lifecycle operator
     # installed (doesn't matter which one)
     assert isinstance(operators[-1], LifecycleOperator)
+
+
+@pytest.mark.vcr(
+    VCRCassettes.OCP_ACM,
+    VCRCassettes.OCP_DISCOVERER_CACHE,
+)
+def test_retrieve_acm_metrics(ocp_client: OpenShiftApi):
+    """Test retrieve acm metrics method."""
+    acm_metrics = ocp_client.retrieve_acm_metrics()
+    assert isinstance(acm_metrics, list)
+    # OCP instance used on VCR preparation should have ACM operator installed,
+    # with active multiClusterHub instance
 
 
 def test_olm_operator_construction(ocp_client: OpenShiftApi, mocker, faker):

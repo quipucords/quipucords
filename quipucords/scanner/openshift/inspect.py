@@ -67,6 +67,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         fact2method = (
             ("workloads", ocp_client.retrieve_workloads),
             ("operators", ocp_client.retrieve_operators),
+            ("acm_metrics", ocp_client.retrieve_acm_metrics),
         )
         extra_facts = {}
         for fact_name, api_method in fact2method:
@@ -74,9 +75,16 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             try:
                 if fact_name == "workloads" and not collect_ocp_workloads_enabled:
                     continue
-                extra_facts[fact_name] = api_method(
+                extra_facts_data = api_method(
                     timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT
                 )
+                if fact_name == "acm_metrics":
+                    for managed_cluster in extra_facts_data:
+                        managed_cluster["hub_cluster_id"] = cluster.uuid
+                # the way to retrieve a hub cluster id is through clusterClaims,
+                # however if the managed cluster is the hub itself,
+                # this info won't be there.
+                extra_facts[fact_name] = extra_facts_data
             except OCPError as err:
                 cluster.errors[fact_name] = err
         return extra_facts
