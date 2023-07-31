@@ -1,6 +1,7 @@
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
 
 from pathlib import Path
+from unittest import mock
 from uuid import UUID
 
 import httpretty
@@ -118,6 +119,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     ocp_client._cluster_operator_api
     ocp_client._subscription_api
     ocp_client._cluster_service_version_api
+    ocp_client._managed_cluster_api
     assert Path(ocp_client._discoverer_cache_file).exists()
 
 
@@ -153,6 +155,13 @@ def test_csv_api(ocp_client: OpenShiftApi):
     assert csv_list
 
 
+@pytest.mark.vcr_primer(VCRCassettes.OCP_ACM, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_cluster_acm_api(ocp_client: OpenShiftApi):
+    """Test _managed_cluster_api."""
+    acm_metrics = ocp_client._list_managed_clusters()
+    assert acm_metrics
+
+
 @pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_retrieve_cluster(ocp_client: OpenShiftApi):
     """Test retrieve cluster method."""
@@ -176,6 +185,134 @@ def test_retrieve_operators(ocp_client: OpenShiftApi):
     # OCP instance used on VCR preparation should have at least one lifecycle operator
     # installed (doesn't matter which one)
     assert isinstance(operators[-1], LifecycleOperator)
+
+
+@pytest.mark.vcr(
+    VCRCassettes.OCP_ACM,
+    VCRCassettes.OCP_DISCOVERER_CACHE,
+)
+def test_retrieve_acm_metrics(ocp_client: OpenShiftApi):
+    """Test retrieve acm metrics method."""
+    # OCP instance used on VCR preparation should have ACM operator installed,
+    # with active multiClusterHub instance
+    acm_metrics = ocp_client.retrieve_acm_metrics()
+    assert isinstance(acm_metrics, list)
+    min_cluster_msg = "This test requires at least 1 cluster managed through ACM."
+    assert len(acm_metrics) >= 1, min_cluster_msg
+
+    # The following assertion is based on the assumption that the provisioned cluster
+    # has not undergone any additional config modifications. When creating the
+    # multiClusterHub instance, it is expected that at least one managed cluster will
+    # be discovered, the hub itself. An associated set of keys is expected.
+    # The "available" key within these metrics is expected to be True, indicating that
+    # the cluster is available and configured properly.
+
+    expected_keys = [
+        "vendor",
+        "cloud",
+        "version",
+        "managed_cluster_id",
+        "available",
+        "core_worker",
+        "socket_worker",
+        "created_via",
+    ]
+    expected_data = [{key: mock.ANY for key in expected_keys}] * len(acm_metrics)
+    assert acm_metrics == expected_data
+    # at least one cluster is available
+    assert any(cluster_metrics["available"] for cluster_metrics in acm_metrics)
+
+
+@pytest.mark.parametrize(
+    "status_info, expected_metrics",
+    [
+        (
+            {
+                "conditions": [{"reason": "ManagedClusterAvailable"}],
+                "capacity": {"core_worker": 4, "socket_worker": 2},
+            },
+            [
+                {
+                    "available": True,
+                    "cloud": "cloud1",
+                    "core_worker": 4,
+                    "created_via": "via1",
+                    "managed_cluster_id": "id1",
+                    "socket_worker": 2,
+                    "vendor": "vendor1",
+                    "version": "version1",
+                }
+            ],
+        ),
+        (
+            {
+                "conditions": [
+                    {"reason": "ManagedClusterWaitForImporting"},
+                    {"reason": "HubClusterAdminAccepted"},
+                ],
+            },
+            [
+                {
+                    "available": False,
+                    "cloud": "cloud1",
+                    "core_worker": None,
+                    "created_via": "via1",
+                    "managed_cluster_id": "id1",
+                    "socket_worker": None,
+                    "vendor": "vendor1",
+                    "version": "version1",
+                }
+            ],
+        ),
+        (
+            {
+                "conditions": [
+                    {"reason": "ManagedClusterWaitForImporting"},
+                    {"reason": "ManagedClusterAvailable"},
+                ],
+                "capacity": {"cpu": 24},
+            },
+            [
+                {
+                    "available": True,
+                    "cloud": "cloud1",
+                    "core_worker": None,
+                    "created_via": "via1",
+                    "managed_cluster_id": "id1",
+                    "socket_worker": None,
+                    "vendor": "vendor1",
+                    "version": "version1",
+                }
+            ],
+        ),
+    ],
+)
+def test_init_managed_cluster(
+    ocp_client: OpenShiftApi, mocker, status_info, expected_metrics
+):
+    """Test logic creating managed cluster metrics dict."""
+    mock_managed_cluster = {
+        "metadata": {
+            "labels": {
+                "vendor": "vendor1",
+                "cloud": "cloud1",
+                "openshiftVersion": "version1",
+                "clusterID": "id1",
+            },
+            "annotations": {"open-cluster-management/created-via": "via1"},
+        },
+        "status": status_info,
+    }
+
+    mocker.patch.object(
+        ocp_client,
+        "_list_managed_clusters",
+        return_value=mocker.Mock(items=[mock_managed_cluster]),
+    )
+
+    acm_metrics = ocp_client.retrieve_acm_metrics()
+
+    assert acm_metrics == expected_metrics
 
 
 def test_olm_operator_construction(ocp_client: OpenShiftApi, mocker, faker):

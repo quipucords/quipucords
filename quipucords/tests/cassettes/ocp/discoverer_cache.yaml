@@ -2645,4 +2645,158 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/26.1.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version
+  response:
+    body:
+      string: "{\n  \"major\": \"1\",\n  \"minor\": \"26\",\n  \"gitVersion\": \"v1.26.5+7d22122\",\n
+        \ \"gitCommit\": \"2fc599b5fd3f060dd20094b520f0f529fd2f52db\",\n  \"gitTreeState\":
+        \"clean\",\n  \"buildDate\": \"2023-06-07T20:30:17Z\",\n  \"goVersion\": \"go1.19.9\",\n
+        \ \"compiler\": \"gc\",\n  \"platform\": \"linux/amd64\"\n}"
+    headers:
+      Audit-Id:
+      - 205aa3fa-bdc1-4a15-8b04-f53797eece1c
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '271'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 02 Aug 2023 22:54:26 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - ce021864-c7fe-4f62-b848-e73c0e4cd57e
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 7ec8762a-c330-4b6f-9df2-340f63df5dcb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/26.1.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/version/openshift
+  response:
+    body:
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"the
+        server could not find the requested resource","reason":"NotFound","details":{},"code":404}
+
+        '
+    headers:
+      Audit-Id:
+      - 5a6b6909-0c4e-4601-b3bd-1d6b3a0409c0
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '174'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 02 Aug 2023 22:54:33 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - ce021864-c7fe-4f62-b848-e73c0e4cd57e
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 7ec8762a-c330-4b6f-9df2-340f63df5dcb
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/26.1.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis
+  response:
+    body:
+      string: '{"kind":"APIGroupList","apiVersion":"v1","groups":[{"name":"apiregistration.k8s.io","versions":[{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiregistration.k8s.io/v1","version":"v1"}},{"name":"apps","versions":[{"groupVersion":"apps/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps/v1","version":"v1"}},{"name":"events.k8s.io","versions":[{"groupVersion":"events.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"events.k8s.io/v1","version":"v1"}},{"name":"authentication.k8s.io","versions":[{"groupVersion":"authentication.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authentication.k8s.io/v1","version":"v1"}},{"name":"authorization.k8s.io","versions":[{"groupVersion":"authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.k8s.io/v1","version":"v1"}},{"name":"autoscaling","versions":[{"groupVersion":"autoscaling/v2","version":"v2"},{"groupVersion":"autoscaling/v1","version":"v1"}],"preferredVersion":{"groupVersion":"autoscaling/v2","version":"v2"}},{"name":"batch","versions":[{"groupVersion":"batch/v1","version":"v1"}],"preferredVersion":{"groupVersion":"batch/v1","version":"v1"}},{"name":"certificates.k8s.io","versions":[{"groupVersion":"certificates.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"certificates.k8s.io/v1","version":"v1"}},{"name":"networking.k8s.io","versions":[{"groupVersion":"networking.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"networking.k8s.io/v1","version":"v1"}},{"name":"policy","versions":[{"groupVersion":"policy/v1","version":"v1"}],"preferredVersion":{"groupVersion":"policy/v1","version":"v1"}},{"name":"rbac.authorization.k8s.io","versions":[{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"rbac.authorization.k8s.io/v1","version":"v1"}},{"name":"storage.k8s.io","versions":[{"groupVersion":"storage.k8s.io/v1","version":"v1"},{"groupVersion":"storage.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"storage.k8s.io/v1","version":"v1"}},{"name":"admissionregistration.k8s.io","versions":[{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"admissionregistration.k8s.io/v1","version":"v1"}},{"name":"apiextensions.k8s.io","versions":[{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiextensions.k8s.io/v1","version":"v1"}},{"name":"scheduling.k8s.io","versions":[{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"scheduling.k8s.io/v1","version":"v1"}},{"name":"coordination.k8s.io","versions":[{"groupVersion":"coordination.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"coordination.k8s.io/v1","version":"v1"}},{"name":"node.k8s.io","versions":[{"groupVersion":"node.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"node.k8s.io/v1","version":"v1"}},{"name":"discovery.k8s.io","versions":[{"groupVersion":"discovery.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"discovery.k8s.io/v1","version":"v1"}},{"name":"flowcontrol.apiserver.k8s.io","versions":[{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta3","version":"v1beta3"},{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta2","version":"v1beta2"}],"preferredVersion":{"groupVersion":"flowcontrol.apiserver.k8s.io/v1beta3","version":"v1beta3"}},{"name":"proxy.open-cluster-management.io","versions":[{"groupVersion":"proxy.open-cluster-management.io/v1alpha1","version":"v1alpha1"},{"groupVersion":"proxy.open-cluster-management.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"proxy.open-cluster-management.io/v1alpha1","version":"v1alpha1"}},{"name":"apps.openshift.io","versions":[{"groupVersion":"apps.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apps.openshift.io/v1","version":"v1"}},{"name":"authorization.openshift.io","versions":[{"groupVersion":"authorization.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"authorization.openshift.io/v1","version":"v1"}},{"name":"build.openshift.io","versions":[{"groupVersion":"build.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"build.openshift.io/v1","version":"v1"}},{"name":"image.openshift.io","versions":[{"groupVersion":"image.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"image.openshift.io/v1","version":"v1"}},{"name":"oauth.openshift.io","versions":[{"groupVersion":"oauth.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"oauth.openshift.io/v1","version":"v1"}},{"name":"project.openshift.io","versions":[{"groupVersion":"project.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"project.openshift.io/v1","version":"v1"}},{"name":"quota.openshift.io","versions":[{"groupVersion":"quota.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"quota.openshift.io/v1","version":"v1"}},{"name":"route.openshift.io","versions":[{"groupVersion":"route.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"route.openshift.io/v1","version":"v1"}},{"name":"security.openshift.io","versions":[{"groupVersion":"security.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.openshift.io/v1","version":"v1"}},{"name":"template.openshift.io","versions":[{"groupVersion":"template.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"template.openshift.io/v1","version":"v1"}},{"name":"user.openshift.io","versions":[{"groupVersion":"user.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"user.openshift.io/v1","version":"v1"}},{"name":"packages.operators.coreos.com","versions":[{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}],"preferredVersion":{"groupVersion":"packages.operators.coreos.com/v1","version":"v1"}},{"name":"config.openshift.io","versions":[{"groupVersion":"config.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"config.openshift.io/v1","version":"v1"}},{"name":"operator.openshift.io","versions":[{"groupVersion":"operator.openshift.io/v1","version":"v1"},{"groupVersion":"operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operator.openshift.io/v1","version":"v1"}},{"name":"admission.hive.openshift.io","versions":[{"groupVersion":"admission.hive.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"admission.hive.openshift.io/v1","version":"v1"}},{"name":"agent.open-cluster-management.io","versions":[{"groupVersion":"agent.open-cluster-management.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"agent.open-cluster-management.io/v1","version":"v1"}},{"name":"apiserver.openshift.io","versions":[{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"apiserver.openshift.io/v1","version":"v1"}},{"name":"apps.open-cluster-management.io","versions":[{"groupVersion":"apps.open-cluster-management.io/v1","version":"v1"},{"groupVersion":"apps.open-cluster-management.io/v1beta1","version":"v1beta1"},{"groupVersion":"apps.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"apps.open-cluster-management.io/v1","version":"v1"}},{"name":"autoscaling.openshift.io","versions":[{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"},{"groupVersion":"autoscaling.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"autoscaling.openshift.io/v1","version":"v1"}},{"name":"cloudcredential.openshift.io","versions":[{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"cloudcredential.openshift.io/v1","version":"v1"}},{"name":"cluster.open-cluster-management.io","versions":[{"groupVersion":"cluster.open-cluster-management.io/v1","version":"v1"},{"groupVersion":"cluster.open-cluster-management.io/v1beta2","version":"v1beta2"},{"groupVersion":"cluster.open-cluster-management.io/v1beta1","version":"v1beta1"},{"groupVersion":"cluster.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"cluster.open-cluster-management.io/v1","version":"v1"}},{"name":"console.open-cluster-management.io","versions":[{"groupVersion":"console.open-cluster-management.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"console.open-cluster-management.io/v1","version":"v1"}},{"name":"console.openshift.io","versions":[{"groupVersion":"console.openshift.io/v1","version":"v1"},{"groupVersion":"console.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"console.openshift.io/v1","version":"v1"}},{"name":"discovery.open-cluster-management.io","versions":[{"groupVersion":"discovery.open-cluster-management.io/v1","version":"v1"},{"groupVersion":"discovery.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"discovery.open-cluster-management.io/v1","version":"v1"}},{"name":"hive.openshift.io","versions":[{"groupVersion":"hive.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"hive.openshift.io/v1","version":"v1"}},{"name":"imageregistry.operator.openshift.io","versions":[{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"imageregistry.operator.openshift.io/v1","version":"v1"}},{"name":"ingress.operator.openshift.io","versions":[{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"ingress.operator.openshift.io/v1","version":"v1"}},{"name":"k8s.cni.cncf.io","versions":[{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"k8s.cni.cncf.io/v1","version":"v1"}},{"name":"machine.openshift.io","versions":[{"groupVersion":"machine.openshift.io/v1","version":"v1"},{"groupVersion":"machine.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"machine.openshift.io/v1","version":"v1"}},{"name":"machineconfiguration.openshift.io","versions":[{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"machineconfiguration.openshift.io/v1","version":"v1"}},{"name":"monitoring.coreos.com","versions":[{"groupVersion":"monitoring.coreos.com/v1","version":"v1"},{"groupVersion":"monitoring.coreos.com/v1beta1","version":"v1beta1"},{"groupVersion":"monitoring.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"monitoring.coreos.com/v1","version":"v1"}},{"name":"multicluster.openshift.io","versions":[{"groupVersion":"multicluster.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"multicluster.openshift.io/v1","version":"v1"}},{"name":"network.openshift.io","versions":[{"groupVersion":"network.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"network.openshift.io/v1","version":"v1"}},{"name":"network.operator.openshift.io","versions":[{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"network.operator.openshift.io/v1","version":"v1"}},{"name":"operator.open-cluster-management.io","versions":[{"groupVersion":"operator.open-cluster-management.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"operator.open-cluster-management.io/v1","version":"v1"}},{"name":"operators.coreos.com","versions":[{"groupVersion":"operators.coreos.com/v2","version":"v2"},{"groupVersion":"operators.coreos.com/v1","version":"v1"},{"groupVersion":"operators.coreos.com/v1alpha2","version":"v1alpha2"},{"groupVersion":"operators.coreos.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"operators.coreos.com/v2","version":"v2"}},{"name":"performance.openshift.io","versions":[{"groupVersion":"performance.openshift.io/v2","version":"v2"},{"groupVersion":"performance.openshift.io/v1","version":"v1"},{"groupVersion":"performance.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"performance.openshift.io/v2","version":"v2"}},{"name":"policy.open-cluster-management.io","versions":[{"groupVersion":"policy.open-cluster-management.io/v1","version":"v1"},{"groupVersion":"policy.open-cluster-management.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"policy.open-cluster-management.io/v1","version":"v1"}},{"name":"samples.operator.openshift.io","versions":[{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"samples.operator.openshift.io/v1","version":"v1"}},{"name":"security.internal.openshift.io","versions":[{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"security.internal.openshift.io/v1","version":"v1"}},{"name":"snapshot.storage.k8s.io","versions":[{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"snapshot.storage.k8s.io/v1","version":"v1"}},{"name":"submariner.io","versions":[{"groupVersion":"submariner.io/v1","version":"v1"},{"groupVersion":"submariner.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"submariner.io/v1","version":"v1"}},{"name":"tuned.openshift.io","versions":[{"groupVersion":"tuned.openshift.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"tuned.openshift.io/v1","version":"v1"}},{"name":"velero.io","versions":[{"groupVersion":"velero.io/v1","version":"v1"}],"preferredVersion":{"groupVersion":"velero.io/v1","version":"v1"}},{"name":"work.open-cluster-management.io","versions":[{"groupVersion":"work.open-cluster-management.io/v1","version":"v1"},{"groupVersion":"work.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"work.open-cluster-management.io/v1","version":"v1"}},{"name":"addon.open-cluster-management.io","versions":[{"groupVersion":"addon.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"addon.open-cluster-management.io/v1alpha1","version":"v1alpha1"}},{"name":"controlplane.operator.openshift.io","versions":[{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"controlplane.operator.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"core.observatorium.io","versions":[{"groupVersion":"core.observatorium.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"core.observatorium.io/v1alpha1","version":"v1alpha1"}},{"name":"eda.ansible.com","versions":[{"groupVersion":"eda.ansible.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"eda.ansible.com/v1alpha1","version":"v1alpha1"}},{"name":"hiveinternal.openshift.io","versions":[{"groupVersion":"hiveinternal.openshift.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"hiveinternal.openshift.io/v1alpha1","version":"v1alpha1"}},{"name":"imageregistry.open-cluster-management.io","versions":[{"groupVersion":"imageregistry.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"imageregistry.open-cluster-management.io/v1alpha1","version":"v1alpha1"}},{"name":"metal3.io","versions":[{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"metal3.io/v1alpha1","version":"v1alpha1"}},{"name":"migration.k8s.io","versions":[{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"migration.k8s.io/v1alpha1","version":"v1alpha1"}},{"name":"multicluster.x-k8s.io","versions":[{"groupVersion":"multicluster.x-k8s.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"multicluster.x-k8s.io/v1alpha1","version":"v1alpha1"}},{"name":"search.open-cluster-management.io","versions":[{"groupVersion":"search.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"search.open-cluster-management.io/v1alpha1","version":"v1alpha1"}},{"name":"submarineraddon.open-cluster-management.io","versions":[{"groupVersion":"submarineraddon.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"submarineraddon.open-cluster-management.io/v1alpha1","version":"v1alpha1"}},{"name":"tower.ansible.com","versions":[{"groupVersion":"tower.ansible.com/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"tower.ansible.com/v1alpha1","version":"v1alpha1"}},{"name":"whereabouts.cni.cncf.io","versions":[{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"whereabouts.cni.cncf.io/v1alpha1","version":"v1alpha1"}},{"name":"wgpolicyk8s.io","versions":[{"groupVersion":"wgpolicyk8s.io/v1alpha2","version":"v1alpha2"}],"preferredVersion":{"groupVersion":"wgpolicyk8s.io/v1alpha2","version":"v1alpha2"}},{"name":"infrastructure.cluster.x-k8s.io","versions":[{"groupVersion":"infrastructure.cluster.x-k8s.io/v1beta1","version":"v1beta1"},{"groupVersion":"infrastructure.cluster.x-k8s.io/v1alpha5","version":"v1alpha5"}],"preferredVersion":{"groupVersion":"infrastructure.cluster.x-k8s.io/v1beta1","version":"v1beta1"}},{"name":"action.open-cluster-management.io","versions":[{"groupVersion":"action.open-cluster-management.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"action.open-cluster-management.io/v1beta1","version":"v1beta1"}},{"name":"agent-install.openshift.io","versions":[{"groupVersion":"agent-install.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"agent-install.openshift.io/v1beta1","version":"v1beta1"}},{"name":"app.k8s.io","versions":[{"groupVersion":"app.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"app.k8s.io/v1beta1","version":"v1beta1"}},{"name":"automationcontroller.ansible.com","versions":[{"groupVersion":"automationcontroller.ansible.com/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"automationcontroller.ansible.com/v1beta1","version":"v1beta1"}},{"name":"automationhub.ansible.com","versions":[{"groupVersion":"automationhub.ansible.com/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"automationhub.ansible.com/v1beta1","version":"v1beta1"}},{"name":"extensions.hive.openshift.io","versions":[{"groupVersion":"extensions.hive.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"extensions.hive.openshift.io/v1beta1","version":"v1beta1"}},{"name":"helm.openshift.io","versions":[{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"helm.openshift.io/v1beta1","version":"v1beta1"}},{"name":"internal.open-cluster-management.io","versions":[{"groupVersion":"internal.open-cluster-management.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"internal.open-cluster-management.io/v1beta1","version":"v1beta1"}},{"name":"observability.open-cluster-management.io","versions":[{"groupVersion":"observability.open-cluster-management.io/v1beta2","version":"v1beta2"},{"groupVersion":"observability.open-cluster-management.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"observability.open-cluster-management.io/v1beta2","version":"v1beta2"}},{"name":"view.open-cluster-management.io","versions":[{"groupVersion":"view.open-cluster-management.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"view.open-cluster-management.io/v1beta1","version":"v1beta1"}},{"name":"metrics.k8s.io","versions":[{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}],"preferredVersion":{"groupVersion":"metrics.k8s.io/v1beta1","version":"v1beta1"}},{"name":"clusterview.open-cluster-management.io","versions":[{"groupVersion":"clusterview.open-cluster-management.io/v1","version":"v1"},{"groupVersion":"clusterview.open-cluster-management.io/v1alpha1","version":"v1alpha1"}],"preferredVersion":{"groupVersion":"clusterview.open-cluster-management.io/v1","version":"v1"}}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 87c37cc1-9015-42cf-ab3d-8573ce815ea1
+      Cache-Control:
+      - no-cache, private
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 02 Aug 2023 22:54:39 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - ce021864-c7fe-4f62-b848-e73c0e4cd57e
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 7ec8762a-c330-4b6f-9df2-340f63df5dcb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Content-Type:
+      - application/json
+      User-Agent:
+      - OpenAPI-Generator/26.1.0/python
+      authorization:
+      - <AUTH_TOKEN>
+    method: GET
+    uri: https://fake.ocp.host:9872/apis/cluster.open-cluster-management.io/v1
+  response:
+    body:
+      string: '{"kind":"APIResourceList","apiVersion":"v1","groupVersion":"cluster.open-cluster-management.io/v1","resources":[{"name":"managedclusters","singularName":"managedcluster","namespaced":false,"kind":"ManagedCluster","verbs":["delete","deletecollection","get","list","patch","create","update","watch"],"shortNames":["mcl","mcls"],"storageVersionHash":"DuqQMgCnGgw="},{"name":"managedclusters/status","singularName":"","namespaced":false,"kind":"ManagedCluster","verbs":["get","patch","update"]}]}
+
+        '
+    headers:
+      Audit-Id:
+      - 89315d70-1276-4c84-a99d-d3f3217627ed
+      Cache-Control:
+      - no-cache, private
+      Content-Length:
+      - '493'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 02 Aug 2023 22:54:46 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      X-Kubernetes-Pf-Flowschema-Uid:
+      - ce021864-c7fe-4f62-b848-e73c0e4cd57e
+      X-Kubernetes-Pf-Prioritylevel-Uid:
+      - 7ec8762a-c330-4b6f-9df2-340f63df5dcb
+    status:
+      code: 200
+      message: OK
 version: 1

@@ -153,6 +153,14 @@ class OpenShiftApi:
         cluster_entity = self._init_cluster(clusters[0])
         return cluster_entity
 
+    def retrieve_acm_metrics(self, **kwargs) -> list:
+        """Retrieve metrics on acm managed clusters."""
+        acm_metrics = []
+        for cluster in self._list_managed_clusters(**kwargs).items:
+            managed_cluster_metrics = self._init_managed_cluster(cluster)
+            acm_metrics.append(managed_cluster_metrics)
+        return acm_metrics
+
     def retrieve_pods(self, **kwargs) -> List[OCPPod]:
         """Retrieve OCP Pods."""
         pods_raw = self._list_pods(**kwargs)
@@ -238,6 +246,12 @@ class OpenShiftApi:
             api_version="operators.coreos.com/v1alpha1", kind="ClusterServiceVersion"
         )
 
+    @cached_property
+    def _managed_cluster_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="cluster.open-cluster-management.io/v1", kind="ManagedCluster"
+        )
+
     @catch_k8s_exception
     def _list_nodes(self, **kwargs):
         return self._node_api.get(**kwargs)
@@ -261,6 +275,10 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_cluster_service_versions(self, **kwargs):
         return self._cluster_service_version_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_managed_clusters(self, **kwargs):
+        return self._managed_cluster_api.get(**kwargs)
 
     def _init_ocp_nodes(self, node) -> OCPNode:
         return OCPNode(
@@ -291,3 +309,32 @@ class OpenShiftApi:
             version=cluster["status"]["desired"]["version"],
         )
         return ocp_cluster
+
+    def _init_managed_cluster(self, cluster) -> dict:
+        managed_cluster_metrics = {}
+
+        key_map_labels = {
+            "vendor": "vendor",
+            "cloud": "cloud",
+            "version": "openshiftVersion",
+            "managed_cluster_id": "clusterID",
+        }
+
+        labels = cluster["metadata"]["labels"]
+        for metric_key, cluster_api_key in key_map_labels.items():
+            managed_cluster_metrics[metric_key] = labels[cluster_api_key]
+
+        conditions = cluster["status"]["conditions"]
+        is_cluster_available = any(
+            condition.get("reason") == "ManagedClusterAvailable"
+            for condition in conditions
+        )
+        managed_cluster_metrics["available"] = is_cluster_available
+
+        capacity = cluster["status"].get("capacity", {})
+        managed_cluster_metrics["core_worker"] = capacity.get("core_worker")
+        managed_cluster_metrics["socket_worker"] = capacity.get("socket_worker")
+        managed_cluster_metrics["created_via"] = cluster["metadata"]["annotations"][
+            "open-cluster-management/created-via"
+        ]
+        return managed_cluster_metrics

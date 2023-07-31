@@ -76,6 +76,23 @@ def expected_cluster():
 
 
 @pytest.fixture
+def expected_acm_metrics():
+    """Return list of ACM metrics."""
+    return [
+        {
+            "vendor": "Openshift",
+            "cloud": "Other",
+            "version": "1.2.3",
+            "managed_cluster_id": "not-a-uuid",
+            "available": True,
+            "core_worker": 4,
+            "socket_worker": 4,
+            "created_via": "Other",
+        }
+    ]
+
+
+@pytest.fixture
 def expected_operators(faker):
     """Return a list operators."""
     return [
@@ -105,6 +122,7 @@ def expected_facts(
     expected_node,
     expected_cluster,
     expected_operators,
+    expected_acm_metrics,
 ):
     """Return a list of expected raw facts on OCP scans."""
     expected_node.cluster_uuid = expected_cluster.uuid
@@ -113,6 +131,7 @@ def expected_facts(
         {
             "cluster": _formatter(expected_cluster),
             "operators": _formatter(expected_operators),
+            "acm_metrics": expected_acm_metrics,
         },
     ]
 
@@ -123,6 +142,7 @@ def patched_openshift_client(  # noqa: PLR0913
     expected_node,
     expected_cluster,
     expected_operators,
+    expected_acm_metrics,
 ):
     """Mock OpenShiftApi forcing it to return expected entities."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
@@ -140,6 +160,11 @@ def patched_openshift_client(  # noqa: PLR0913
         OpenShiftApi,
         "retrieve_operators",
         return_value=expected_operators,
+    )
+    mocker.patch.object(
+        OpenShiftApi,
+        "retrieve_acm_metrics",
+        return_value=expected_acm_metrics,
     )
 
 
