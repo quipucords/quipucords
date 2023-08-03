@@ -23,7 +23,7 @@ packaging==23.1
     #   -r requirements-build.in
     #   hatchling
     #   setuptools-scm
-pathspec==0.11.1
+pathspec==0.11.2
     # via hatchling
 pbr==5.11.1
     # via -r requirements-build.in
