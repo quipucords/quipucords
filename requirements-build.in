@@ -9,6 +9,7 @@ flit_core>=3.3
 flit_core>=3.4,<4
 flit_core>=3.8,<4
 hatchling>=0.25.1
+hatchling>=1.6.0,<2
 packaging>=20.0
 pbr
 pbr>=1.8
