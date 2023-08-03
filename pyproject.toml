@@ -11,7 +11,7 @@ build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.11"
 ansible = ">=6,<7"
 django = "^4.2.3"
 django-filter = ">=22.1"
