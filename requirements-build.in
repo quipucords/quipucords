@@ -27,12 +27,10 @@ setuptools>=42.0.0
 setuptools>=45
 setuptools>=45.0
 setuptools>=46.4.0
-setuptools>=56
 setuptools>=61.0.0
 setuptools>=62.4
 setuptools>=62.4.0
 setuptools_scm
-setuptools_scm[toml]>=3.4.1
 typing_extensions
 wheel
 wheel>=0.28.0
