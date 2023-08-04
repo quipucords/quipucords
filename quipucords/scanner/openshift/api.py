@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
@@ -138,6 +139,54 @@ class OpenShiftApi:
             return False
         return True
 
+    # Adding support for fetching OCP Prometheus Metrics
+    # Reference: https://access.redhat.com/solutions/3775611
+
+    def metrics_query(self, query):
+        """Execute an OpenShift Prometheus Query."""
+        kube_config = self._configuration
+        if not self._metrics_host:
+            return []
+        try:
+            response = self._api_client.request(
+                "GET",
+                url=f"https://{self._metrics_host}/api/v1/query?query={query}",
+                headers=kube_config.api_key,
+            )
+        except ApiException as err:
+            logger.error(
+                "Failed to execute the Openshift metrics query: '%s' error: '%s'",
+                query,
+                err.reason,
+            )
+            return []
+
+        json_response = json.loads(response.data)
+        if not response.reason == "OK":
+            logger.error(
+                "Failed to execute the Openshift Prometheus query: '%s' error: '%s'",
+                query,
+                json_response["error"],
+            )
+            return []
+        return [r["metric"] for r in json_response["data"]["result"]]
+
+    @cached_property
+    @catch_k8s_exception
+    def _metrics_host(self):
+        """Return the Prometheus host to use for accessing metrics."""
+        route_list = self._route_api.get(
+            namespace="openshift-monitoring",
+            field_selector="metadata.name=prometheus-k8s",
+        ).items
+        if len(route_list) != 1:
+            logger.warning(
+                "Could not find the OpenShift prometheus-k8s metrics route,"
+                " querying metrics will be disabled."
+            )
+            return None
+        return route_list[0]["spec"]["host"]
+
     def retrieve_nodes(self, **kwargs) -> List[OCPNode]:
         """Retrieve nodes under OCP host."""
         node_list = []
@@ -232,6 +281,12 @@ class OpenShiftApi:
     def _cluster_operator_api(self):
         return self._dynamic_client.resources.get(
             api_version="config.openshift.io/v1", kind="ClusterOperator"
+        )
+
+    @cached_property
+    def _route_api(self):
+        return self._dynamic_client.resources.get(
+            api_version="route.openshift.io/v1", kind="Route"
         )
 
     @cached_property
