@@ -199,3 +199,18 @@ generate-sudo-list:
 
 test-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1
+
+# shamelessly copied/modified from https://github.com/RedHatInsights/insights-host-inventory/blob/64fa5698c88cfb92258c532cfbd26a657faa07f6/Makefile#L48-L57
+# hence this role follows GPLv2 license (I guess... HELP)
+update-system-profile-schema:
+	[ -d ../inventory-schemas ] || git clone git@github.com:RedHatInsights/inventory-schemas.git ../inventory-schemas
+	(cd ../inventory-schemas && git pull)
+	cp \
+	    ../inventory-schemas/schemas/system_profile/v1.yaml \
+	    schemas/system_profile/schema.yaml
+	cp ../inventory-schemas/LICENSE.txt schemas/system_profile/LICENSE.txt
+	( cd ../inventory-schemas; set +e;git rev-parse HEAD) > schemas/system_profile/commit_id
+	git add schemas/system_profile/schema.yaml
+	git add schemas/system_profile/commit_id
+	git add schemas/system_profile/LICENSE.txt
+	git diff --cached
