@@ -9,7 +9,7 @@ from api.models import ScanTask
 from constants import DataSources
 from quipucords.featureflag import FeatureFlag
 from scanner.exceptions import ScanFailureError
-from scanner.openshift import InspectTaskRunner
+from scanner.openshift import InspectTaskRunner, metrics
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
     ClusterOperator,
@@ -169,6 +169,7 @@ def test_inspect_with_success(  # noqa: PLR0913
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
     mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
+    mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value={})
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -192,6 +193,7 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
 ):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
+    mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value={})
     mocker.patch.object(
         OpenShiftApi, "retrieve_nodes", return_value=[node_ok, node_err]
     )
@@ -222,6 +224,7 @@ def test_inspect_with_failure(  # noqa: PLR0913
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
     mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
+    mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value={})
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task(mocker.Mock())
@@ -249,6 +252,7 @@ def test_inspect_errors_on_extra_cluster_facts(  # noqa: PLR0913
     """Test connecting to OpenShift host with errors collecting extra cluster facts."""
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
+    mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value={})
     # leave non-error extra facts empty (since this won't be considered an error and is
     # easier to test)
     for extra_fact in EXTRA_CLUSTER_FACTS - {extra_fact_with_error}:
@@ -303,6 +307,7 @@ def test_inspect_with_enabled_workloads(  # noqa: PLR0913
     mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
     mocker.patch.object(OpenShiftApi, "retrieve_acm_metrics", return_value=acm_metrics)
+    mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value={})
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     runner.execute_task(mocker.Mock())
@@ -320,6 +325,7 @@ def test_inspect_with_disabled_workloads(  # noqa: PLR0913
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
+    mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value={})
     mock_retrieve_workloads = mocker.patch.object(
         OpenShiftApi, "retrieve_workloads", return_value=[workload]
     )
