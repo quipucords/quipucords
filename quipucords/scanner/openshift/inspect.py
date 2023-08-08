@@ -5,6 +5,7 @@ from django.db import transaction
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
 from scanner.exceptions import ScanFailureError
+from scanner.openshift import metrics
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPError, OCPNode
 from scanner.openshift.runner import OpenShiftTaskRunner
@@ -80,6 +81,10 @@ class InspectTaskRunner(OpenShiftTaskRunner):
                 )
             except OCPError as err:
                 cluster.errors[fact_name] = err
+
+        # Let's add the cluster metrics facts
+        extra_facts.update(metrics.retrieve_cluster_metrics(ocp_client))
+
         return extra_facts
 
     def _check_prerequisites(self):
