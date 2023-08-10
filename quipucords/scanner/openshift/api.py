@@ -142,33 +142,19 @@ class OpenShiftApi:
     # Adding support for fetching OCP Prometheus Metrics
     # Reference: https://access.redhat.com/solutions/3775611
 
+    @catch_k8s_exception
     def metrics_query(self, query):
         """Execute an OpenShift Prometheus Query."""
         kube_config = self._configuration
         if not self._metrics_host:
             return []
-        try:
-            response = self._api_client.request(
-                "GET",
-                url=f"https://{self._metrics_host}/api/v1/query?query={query}",
-                headers=kube_config.api_key,
-            )
-        except ApiException as err:
-            logger.error(
-                "Failed to execute the Openshift metrics query: '%s' error: '%s'",
-                query,
-                err.reason,
-            )
-            return []
+        response = self._api_client.request(
+            "GET",
+            url=f"https://{self._metrics_host}/api/v1/query?query={query}",
+            headers=kube_config.api_key,
+        )
 
         json_response = json.loads(response.data)
-        if not response.reason == "OK":
-            logger.error(
-                "Failed to execute the Openshift Prometheus query: '%s' error: '%s'",
-                query,
-                json_response["error"],
-            )
-            return []
         return [r["metric"] for r in json_response["data"]["result"]]
 
     @cached_property
