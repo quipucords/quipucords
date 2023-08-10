@@ -22,16 +22,12 @@ count by(instance,
 }
 
 
-def retrieve_cluster_metrics(ocp_client):
-    """Execute Prometheus queries and return the Cluster metrics."""
-    cluster_metrics = {}
-    for name, metric in OCP_PROMETHEUS_METRICS.items():
-        raw_result = ocp_client.metrics_query(metric["query"])
-        result = []
-        for item in raw_result:
-            query_item = {}
-            for attr in metric["attributes"]:
-                query_item[attr] = item.get(attr, None)
-            result.append(query_item)
-        cluster_metrics[name] = result
-    return cluster_metrics
+def retrieve_cluster_metrics(ocp_client, metric):
+    """Execute a Prometheus query and return the Cluster metrics."""
+    result = []
+    for item in ocp_client.metrics_query(metric["query"]):
+        result_item = {}
+        for attr in metric["attributes"]:
+            result_item[attr] = item.get(attr, None)
+        result.append(result_item)
+    return result
