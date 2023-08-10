@@ -7,7 +7,6 @@ import pytest
 
 from api.inspectresult.model import RawFactEncoder
 from constants import DataSources
-from scanner.openshift import metrics
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
     ClusterOperator,
@@ -166,11 +165,6 @@ def patched_openshift_client(  # noqa: PLR0913
         OpenShiftApi,
         "retrieve_acm_metrics",
         return_value=expected_acm_metrics,
-    )
-    mocker.patch.object(
-        metrics,
-        "retrieve_cluster_metrics",
-        return_value={},
     )
 
 

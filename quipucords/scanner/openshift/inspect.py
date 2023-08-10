@@ -83,7 +83,13 @@ class InspectTaskRunner(OpenShiftTaskRunner):
                 cluster.errors[fact_name] = err
 
         # Let's add the cluster metrics facts
-        extra_facts.update(metrics.retrieve_cluster_metrics(ocp_client))
+        for fact_name, metric in metrics.OCP_PROMETHEUS_METRICS.items():
+            try:
+                extra_facts[fact_name] = metrics.retrieve_cluster_metrics(
+                    ocp_client, metric
+                )
+            except OCPError as err:
+                cluster.errors[fact_name] = err
 
         return extra_facts
 
