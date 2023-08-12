@@ -62,14 +62,14 @@ class BaseNormalizer(metaclass=NormalizerMeta):
         if hasattr(self, "_normalized"):
             return self._normalized
         self._normalized = {}
-        for fact_name, field in self.fields.items():
-            fact_value = self._normalize_fact(fact_name)
+        for fact_name in self.fields.keys():
+            fact_value, raw_fact_keys = self._normalize_fact(fact_name)
+            self._normalized[fact_name] = fact_value
             self._metadata[fact_name] = {
-                "raw_fact_key": field.raw_fact_key,
+                "raw_fact_keys": raw_fact_keys,
                 "source_type": self.source_type,
                 "server_id": self.server_id,
             }
-            self._normalized[fact_name] = fact_value
         return self._normalized
 
     def _normalize_fact(self, fact_name):
@@ -78,15 +78,23 @@ class BaseNormalizer(metaclass=NormalizerMeta):
 
         Blind exceptions are used to ensure issues with normalization or validation
         functions don't affect other facts.
+
+        Returns the normalized fact and a list a raw facts used for normalization.
         """
-        field = self.fields[fact_name]
-        dep_kwargs = {dep: self._normalized[dep] for dep in field.dependencies}
-        raw_value = self.raw_facts.get(field.raw_fact_key)
+        field: FactMapper = self.fields[fact_name]
+        kwargs = {dep: self._normalized[dep] for dep in field.dependencies}
+        if len(field.raw_facts) == 1:
+            raw_fact_key = field.raw_facts[0]
+            raw_value = self.raw_facts.get(raw_fact_key)
+            args = (raw_value,)
+        else:
+            args = ()
+            kwargs.update(**{raw: self.raw_facts.get(raw) for raw in field.raw_facts})
         try:
-            normalized_fact = field.normalizer(raw_value, **dep_kwargs)
+            normalized_fact = field.normalizer(*args, **kwargs)
         except Exception:  # where's the blind exception error, ruff?
             logger.exception("Unexpected error during '%s' normalization.", fact_name)
-            return None
+            return None, None
         try:
             for validator in field.validators:
                 if not validator(normalized_fact):
@@ -95,12 +103,12 @@ class BaseNormalizer(metaclass=NormalizerMeta):
                         fact_name=fact_name,
                         normalized_fact=normalized_fact,
                     )
-                    return None
+                    return None, None
         except Exception:
             logger.exception("Unexpected error during '%s' validation.", fact_name)
-            return None
-
-        return normalized_fact
+            return None, None
+        # for now, assume all facts contributed
+        return normalized_fact, field.raw_facts
 
 
 class FactMapper:
@@ -112,7 +120,7 @@ class FactMapper:
 
     def __init__(
         self,
-        raw_fact_key: str,
+        raw_fact: str | list[str] | None,
         normalizer: callable,
         *,
         validators=None,
@@ -120,15 +128,23 @@ class FactMapper:
     ) -> None:
         """Instantiate FactMapper.
 
-        :param raw_fact_key: name of the raw fact collected during inspection phase
-        :param normalizer: function used to normalize raw fact (signature MUST be
-            fn(raw_fact_value, **dependencies) where dependencies are kwargs from
-            dependencies)
+        :param raw_fact: raw fact name or list of raw fact names used to normalize a
+            fact
+        :param normalizer: function used to normalize raw fact. When raw_fact is a str,
+            signature of normalizer SHOULD be fn(raw_fact_value, **dependencies) where
+            dependencies are kwargs from dependencies. When raw_fact is a list,
+            signature should be fn(**kwargs), where kwargs are raw facts and
+            dependencies.
         :param validators: list of functions used to validate the output (signature
             fn(fact_value) -> bool)
         :param dependencies: list of normalized facts that this fact depends
         """
-        self.raw_fact_key = raw_fact_key
+        if isinstance(raw_fact, str):
+            self.raw_facts = [raw_fact]
+        elif raw_fact is None:
+            self.raw_facts = []
+        else:
+            self.raw_facts = raw_fact
         self.fact_name = None
         self.normalizer = normalizer
         self.dependencies = dependencies or []

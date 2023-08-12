@@ -17,10 +17,10 @@ def test_normalizer_creation():
     assert set(Normalizer.fields.keys()) == {"fact1", "fact2"}
     assert BaseNormalizer.fields == {}
     assert Normalizer.fact1.fact_name == "fact1"
-    assert Normalizer.fact1.raw_fact_key == "raw1"
+    assert Normalizer.fact1.raw_facts == ["raw1"]
     assert Normalizer.fact1.dependencies == []
     assert Normalizer.fact2.fact_name == "fact2"
-    assert Normalizer.fact2.raw_fact_key == "raw2"
+    assert Normalizer.fact2.raw_facts == ["raw2"]
     assert Normalizer.fact2.dependencies == ["fact1"]
 
 
@@ -41,7 +41,7 @@ def test_dependency(mocker):
     """Test normalization of facts with dependencies."""
     raw_facts = {"le_json": '{"final_answer": "42"}'}
 
-    def _normalize_fact2(raw_fact, fact1):
+    def _normalize_fact2(*, fact1):
         return int(fact1["final_answer"])
 
     class N(BaseNormalizer):
@@ -61,3 +61,18 @@ def test_dependency(mocker):
         "fact1": {"final_answer": "forty two"},
         "fact2": None,
     }
+
+
+def test_multiple_raw_facts(mocker):
+    """Test normalization of facts that depend on multiple raw facts directly."""
+    raw_facts = {"raw1": 2, "raw2": 3}
+
+    def _normalizer(*, raw1, raw2):
+        return raw1 + raw2
+
+    class N(BaseNormalizer):
+        fact = FactMapper(["raw1", "raw2"], _normalizer)
+
+    norm = N(raw_facts, mocker.ANY)
+    norm.normalize()
+    assert norm.facts == {"fact": 5}
