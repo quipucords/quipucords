@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from logging import getLogger
 from typing import Any
 
+from utils import SystemProfile
+
 logger = getLogger(__name__)
 
 
@@ -101,7 +103,7 @@ class BaseNormalizer(ABC):
         else:
             self._check_raw_fact_keys_for_fact(fact_name, norm_result.raw_fact_keys)
 
-        for validator in field.validators:
+        for validator in self.get_validators(field):
             try:
                 is_valid = validator(norm_result.value)
             except Exception:
@@ -114,6 +116,11 @@ class BaseNormalizer(ABC):
                 return NormalizedResult(None, has_error=True, raw_fact_keys=None)
 
         return norm_result
+
+    @classmethod
+    def get_validators(cls, field: "FactMapper"):
+        """Get validators of a given field."""
+        return field.validators
 
     @classmethod
     def _get_raw_fact_keys(cls, fact_name):
@@ -134,6 +141,18 @@ class BaseNormalizer(ABC):
             raise AssertionError(
                 f"Unexpected raw facts used for fact '{fact_name}': {unexpected_keys}",
             )
+
+
+class SystemProfileNormalizer(BaseNormalizer):
+    """Normalizer that enhances validation with system profile validators."""
+
+    @classmethod
+    def get_validators(cls, field: "FactMapper"):
+        """Get validators of a given field plus SP validator if applicable."""
+        validators = field.validators.copy()
+        if SystemProfile.is_fact(field.fact_name):
+            validators.append(SystemProfile.validator_factory(field.fact_name))
+        return validators
 
 
 class FactMapper:
@@ -160,7 +179,7 @@ class FactMapper:
             where kwargs are dependencies. When raw_fact_key is a list, signature should
             be `fn(**kwargs)`, where kwargs are raw facts and dependencies.
         :param validators: list of functions used to validate the output (signature
-            fn(fact_value) -> bool)
+            fn(fact_value) -> bool).
         :param dependencies: list of normalized facts that this fact depends
         """
         if isinstance(raw_fact_key, str):

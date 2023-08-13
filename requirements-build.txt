@@ -28,17 +28,35 @@ flit-core==3.9.0
     #   sqlparse
     #   typing-extensions
     #   wheel
+hatch-fancy-pypi-readme==23.1.0
+    # via
+    #   attrs
+    #   jsonschema
+hatch-vcs==0.4.0
+    # via
+    #   attrs
+    #   jsonschema
+    #   jsonschema-specifications
+    #   referencing
 hatchling==1.18.0
     # via
+    #   attrs
     #   colorama
+    #   hatch-fancy-pypi-readme
+    #   hatch-vcs
+    #   jsonschema
+    #   jsonschema-specifications
+    #   referencing
     #   urllib3
+maturin==1.3.2
+    # via rpds-py
 packaging==23.2 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   hatchling
     #   setuptools-scm
 pathspec==0.11.2
     # via hatchling
-pbr==5.11.1
+pbr==6.0.0
     # via
     #   ansible-runner
     #   lockfile
@@ -56,12 +74,14 @@ setuptools-rust==1.8.1
     # via
     #   bcrypt
     #   cryptography
+    #   maturin
 setuptools-scm==8.0.4
     # via
+    #   hatch-vcs
     #   pluggy
     #   python-dateutil
     #   setuptools-rust
-trove-classifiers==2023.10.18
+trove-classifiers==2023.11.14
     # via hatchling
 typing-extensions==4.8.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
@@ -72,6 +92,7 @@ wheel==0.41.3
     #   cachetools
     #   click-repl
     #   cryptography
+    #   maturin
     #   pynacl
     #   python-dateutil
     #   python-string-utils
@@ -93,6 +114,7 @@ setuptools==68.2.2 ; python_version >= "3.11" and python_version < "3.12"
     #   cryptography
     #   django
     #   gitpython
+    #   maturin
     #   pathspec
     #   pluggy
     #   pyasn1
