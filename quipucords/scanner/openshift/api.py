@@ -146,22 +146,22 @@ class OpenShiftApi:
     def metrics_query(self, query):
         """Execute an OpenShift Prometheus Query."""
         kube_config = self._configuration
-        if not self._metrics_host:
+        metrics_host = self._metrics_host()
+        if not metrics_host:
             return []
         response = self._api_client.request(
             "GET",
-            url=f"https://{self._metrics_host}/api/v1/query?query={query}",
+            url=f"https://{metrics_host}/api/v1/query?query={query}",
             headers=kube_config.api_key,
         )
 
         json_response = json.loads(response.data)
         return [r["metric"] for r in json_response["data"]["result"]]
 
-    @cached_property
     @catch_k8s_exception
     def _metrics_host(self):
         """Return the Prometheus host to use for accessing metrics."""
-        route_list = self._route_api.get(
+        route_list = self._list_routes(
             namespace="openshift-monitoring",
             field_selector="metadata.name=prometheus-k8s",
         ).items
@@ -320,6 +320,10 @@ class OpenShiftApi:
     @catch_k8s_exception
     def _list_managed_clusters(self, **kwargs):
         return self._managed_cluster_api.get(**kwargs)
+
+    @catch_k8s_exception
+    def _list_routes(self, **kwargs):
+        return self._route_api.get(**kwargs)
 
     def _init_ocp_nodes(self, node) -> OCPNode:
         return OCPNode(
