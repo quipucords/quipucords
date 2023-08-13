@@ -3,6 +3,7 @@
 from logging import getLogger
 
 from api.status.misc import get_server_id
+from utils import SystemProfile
 
 logger = getLogger(__name__)
 
@@ -136,7 +137,8 @@ class FactMapper:
             signature should be fn(**kwargs), where kwargs are raw facts and
             dependencies.
         :param validators: list of functions used to validate the output (signature
-            fn(fact_value) -> bool)
+            fn(fact_value) -> bool). If the fact is part of system profile, an jsonchema
+            validator will be automatically added.
         :param dependencies: list of normalized facts that this fact depends
         """
         if isinstance(raw_fact, str):
@@ -163,3 +165,5 @@ class FactMapper:
                 raise ValueError(
                     f"'{dep}' can't be found on normalizer '{normalizer.__name__}'"
                 )
+        if SystemProfile.is_fact(self.fact_name):
+            self.validators.append(SystemProfile.validator_factory(self.fact_name))
