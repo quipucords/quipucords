@@ -39,14 +39,14 @@ setuptools-rust==1.6.0
     # via -r requirements-build.in
 setuptools-scm[toml]==7.1.0
     # via -r requirements-build.in
-trove-classifiers==2023.7.6
+trove-classifiers==2023.8.7
     # via hatchling
 typing-extensions==4.7.1
     # via
     #   -r requirements-build.in
     #   setuptools-rust
     #   setuptools-scm
-wheel==0.41.0
+wheel==0.41.1
     # via -r requirements-build.in
 
 # The following packages are considered to be unsafe in a requirements file:
