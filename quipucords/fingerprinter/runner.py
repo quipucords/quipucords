@@ -880,7 +880,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         :param source: Source used to gather raw facts.
         :param raw_fact_key: Raw fact key used to obtain value
-        :param raw_fact: Raw fact used used to obtain value
+        :param raw_fact: Raw fact used to obtain value
         :param fingerprint_key: Key used to store fingerprint
         :param fingerprint: dict containing all fingerprint facts
         this fact.
@@ -925,7 +925,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """Create the fingerprint products with fact and metadata.
 
         :param source: Source used to gather raw facts.
-        :param raw_fact: Raw fact used used to obtain value
+        :param raw_fact: Raw fact used to obtain value
         :param fingerprint: dict containing all fingerprint facts
         this fact.
         """
@@ -942,7 +942,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         :param source: Source used to gather raw facts.
         :param raw_fact_key: Raw fact key used to obtain value
-        :param raw_fact: Raw fact used used to obtain value
+        :param raw_fact: Raw fact used to obtain value
         :param fingerprint: dict containing all fingerprint facts
         this fact.
         """
