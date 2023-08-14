@@ -10,6 +10,7 @@ from django.db import DataError
 
 from api.deployments_report.model import SystemFingerprint
 from api.models import DeploymentsReport, DetailsReport, ServerInformation, Source
+from api.scantask.model import ScanTask
 from constants import DataSources
 from fingerprinter.constants import ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY
 from fingerprinter.runner import (
@@ -133,14 +134,14 @@ def source():
 @pytest.fixture
 def scan_job(source):
     """Create a ScanJob for tests."""
-    scan_job, _ = create_scan_job(source)
+    scan_job, _ = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
     return scan_job
 
 
 @pytest.fixture
 def fingerprint_task(scan_job):
-    """Get the fingerprint task, which by convention is the last ScanJob task."""
-    return scan_job.tasks.last()
+    """Get the fingerprint task."""
+    return scan_job.tasks.filter(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT).last()
 
 
 @pytest.fixture
