@@ -1067,46 +1067,32 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         # Determine if running on VM or bare metal
         virt_what_type = fact.get("virt_what_type")
-        virt_type = fact.get("virt_type")
-        if virt_what_type or virt_type:
-            if virt_what_type == "bare metal":
-                self._add_fact_to_fingerprint(
-                    source,
-                    "virt_what_type",
-                    fact,
-                    "infrastructure_type",
-                    fingerprint,
-                    fact_value=SystemFingerprint.BARE_METAL,
-                )
-            elif virt_type:
-                self._add_fact_to_fingerprint(
-                    source,
-                    "virt_type",
-                    fact,
-                    "infrastructure_type",
-                    fingerprint,
-                    fact_value=SystemFingerprint.VIRTUALIZED,
-                )
-            else:
-                # virt_what_type is not bare metal or None
-                # (since both cannot be)
-                self._add_fact_to_fingerprint(
-                    source,
-                    "virt_what_type",
-                    fact,
-                    "infrastructure_type",
-                    fingerprint,
-                    fact_value=SystemFingerprint.UNKNOWN,
-                )
+        if virt_what_type == "bare metal":
+            raw_fact_key = "virt_what_type"
+            fact_value = SystemFingerprint.BARE_METAL
+        elif fact.get("virt_type"):
+            raw_fact_key = "virt_type"
+            fact_value = SystemFingerprint.VIRTUALIZED
+        elif fact.get("subman_virt_is_guest", False):
+            # We don't know virt_type, but subscription-manager says it's a guest.
+            # So, we assume it's virtualized. See also: DISCOVERY-243.
+            raw_fact_key = "subman_virt_is_guest"
+            fact_value = SystemFingerprint.VIRTUALIZED
+        elif virt_what_type:
+            # virt_what_type is not "bare metal" or None, but we have no other details.
+            raw_fact_key = "virt_what_type"
+            fact_value = SystemFingerprint.UNKNOWN
         else:
-            self._add_fact_to_fingerprint(
-                source,
-                "virt_what_type/virt_type",
-                fact,
-                "infrastructure_type",
-                fingerprint,
-                fact_value=SystemFingerprint.UNKNOWN,
-            )
+            raw_fact_key = "virt_what_type/virt_type"
+            fact_value = SystemFingerprint.UNKNOWN
+        self._add_fact_to_fingerprint(
+            source,
+            raw_fact_key,
+            fact,
+            "infrastructure_type",
+            fingerprint,
+            fact_value=fact_value,
+        )
 
         self._add_entitlements_to_fingerprint(
             source, "subman_consumed", fact, fingerprint
