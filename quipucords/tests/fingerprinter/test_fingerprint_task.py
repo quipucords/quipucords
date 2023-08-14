@@ -438,19 +438,14 @@ def _validate_network_result(fingerprint, fact):
     assert fact.get("redhat_packages_gpg_num_rh_packages") == fingerprint.get(
         "redhat_package_count"
     )
-    system_purpose_json = fact.get("system_purpose_json", None)
-    if system_purpose_json:
+    if system_purpose_json := fact.get("system_purpose_json"):
         assert system_purpose_json == fingerprint.get("system_purpose")
-        assert system_purpose_json.get("role", None) == fingerprint.get("system_role")
-        assert system_purpose_json.get("addons", None) == fingerprint.get(
-            "system_addons"
+        assert system_purpose_json.get("role") == fingerprint.get("system_role")
+        assert system_purpose_json.get("addons") == fingerprint.get("system_addons")
+        assert system_purpose_json.get("service_level_agreement") == fingerprint.get(
+            "system_service_level_agreement"
         )
-        assert system_purpose_json.get(
-            "service_level_agreement", None
-        ) == fingerprint.get("system_service_level_agreement")
-        assert system_purpose_json.get("usage", None) == fingerprint.get(
-            "system_usage_type"
-        )
+        assert system_purpose_json.get("usage") == fingerprint.get("system_usage_type")
     else:
         assert fingerprint.get("system_role") is None
         assert fingerprint.get("system_addons") is None
