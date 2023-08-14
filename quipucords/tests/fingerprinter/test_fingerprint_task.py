@@ -5,6 +5,7 @@ from datetime import datetime
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
 from django.db import DataError
 from django.test import TestCase
 
@@ -1435,16 +1436,15 @@ class EngineTest(TestCase):
                 self.assertIn("failed", status_message.lower())
                 self.assertEqual(status, "failed")
 
-    def test_format_certs(self):
-        """Testing the format_certs function."""
-        certs = ["69.pem", "67.pem", ""]
-        formatted_certs = FingerprintTaskRunner.format_certs(certs)
-        self.assertEqual([69, 67], formatted_certs)
-        # assert empty list stays empty
-        certs = []
-        formatted_certs = FingerprintTaskRunner.format_certs(certs)
-        self.assertEqual([], formatted_certs)
-        # assert exception returns empty
-        certs = ["notint.pem"]
-        formatted_certs = FingerprintTaskRunner.format_certs(certs)
-        self.assertEqual([], formatted_certs)
+
+@pytest.mark.parametrize(
+    "certs, expected_formatted_certs",
+    [
+        (["69.pem", "67.pem", ""], [69, 67]),
+        ([], []),  # assert empty list stays empty
+        (["notint.pem"], []),  # assert exception returns empty
+    ],
+)
+def test_format_certs(certs, expected_formatted_certs):
+    """Testing the format_certs function."""
+    assert expected_formatted_certs == FingerprintTaskRunner.format_certs(certs)
