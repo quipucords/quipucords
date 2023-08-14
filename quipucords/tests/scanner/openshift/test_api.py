@@ -109,7 +109,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     """
     assert (
         not ocp_client._discoverer_cache_file.exists()
-    ), "Cache file exists prior to test excecution!"
+    ), "Cache file exists prior to test execution!"
     # just accessing the attribute will trigger "introspection" requests at ocp
     ocp_client._dynamic_client
     ocp_client._cluster_api
@@ -117,6 +117,7 @@ def test_dynamic_client_cache(ocp_client: OpenShiftApi):
     ocp_client._namespace_api
     ocp_client._pod_api
     ocp_client._cluster_operator_api
+    ocp_client._route_api
     ocp_client._subscription_api
     ocp_client._cluster_service_version_api
     ocp_client._managed_cluster_api
@@ -137,6 +138,21 @@ def test_cluster_operators_api(ocp_client: OpenShiftApi):
     """Test _cluster_api."""
     cluster_operators = ocp_client._list_cluster_operators()
     assert cluster_operators
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_ROUTE, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_route_api(ocp_client: OpenShiftApi):
+    """Test _route_api."""
+    routes = ocp_client._list_routes()
+    assert routes
+
+
+@pytest.mark.vcr(VCRCassettes.OCP_ROUTE, VCRCassettes.OCP_DISCOVERER_CACHE)
+def test_list_route(ocp_client: OpenShiftApi):
+    """Test retrieve node method."""
+    list_routes = ocp_client._list_routes().items
+    for route in list_routes:
+        assert route["spec"]["host"]
 
 
 @pytest.mark.vcr_primer(
