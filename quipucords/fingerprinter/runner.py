@@ -982,47 +982,61 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         fingerprint = {META_DATA_KEY: {}}
 
-        # Common facts
-        self._add_fact_to_fingerprint(
-            source, "uname_hostname", fact, "name", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "uname_processor", fact, "architecture", fingerprint
-        )
+        # Use a list to drive direct mappings of raw_fact_key, fingerprint_key pairs.
+        raw_fact_keys_to_fingerprint_keys = [
+            # Common facts
+            ("uname_hostname", "name"),
+            ("uname_processor", "architecture"),
+            # Red Hat facts
+            ("redhat_packages_gpg_num_rh_packages", "redhat_package_count"),
+            ("redhat_packages_certs", "redhat_certs"),
+            ("redhat_packages_gpg_is_redhat", "is_redhat"),
+            ("etc_machine_id", "etc_machine_id"),
+            # Set OS information
+            ("etc_release_name", "os_name"),
+            ("etc_release_version", "os_version"),
+            ("etc_release_release", "os_release"),
+            # Set ip address from either network or vcenter
+            ("ifconfig_ip_addresses", "ip_addresses"),
+            # Set CPU facts
+            ("cpu_count", "cpu_count"),
+            # Network scan specific facts
+            ("dmi_system_uuid", "bios_uuid"),
+            ("subscription_manager_id", "subscription_manager_id"),
+            # System information
+            ("cpu_socket_count", "cpu_socket_count"),
+            ("cpu_core_count", "cpu_core_count"),
+            ("cpu_core_per_socket", "cpu_core_per_socket"),
+            ("cpu_hyperthreading", "cpu_hyperthreading"),
+            # Determine system_creation_date
+            ("date_machine_id", "date_machine_id"),
+            ("date_anaconda_log", "date_anaconda_log"),
+            ("date_filesystem_create", "date_filesystem_create"),
+            ("date_yum_history", "date_yum_history"),
+            ("insights_client_id", "insights_client_id"),
+            # public cloud fact
+            ("cloud_provider", "cloud_provider"),
+            # user data facts
+            ("system_user_count", "system_user_count"),
+            ("user_login_history", "user_login_history"),
+            # System purpose facts
+            ("system_purpose_json", "system_purpose"),
+            ("system_purpose_json__role", "system_role"),
+            ("system_purpose_json__addons", "system_addons"),
+            (
+                "system_purpose_json__service_level_agreement",
+                "system_service_level_agreement",
+            ),
+            ("system_purpose_json__usage", "system_usage_type"),
+            # Determine if VM facts
+            ("virt_type", "virtualized_type"),
+            ("system_memory_bytes", "system_memory_bytes"),
+        ]
 
-        # Red Hat facts
-        self._add_fact_to_fingerprint(
-            source,
-            "redhat_packages_gpg_num_rh_packages",
-            fact,
-            "redhat_package_count",
-            fingerprint,
-        )
-        self._add_fact_to_fingerprint(
-            source, "redhat_packages_certs", fact, "redhat_certs", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "redhat_packages_gpg_is_redhat", fact, "is_redhat", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "etc_machine_id", fact, "etc_machine_id", fingerprint
-        )
-
-        # Set OS information
-        self._add_fact_to_fingerprint(
-            source, "etc_release_name", fact, "os_name", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "etc_release_version", fact, "os_version", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "etc_release_release", fact, "os_release", fingerprint
-        )
-
-        # Set ip address from either network or vcenter
-        self._add_fact_to_fingerprint(
-            source, "ifconfig_ip_addresses", fact, "ip_addresses", fingerprint
-        )
+        for raw_fact_key, fingerprint_key in raw_fact_keys_to_fingerprint_keys:
+            self._add_fact_to_fingerprint(
+                source, raw_fact_key, fact, fingerprint_key, fingerprint
+            )
 
         # Set mac address from either network or vcenter
         self._add_fact_to_fingerprint(
@@ -1032,74 +1046,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             "mac_addresses",
             fingerprint,
             fact_formatter=formatters.format_mac_addresses,
-        )
-
-        # Set CPU facts
-        self._add_fact_to_fingerprint(
-            source, "cpu_count", fact, "cpu_count", fingerprint
-        )
-
-        # Network scan specific facts
-        # Set bios UUID
-        self._add_fact_to_fingerprint(
-            source, "dmi_system_uuid", fact, "bios_uuid", fingerprint
-        )
-
-        # Set subscription manager id
-        self._add_fact_to_fingerprint(
-            source,
-            "subscription_manager_id",
-            fact,
-            "subscription_manager_id",
-            fingerprint,
-        )
-
-        # System information
-        self._add_fact_to_fingerprint(
-            source, "cpu_socket_count", fact, "cpu_socket_count", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "cpu_core_count", fact, "cpu_core_count", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "cpu_core_per_socket", fact, "cpu_core_per_socket", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "cpu_hyperthreading", fact, "cpu_hyperthreading", fingerprint
-        )
-
-        # Determine system_creation_date
-        self._add_fact_to_fingerprint(
-            source, "date_machine_id", fact, "date_machine_id", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "date_anaconda_log", fact, "date_anaconda_log", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source,
-            "date_filesystem_create",
-            fact,
-            "date_filesystem_create",
-            fingerprint,
-        )
-        self._add_fact_to_fingerprint(
-            source, "date_yum_history", fact, "date_yum_history", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "insights_client_id", fact, "insights_client_id", fingerprint
-        )
-
-        # public cloud fact
-        self._add_fact_to_fingerprint(
-            source, "cloud_provider", fact, "cloud_provider", fingerprint
-        )
-
-        # user data facts
-        self._add_fact_to_fingerprint(
-            source, "system_user_count", fact, "system_user_count", fingerprint
-        )
-        self._add_fact_to_fingerprint(
-            source, "user_login_history", fact, "user_login_history", fingerprint
         )
 
         last_checkin = None
@@ -1161,56 +1107,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 fingerprint,
                 fact_value=SystemFingerprint.UNKNOWN,
             )
-
-        # System purpose facts
-        self._add_fact_to_fingerprint(
-            source,
-            "system_purpose_json",
-            fact,
-            "system_purpose",
-            fingerprint,
-        )
-
-        self._add_fact_to_fingerprint(
-            source,
-            "system_purpose_json__role",
-            fact,
-            "system_role",
-            fingerprint,
-        )
-
-        self._add_fact_to_fingerprint(
-            source,
-            "system_purpose_json__addons",
-            fact,
-            "system_addons",
-            fingerprint,
-        )
-
-        self._add_fact_to_fingerprint(
-            source,
-            "system_purpose_json__service_level_agreement",
-            fact,
-            "system_service_level_agreement",
-            fingerprint,
-        )
-
-        self._add_fact_to_fingerprint(
-            source,
-            "system_purpose_json__usage",
-            fact,
-            "system_usage_type",
-            fingerprint,
-        )
-
-        # Determine if VM facts
-        self._add_fact_to_fingerprint(
-            source, "virt_type", fact, "virtualized_type", fingerprint
-        )
-
-        self._add_fact_to_fingerprint(
-            source, "system_memory_bytes", fact, "system_memory_bytes", fingerprint
-        )
 
         self._add_entitlements_to_fingerprint(
             source, "subman_consumed", fact, fingerprint
