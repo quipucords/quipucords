@@ -23,6 +23,10 @@ SCAN_TARGET_PASSWORD = "super-secret-password"
 SCAN_TARGET_SSH_PORT = "2222"
 SCAN_TARGET_USERNAME = "non-root-user"
 VCR_CASSETTES_DIR = PROJECT_ROOT_DIR / "quipucords/tests/cassettes"
+# For URI's standard ports 80 and 443, we do not specify those in the VCR
+# Request URI's, i.e. accessing external routes, the 443 is not specified,
+# so we drop the ports when we rewrite the request URI's in the cassettes.
+VCR_NO_PORT_URI_PORTS = [80, 443]
 
 
 class ConstantsFromEnv:
@@ -35,6 +39,9 @@ class ConstantsFromEnv:
     TEST_OCP_AUTH_TOKEN = EnvVar("<AUTH_TOKEN>")
     TEST_OCP_SSL_VERIFY = EnvVar("true", as_bool)
     TEST_OCP_URI = EnvVar("https://fake.ocp.host:9872", BaseURI)
+    TEST_OCP_METRICS_URI = EnvVar(
+        "https://prometheus-k8s-openshift-monitoring.apps.fake.ocp.host", BaseURI
+    )
 
 
 class VCRPath:
@@ -43,7 +50,7 @@ class VCRPath:
 
     The path will be based only on VCRPath parent attribute name, which
     should have at least two "words" separated by "_". The first word will
-    considered a folder and the rest will be considered a file name which will
+    be considered a folder and the rest will be considered a file name which will
     receive a ".yaml" suffix.
 
     To give a pratical usage example:
@@ -75,6 +82,7 @@ class VCRCassettes:
     OCP_PODS = VCRPath()
     OCP_CLUSTER_OPERATORS = VCRPath()
     OCP_ROUTE = VCRPath()
+    OCP_METRICS_CACHE = VCRPath()
     OCP_SUBSCRIPTIONS = VCRPath()
     OCP_CSV = VCRPath()
     OCP_ACM = VCRPath()

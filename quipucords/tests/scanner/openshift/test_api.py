@@ -456,3 +456,35 @@ def test_retrieve_workloads(ocp_client: OpenShiftApi):
     assert_elements_type(workloads, OCPWorkload)
     assert len(workloads) < len(pods)
     assert {p.app_name for p in pods} == {a.name for a in workloads}
+
+
+@pytest.fixture
+def node_metrics_query():
+    """Return a simple node metrics query."""
+    return "count by(instance) (max by(node, instance) (cluster:cpu_core_node_labels))"
+
+
+@pytest.mark.vcr_primer(VCRCassettes.OCP_METRICS_CACHE)
+@pytest.mark.vcr(
+    VCRCassettes.OCP_ROUTE,
+    VCRCassettes.OCP_METRICS_CACHE,
+)
+def test_metrics_query(
+    ocp_client: OpenShiftApi,
+    node_metrics_query,
+    mocker,
+):
+    """Test Prometheus query is properly parsed and returned."""
+    mocker.patch.object(
+        ocp_client,
+        "_metrics_host",
+        return_value=ConstantsFromEnv.TEST_OCP_METRICS_URI.value.host,
+    )
+    query_response = ocp_client.metrics_query(node_metrics_query)
+
+    # Make sure metrics_query has properly extracted the metric out of the
+    # Prometheus response (and not in the response returned) and that the
+    # query did return the instance being asked for.
+    for query_item in query_response:
+        assert "instance" in query_item
+        assert "metric" not in query_item

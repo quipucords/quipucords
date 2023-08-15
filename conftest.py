@@ -104,12 +104,17 @@ def _replace_cassette_uri(vcr_request, uri_map: dict):
     """
     Replace recorded request URI with its equivalent fallback URI.
 
-    Cassete recorded URIs are intended to be set on ConstantsFromEnv class
+    Cassette recorded URIs are intended to be set on ConstantsFromEnv class
     (see tests/constants.py module).
     """
+    from tests.constants import VCR_NO_PORT_URI_PORTS
+
     # https://vcrpy.readthedocs.io/en/latest/advanced.html#custom-request-filtering
 
-    vcr_base_uri = f"{vcr_request.scheme}://{vcr_request.host}:{vcr_request.port}"
+    if vcr_request.port in VCR_NO_PORT_URI_PORTS:
+        vcr_base_uri = f"{vcr_request.scheme}://{vcr_request.host}"
+    else:
+        vcr_base_uri = f"{vcr_request.scheme}://{vcr_request.host}:{vcr_request.port}"
     fallback_base_uri = uri_map[vcr_base_uri]
     vcr_request.uri = fallback_base_uri.replace_base_uri(vcr_request.uri)
     return vcr_request
