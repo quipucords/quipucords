@@ -10,7 +10,7 @@ from urllib.parse import urlparse, urlunparse
 
 class EnvVar:
     """
-    Environment value with an fallback value.
+    Environment value with a fallback value.
 
     The environment variable name will match the name of the attribute
     where this is instantiated.
@@ -52,7 +52,7 @@ class BaseURI:
     """
     BaseURI class.
 
-    BaseURI represents the three initial parts on an URI: protocol/scheme, host
+    BaseURI represents the three initial parts on a URI: protocol/scheme, host
     and port.
     """
 
@@ -109,8 +109,13 @@ class BaseURI:
 
     def replace_base_uri(self, uri: str):
         """Replace protocol, host and port from an uri with this instance values."""
+        from tests.constants import VCR_NO_PORT_URI_PORTS
+
         protocol, host, *other_parts = urlparse(uri)
-        return urlunparse((self.protocol, f"{self.host}:{self.port}", *other_parts))
+        if self.port in VCR_NO_PORT_URI_PORTS:
+            return urlunparse((self.protocol, f"{self.host}", *other_parts))
+        else:
+            return urlunparse((self.protocol, f"{self.host}:{self.port}", *other_parts))
 
 
 def as_bool(value) -> bool:
