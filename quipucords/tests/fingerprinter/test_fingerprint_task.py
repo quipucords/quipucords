@@ -592,6 +592,64 @@ def test_process_network_source(
     # performs validation with assertions.
 
 
+@pytest.mark.parametrize(
+    "facts, expected_raw_fact_key, expected_infrastructure_type",
+    (
+        (
+            {"virt_what_type": "bare metal"},
+            "virt_what_type",
+            SystemFingerprint.BARE_METAL,
+        ),
+        (
+            {"virt_type": "unspecified-magic"},
+            "virt_type",
+            SystemFingerprint.VIRTUALIZED,
+        ),
+        (
+            {"subman_virt_is_guest": True},
+            "subman_virt_is_guest",
+            SystemFingerprint.VIRTUALIZED,
+        ),
+        (
+            {"virt_what_type": "unspecified-magic"},
+            "virt_what_type",
+            SystemFingerprint.UNKNOWN,
+        ),
+        (
+            {"virt_what_type": None},
+            "virt_what_type/virt_type",
+            SystemFingerprint.UNKNOWN,
+        ),
+        ({}, "virt_what_type/virt_type", SystemFingerprint.UNKNOWN),
+    ),
+)
+@pytest.mark.django_db
+def test_process_network_source_infrastructure_type(
+    server_id,
+    fingerprint_task_runner,
+    facts,
+    expected_raw_fact_key,
+    expected_infrastructure_type,
+):
+    """
+    Test that network source fact processing gives expected infrastructure types.
+
+    This test is intended to test exhaustively many inputs that can lead to the various
+    infrastructure_type fingerprint values that could indicate a virtualized guest.
+    """
+    source = {
+        "server_id": server_id,
+        "source_name": "source1",
+        "source_type": DataSources.NETWORK,
+    }
+    fingerprint = fingerprint_task_runner._process_network_fact(source, facts)
+    assert fingerprint["infrastructure_type"] == expected_infrastructure_type
+    assert (
+        fingerprint[META_DATA_KEY]["infrastructure_type"]["raw_fact_key"]
+        == expected_raw_fact_key
+    )
+
+
 @pytest.mark.django_db
 def test_process_network_system_purpose(server_id, fingerprint_task_runner):
     """Test process network system_purpose."""
