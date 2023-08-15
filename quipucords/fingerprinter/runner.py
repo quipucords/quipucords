@@ -747,8 +747,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
         return result_by_key, key_not_found_list
 
     def _merge_fingerprint(  # noqa: PLR0912, C901
-        self, priority_fingerprint, to_merge_fingerprint, reverse_priority_keys=None
-    ):
+        self,
+        priority_fingerprint: dict,
+        to_merge_fingerprint: dict,
+        reverse_priority_keys=None,
+    ) -> dict:
         """Merge two fingerprints.
 
         The priority_fingerprint values are always used.  The
@@ -868,11 +871,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
     def _add_fact_to_fingerprint(  # noqa: PLR0913
         self,
-        source,
-        raw_fact_key,
-        raw_fact,
-        fingerprint_key,
-        fingerprint,
+        source: dict,
+        raw_fact_key: str,
+        raw_fact: dict,
+        fingerprint_key: str,
+        fingerprint: dict,
         fact_value=None,
         fact_formatter=None,
     ):
@@ -973,7 +976,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         else:
             fingerprint[ENTITLEMENTS_KEY] = entitlements
 
-    def _process_network_fact(self, source, fact):  # noqa: PLR0915
+    def _process_network_fact(self, source: dict, fact: dict) -> dict:
         """Process a fact and convert to a fingerprint.
 
         :param source: The source that provided this fact.
