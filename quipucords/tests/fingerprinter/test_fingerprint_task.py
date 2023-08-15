@@ -567,11 +567,6 @@ def test_process_network_source(server_id, fingerprint_task_runner):
         server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
     )
 
-    system_purpose_json["_version"] = 1
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
     system_purpose_json["role"] = "server"
     _create_network_fingerprint(
         server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
