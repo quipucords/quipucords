@@ -549,48 +549,47 @@ def _create_satellite_fingerprint(server_id, fingerprint_task_runner, *args, **k
 ################################################################
 # Test Source functions
 ################################################################
+@pytest.mark.parametrize(
+    "system_purpose_json",
+    [
+        None,
+        {},
+        {"_version": 1},
+        {"_version": 1, "role": "server"},
+        {"_version": 1, "role": "server", "service_level_agreement": "self-service"},
+        {
+            "_version": 1,
+            "role": "server",
+            "service_level_agreement": "self-service",
+            "usage": "dev",
+        },
+        {
+            "_version": 1,
+            "role": "server",
+            "service_level_agreement": "self-service",
+            "usage": "dev",
+            "addons": "ibm",
+        },
+        {
+            "_version": 1,
+            "role": "server",
+            "service_level_agreement": "self-service",
+            "usage": "dev",
+            "addons": "ibm",
+            "random_extra_field": "redhat",
+        },
+    ],
+)
 @pytest.mark.django_db
-def test_process_network_source(server_id, fingerprint_task_runner):
-    """Test process network source."""
-    system_purpose_json = None
+def test_process_network_source(
+    server_id, fingerprint_task_runner, system_purpose_json
+):
+    """Test process network source based on various system purpose JSONs."""
     _create_network_fingerprint(
         server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
     )
-
-    system_purpose_json = {}
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
-    system_purpose_json["_version"] = 1
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
-    system_purpose_json["role"] = "server"
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
-    system_purpose_json["service_level_agreement"] = "self-service"
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
-    system_purpose_json["usage"] = "dev"
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
-    system_purpose_json["addons"] = ["ibm"]
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
-
-    system_purpose_json["random_extra_field"] = ["redhat"]
-    _create_network_fingerprint(
-        server_id, fingerprint_task_runner, system_purpose_json=system_purpose_json
-    )
+    # We have no special assertions here because _create_network_fingerprint already
+    # performs validation with assertions.
 
 
 @pytest.mark.django_db
