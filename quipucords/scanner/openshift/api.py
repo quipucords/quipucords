@@ -151,7 +151,8 @@ class OpenShiftApi:
             return []
         response = self._api_client.request(
             "GET",
-            url=f"https://{metrics_host}/api/v1/query?query={query}",
+            url=f"https://{metrics_host}/api/v1/query",
+            query_params={"query": query},
             headers=kube_config.api_key,
         )
 

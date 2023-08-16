@@ -149,7 +149,7 @@ def test_route_api(ocp_client: OpenShiftApi):
 
 @pytest.mark.vcr(VCRCassettes.OCP_ROUTE, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_list_route(ocp_client: OpenShiftApi):
-    """Test retrieve node method."""
+    """Test retrieve routes method."""
     list_routes = ocp_client._list_routes().items
     for route in list_routes:
         assert route["spec"]["host"]
@@ -464,10 +464,9 @@ def node_metrics_query():
     return "count by(instance) (max by(node, instance) (cluster:cpu_core_node_labels))"
 
 
-@pytest.mark.vcr_primer(VCRCassettes.OCP_METRICS_CACHE)
-@pytest.mark.vcr(
-    VCRCassettes.OCP_ROUTE,
+@pytest.mark.vcr_primer(
     VCRCassettes.OCP_METRICS_CACHE,
+    VCRCassettes.OCP_DISCOVERER_CACHE,
 )
 def test_metrics_query(
     ocp_client: OpenShiftApi,
