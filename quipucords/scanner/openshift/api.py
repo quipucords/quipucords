@@ -9,6 +9,7 @@ from typing import List
 
 from kubernetes.client import ApiClient, ApiException, CoreV1Api
 from kubernetes.client import Configuration as KubeConfig
+from kubernetes.dynamic.exceptions import ResourceNotFoundError
 from openshift.dynamic import DynamicClient
 from openshift.helper.userpassauth import OCPLoginConfiguration
 from urllib3.exceptions import MaxRetryError
@@ -192,9 +193,15 @@ class OpenShiftApi:
     def retrieve_acm_metrics(self, **kwargs) -> list:
         """Retrieve metrics on acm managed clusters."""
         acm_metrics = []
-        for cluster in self._list_managed_clusters(**kwargs).items:
-            managed_cluster_metrics = self._init_managed_cluster(cluster)
-            acm_metrics.append(managed_cluster_metrics)
+        try:
+            for cluster in self._list_managed_clusters(**kwargs).items:
+                managed_cluster_metrics = self._init_managed_cluster(cluster)
+                acm_metrics.append(managed_cluster_metrics)
+        except ResourceNotFoundError:
+            logger.info(
+                "OpenShift host at %(host)s does not have the ManagedCluster API.",
+                {"host": self._configuration.host},
+            )
         return acm_metrics
 
     def retrieve_pods(self, **kwargs) -> List[OCPPod]:
