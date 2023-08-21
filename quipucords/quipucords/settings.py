@@ -336,31 +336,7 @@ LOGGING = {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        "scanner.callback": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "scanner.manager": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "scanner.job": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "scanner.task": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "scanner.network": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "scanner.vcenter": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "scanner.satellite": {
+        "scanner": {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
