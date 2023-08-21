@@ -166,7 +166,7 @@ class OpenShiftApi:
         route_list = self._list_routes(
             namespace="openshift-monitoring",
             field_selector="metadata.name=prometheus-k8s",
-        ).items
+        )
         if len(route_list) != 1:
             logger.warning(
                 "Could not find the OpenShift prometheus-k8s metrics route,"
@@ -178,14 +178,14 @@ class OpenShiftApi:
     def retrieve_nodes(self, **kwargs) -> List[OCPNode]:
         """Retrieve nodes under OCP host."""
         node_list = []
-        for node in self._list_nodes(**kwargs).items:
+        for node in self._list_nodes(**kwargs):
             ocp_node = self._init_ocp_nodes(node)
             node_list.append(ocp_node)
         return node_list
 
     def retrieve_cluster(self, **kwargs) -> OCPCluster:
         """Retrieve cluster under OCP host."""
-        clusters = self._list_clusters(**kwargs).items
+        clusters = self._list_clusters(**kwargs)
         assert len(clusters) == 1, "More than one cluster in cluster API"
         cluster_entity = self._init_cluster(clusters[0])
         return cluster_entity
@@ -194,7 +194,7 @@ class OpenShiftApi:
         """Retrieve metrics on acm managed clusters."""
         acm_metrics = []
         try:
-            for cluster in self._list_managed_clusters(**kwargs).items:
+            for cluster in self._list_managed_clusters(**kwargs):
                 managed_cluster_metrics = self._init_managed_cluster(cluster)
                 acm_metrics.append(managed_cluster_metrics)
         except ResourceNotFoundError:
@@ -208,7 +208,7 @@ class OpenShiftApi:
         """Retrieve OCP Pods."""
         pods_raw = self._list_pods(**kwargs)
         pods_list = []
-        for pod in pods_raw.items:
+        for pod in pods_raw:
             ocp_pod = OCPPod.from_api_object(pod)
             pods_list.append(ocp_pod)
         return pods_list
@@ -232,16 +232,16 @@ class OpenShiftApi:
         """Retrieve cluster and "olm" operators."""
         cluster_operators = [
             ClusterOperator.from_raw_object(operator)
-            for operator in self._list_cluster_operators(**kwargs).items
+            for operator in self._list_cluster_operators(**kwargs)
         ]
         olm_operators = [
             LifecycleOperator.from_raw_object(operator)
-            for operator in self._list_subscriptions(**kwargs).items
+            for operator in self._list_subscriptions(**kwargs)
         ]
         # Use CSV api to enhance olm operators with extra metadata
         csv_map = {
             csv.metadata.name: csv
-            for csv in self._list_cluster_service_versions(**kwargs).items
+            for csv in self._list_cluster_service_versions(**kwargs)
         }
         for operator in olm_operators:
             csv = csv_map[operator.cluster_service_version]
@@ -303,35 +303,35 @@ class OpenShiftApi:
 
     @catch_k8s_exception
     def _list_nodes(self, **kwargs):
-        return self._node_api.get(**kwargs)
+        return self._node_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_clusters(self, **kwargs):
-        return self._cluster_api.get(**kwargs)
+        return self._cluster_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_pods(self, **kwargs):
-        return self._pod_api.get(**kwargs)
+        return self._pod_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_cluster_operators(self, **kwargs):
-        return self._cluster_operator_api.get(**kwargs)
+        return self._cluster_operator_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_subscriptions(self, **kwargs):
-        return self._subscription_api.get(**kwargs)
+        return self._subscription_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_cluster_service_versions(self, **kwargs):
-        return self._cluster_service_version_api.get(**kwargs)
+        return self._cluster_service_version_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_managed_clusters(self, **kwargs):
-        return self._managed_cluster_api.get(**kwargs)
+        return self._managed_cluster_api.get(**kwargs).items
 
     @catch_k8s_exception
     def _list_routes(self, **kwargs):
-        return self._route_api.get(**kwargs)
+        return self._route_api.get(**kwargs).items
 
     def _init_ocp_nodes(self, node) -> OCPNode:
         return OCPNode(
