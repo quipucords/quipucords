@@ -6,6 +6,7 @@ from uuid import UUID
 
 import httpretty
 import pytest
+from kubernetes.dynamic.exceptions import ResourceNotFoundError
 
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
@@ -328,6 +329,16 @@ def test_init_managed_cluster(
 
     acm_metrics = ocp_client.retrieve_acm_metrics()
 
+    assert acm_metrics == expected_metrics
+
+
+def test_retrieve_acm_metrics_when_acm_not_available(ocp_client: OpenShiftApi, mocker):
+    """Test retrieving no metrics when ACM ManagedCluster API is not available."""
+    expected_metrics = []
+    mocker.patch.object(
+        ocp_client, "_list_managed_clusters", side_effect=ResourceNotFoundError
+    )
+    acm_metrics = ocp_client.retrieve_acm_metrics()
     assert acm_metrics == expected_metrics
 
 
