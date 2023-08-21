@@ -151,7 +151,7 @@ def test_route_api(ocp_client: OpenShiftApi):
 @pytest.mark.vcr(VCRCassettes.OCP_ROUTE, VCRCassettes.OCP_DISCOVERER_CACHE)
 def test_list_route(ocp_client: OpenShiftApi):
     """Test retrieve routes method."""
-    list_routes = ocp_client._list_routes().items
+    list_routes = ocp_client._list_routes()
     for route in list_routes:
         assert route["spec"]["host"]
 
@@ -324,7 +324,7 @@ def test_init_managed_cluster(
     mocker.patch.object(
         ocp_client,
         "_list_managed_clusters",
-        return_value=mocker.Mock(items=[mock_managed_cluster]),
+        return_value=[mock_managed_cluster],
     )
 
     acm_metrics = ocp_client.retrieve_acm_metrics()
@@ -364,12 +364,12 @@ def test_olm_operator_construction(ocp_client: OpenShiftApi, mocker, faker):
     mocker.patch.object(
         OpenShiftApi,
         "_list_subscriptions",
-        return_value=mocker.Mock(items=[subscription]),
+        return_value=[subscription],
     )
     mocker.patch.object(
         OpenShiftApi,
         "_list_cluster_service_versions",
-        return_value=mocker.Mock(items=[csv]),
+        return_value=[csv],
     )
 
     operators = ocp_client.retrieve_operators()
