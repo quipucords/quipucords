@@ -1,5 +1,5 @@
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
-
+import logging
 from pathlib import Path
 from unittest import mock
 from uuid import UUID
@@ -8,7 +8,7 @@ import httpretty
 import pytest
 from kubernetes.dynamic.exceptions import ResourceNotFoundError
 
-from scanner.openshift.api import OpenShiftApi
+from scanner.openshift.api import OpenShiftApi, optional_openshift_resource
 from scanner.openshift.entities import (
     ClusterOperator,
     LifecycleOperator,
@@ -332,14 +332,51 @@ def test_init_managed_cluster(
     assert acm_metrics == expected_metrics
 
 
-def test_retrieve_acm_metrics_when_acm_not_available(ocp_client: OpenShiftApi, mocker):
-    """Test retrieving no metrics when ACM ManagedCluster API is not available."""
-    expected_metrics = []
-    mocker.patch.object(
-        ocp_client, "_list_managed_clusters", side_effect=ResourceNotFoundError
-    )
-    acm_metrics = ocp_client.retrieve_acm_metrics()
-    assert acm_metrics == expected_metrics
+def test_optional_openshift_resource(caplog):
+    """Test optional_openshift_resource handles the normal happy path case."""
+    expected_things = [1, 2, "a", "b"]
+
+    @optional_openshift_resource("optional thing API")
+    def _list_optional_things():
+        return expected_things
+
+    caplog.set_level(logging.INFO)
+    assert _list_optional_things() == expected_things
+    assert len(caplog.messages) == 0
+
+
+def test_optional_openshift_resource_missing(caplog):
+    """Test optional_openshift_resource gracefully handles a missing OpenShift API."""
+
+    @optional_openshift_resource("optional thing API")
+    def _list_optional_things():
+        # Normally a call like this would be invoked on an OpenShiftApi client.
+        # For the sake of testing, we simply want to force a client exception.
+        # This emulates the client's behavior when the caller requests a resource that
+        # the server does not have, as may happen for optional features like ACM.
+        raise ResourceNotFoundError
+
+    caplog.set_level(logging.INFO)
+    assert _list_optional_things() == []
+    assert caplog.messages == ["This OpenShift host does not have optional thing API."]
+
+
+@pytest.mark.parametrize(
+    "empty_return_type, expected_output", ((list, []), (dict, {}), (type(None), None))
+)
+def test_optional_openshift_resource_missing_custom_empty_return_type(
+    empty_return_type, expected_output
+):
+    """Test optional_openshift_resource returns an instance of the specified type."""
+
+    @optional_openshift_resource("optional thing API", empty_return_type)
+    def _list_optional_things():
+        raise ResourceNotFoundError
+
+    if expected_output is None:
+        assert _list_optional_things() is None
+    else:
+        assert _list_optional_things() == expected_output
 
 
 def test_olm_operator_construction(ocp_client: OpenShiftApi, mocker, faker):

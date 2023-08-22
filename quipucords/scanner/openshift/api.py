@@ -57,6 +57,30 @@ def catch_k8s_exception(func):
     return _decorator
 
 
+def optional_openshift_resource(resource_name: str, empty_return_type: type = list):
+    """
+    Handle ResourceNotFoundError if the host does not support the given resource.
+
+    Returns an empty list if the resource is not found.
+    """
+
+    def _optional_openshift_resource(func):
+        @wraps(func)
+        def _wrapped_func(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except ResourceNotFoundError:
+                logger.info(
+                    "This OpenShift host does not have %(resource_name)s.",
+                    {"resource_name": resource_name},
+                )
+                return empty_return_type()
+
+        return _wrapped_func
+
+    return _optional_openshift_resource
+
+
 class OpenShiftApi:
     """OpenShift interface for Quipucords."""
 
@@ -193,15 +217,9 @@ class OpenShiftApi:
     def retrieve_acm_metrics(self, **kwargs) -> list:
         """Retrieve metrics on acm managed clusters."""
         acm_metrics = []
-        try:
-            for cluster in self._list_managed_clusters(**kwargs):
-                managed_cluster_metrics = self._init_managed_cluster(cluster)
-                acm_metrics.append(managed_cluster_metrics)
-        except ResourceNotFoundError:
-            logger.info(
-                "OpenShift host at %(host)s does not have the ManagedCluster API.",
-                {"host": self._configuration.host},
-            )
+        for cluster in self._list_managed_clusters(**kwargs):
+            managed_cluster_metrics = self._init_managed_cluster(cluster)
+            acm_metrics.append(managed_cluster_metrics)
         return acm_metrics
 
     def retrieve_pods(self, **kwargs) -> List[OCPPod]:
@@ -326,6 +344,7 @@ class OpenShiftApi:
         return self._cluster_service_version_api.get(**kwargs).items
 
     @catch_k8s_exception
+    @optional_openshift_resource("ManagedCluster API")
     def _list_managed_clusters(self, **kwargs):
         return self._managed_cluster_api.get(**kwargs).items
 
