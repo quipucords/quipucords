@@ -128,3 +128,6 @@ quipucords/roles/
 
 # local files
 var/
+
+# vagrant data
+.vagrant/
