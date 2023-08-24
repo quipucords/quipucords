@@ -193,8 +193,14 @@ class OpenShiftApi:
             for csv in self._list_cluster_service_versions(**kwargs).items
         }
         for operator in olm_operators:
-            csv = csv_map[operator.cluster_service_version]
-            operator.display_name = csv.spec.displayName
+            try:
+                csv = csv_map[operator.cluster_service_version]
+                operator.display_name = csv.spec.displayName
+            except KeyError:
+                # This can happen in rare cases when we find an operator that wasn't
+                # listed in the cluster service versions. I'm not sure how this can
+                # happen, but we have actually seen it on a shared OpenShift server.
+                operator.display_name = operator.name
 
         return cluster_operators + olm_operators
 
