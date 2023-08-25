@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from functools import cached_property, wraps
 from logging import getLogger
 from typing import List
@@ -193,14 +194,15 @@ class OpenShiftApi:
             for csv in self._list_cluster_service_versions(**kwargs).items
         }
         for operator in olm_operators:
-            try:
+            # We suppress KeyError below because sometimes we find an operator that
+            # wasn't listed in the cluster service versions. I'm not sure how this can
+            # happen, but we have actually seen it on a shared OpenShift server.
+            # See related: https://github.com/quipucords/quipucords/pull/2447
+            # In that case, `operator.display_name` keeps its default `None` which
+            # we prefer over choosing some other value.
+            with contextlib.suppress(KeyError):
                 csv = csv_map[operator.cluster_service_version]
                 operator.display_name = csv.spec.displayName
-            except KeyError:
-                # This can happen in rare cases when we find an operator that wasn't
-                # listed in the cluster service versions. I'm not sure how this can
-                # happen, but we have actually seen it on a shared OpenShift server.
-                operator.display_name = operator.name
 
         return cluster_operators + olm_operators
 
