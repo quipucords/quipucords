@@ -6,18 +6,16 @@ OCP_PROMETHEUS_METRICS = {
             "instance",
             "label_node_hyperthread_enabled",
             "label_node_role_kubernetes_io_master",
+            "package",
         ],
         "query": """
-count by(instance,
-         label_node_hyperthread_enabled,
-         label_node_role_kubernetes_io_master)
-(max
-    by(node, instance,
-             label_node_hyperthread_enabled,
-             label_node_role_kubernetes_io_master)
-    (cluster:cpu_core_node_labels)
-)
-""",
+            group by(
+                instance,
+                label_node_hyperthread_enabled,
+                label_node_role_kubernetes_io_master,
+                package
+            )  (cluster:cpu_core_node_labels)
+            """,
     }
 }
 

@@ -95,21 +95,31 @@ def cluster_metrics(faker):
                 "instance": f"master-0.{fake_host_base}",
                 "label_node_hyperthread_enabled": "true",
                 "label_node_role_kubernetes_io_master": "true",
+                "package": "0",
+            },
+            {
+                "instance": f"master-0.{fake_host_base}",
+                "label_node_hyperthread_enabled": "true",
+                "label_node_role_kubernetes_io_master": "true",
+                "package": "1",
             },
             {
                 "instance": f"master-1.{fake_host_base}",
                 "label_node_hyperthread_enabled": "false",
                 "label_node_role_kubernetes_io_master": "true",
+                "package": "0",
             },
             {
                 "instance": f"worker-0.{fake_host_base}",
                 "label_node_hyperthread_enabled": "true",
                 "label_node_role_kubernetes_io_master": None,
+                "package": "0",
             },
             {
                 "instance": f"worker-1.{fake_host_base}",
                 "label_node_hyperthread_enabled": "false",
                 "label_node_role_kubernetes_io_master": None,
+                "package": "0",
             },
         ]
     }
