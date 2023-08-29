@@ -100,6 +100,16 @@ SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
 # TODO FIXME Remove this dangerous default.
 DEBUG = env.bool("DJANGO_DEBUG", True)
 
+if env.bool("QPC_URLLIB3_DISABLE_WARNINGS", False):
+    # Optionally disable noisy urllib3 warnings.
+    # Some scan target systems may have invalid or self-signed certs that the user does
+    # not intend to fix, and they may optionally configure its source not to verify the
+    # cert, but that makes urllib3 produce very noisy warnings that can drown out other
+    # more meaningful log messages.
+    import urllib3
+
+    urllib3.disable_warnings()
+
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOST_LIST", default=["*"])
 
 # Application definition
