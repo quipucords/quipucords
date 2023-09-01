@@ -8,6 +8,7 @@ from time import sleep
 from unittest import mock
 
 import pytest
+from django.conf import settings
 
 from api.models import ScanTask, SystemFingerprint
 from fingerprinter.constants import (
@@ -26,7 +27,7 @@ logger = getLogger(__name__)
 @pytest.fixture
 def expected_network_scan_facts():
     """Set of expected facts on network scan."""
-    return {
+    expected_fact_names = {
         "business_central_candidates",
         "business_central_candidates_eap",
         "cloud_provider",
@@ -177,6 +178,43 @@ def expected_network_scan_facts():
         "virt_what_type",
         "yum_enabled_repolist",
     }
+    if not settings.QPC_EXCLUDE_INTERNAL_FACTS:
+        expected_fact_names |= {
+            "internal_cpu_model_name_kvm",
+            "internal_cpu_socket_count_cpuinfo",
+            "internal_cpu_socket_count_dmi",
+            "internal_distro_standard_release",
+            "internal_dmi_chassis_asset_tag",
+            "internal_dmi_system_product_name",
+            "internal_dmi_system_uuid",
+            "internal_have_chkconfig",
+            "internal_have_dmidecode",
+            "internal_have_ifconfig",
+            "internal_have_java",
+            "internal_have_locate",
+            "internal_have_rct",
+            "internal_have_rpm",
+            "internal_have_subscription_manager",
+            "internal_have_systemctl",
+            "internal_have_tune2fs",
+            "internal_have_unzip",
+            "internal_have_virsh",
+            "internal_have_virt_what",
+            "internal_have_yum",
+            "internal_host_started_processing_role",
+            "internal_jboss_brms_business_central_candidates",
+            "internal_jboss_brms_kie_search_candidates",
+            "internal_jboss_brms_kie_server_candidates",
+            "internal_kvm_found",
+            "internal_release_file",
+            "internal_sys_manufacturer",
+            "internal_system_user_count",
+            "internal_user_login_history",
+            "internal_virt_what_error",
+            "internal_xen_guest",
+            "internal_xen_privcmd_found",
+        }
+    return expected_fact_names
 
 
 @pytest.fixture
