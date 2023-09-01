@@ -6,7 +6,7 @@ INET_PREFIXES = ["inet addr:", "inet "]
 
 
 class ProcessIPAddresses(process.Processor):
-    """Process the ip addresses from ifconfig."""
+    """Process the ip addresses from ifconfig (or `ip address show`)."""
 
     KEY = "ifconfig_ip_addresses"
 
@@ -18,7 +18,7 @@ class ProcessIPAddresses(process.Processor):
         for line in lines:
             for prefix in INET_PREFIXES:
                 if line.startswith(prefix):
-                    ip_line = line[len(prefix) :].split()[0]
+                    ip_line = line[len(prefix) :].split()[0].split("/")[0]
                     if ip_line != "127.0.0.1":
                         result.append(ip_line)
                     break
@@ -26,7 +26,7 @@ class ProcessIPAddresses(process.Processor):
 
 
 class ProcessMacAddresses(process.Processor):
-    """Process the mac addresses from ifconfig."""
+    """Process the mac addresses from ifconfig (or `ip address show`)."""
 
     KEY = "ifconfig_mac_addresses"
 
