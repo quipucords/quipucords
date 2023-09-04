@@ -9,6 +9,7 @@ BINDIR  = bin
 PARALLEL_NUM ?= $(shell python -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=15
 
+QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
 QUIPUCORDS_UI_RELEASE ?= latest
 
@@ -185,7 +186,7 @@ serve-swagger: $(qpc_on_ui_dir)
 build-container:
 	podman build \
 		--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
-		-t quipucords .
+		-t $(QUIPUCORDS_CONTAINER_TAG) .
 
 check-db-migrations-needed:
 	$(PYTHON) quipucords/manage.py makemigrations --check
