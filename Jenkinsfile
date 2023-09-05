@@ -1,4 +1,4 @@
-@Library("smqe-shared-lib@master") _
+@Library("smqe-shared-lib@mzalewsk/support-dsc-pr-fork") _
 
 node("discovery_ci") {
     stage("Setup test environment") {
