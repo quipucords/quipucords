@@ -169,6 +169,22 @@
   ignore_errors: yes
   when: "internal_whereis_ifconfig_cmd.get('rc') == 0 and internal_whereis_ifconfig_cmd.get('stdout_lines') != ['ifconfig:']"
 
+- name: gather internal_whereis_ip_cmd
+  raw: command -v /sbin/ip
+  register:  internal_whereis_ip_cmd
+  ignore_errors: yes
+
+- name: set internal_have_ip default
+  set_fact:
+    internal_have_ip: false
+  ignore_errors: yes
+
+- name: set internal_have_ip
+  set_fact:
+    internal_have_ip: true
+  ignore_errors: yes
+  when: "internal_whereis_ip_cmd.get('rc') == 0"
+
 - name: gather internal_have_unzip_cmd
   raw: command -v unzip
   register: internal_have_unzip_cmd

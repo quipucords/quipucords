@@ -1019,15 +1019,25 @@ class FingerprintTaskRunner(ScanTaskRunner):
             source, "etc_release_release", fact, "os_release", fingerprint
         )
 
-        # Set ip address from either network or vcenter
+        # Get IPv4 addresses from ifconfig's fact if present, else from ip's fact.
+        ip_addresses_raw_fact_key = (
+            "ifconfig_ip_addresses"
+            if deepget(fact, "ifconfig_ip_addresses") is not None
+            else "ip_address_show_ipv4"
+        )
         self._add_fact_to_fingerprint(
-            source, "ifconfig_ip_addresses", fact, "ip_addresses", fingerprint
+            source, ip_addresses_raw_fact_key, fact, "ip_addresses", fingerprint
         )
 
-        # Set mac address from either network or vcenter
+        # Get MAC addresses from ifconfig's fact if present, else from ip's fact.
+        mac_addresses_raw_fact_key = (
+            "ifconfig_mac_addresses"
+            if deepget(fact, "ifconfig_mac_addresses") is not None
+            else "ip_address_show_mac"
+        )
         self._add_fact_to_fingerprint(
             source,
-            "ifconfig_mac_addresses",
+            mac_addresses_raw_fact_key,
             fact,
             "mac_addresses",
             fingerprint,
