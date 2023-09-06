@@ -11,6 +11,7 @@ from . import (
     fuse,
     ifconfig,
     installed_products,
+    ip,
     jws,
     karaf,
     redhat_packages,

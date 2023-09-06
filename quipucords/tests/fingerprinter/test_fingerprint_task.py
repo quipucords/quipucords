@@ -1319,8 +1319,8 @@ def test_all_facts_with_null_value_in_process_network_scan(
     facts_dict = network_template()
     result = fingerprint_task_runner._process_network_fact(source_dict, facts_dict)
     metadata_dict = result.pop(META_DATA_KEY)
-    assert set(metadata_dict.keys()) == set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
-    assert {
+
+    expected_metadata = {
         fingerprint_name: {
             "server_id": server_id,
             "source_name": source.name,
@@ -1329,7 +1329,18 @@ def test_all_facts_with_null_value_in_process_network_scan(
             "raw_fact_key": fact_name,
         }
         for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_NETWORK.items()
-    } == metadata_dict
+    }
+    # Two slight changes from the default EXPECTED_FINGERPRINT_MAP_NETWORK dict:
+    # This test creates facts_dict with None for all facts, and when we fingerprint,
+    # if ifconfig_ip_addresses is None, we switch from ifconfig_ip_addresses to
+    # ip_address_show_ipv4 as the raw fact source for ip_addresses. The same logic
+    # applies for mac_addresses. Other tests that set not-None values in these raw
+    # facts continue to expect the default ifconfig-related raw fact names.
+    expected_metadata["ip_addresses"]["raw_fact_key"] = "ip_address_show_ipv4"
+    expected_metadata["mac_addresses"]["raw_fact_key"] = "ip_address_show_mac"
+
+    assert set(metadata_dict.keys()) == set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
+    assert expected_metadata == metadata_dict
 
     expected_fingerprints = {
         fingerprint_name: None for fingerprint_name in EXPECTED_FINGERPRINT_MAP_NETWORK
