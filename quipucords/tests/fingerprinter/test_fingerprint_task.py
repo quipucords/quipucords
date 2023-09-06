@@ -118,6 +118,7 @@ class EngineTest(TestCase):
 
     def setUp(self):
         """Create test case setup."""
+        self.maxDiff = None  # makes AssertionError verbose
         self.server_id = ServerInformation.create_or_retrieve_server_id()
         self.source = Source(
             name="source1",
@@ -1209,7 +1210,8 @@ class EngineTest(TestCase):
         self.assertEqual(
             set(metadata_dict.keys()), set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
         )
-        assert {
+
+        expected_metadata = {
             fingerprint_name: {
                 "server_id": self.server_id,
                 "source_name": self.source.name,
@@ -1218,7 +1220,17 @@ class EngineTest(TestCase):
                 "raw_fact_key": fact_name,
             }
             for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_NETWORK.items()
-        } == metadata_dict
+        }
+        # Two slight changes from the default EXPECTED_FINGERPRINT_MAP_NETWORK dict:
+        # This test creates facts_dict with None for all facts, and when we fingerprint,
+        # if ifconfig_ip_addresses is None, we switch from ifconfig_ip_addresses to
+        # ip_address_show_ipv4 as the raw fact source for ip_addresses. The same logic
+        # applies for mac_addresses. Other tests that set not-None values in these raw
+        # facts continue to expect the default ifconfig-related raw fact names.
+        expected_metadata["ip_addresses"]["raw_fact_key"] = "ip_address_show_ipv4"
+        expected_metadata["mac_addresses"]["raw_fact_key"] = "ip_address_show_mac"
+
+        self.assertDictEqual(expected_metadata, metadata_dict)
 
         expected_fingerprints = {
             fingerprint_name: None
