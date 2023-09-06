@@ -25,8 +25,10 @@ logger = logging.getLogger(__name__)
 
 env = environ.Env()
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# BASE_DIR is ./quipucords/quipucords
 BASE_DIR = Path(__file__).absolute().parent.parent
+# DEFAULT_DATA_DIR is ./var, which is on .gitignore
+DEFAULT_DATA_DIR = BASE_DIR.parent / "var"
 
 PRODUCTION = env.bool("PRODUCTION", False)
 
@@ -55,7 +57,7 @@ def app_secret_key_and_path():
     # We also update the DJANGO_SECRET_PATH file accordingly
     # as it is also used as the Ansible password vault.
     django_secret_path = Path(
-        env.str("DJANGO_SECRET_PATH", str(BASE_DIR / "secret.txt"))
+        env.str("DJANGO_SECRET_PATH", str(DEFAULT_DATA_DIR / "secret.txt"))
     )
 
     django_secret_key = env("DJANGO_SECRET_KEY", default=None)
@@ -179,8 +181,8 @@ if QPC_DBMS not in allowed_db_engines:
 
 if QPC_DBMS == "sqlite":
     # If user enters an invalid QPC_DBMS, use default postgresql
-    DEV_DB = os.path.join(BASE_DIR, "db.sqlite3")
-    PROD_DB = os.path.join(env.str("DJANGO_DB_PATH", str(BASE_DIR)), "db.sqlite3")
+    DEV_DB = DEFAULT_DATA_DIR / "db.sqlite3"
+    PROD_DB = Path(env.str("DJANGO_DB_PATH", str(DEFAULT_DATA_DIR))) / "db.sqlite3"
     DB_PATH = PROD_DB if PRODUCTION else DEV_DB
     DATABASES = {
         "default": {
@@ -275,10 +277,8 @@ LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
 VERBOSE_FORMATTING = (
     "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
 )
-
-LOG_DIRECTORY = Path(env.str("LOG_DIRECTORY", str(BASE_DIR)))
-DEFAULT_LOG_FILE = LOG_DIRECTORY / "app.log"
-LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(DEFAULT_LOG_FILE)))
+LOG_DIRECTORY = Path(env.str("QPC_LOG_DIRECTORY", str(DEFAULT_DATA_DIR / "logs")))
+LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(LOG_DIRECTORY / "app.log")))
 
 LOGGING = {
     "version": 1,
@@ -375,6 +375,8 @@ LOGGING = {
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
+# Reverse default behavior for better readability in log files
+os.environ.setdefault("ANSIBLE_NOCOLOR", "False")
 
 QPC_EXCLUDE_INTERNAL_FACTS = env.bool("QPC_EXCLUDE_INTERNAL_FACTS", False)
 QPC_TOKEN_EXPIRE_HOURS = env.int("QPC_TOKEN_EXPIRE_HOURS", 24)

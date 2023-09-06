@@ -59,7 +59,7 @@ class SecretKeyTests(TestCase):
 
     def test_base_secret_key(self):
         """Test base secret file is read and honored."""
-        base_secret_path = Path(str(django_settings.BASE_DIR / "secret.txt"))
+        base_secret_path = Path(str(django_settings.DEFAULT_DATA_DIR / "secret.txt"))
         with patch.dict(settings.os.environ, {}, clear=True):
             if base_secret_path.exists():
                 base_secret_key = base_secret_path.read_text(encoding="utf-8").strip()
