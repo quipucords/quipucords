@@ -14,3 +14,4 @@ class DataSources(TextChoices):
 
 
 ENCRYPTED_DATA_MASK = "********"
+SCAN_JOB_LOG = "scan-job-{scan_job_id}-{output_type}.txt"

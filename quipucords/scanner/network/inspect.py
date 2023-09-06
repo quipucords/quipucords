@@ -1,6 +1,7 @@
 """ScanTask used for network connection discovery."""
 import logging
 import os.path
+from pathlib import Path
 
 import ansible_runner
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -16,6 +17,7 @@ from api.models import (
     SystemInspectionResult,
 )
 from api.vault import write_to_yaml
+from constants import SCAN_JOB_LOG
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException
 from scanner.network.inspect_callback import InspectResultCallback
@@ -251,6 +253,8 @@ class InspectTaskRunner(ScanTaskRunner):
 
             # Let's delete any private ssh key files that we generated
             delete_ssh_keyfiles(inventory)
+            # save stdout and stderr from ansible
+            self._persist_ansible_logs(runner_obj)
 
             final_status = runner_obj.status
             if final_status == "canceled":
@@ -279,6 +283,16 @@ class InspectTaskRunner(ScanTaskRunner):
             # Always run this as our scans are more tolerant of errors
             call.finalize_failed_hosts()
         return error_msg, scan_result
+
+    def _persist_ansible_logs(self, runner_obj: ansible_runner.Runner):
+        """Persist ansible logs."""
+        for output in ["stdout", "stderr"]:
+            output_path: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
+                scan_job_id=self.scan_job.id,
+                output_type=f"ansible-{output}",
+            )
+            file_handle = getattr(runner_obj, output)
+            output_path.write_text(file_handle.read())
 
     def _obtain_discovery_data(self):
         """Obtain discover scan data.  Either via new scan or paused scan.
