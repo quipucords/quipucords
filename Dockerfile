@@ -13,6 +13,7 @@ ENV PATH="/opt/venv/bin:${PATH}"
 ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_LOG_LEVEL=INFO
+ENV QPC_LOG_DIRECTORY=/var/log
 
 COPY scripts/dnf /usr/local/bin/dnf
 ARG BUILD_PACKAGES="crypto-policies-scripts gcc postgresql-devel python3.11-devel"
