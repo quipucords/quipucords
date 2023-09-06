@@ -257,7 +257,9 @@ class TestNetworkInspectScanner:
     def test_inspect_scan_fail_no_facts(self, mock_run):
         """Test running a inspect scan with mocked connection."""
         mock_run.return_value.status = "successful"
-        with requests_mock.Mocker() as mocker:
+        with requests_mock.Mocker() as mocker, patch.object(
+            InspectTaskRunner, "_persist_ansible_logs"
+        ):
             mocker.post(self.fact_endpoint, status_code=201, json={"id": 1})
             scanner = InspectTaskRunner(self.scan_job, self.scan_task)
             scanner.connect_scan_task = self.connect_scan_task
@@ -317,7 +319,8 @@ class TestNetworkInspectScanner:
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
 
         scanner.connect_scan_task = self.connect_scan_task
-        scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
+        with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
+            scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
         mock_run.assert_called()
 
     def test_populate_callback(self):
@@ -385,7 +388,8 @@ class TestNetworkInspectScanner:
         """Test modifying the log level."""
         mock_run.return_value.status = "successful"
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
+        with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
+            scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
