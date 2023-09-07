@@ -44,6 +44,8 @@ def reports(request, report_id=None):
     reports_dict["report_id"] = report_id
     # details
     details_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
+    # add scan job id to allow detection of related logs on GzipRenderer
+    reports_dict["scan_job_id"] = details_data.scanjob.id
     serializer = DetailsReportSerializer(details_data)
     json_details = serializer.data
     json_details.pop("cached_csv", None)

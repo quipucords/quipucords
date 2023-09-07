@@ -2,7 +2,9 @@
 
 import hashlib
 import logging
+from pathlib import Path
 
+from django.conf import settings
 from rest_framework import renderers
 
 from api import messages
@@ -52,6 +54,16 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
             details_csv_name: encode_content(details_csv, "csv"),
             deployments_csv_name: encode_content(deployments_csv, "csv"),
         }
+
+        # collect associated logs
+        scan_job_id = reports_dict.get("scan_job_id")
+        log_directory: Path = settings.LOG_DIRECTORY
+        log_files = list(log_directory.glob(f"scan-job-{scan_job_id}-*"))
+        if not log_files:
+            logger.warning("No logs were found for report_id=%s", report_id)
+        for log in log_files:
+            file_name = create_filename(log.name, None, report_id)
+            files_data[file_name] = encode_content(log.read_text(), "plaintext")
 
         # generate hashes
         sha256sum_content = ""
