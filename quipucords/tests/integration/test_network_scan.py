@@ -4,6 +4,7 @@ import tarfile
 from datetime import datetime
 from io import BytesIO
 from logging import getLogger
+from pathlib import Path
 from time import sleep
 from unittest import mock
 
@@ -11,6 +12,7 @@ import pytest
 from django.conf import settings
 
 from api.models import ScanTask, SystemFingerprint
+from constants import SCAN_JOB_LOG
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -363,10 +365,15 @@ class TestNetworkScan:
         return scan_id
 
     @pytest.fixture(scope="class")
-    def scan_response(self, apiclient, scan_id):
+    def scan_response(self, apiclient, scan_id, log_directory: Path):
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = apiclient.post(f"scans/{scan_id}/jobs/")
         assert create_scan_job_response.ok, create_scan_job_response.text
+
+        scan_job_id = create_scan_job_response.json()["id"]
+        # ensure there are no logs created for this scan job
+        logs = list(log_directory.glob(f"scan-job-{scan_job_id}-*"))
+        assert len(logs) == 0
 
         response = apiclient.get(f"scans/{scan_id}/")
         attempts = 1
@@ -390,6 +397,11 @@ class TestNetworkScan:
     def report_id(self, scan_response):
         """Return the latest report id from performed scan."""
         return scan_response.json()["most_recent"]["report_id"]
+
+    @pytest.fixture(scope="class")
+    def scan_job_id(self, scan_response):
+        """return the ID of the latest ScanJob."""
+        return scan_response.json()["most_recent"]["id"]
 
     def test_details_report(self, apiclient, expected_network_scan_facts, report_id):
         """Sanity check details report."""
@@ -521,3 +533,42 @@ class TestNetworkScan:
         assert response.ok, response.content
         data = response.json()
         assert data
+
+    def test_ansible_logs(self, apiclient, report_id, scan_job_id, log_directory: Path):
+        """Check if ansible logs were generated and included on report tarball."""
+        stdout_log = log_directory / SCAN_JOB_LOG.format(
+            scan_job_id=scan_job_id,
+            output_type="ansible-stdout",
+        )
+        stderr_log = log_directory / SCAN_JOB_LOG.format(
+            scan_job_id=scan_job_id,
+            output_type="ansible-stderr",
+        )
+        assert stdout_log.is_file()
+        assert stdout_log.stat().st_size > 0
+        # successful scans have empty stderr
+        assert stderr_log.is_file()
+        assert (
+            stderr_log.stat().st_size == 0
+        ), f"Ansible error log not empty\n{stderr_log.read_text()}"
+
+        full_report_response = apiclient.get(f"reports/{report_id}/")
+        assert full_report_response.ok
+
+        with tarfile.open(fileobj=BytesIO(full_report_response.content)) as tarball:
+            tarball_fnames = set(tarball.getnames())
+            expected_log_names = {
+                f"report_id_{report_id}/{log_file.name}"
+                for log_file in [stdout_log, stderr_log]
+            }
+            assert expected_log_names.issubset(tarball_fnames)
+            # ensure the file contents match
+            stdout_contents = tarball.extractfile(
+                f"report_id_{report_id}/{stdout_log.name}"
+            ).read()
+            assert stdout_contents == stdout_log.read_bytes()
+
+            stderr_contents = tarball.extractfile(
+                f"report_id_{report_id}/{stderr_log.name}"
+            ).read()
+            assert stderr_contents == bytes()

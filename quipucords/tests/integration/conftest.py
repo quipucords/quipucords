@@ -1,4 +1,13 @@
-"""Common fixtures for integration tests."""
+"""
+Common fixtures for integration tests.
+
+pytest_docker_tools is used to create container images and container fixtures.
+Besides some specifics, it is mostly passing kwargs to docker sdk.
+
+Links to relevant documentation
+- https://github.com/Jc2k/pytest-docker-tools#containers
+- https://docker-py.readthedocs.io/en/stable/containers.html
+"""
 
 from urllib.parse import urljoin
 
@@ -13,6 +22,13 @@ from tests.utils.container_wrappers import (
     ScanTargetContainer,
 )
 from tests.utils.http import QPCAuth
+
+
+@pytest.fixture(scope="class")
+def log_directory(tmp_path_factory):
+    """Path where log files will be stored."""
+    return tmp_path_factory.mktemp("logs")
+
 
 postgres_container = container(
     environment={
@@ -54,6 +70,7 @@ qpc_server_container = container(
     scope="class",
     timeout=constants.READINESS_TIMEOUT_SECONDS,
     wrapper_class=QuipucordsContainer,
+    volumes={"{log_directory!s}": {"bind": "/var/log", "mode": "z"}},
 )
 
 scan_target_image = build(
