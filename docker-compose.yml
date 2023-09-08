@@ -74,8 +74,6 @@ services:
       - .:/app:ro
       - ./deploy:/deploy:ro
       - ./var/sshkeys/:/sshkeys:ro
-    ports:
-      - "56789:5678"
     environment:
       ANSIBLE_LOG_LEVEL: 3
       NETWORK_CONNECT_JOB_TIMEOUT: 6
