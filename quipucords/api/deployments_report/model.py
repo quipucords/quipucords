@@ -98,6 +98,8 @@ class SystemFingerprint(models.Model):
     )
     cpu_hyperthreading = models.BooleanField(null=True)
 
+    installed_products = models.JSONField(unique=False, blank=True, null=True)
+
     system_creation_date = models.DateField(blank=True, null=True)
     system_last_checkin_date = models.DateField(blank=True, null=True)
 

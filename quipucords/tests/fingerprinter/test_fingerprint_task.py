@@ -43,6 +43,7 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "etc_machine_id": "etc_machine_id",
     "infrastructure_type": "virt_what_type/virt_type",
     "insights_client_id": "insights_client_id",
+    "installed_products": "installed_products",
     "ip_addresses": "ifconfig_ip_addresses",
     "is_redhat": "redhat_packages_gpg_is_redhat",
     "mac_addresses": "ifconfig_mac_addresses",

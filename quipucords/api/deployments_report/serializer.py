@@ -80,6 +80,8 @@ class SystemFingerprintSerializer(ModelSerializer):
     cpu_core_per_socket = IntegerField(min_value=0, **default_args)
     cpu_hyperthreading = BooleanField(**default_args)
 
+    installed_products = JSONField(**default_args)
+
     system_creation_date = DateField(**default_args)
     system_last_checkin_date = DateField(**default_args)
 

@@ -243,6 +243,7 @@ def fingerprint_fact_map():
         "etc_machine_id": "etc_machine_id",
         "infrastructure_type": "virt_what_type/virt_type",
         "insights_client_id": "insights_client_id",
+        "installed_products": "installed_products",
         "ip_addresses": "ip_address_show_ipv4",
         "is_redhat": "redhat_packages_gpg_is_redhat",
         "mac_addresses": "ip_address_show_mac",
