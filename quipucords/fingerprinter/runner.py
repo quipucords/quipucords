@@ -986,6 +986,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("etc_release_name", "os_name"),
             ("etc_release_version", "os_version"),
             ("etc_release_release", "os_release"),
+            # Installed products (name + product/eng ID pairs)
+            ("installed_products", "installed_products"),
             # Get IPv4 addresses from ifconfig's fact if present, else from ip's fact.
             (
                 "ifconfig_ip_addresses"

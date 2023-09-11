@@ -59,6 +59,12 @@ def _network_raw_facts():
         "ifconfig_ip_addresses": [_faker.ipv4()],
         "ifconfig_mac_addresses": [_faker.mac_address()],
         "insights_client_id": _faker.uuid4(),
+        "installed_products": [
+            {
+                "id": _faker.pyint(),
+                "name": fake_rhel(),
+            }
+        ],
         "subscription_manager_id": _faker.uuid4(),
         "system_memory_bytes": _faker.pyint(max_value=2**65),  # max value for bigint
         "system_purpose_json": None,
