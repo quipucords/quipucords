@@ -64,7 +64,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     """
     Serializer for HBI system profile.
 
-    System profile facts are a set of curated facts with a well defined schema.
+    System profile facts are a set of curated facts with a well-defined schema.
     """
 
     # about system profile schema:
@@ -79,6 +79,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     infrastructure_vendor = fields.CharField(
         max_length=100, **default_kwargs
     )  # TODO: Looks like virt_type might answer this, but only for virtualized infra
+    installed_products = fields.ListField(child=fields.DictField())
     # yupana builds operating_system from os_release
     os_release = fields.CharField(max_length=100, **default_kwargs)
     arch = fields.CharField(source="architecture", max_length=50, **default_kwargs)
