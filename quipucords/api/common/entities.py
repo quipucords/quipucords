@@ -217,6 +217,12 @@ class HostEntity:
                 "Host wasn't properly initialized to list products"
             ) from err
 
+    @property
+    def installed_products(self):
+        """Return the installed products on the system."""
+        # installed_products ref: https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L374-L377  # noqa: E501
+        return self._fingerprints.installed_products or []
+
     def has_canonical_facts(self):
         """Return True if host contains at least one canonical fact."""
         for canonical_fact in CANONICAL_FACTS:
