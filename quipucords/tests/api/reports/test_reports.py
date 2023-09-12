@@ -28,6 +28,7 @@ class ReportsTest(LoggedUserMixin, TestCase):
         """Create test case setup."""
         management.call_command("flush", "--no-input")
         super().setUp()
+        self.maxDiff = None  # more verbose test failure results
         self.net_source = Source.objects.create(
             name="test_source", source_type=DataSources.NETWORK
         )
