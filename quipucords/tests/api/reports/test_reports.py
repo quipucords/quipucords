@@ -196,10 +196,12 @@ class ReportsTest(LoggedUserMixin, TestCase):
             file_contents = tar.extractfile(file).read().decode()
             if filenames[idx].endswith("csv"):
                 if "details" in file_contents:
-                    assert self.parse_csv(file_contents) == self.parse_csv(details_csv)
+                    self.assertEqual(
+                        self.parse_csv(file_contents), self.parse_csv(details_csv)
+                    )
                 elif "deployments" in file_contents:
-                    assert self.parse_csv(file_contents) == self.parse_csv(
-                        deployments_csv
+                    self.assertEqual(
+                        self.parse_csv(file_contents), self.parse_csv(deployments_csv)
                     )
                 else:
                     sys.exit("Could not identify .csv return.")
@@ -219,7 +221,7 @@ class ReportsTest(LoggedUserMixin, TestCase):
 
     def test_parse_csv(self):
         """Test parse_csv utility."""
-        assert self.parse_csv("1,2,3\na,b,c") == [list("123"), list("abc")]
+        self.assertEqual(self.parse_csv("1,2,3\na,b,c"), [list("123"), list("abc")])
 
     def test_reports_gzip_renderer_masked(self):
         """Get a tar.gz return for report_id via API with masked values."""
@@ -297,7 +299,7 @@ class ReportsTest(LoggedUserMixin, TestCase):
             "details.csv",
             "deployments.csv",
         }
-        assert set(file2hash) == expected_hashed_filenames
+        self.assertEqual(set(file2hash), expected_hashed_filenames)
         # recalculate hashes
         new_file2hash = {}
         for hashed_filename, calculated_hash in file2hash.items():
@@ -305,4 +307,4 @@ class ReportsTest(LoggedUserMixin, TestCase):
             file_contents = tar.extractfile(file).read()
             new_hash = hashlib.sha256(file_contents).hexdigest()
             new_file2hash[hashed_filename] = new_hash
-        assert new_file2hash == file2hash, "SHA256SUM content is incorrect"
+        self.assertEqual(new_file2hash, file2hash, "SHA256SUM content is incorrect")
