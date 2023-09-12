@@ -1427,9 +1427,6 @@ definitions:
                 "namespace": "qpc",
                 "facts": {
                     "rh_product_certs": [],
-                    "rh_products_installed": [
-                        "RHEL"
-                    ],
                     "last_reported": "2019-08-01T17:21:23.842458",
                     "system_purpose": {
                         "_version": "1",

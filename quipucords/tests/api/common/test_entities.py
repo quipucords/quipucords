@@ -193,17 +193,15 @@ class TestHostEntity:
             host.products
 
     @pytest.mark.parametrize(
-        "fingerprint,expected_product_names,expected_rh_products_installed",
+        "fingerprint,expected_product_names",
         [
             (
                 pytest.lazy_fixture("fingerprint_wo_products"),
                 set(),
-                [],
             ),
             (
                 pytest.lazy_fixture("fingerprint_with_products"),
                 {"JBoss EAP", "UNKOWN PRODUCT"},
-                ["EAP"],
             ),
         ],
     )
@@ -211,19 +209,10 @@ class TestHostEntity:
         self,
         fingerprint,
         expected_product_names,
-        expected_rh_products_installed,
     ):
-        """Test products/rh_products_installed properties."""
+        """Test products properties."""
         host = self.host_init(fingerprint)
         assert host.products == expected_product_names
-        assert host.rh_products_installed == expected_rh_products_installed
-
-    def test_products_is_rhel(self, fingerprint):
-        """Check if RHEL is added to rh_products_installed when system is rhel."""
-        fingerprint.is_redhat = True
-        fingerprint.save()
-        host = self.host_init(fingerprint)
-        assert "RHEL" in host.rh_products_installed
 
     @pytest.mark.parametrize(
         "cpu_socket_count,vm_host_socket_count,expected_result",
