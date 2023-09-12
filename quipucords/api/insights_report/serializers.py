@@ -27,7 +27,6 @@ class FactsSerializer(Serializer):
     last_discovered = fields.DateTimeField()
     qpc_server_version = fields.CharField(default=server_version)
     qpc_server_id = fields.CharField(default=get_server_id)
-    rh_products_installed = fields.ListField(child=fields.CharField())
 
 
 class FactsetSerializer(Serializer):
