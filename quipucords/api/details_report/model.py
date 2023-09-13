@@ -21,4 +21,3 @@ class DetailsReport(models.Model):
         "DeploymentsReport", models.CASCADE, related_name="details_report", null=True
     )
     cached_csv = models.TextField(null=True)
-    cached_masked_csv = models.TextField(null=True)

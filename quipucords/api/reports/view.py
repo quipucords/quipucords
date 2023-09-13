@@ -17,9 +17,8 @@ from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
 from api import messages
-from api.common.util import is_int, validate_query_param_bool
+from api.common.util import is_int
 from api.deployments_report.view import build_cached_json_report
-from api.details_report.util import mask_details_facts
 from api.models import DeploymentsReport, DetailsReport
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import DetailsReportSerializer
@@ -38,7 +37,6 @@ perm_classes = (IsAuthenticated,)
 def reports(request, report_id=None):
     """Lookup and return reports."""
     reports_dict = {}
-    mask_report = request.query_params.get("mask", False)
     if report_id is not None:
         if not is_int(report_id):
             error = {"report_id": [_(messages.COMMON_ID_INV)]}
@@ -48,8 +46,6 @@ def reports(request, report_id=None):
     details_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
     serializer = DetailsReportSerializer(details_data)
     json_details = serializer.data
-    if validate_query_param_bool(mask_report):
-        json_details = mask_details_facts(json_details)
     json_details.pop("cached_csv", None)
     reports_dict["details_json"] = json_details
     # deployments
@@ -65,12 +61,6 @@ def reports(request, report_id=None):
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
-    deployments_report = build_cached_json_report(deployments_data, mask_report)
-    if deployments_report:
-        reports_dict["deployments_json"] = deployments_report
-        return Response(reports_dict)
-    error = {
-        "detail": f"Deployments report {report_id} could not be masked."
-        " Rerun the scan to generate a masked deployments report."
-    }
-    return Response(error, status=status.HTTP_428_PRECONDITION_REQUIRED)
+    deployments_report = build_cached_json_report(deployments_data)
+    reports_dict["deployments_json"] = deployments_report
+    return Response(reports_dict)

@@ -15,15 +15,12 @@ from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.models import Credential, DetailsReport, ServerInformation, Source
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
-from tests.utils import patch_mask_value
 
 
 class MockRequest:
     """Mock a request object for the renderer."""
 
-    def __init__(self, mask_rep=False):
-        """Initialize a fake request object."""
-        self.query_params = {"mask": mask_rep}
+    query_params = {}
 
 
 class DetailReportTest(LoggedUserMixin, TestCase):
@@ -113,61 +110,6 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         response_json = self.retrieve_expect_200(identifier)
         self.assertEqual(response_json["report_id"], identifier)
 
-    def test_details_masked(self):
-        """Get details report with masked values for a report via API."""
-        request_json = {
-            "report_type": "details",
-            "sources": [
-                {
-                    "server_id": self.server_id,
-                    "report_version": create_report_version(),
-                    "source_name": self.net_source.name,
-                    "source_type": self.net_source.source_type,
-                    "facts": [
-                        {
-                            "ip_addresses": ["1.2.3.4"],
-                            "mac_addresses": ["1.2.3.5", "2.4.5.6"],
-                            "uname_hostname": "foo",
-                            "vm.name": "foo",
-                        }
-                    ],
-                }
-            ],
-        }
-
-        mask_map = {
-            "1.2.3.4": "MASK1",
-            "1.2.3.5": "MASK2",
-            "2.4.5.6": "MASK3",
-            "foo": "MASK4",
-        }
-
-        response_json = self.create_expect_201(request_json)
-        identifier = response_json["report_id"]
-
-        with patch_mask_value(mask_map):
-            response_json = self.retrieve_expect_200(
-                identifier, query_param="?mask=True"
-            )
-        self.assertEqual(response_json["report_id"], identifier)
-        # assert the ips/macs/hostname is masked
-        source_to_check = response_json.get("sources")[0]
-        facts = source_to_check.get("facts")
-        expected_facts = [
-            {
-                "ip_addresses": ["MASK1"],
-                "mac_addresses": ["MASK2", "MASK3"],
-                "uname_hostname": "MASK4",
-                "vm.name": "MASK4",
-            }
-        ]
-        self.assertEqual(facts, expected_facts)
-        # test bad query param
-        url = "/api/v1/reports/" + str(identifier) + "/details/?mask=foo"
-        # Query API
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     ##############################################################
     # Test CSV Renderer
     ##############################################################
@@ -231,49 +173,6 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         )
         # These would be different if not cached
         self.assertEqual(csv_result, expected)
-
-        # Clear cache
-        details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
-        details_report.cached_csv = None
-        details_report.save()
-
-        # Test with masked data
-        test_json["sources"][0]["facts"] = [
-            {
-                "ip_addresses": ["MASK1"],
-                "mac_addresses": ["MASK2", "MASK3"],
-                "uname_hostname": "MASK4",
-                "vm.name": "MASK4",
-            }
-        ]
-        new_mock_req = MockRequest(mask_rep=True)
-        new_renderer = {"request": new_mock_req}
-        csv_result = renderer.render(test_json, renderer_context=new_renderer)
-        expected = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n"
-            f"1,details,{self.report_version},{test_json.get('report_platform_id')},"
-            "1\r\n\r\n\r\n"
-            "Source\r\n"
-            "Server Identifier,Source Name,Source Type\r\n"
-            f"{self.server_id},test_source,network\r\n"
-            "Facts\r\n"
-            "ip_addresses,mac_addresses,uname_hostname,vm.name\r\n"
-            "[MASK1],[MASK2;MASK3],"
-            "MASK4,MASK4\r\n\r\n\r\n"
-        )
-        self.assertEqual(csv_result, expected)
-
-        # Test cached works too for hashed
-        test_json = copy.deepcopy(response_json)
-        test_json["sources"][0]["facts"] = []
-        csv_result = renderer.render(test_json, renderer_context=new_renderer)
-        # These would be different if not cached
-        self.assertEqual(csv_result, expected)
-
-        # Clear cache
-        details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
-        details_report.cached_csv = None
-        details_report.save()
 
         # Clear cache
         details_report = DetailsReport.objects.get(report_id=response_json["report_id"])

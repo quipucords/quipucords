@@ -8,7 +8,6 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.common.common_report import CSVHelper, create_report_version, sanitize_row
-from api.common.util import mask_data_general, validate_query_param_bool
 from api.models import DetailsReport, ScanTask, ServerInformation
 from api.serializers import DetailsReportSerializer
 from constants import DataSources
@@ -180,7 +179,7 @@ def create_details_report(report_version, json_details_report):
     return None
 
 
-def create_details_csv(details_report_dict, request):  # noqa: C901
+def create_details_csv(details_report_dict):  # noqa: C901
     """Create details csv."""
     report_id = details_report_dict.get("report_id")
     if report_id is None:
@@ -189,11 +188,8 @@ def create_details_csv(details_report_dict, request):  # noqa: C901
     details_report = DetailsReport.objects.filter(report_id=report_id).first()
     if details_report is None:
         return None
-    mask_report = request.query_params.get("mask", False)
     # Check for a cached copy of csv
     cached_csv = details_report.cached_csv
-    if validate_query_param_bool(mask_report):
-        cached_csv = details_report.cached_masked_csv
     if cached_csv:
         logger.info("Using cached csv results for details report %d", report_id)
         return cached_csv
@@ -270,39 +266,7 @@ def create_details_csv(details_report_dict, request):  # noqa: C901
 
     logger.info("Caching csv results for details report %d", report_id)
     cached_csv = details_report_csv_buffer.getvalue()
-    if validate_query_param_bool(mask_report):
-        details_report.cached_masked_csv = cached_csv
-    else:
-        details_report.cached_csv = cached_csv
+    details_report.cached_csv = cached_csv
     details_report.save()
 
     return cached_csv
-
-
-def mask_details_facts(report):
-    """Mask sensitive facts from the details report.
-
-    :param: report <dict> The details report to mask
-
-    :returns: report <dict> The masked details report.
-    """
-    mac_and_ip_facts = [
-        "ifconfig_ip_addresses",
-        "ip_addresses",
-        "vm.ip_addresses",
-        "ifconfig_mac_addresses",
-        "mac_addresses",
-        "vm.mac_addresses",
-    ]
-    name_related_facts = [
-        "vm.host_name",
-        "vm.dns_name",
-        "vm.cluster",
-        "vm.name",
-        "uname_hostname",
-    ]
-    sources = report.get("sources", [])
-    for source in sources:
-        facts = source.get("facts")
-        source["facts"] = mask_data_general(facts, mac_and_ip_facts, name_related_facts)
-    return report

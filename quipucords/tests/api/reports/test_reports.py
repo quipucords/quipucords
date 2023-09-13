@@ -10,7 +10,6 @@ from django.core import management
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.serializers import ValidationError
 
 from api.common.common_report import create_report_version
 from api.models import Credential, ServerInformation, Source
@@ -18,7 +17,6 @@ from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from constants import DataSources
 from tests.api.details_report.test_details_report import MockRequest
 from tests.mixins import LoggedUserMixin
-from tests.utils import patch_mask_value
 
 
 class ReportsTest(LoggedUserMixin, TestCase):
@@ -224,58 +222,11 @@ class ReportsTest(LoggedUserMixin, TestCase):
         """Test parse_csv utility."""
         self.assertEqual(self.parse_csv("1,2,3\na,b,c"), [list("123"), list("abc")])
 
-    def test_reports_gzip_renderer_masked(self):
-        """Get a tar.gz return for report_id via API with masked values."""
-        with patch_mask_value({"1.2.3.4": "<MASKED>"}):
-            reports_dict = self.create_reports_dict(query_params="?mask=True")
-        deployments_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID\r\n"
-            f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
-            "\r\n"
-            "\r\n"
-            "System Fingerprints:\r\n"
-            "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-ansible,detection-network,detection-openshift,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
-            ",,,2,2,,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,2,2,False,2,False,True,False,False,False,,,virtualized,,[<MASKED>],,absent,absent,absent,absent,,<MASKED>,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            "\r\n"
-        )
-
-        details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[<MASKED>],<MASKED>,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
-            % (
-                self.report_version,
-                reports_dict.get("details_json").get("report_platform_id"),
-                self.server_id,
-            )
-        )
-        renderer = ReportsGzipRenderer()
-        mock_req = MockRequest(mask_rep=True)
-        mock_renderer_context = {"request": mock_req}
-        tar_gz_result = renderer.render(
-            reports_dict, renderer_context=mock_renderer_context
-        )
-        self.assertNotEqual(tar_gz_result, None)
-        with tarfile.open(fileobj=tar_gz_result) as tarball:
-            self.check_tarball(deployments_csv, details_csv, tarball)
-
-    def test_reports_gzip_renderer_masked_bad_req(self):
-        """Get a tar.gz return for report_id via API with a bad query param."""
-        reports_dict = self.create_reports_dict(query_params="?mask=True")
-        renderer = ReportsGzipRenderer()
-        mock_req = MockRequest(mask_rep="foo")
-        mock_renderer_context = {"request": mock_req}
-        with self.assertRaises(ValidationError):
-            tar_gz_result = renderer.render(
-                reports_dict, renderer_context=mock_renderer_context
-            )
-            self.assertEqual(tar_gz_result, None)
-
     def test_sha256sum(self):
         """Ensure SHA256SUM hashes are correct."""
         reports_dict = self.create_reports_dict()
         renderer = ReportsGzipRenderer()
-        mock_req = MockRequest(mask_rep=True)
+        mock_req = MockRequest()
         mock_renderer_context = {"request": mock_req}
         tar_gz_result = renderer.render(
             reports_dict, renderer_context=mock_renderer_context
