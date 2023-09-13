@@ -112,7 +112,7 @@ class TestProcessCloudProvider(unittest.TestCase):
             cloud_provider.ProcessCloudProvider.process(
                 "QPC_FORCE_POST_PROCESS", dependencies
             ),
-            cloud_provider.GOOGLE,
+            cloud_provider.GCP,
         )
         dependencies["dmi_bios_version"] = "6.0"
         dependencies["dmi_system_manufacturer"] = "Alibaba Cloud"

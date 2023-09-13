@@ -3,7 +3,7 @@
 from scanner.network.processing import process
 
 AMAZON = "aws"
-GOOGLE = "google"
+GCP = "gcp"
 AZURE = "azure"
 ALIBABA = "alibaba"
 
@@ -77,7 +77,7 @@ class ProcessCloudProvider(process.Processor):
         if "amazon" in dmi_bios_version.lower():
             return AMAZON
         if "google" in dmi_bios_version.lower():
-            return GOOGLE
+            return GCP
         if "7783-7084-3265-9085-8269-3286-77" in dmi_chassis_asset_tag:
             return AZURE
         if (
