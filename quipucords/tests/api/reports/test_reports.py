@@ -3,19 +3,24 @@
 import csv
 import hashlib
 import json
+import logging
 import sys
 import tarfile
+from io import BytesIO
 
+import pytest
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
 from api.common.common_report import create_report_version
+from api.deployments_report.model import DeploymentsReport
 from api.models import Credential, ServerInformation, Source
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
-from constants import DataSources
+from constants import SCAN_JOB_LOG, DataSources
 from tests.api.details_report.test_details_report import MockRequest
+from tests.factories import DeploymentReportFactory
 from tests.mixins import LoggedUserMixin
 
 
@@ -260,3 +265,57 @@ class ReportsTest(LoggedUserMixin, TestCase):
             new_hash = hashlib.sha256(file_contents).hexdigest()
             new_file2hash[hashed_filename] = new_hash
         self.assertEqual(new_file2hash, file2hash, "SHA256SUM content is incorrect")
+
+
+def test_report_without_logs(django_client, caplog):
+    """Explicitly test report without logs."""
+    caplog.set_level(logging.WARNING)
+    report = DeploymentReportFactory.create()
+    response = django_client.get(f"/api/v1/reports/{report.id}/")
+    assert response.ok, response.text
+    assert f"No logs were found for report_id={report.id}" in caplog.messages
+    expected_files = {
+        f"report_id_{report.id}/{fname}"
+        for fname in [
+            "SHA256SUM",
+            "deployments.csv",
+            "deployments.json",
+            "details.csv",
+            "details.json",
+        ]
+    }
+    with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
+        assert set(tarball.getnames()) == expected_files
+
+
+@pytest.fixture
+def report_with_logs(settings, faker):
+    """Return a completed DeploymentReport instance that has associate scan job logs."""
+    report: DeploymentsReport = DeploymentReportFactory.create()
+    scan_job_id = report.details_report.scanjob.id
+    log_file = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
+        scan_job_id=scan_job_id, output_type="test"
+    )
+    log_file.write_text(faker.paragraph())
+    return report
+
+
+def test_report_with_logs(django_client, report_with_logs):
+    """Test if scan job logs are included in tarball when present."""
+    report = report_with_logs
+    scan_job_id = report.details_report.scanjob.id
+    response = django_client.get(f"/api/v1/reports/{report.id}/")
+    assert response.ok, response.text
+    expected_files = {
+        f"report_id_{report.id}/{fname}"
+        for fname in [
+            "SHA256SUM",
+            "deployments.csv",
+            "deployments.json",
+            "details.csv",
+            "details.json",
+            f"scan-job-{scan_job_id}-test.txt",
+        ]
+    }
+    with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
+        assert set(tarball.getnames()) == expected_files

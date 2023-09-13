@@ -6,6 +6,7 @@ the proper patching.
 """
 
 from functools import partial
+from pathlib import Path
 from urllib.parse import urljoin
 
 import pytest
@@ -17,6 +18,16 @@ from django.test import override_settings
 def disable_celery_until_we_are_ready(settings):
     """Disable Celery scan manager in tests until we are ready to switch everything."""
     settings.QPC_ENABLE_CELERY_SCAN_MANAGER = False
+
+
+@pytest.fixture(autouse=True)
+def default_data_dir(settings, tmp_path: Path) -> Path:
+    """Set a clean data dir for storing files."""
+    data_dir = tmp_path / "data"
+    settings.DEFAULT_DATA_DIR = data_dir
+    settings.LOG_DIRECTORY = data_dir / "logs"
+    settings.LOG_DIRECTORY.mkdir(parents=True)
+    return data_dir
 
 
 @pytest.fixture(autouse=True)
