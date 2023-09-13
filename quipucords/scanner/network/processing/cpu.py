@@ -98,7 +98,7 @@ class ProcessCpuSocketCount(process.Processor):
             and cpuinfo_cpu_socket_count.get("rc") == 0
             and cpuinfo_cpu_socket_count.get("stdout_lines")
         ):
-            cpuinfo_count = cpuinfo_cpu_socket_count.get("stdout_lines", [0])[0]
+            cpuinfo_count = cpuinfo_cpu_socket_count.get("stdout_lines", [0])[-1]
             if is_int(cpuinfo_count):
                 if (
                     convert_to_int(cpuinfo_count) != 0

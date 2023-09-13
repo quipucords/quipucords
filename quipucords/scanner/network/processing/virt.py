@@ -10,6 +10,12 @@ VIRT_TYPE_KVM = "kvm"
 VIRT_TYPE_XEN = "xen"
 
 
+def is_last_stdout_line_y(stdout_lines: list) -> bool:
+    """Return True if the last line of stdout_lines is "Y"."""
+    stdout_lines = [line for line in stdout_lines if line]
+    return bool(stdout_lines and stdout_lines[-1] == "Y")
+
+
 class ProcessVirtXenPrivcmdFound(process.Processor):
     """Process the internal_xen_privcmd_found from virt."""
 
@@ -18,11 +24,7 @@ class ProcessVirtXenPrivcmdFound(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_xen_privcmd_found output."""
-        result = output.get("stdout_lines")
-        if isinstance(result, list):
-            result = [line for line in result if line]
-            return bool(result) and result[0] == "Y"
-        return False
+        return is_last_stdout_line_y(output.get("stdout_lines", []))
 
 
 class ProcessVirtKvmFound(process.Processor):
@@ -33,11 +35,7 @@ class ProcessVirtKvmFound(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_kvm_found output."""
-        result = output.get("stdout_lines")
-        if isinstance(result, list):
-            result = [line for line in result if line]
-            return bool(result) and result[0] == "Y"
-        return False
+        return is_last_stdout_line_y(output.get("stdout_lines", []))
 
 
 class ProcessVirtXenGuest(process.Processor):
@@ -48,11 +46,9 @@ class ProcessVirtXenGuest(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_xen_guest output."""
-        result = output.get("stdout_lines")
-        if isinstance(result, list):
-            result = [line for line in result if line]
-            return bool(result) and is_int(result[0]) and convert_to_int(result[0]) > 0
-        return False
+        result = output.get("stdout_lines", [])
+        result = [line for line in result if line]
+        return bool(result and is_int(result[-1]) and convert_to_int(result[-1]) > 0)
 
 
 class ProcessSystemManufacturer(process.Processor):
@@ -64,12 +60,9 @@ class ProcessSystemManufacturer(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_sys_manufacturer output."""
-        result = output.get("stdout_lines")
-        if isinstance(result, list):
-            result = [line for line in result if line]
-            if bool(result):
-                return result[0]
-        return None
+        result = output.get("stdout_lines", [])
+        result = [line for line in result if line]
+        return result[-1] if result else None
 
 
 class ProcessVirtCpuModelNameKvm(process.Processor):
@@ -80,11 +73,7 @@ class ProcessVirtCpuModelNameKvm(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Process internal_cpu_model_name_kvm output."""
-        result = output.get("stdout_lines")
-        if isinstance(result, list):
-            result = [line for line in result if line]
-            return bool(result) and result[0] == "Y"
-        return False
+        return is_last_stdout_line_y(output.get("stdout_lines", []))
 
 
 class ProcessVirtType(process.Processor):

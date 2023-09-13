@@ -135,7 +135,7 @@
   set_fact:
     internal_have_systemctl: true
   ignore_errors: yes
-  when: (internal_whereis_systemctl_cmd.get('rc') == 0 and internal_whereis_systemctl_cmd.get('stdout_lines') != ['systemctl:'])
+  when: (internal_whereis_systemctl_cmd.get('rc') == 0 and internal_whereis_systemctl_cmd.get('stdout_lines')[-1] != 'systemctl:')
 
 - name: gather internal_whereis_chkconfig_cmd
   raw: whereis chkconfig
@@ -151,7 +151,7 @@
   set_fact:
     internal_have_chkconfig: true
   ignore_errors: yes
-  when: (internal_whereis_chkconfig_cmd.get('rc') == 0 and internal_whereis_chkconfig_cmd.get('stdout_lines') != ['chkconfig:'])
+  when: (internal_whereis_chkconfig_cmd.get('rc') == 0 and internal_whereis_chkconfig_cmd.get('stdout_lines')[-1] != 'chkconfig:')
 
 - name: gather internal_whereis_ifconfig_cmd
   raw: whereis ifconfig
@@ -167,7 +167,7 @@
   set_fact:
     internal_have_ifconfig: true
   ignore_errors: yes
-  when: "internal_whereis_ifconfig_cmd.get('rc') == 0 and internal_whereis_ifconfig_cmd.get('stdout_lines') != ['ifconfig:']"
+  when: "internal_whereis_ifconfig_cmd.get('rc') == 0 and internal_whereis_ifconfig_cmd.get('stdout_lines')[-1] != 'ifconfig:'"
 
 - name: gather internal_whereis_ip_cmd
   raw: command -v /sbin/ip

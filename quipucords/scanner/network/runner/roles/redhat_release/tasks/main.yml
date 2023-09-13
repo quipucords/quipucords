@@ -19,10 +19,10 @@
 
 - name: set redhat_release facts based on internal_redhat_release
   set_fact:
-    redhat_release_name: "{{ internal_redhat_release['stdout_lines'][0] }}"
-    redhat_release_version: "{{ internal_redhat_release['stdout_lines'][1] }}"
-    redhat_release_release: "{{ internal_redhat_release['stdout_lines'][2] }}"
+    redhat_release_name: "{{ internal_redhat_release['stdout_lines'][-3] }}"
+    redhat_release_version: "{{ internal_redhat_release['stdout_lines'][-2] }}"
+    redhat_release_release: "{{ internal_redhat_release['stdout_lines'][-1] }}"
   ignore_errors: yes
   when:
     - "'stdout_lines' in internal_redhat_release"
-    - "internal_redhat_release['stdout_lines']|length == 3"
+    - "internal_redhat_release['stdout_lines']|length >= 3"

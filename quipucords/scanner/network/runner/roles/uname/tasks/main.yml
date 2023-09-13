@@ -11,7 +11,7 @@
 
 - name: add uname.os to dictionary
   set_fact:
-    uname_os: "{{ internal_uname_os | json_query('stdout_lines[0]') | default('') }}"
+    uname_os: "{{ internal_uname_os | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
 - name: gather internal_uname_hostname fact
@@ -21,7 +21,7 @@
 
 - name: add uname.hostname to dictionary
   set_fact:
-    uname_hostname: "{{ internal_uname_hostname | json_query('stdout_lines[0]') | default('') }}"
+    uname_hostname: "{{ internal_uname_hostname | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
 - name: gather internal_uname_processor fact
@@ -31,7 +31,7 @@
 
 - name: add uname_processor to dictionary
   set_fact:
-    uname_processor: "{{ internal_uname_processor | json_query('stdout_lines[0]') | default('') }}"
+    uname_processor: "{{ internal_uname_processor | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
 - name: gather internal_uname_kernel fact
@@ -41,7 +41,7 @@
 
 - name: add uname.kernel to dictionary
   set_fact:
-    uname_kernel: "{{ internal_uname_kernel | json_query('stdout_lines[0]') | default('') }}"
+    uname_kernel: "{{ internal_uname_kernel | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
 - name: gather internal_uname_all fact
@@ -51,7 +51,7 @@
 
 - name: add uname.all to dictionary
   set_fact:
-    uname_all: "{{ internal_uname_all | json_query('stdout_lines[0]') | default('') }}"
+    uname_all: "{{ internal_uname_all | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
 - name: gather internal_uname_hardware_platform fact
@@ -61,5 +61,5 @@
 
 - name: add uname.hardware_platform to dictionary
   set_fact:
-    uname_hardware_platform: "{{ internal_uname_hardware_platform | json_query('stdout_lines[0]') | default('') }}"
+    uname_hardware_platform: "{{ internal_uname_hardware_platform | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes

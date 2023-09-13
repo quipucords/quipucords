@@ -12,7 +12,7 @@ class TestProcessCpuModelVer(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu model ver."""
-        self.assertEqual(cpu.ProcessCpuModelVer.process(ansible_result("a\nb\nc")), "a")
+        self.assertEqual(cpu.ProcessCpuModelVer.process(ansible_result("a\nb\nc")), "c")
 
     def test_not_found(self):
         """Did not find cpu model ver."""
@@ -27,7 +27,7 @@ class TestProcessCpuCpuFamily(unittest.TestCase):
     def test_success_case(self):
         """Found cpu family."""
         self.assertEqual(
-            cpu.ProcessCpuCpuFamily.process(ansible_result("a\nb\nc")), "a"
+            cpu.ProcessCpuCpuFamily.process(ansible_result("a\nb\nc")), "c"
         )
 
     def test__not_found(self):
@@ -42,7 +42,7 @@ class TestProcessCpuVendorId(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu vendor id."""
-        self.assertEqual(cpu.ProcessCpuVendorId.process(ansible_result("a\nb\nc")), "a")
+        self.assertEqual(cpu.ProcessCpuVendorId.process(ansible_result("a\nb\nc")), "c")
 
     def test__not_found(self):
         """Did not find cpu vendor id."""
@@ -57,7 +57,7 @@ class TestProcessCpuModelName(unittest.TestCase):
     def test_success_case(self):
         """Found cpu model name."""
         self.assertEqual(
-            cpu.ProcessCpuModelName.process(ansible_result("a\nb\nc")), "a"
+            cpu.ProcessCpuModelName.process(ansible_result("a\nb\nc")), "c"
         )
 
     def test__not_found(self):
@@ -72,7 +72,7 @@ class TestProcessCpuBogomips(unittest.TestCase):
 
     def test_success_case(self):
         """Found cpu bogomips."""
-        self.assertEqual(cpu.ProcessCpuBogomips.process(ansible_result("a\nb\nc")), "a")
+        self.assertEqual(cpu.ProcessCpuBogomips.process(ansible_result("a\nb\nc")), "c")
 
     def test__not_found(self):
         """Did not find cpu bogomips."""
