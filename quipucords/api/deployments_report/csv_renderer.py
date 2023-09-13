@@ -13,4 +13,4 @@ class DeploymentCSVRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render report as CSV."""
-        return create_deployments_csv(data, renderer_context.get("request"))
+        return create_deployments_csv(data)

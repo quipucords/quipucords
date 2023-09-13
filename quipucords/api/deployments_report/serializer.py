@@ -160,9 +160,7 @@ class DeploymentReportSerializer(NotEmptySerializer):
     details_report = PrimaryKeyRelatedField(queryset=DetailsReport.objects.all())
     report_id = IntegerField(read_only=True)
     cached_fingerprints = JSONField(read_only=True)
-    cached_masked_fingerprints = JSONField(read_only=True)
     cached_csv = CharField(read_only=True)
-    cached_masked_csv = CharField(read_only=True)
 
     status = ChoiceField(read_only=True, choices=DeploymentsReport.STATUS_CHOICES)
     system_fingerprints = FingerprintField(many=True, read_only=True)

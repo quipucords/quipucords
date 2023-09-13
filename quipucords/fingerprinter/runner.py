@@ -15,7 +15,6 @@ from api.common.util import (
     is_boolean,
     is_float,
     is_int,
-    mask_data_general,
 )
 from api.models import DeploymentsReport, Product, ScanTask, SystemFingerprint
 from api.serializers import SystemFingerprintSerializer
@@ -248,9 +247,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             status = ScanTask.FAILED
         deployment_report.cached_fingerprints = final_fingerprint_list
-        deployment_report.cached_masked_fingerprints = mask_data_general(
-            deepcopy(final_fingerprint_list), MAC_AND_IP_FACTS, NAME_RELATED_FACTS
-        )
         deployment_report.save()
         self.scan_task.log_message(
             f"RESULTS (report id={deployment_report.report_id}) -  "

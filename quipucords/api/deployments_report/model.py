@@ -36,9 +36,7 @@ class DeploymentsReport(models.Model):
     )
     report_id = models.IntegerField(null=True)
     cached_fingerprints = models.JSONField(null=True)
-    cached_masked_fingerprints = models.JSONField(null=True)
     cached_csv = models.TextField(null=True)
-    cached_masked_csv = models.TextField(null=True)
 
 
 class SystemFingerprint(models.Model):
