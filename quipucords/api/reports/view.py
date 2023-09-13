@@ -14,10 +14,7 @@ from rest_framework.decorators import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.serializers import ValidationError
 
-from api import messages
-from api.common.util import is_int
 from api.deployments_report.view import build_cached_json_report
 from api.models import DeploymentsReport, DetailsReport
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
@@ -34,35 +31,33 @@ perm_classes = (IsAuthenticated,)
 @authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((ReportsGzipRenderer,))
-def reports(request, report_id=None):
+def reports(request, report_id):
     """Lookup and return reports."""
     reports_dict = {}
-    if report_id is not None:
-        if not is_int(report_id):
-            error = {"report_id": [_(messages.COMMON_ID_INV)]}
-            raise ValidationError(error)
     reports_dict["report_id"] = report_id
-    # details
-    details_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
+    details_report = get_object_or_404(DetailsReport, report_id=report_id)
     # add scan job id to allow detection of related logs on GzipRenderer
-    reports_dict["scan_job_id"] = details_data.scanjob.id
-    serializer = DetailsReportSerializer(details_data)
+    reports_dict["scan_job_id"] = details_report.scanjob.id
+    serializer = DetailsReportSerializer(details_report)
     json_details = serializer.data
     json_details.pop("cached_csv", None)
     reports_dict["details_json"] = json_details
-    # deployments
-    deployments_data = get_object_or_404(
-        DeploymentsReport.objects.all(), report_id=report_id
-    )
-    if deployments_data.status != DeploymentsReport.STATUS_COMPLETE:
-        deployments_id = deployments_data.details_report.id
+    deployments_report = get_object_or_404(DeploymentsReport, report_id=report_id)
+    # deployments_report.status seems redundant considering scan job already
+    # has a "state machine". Consider removing this in future iterations (we will
+    # be forced to revisit this idea when Report replaces Details and Deployments
+    # models)
+    if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
+        deployments_id = deployments_report.details_report.id
         return Response(
             {
-                "detail": f"Deployment report {deployments_id} could not be created."
-                "  See server logs."
+                "detail": _(
+                    f"Deployment report {deployments_id} could not be created."
+                    " See server logs."
+                )
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
-    deployments_report = build_cached_json_report(deployments_data)
-    reports_dict["deployments_json"] = deployments_report
+    deployments_json = build_cached_json_report(deployments_report)
+    reports_dict["deployments_json"] = deployments_json
     return Response(reports_dict)
