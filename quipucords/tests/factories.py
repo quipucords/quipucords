@@ -8,6 +8,9 @@ from faker import Faker
 from api import models
 from api.status import get_server_id
 from constants import DataSources
+from tests.utils import fake_rhel, raw_facts_generator
+
+_faker = Faker()
 
 
 def format_sources(obj):
@@ -32,12 +35,27 @@ def system_fingerprint_source_types():
     return all_types - ignored_types
 
 
+def generate_details_sources(obj):
+    """Return raw facts for details report depending on source_type."""
+    sources_list = []
+    for source_type in obj.source_types:
+        source = {
+            "server_id": _faker.uuid4(),
+            "source_name": _faker.slug(),
+            "source_type": source_type,
+            "report_version": _faker.uuid4(),
+            "facts": list(raw_facts_generator(source_type, obj.facts_per_source)),
+        }
+        sources_list.append(source)
+    return sources_list
+
+
 class SystemFingerprintFactory(DjangoModelFactory):
     """SystemFingerprint factory."""
 
     name = factory.Faker("hostname")
     bios_uuid = factory.Faker("uuid4")
-    os_release = "Red Hat Enterprise Linux release 8.5 (Ootpa)"
+    os_release = factory.LazyFunction(fake_rhel)
     ip_addresses = factory.LazyAttribute(lambda o: o.ip_addresses_list)
     architecture = factory.Iterator(["x86_64", "ARM"])
     sources = factory.LazyAttribute(format_sources)
@@ -62,6 +80,7 @@ class DeploymentReportFactory(DjangoModelFactory):
         factory_related_name="deployment_report",
     )
     report_version = "REPORT_VERSION"
+    status = models.DeploymentsReport.STATUS_COMPLETE
 
     class Meta:
         """Factory options."""
@@ -103,12 +122,18 @@ class DetailsReportFactory(DjangoModelFactory):
         "tests.factories.ScanJobFactory",
         factory_related_name="details_report",
     )
+    sources = factory.LazyAttribute(generate_details_sources)
 
     class Meta:
         """Factory options."""
 
         model = "api.DetailsReport"
 
+    class Params:
+        """Factory parameters."""
+
+        source_types = factory.Faker("random_elements", elements=DataSources.values)
+        facts_per_source = factory.Faker("pyint", min_value=2, max_value=10)
 
 class JobConnectionResultFactory(DjangoModelFactory):
     """Factory for JobConnectionResult model."""
@@ -204,7 +229,7 @@ class CredentialFactory(DjangoModelFactory):
             getattr(self, "username", None) or getattr(self, "password", None)
         )
         if self.cred_type == DataSources.OPENSHIFT and not has_user_or_pass:
-            return Faker().password()
+            return _faker.password()
         return None
 
 
