@@ -14,9 +14,11 @@
 
 - name: extract result value for subman.cpu.cpu(s)
   set_fact:
-    subman_cpu_cpu: "{{ internal_subman_cpu_cpu_cmd['stdout'] | trim | default(None) }}"
+    subman_cpu_cpu: "{{ internal_subman_cpu_cpu_cmd['stdout_lines'][-1] | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subman_cpu_cpu_cmd'
+  when:
+    - '"stdout_lines" in internal_subman_cpu_cpu_cmd'
+    - 'internal_subman_cpu_cpu_cmd["stdout_lines"] | length > 0'
 
 # subman_cpu_core_per_socket fact
 - name: gather subman.cpu.core(s)_per_socket fact
@@ -28,9 +30,11 @@
 
 - name: extract result value for subman.cpu.core(s)_per_socket
   set_fact:
-    subman_cpu_core_per_socket: "{{  internal_subman_cpu_core_per_socket_cmd['stdout'] | trim | default(None) }}"
+    subman_cpu_core_per_socket: "{{  internal_subman_cpu_core_per_socket_cmd['stdout_lines'][-1] | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subman_cpu_core_per_socket_cmd'
+  when:
+    - '"stdout_lines" in internal_subman_cpu_core_per_socket_cmd'
+    - 'internal_subman_cpu_core_per_socket_cmd["stdout_lines"] | length > 0'
 
 # subman_cpu_cpu_socket fact
 - name: gather subman.cpu.cpu_socket(s) fact
@@ -42,9 +46,11 @@
 
 - name: extract result value for subman.cpu.cpu_socket(s)
   set_fact:
-    subman_cpu_cpu_socket: "{{  internal_subman_cpu_cpu_socket_cmd['stdout'] | trim | default(None) }}"
+    subman_cpu_cpu_socket: "{{  internal_subman_cpu_cpu_socket_cmd['stdout_lines'][-1] | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subman_cpu_cpu_socket_cmd'
+  when:
+    - '"stdout_lines" in internal_subman_cpu_cpu_socket_cmd'
+    - 'internal_subman_cpu_cpu_socket_cmd["stdout_lines"] | length > 0'
 
 # subman_virt_host_type fact
 - name: gather subman.virt.host_type fact
@@ -56,8 +62,10 @@
 
 - name: extract result value for subman.virt.host_type
   set_fact:
-    subman_virt_host_type: "{{  internal_subman_virt_host_type_cmd['stdout'] | trim | default(None) }}"
-  when: '"stdout" in internal_subman_virt_host_type_cmd'
+    subman_virt_host_type: "{{  internal_subman_virt_host_type_cmd['stdout_lines'][-1] | trim | default(None) }}"
+  when:
+    - '"stdout_lines" in internal_subman_virt_host_type_cmd'
+    - 'internal_subman_virt_host_type_cmd["stdout_lines"] | length > 0'
 
 # subman_virt_is_guest fact
 - name: gather subman.virt.is_guest fact
@@ -69,9 +77,12 @@
 
 - name: extract result value for subman.virt.is_guest
   set_fact:
-    subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout'] | string() | trim | default(None) }}"
+    subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout_lines'][-1] | string() | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subman_virt_is_guest_cmd'
+  when:
+    - '"stdout_lines" in internal_subman_virt_is_guest_cmd'
+    - 'internal_subman_virt_is_guest_cmd["stdout_lines"] | length > 0'
+
 
 # subman_virt_uuid fact
 - name: gather subman.virt.uuid fact
@@ -83,9 +94,11 @@
 
 - name: extract result value for subman.virt.uuid
   set_fact:
-    subman_virt_uuid: "{{  internal_subman_virt_uuid_cmd['stdout'] | trim | default(None) }}"
+    subman_virt_uuid: "{{  internal_subman_virt_uuid_cmd['stdout_lines'][-1] | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subman_virt_uuid_cmd'
+  when:
+    - '"stdout_lines" in internal_subman_virt_uuid_cmd'
+    - 'internal_subman_virt_uuid_cmd["stdout_lines"] | length > 0'
 
 # subman_overall_status fact
 - name: gather subman.overall.status fact
@@ -99,9 +112,11 @@
 
 - name: extract result value for subman.overall.status
   set_fact:
-    subman_overall_status: "{{ internal_subman_overall_status_cmd['stdout'] | string() | trim | default(None) }}"
+    subman_overall_status: "{{ internal_subman_overall_status_cmd['stdout_lines'][-1] | string() | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subman_overall_status_cmd'
+  when:
+    - '"stdout_lines" in internal_subman_overall_status_cmd'
+    - 'internal_subman_overall_status_cmd["stdout_lines"] | length > 0'
 
 # subman fact
 - name: gather subman.has_facts_file fact
@@ -112,11 +127,14 @@
 
 - name: add subman.has_facts_file to dictionary
   set_fact:
-    subman: "{{ subman|default({}) | combine({ item: (internal_subman_facts_file_lines['stdout'] | int) > 0 }) }}"
+    subman: "{{ subman|default({}) | combine({ item: (internal_subman_facts_file_lines['stdout_lines'][-1] | int) > 0 }) }}"
   with_items:
   - 'subman.has_facts_file'
   ignore_errors: yes
-  when: 'internal_have_subscription_manager and "stdout" in internal_subman_facts_file_lines'
+  when:
+    - 'internal_have_subscription_manager'
+    - '"stdout_lines" in internal_subman_facts_file_lines'
+    - 'internal_subman_facts_file_lines["stdout_lines"] | length > 0'
 
 # subman_consumed fact
 - name: gather internal_subman_consumed
@@ -144,6 +162,8 @@
 
 - name: extract result value for subscription_manager_id
   set_fact:
-    subscription_manager_id: "{{ internal_subscription_manager_id_cmd['stdout'] | trim | default(None) }}"
+    subscription_manager_id: "{{ internal_subscription_manager_id_cmd['stdout_lines'][-1] | trim | default(None) }}"
   ignore_errors: yes
-  when: '"stdout" in internal_subscription_manager_id_cmd'
+  when:
+    - '"stdout_lines" in internal_subscription_manager_id_cmd'
+    - 'internal_subscription_manager_id_cmd["stdout_lines"] | length > 0'

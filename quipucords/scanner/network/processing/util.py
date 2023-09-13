@@ -7,17 +7,20 @@ from scanner.network.processing import process
 logger = logging.getLogger(__name__)
 
 
-def get_line(lines, line_index=0):
+def get_line(lines, line_index=-1):
     """Get a line from output.
+
+    By default, get the last line of the output, not the first, since the stdout stream
+    may have been contaminated by unwanted output before our command ran.
 
     :param lines: list of output lines
     :param line_index: The index line to retrieve
     :returns: The specific line or empty string
     """
-    num_lines = len(lines)
-    if num_lines > line_index:
+    try:
         return lines[line_index]
-    return process.NO_DATA
+    except IndexError:
+        return process.NO_DATA
 
 
 class InitLineFinder(process.Processor):

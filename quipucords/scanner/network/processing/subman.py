@@ -20,8 +20,15 @@ class ProcessSubmanConsumed(process.Processor):
         entitlements_data = []
         entitlements = output.get("stdout_lines", [])
         for entitlement in entitlements:
-            if entitlement:
+            if not entitlement:
+                # Skip emtpy lines.
+                continue
+            try:
                 name, entitlement_id = entitlement.split(" - ")
                 entitlement_dict = {"name": name, "entitlement_id": entitlement_id}
                 entitlements_data.append(entitlement_dict)
+            except ValueError as e:
+                # .split may fail on unexpected outputs in the stdout_lines.
+                # We should log this as an error but keep trying other lines.
+                logger.error(e)
         return entitlements_data

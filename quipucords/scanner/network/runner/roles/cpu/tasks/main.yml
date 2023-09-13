@@ -45,7 +45,7 @@
   ignore_errors: yes
 
 - name: gather internal_cpu_model_ver fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^model\s*.' | sed -n -e 's/^.*model\s*.\s*//p'
+  raw: cat /proc/cpuinfo 2>/dev/null | grep '^model\s*:' | sed -n -e 's/^.*model\s*:\s*//p'
   register: internal_cpu_model_ver
   ignore_errors: yes
 
@@ -61,7 +61,7 @@
 
 - name: extract or default cpu.count fact
   set_fact:
-    cpu_count: "{{ internal_cpu_count_cmd | json_query('stdout_lines[0]') }}"
+    cpu_count: "{{ internal_cpu_count_cmd | json_query('stdout_lines[-1]') }}"
   ignore_errors: yes
 
 - name: gather cpu.core_per_socket fact
@@ -71,7 +71,7 @@
 
 - name: extract or default cpu.core_per_socket fact
   set_fact:
-    cpu_core_per_socket: "{{ internal_cpu_core_per_socket_cmd | json_query('stdout_lines[0]') }}"
+      cpu_core_per_socket: "{{ internal_cpu_core_per_socket_cmd | json_query('stdout_lines[-1]') }}"
   ignore_errors: yes
 
 - name: gather cpu.siblings fact
@@ -81,7 +81,7 @@
 
 - name: extract or default cpu.siblings fact
   set_fact:
-    cpu_siblings: "{{ internal_cpu_siblings_cmd | json_query('stdout_lines[0]') }}"
+    cpu_siblings: "{{ internal_cpu_siblings_cmd | json_query('stdout_lines[-1]') }}"
   ignore_errors: yes
 
 - name: determine cpu.hyperthreading fact

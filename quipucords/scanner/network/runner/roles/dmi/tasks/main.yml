@@ -13,15 +13,17 @@
 
 - name: extract result value for dmi.bios-vendor
   set_fact:
-    dmi_bios_vendor: "{{  internal_dmi_bios_vendor_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+    dmi_bios_vendor: "{{ internal_dmi_bios_vendor_cmd['stdout_lines'][-1] | trim if internal_have_dmidecode else '' }}"
   ignore_errors: yes
-  when: '"stdout" in internal_dmi_bios_vendor_cmd'
+  when:
+    - '"stdout_lines" in internal_dmi_bios_vendor_cmd'
+    - 'internal_dmi_bios_vendor_cmd["stdout_lines"] | length > 0'
 
 - name: handle failure value for dmi.bios-vendor
   set_fact:
     dmi_bios_vendor: ""
   ignore_errors: yes
-  when: '"stdout" not in internal_dmi_bios_vendor_cmd'
+  when: '"stdout_lines" not in internal_dmi_bios_vendor_cmd'
 
 - name: gather dmi.bios-version fact
   raw: /usr/sbin/dmidecode -s bios-version 2>/dev/null
@@ -32,15 +34,17 @@
 
 - name: extract result value for dmi.bios-version
   set_fact:
-    dmi_bios_version: "{{  internal_dmi_bios_version_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+    dmi_bios_version: "{{ internal_dmi_bios_version_cmd['stdout_lines'][-1] | trim if internal_have_dmidecode else '' }}"
   ignore_errors: yes
-  when: '"stdout" in internal_dmi_bios_version_cmd'
+  when:
+    - '"stdout_lines" in internal_dmi_bios_version_cmd'
+    - 'internal_dmi_bios_version_cmd["stdout_lines"] | length > 0'
 
 - name: handle failure value for dmi.bios-version
   set_fact:
     dmi_bios_version: ""
   ignore_errors: yes
-  when: '"stdout" not in internal_dmi_bios_version_cmd'
+  when: '"stdout_lines" not in internal_dmi_bios_version_cmd'
 
 - name: gather dmi.system-manufacturer fact
   raw: /usr/sbin/dmidecode 2>/dev/null | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
@@ -51,15 +55,17 @@
 
 - name: extract result value for dmi.system-manufacturer
   set_fact:
-    dmi_system_manufacturer: "{{  internal_dmi_system_manufacturer_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+    dmi_system_manufacturer: "{{ internal_dmi_system_manufacturer_cmd['stdout_lines'][-1] | trim if internal_have_dmidecode else '' }}"
   ignore_errors: yes
-  when: '"stdout" in internal_dmi_system_manufacturer_cmd'
+  when:
+    - '"stdout_lines" in internal_dmi_system_manufacturer_cmd'
+    - 'internal_dmi_system_manufacturer_cmd["stdout_lines"] | length > 0'
 
 - name: handle failure value for dmi.system-manufacturer
   set_fact:
     dmi_system_manufacturer: ""
   ignore_errors: yes
-  when: '"stdout" not in internal_dmi_system_manufacturer_cmd'
+  when: '"stdout_lines" not in internal_dmi_system_manufacturer_cmd'
 
 - name: gather dmi.processor-family fact
   raw: /usr/sbin/dmidecode -s processor-family 2>/dev/null
@@ -70,15 +76,17 @@
 
 - name: extract result value for dmi.processor-family
   set_fact:
-    dmi_processor_family: "{{  internal_dmi_processor_family_cmd['stdout'] | trim if internal_have_dmidecode else '' }}"
+    dmi_processor_family: "{{ internal_dmi_processor_family_cmd['stdout_lines'][-1] | trim if internal_have_dmidecode else '' }}"
   ignore_errors: yes
-  when: '"stdout" in internal_dmi_processor_family_cmd'
+  when:
+    - '"stdout_lines" in internal_dmi_processor_family_cmd'
+    - 'internal_dmi_processor_family_cmd["stdout_lines"] | length > 0'
 
 - name: handle failure value for dmi.processor-family
   set_fact:
     dmi_processor_family: ""
   ignore_errors: yes
-  when: '"stdout" not in internal_dmi_processor_family_cmd'
+  when: '"stdout_lines" not in internal_dmi_processor_family_cmd'
 
 - name: gather dmi.system-uuid fact
   raw: /usr/sbin/dmidecode -s system-uuid 2>/dev/null

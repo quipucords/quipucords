@@ -21,7 +21,7 @@
 
 - name: extract result value for uptime
   set_fact:
-    last_booted_at: "{{ internal_uptime_utc_cmd['stdout'] | trim}}"
+    last_booted_at: "{{ internal_uptime_utc_cmd | json_query('stdout_lines[-1]') | trim }}"
   ignore_errors: yes
 
 - name: gather date.anaconda_log fact
@@ -33,15 +33,18 @@
 
 - name: extract result value for date.anaconda_log
   set_fact:
-    date_anaconda_log: "{{ internal_date_anaconda_log_cmd['stdout'] | trim | default('') }}"
+    date_anaconda_log: "{{ internal_date_anaconda_log_cmd['stdout_lines'][-1] | trim | default('') }}"
   ignore_errors: yes
-  when: '"stdout" in internal_date_anaconda_log_cmd'
+  when:
+    - '"stdout_lines" in internal_date_anaconda_log_cmd'
+    - 'internal_date_anaconda_log_cmd["stdout_lines"] | length > 0'
+
 
 - name: handle failure value for date.anaconda_log
   set_fact:
     date_anaconda_log: ""
   ignore_errors: yes
-  when: '"stdout" not in internal_date_anaconda_log_cmd'
+  when: '"stdout_lines" not in internal_date_anaconda_log_cmd or internal_date_anaconda_log_cmd["stdout_lines"] | length == 0'
 
 - name: gather internal_date_machine_id fact
   raw: if [ -f /etc/machine-id ] ; then ls --full-time /etc/machine-id 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}' ; fi

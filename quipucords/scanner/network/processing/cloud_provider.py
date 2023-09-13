@@ -42,11 +42,9 @@ class ProcessDmiSystemProductName(process.Processor):
         """Pass the output back through."""
         dmi_system_product_name = dependencies.get("internal_dmi_system_product_name")
         if dmi_system_product_name and dmi_system_product_name.get("rc") == 0:
-            result = dmi_system_product_name.get("stdout_lines")
+            result = dmi_system_product_name.get("stdout_lines", [])
             if result:
-                if result[0] == "" and len(result) > 1:  # noqa: PLC1901
-                    return result[1].strip()
-                return result[0].strip()
+                return result[-1].strip()
         return ""
 
 

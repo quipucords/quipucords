@@ -50,13 +50,19 @@ class TestProcessDmiSystemProductName(unittest.TestCase):
     """Test ProcessDmiSystemProductName."""
 
     def test_success_case(self):
-        """Found dmi system product name."""
+        """
+        Found dmi system product name.
+
+        Please note that the way we handle multiple results may be unintuitive. If
+        Ansible's output includes multiple lines which may mean multiple products,
+        we always return only one of them: the content from the last line.
+        """
         dependencies = {"internal_dmi_system_product_name": ansible_result("a\nb\nc")}
         self.assertEqual(
             cloud_provider.ProcessDmiSystemProductName.process(
                 "QPC_FORCE_POST_PROCESS", dependencies
             ),
-            "a",
+            "c",
         )
         # stdout_lines looks like ['', 'b']
         dependencies["internal_dmi_system_product_name"] = ansible_result("\nb\n")

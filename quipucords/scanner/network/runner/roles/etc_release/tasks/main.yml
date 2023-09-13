@@ -38,13 +38,13 @@
   ignore_errors: yes
 
 - name: set internal_release_file when a release file is found
-  set_fact: 
-    internal_release_file: '{{ internal_release_found["stdout_lines"][0] }}'
+  set_fact:
+    internal_release_file: '{{ internal_release_found["stdout_lines"][-1] }}'
   ignore_errors: yes
   when:
     - '"stdout_lines" in internal_release_found'
     - 'internal_release_found["stdout_lines"]|length > 0'
-    - 'internal_release_found["stdout_lines"][0]|length > 0'
+    - 'internal_release_found["stdout_lines"][-1]|length > 0'
 
 - name: set internal_release_file_content based on internal_release_file
   raw: cat {{ internal_release_file }}
@@ -59,8 +59,8 @@
 - name: set etc_release facts for Debian based on internal_release_file_content
   set_fact:
     etc_release_name: "Debian"
-    etc_release_version: "{{ internal_release_file_content['stdout_lines'][0] }}"
-    etc_release_release: "{{ 'Debian ' + internal_release_file_content['stdout_lines'][0] }}"
+    etc_release_version: "{{ internal_release_file_content['stdout_lines'][-1] }}"
+    etc_release_release: "{{ 'Debian ' + internal_release_file_content['stdout_lines'][-1] }}"
   ignore_errors: yes
   when:
     - internal_release_file is defined
@@ -72,16 +72,16 @@
 
 - name: set etc_release facts for typical distros based on internal_release_file_content
   set_fact:
-    etc_release_name: "{{ internal_release_file_content['stdout_lines'][0].split('release')[0].strip() }}"
-    etc_release_version: "{{ internal_release_file_content['stdout_lines'][0].split('release')[1].strip() }}"
-    etc_release_release: "{{ internal_release_file_content['stdout_lines'][0].strip() }}"
+    etc_release_name: "{{ internal_release_file_content['stdout_lines'][-1].split('release')[0].strip() }}"
+    etc_release_version: "{{ internal_release_file_content['stdout_lines'][-1].split('release')[1].strip() }}"
+    etc_release_release: "{{ internal_release_file_content['stdout_lines'][-1].strip() }}"
   ignore_errors: yes
   when:
     - internal_release_file is defined
     - 'internal_release_file in internal_distro_standard_release'
     - '"stdout_lines" in internal_release_file_content'
     - 'internal_release_file_content["stdout_lines"]|length > 0'
-    - '"release" in internal_release_file_content["stdout_lines"][0]'
+    - '"release" in internal_release_file_content["stdout_lines"][-1]'
 
 # set facts using Linux Standard Base when no other release file was found
 
@@ -103,9 +103,9 @@
 
 - name: set etc_release facts based on internal_lsb_release
   set_fact:
-    etc_release_name: '{{ internal_lsb_release["stdout_lines"][0] }}'
-    etc_release_version: '{{ internal_lsb_release["stdout_lines"][1] }}'
-    etc_release_release: '{{ internal_lsb_release["stdout_lines"][0] + " " + internal_lsb_release["stdout_lines"][1] }}'
+    etc_release_name: '{{ internal_lsb_release["stdout_lines"][-2] }}'
+    etc_release_version: '{{ internal_lsb_release["stdout_lines"][-1] }}'
+    etc_release_release: '{{ internal_lsb_release["stdout_lines"][-2] + " " + internal_lsb_release["stdout_lines"][-1] }}'
   ignore_errors: yes
   when:
     - internal_lsb_release is defined
@@ -122,9 +122,9 @@
 
 - name: set etc_release facts based on internal_uname_version
   set_fact:
-    etc_release_name: "{{ internal_uname_version['stdout_lines'][0].split(' ')[:-1]|join(' ') }}"
-    etc_release_version: "{{ internal_uname_version['stdout_lines'][0].split(' ')[-1] }}"
-    etc_release_release: "{{ internal_uname_version['stdout_lines'][0] }}"
+    etc_release_name: "{{ internal_uname_version['stdout_lines'][-1].split(' ')[:-1]|join(' ') }}"
+    etc_release_version: "{{ internal_uname_version['stdout_lines'][-1].split(' ')[-1] }}"
+    etc_release_release: "{{ internal_uname_version['stdout_lines'][-1] }}"
   ignore_errors: yes
   when:
     - internal_uname_version is defined
@@ -139,5 +139,5 @@
 
 - name: extract etc machine id from intern_get_etc_machine_id
   set_fact:
-    etc_machine_id: "{{ internal_get_etc_machine_id.get('stdout') | default('') }}"
+    etc_machine_id: "{{ internal_get_etc_machine_id | json_query('stdout_lines[-1]') }}"
   ignore_errors: yes

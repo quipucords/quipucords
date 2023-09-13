@@ -16,7 +16,7 @@
 # it failed or never ran), then the result will be null.
 - name: set fact whether red hat rpms are installed or not
   set_fact:
-    redhat_packages_gpg_is_redhat: '{{ (internal_redhat_packages_gpg_is_redhat_cmd | json_query("stdout_lines[0]")) == "Y" }}'
+    redhat_packages_gpg_is_redhat: '{{ (internal_redhat_packages_gpg_is_redhat_cmd | json_query("stdout_lines[-1]")) == "Y" }}'
   ignore_errors: yes
 
 - name: gather the number of all installed red hat packages filtered by gpg keys
@@ -27,7 +27,7 @@
 
 - name: set fact of number of installed red hat packages filtered by gpg keys
   set_fact:
-    redhat_packages_gpg_num_rh_packages: '{{ internal_redhat_packages_gpg_num_rh_packages | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_num_rh_packages: '{{ internal_redhat_packages_gpg_num_rh_packages | json_query("stdout_lines[-1]") }}'
   ignore_errors: yes
 
 - name: gather total number of installed packages
@@ -38,7 +38,7 @@
 
 - name: set fact of number of all installed rpm packages
   set_fact:
-    redhat_packages_gpg_num_installed_packages: '{{ internal_redhat_packages_all_count | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_num_installed_packages: '{{ internal_redhat_packages_all_count | json_query("stdout_lines[-1]") }}'
   ignore_errors: yes
 
 - name: gather the last installed red hat package filtered by gpg keys
@@ -50,7 +50,7 @@
 
 - name: set fact of last installed rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_installed: '{{ internal_redhat_packages_gpg_last_installed | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_last_installed: '{{ internal_redhat_packages_gpg_last_installed | json_query("stdout_lines[-1]") }}'
   ignore_errors: yes
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat
@@ -64,7 +64,7 @@
 
 - name: set fact of last built rh package filtered by gpg key
   set_fact:
-    redhat_packages_gpg_last_built: '{{ internal_redhat_packages_gpg_last_built | json_query("stdout_lines[0]") }}'
+    redhat_packages_gpg_last_built: '{{ internal_redhat_packages_gpg_last_built | json_query("stdout_lines[-1]") }}'
   ignore_errors: yes
   when:
     internal_have_rpm and redhat_packages_gpg_is_redhat

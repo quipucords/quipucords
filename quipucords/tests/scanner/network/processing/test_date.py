@@ -12,7 +12,7 @@ class TestProcessDateDate(unittest.TestCase):
 
     def test_success_case(self):
         """Found date."""
-        self.assertEqual(date.ProcessDateDate.process(ansible_result("a\nb\nc")), "a")
+        self.assertEqual(date.ProcessDateDate.process(ansible_result("a\nb\nc")), "c")
 
     def test_not_found(self):
         """Did not find date."""
@@ -27,7 +27,7 @@ class ProcessDateFilesystemCreate(unittest.TestCase):
     def test_success_case(self):
         """Found date file system create."""
         self.assertEqual(
-            date.ProcessDateFilesystemCreate.process(ansible_result("a\nb\nc")), "a"
+            date.ProcessDateFilesystemCreate.process(ansible_result("a\nb\nc")), "c"
         )
 
     def test_not_found(self):
@@ -44,7 +44,7 @@ class ProcessDateMachineId(unittest.TestCase):
     def test_success_case(self):
         """Found date machine id."""
         self.assertEqual(
-            date.ProcessDateMachineId.process(ansible_result("a\nb\nc")), "a"
+            date.ProcessDateMachineId.process(ansible_result("a\nb\nc")), "c"
         )
 
     def test_not_found(self):

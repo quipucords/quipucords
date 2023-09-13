@@ -12,10 +12,8 @@ class ProcessJWSInstalledWithRpm(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Determine if jws was installed with rpm. Version 3 and up."""
-        stdout = output.get("stdout_lines", [])
-        if len(stdout) == 1 and "Red Hat JBoss Web Server" in stdout[0]:
-            return True
-        return False
+        stdout_lines = output.get("stdout_lines", [])
+        return bool(stdout_lines and "Red Hat JBoss Web Server" in stdout_lines[-1])
 
 
 class ProcessHasJBossEULA(process.Processor):
@@ -26,8 +24,8 @@ class ProcessHasJBossEULA(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Check if JBossEULA.txt exists in JWS_Home directory."""
-        stdout = output.get("stdout", "false")
-        return stdout == "true"
+        stdout_lines = output.get("stdout_lines", [])
+        return bool(stdout_lines and stdout_lines[-1] == "true")
 
 
 class ProcessTomcatPartOfRedhatProduct(process.Processor):
@@ -38,10 +36,8 @@ class ProcessTomcatPartOfRedhatProduct(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Return either True or False."""
-        result = output.get("stdout_lines", False)
-        if result and result[0] == "True":
-            return True
-        return False
+        stdout_lines = output.get("stdout_lines", [])
+        return bool(stdout_lines and stdout_lines[-1] == "True")
 
 
 class ProcessJWSHasCert(process.Processor):
@@ -53,6 +49,5 @@ class ProcessJWSHasCert(process.Processor):
     @staticmethod
     def process(output, dependencies=None):
         """Return either True or False."""
-        if output.get("stdout_lines", False):
-            return True
-        return False
+        stdout_lines = output.get("stdout_lines", [])
+        return bool(stdout_lines and stdout_lines[-1].endswith(".pem"))

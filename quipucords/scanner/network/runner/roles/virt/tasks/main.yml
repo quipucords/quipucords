@@ -78,8 +78,8 @@
   ignore_errors: yes
 
 - name: extract output virt.num_guests fact
-  set_fact: 
-    virt_num_guests: "{{ (virt_num_guests | json_query('stdout_lines[0]')) if internal_have_virsh else None }}"
+  set_fact:
+    virt_num_guests: "{{ virt_num_guests['stdout_lines'][-1] if internal_have_virsh else None }}"
   ignore_errors: yes
 
 - name: gather virt.num_running_guests fact
@@ -89,6 +89,6 @@
   when: 'internal_have_virsh'
 
 - name: extract output virt.num_running_guests fact
-  set_fact: 
-    virt_num_running_guests: "{{ (internal_virt_num_running_guests | json_query('stdout_lines[0]')) if internal_have_virsh else None }}"
+  set_fact:
+    virt_num_running_guests: "{{ internal_virt_num_running_guests['stdout_lines'][-1] if internal_have_virsh else None }}"
   ignore_errors: yes
