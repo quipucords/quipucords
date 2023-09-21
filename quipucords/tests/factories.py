@@ -104,17 +104,6 @@ class DeploymentReportFactory(DjangoModelFactory):
         )
 
     @factory.post_generation
-    def _set_report_id(obj, *args, **kwargs):
-        """
-        Reproduce the logic for report_id creation.
-
-        Usually this type of thing could be with factory boy through lazy_attributes,
-        but this would also require letting factory boy handling pk creation
-        instead of deferring this responsibility to the database.
-        """
-        obj.report_id = obj.pk  # noqa: W0201
-
-    @factory.post_generation
     def _set_cached_fingerprints(obj, *args, **kwargs):
         """Reproduce the logic responsible for DUPLICATION of fingerprints."""
         # only attempt to generate fingerprints for obj already saved to db
@@ -149,18 +138,6 @@ class DetailsReportFactory(DjangoModelFactory):
 
         source_types = factory.Faker("random_elements", elements=DataSources.values)
         facts_per_source = factory.Faker("pyint", min_value=2, max_value=10)
-
-    @factory.post_generation
-    def _set_report_id(obj, *args, **kwargs):
-        """
-        Reproduce the logic for report_id creation.
-
-        Usually this type of thing could be with factory boy through lazy_attributes,
-        but this would also require letting factory boy handling pk creation
-        instead of deferring this responsibility to the database.
-        """
-        deployments_id = getattr(obj.deployment_report, "id", None)
-        obj.report_id = deployments_id  # noqa: W0201
 
 
 class JobConnectionResultFactory(DjangoModelFactory):

@@ -48,7 +48,6 @@ class ScanJob(models.Model):
         null=True, default=_(messages.SJ_STATUS_MSG_CREATED)
     )
     options = models.OneToOneField(ScanOptions, null=True, on_delete=models.CASCADE)
-    report_id = models.IntegerField(null=True)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 

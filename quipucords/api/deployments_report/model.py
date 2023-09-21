@@ -34,7 +34,6 @@ class DeploymentsReport(models.Model):
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
-    report_id = models.IntegerField(null=True)
     cached_fingerprints = models.JSONField(null=True)
     cached_csv = models.TextField(null=True)
 
