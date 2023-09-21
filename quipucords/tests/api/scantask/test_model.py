@@ -14,9 +14,9 @@ class TestLoggingRawFacts:
 
     def test_greenpath(self, caplog):
         """Test logging_raw_facts method "greenpath"."""
-        details_report = Report(sources=[{"mamao": "papaia"}])
-        details_report.save()
-        scan_task: ScanTask = ScanTaskFactory(details_report=details_report)
+        report = Report(sources=[{"mamao": "papaia"}])
+        report.save()
+        scan_task: ScanTask = ScanTaskFactory(details_report=report)
         caplog.clear()
         scan_task.log_raw_facts()
         assert [rec.message for rec in caplog.records] == [

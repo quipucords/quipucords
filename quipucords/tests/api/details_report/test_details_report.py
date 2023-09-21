@@ -175,7 +175,7 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = Report.objects.get(report_id=response_json["report_id"])
+        details_report = Report.objects.get(id=response_json["report_id"])
         details_report.cached_csv = None
         details_report.save()
 
@@ -211,7 +211,7 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = Report.objects.get(report_id=response_json["report_id"])
+        details_report = Report.objects.get(id=response_json["report_id"])
         details_report.cached_csv = None
         details_report.save()
 

@@ -43,7 +43,7 @@ def reports(request, report_id=None):
             raise ValidationError(error)
     reports_dict["report_id"] = report_id
     # details
-    details_data = get_object_or_404(Report.objects.all(), report_id=report_id)
+    details_data = get_object_or_404(Report.objects.all(), id=report_id)
     # add scan job id to allow detection of related logs on GzipRenderer
     reports_dict["scan_job_id"] = details_data.scanjob.id
     serializer = DetailsReportSerializer(details_data)
@@ -52,7 +52,7 @@ def reports(request, report_id=None):
     reports_dict["details_json"] = json_details
     # deployments
     deployments_data = get_object_or_404(
-        DeploymentsReport.objects.all(), report_id=report_id
+        DeploymentsReport.objects.all(), report__id=report_id
     )
     if deployments_data.status != DeploymentsReport.STATUS_COMPLETE:
         deployments_id = deployments_data.details_report.id

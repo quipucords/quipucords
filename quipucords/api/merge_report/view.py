@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
 from api import messages
+from api.common.common_report import REPORT_TYPE_DETAILS
 from api.common.util import is_int
 from api.details_report.util import create_details_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
@@ -51,14 +52,13 @@ def sync_merge_reports(request):
     report_version = details_report_json.get("report_version", None)
     details_report = create_details_report(report_version, details_report_json)
     merge_job = ScanJob.objects.create(
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=details_report
     )
     merge_job.queue()
     runner = ScanJobRunner(merge_job)
     runner.run()
 
     if merge_job.status != ScanTask.COMPLETED:
-
         raise Exception(merge_job.status_message)
 
     merge_job.refresh_from_db()
@@ -103,9 +103,9 @@ def _convert_ids_to_json(report_request_json):
 
     for report in reports:
         sources = sources + report.sources
-        if not report_version and report.report_version and report.report_type:
+        if not report_version and report.report_version:
             report_version = report.report_version
-            report_type = report.report_type
+            report_type = REPORT_TYPE_DETAILS
     details_report_json = {"sources": sources}
     if report_version:
         details_report_json["report_version"] = report_version
@@ -148,7 +148,7 @@ def _create_async_merge_report_job(details_report_data):
     # Create new job to run
 
     merge_job = ScanJob.objects.create(
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=details_report
     )
     merge_job.log_current_status()
     job_serializer = ScanJobSerializer(merge_job)
@@ -181,7 +181,7 @@ def _validate_merge_report(data):
     """Validate merge reports.
 
     :param data: dict with list of report ids
-    :returns QuerySet DetailsReport
+    :returns QuerySet Report
     """
     error = {"reports": []}
     if not isinstance(data, dict) or data.get("reports") is None:

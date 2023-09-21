@@ -8,7 +8,7 @@ from api.models import DeploymentsReport, Source, SourceOptions, SystemFingerpri
 from constants import DataSources
 from tests.factories import (
     DeploymentReportFactory,
-    DetailsReportFactory,
+    ReportFactory,
     SourceFactory,
 )
 
@@ -75,24 +75,11 @@ class TestDeploymentReportFactoryReportID:
         """Check report_id matches model pk."""
         deployments_report = factory_method()
         assert deployments_report.id
-        assert deployments_report.id == deployments_report.report_id
 
     def test_create_batch(self):
         """Check report_id matches model pk using create_batch method."""
         deployments_reports = DeploymentReportFactory.create_batch(size=2)
         assert all(d.id for d in deployments_reports)
-        assert all(d.id == d.report_id for d in deployments_reports)
-
-    def test_build(self):
-        """Check report_id with instances created by build method."""
-        deployments_report: DeploymentsReport = DeploymentReportFactory.build()
-        assert deployments_report.id is None
-        assert deployments_report.report_id == deployments_report.id
-        # save instance to db. it should have got an id
-        deployments_report.save()
-        assert deployments_report.id
-        # using build method report_id won't match pk
-        assert deployments_report.id != deployments_report.report_id
 
 
 @pytest.mark.django_db
@@ -122,9 +109,7 @@ class TestDetailsFactory:
     @pytest.mark.parametrize("source_type", DataSources.values)
     def test_source_generation(self, source_type):
         """Test automatic generation of Details facts is not breaking anything."""
-        report = DetailsReportFactory.build(
-            source_types=[source_type], deployment_report=None
-        )
+        report = ReportFactory.build(source_types=[source_type], deployment_report=None)
         # report.id is None since it is not saved to db yet
         assert report.id is None
         assert len(report.sources) == 1
