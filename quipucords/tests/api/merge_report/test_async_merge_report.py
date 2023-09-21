@@ -432,6 +432,7 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
         json_response = self.merge_details_by_ids_expect_201(data)
         expected = {
             "id": 3,
+            "report_id": mock.ANY,
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",

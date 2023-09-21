@@ -131,7 +131,7 @@ class DetailsReportFactory(DjangoModelFactory):
     class Meta:
         """Factory options."""
 
-        model = "api.DetailsReport"
+        model = "api.Report"
 
     class Params:
         """Factory parameters."""

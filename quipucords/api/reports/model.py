@@ -4,18 +4,18 @@ import uuid
 
 from django.db import models
 
-from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DETAILS
 from api.inspectresult.model import RawFactEncoder
 
 
-class DetailsReport(models.Model):
+class Report(models.Model):
     """A reported set of facts."""
 
-    report_type = models.CharField(
-        max_length=11, choices=REPORT_TYPE_CHOICES, default=REPORT_TYPE_DETAILS
-    )
     report_version = models.CharField(max_length=64, null=False)
+    # report_platform_id is a unique identifier required by yupana/insights
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    # ---------------------------- legacy fields ----------------------------
+    # legacy data that should be (re)moved when we transition to the paradigm
+    # of "normalization phase"
     sources = models.JSONField(null=False, default=list, encoder=RawFactEncoder)
     deployment_report = models.OneToOneField(
         "DeploymentsReport", models.CASCADE, related_name="details_report", null=True

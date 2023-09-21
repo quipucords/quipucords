@@ -8,7 +8,7 @@ from rest_framework import status
 
 from api import messages
 from api.common.common_report import create_report_version
-from api.models import Credential, DetailsReport, ServerInformation, Source
+from api.models import Credential, Report, ServerInformation, Source
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
 
@@ -81,7 +81,7 @@ class DetailsReportTest(LoggedUserMixin, TestCase):
 
         response_json = self.create_expect_201(request_json)
         self.assertEqual(response_json["sources"], request_json["sources"])
-        self.assertEqual(DetailsReport.objects.count(), 1)
+        self.assertEqual(Report.objects.count(), 1)
 
     def test_empty_request_body(self):
         """Test empty request body."""

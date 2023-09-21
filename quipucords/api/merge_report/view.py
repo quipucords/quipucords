@@ -15,9 +15,10 @@ from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
 from api import messages
+from api.common.common_report import REPORT_TYPE_DETAILS
 from api.common.util import is_int
 from api.details_report.util import create_details_report, validate_details_report_json
-from api.models import DetailsReport, ScanJob, ScanTask
+from api.models import Report, ScanJob, ScanTask
 from api.serializers import DetailsReportSerializer, ScanJobSerializer
 from api.signal.scanjob_signal import start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -62,7 +63,7 @@ def sync_merge_reports(request):
         raise Exception(merge_job.status_message)
 
     merge_job.refresh_from_db()
-    details_report = DetailsReport.objects.get(pk=details_report.id)
+    details_report = Report.objects.get(pk=details_report.id)
 
     # Prepare REST response body
     serializer = DetailsReportSerializer(details_report)
@@ -103,9 +104,9 @@ def _convert_ids_to_json(report_request_json):
 
     for report in reports:
         sources = sources + report.sources
-        if not report_version and report.report_version and report.report_type:
+        if not report_version and report.report_version:
             report_version = report.report_version
-            report_type = report.report_type
+            report_type = REPORT_TYPE_DETAILS
     details_report_json = {"sources": sources}
     if report_version:
         details_report_json["report_version"] = report_version
@@ -181,7 +182,7 @@ def _validate_merge_report(data):
     """Validate merge reports.
 
     :param data: dict with list of report ids
-    :returns QuerySet DetailsReport
+    :returns QuerySet Report
     """
     error = {"reports": []}
     if not isinstance(data, dict) or data.get("reports") is None:
@@ -210,7 +211,7 @@ def _validate_merge_report(data):
         error.get("reports").append(_(messages.REPORT_MERGE_NOT_UNIQUE))
         raise ValidationError(error)
 
-    reports = DetailsReport.objects.filter(pk__in=report_ids).order_by("-id")
+    reports = Report.objects.filter(pk__in=report_ids).order_by("-id")
     actual_report_ids = [report.id for report in reports]
     missing_reports = set(report_ids) - set(actual_report_ids)
     if bool(missing_reports):
