@@ -17,7 +17,6 @@ class DetailsReport(models.Model):
     report_version = models.CharField(max_length=64, null=False)
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
     sources = models.JSONField(null=False, default=list, encoder=RawFactEncoder)
-    report_id = models.IntegerField(null=True)
     deployment_report = models.OneToOneField(
         "DeploymentsReport", models.CASCADE, related_name="details_report", null=True
     )
