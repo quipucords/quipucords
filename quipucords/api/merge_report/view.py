@@ -17,7 +17,7 @@ from rest_framework.serializers import ValidationError
 from api import messages
 from api.common.util import is_int
 from api.details_report.util import create_details_report, validate_details_report_json
-from api.models import DetailsReport, ScanJob, ScanTask
+from api.models import Report, ScanJob, ScanTask
 from api.serializers import DetailsReportSerializer, ScanJobSerializer
 from api.signal.scanjob_signal import start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -62,7 +62,7 @@ def sync_merge_reports(request):
         raise Exception(merge_job.status_message)
 
     merge_job.refresh_from_db()
-    details_report = DetailsReport.objects.get(pk=details_report.id)
+    details_report = Report.objects.get(pk=details_report.id)
 
     # Prepare REST response body
     serializer = DetailsReportSerializer(details_report)
@@ -210,7 +210,7 @@ def _validate_merge_report(data):
         error.get("reports").append(_(messages.REPORT_MERGE_NOT_UNIQUE))
         raise ValidationError(error)
 
-    reports = DetailsReport.objects.filter(pk__in=report_ids).order_by("-id")
+    reports = Report.objects.filter(pk__in=report_ids).order_by("-id")
     actual_report_ids = [report.id for report in reports]
     missing_reports = set(report_ids) - set(actual_report_ids)
     if bool(missing_reports):

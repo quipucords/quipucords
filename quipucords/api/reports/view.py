@@ -19,7 +19,7 @@ from rest_framework.serializers import ValidationError
 from api import messages
 from api.common.util import is_int
 from api.deployments_report.view import build_cached_json_report
-from api.models import DeploymentsReport, DetailsReport
+from api.models import DeploymentsReport, Report
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import DetailsReportSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -43,7 +43,7 @@ def reports(request, report_id=None):
             raise ValidationError(error)
     reports_dict["report_id"] = report_id
     # details
-    details_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
+    details_data = get_object_or_404(Report.objects.all(), report_id=report_id)
     # add scan job id to allow detection of related logs on GzipRenderer
     reports_dict["scan_job_id"] = details_data.scanjob.id
     serializer = DetailsReportSerializer(details_data)

@@ -14,7 +14,7 @@ from api.deployments_report.model import (
     Product,
     SystemFingerprint,
 )
-from api.details_report.model import DetailsReport
+from api.reports.model import Report
 from api.inspectresult.model import (
     JobInspectionResult,
     RawFact,

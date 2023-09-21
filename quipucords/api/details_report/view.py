@@ -23,7 +23,7 @@ from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.common.util import is_int
 from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.details_report.util import create_details_report, validate_details_report_json
-from api.models import DetailsReport, ScanJob, ScanTask
+from api.models import Report, ScanJob, ScanTask
 from api.serializers import DetailsReportSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 from scanner.job import ScanJobRunner
@@ -46,7 +46,7 @@ def details(request, report_id=None):
         if not is_int(report_id):
             error = {"report_id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
-    detail_data = get_object_or_404(DetailsReport.objects.all(), report_id=report_id)
+    detail_data = get_object_or_404(Report.objects.all(), report_id=report_id)
     serializer = DetailsReportSerializer(detail_data)
     json_details = serializer.data
     http_accept = request.META.get("HTTP_ACCEPT")
@@ -67,7 +67,7 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     )
     permission_classes = (IsAuthenticated,)
 
-    queryset = DetailsReport.objects.all()
+    queryset = Report.objects.all()
     serializer_class = DetailsReportSerializer
 
     def create(self, request, *args, **kwargs):
@@ -103,7 +103,7 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             return Response(error_json, status=status.HTTP_400_BAD_REQUEST)
 
         scan_job = ScanJob.objects.get(pk=scan_job.id)
-        details_report = DetailsReport.objects.get(pk=details_report.id)
+        details_report = Report.objects.get(pk=details_report.id)
 
         # Prepare REST response body
         serializer = self.get_serializer(details_report)

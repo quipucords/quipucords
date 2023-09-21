@@ -12,7 +12,7 @@ from rest_framework import status
 from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.details_report.csv_renderer import DetailsCSVRenderer
-from api.models import Credential, DetailsReport, ServerInformation, Source
+from api.models import Credential, Report, ServerInformation, Source
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
 
@@ -175,7 +175,7 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
+        details_report = Report.objects.get(report_id=response_json["report_id"])
         details_report.cached_csv = None
         details_report.save()
 
@@ -193,7 +193,7 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = DetailsReport.objects.get(id=response_json["report_id"])
+        details_report = Report.objects.get(id=response_json["report_id"])
         details_report.cached_csv = None
         details_report.save()
 
@@ -211,7 +211,7 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = DetailsReport.objects.get(report_id=response_json["report_id"])
+        details_report = Report.objects.get(report_id=response_json["report_id"])
         details_report.cached_csv = None
         details_report.save()
 
