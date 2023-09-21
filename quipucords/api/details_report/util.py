@@ -7,8 +7,13 @@ from io import StringIO
 from django.utils.translation import gettext as _
 
 from api import messages
-from api.common.common_report import CSVHelper, create_report_version, sanitize_row
-from api.models import DetailsReport, ScanTask, ServerInformation
+from api.common.common_report import (
+    REPORT_TYPE_DETAILS,
+    CSVHelper,
+    create_report_version,
+    sanitize_row,
+)
+from api.models import Report, ScanTask, ServerInformation
 from api.serializers import DetailsReportSerializer
 from constants import DataSources
 
@@ -184,9 +189,9 @@ def create_details_csv(details_report_dict):  # noqa: C901
     report_id = details_report_dict.get("report_id")
     if report_id is None:
         return None
-
-    details_report = DetailsReport.objects.filter(report_id=report_id).first()
-    if details_report is None:
+    try:
+        details_report = Report.objects.get(id=report_id)
+    except Report.DoesNotExist:
         return None
     # Check for a cached copy of csv
     cached_csv = details_report.cached_csv
@@ -214,7 +219,7 @@ def create_details_csv(details_report_dict):  # noqa: C901
         csv_writer.writerow(
             [
                 report_id,
-                details_report.report_type,
+                REPORT_TYPE_DETAILS,
                 details_report.report_version,
                 details_report.report_platform_id,
                 0,
@@ -225,7 +230,7 @@ def create_details_csv(details_report_dict):  # noqa: C901
     csv_writer.writerow(
         [
             report_id,
-            details_report.report_type,
+            REPORT_TYPE_DETAILS,
             details_report.report_version,
             details_report.report_platform_id,
             len(sources),

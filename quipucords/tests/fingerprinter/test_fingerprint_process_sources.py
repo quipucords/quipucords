@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from api.models import DetailsReport, ScanJob, ScanTask
+from api.models import Report, ScanJob, ScanTask
 from constants import DataSources
 from fingerprinter.runner import FingerprintTaskRunner
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__file__)
 @pytest.fixture
 def details_report(mocker):
     """Details report patched to contain all possible source types."""
-    report = mocker.MagicMock(spec=DetailsReport)
+    report = mocker.MagicMock(spec=Report)
     report.sources = [
         {
             "source_type": source_type,

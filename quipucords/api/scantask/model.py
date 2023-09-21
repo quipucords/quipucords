@@ -12,8 +12,8 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.details_report.model import DetailsReport
 from api.inspectresult.model import TaskInspectionResult
+from api.reports.model import Report
 from api.scantask.queryset import ScanTaskQuerySet
 from api.source.model import Source
 
@@ -79,9 +79,7 @@ class ScanTask(models.Model):
     )
 
     # Fingerprint task field
-    details_report = models.ForeignKey(
-        DetailsReport, null=True, on_delete=models.CASCADE
-    )
+    details_report = models.ForeignKey(Report, null=True, on_delete=models.CASCADE)
 
     # custom queryset / object manager
     objects = ScanTaskQuerySet.as_manager()

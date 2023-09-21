@@ -11,8 +11,8 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
-from api.details_report.model import DetailsReport
 from api.inspectresult.model import JobInspectionResult, TaskInspectionResult
+from api.reports.model import Report
 from api.scan.model import (
     DisabledOptionalProductsOptions,
     ExtendedProductSearchOptions,
@@ -65,9 +65,7 @@ class ScanJob(models.Model):
         JobInspectionResult, null=True, on_delete=models.CASCADE
     )
 
-    details_report = models.OneToOneField(
-        DetailsReport, null=True, on_delete=models.CASCADE
-    )
+    details_report = models.OneToOneField(Report, null=True, on_delete=models.CASCADE)
 
     class Meta:
         """Metadata for model."""

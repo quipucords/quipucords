@@ -4,7 +4,7 @@ import logging
 
 import pytest
 
-from api.models import DetailsReport, ScanTask
+from api.models import Report, ScanTask
 from tests.factories import ScanTaskFactory
 
 
@@ -14,7 +14,7 @@ class TestLoggingRawFacts:
 
     def test_greenpath(self, caplog):
         """Test logging_raw_facts method "greenpath"."""
-        details_report = DetailsReport(sources=[{"mamao": "papaia"}])
+        details_report = Report(sources=[{"mamao": "papaia"}])
         details_report.save()
         scan_task: ScanTask = ScanTaskFactory(details_report=details_report)
         caplog.clear()
@@ -28,7 +28,7 @@ class TestLoggingRawFacts:
     @pytest.mark.parametrize("log_level", (logging.INFO, logging.ERROR))
     def test_log_level(self, caplog, log_level):
         """Test logging_raw_facts method "greenpath"."""
-        details_report = DetailsReport()
+        details_report = Report()
         details_report.save()
         scan_task: ScanTask = ScanTaskFactory(details_report=details_report)
         caplog.clear()

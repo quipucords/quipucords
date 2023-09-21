@@ -9,7 +9,7 @@ import pytest
 from django.db import DataError
 
 from api.deployments_report.model import SystemFingerprint
-from api.models import DeploymentsReport, DetailsReport, ServerInformation, Source
+from api.models import DeploymentsReport, Report, ServerInformation, Source
 from api.scantask.model import ScanTask
 from constants import DataSources
 from fingerprinter.constants import ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY
@@ -1508,7 +1508,7 @@ def test_process_details_report_failed(fingerprint_task_runner):
     """Test processing a details report no valid fps."""
     fact_collection = {}
     deployments_report = DeploymentsReport(report_id=1)
-    details_report = DetailsReport(deployment_report=deployments_report)
+    details_report = Report(deployment_report=deployments_report)
     with patch(
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=fact_collection,
@@ -1533,7 +1533,7 @@ def test_process_details_report_success(fingerprint_task_runner):
     }
     deployments_report = DeploymentsReport(report_id=1, id=1)
     deployments_report.save()
-    details_report = DetailsReport(id=1, deployment_report=deployments_report)
+    details_report = Report(id=1, deployment_report=deployments_report)
     with patch(
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=[fact_collection],
@@ -1555,7 +1555,7 @@ def test_process_details_report_exception(fingerprint_task_runner):
     }
     deployments_report = DeploymentsReport(report_id=1, id=1)
     deployments_report.save()
-    details_report = DetailsReport(id=1, deployment_report=deployments_report)
+    details_report = Report(id=1, deployment_report=deployments_report)
     with patch(
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=[fact_collection],

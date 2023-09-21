@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.deployments_report.view import build_cached_json_report
-from api.models import DeploymentsReport, DetailsReport
+from api.models import DeploymentsReport, Report
 from api.reports.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import DetailsReportSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -35,7 +35,7 @@ def reports(request, report_id):
     """Lookup and return reports."""
     reports_dict = {}
     reports_dict["report_id"] = report_id
-    details_report = get_object_or_404(DetailsReport, report_id=report_id)
+    details_report = get_object_or_404(Report, id=report_id)
     # add scan job id to allow detection of related logs on GzipRenderer
     reports_dict["scan_job_id"] = details_report.scanjob.id
     serializer = DetailsReportSerializer(details_report)
@@ -45,8 +45,7 @@ def reports(request, report_id):
     deployments_report = get_object_or_404(DeploymentsReport, report_id=report_id)
     # deployments_report.status seems redundant considering scan job already
     # has a "state machine". Consider removing this in future iterations (we will
-    # be forced to revisit this idea when Report replaces Details and Deployments
-    # models)
+    # be forced to revisit this idea when Report replaces Deployments models)
     if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
         deployments_id = deployments_report.details_report.id
         return Response(
