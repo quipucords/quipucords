@@ -1,270 +1,69 @@
-"""Test the reports API."""
+"""
+Test the reports API.
+
+This module confirms that the report download tarball (.tar.gz) has all expected files.
+That may include (but not necessarily be limited to): "SHA256SUM", "deployments.csv",
+"deployments.json", "details.csv", "details.json", and "scan-job-{some_id}.txt".
+
+For the individual report files, these tests generally check the following conditions:
+
+* Verify the file in the tarball matches the individual report API's response.
+* Verify the file in the tarball matches what our model serializer generates.
+* Directly sanity check a few structural elements or fields directly against the model.
+
+These tests effectively exercise ReportsGzipRenderer by requesting the report view
+despite not instantiating it directly. (I'm including this comment to help future devs
+searching for "ReportsGzipRenderer" in our repo.)
+"""
 
 import csv
 import hashlib
 import json
 import logging
-import sys
 import tarfile
 from io import BytesIO
+from pathlib import Path
 
 import pytest
-from django.core import management
-from django.test import TestCase
-from django.urls import reverse
-from rest_framework import status
+from requests import Response
+from rest_framework.renderers import JSONRenderer
 
-from api.common.common_report import create_report_version
+from api.common.common_report import REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DETAILS
 from api.deployments_report.model import DeploymentsReport
-from api.models import Credential, ServerInformation, Source
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer
-from constants import SCAN_JOB_LOG, DataSources
-from tests.api.details_report.test_details_report import MockRequest
+from api.deployments_report.util import create_deployments_csv
+from api.deployments_report.view import build_cached_json_report
+from api.details_report.serializer import DetailsReportSerializer
+from api.details_report.util import create_details_csv
+from api.reports.model import Report
+from constants import SCAN_JOB_LOG
 from tests.factories import DeploymentReportFactory
-from tests.mixins import LoggedUserMixin
+
+DEPLOYMENTS_CSV_FILENAME = "deployments.csv"
+DEPLOYMENTS_JSON_FILENAME = "deployments.json"
+DETAILS_CSV_FILENAME = "details.csv"
+DETAILS_JSON_FILENAME = "details.json"
+SHA256SUM_FILENAME = "SHA256SUM"
+TARBALL_ALWAYS_EXPECTED_FILENAMES = {
+    SHA256SUM_FILENAME,
+    DEPLOYMENTS_CSV_FILENAME,
+    DEPLOYMENTS_JSON_FILENAME,
+    DETAILS_CSV_FILENAME,
+    DETAILS_JSON_FILENAME,
+}
+
+REPORTS_API_PATH = "/api/v1/reports/{0}/"
+DEPLOYMENTS_API_PATH = "/api/v1/reports/{0}/deployments/"
+DETAILS_API_PATH = "/api/v1/reports/{0}/details/"
 
 
-class ReportsTest(LoggedUserMixin, TestCase):
-    """Tests against the Reports function."""
-
-    def setUp(self):
-        """Create test case setup."""
-        management.call_command("flush", "--no-input")
-        super().setUp()
-        self.maxDiff = None  # more verbose test failure results
-        self.net_source = Source.objects.create(
-            name="test_source", source_type=DataSources.NETWORK
-        )
-
-        self.net_cred = Credential.objects.create(
-            name="net_cred1",
-            cred_type=DataSources.NETWORK,
-            username="username",
-            password="password",
-            become_password=None,
-            ssh_keyfile=None,
-        )
-        self.net_source.credentials.add(self.net_cred)
-
-        self.net_source.hosts = ["1.2.3.4"]
-        self.net_source.save()
-        self.server_id = ServerInformation.create_or_retrieve_server_id()
-        self.report_version = create_report_version()
-        self.details_json = None
-        self.deployments_json = None
-        self.mock_req = MockRequest()
-        self.mock_renderer_context = {"request": self.mock_req}
-
-    def tearDown(self):
-        """Create test case tearDown."""
-
-    def create_details_report(self, data):
-        """Call the create endpoint."""
-        url = reverse("reports-list")
-        return self.client.post(url, json.dumps(data), "application/json")
-
-    def create_details_report_expect_201(self, data):
-        """Create a source, return the response as a dict."""
-        response = self.create_details_report(data)
-        if response.status_code != status.HTTP_201_CREATED:
-            print("Failure cause: ")
-            print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        details_json = response.json()
-        self.details_json = details_json
-        return details_json
-
-    def generate_fingerprints(self, os_name="RHEL", os_versions=None):
-        """Create a Report for testing."""
-        facts = []
-        fc_json = {
-            "report_type": "details",
-            "sources": [
-                {
-                    "server_id": self.server_id,
-                    "report_version": create_report_version(),
-                    "source_name": self.net_source.name,
-                    "source_type": self.net_source.source_type,
-                    "facts": facts,
-                }
-            ],
-        }
-
-        if os_versions is None:
-            os_versions = ["7.3", "7.4"]
-
-        for version in os_versions:
-            release = f"{os_name} {version}"
-            fact_json = {
-                "connection_host": "1.2.3.4",
-                "connection_port": 22,
-                "connection_uuid": "834c8f3b-5015-4156-bfb7-286d3ffe11b4",
-                "cpu_count": 2,
-                "cpu_core_per_socket": 1,
-                "cpu_siblings": 1,
-                "cpu_hyperthreading": False,
-                "cpu_socket_count": 2,
-                "cpu_core_count": 2,
-                "date_anaconda_log": "2017-07-18",
-                "date_yum_history": "2017-07-18",
-                "etc_release_name": os_name,
-                "etc_release_version": version,
-                "etc_release_release": release,
-                "uname_hostname": "1.2.3.4",
-                "virt_virt": "virt-guest",
-                "virt_type": "vmware",
-                "virt_num_guests": 1,
-                "virt_num_running_guests": 1,
-                "virt_what_type": "vt",
-                "ifconfig_ip_addresses": ["1.2.3.4"],
-            }
-            facts.append(fact_json)
-        details_report = self.create_details_report_expect_201(fc_json)
-        return details_report
-
-    def retrieve_expect_200_details(self, identifier, query_param=""):
-        """Create a source, return the response as a dict."""
-        url = "/api/v1/reports/" + str(identifier) + "/details/" + query_param
-        response = self.client.get(url)
-
-        if response.status_code != status.HTTP_200_OK:
-            print("Failure cause: ")
-            print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        return response.json()
-
-    def create_reports_dict(self, query_params=""):
-        """Create a deployments report."""
-        url = "/api/v1/reports/1/deployments/" + query_params
-        self.generate_fingerprints(os_versions=["7.4", "7.4", "7.5"])
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        report = response.json()
-        self.deployments_json = report
-        self.details_json = self.retrieve_expect_200_details(1, query_params)
-
-        reports_dict = {}
-        reports_dict["report_id"] = 1
-        reports_dict["details_json"] = self.details_json
-        reports_dict["deployments_json"] = self.deployments_json
-        return reports_dict
-
-    def test_reports_gzip_renderer(self):
-        """Get a tar.gz return for report_id via API."""
-        reports_dict = self.create_reports_dict()
-        deployments_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID\r\n"
-            f"1,deployments,{self.report_version},{reports_dict.get('deployments_json').get('report_platform_id')}\r\n"  # noqa: E501
-            "\r\n"
-            "\r\n"
-            "System Fingerprints:\r\n"
-            "architecture,bios_uuid,cloud_provider,cpu_core_count,cpu_count,cpu_hyperthreading,cpu_socket_count,detection-acs,detection-ansible,detection-network,detection-openshift,detection-satellite,detection-vcenter,entitlements,etc_machine_id,infrastructure_type,insights_client_id,installed_products,ip_addresses,is_redhat,jboss brms,jboss eap,jboss fuse,jboss web server,mac_addresses,name,os_name,os_release,os_version,redhat_certs,redhat_package_count,sources,subscription_manager_id,system_addons,system_creation_date,system_last_checkin_date,system_memory_bytes,system_role,system_service_level_agreement,system_usage_type,system_user_count,user_login_history,virtual_host_name,virtual_host_uuid,virtualized_type,vm_cluster,vm_datacenter,vm_dns_name,vm_host_core_count,vm_host_socket_count,vm_state,vm_uuid\r\n"  # noqa: E501
-            ",,,2,2,,2,False,False,True,False,False,False,,,virtualized,,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,2,2,False,2,False,False,True,False,False,False,,,virtualized,,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.4,7.4,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            ",,,2,2,False,2,False,False,True,False,False,False,,,virtualized,,,[1.2.3.4],,absent,absent,absent,absent,,1.2.3.4,RHEL,RHEL 7.5,7.5,,,[test_source],,,2017-07-18,,,,,,,,,,vmware,,,,,,,\r\n"  # noqa: E501
-            "\r\n"
-        )
-
-        details_csv = (
-            "Report ID,Report Type,Report Version,Report Platform ID,Number Sources\r\n1,details,%s,%s,1\r\n\r\n\r\nSource\r\nServer Identifier,Source Name,Source Type\r\n%s,test_source,network\r\nFacts\r\nconnection_host,connection_port,connection_uuid,cpu_core_count,cpu_core_per_socket,cpu_count,cpu_hyperthreading,cpu_siblings,cpu_socket_count,date_anaconda_log,date_yum_history,etc_release_name,etc_release_release,etc_release_version,ifconfig_ip_addresses,uname_hostname,virt_num_guests,virt_num_running_guests,virt_type,virt_virt,virt_what_type\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.4,7.4,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n1.2.3.4,22,834c8f3b-5015-4156-bfb7-286d3ffe11b4,2,1,2,False,1,2,2017-07-18,2017-07-18,RHEL,RHEL 7.5,7.5,[1.2.3.4],1.2.3.4,1,1,vmware,virt-guest,vt\r\n\r\n\r\n"  # noqa: E501
-            % (
-                self.report_version,
-                reports_dict.get("details_json").get("report_platform_id"),
-                self.server_id,
-            )
-        )
-
-        renderer = ReportsGzipRenderer()
-        tar_gz_result = renderer.render(
-            reports_dict, renderer_context=self.mock_renderer_context
-        )
-        self.assertNotEqual(tar_gz_result, None)
-        with tarfile.open(fileobj=tar_gz_result) as tarball:
-            self.check_tarball(deployments_csv, details_csv, tarball)
-
-    def check_tarball(
-        self, deployments_csv: str, details_csv: str, tar: tarfile.TarFile
-    ):
-        """
-        Check report tarball content.
-
-        :param deployments_csv: CSV for deployments report
-        :param details_csv: CSV for details report
-        :param tar: Tar object to examine for equality
-        """
-        files = tar.getmembers()
-        filenames = tar.getnames()
-        self.assertEqual(len(files), 5)
-        # tar.getnames() always returns same order as tar.getmembers()
-        for idx, file in enumerate(files):
-            file_contents = tar.extractfile(file).read().decode()
-            if filenames[idx].endswith("csv"):
-                if "details" in file_contents:
-                    self.assertEqual(
-                        self.parse_csv(file_contents), self.parse_csv(details_csv)
-                    )
-                elif "deployments" in file_contents:
-                    self.assertEqual(
-                        self.parse_csv(file_contents), self.parse_csv(deployments_csv)
-                    )
-                else:
-                    sys.exit("Could not identify .csv return.")
-            elif filenames[idx].endswith("json"):
-                tar_json = json.loads(file_contents)
-                tar_json_type = tar_json.get("report_type")
-                if tar_json_type == "details":
-                    self.assertEqual(tar_json, self.details_json)
-                elif tar_json_type == "deployments":
-                    self.assertEqual(tar_json, self.deployments_json)
-                else:
-                    sys.exit("Could not identify .json return")
-
-    def parse_csv(self, file_contents: str):
-        """Parse a string formatted as csv."""
-        return list(csv.reader(file_contents.splitlines()))
-
-    def test_parse_csv(self):
-        """Test parse_csv utility."""
-        self.assertEqual(self.parse_csv("1,2,3\na,b,c"), [list("123"), list("abc")])
-
-    def test_sha256sum(self):
-        """Ensure SHA256SUM hashes are correct."""
-        reports_dict = self.create_reports_dict()
-        renderer = ReportsGzipRenderer()
-        mock_req = MockRequest()
-        mock_renderer_context = {"request": mock_req}
-        tar_gz_result = renderer.render(
-            reports_dict, renderer_context=mock_renderer_context
-        )
-        self.assertNotEqual(tar_gz_result, None)
-        tar = tarfile.open(fileobj=tar_gz_result)
-        files = tar.getmembers()
-        # ignore folder name
-        filenames = [file.rsplit("/", 1)[1] for file in tar.getnames()]
-        # tar.getnames() always returns same order as tar.getmembers()
-        filename_to_file = dict(zip(filenames, files))
-        shasum_content = tar.extractfile(filename_to_file["SHA256SUM"]).read().decode()
-        # map calculated hashes for future comparison
-        file2hash = {}
-        for line in shasum_content.splitlines():
-            calculated_hash, hashed_filename = line.split()
-            file2hash[hashed_filename] = calculated_hash
-
-        expected_hashed_filenames = {
-            "details.json",
-            "deployments.json",
-            "details.csv",
-            "deployments.csv",
-        }
-        self.assertEqual(set(file2hash), expected_hashed_filenames)
-        # recalculate hashes
-        new_file2hash = {}
-        for hashed_filename, calculated_hash in file2hash.items():
-            file = filename_to_file[hashed_filename]
-            file_contents = tar.extractfile(file).read()
-            new_hash = hashlib.sha256(file_contents).hexdigest()
-            new_file2hash[hashed_filename] = new_hash
-        self.assertEqual(new_file2hash, file2hash, "SHA256SUM content is incorrect")
+def get_serialized_report_data(report: Report) -> dict:
+    """Get the serialized form of the Report, simulating a view's processing."""
+    # We need to refresh from DB because something about how the factory created the
+    # Report object here can cause unexpected failures in the serializer. Maybe a bug?
+    report.refresh_from_db()
+    report_data = DetailsReportSerializer(report).data
+    report_data.pop("cached_csv", None)  # because the view does this before returning
+    return report_data
 
 
 def test_report_without_logs(django_client, caplog):
@@ -272,18 +71,11 @@ def test_report_without_logs(django_client, caplog):
     caplog.set_level(logging.WARNING)
     deployment = DeploymentReportFactory.create()
     report_id = deployment.report.id
-    response = django_client.get(f"/api/v1/reports/{report_id}/")
+    response = django_client.get(REPORTS_API_PATH.format(report_id))
     assert response.ok, response.text
     assert f"No logs were found for report_id={report_id}" in caplog.messages
     expected_files = {
-        f"report_id_{report_id}/{fname}"
-        for fname in [
-            "SHA256SUM",
-            "deployments.csv",
-            "deployments.json",
-            "details.csv",
-            "details.json",
-        ]
+        f"report_id_{report_id}/{fname}" for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
         assert set(tarball.getnames()) == expected_files
@@ -298,6 +90,7 @@ def deployment_with_logs(settings, faker):
         scan_job_id=scan_job_id, output_type="test"
     )
     log_file.write_text(faker.paragraph())
+    assert len(deployments_report.report.sources) > 0  # to verify we have some data
     return deployments_report
 
 
@@ -305,18 +98,219 @@ def test_report_with_logs(django_client, deployment_with_logs):
     """Test if scan job logs are included in tarball when present."""
     report = deployment_with_logs.report
     scan_job_id = report.scanjob.id
-    response = django_client.get(f"/api/v1/reports/{report.id}/")
+    response = django_client.get(REPORTS_API_PATH.format(report.id))
     assert response.ok, response.text
     expected_files = {
         f"report_id_{report.id}/{fname}"
-        for fname in [
-            "SHA256SUM",
-            "deployments.csv",
-            "deployments.json",
-            "details.csv",
-            "details.json",
-            f"scan-job-{scan_job_id}-test.txt",
-        ]
+        for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
+            {f"scan-job-{scan_job_id}-test.txt"}
+        )
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
         assert set(tarball.getnames()) == expected_files
+
+
+def extract_tarball_from_response(response: Response) -> dict[str, bytes]:
+    r"""
+    Extract the files from a response tarball.
+
+    Note that the returned dict has file contents as raw bytes, not decoded strings.
+
+    Example return value:
+
+        {
+            "message.txt": b"hello world\n",
+            "data.csv": b"id,name\n420,potato\n",
+            "data.json": b'{"id":420,"name":"potato"}\n',
+        }
+    """
+    files_contents = {}
+    with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
+        filepaths = tarball.getnames()
+        for filepath in filepaths:
+            name = Path(filepath).name
+            encoded_content = tarball.extractfile(filepath).read()
+            files_contents[name] = encoded_content
+    return files_contents
+
+
+def test_report_tarball_sha256sum(django_client, deployment_with_logs):
+    """Verify SHA256SUM files and digests are correct."""
+    deployments_report = deployment_with_logs
+    response = django_client.get(REPORTS_API_PATH.format(deployments_report.report.id))
+    assert response.ok, response.text
+
+    files_contents = extract_tarball_from_response(response)
+    expected_filenames = TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
+        {f"scan-job-{deployments_report.report.scanjob.id}-test.txt"}
+    )
+    assert expected_filenames == set(
+        files_contents.keys()
+    ), "incorrect files in tarball"
+
+    sha256sum_dict = dict(
+        (line.split()[1], line.split()[0])  # swap order to look like {name: contents}
+        for line in files_contents[SHA256SUM_FILENAME].decode().splitlines()
+    )
+    assert expected_filenames.difference({SHA256SUM_FILENAME}) == set(
+        sha256sum_dict.keys()
+    ), "incorrect files listed in SHA256SUM file"
+
+    for name, downloaded_digest in sha256sum_dict.items():
+        assert name in files_contents
+        recalculated_digest = hashlib.sha256(files_contents[name]).hexdigest()
+        assert (
+            downloaded_digest == recalculated_digest
+        ), f"incorrect SHA256SUM digest for {name}"
+
+
+def test_report_tarball_details_json(
+    django_client, deployment_with_logs: DeploymentsReport
+):
+    """Test report tarball contains expected details.json."""
+    deployments_report = deployment_with_logs
+    report = deployments_report.report
+    tarball_response = django_client.get(
+        REPORTS_API_PATH.format(deployments_report.report.id)
+    )
+    assert tarball_response.ok, tarball_response.text
+
+    files_contents = extract_tarball_from_response(tarball_response)
+    assert DETAILS_JSON_FILENAME in files_contents
+    tarball_details_json = json.loads(files_contents[DETAILS_JSON_FILENAME].decode())
+
+    # Compare tarball details.json contents with the standalone API's response.
+    api_details_response = django_client.get(
+        DETAILS_API_PATH.format(deployments_report.report.id),
+        headers={"Accept": "application/json"},
+    )
+    assert api_details_response.ok, api_details_response.text
+    api_details_json = api_details_response.json()
+    assert tarball_details_json == api_details_json
+
+    # Compare tarball details.json contents with our model serialized.
+    serialized_report_data = get_serialized_report_data(report)
+    expected_report_json = json.loads(
+        JSONRenderer().render(data=serialized_report_data)
+    )
+    assert expected_report_json == tarball_details_json
+
+    # Sanity-check some tarball details.json fields directly with our stored model.
+    assert tarball_details_json["report_id"] == report.id
+    assert tarball_details_json["report_type"] == REPORT_TYPE_DETAILS
+    assert tarball_details_json["report_platform_id"] == str(report.report_platform_id)
+
+
+def test_report_tarball_deployments_json(
+    django_client, deployment_with_logs: DeploymentsReport
+):
+    """Test report tarball contains expected deployments.json."""
+    deployments_report = deployment_with_logs
+    tarball_response = django_client.get(
+        REPORTS_API_PATH.format(deployments_report.report.id)
+    )
+    assert tarball_response.ok, tarball_response.text
+
+    files_contents = extract_tarball_from_response(tarball_response)
+    assert DEPLOYMENTS_JSON_FILENAME in files_contents
+    tarball_deployments_json = json.loads(
+        files_contents[DEPLOYMENTS_JSON_FILENAME].decode()
+    )
+
+    # Compare tarball details.json contents with our model serialized.
+    model_data_as_json = build_cached_json_report(deployments_report)
+    assert model_data_as_json == tarball_deployments_json
+
+    # Compare tarball deployments.json contents with the standalone API's response.
+    api_deployments_response = django_client.get(
+        DEPLOYMENTS_API_PATH.format(deployments_report.report.id),
+        headers={"Accept": "application/json"},
+    )
+    assert api_deployments_response.ok, api_deployments_response.text
+    api_deployments_json = api_deployments_response.json()
+    assert tarball_deployments_json == api_deployments_json
+
+    # Sanity-check the basic structure of the tarball deployments.json directly.
+    assert tarball_deployments_json["report_id"] == deployments_report.report.id
+    assert tarball_deployments_json["report_type"] == REPORT_TYPE_DEPLOYMENT
+
+
+def test_report_details_csv(django_client, deployment_with_logs: DeploymentsReport):
+    """Test report tarball contains expected details.csv."""
+    deployments_report = deployment_with_logs
+    tarball_response = django_client.get(
+        REPORTS_API_PATH.format(deployments_report.report.id)
+    )
+    assert tarball_response.ok, tarball_response.text
+
+    files_contents = extract_tarball_from_response(tarball_response)
+    assert DETAILS_CSV_FILENAME in files_contents
+    tarball_details_csv = files_contents[DETAILS_CSV_FILENAME].decode()
+
+    # Compare tarball details.csv contents with the standalone API's response.
+    details_csv_response = django_client.get(
+        DETAILS_API_PATH.format(deployments_report.report.id),
+        headers={"Accept": "text/csv"},
+    )
+    assert details_csv_response.ok, details_csv_response.text
+    assert details_csv_response.text == tarball_details_csv
+
+    # Compare tarball details.csv contents with our model serialized.
+    serialized_report_data = get_serialized_report_data(deployments_report.report)
+    report_data_csv = create_details_csv(serialized_report_data)
+    assert report_data_csv == tarball_details_csv
+
+    # Sanity-check the basic structure of the tarball details.csv directly.
+    tarball_details_csv_lines = list(csv.reader(tarball_details_csv.splitlines()))
+    expected_csv_first_line = [
+        "Report ID",
+        "Report Type",
+        "Report Version",
+        "Report Platform ID",
+        "Number Sources",
+    ]
+    assert tarball_details_csv_lines[0] == expected_csv_first_line
+    # Why 12? We expect three separate table headers in the file, two section markers,
+    # four blank lines, and at least one line per table. Yes, this CSV is a mess. >:(
+    assert len(tarball_details_csv_lines) >= 12
+
+
+def test_report_deployments_csv(django_client, deployment_with_logs: DeploymentsReport):
+    """Test report tarball contains expected deployments.csv."""
+    deployments_report = deployment_with_logs
+    tarball_response = django_client.get(
+        REPORTS_API_PATH.format(deployments_report.report.id)
+    )
+    assert tarball_response.ok, tarball_response.text
+
+    files_contents = extract_tarball_from_response(tarball_response)
+    assert DEPLOYMENTS_CSV_FILENAME in files_contents
+
+    # Compare tarball deployments.csv contents with the standalone API's response.
+    tarball_deployments_csv = files_contents[DEPLOYMENTS_CSV_FILENAME].decode()
+    deployments_csv_response = django_client.get(
+        DEPLOYMENTS_API_PATH.format(deployments_report.report.id),
+        headers={"Accept": "text/csv"},
+    )
+    assert deployments_csv_response.ok, deployments_csv_response.text
+    assert deployments_csv_response.text == tarball_deployments_csv
+
+    # Compare tarball deployments.csv contents with our model serialized.
+    model_data_as_json = build_cached_json_report(deployments_report)
+    model_data_as_csv = create_deployments_csv(model_data_as_json)
+    assert model_data_as_csv == tarball_deployments_csv
+
+    # Sanity-check the basic structure of the tarball deployments.csv directly.
+    tarball_deployments_csv_lines = list(
+        csv.reader(tarball_deployments_csv.splitlines())
+    )
+    expected_csv_first_line = [
+        "Report ID",
+        "Report Type",
+        "Report Version",
+        "Report Platform ID",
+    ]
+    assert tarball_deployments_csv_lines[0] == expected_csv_first_line
+    # Why 7? We expect two separate table headers in the file, one section marker,
+    # three blank lines, and at least one line per table. Yes, this CSV is a mess. >:(
+    assert len(tarball_deployments_csv_lines) >= 7
