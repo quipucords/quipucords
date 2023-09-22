@@ -18,9 +18,12 @@ flit-core==3.9.0
     # via -r requirements-build.in
 hatchling==1.18.0
     # via -r requirements-build.in
+markdown-it-py==3.0.0
+    # via rich
+mdurl==0.1.2
+    # via markdown-it-py
 packaging==23.1
     # via
-    #   -r requirements-build.in
     #   hatchling
     #   setuptools-scm
 pathspec==0.11.2
@@ -33,24 +36,25 @@ poetry-core==1.7.0
     # via -r requirements-build.in
 pycparser==2.21
     # via cffi
+pygments==2.16.1
+    # via rich
+rich==13.5.3
+    # via -r requirements-build.in
 semantic-version==2.10.0
     # via setuptools-rust
 setuptools-rust==1.7.0
     # via -r requirements-build.in
-setuptools-scm[toml]==7.1.0
+setuptools-scm[toml]==8.0.3
     # via -r requirements-build.in
-trove-classifiers==2023.8.7
+trove-classifiers==2023.9.19
     # via hatchling
-typing-extensions==4.7.1
-    # via
-    #   -r requirements-build.in
-    #   setuptools-rust
-    #   setuptools-scm
+typing-extensions==4.8.0
+    # via setuptools-rust
 wheel==0.41.2
     # via -r requirements-build.in
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==68.2.0 ; python_version != "3.3"
+setuptools==68.2.2 ; python_version != "3.3"
     # via
     #   -r requirements-build.in
     #   setuptools-rust
