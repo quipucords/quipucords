@@ -184,9 +184,13 @@ serve-swagger: $(qpc_on_ui_dir)
 	cd $(QUIPUCORDS_UI_PATH);yarn;node ./scripts/swagger.js
 
 build-container:
+	# podman build \
+	# 	--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
+	# 	-t $(QUIPUCORDS_CONTAINER_TAG) .
 	podman build \
-		--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
+		--build-arg UI_RELEASE=1.5.1 \
 		-t $(QUIPUCORDS_CONTAINER_TAG) .
+
 
 check-db-migrations-needed:
 	$(PYTHON) quipucords/manage.py makemigrations --check
