@@ -72,26 +72,23 @@ def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
     scan_task = ScanTask.objects.get(id=scan_task_id)
     scan_job = scan_task.job
 
-    if not (details_report := scan_task.details_report):
-        details_report, error_message = create_details_report_for_scan_job(scan_job)
-        if not details_report:
+    if not (report := scan_job.report):
+        report, error_message = create_details_report_for_scan_job(scan_job)
+        if not report:
             scan_job.status_fail(error_message)
             return False, scan_task_id, ScanTask.FAILED
 
-    # Associate details report with the scan job.
-    scan_job.details_report = details_report
+    # Associate report with the scan job.
+    scan_job.report = report
     scan_job.save()
     # Associate details report with the fingerprint task.
-    scan_task.details_report = details_report
+    scan_task.details_report = report
     scan_task.save()
     # Yes, that feels redundant, but I'm just preserving existing behavior.
 
     runner = FingerprintTaskRunner(scan_job, scan_task)
     success = (task_status := run_task_runner(runner)) == ScanTask.COMPLETED
-    details_report.refresh_from_db()
     if success:
-        scan_job.report_id = details_report.deployment_report.id
-        scan_job.save()
         scan_job.log_message(f"Report {scan_job.report_id:d} created.")
     else:
         scan_task.log_message(
