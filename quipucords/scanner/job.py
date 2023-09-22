@@ -371,7 +371,6 @@ class SyncScanJobRunner:
                 self._log_details_report_error(fingerprint_task_runner, details_report)
             else:
                 # Record results for successful tasks
-                self.scan_job.report_id = details_report.deployment_report.id
                 self.scan_job.save()
                 self.scan_job.log_message(
                     f"Report {self.scan_job.report_id:d} created."

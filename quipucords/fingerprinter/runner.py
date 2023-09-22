@@ -105,23 +105,15 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
     def execute_task(self, manager_interrupt):
         """Execute fingerprint task."""
-        details_report = self.scan_task.details_report
-
         deployment_report = DeploymentsReport(report_version=create_report_version())
         deployment_report.save()
 
-        # Set the report ids.  Right now they are deployment report id
-        # but they do not have to
-        deployment_report.report_id = deployment_report.id
-        deployment_report.save()
-
-        details_report.deployment_report = deployment_report
-        details_report.report_id = deployment_report.id
-        details_report.save()
+        self.scan_job.report.deployment_report = deployment_report
+        self.scan_job.report.save()
 
         try:
             message, status = self._process_details_report(
-                manager_interrupt, details_report
+                manager_interrupt, self.scan_job.report
             )
 
             self.check_for_interrupt(manager_interrupt)
@@ -137,7 +129,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
             error_message = (
-                f"Fact collection {details_report.id} failed to be processed."
+                f"Fact collection {self.scan_job.report_id} failed to be processed."
             )
 
             self.scan_task.log_message(f"{error_message}", log_level=logging.ERROR)

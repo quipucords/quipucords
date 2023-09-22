@@ -16,12 +16,12 @@ from tests.factories import ReportFactory, ScanJobFactory, ScanTaskFactory
 @pytest.mark.django_db
 def test_fingerprint_happy_path_details_report_already_exists(mocker):
     """Test fingerprint calls fingerprint runner when details report already exists."""
-    scan_job = ScanJobFactory(status=ScanTask.RUNNING, report=None)
-    details_report = ReportFactory(scanjob=None)
+    report = ReportFactory(scanjob=None)
+    scan_job = ScanJobFactory(status=ScanTask.RUNNING, report=report)
     scan_task = ScanTaskFactory(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
         status=ScanTask.PENDING,
-        details_report=details_report,
+        details_report=report,
         job=scan_job,
     )
     mock_run_task_runner = mocker.patch(
@@ -34,12 +34,12 @@ def test_fingerprint_happy_path_details_report_already_exists(mocker):
 
     success, scan_task_id, status = tasks.fingerprint.delay(scan_task.id).get()
     scan_job.refresh_from_db()
-    details_report.refresh_from_db()
+    report.refresh_from_db()
 
     assert success
     assert scan_task_id == scan_task.id, "unexpected returned scan_task_id"
     assert status == ScanTask.COMPLETED, "unexpected returned status"
-    assert scan_job.report == details_report
+    assert scan_job.report == report
     assert mock_fingerprint_runner_class.call_args[0][0].id == scan_job.id
     assert mock_fingerprint_runner_class.call_args[0][1].id == scan_task.id
     mock_fingerprint_runner = mock_fingerprint_runner_class.return_value
