@@ -15,7 +15,7 @@ from tests.factories import DeploymentReportFactory
 def report_entity():
     """Return a ReportEntity with 10 hosts."""
     deployment_report = DeploymentReportFactory.create(number_of_fingerprints=10)
-    return ReportEntity.from_report_id(deployment_report.id)
+    return ReportEntity.from_report_id(deployment_report.report.id)
 
 
 @pytest.mark.dbcompat

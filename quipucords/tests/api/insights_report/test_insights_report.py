@@ -24,7 +24,8 @@ class TestInsightsReport:
             number_of_fingerprints=3,
             status=DeploymentsReport.STATUS_COMPLETE,
         )
-        url = f"/api/v1/reports/{deployment_report.id}/insights/"
+        report_id = deployment_report.report.id
+        url = f"/api/v1/reports/{report_id}/insights/"
         # mock slice size so we can expect 2 slices on this test
         with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=2):
             response = django_client.get(url)
@@ -38,7 +39,8 @@ class TestInsightsReport:
             number_of_fingerprints=11,
             status=DeploymentsReport.STATUS_COMPLETE,
         )
-        url = f"/api/v1/reports/{deployments_report.id}/insights/?format=tar.gz"
+        report_id = deployments_report.report.id
+        url = f"/api/v1/reports/{report_id}/insights/?format=tar.gz"
         # mock slice size so we can expect 2 slices on this test
         with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
             response = django_client.get(url)
@@ -54,11 +56,12 @@ class TestInsightsReport:
 
     def validate_data(self, data: dict, deployment_report: DeploymentsReport):
         """Validate insights report data."""
-        assert create_filename("metadata", "json", deployment_report.id) in data.keys()
+        report_id = deployment_report.report.id
+        assert create_filename("metadata", "json", report_id) in data.keys()
         report_slices = {}
-        metadata_filename = f"report_id_{deployment_report.id}/metadata.json"
+        metadata_filename = f"report_id_{report_id}/metadata.json"
         for key in data:
-            assert f"report_id_{deployment_report.id}/" in key
+            assert f"report_id_{report_id}/" in key
             if key != metadata_filename:
                 report_slices[key] = data[key]
         # metadata slice number_hosts matches the actual
@@ -91,17 +94,15 @@ class TestInsightsReport:
         deployment_report = DeploymentReportFactory(
             status=DeploymentsReport.STATUS_COMPLETE,
         )
-        url = f"/api/v1/reports/{deployment_report.id}/insights/"
+        report_id = deployment_report.report.id
+        url = f"/api/v1/reports/{report_id}/insights/"
         response = django_client.get(url)
         assert response.status_code == 200
         response_json = response.json()
 
-        assert (
-            create_filename("metadata", "json", deployment_report.id)
-            in response_json.keys()
-        )
+        assert create_filename("metadata", "json", report_id) in response_json.keys()
         for key in response_json:
-            assert f"report_id_{deployment_report.id}/" in key
+            assert f"report_id_{report_id}/" in key
 
     def test_get_insights_report_404_no_canonical(self, django_client):
         """Retrieve insights report."""
@@ -109,6 +110,7 @@ class TestInsightsReport:
             number_of_fingerprints=0,
             status=DeploymentsReport.STATUS_COMPLETE,
         )
+        report_id = deployment_report.report.id
         # fingerprint without canonical facts
         SystemFingerprintFactory.create(
             deployment_report_id=deployment_report.id,
@@ -121,7 +123,7 @@ class TestInsightsReport:
             cloud_provider=None,
         )
         assert deployment_report.system_fingerprints.count() == 1
-        url = f"/api/v1/reports/{deployment_report.id}/insights/"
+        url = f"/api/v1/reports/{report_id}/insights/"
         response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 

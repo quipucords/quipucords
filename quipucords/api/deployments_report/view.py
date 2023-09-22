@@ -55,19 +55,19 @@ def deployments(request, report_id=None):
     return Response(deployments_json)
 
 
-def build_cached_json_report(report):
+def build_cached_json_report(deployments_report):
     """Create a count report based on the fingerprints and the group.
 
     :param report: the DeploymentsReport used to group count
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
-    system_fingerprints = report.cached_fingerprints
+    system_fingerprints = deployments_report.cached_fingerprints
     return {
-        "report_id": report.id,
-        "status": report.status,
-        "report_type": report.report_type,
-        "report_version": report.report_version,
-        "report_platform_id": str(report.report_platform_id),
+        "report_id": deployments_report.report.id,
+        "status": deployments_report.status,
+        "report_type": deployments_report.report_type,
+        "report_version": deployments_report.report_version,
+        "report_platform_id": str(deployments_report.report_platform_id),
         "system_fingerprints": system_fingerprints,
     }

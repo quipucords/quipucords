@@ -66,7 +66,8 @@ class TestReportEntity:
     def test_from_report_id(self, django_assert_max_num_queries, deployment_reports):
         """Test ReportEntity factory method "from_report_id"."""
         # pick the id for one of the reports
-        report_id = deployment_reports[0].id
+        report_id = deployment_reports[0].report.id
+        deployment_id = deployment_reports[0].id
 
         with django_assert_max_num_queries(2):
             report = ReportEntity.from_report_id(report_id)
@@ -79,7 +80,7 @@ class TestReportEntity:
         fingerprint_ids = set(host.id for host in report.hosts)
 
         fingerprints_from_report = SystemFingerprint.objects.filter(
-            deployment_report_id=report_id
+            deployment_report_id=deployment_id
         )
         assert set(f.id for f in fingerprints_from_report) == fingerprint_ids
 
@@ -92,22 +93,24 @@ class TestReportEntity:
         """Check if the proper error is raised."""
         deployment_report = DeploymentReportFactory(number_of_fingerprints=0)
         with pytest.raises(SystemFingerprint.DoesNotExist):
-            ReportEntity.from_report_id(deployment_report.id)
+            ReportEntity.from_report_id(deployment_report.report.id)
 
     def test_last_discovered_built_from_factory(self, django_assert_num_queries):
         """Test last_discovered property."""
-        report_id = DeploymentReportFactory().id
+        deployment = DeploymentReportFactory()
+        deployment_id = deployment.id
+        report_id = deployment.report.id
         # query for deployment report to force only deployment report to be loaded
-        deployment_report = DeploymentsReport.objects.get(id=report_id)
-        report = ReportEntity.from_report_id(deployment_report.id)
+        DeploymentsReport.objects.get(id=deployment_id)
+        report = ReportEntity.from_report_id(report_id)
         with django_assert_num_queries(0):
             assert isinstance(report.last_discovered, datetime)
 
     def test_last_discovered_initialized(self, django_assert_num_queries):
         """Test last_discovered property with ReportEntity initialized manually."""
-        report_id = DeploymentReportFactory().id
+        deployment_id = DeploymentReportFactory().id
         # query for deployment report to force only deployment report to be loaded
-        deployment_report = DeploymentsReport.objects.get(id=report_id)
+        deployment_report = DeploymentsReport.objects.get(id=deployment_id)
         report = ReportEntity(
             deployment_report, hosts=deployment_report.system_fingerprints.all()
         )
@@ -122,10 +125,10 @@ class TestReportEntity:
             deployment_report=deployment_report
         )
         assert deployment_report.system_fingerprints.count() == 2
-        report_filtered = ReportEntity.from_report_id(deployment_report.id)
+        report_filtered = ReportEntity.from_report_id(deployment_report.report.id)
         assert len(report_filtered.hosts) == 1
         report_unfiltered = ReportEntity.from_report_id(
-            deployment_report.id, skip_non_canonical=False
+            deployment_report.report.id, skip_non_canonical=False
         )
         assert len(report_unfiltered.hosts) == 2
         assert (
@@ -183,7 +186,9 @@ class TestHostEntity:
     @classmethod
     def host_init(cls, system_fingerprint) -> HostEntity:
         """Initialize HostEntity using ReportEntity annotated query."""
-        report = ReportEntity.from_report_id(system_fingerprint.deployment_report.id)
+        report = ReportEntity.from_report_id(
+            system_fingerprint.deployment_report.report.id
+        )
         return report.hosts[0]
 
     def test_products_not_implemented(self, fingerprint):
