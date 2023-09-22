@@ -11,7 +11,18 @@ from urllib.parse import urljoin
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core import management
 from django.test import override_settings
+
+
+@pytest.fixture(scope="session")
+def django_db_setup(django_db_setup, django_db_blocker):
+    """Force db sequences to use random numbers."""
+    with django_db_blocker.unblock():
+        # randomize db sequences to avoid ID coincidences causing
+        # false positive tests, avoid hardcoded IDs, and attempt
+        # to simulate a real world-like scenario.
+        management.call_command("randomize_db_sequences")
 
 
 @pytest.fixture(autouse=True)
