@@ -34,7 +34,7 @@ perm_classes = (IsAuthenticated,)
 def insights(request, report_id=None):
     """Lookup and return a insights system report."""
     deployment_report = get_object_or_404(
-        DeploymentsReport.objects.only("id", "status"), pk=report_id
+        DeploymentsReport.objects.only("id", "status"), report__id=report_id
     )
     _validate_deployment_report_status(deployment_report)
     report = _get_report(deployment_report)
@@ -46,7 +46,7 @@ def _validate_deployment_report_status(deployment_report):
     if deployment_report.status != DeploymentsReport.STATUS_COMPLETE:
         raise FailedDependencyError(
             {
-                "detail": f"Insights report {deployment_report.id} could not be "
+                "detail": f"Insights report {deployment_report.report.id} could not be "
                 "created. See server logs."
             },
         )
@@ -54,10 +54,10 @@ def _validate_deployment_report_status(deployment_report):
 
 def _get_report(deployment_report):
     try:
-        report = ReportEntity.from_report_id(deployment_report.id)
+        report = ReportEntity.from_report_id(deployment_report.report.id)
     except SystemFingerprint.DoesNotExist as err:
         raise NotFound(
-            f"Insights report {deployment_report.id} was not generated because "
+            f"Insights report {deployment_report.report.id} was not generated because "
             "there were 0 valid hosts. See server logs."
         ) from err
 

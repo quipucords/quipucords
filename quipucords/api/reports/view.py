@@ -47,11 +47,10 @@ def reports(request, report_id):
     # has a "state machine". Consider removing this in future iterations (we will
     # be forced to revisit this idea when Report replaces Deployments models)
     if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
-        deployments_id = deployments_report.details_report.id
         return Response(
             {
                 "detail": _(
-                    f"Deployment report {deployments_id} could not be created."
+                    f"Deployment report {report_id} could not be created."
                     " See server logs."
                 )
             },

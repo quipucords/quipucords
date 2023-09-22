@@ -270,12 +270,13 @@ class ReportsTest(LoggedUserMixin, TestCase):
 def test_report_without_logs(django_client, caplog):
     """Explicitly test report without logs."""
     caplog.set_level(logging.WARNING)
-    report = DeploymentReportFactory.create()
-    response = django_client.get(f"/api/v1/reports/{report.id}/")
+    deployment = DeploymentReportFactory.create()
+    report_id = deployment.report.id
+    response = django_client.get(f"/api/v1/reports/{report_id}/")
     assert response.ok, response.text
-    assert f"No logs were found for report_id={report.id}" in caplog.messages
+    assert f"No logs were found for report_id={report_id}" in caplog.messages
     expected_files = {
-        f"report_id_{report.id}/{fname}"
+        f"report_id_{report_id}/{fname}"
         for fname in [
             "SHA256SUM",
             "deployments.csv",
@@ -289,7 +290,7 @@ def test_report_without_logs(django_client, caplog):
 
 
 @pytest.fixture
-def report_with_logs(settings, faker):
+def deployment_with_logs(settings, faker):
     """Return a completed DeploymentReport instance that has associate scan job logs."""
     deployments_report: DeploymentsReport = DeploymentReportFactory.create()
     scan_job_id = deployments_report.report.scanjob.id
@@ -300,10 +301,10 @@ def report_with_logs(settings, faker):
     return deployments_report
 
 
-def test_report_with_logs(django_client, report_with_logs):
+def test_report_with_logs(django_client, deployment_with_logs):
     """Test if scan job logs are included in tarball when present."""
-    report = report_with_logs
-    scan_job_id = report.report.scanjob.id
+    report = deployment_with_logs.report
+    scan_job_id = report.scanjob.id
     response = django_client.get(f"/api/v1/reports/{report.id}/")
     assert response.ok, response.text
     expected_files = {
