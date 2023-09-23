@@ -240,7 +240,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             deployment_report.status = DeploymentsReport.STATUS_COMPLETE
         else:
             status_message = (
-                f"FAILED to create report id={deployment_report.report_id} - "
+                f"FAILED to create report id={deployment_report.report.id} - "
                 "produced no valid fingerprints"
             )
             self.scan_task.log_message(status_message, log_level=logging.ERROR)
@@ -249,7 +249,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         deployment_report.cached_fingerprints = final_fingerprint_list
         deployment_report.save()
         self.scan_task.log_message(
-            f"RESULTS (report id={deployment_report.report_id}) -  "
+            f"RESULTS (report id={deployment_report.report.id}) -  "
             f"(valid fingerprints={number_valid}, "
             f"invalid fingerprints={number_invalid})"
         )

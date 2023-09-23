@@ -18,6 +18,6 @@ class Report(models.Model):
     # of "normalization phase"
     sources = models.JSONField(null=False, default=list, encoder=RawFactEncoder)
     deployment_report = models.OneToOneField(
-        "DeploymentsReport", models.CASCADE, related_name="details_report", null=True
+        "DeploymentsReport", models.CASCADE, related_name="report", null=True
     )
     cached_csv = models.TextField(null=True)

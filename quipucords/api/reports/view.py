@@ -42,7 +42,7 @@ def reports(request, report_id):
     json_details = serializer.data
     json_details.pop("cached_csv", None)
     reports_dict["details_json"] = json_details
-    deployments_report = get_object_or_404(DeploymentsReport, report_id=report_id)
+    deployments_report = get_object_or_404(DeploymentsReport, report__id=report_id)
     # deployments_report.status seems redundant considering scan job already
     # has a "state machine". Consider removing this in future iterations (we will
     # be forced to revisit this idea when Report replaces Deployments models)

@@ -40,17 +40,19 @@ def deployments(request, report_id=None):
     if not is_int(report_id):
         error = {"report_id": [_(messages.COMMON_ID_INV)]}
         raise ValidationError(error)
-    report = get_object_or_404(DeploymentsReport.objects.all(), report_id=report_id)
-    if report.status != DeploymentsReport.STATUS_COMPLETE:
+    deployments_report = get_object_or_404(
+        DeploymentsReport.objects.all(), report__id=report_id
+    )
+    if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
         return Response(
             {
-                "detail": f"Deployment report {report.details_report.id}"
+                "detail": f"Deployment report {deployments_report.report.id}"
                 " could not be created. See server logs."
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
-    deployments_report = build_cached_json_report(report)
-    return Response(deployments_report)
+    deployments_json = build_cached_json_report(deployments_report)
+    return Response(deployments_json)
 
 
 def build_cached_json_report(report):

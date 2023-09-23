@@ -262,7 +262,7 @@ class ReportEntity:
             return self._deployment_report.last_discovered
         except AttributeError:
 
-            return self._deployment_report.details_report.scanjob.end_time
+            return self._deployment_report.report.scanjob.end_time
 
     @classmethod
     def from_report_id(cls, report_id, skip_non_canonical=True):
@@ -284,9 +284,10 @@ class ReportEntity:
         """
         deployment_report = (
             DeploymentsReport.objects.annotate(
-                last_discovered=F("details_report__scanjob__end_time")
+                last_discovered=F("report__scanjob__end_time"),
+                report_id=F("report__id"),
             )
-            .filter(pk=report_id)
+            .filter(report__id=report_id)
             .get()
         )
         # openshift/ansible sources won't make sense in insights reports.

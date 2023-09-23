@@ -8,7 +8,7 @@ from api.models import DeploymentsReport, Source, SourceOptions, SystemFingerpri
 from constants import DataSources
 from tests.factories import (
     DeploymentReportFactory,
-    DetailsReportFactory,
+    ReportFactory,
     SourceFactory,
 )
 
@@ -109,9 +109,7 @@ class TestDetailsFactory:
     @pytest.mark.parametrize("source_type", DataSources.values)
     def test_source_generation(self, source_type):
         """Test automatic generation of Details facts is not breaking anything."""
-        report = DetailsReportFactory.build(
-            source_types=[source_type], deployment_report=None
-        )
+        report = ReportFactory.build(source_types=[source_type], deployment_report=None)
         # report.id is None since it is not saved to db yet
         assert report.id is None
         assert len(report.sources) == 1

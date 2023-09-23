@@ -339,7 +339,7 @@ class SyncScanJobRunner:
                     return ScanTask.FAILED
 
             # Associate details report with scan job
-            self.scan_job.details_report = details_report
+            self.scan_job.report = details_report
             self.scan_job.save()
 
             # Associate details report with fingerprint task
