@@ -47,7 +47,7 @@ def create_deployments_csv(deployments_report_dict):  # noqa: PLR0912, PLR0915, 
     if report_id is None:
         return None
 
-    deployment_report = DeploymentsReport.objects.filter(report_id=report_id).first()
+    deployment_report = DeploymentsReport.objects.filter(report__id=report_id).first()
     if deployment_report is None:
         return None
 

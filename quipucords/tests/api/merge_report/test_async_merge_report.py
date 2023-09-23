@@ -1,6 +1,7 @@
 """Test the report API."""
 
 import json
+from unittest import mock
 from unittest.mock import patch
 
 from django.core import management
@@ -91,6 +92,7 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
         response_json = self.merge_details_from_source_expect_201(request_json)
 
         expected = {
+            "report_id": mock.ANY,
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",

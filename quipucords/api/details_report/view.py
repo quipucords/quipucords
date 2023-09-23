@@ -84,9 +84,9 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             report_version = create_report_version()
 
         # Create FC model and save data
-        details_report = create_details_report(create_report_version(), request.data)
+        report = create_details_report(create_report_version(), request.data)
         scan_job = ScanJob.objects.create(
-            scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, details_report=details_report
+            scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=report
         )
         if warn_deprecated:
             scan_job.log_message(
@@ -103,9 +103,9 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             return Response(error_json, status=status.HTTP_400_BAD_REQUEST)
 
         scan_job = ScanJob.objects.get(pk=scan_job.id)
-        details_report = Report.objects.get(pk=details_report.id)
+        report = Report.objects.get(pk=report.id)
 
         # Prepare REST response body
-        serializer = self.get_serializer(details_report)
+        serializer = self.get_serializer(report)
         result = serializer.data
         return Response(result, status=status.HTTP_201_CREATED)

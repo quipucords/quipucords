@@ -65,7 +65,7 @@ class ScanJob(models.Model):
         JobInspectionResult, null=True, on_delete=models.CASCADE
     )
 
-    details_report = models.OneToOneField(Report, null=True, on_delete=models.CASCADE)
+    report = models.OneToOneField(Report, null=True, on_delete=models.CASCADE)
 
     class Meta:
         """Metadata for model."""
@@ -194,13 +194,13 @@ class ScanJob(models.Model):
                 inspect_systems_unreachable + connection_systems_unreachable
             )
         self.refresh_from_db()
-        if self.report_id and self.details_report:
-            self.details_report.refresh_from_db()
+        if self.report_id and self.report:
+            self.report.refresh_from_db()
 
-            if self.details_report.deployment_report:
+            if self.report.deployment_report:
 
                 system_fingerprint_count = (
-                    self.details_report.deployment_report.system_fingerprints.count()
+                    self.report.deployment_report.system_fingerprints.count()
                 )
 
         return (
@@ -290,8 +290,8 @@ class ScanJob(models.Model):
                 self.connection_results.task_results.all().delete()
             if self.inspection_results is not None:
                 self.inspection_results.task_results.all().delete()
-            if self.details_report and self.details_report.deployment_report:
-                self.details_report.deployment_report.system_fingerprints.delete()
+            if self.report and self.report.deployment_report:
+                self.report.deployment_report.system_fingerprints.delete()
 
         # Create tasks
         conn_tasks = self._create_connection_tasks()
@@ -397,7 +397,7 @@ class ScanJob(models.Model):
             fingerprint_task = ScanTask.objects.create(
                 job=self,
                 scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                details_report=self.details_report,
+                details_report=self.report,
                 status=ScanTask.PENDING,
                 status_message=_(messages.ST_STATUS_MSG_PENDING),
                 sequence_number=count,

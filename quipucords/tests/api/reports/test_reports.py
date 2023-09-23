@@ -291,19 +291,19 @@ def test_report_without_logs(django_client, caplog):
 @pytest.fixture
 def report_with_logs(settings, faker):
     """Return a completed DeploymentReport instance that has associate scan job logs."""
-    report: DeploymentsReport = DeploymentReportFactory.create()
-    scan_job_id = report.details_report.scanjob.id
+    deployments_report: DeploymentsReport = DeploymentReportFactory.create()
+    scan_job_id = deployments_report.report.scanjob.id
     log_file = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
         scan_job_id=scan_job_id, output_type="test"
     )
     log_file.write_text(faker.paragraph())
-    return report
+    return deployments_report
 
 
 def test_report_with_logs(django_client, report_with_logs):
     """Test if scan job logs are included in tarball when present."""
     report = report_with_logs
-    scan_job_id = report.details_report.scanjob.id
+    scan_job_id = report.report.scanjob.id
     response = django_client.get(f"/api/v1/reports/{report.id}/")
     assert response.ok, response.text
     expected_files = {
