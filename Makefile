@@ -12,6 +12,11 @@ TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=15
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
 QUIPUCORDS_UI_RELEASE ?= latest
+GITHUB_API_TOKEN_SECRET ?= /run/secrets/gh_api_token
+GITHUB_API_TOKEN := $(file < $(GITHUB_API_TOKEN_SECRET))
+ifneq ($(GITHUB_API_TOKEN),)
+	GITHUB_API_AUTH = -H "Authorization: Bearer $(GITHUB_API_TOKEN)"
+endif
 
 ifndef DOCKER_HOST
 	PODMAN_SOCKET := $(shell podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2> /dev/null || podman info --format '{{.Host.RemoteSocket.Path}}' 2> /dev/null || echo -n "")
@@ -175,17 +180,20 @@ build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
 
 fetch-ui: clean-ui
 	@if [[ $(QUIPUCORDS_UI_RELEASE) = "latest" ]]; then \
-		DOWNLOAD_URL=`curl -s https://api.github.com/repos/quipucords/quipucords-ui/releases/$(QUIPUCORDS_UI_RELEASE) | jq -r '.assets[] | select(.name | test("quipucords-ui-dist.tar.gz")) | .browser_download_url'`; \
+		GH_FILE=`mktemp`; \
+		curl $(GITHUB_API_AUTH) --output "$${GH_FILE}" -sSf "https://api.github.com/repos/quipucords/quipucords-ui/releases/$(QUIPUCORDS_UI_RELEASE)"; \
+		DOWNLOAD_URL=`jq -r '.assets[] | select(.name | test("quipucords-ui-dist.tar.gz")) | .browser_download_url' "$${GH_FILE}"`; \
+		rm "$${GH_FILE}"; \
 	else \
 		DOWNLOAD_URL="https://github.com/quipucords/quipucords-ui/releases/download/$(QUIPUCORDS_UI_RELEASE)/quipucords-ui-dist.tar.gz"; \
 	fi; \
 	echo "download_url=$${DOWNLOAD_URL}"; \
 	curl -k -SL "$${DOWNLOAD_URL}" -o ui-dist.tar.gz &&\
-    tar -xzvf ui-dist.tar.gz &&\
+	tar -xzvf ui-dist.tar.gz &&\
 	mkdir -p quipucords/quipucords/ &&\
-    mv dist/templates quipucords/quipucords/. &&\
-    mv dist/client quipucords/. &&\
-    rm -rf ui-dist* dist
+	mv dist/templates quipucords/quipucords/. &&\
+	mv dist/client quipucords/. &&\
+	rm -rf ui-dist* dist
 
 qpc_on_ui_dir = ${QUIPUCORDS_UI_PATH}/.qpc/quipucords
 $(qpc_on_ui_dir): $(QUIPUCORDS_UI_PATH)
@@ -199,6 +207,7 @@ serve-swagger: $(qpc_on_ui_dir)
 build-container:
 	podman build \
 		--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
+		--secret=id=gh_api_token,src=.github_api_token \
 		-t $(QUIPUCORDS_CONTAINER_TAG) .
 
 check-db-migrations-needed:

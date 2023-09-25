@@ -6,6 +6,7 @@
 .dockerignore
 .egg
 .github
+.github_api_token
 .gitignore
 .pytest_cache
 .tool-versions

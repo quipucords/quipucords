@@ -48,7 +48,7 @@ RUN dnf remove ${BUILD_PACKAGES} -y && \
 # Fetch UI code
 COPY Makefile .
 ARG UI_RELEASE="latest"
-RUN make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
+RUN --mount=type=secret,id=gh_api_token make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
 # Create /etc/ssl/qpc
 COPY deploy/ssl /etc/ssl/qpc
