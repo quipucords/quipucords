@@ -397,7 +397,6 @@ class ScanJob(models.Model):
             fingerprint_task = ScanTask.objects.create(
                 job=self,
                 scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-                details_report=self.report,
                 status=ScanTask.PENDING,
                 status_message=_(messages.ST_STATUS_MSG_PENDING),
                 sequence_number=count,

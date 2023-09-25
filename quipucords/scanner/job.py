@@ -330,21 +330,18 @@ class SyncScanJobRunner:
                 return task_status
 
         if self.scan_job.scan_type != ScanTask.SCAN_TYPE_CONNECT:
-            if not (details_report := fingerprint_task_runner.scan_task.details_report):
-                details_report, error_message = create_details_report_for_scan_job(
+            if not (report := fingerprint_task_runner.scan_job.report):
+                report, error_message = create_details_report_for_scan_job(
                     self.scan_job
                 )
-                if not details_report:
+                if not report:
                     self.scan_job.status_fail(error_message)
                     return ScanTask.FAILED
 
             # Associate details report with scan job
-            self.scan_job.report = details_report
+            self.scan_job.report = report
             self.scan_job.save()
 
-            # Associate details report with fingerprint task
-            fingerprint_task_runner.scan_task.details_report = details_report
-            fingerprint_task_runner.scan_task.save()
             try:
                 if interrupt_status := self.check_manager_interrupt():
                     return interrupt_status
@@ -357,7 +354,7 @@ class SyncScanJobRunner:
                     log_level=logging.ERROR,
                     exception=error,
                 )
-                self._log_details_report_error(fingerprint_task_runner, details_report)
+                self._log_details_report_error(fingerprint_task_runner, report)
                 raise error
             if task_status in [ScanTask.CANCELED, ScanTask.PAUSED]:
                 return task_status
@@ -368,7 +365,7 @@ class SyncScanJobRunner:
                     f"Task {fingerprint_task_runner.scan_task.sequence_number} failed.",
                     log_level=logging.ERROR,
                 )
-                self._log_details_report_error(fingerprint_task_runner, details_report)
+                self._log_details_report_error(fingerprint_task_runner, report)
             else:
                 # Record results for successful tasks
                 self.scan_job.save()

@@ -81,10 +81,6 @@ def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
     # Associate report with the scan job.
     scan_job.report = report
     scan_job.save()
-    # Associate details report with the fingerprint task.
-    scan_task.details_report = report
-    scan_task.save()
-    # Yes, that feels redundant, but I'm just preserving existing behavior.
 
     runner = FingerprintTaskRunner(scan_job, scan_task)
     success = (task_status := run_task_runner(runner)) == ScanTask.COMPLETED

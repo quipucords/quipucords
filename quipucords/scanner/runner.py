@@ -41,10 +41,10 @@ class ScanTaskRunner(metaclass=ABCMeta):
             elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
                 self.scan_task.inspection_result.systems.all().delete()
             elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-                details_report = self.scan_task.details_report
-                if details_report:
+                report = self.scan_job.report
+                if report:
                     # remove results from previous interrupted scan
-                    deployment_report = details_report.deployment_report
+                    deployment_report = report.deployment_report
 
                     if deployment_report:
                         # remove partial results
@@ -55,8 +55,8 @@ class ScanTaskRunner(metaclass=ABCMeta):
                         )
                         deployment_report.system_fingerprints.all().delete()
                         deployment_report.save()
-                        details_report.deployment_report = None
-                        details_report.save()
+                        report.deployment_report = None
+                        report.save()
                         deployment_report.delete()
 
     def run(self, manager_interrupt: Value = None):
