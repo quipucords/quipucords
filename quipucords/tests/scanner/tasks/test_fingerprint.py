@@ -21,7 +21,6 @@ def test_fingerprint_happy_path_details_report_already_exists(mocker):
     scan_task = ScanTaskFactory(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
         status=ScanTask.PENDING,
-        details_report=report,
         job=scan_job,
     )
     mock_run_task_runner = mocker.patch(

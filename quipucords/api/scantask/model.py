@@ -13,7 +13,6 @@ from django.utils.translation import gettext as _
 from api import messages
 from api.connresult.model import TaskConnectionResult
 from api.inspectresult.model import TaskInspectionResult
-from api.reports.model import Report
 from api.scantask.queryset import ScanTaskQuerySet
 from api.source.model import Source
 
@@ -78,9 +77,6 @@ class ScanTask(models.Model):
         TaskInspectionResult, null=True, on_delete=models.CASCADE
     )
 
-    # Fingerprint task field
-    details_report = models.ForeignKey(Report, null=True, on_delete=models.CASCADE)
-
     # custom queryset / object manager
     objects = ScanTaskQuerySet.as_manager()
 
@@ -141,13 +137,12 @@ class ScanTask(models.Model):
     def _log_fingerprint_stats(self, prefix):
         """Log stats for fingerprinter."""
         system_fingerprint_count = 0
-        if self.details_report:
-            self.details_report.refresh_from_db()
+        if self.job.report:
+            self.job.report.refresh_from_db()
 
-            if self.details_report.deployment_report:
-
+            if self.job.report.deployment_report:
                 system_fingerprint_count = (
-                    self.details_report.deployment_report.system_fingerprints.count()
+                    self.job.report.deployment_report.system_fingerprints.count()
                 )
         message = f"{prefix} Stats: system_fingerprint_count={system_fingerprint_count}"
         self.log_message(message)
@@ -190,8 +185,8 @@ class ScanTask(models.Model):
         """Log a message for this task."""
         elapsed_time = self._compute_elapsed_time()
         details_report_id = None
-        if self.details_report:
-            details_report_id = self.details_report.id
+        if self.job.report:
+            details_report_id = self.job.report.id
         actual_message = (
             f"Job {self.job.id:d},"
             f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
@@ -410,12 +405,12 @@ class ScanTask(models.Model):
         elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-            return self.details_report
+            return self.job.report
         return None
 
     def log_raw_facts(self, log_level=logging.INFO):
         """Log raw facts stored on details report."""
-        if not self.details_report:
+        if not self.job.report:
             self.log_message(
                 "Missing details report - Impossible to log raw facts.",
                 log_level=max(logging.ERROR, log_level),
@@ -424,5 +419,5 @@ class ScanTask(models.Model):
         # Using a pure logger to avoid the extra context information added
         # by log_message method.
         logger.log(log_level, f"{'raw facts':-^50}")
-        logger.log(log_level, self.details_report.sources)
+        logger.log(log_level, self.job.report.sources)
         logger.log(log_level, "-" * 50)
