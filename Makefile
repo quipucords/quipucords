@@ -132,6 +132,9 @@ server-makemigrations:
 server-migrate:
 	$(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
 
+server-randomize-sequences:
+	$(PYTHON) quipucords/manage.py randomize_db_sequences --settings quipucords.settings
+
 celery-worker:
 	$(PYTHON) -m celery --app quipucords --workdir quipucords worker
 
