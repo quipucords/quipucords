@@ -175,9 +175,9 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = Report.objects.get(id=response_json["report_id"])
-        details_report.cached_csv = None
-        details_report.save()
+        report = Report.objects.get(id=response_json["report_id"])
+        report.cached_csv = None
+        report.save()
 
         # Remove sources
         test_json = copy.deepcopy(response_json)
@@ -193,9 +193,9 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = Report.objects.get(id=response_json["report_id"])
-        details_report.cached_csv = None
-        details_report.save()
+        report = Report.objects.get(id=response_json["report_id"])
+        report.cached_csv = None
+        report.save()
 
         # Remove sources
         test_json = copy.deepcopy(response_json)
@@ -211,9 +211,9 @@ class DetailReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(csv_result, expected)
 
         # Clear cache
-        details_report = Report.objects.get(id=response_json["report_id"])
-        details_report.cached_csv = None
-        details_report.save()
+        report = Report.objects.get(id=response_json["report_id"])
+        report.cached_csv = None
+        report.save()
 
         # Remove facts
         test_json = copy.deepcopy(response_json)

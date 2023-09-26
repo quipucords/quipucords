@@ -119,7 +119,7 @@ class DeploymentReportFactory(DjangoModelFactory):
 
 
 class ReportFactory(DjangoModelFactory):
-    """Factory for DetailsReport."""
+    """Factory for Report."""
 
     deployment_report = factory.SubFactory(DeploymentReportFactory, report=None)
     scanjob = factory.RelatedFactory(

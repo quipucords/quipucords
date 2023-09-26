@@ -61,7 +61,7 @@ def build_sources_from_tasks(tasks):
 
 
 def validate_details_report_json(details_report_json, external_json):
-    """Validate details_report field.
+    """Validate details report.
 
     :param details_report_json: dict representing a details report
     :param external_json: bool True if json came in via REST
@@ -159,27 +159,29 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_details_report(report_version, json_details_report):
-    """Create details report.
+def create_report(report_version, json_details_report):
+    """Create report.
 
-    Fact collection consists of a DetailsReport record
+    Fact collection consists of a Report record
     :param report_version: major.minor.patch version of report.
     :param json_details_report: dict representing a details report
-    :returns: The newly created DetailsReport
+    :returns: The newly created Report
     """
     # Create new details report
     serializer = DetailsReportSerializer(data=json_details_report)
     if serializer.is_valid():
-        details_report = serializer.save()
+        report = serializer.save()
         # removed by serializer since it is read-only.  Set again.
-        details_report.report_version = report_version
-        details_report.save()
-        logger.debug("Fact collection created: %s", details_report)
-        return details_report
+        report.report_version = report_version
+        report.save()
+        logger.debug("Fact collection created: %s", report)
+        return report
 
-    logger.error("Details report could not be persisted.")
+    logger.error("Report could not be persisted.")
     logger.error("Invalid json_details_report: %s", json_details_report)
-    logger.error("DetailsReport errors: %s", serializer.errors)
+    # seriously? this is used in a view and the best we can do is LOG serializer
+    # errors instead of returning them in a error response?!
+    logger.error("Report errors: %s", serializer.errors)
 
     return None
 
@@ -190,11 +192,11 @@ def create_details_csv(details_report_dict):  # noqa: C901
     if report_id is None:
         return None
     try:
-        details_report = Report.objects.get(id=report_id)
+        report = Report.objects.get(id=report_id)
     except Report.DoesNotExist:
         return None
     # Check for a cached copy of csv
-    cached_csv = details_report.cached_csv
+    cached_csv = report.cached_csv
     if cached_csv:
         logger.info("Using cached csv results for details report %d", report_id)
         return cached_csv
@@ -220,8 +222,8 @@ def create_details_csv(details_report_dict):  # noqa: C901
             [
                 report_id,
                 REPORT_TYPE_DETAILS,
-                details_report.report_version,
-                details_report.report_platform_id,
+                report.report_version,
+                report.report_platform_id,
                 0,
             ]
         )
@@ -231,8 +233,8 @@ def create_details_csv(details_report_dict):  # noqa: C901
         [
             report_id,
             REPORT_TYPE_DETAILS,
-            details_report.report_version,
-            details_report.report_platform_id,
+            report.report_version,
+            report.report_platform_id,
             len(sources),
         ]
     )
@@ -271,7 +273,7 @@ def create_details_csv(details_report_dict):  # noqa: C901
 
     logger.info("Caching csv results for details report %d", report_id)
     cached_csv = details_report_csv_buffer.getvalue()
-    details_report.cached_csv = cached_csv
-    details_report.save()
+    report.cached_csv = cached_csv
+    report.save()
 
     return cached_csv

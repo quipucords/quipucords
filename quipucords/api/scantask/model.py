@@ -398,7 +398,7 @@ class ScanTask(models.Model):
         using a ScanTask object so others can retrieve them if needed.
 
         :returns: Scan result object for task (either TaskConnectionResult,
-            TaskInspectionResult, or DetailsReport)
+            TaskInspectionResult, or Report)
         """
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             return self.inspection_result

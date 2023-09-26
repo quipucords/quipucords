@@ -73,7 +73,7 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
         return response.json()
 
     def generate_fingerprints(self, os_name="RHEL", os_versions=None):
-        """Create a DetailsReport for test."""
+        """Create a Report and DeploymentsReport for test."""
         facts = []
         fc_json = {
             "report_type": "details",
@@ -116,8 +116,8 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
                 "virt_what_type": "vt",
             }
             facts.append(fact_json)
-        details_report = self.create_details_report_expect_201(fc_json)
-        return details_report
+        report = self.create_details_report_expect_201(fc_json)
+        return report
 
     def test_get_details_report_group_report(self):
         """Get a specific group count report."""
@@ -148,7 +148,7 @@ class DeploymentReportTest(LoggedUserMixin, TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_bad_deployment_report(self):
-        """Test case where DetailsReport exists but no fingerprint."""
+        """Test case where Report exists but no fingerprint."""
         url = "/api/v1/reports/1/deployments/"
 
         # Create a system fingerprint via collection receiver

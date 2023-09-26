@@ -138,20 +138,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
             raise error
 
-    def _process_details_report(  # noqa: PLR0915
-        self, manager_interrupt, details_report
-    ):
+    def _process_details_report(self, manager_interrupt, report):  # noqa: PLR0915
         """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled
-        :param details_report: DetailsReport that was saved
+        :param report: Report that was saved
         :param scan_task: Task that is running this merge
         :returns: Status message and status
         """
         self.scan_task.log_message("START DEDUPLICATION")
 
         # Invoke ENGINE to create fingerprints from facts
-        fingerprints_list = self._process_sources(details_report)
+        fingerprints_list = self._process_sources(report)
 
         self.scan_task.log_message("END DEDUPLICATION")
 
@@ -160,7 +158,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_task.log_message("START FINGERPRINT PERSISTENCE")
         status_count = 0
         total_count = len(fingerprints_list)
-        deployment_report = details_report.deployment_report
+        deployment_report = report.deployment_report
         date_field = DateField()
         final_fingerprint_list = []
 
@@ -221,7 +219,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     log_level=logging.ERROR,
                 )
             self.scan_task.log_message(
-                f"Fingerprints (report id={details_report.id}): {fingerprint_dict}",
+                f"Fingerprints (report id={report.id}): {fingerprint_dict}",
                 log_level=logging.DEBUG,
             )
 
@@ -281,15 +279,15 @@ class FingerprintTaskRunner(ScanTaskRunner):
             log_level=log_level,
         )
 
-    def _process_sources(self, details_report):
+    def _process_sources(self, report):
         """Process facts and convert to fingerprints.
 
-        :param details_report: DetailsReport containing raw facts
+        :param details_report: Report containing raw facts
         :returns: list of fingerprints for all systems (all scans)
         """
         # fingerprints per source type
         fingerprint_map = {datasource: [] for datasource in DataSources.values}
-        source_list = details_report.sources
+        source_list = report.sources
         total_source_count = len(source_list)
         self.scan_task.log_message(f"{total_source_count} sources to process")
         source_count = 0

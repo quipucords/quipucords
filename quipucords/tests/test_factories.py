@@ -103,8 +103,8 @@ class TestSourceFactory:
 
 
 @pytest.mark.django_db
-class TestDetailsFactory:
-    """Test DetailsReportFactory."""
+class TestReportFactory:
+    """Test ReportFactory."""
 
     @pytest.mark.parametrize("source_type", DataSources.values)
     def test_source_generation(self, source_type):

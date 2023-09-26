@@ -14,7 +14,7 @@ from tests.mixins import LoggedUserMixin
 
 
 class DetailsReportTest(LoggedUserMixin, TestCase):
-    """Tests against the DetailsReport model and view set."""
+    """Tests against the Report model and view set."""
 
     def setUp(self):
         """Create test case setup."""
