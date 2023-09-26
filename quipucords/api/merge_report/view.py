@@ -19,55 +19,14 @@ from api.common.common_report import REPORT_TYPE_DETAILS
 from api.common.util import is_int
 from api.details_report.util import create_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
-from api.serializers import DetailsReportSerializer, ScanJobSerializer
+from api.serializers import ScanJobSerializer
 from api.signal.scanjob_signal import start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
-from scanner.job import ScanJobRunner
 
 logger = logging.getLogger(__name__)
 
 auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
-
-
-@api_view(["PUT"])
-@authentication_classes(auth_classes)
-@permission_classes(perm_classes)
-def sync_merge_reports(request):
-    """Merge reports synchronously."""
-    error = {"reports": []}
-
-    details_report_json = _convert_ids_to_json(request.data)
-
-    has_errors, validation_result = validate_details_report_json(
-        details_report_json, True
-    )
-    if has_errors:
-        message = _(messages.REPORT_MERGE_NO_RESULTS % validation_result)
-        error.get("reports").append(message)
-        raise ValidationError(error)
-
-    # Create FC model and save data
-    details_report_json = _reconcile_source_versions(details_report_json)
-    report_version = details_report_json.get("report_version", None)
-    report = create_report(report_version, details_report_json)
-    merge_job = ScanJob.objects.create(
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=report
-    )
-    merge_job.queue()
-    runner = ScanJobRunner(merge_job)
-    runner.run()
-
-    if merge_job.status != ScanTask.COMPLETED:
-        raise Exception(merge_job.status_message)
-
-    merge_job.refresh_from_db()
-    report = Report.objects.get(pk=report.id)
-
-    # Prepare REST response body
-    serializer = DetailsReportSerializer(report)
-    result = serializer.data
-    return Response(result, status=status.HTTP_201_CREATED)
 
 
 @api_view(["get", "put", "post"])

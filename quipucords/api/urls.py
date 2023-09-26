@@ -18,7 +18,6 @@ from api.views import (
     jobs,
     reports,
     status,
-    sync_merge_reports,
 )
 
 ROUTER = SimpleRouter()
@@ -35,7 +34,6 @@ urlpatterns = [
     path("reports/<int:report_id>/deployments/", deployments),
     path("reports/<int:report_id>/insights/", insights),
     path("reports/<int:report_id>/", reports),
-    path("reports/merge/", sync_merge_reports),
     path("reports/merge/jobs/", async_merge_reports),
     path("reports/merge/jobs/<int:scan_job_id>/", async_merge_reports),
     path("scans/<int:scan_id>/jobs/", jobs),
