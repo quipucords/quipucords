@@ -35,10 +35,10 @@ def reports(request, report_id):
     """Lookup and return reports."""
     reports_dict = {}
     reports_dict["report_id"] = report_id
-    details_report = get_object_or_404(Report, id=report_id)
+    report = get_object_or_404(Report, id=report_id)
     # add scan job id to allow detection of related logs on GzipRenderer
-    reports_dict["scan_job_id"] = details_report.scanjob.id
-    serializer = DetailsReportSerializer(details_report)
+    reports_dict["scan_job_id"] = report.scanjob.id
+    serializer = DetailsReportSerializer(report)
     json_details = serializer.data
     json_details.pop("cached_csv", None)
     reports_dict["details_json"] = json_details

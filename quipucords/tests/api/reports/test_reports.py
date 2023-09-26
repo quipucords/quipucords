@@ -75,7 +75,7 @@ class ReportsTest(LoggedUserMixin, TestCase):
         return details_json
 
     def generate_fingerprints(self, os_name="RHEL", os_versions=None):
-        """Create a DetailsReport for test."""
+        """Create a Report for testing."""
         facts = []
         fc_json = {
             "report_type": "details",

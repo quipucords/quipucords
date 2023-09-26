@@ -12,8 +12,8 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def details_report(mocker):
-    """Details report patched to contain all possible source types."""
+def report(mocker):
+    """Report patched to contain all possible source types."""
     report = mocker.MagicMock(spec=Report)
     report.sources = [
         {
@@ -135,12 +135,12 @@ def expected_messages():
 
 
 def test_process_sources(
-    task_runner: FingerprintTaskRunner, expected_messages, details_report, caplog
+    task_runner: FingerprintTaskRunner, expected_messages, report, caplog
 ):
     """Test FingerprintTaskRunner._process_sources counting mechanism."""
     caplog.set_level(logging.INFO)
 
-    fingerprints = task_runner._process_sources(details_report)  # noqa: W0212
+    fingerprints = task_runner._process_sources(report)  # noqa: W0212
     non_merged_fingerprints = [1, 2, 2]
     # ocp/ansible fingerprints wont be part of deduplication/merging process
     assert fingerprints == [1, 2] + 2 * non_merged_fingerprints

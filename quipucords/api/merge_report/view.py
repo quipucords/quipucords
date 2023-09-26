@@ -17,7 +17,7 @@ from rest_framework.serializers import ValidationError
 from api import messages
 from api.common.common_report import REPORT_TYPE_DETAILS
 from api.common.util import is_int
-from api.details_report.util import create_details_report, validate_details_report_json
+from api.details_report.util import create_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
 from api.serializers import DetailsReportSerializer, ScanJobSerializer
 from api.signal.scanjob_signal import start_scan
@@ -50,9 +50,9 @@ def sync_merge_reports(request):
     # Create FC model and save data
     details_report_json = _reconcile_source_versions(details_report_json)
     report_version = details_report_json.get("report_version", None)
-    details_report = create_details_report(report_version, details_report_json)
+    report = create_report(report_version, details_report_json)
     merge_job = ScanJob.objects.create(
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=details_report
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=report
     )
     merge_job.queue()
     runner = ScanJobRunner(merge_job)
@@ -62,10 +62,10 @@ def sync_merge_reports(request):
         raise Exception(merge_job.status_message)
 
     merge_job.refresh_from_db()
-    details_report = Report.objects.get(pk=details_report.id)
+    report = Report.objects.get(pk=report.id)
 
     # Prepare REST response body
-    serializer = DetailsReportSerializer(details_report)
+    serializer = DetailsReportSerializer(report)
     result = serializer.data
     return Response(result, status=status.HTTP_201_CREATED)
 
@@ -93,8 +93,8 @@ def async_merge_reports(request, scan_job_id=None):
 def _convert_ids_to_json(report_request_json):
     """Retrieve merge report job status.
 
-    :param report_request_json: dict with report list of DetailsReport ids
-    :returns: DetailsReport as dict
+    :param report_request_json: dict with report list of Report ids
+    :returns: Report as dict
     """
     reports = _validate_merge_report(report_request_json)
     sources = []
@@ -143,7 +143,7 @@ def _create_async_merge_report_job(details_report_data):
 
     # Create FC model and save data
     report_version = details_report_data.get("report_version", None)
-    details_report = create_details_report(report_version, details_report_data)
+    details_report = create_report(report_version, details_report_data)
 
     # Create new job to run
 

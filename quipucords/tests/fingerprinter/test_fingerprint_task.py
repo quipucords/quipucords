@@ -188,7 +188,7 @@ def _create_network_details_report_json(  # noqa: PLR0913, PLR0912, PLR0915, C90
     architecture="x86_64",
     user_has_sudo=True,
 ):
-    """Create an in memory DetailsReport for tests."""
+    """Create an in memory details report for tests."""
     fact = network_template()
     if source_name:
         fact["source_name"] = source_name
@@ -288,7 +288,7 @@ def _create_vcenter_details_report_json(  # noqa: PLR0913, PLR0912, C901
     architecture="x86_64",
     is_redhat=True,
 ):
-    """Create an in memory DetailsReport for tests."""
+    """Create an in memory details report for tests."""
     fact = vcenter_template()
     if source_name:
         fact["source_name"] = source_name
@@ -356,7 +356,7 @@ def _create_satellite_details_report_json(  # noqa: PLR0913, PLR0912, C901
     architecture="x86_64",
     is_redhat=True,
 ):
-    """Create an in memory DetailsReport for tests."""
+    """Create an in memory details report for tests."""
     fact = satellite_template()
     if source_name:
         fact["source_name"] = source_name
@@ -1508,13 +1508,13 @@ def test_process_details_report_failed(fingerprint_task_runner):
     """Test processing a details report no valid fps."""
     fact_collection = {}
     deployments_report = DeploymentsReport()
-    details_report = Report(deployment_report=deployments_report)
+    report = Report(deployment_report=deployments_report)
     with patch(
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=fact_collection,
     ):
         status_message, status = fingerprint_task_runner._process_details_report(
-            "", details_report
+            "", report
         )
         assert "failed" in status_message.lower()
         assert status == "failed"
@@ -1533,13 +1533,13 @@ def test_process_details_report_success(fingerprint_task_runner):
     }
     deployments_report = DeploymentsReport(id=1)
     deployments_report.save()
-    details_report = Report(id=1, deployment_report=deployments_report)
+    report = Report(id=1, deployment_report=deployments_report)
     with patch(
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=[fact_collection],
     ):
         status_message, status = fingerprint_task_runner._process_details_report(
-            "", details_report
+            "", report
         )
     assert "success" in status_message.lower()
     assert status == "completed"
@@ -1555,7 +1555,7 @@ def test_process_details_report_exception(fingerprint_task_runner):
     }
     deployments_report = DeploymentsReport(id=1)
     deployments_report.save()
-    details_report = Report(id=1, deployment_report=deployments_report)
+    report = Report(id=1, deployment_report=deployments_report)
     with patch(
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=[fact_collection],
@@ -1564,7 +1564,7 @@ def test_process_details_report_exception(fingerprint_task_runner):
         side_effect=DataError,
     ):
         status_message, status = fingerprint_task_runner._process_details_report(
-            "", details_report
+            "", report
         )
         assert "failed" in status_message.lower()
         assert status == "failed"

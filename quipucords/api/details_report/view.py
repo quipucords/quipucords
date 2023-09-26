@@ -22,7 +22,7 @@ from api.common.common_report import create_report_version
 from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.common.util import is_int
 from api.details_report.csv_renderer import DetailsCSVRenderer
-from api.details_report.util import create_details_report, validate_details_report_json
+from api.details_report.util import create_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
 from api.serializers import DetailsReportSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -84,7 +84,7 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             report_version = create_report_version()
 
         # Create FC model and save data
-        report = create_details_report(create_report_version(), request.data)
+        report = create_report(create_report_version(), request.data)
         scan_job = ScanJob.objects.create(
             scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=report
         )
