@@ -9,7 +9,6 @@ from api.connresult.serializer import (
 )
 from api.credential.serializer import CredentialSerializer
 from api.deployments_report.serializer import (
-    DeploymentReportSerializer,
     SystemFingerprintSerializer,
 )
 from api.details_report.serializer import DetailsReportSerializer

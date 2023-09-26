@@ -13,7 +13,7 @@ from django.conf import settings
 from api.common.common_report import create_report_version
 from api.details_report.util import (
     build_sources_from_tasks,
-    create_details_report,
+    create_report,
     validate_details_report_json,
 )
 from api.models import ScanJob, ScanTask
@@ -62,10 +62,10 @@ def get_task_runners_for_job(
     return task_runners, fingerprint_task_runner
 
 
-def create_details_report_for_scan_job(scan_job: ScanJob):
-    """Create and save a DetailsReport if the ScanJob's ScanTasks have valid Sources.
+def create_report_for_scan_job(scan_job: ScanJob):
+    """Create and save a Report if the ScanJob's ScanTasks have valid Sources.
 
-    :returns: tuple[DetailsReport,str] with the created DetailsReport (if successful)
+    :returns: tuple[Report,str] with the created Report (if successful)
         and error string (if not successful)
     """
     inspect_tasks = scan_job.tasks.filter(
@@ -88,10 +88,8 @@ def create_details_report_for_scan_job(scan_job: ScanJob):
     if has_errors:
         return None, f"Scan produced invalid details report JSON: {validation_result}"
 
-    if details_report := create_details_report(
-        create_report_version(), details_report_json
-    ):
-        return details_report, None
+    if report := create_report(create_report_version(), details_report_json):
+        return report, None
 
     return None, "No facts gathered from scan."
 
@@ -331,9 +329,7 @@ class SyncScanJobRunner:
 
         if self.scan_job.scan_type != ScanTask.SCAN_TYPE_CONNECT:
             if not (report := fingerprint_task_runner.scan_job.report):
-                report, error_message = create_details_report_for_scan_job(
-                    self.scan_job
-                )
+                report, error_message = create_report_for_scan_job(self.scan_job)
                 if not report:
                     self.scan_job.status_fail(error_message)
                     return ScanTask.FAILED

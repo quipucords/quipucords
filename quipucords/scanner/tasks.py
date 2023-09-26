@@ -7,7 +7,7 @@ from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
-from scanner.job import create_details_report_for_scan_job, run_task_runner
+from scanner.job import create_report_for_scan_job, run_task_runner
 from scanner.runner import ScanTaskRunner
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
 
 
 def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
-    """Create and assign the DetailsReport, and update the related ScanJob status.
+    """Create and assign the Report, and update the related ScanJob status.
 
     This task should run once after all inspection tasks have collected and stored
     Facts for all Sources associated with the given ScanTask's ScanJob. This logic
@@ -73,7 +73,7 @@ def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
     scan_job = scan_task.job
 
     if not (report := scan_job.report):
-        report, error_message = create_details_report_for_scan_job(scan_job)
+        report, error_message = create_report_for_scan_job(scan_job)
         if not report:
             scan_job.status_fail(error_message)
             return False, scan_task_id, ScanTask.FAILED

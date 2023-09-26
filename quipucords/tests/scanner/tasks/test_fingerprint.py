@@ -28,7 +28,7 @@ def test_fingerprint_happy_path_details_report_already_exists(mocker):
     )
     mock_fingerprint_runner_class = mocker.patch.object(tasks, "FingerprintTaskRunner")
     mock_create_details_report = mocker.patch(
-        "scanner.tasks.create_details_report_for_scan_job"
+        "scanner.tasks.create_report_for_scan_job"
     )
 
     success, scan_task_id, status = tasks.fingerprint.delay(scan_task.id).get()
@@ -54,10 +54,10 @@ def test_fingerprint_happy_path_creates_details_report(mocker):
     scan_task = ScanTaskFactory(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, status=ScanTask.PENDING, job=scan_job
     )
-    details_report = ReportFactory(scanjob=None)
+    report = ReportFactory(scanjob=None)
     mocker.patch(
-        "scanner.tasks.create_details_report_for_scan_job",
-        return_value=(details_report, None),
+        "scanner.tasks.create_report_for_scan_job",
+        return_value=(report, None),
     )
     mock_run_task_runner = mocker.patch(
         "scanner.tasks.run_task_runner", return_value=ScanTask.COMPLETED
@@ -66,12 +66,12 @@ def test_fingerprint_happy_path_creates_details_report(mocker):
 
     success, scan_task_id, status = tasks.fingerprint.delay(scan_task.id).get()
     scan_job.refresh_from_db()
-    details_report.refresh_from_db()
+    report.refresh_from_db()
 
     assert success
     assert scan_task_id == scan_task.id, "unexpected returned scan_task_id"
     assert status == ScanTask.COMPLETED, "unexpected returned status"
-    assert scan_job.report == details_report
+    assert scan_job.report == report
     assert mock_fingerprint_runner_class.call_args[0][0].id == scan_job.id
     assert mock_fingerprint_runner_class.call_args[0][1].id == scan_task.id
     mock_fingerprint_runner = mock_fingerprint_runner_class.return_value
@@ -87,7 +87,7 @@ def test_fingerprint_fails_when_create_details_report_fails(mocker):
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, status=ScanTask.PENDING, job=scan_job
     )
     mocker.patch(
-        "scanner.tasks.create_details_report_for_scan_job", return_value=(None, "fail")
+        "scanner.tasks.create_report_for_scan_job", return_value=(None, "fail")
     )
     mock_run_task_runner = mocker.patch("scanner.tasks.run_task_runner")
     mock_fingerprint_runner_class = mocker.patch.object(tasks, "FingerprintTaskRunner")
