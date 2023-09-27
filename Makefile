@@ -6,12 +6,22 @@ DIRS	= test bin locale src
 PYDIRS	= quipucords
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
-PARALLEL_NUM ?= $(shell python -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
+PARALLEL_NUM ?= $(shell $(PYTHON) -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=15
 
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
 QUIPUCORDS_UI_RELEASE ?= latest
+
+ifndef DOCKER_HOST
+	PODMAN_SOCKET := $(shell podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2> /dev/null || podman info --format '{{.Host.RemoteSocket.Path}}' 2> /dev/null || echo -n "")
+
+	ifneq ($(PODMAN_SOCKET),)
+		ifneq ($(wildcard $(PODMAN_SOCKET)),)
+			export DOCKER_HOST := unix://$(PODMAN_SOCKET)
+		endif
+	endif
+endif
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
