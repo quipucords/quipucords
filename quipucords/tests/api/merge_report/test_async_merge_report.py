@@ -7,6 +7,7 @@ from unittest.mock import patch
 from django.core import management
 from django.test import TestCase
 from django.urls import reverse
+import pytest
 from rest_framework import status
 
 from api import messages
@@ -15,6 +16,7 @@ from api.models import Credential, ScanTask, ServerInformation, Source
 from constants import DataSources
 from tests.mixins import LoggedUserMixin
 from tests.scanner.test_util import create_scan_job
+from tests.utils.raw_facts_generator import fake_semver
 
 
 def dummy_start():
@@ -441,3 +443,44 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
         }
 
         self.assertEqual(json_response, expected)
+
+
+@pytest.fixture
+def sources(faker):
+    """Return a sources list for details report."""
+    return [
+        {
+            "server_id": faker.uuid4(),
+            "source_type": faker.random_element(DataSources.values),
+            "source_name": faker.slug(),
+            "report_version": f"{fake_semver()}+{faker.sha1()}",
+            "facts": [
+                {"tomato": "tomate"},
+                {"potato": "batata"},
+            ],
+        }
+    ]
+
+
+@patch("api.merge_report.view.start_scan", side_effect=dummy_start)
+def test_greenpath_create(start_scan, sources, django_client):
+    """Create report merge job object via API."""
+    # this use case for
+    payload = {
+        "report_type": "details",
+        "sources": sources,
+    }
+    merge_resp = django_client.post("/api/v1/reports/merge/jobs/", payload)
+    assert merge_resp.ok, merge_resp.text
+    expected_response = {
+        "id": mock.ANY,
+        "report_id": mock.ANY,
+        "scan_type": "fingerprint",
+        "status": "created",
+        "status_message": "Job is created.",
+    }
+    assert merge_resp.json() == expected_response
+
+    job_id = merge_resp.json()["id"]
+    job_resp = django_client.get(f"/api/v1/reports/merge/jobs/{job_id}/")
+    assert job_resp.ok, job_resp.text
