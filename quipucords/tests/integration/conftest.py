@@ -36,7 +36,7 @@ postgres_container = container(
         "POSTGRES_PASSWORD": constants.POSTGRES_PASSWORD,
         "POSTGRES_DB": constants.POSTGRES_DB,
     },
-    image="postgres:12",
+    image="docker.io/library/postgres:12",
     restart_policy={"Name": "on-failure"},
     scope="class",
     timeout=constants.READINESS_TIMEOUT_SECONDS,

@@ -1,4 +1,4 @@
-FROM redhat/ubi9-init
+FROM docker.io/redhat/ubi9-init
 
 RUN dnf -y install openssh-server openssl sudo; \
     dnf clean all
