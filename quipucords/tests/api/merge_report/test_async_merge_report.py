@@ -105,6 +105,45 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
         get_response = self.client.get(url)
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
 
+    @patch("api.merge_report.view.start_scan", side_effect=dummy_start)
+    def test_success_create_with_identical_sources(self, start_scan):
+        """Create report merge job with two identical sources."""
+        request_json = {
+            "report_type": "details",
+            "sources": [
+                {
+                    "server_id": self.server_id,
+                    "report_version": create_report_version(),
+                    "source_name": self.net_source.name,
+                    "source_type": self.net_source.source_type,
+                    "facts": [{"key": "value"}],
+                },
+                {
+                    "server_id": self.server_id,
+                    "report_version": create_report_version(),
+                    "source_name": self.net_source.name,
+                    "source_type": self.net_source.source_type,
+                    "facts": [{"key": "value"}],
+                },
+            ],
+        }
+
+        response_json = self.merge_details_from_source_expect_201(request_json)
+
+        expected = {
+            "report_id": mock.ANY,
+            "scan_type": "fingerprint",
+            "status": "created",
+            "status_message": "Job is created.",
+        }
+        self.assertIn("id", response_json)
+        job_id = response_json.pop("id")
+        self.assertEqual(response_json, expected)
+
+        url = f"/api/v1/reports/merge/jobs/{job_id}/"
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+
     def test_404_if_not_fingerprint_job(self):
         """Test report job status only returns merge jobs."""
         source = Source(
@@ -369,6 +408,12 @@ class AsyncMergeReports(LoggedUserMixin, TestCase):
     def test_by_id_merge_jobs_list_too_short(self):
         """Test report merge by id with list too short."""
         data = {"reports": [5]}
+        json_response = self.merge_details_by_ids_expect_400(data)
+        self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_TOO_SHORT]})
+
+    def test_by_id_merge_jobs_list_empty(self):
+        """Test report merge by id with an empty list."""
+        data = {"reports": []}
         json_response = self.merge_details_by_ids_expect_400(data)
         self.assertEqual(json_response, {"reports": [messages.REPORT_MERGE_TOO_SHORT]})
 
