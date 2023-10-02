@@ -58,7 +58,8 @@ DETAILS_API_PATH = "/api/v1/reports/{0}/details/"
 def get_serialized_report_data(report: Report) -> dict:
     """Get the serialized form of the Report, simulating a view's processing."""
     # We need to refresh from DB because something about how the factory created the
-    # Report object here can cause unexpected failures in the serializer. Maybe a bug?
+    # Report object here can cause flaky, unexpected failures in the serializer.
+    # Maybe there's a bug in the factories or how we're using them?
     report.refresh_from_db()
     report_data = DetailsReportSerializer(report).data
     report_data.pop("cached_csv", None)  # because the view does this before returning
