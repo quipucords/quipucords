@@ -22,10 +22,8 @@ import json
 import logging
 import tarfile
 from io import BytesIO
-from pathlib import Path
 
 import pytest
-from requests import Response
 from rest_framework.renderers import JSONRenderer
 
 from api.common.common_report import REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DETAILS
@@ -37,6 +35,7 @@ from api.details_report.util import create_details_csv
 from api.reports.model import Report
 from constants import SCAN_JOB_LOG
 from tests.factories import DeploymentReportFactory
+from tests.report_utils import extract_tarball_from_response
 
 DEPLOYMENTS_CSV_FILENAME = "deployments.csv"
 DEPLOYMENTS_JSON_FILENAME = "deployments.json"
@@ -108,30 +107,6 @@ def test_report_with_logs(django_client, deployment_with_logs):
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
         assert set(tarball.getnames()) == expected_files
-
-
-def extract_tarball_from_response(response: Response) -> dict[str, bytes]:
-    r"""
-    Extract the files from a response tarball.
-
-    Note that the returned dict has file contents as raw bytes, not decoded strings.
-
-    Example return value:
-
-        {
-            "message.txt": b"hello world\n",
-            "data.csv": b"id,name\n420,potato\n",
-            "data.json": b'{"id":420,"name":"potato"}\n',
-        }
-    """
-    files_contents = {}
-    with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
-        filepaths = tarball.getnames()
-        for filepath in filepaths:
-            name = Path(filepath).name
-            encoded_content = tarball.extractfile(filepath).read()
-            files_contents[name] = encoded_content
-    return files_contents
 
 
 def test_report_tarball_sha256sum(django_client, deployment_with_logs):
