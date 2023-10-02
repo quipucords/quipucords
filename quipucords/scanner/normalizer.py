@@ -1,6 +1,8 @@
 """normalizer module."""
 
+from dataclasses import dataclass
 from logging import getLogger
+from typing import Any
 
 logger = getLogger(__name__)
 
@@ -71,16 +73,17 @@ class BaseNormalizer(metaclass=NormalizerMeta):
             return self._normalized
         self._normalized = {}
         for fact_name in self.fields.keys():
-            fact_value, raw_fact_keys = self._normalize_fact(fact_name)
-            self._normalized[fact_name] = fact_value
+            norm_result = self._normalize_fact(fact_name)
+            self._normalized[fact_name] = norm_result.value
             self._metadata[fact_name] = {
-                "raw_fact_keys": raw_fact_keys,
+                "raw_fact_keys": norm_result.raw_fact_keys,
                 "source_type": self.source_type,
                 "server_id": self.server_id,
+                "has_error": norm_result.has_error,
             }
         return self._normalized
 
-    def _normalize_fact(self, fact_name):
+    def _normalize_fact(self, fact_name) -> "NormalizedResult":
         """
         Normalize given fact.
 
@@ -101,24 +104,51 @@ class BaseNormalizer(metaclass=NormalizerMeta):
                 **{raw: self.raw_facts.get(raw) for raw in field.raw_fact_keys}
             )
         try:
-            normalized_fact = field.normalizer_func(*args, **kwargs)
+            norm_result = field.normalizer_func(*args, **kwargs)
         except Exception:
             logger.exception("Unexpected error during '%s' normalization.", fact_name)
-            return None, None
-        try:
-            for validator in field.validators:
-                if not validator(normalized_fact):
-                    logger.error(
-                        "'{fact_name}' is invalid (value={normalized_fact})",
-                        fact_name=fact_name,
-                        normalized_fact=normalized_fact,
-                    )
-                    return None, None
-        except Exception:
-            logger.exception("Unexpected error during '%s' validation.", fact_name)
-            return None, None
-        # for now, assume all facts contributed
-        return normalized_fact, field.raw_fact_keys
+            return NormalizedResult(None, has_error=True, raw_fact_keys=None)
+        if not isinstance(norm_result, NormalizedResult):
+            raw_fact_keys = self._get_raw_fact_keys(fact_name)
+            norm_result = NormalizedResult(
+                value=norm_result, raw_fact_keys=raw_fact_keys
+            )
+        else:
+            self._check_raw_fact_keys_for_fact(fact_name, norm_result.raw_fact_keys)
+
+        for validator in field.validators:
+            try:
+                is_valid = validator(norm_result.value)
+            except Exception:
+                logger.exception("Unexpected error during '%s' validation.", fact_name)
+                return NormalizedResult(None, has_error=True, raw_fact_keys=None)
+            if not is_valid:
+                logger.error(
+                    "'%s' is invalid (value={%s})", fact_name, norm_result.value
+                )
+                return NormalizedResult(None, has_error=True, raw_fact_keys=None)
+
+        return norm_result
+
+    @classmethod
+    def _get_raw_fact_keys(cls, fact_name):
+        field: FactMapper = cls.fields[fact_name]
+        keys = set(field.raw_fact_keys)
+        for dep in field.dependencies:
+            dep_keys = cls.fields[dep].raw_fact_keys
+            keys |= set(dep_keys)
+        return sorted(keys)
+
+    @classmethod
+    def _check_raw_fact_keys_for_fact(cls, fact_name, raw_fact_keys):
+        if not raw_fact_keys:
+            return
+        allowed_keys = set(cls._get_raw_fact_keys(fact_name))
+        unexpected_keys = set(raw_fact_keys) - allowed_keys
+        if unexpected_keys:
+            raise AssertionError(
+                f"Unexpected raw facts used for fact '{fact_name}': {unexpected_keys}",
+            )
 
 
 class FactMapper:
@@ -173,3 +203,16 @@ class FactMapper:
                     f"'{dep}' can't be found on normalizer '{normalizer.__name__}'"
                 )
         normalizer.fields[self.fact_name] = self
+
+
+@dataclass
+class NormalizedResult:
+    """
+    Wrapper for normalized fact value.
+
+    Contains the actual value with extra metadata.
+    """
+
+    value: Any
+    raw_fact_keys: list
+    has_error: bool = False
