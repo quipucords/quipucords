@@ -17,6 +17,7 @@ services:
       REDIS_HOST: qpc-redis
       REDIS_PASSWORD: qpc
       QPC_ENABLE_CELERY_SCAN_MANAGER: 1
+      QPC_ENABLE_NORMALIZATION_PHASE: 1
     ports:
       - "5678:5678"
     volumes:
@@ -90,7 +91,7 @@ services:
       REDIS_HOST: qpc-redis
       REDIS_PASSWORD: qpc
       QPC_ENABLE_CELERY_SCAN_MANAGER: 1
-
+      QPC_ENABLE_NORMALIZATION_PHASE: 1
   scan-target:
     build:
       context: .

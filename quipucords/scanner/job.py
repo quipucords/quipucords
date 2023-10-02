@@ -17,6 +17,7 @@ from api.details_report.util import (
     validate_details_report_json,
 )
 from api.models import ScanJob, ScanTask
+from api.reports.model import Report
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 from scanner.runner import ScanTaskRunner
@@ -194,6 +195,7 @@ class CeleryBasedScanJobRunner:
             celery_run_task_runner,
             finalize_scan,
             fingerprint,
+            normalize,
         )
 
         # Get and group relevant IDs and types for Celery tasks to fetch later.
@@ -209,6 +211,26 @@ class CeleryBasedScanJobRunner:
             scan_type = scan_task.scan_type
             signature = celery_run_task_runner.si(scan_task_id, source_type, scan_type)
             celery_signatures_by_source[source_id].append(signature)
+            # Normalization phase is exclusive to celery task runner and (at least for
+            # now) is not tied to a specific scan task. It will use a inspection task id
+            # to grab all the raw facts related to it.
+            if (
+                settings.QPC_ENABLE_NORMALIZATION_PHASE
+                and scan_type == ScanTask.SCAN_TYPE_INSPECT
+            ):
+                # normalization requires that reported is created earlier; it MUST be
+                # done otherwise race conditions could create multiple reports. Why?
+                # because when a new Report is created this way it can change ScanJob
+                # report_id. If instead we had the relationship on report side we could
+                # fix the race condition since django wouldn't allow creating 2 reports
+                # for the same scanjob - and maybe writing a custom function to create,
+                # deal with the exception if report exists and then get, instead of
+                # using django's get_or_create.
+                Report.objects.get_or_create(
+                    scanjob=self.scan_job, report_version=create_report_version()
+                )
+                normalization_signature = normalize.si(scan_task_id, source_type)
+                celery_signatures_by_source[source_id].append(normalization_signature)
 
         # Start a chain with a group that contains n chains, one chain for each Source.
         # Each chain contains the tasks required for that Source. Typically, this will

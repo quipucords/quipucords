@@ -3,8 +3,8 @@ import logging
 
 import celery
 
-from api.scanjob.model import ScanJob
-from api.scantask.model import ScanTask
+from api.models import Host, ScanJob, ScanTask
+from api.status.misc import get_server_id
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 from scanner.job import create_report_for_scan_job, run_task_runner
@@ -26,6 +26,15 @@ def get_task_runner_class(source_type, scan_type) -> type[ScanTaskRunner]:
         logger.exception("invalid scan_type %s", scan_type)
         raise NotImplementedError
     return getattr(get_scanner(source_type), runner_class_name)
+
+
+def get_normalizer(source_type):
+    """Get the raw fact normalizer class for the given source type."""
+    try:
+        return getattr(get_scanner(source_type), "Normalizer")
+    # TODO: remove this when normalization phase is implemented for all source types
+    except AttributeError:
+        raise NotImplementedError
 
 
 @celery.shared_task(bind=True)
@@ -51,6 +60,37 @@ def _celery_run_task_runner(
         # If this task failed, we do not want subsequent tasks in its chain to run.
         task_instance.request.chain = None
     return success, scan_task_id, task_status
+
+
+@celery.shared_task
+def normalize(scan_task_id: int, source_type: str) -> tuple[bool, int, str]:
+    """Normalize raw facts.
+
+    :returns: tuple containing success bool, scan task id, and scan task status
+    """
+    scan_task: ScanTask = ScanTask.objects.get(id=scan_task_id)
+    report = scan_task.job.report
+    try:
+        normalizer_class = get_normalizer(source_type)
+    except NotImplementedError:
+        logger.exception(
+            "Normalization not yet implemented for source type '%s'", source_type
+        )
+        return False, scan_task_id, ScanTask.FAILED
+    raw_fact_list = scan_task.get_facts()
+    hosts = []
+    for raw_fact in raw_fact_list:
+        normalizer = normalizer_class(raw_fact, get_server_id())
+        normalizer.normalize()
+        hosts.append(
+            Host(
+                report=report,
+                metadata=normalizer.metadata,
+                **normalizer.facts,
+            )
+        )
+    Host.objects.bulk_create(hosts)
+    return True, scan_task_id, ScanTask.COMPLETED
 
 
 @celery.shared_task
