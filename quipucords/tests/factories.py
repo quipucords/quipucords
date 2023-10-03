@@ -10,6 +10,7 @@ from api.serializers import SystemFingerprintSerializer
 from api.status import get_server_id
 from constants import DataSources
 from tests.utils import fake_rhel, raw_facts_generator
+from tests.utils.raw_facts_generator import fake_installed_products
 
 _faker = Faker()
 
@@ -60,6 +61,7 @@ class SystemFingerprintFactory(DjangoModelFactory):
     ip_addresses = factory.LazyAttribute(lambda o: o.ip_addresses_list)
     architecture = factory.Iterator(["x86_64", "ARM"])
     sources = factory.LazyAttribute(format_sources)
+    installed_products = factory.LazyFunction(fake_installed_products)
 
     class Params:
         """Factory parameters."""

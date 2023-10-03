@@ -32,6 +32,18 @@ def fake_rhel():
     return f"Red Hat Enterprise Linux release {fake_major_minor_ver()} ({codename})"
 
 
+def fake_installed_products() -> list[dict]:
+    """Return a list representing at least one found installed product."""
+    installed_products = [
+        {
+            "id": str(_faker.pyint(min_value=100, max_value=999)),
+            "name": f"Red Hat {_faker.name().title()} {fake_semver()}",
+        }
+        for _ in range(_faker.pyint(min_value=1, max_value=5))
+    ]
+    return installed_products
+
+
 def fake_major_minor_ver():
     """Return a string representing a X.Y version."""
     major = _faker.pyint(min_value=1, max_value=99)
@@ -59,12 +71,7 @@ def _network_raw_facts():
         "ifconfig_ip_addresses": [_faker.ipv4()],
         "ifconfig_mac_addresses": [_faker.mac_address()],
         "insights_client_id": _faker.uuid4(),
-        "installed_products": [
-            {
-                "id": _faker.pyint(),
-                "name": fake_rhel(),
-            }
-        ],
+        "installed_products": fake_installed_products(),
         "subscription_manager_id": _faker.uuid4(),
         "system_memory_bytes": _faker.pyint(max_value=2**65),  # max value for bigint
         "system_purpose_json": None,

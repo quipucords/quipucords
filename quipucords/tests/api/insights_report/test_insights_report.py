@@ -54,6 +54,38 @@ def validate_data(
         expected_bios_uuids
     ), "unexpected hosts count"
 
+    # Assert that the Insights report has all the expected installed_products.
+    expected_installed_products = [
+        installed_product
+        for host in deployment_report.system_fingerprints.all()
+        for installed_product in host.installed_products
+    ]
+    # SystemFingerprintFactory should have created at least one installed_product.
+    assert len(expected_installed_products) > 0
+    # Ugly but yes this is how you navigate to this data in our Insights report:
+    returned_installed_products = [
+        installed_product
+        for slice_key in report_slices
+        for host in report_slices[slice_key]["hosts"]
+        for installed_product in host["system_profile"]["installed_products"]
+    ]
+    # installed_products objects should look like:
+    # {"id": "12345", "name": "My Amazing Product"}
+    # Based on the specification here:
+    # https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L87  # noqa: E501
+    for installed_product in returned_installed_products:
+        assert "id" in installed_product
+        assert "name" in installed_product
+    # We can't use sets to compare installed_products because dicts aren't hashable; so,
+    # we sort them before comparing in case the list elements were ordered differently.
+    expected_installed_products = sorted(
+        expected_installed_products, key=lambda p: (p["id"], p["name"])
+    )
+    returned_installed_products = sorted(
+        returned_installed_products, key=lambda p: (p["id"], p["name"])
+    )
+    assert returned_installed_products == expected_installed_products
+
 
 def test_get_insights_report_as_json(django_client):
     """Retrieve insights report as JSON and verify it contains all data (no slicing)."""
