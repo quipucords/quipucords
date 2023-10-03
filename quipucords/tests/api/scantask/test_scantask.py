@@ -28,8 +28,6 @@ class ScanTaskTest(TestCase):
             become_password=None,
             ssh_keyfile=None,
         )
-        self.cred_for_upload = self.cred.id
-
         self.source = Source.objects.create(
             name="source1", source_type="network", port=22
         )
