@@ -12,16 +12,6 @@ from tests.factories import ReportFactory
 from tests.utils import fake_semver
 
 
-class MockRequest:
-    """Mock a request object for the renderer.
-
-    FIXME: remove this class when test_reports and test_deployments_reports are
-    refactored.
-    """
-
-    query_params = {}
-
-
 @pytest.fixture
 def sources(faker):
     """Return a sources list for details report."""
