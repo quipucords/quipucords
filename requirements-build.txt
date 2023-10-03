@@ -6,7 +6,7 @@
 #
 calver==2022.6.26
     # via -r requirements-build.in
-cffi==1.15.1 ; platform_python_implementation != "PyPy"
+cffi==1.16.0 ; platform_python_implementation != "PyPy"
     # via -r requirements-build.in
 cython==0.29.36
     # via -r requirements-build.in
@@ -16,13 +16,18 @@ editables==0.5
     # via hatchling
 flit-core==3.9.0
     # via -r requirements-build.in
-hatchling==1.18.0
+hatch-fancy-pypi-readme==23.1.0
     # via -r requirements-build.in
-markdown-it-py==3.0.0
-    # via rich
-mdurl==0.1.2
-    # via markdown-it-py
-packaging==23.1
+hatch-vcs==0.3.0
+    # via -r requirements-build.in
+hatchling==1.18.0
+    # via
+    #   -r requirements-build.in
+    #   hatch-fancy-pypi-readme
+    #   hatch-vcs
+maturin==1.2.3
+    # via -r requirements-build.in
+packaging==23.2
     # via
     #   hatchling
     #   setuptools-scm
@@ -36,20 +41,20 @@ poetry-core==1.7.0
     # via -r requirements-build.in
 pycparser==2.21
     # via cffi
-pygments==2.16.1
-    # via rich
-rich==13.5.3
-    # via -r requirements-build.in
 semantic-version==2.10.0
     # via setuptools-rust
 setuptools-rust==1.7.0
     # via -r requirements-build.in
-setuptools-scm[toml]==8.0.3
-    # via -r requirements-build.in
+setuptools-scm[toml]==8.0.4
+    # via
+    #   -r requirements-build.in
+    #   hatch-vcs
 trove-classifiers==2023.9.19
     # via hatchling
 typing-extensions==4.8.0
-    # via setuptools-rust
+    # via
+    #   setuptools-rust
+    #   setuptools-scm
 wheel==0.41.2
     # via -r requirements-build.in
 
