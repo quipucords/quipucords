@@ -10,10 +10,10 @@ def fact_expander(fact_name):
     return {fact.split("__")[0] for fact in vals}
 
 
-def random_name(min_legth=5, max_length=15):
+def random_name(min_length=5, max_length=15):
     """Generate a random string."""
     characters = string.ascii_letters + string.digits + "-."
-    return "".join(random.choices(characters, k=random.randint(min_legth, max_length)))
+    return "".join(random.choices(characters, k=random.randint(min_length, max_length)))
 
 
 def random_value():

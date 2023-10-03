@@ -263,7 +263,7 @@ class SourceFactory(DjangoModelFactory):
 
     @classmethod
     def _create(cls, *args, **kwargs):
-        """Override DjangoModelFactoy internal create method."""
+        """Override DjangoModelFactory internal create method."""
         credentials = kwargs.pop("credentials", [])
         source = super()._create(*args, **kwargs)
         # simple M2M fields are not supported as attributes on factory boy, hence this

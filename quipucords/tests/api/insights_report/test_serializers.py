@@ -1,4 +1,4 @@
-"""Test insigths serializers."""
+"""Test Insights serializers."""
 
 import pytest
 

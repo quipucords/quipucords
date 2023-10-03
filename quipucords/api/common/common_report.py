@@ -74,7 +74,7 @@ def create_filename(file_name, file_ext, report_id):
 
 
 def encode_content(content, file_format):
-    """Encode content as bytes based on it's file format."""
+    """Encode content as bytes based on its file format."""
 
     def _textfile_encoder(content):
         return content.encode("utf-8")

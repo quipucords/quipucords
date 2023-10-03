@@ -11,7 +11,7 @@ _faker = Faker()
 def raw_facts_generator(source_type, n):
     """Generate 'n' raw facts for a given source type."""
     if source_type == DataSources.OPENSHIFT:
-        # ocp gets a special treatment due to its assimetric raw facts (cluster vs node)
+        # ocp gets a special treatment due to its asymmetric raw facts (cluster vs node)
         yield from _openshift_raw_facts_generator(n)
     else:
         func_map = {
@@ -45,7 +45,7 @@ def fake_installed_products() -> list[dict]:
 
 
 def fake_major_minor_ver():
-    """Return a string representing a X.Y version."""
+    """Return a string representing an X.Y version."""
     major = _faker.pyint(min_value=1, max_value=99)
     minor = _faker.random_digit()
     return f"{major}.{minor}"
@@ -176,7 +176,7 @@ def _ansible_raw_facts():
 
 def _openshift_raw_facts_generator(number_of_facts):
     """Generate openshift raw facts."""
-    # TODO: consider addopting a solution like polyfactory to generate factories for
+    # TODO: consider adopting a solution like polyfactory to generate factories for
     # pydantic models
     cluster = OCPCluster(
         uuid=_faker.uuid4(),
