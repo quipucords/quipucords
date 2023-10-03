@@ -47,3 +47,4 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
+        continue-on-error: true
