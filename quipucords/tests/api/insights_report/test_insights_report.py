@@ -6,7 +6,7 @@ from api.common.common_report import create_filename
 from api.models import DeploymentsReport
 from tests.constants import API_REPORTS_INSIGHTS_PATH
 from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
-from tests.report_utils import extract_tarball_from_response
+from tests.report_utils import extract_files_from_tarball
 
 
 def validate_data(
@@ -130,7 +130,9 @@ def test_get_insights_report_as_tarball_sliced(django_client):
         )
     assert response.ok, f"response was not ok; status {response.status_code}"
     # reformat tarball to match json report
-    data = extract_tarball_from_response(response, strip_dirs=False, decode_json=True)
+    data = extract_files_from_tarball(
+        response.content, strip_dirs=False, decode_json=True
+    )
     validate_data(data, deployments_report)
 
 

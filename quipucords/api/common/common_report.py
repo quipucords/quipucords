@@ -7,6 +7,7 @@ import tarfile
 from rest_framework.renderers import JSONRenderer
 
 from quipucords.environment import server_version
+from tests.report_utils import extract_files_from_tarball
 
 logger = logging.getLogger(__name__)
 
@@ -38,33 +39,6 @@ def sanitize_row(row):
     return new_row
 
 
-def extract_tar_gz(file_like_obj):
-    """Retrieve the contents of a tar.gz file like object.
-
-    :param file_like_obj: A hexstring or BytesIO tarball saved in memory
-    with gzip compression.
-    """
-    if not isinstance(file_like_obj, (io.BytesIO, bytes, bytearray)):
-        return None
-    if not isinstance(file_like_obj, io.BytesIO):
-        file_like_obj = io.BytesIO(file_like_obj)
-
-    file_data_list = []
-    with tarfile.open(fileobj=file_like_obj) as tar:
-        files = tar.getmembers()
-        for file in files:
-            tarfile_obj = tar.extractfile(file)
-            file_data = tarfile_obj.read().decode("utf-8")
-            if ".json" in file.name:
-                try:
-                    file_data = json.loads(file_data)
-                except ValueError:
-                    logger.exception("Unexpected error parsing a json file.")
-                    return None
-            file_data_list.append(file_data)
-    return file_data_list
-
-
 def create_filename(file_name, file_ext, report_id):
     """Create the filename."""
     file_name = f"report_id_{report_id}/{file_name}"
@@ -87,7 +61,7 @@ def encode_content(content, file_format):
     return renderer[file_format](content)
 
 
-def create_tar_buffer(files_data):
+def create_tar_buffer(files_data) -> io.BytesIO | None:
     """Generate a file buffer based off a dictionary.
 
     :param files_data: A dictionary of strings.

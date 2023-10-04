@@ -7,12 +7,8 @@ from collections import OrderedDict
 
 from django.test import TestCase
 
-from api.common.common_report import (
-    CSVHelper,
-    create_tar_buffer,
-    encode_content,
-    extract_tar_gz,
-)
+from api.common.common_report import CSVHelper, create_tar_buffer, encode_content
+from tests.report_utils import extract_files_from_tarball
 
 
 class CommonUtilTest(TestCase):
@@ -143,37 +139,10 @@ class CommonUtilTest(TestCase):
             for file_name, data in files_data.items()
         }
         tar_buffer = create_tar_buffer(files_data_encoded)
-        self.assertIsInstance(tar_buffer, (io.BytesIO))
-        # bytesIO
-        file_contents = extract_tar_gz(tar_buffer)
-        for data in file_contents:
-            self.assertIn(data, files_data.values())
-        self.assertEqual(len(file_contents), len(files_data.values()))
-        # hexstring
-        file_contents = extract_tar_gz(tar_buffer.getvalue())
-        for data in file_contents:
-            self.assertIn(data, files_data.values())
-        self.assertEqual(len(file_contents), len(files_data.values()))
-
-    def test_extract_tar_gz_content_bad_param_type(self):
-        """Test passing bad types as parameters."""
-        bad_types = ["", 7, ["test"], {"key": "value"}]
-        for bad_type in bad_types:
-            file_contents = extract_tar_gz(bad_type)
-            self.assertEqual(file_contents, None)
-
-    def test_extract_tar_gz_empty_tar_gz(self):
-        """Test trying to extract and empty tar.gz file."""
-        tar_buffer = io.BytesIO()
-        json_buffer = io.BytesIO()
-        with tarfile.TarFile(fileobj=tar_buffer, mode="w") as tar_file:
-            info = tarfile.TarInfo(name="report.json")
-            info.size = len(json_buffer.getvalue())
-            tar_file.addfile(tarinfo=info, fileobj=json_buffer)
-        tar_buffer.seek(0)
-        # bytesIO
-        file_contents = extract_tar_gz(tar_buffer)
-        self.assertEqual(file_contents, None)
-        # hexstring
-        file_contents = extract_tar_gz(tar_buffer.getvalue())
-        self.assertEqual(file_contents, None)
+        self.assertIsInstance(tar_buffer, io.BytesIO)
+        extracted_files = extract_files_from_tarball(
+            tar_buffer, strip_dirs=False, decode_json=True
+        )
+        self.assertEqual(set(extracted_files.keys()), set(files_data.keys()))
+        for extracted_name, extracted_data in extracted_files.items():
+            self.assertEqual(extracted_data, files_data[extracted_name])
