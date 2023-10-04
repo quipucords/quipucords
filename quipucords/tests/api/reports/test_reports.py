@@ -34,6 +34,11 @@ from api.details_report.serializer import DetailsReportSerializer
 from api.details_report.util import create_details_csv
 from api.reports.model import Report
 from constants import SCAN_JOB_LOG
+from tests.constants import (
+    API_REPORTS_DEPLOYMENTS_PATH,
+    API_REPORTS_DETAILS_PATH,
+    API_REPORTS_PATH,
+)
 from tests.factories import DeploymentReportFactory
 from tests.report_utils import extract_tarball_from_response
 
@@ -49,10 +54,6 @@ TARBALL_ALWAYS_EXPECTED_FILENAMES = {
     DETAILS_CSV_FILENAME,
     DETAILS_JSON_FILENAME,
 }
-
-REPORTS_API_PATH = "/api/v1/reports/{0}/"
-DEPLOYMENTS_API_PATH = "/api/v1/reports/{0}/deployments/"
-DETAILS_API_PATH = "/api/v1/reports/{0}/details/"
 
 
 def get_serialized_report_data(report: Report) -> dict:
@@ -71,7 +72,7 @@ def test_report_without_logs(django_client, caplog):
     caplog.set_level(logging.WARNING)
     deployment = DeploymentReportFactory.create()
     report_id = deployment.report.id
-    response = django_client.get(REPORTS_API_PATH.format(report_id))
+    response = django_client.get(API_REPORTS_PATH.format(report_id))
     assert response.ok, response.text
     assert f"No logs were found for report_id={report_id}" in caplog.messages
     expected_files = {
@@ -98,7 +99,7 @@ def test_report_with_logs(django_client, deployment_with_logs):
     """Test if scan job logs are included in tarball when present."""
     report = deployment_with_logs.report
     scan_job_id = report.scanjob.id
-    response = django_client.get(REPORTS_API_PATH.format(report.id))
+    response = django_client.get(API_REPORTS_PATH.format(report.id))
     assert response.ok, response.text
     expected_files = {
         f"report_id_{report.id}/{fname}"
@@ -113,7 +114,7 @@ def test_report_with_logs(django_client, deployment_with_logs):
 def test_report_tarball_sha256sum(django_client, deployment_with_logs):
     """Verify SHA256SUM files and digests are correct."""
     deployments_report = deployment_with_logs
-    response = django_client.get(REPORTS_API_PATH.format(deployments_report.report.id))
+    response = django_client.get(API_REPORTS_PATH.format(deployments_report.report.id))
     assert response.ok, response.text
 
     files_contents = extract_tarball_from_response(response)
@@ -147,7 +148,7 @@ def test_report_tarball_details_json(
     deployments_report = deployment_with_logs
     report = deployments_report.report
     tarball_response = django_client.get(
-        REPORTS_API_PATH.format(deployments_report.report.id)
+        API_REPORTS_PATH.format(deployments_report.report.id)
     )
     assert tarball_response.ok, tarball_response.text
 
@@ -157,7 +158,7 @@ def test_report_tarball_details_json(
 
     # Compare tarball details.json contents with the standalone API's response.
     api_details_response = django_client.get(
-        DETAILS_API_PATH.format(deployments_report.report.id),
+        API_REPORTS_DETAILS_PATH.format(deployments_report.report.id),
         headers={"Accept": "application/json"},
     )
     assert api_details_response.ok, api_details_response.text
@@ -183,7 +184,7 @@ def test_report_tarball_deployments_json(
     """Test report tarball contains expected deployments.json."""
     deployments_report = deployment_with_logs
     tarball_response = django_client.get(
-        REPORTS_API_PATH.format(deployments_report.report.id)
+        API_REPORTS_PATH.format(deployments_report.report.id)
     )
     assert tarball_response.ok, tarball_response.text
 
@@ -199,7 +200,7 @@ def test_report_tarball_deployments_json(
 
     # Compare tarball deployments.json contents with the standalone API's response.
     api_deployments_response = django_client.get(
-        DEPLOYMENTS_API_PATH.format(deployments_report.report.id),
+        API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id),
         headers={"Accept": "application/json"},
     )
     assert api_deployments_response.ok, api_deployments_response.text
@@ -215,7 +216,7 @@ def test_report_details_csv(django_client, deployment_with_logs: DeploymentsRepo
     """Test report tarball contains expected details.csv."""
     deployments_report = deployment_with_logs
     tarball_response = django_client.get(
-        REPORTS_API_PATH.format(deployments_report.report.id)
+        API_REPORTS_PATH.format(deployments_report.report.id)
     )
     assert tarball_response.ok, tarball_response.text
 
@@ -225,7 +226,7 @@ def test_report_details_csv(django_client, deployment_with_logs: DeploymentsRepo
 
     # Compare tarball details.csv contents with the standalone API's response.
     details_csv_response = django_client.get(
-        DETAILS_API_PATH.format(deployments_report.report.id),
+        API_REPORTS_DETAILS_PATH.format(deployments_report.report.id),
         headers={"Accept": "text/csv"},
     )
     assert details_csv_response.ok, details_csv_response.text
@@ -255,7 +256,7 @@ def test_report_deployments_csv(django_client, deployment_with_logs: Deployments
     """Test report tarball contains expected deployments.csv."""
     deployments_report = deployment_with_logs
     tarball_response = django_client.get(
-        REPORTS_API_PATH.format(deployments_report.report.id)
+        API_REPORTS_PATH.format(deployments_report.report.id)
     )
     assert tarball_response.ok, tarball_response.text
 
@@ -265,7 +266,7 @@ def test_report_deployments_csv(django_client, deployment_with_logs: Deployments
     # Compare tarball deployments.csv contents with the standalone API's response.
     tarball_deployments_csv = files_contents[DEPLOYMENTS_CSV_FILENAME].decode()
     deployments_csv_response = django_client.get(
-        DEPLOYMENTS_API_PATH.format(deployments_report.report.id),
+        API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id),
         headers={"Accept": "text/csv"},
     )
     assert deployments_csv_response.ok, deployments_csv_response.text
