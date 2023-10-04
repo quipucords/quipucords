@@ -4,10 +4,9 @@ from rest_framework import status
 
 from api.common.common_report import create_filename
 from api.models import DeploymentsReport
+from tests.constants import API_REPORTS_INSIGHTS_PATH
 from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
 from tests.report_utils import extract_tarball_from_response
-
-INSIGHTS_API_PATH = "/api/v1/reports/{0}/insights/"
 
 
 def validate_data(
@@ -93,7 +92,7 @@ def test_get_insights_report_as_json(django_client):
         status=DeploymentsReport.STATUS_COMPLETE,
     )
     report_id = deployment_report.report.id
-    response = django_client.get(INSIGHTS_API_PATH.format(report_id))
+    response = django_client.get(API_REPORTS_INSIGHTS_PATH.format(report_id))
     assert response.ok, f"response was not ok; status {response.status_code}"
 
     # mock slice size so we can expect result to contain all data without slicing
@@ -111,7 +110,7 @@ def test_get_insights_report_as_json_sliced(django_client):
     report_id = deployment_report.report.id
     # mock slice size so we can expect 2 slices on this test
     with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=2):
-        response = django_client.get(INSIGHTS_API_PATH.format(report_id))
+        response = django_client.get(API_REPORTS_INSIGHTS_PATH.format(report_id))
     assert response.ok, f"response was not ok; status {response.status_code}"
     response_json = response.json()
     validate_data(response_json, deployment_report)
@@ -127,7 +126,7 @@ def test_get_insights_report_as_tarball_sliced(django_client):
     # mock slice size so we can expect 2 slices on this test
     with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
         response = django_client.get(
-            INSIGHTS_API_PATH.format(report_id), params={"format": "tar.gz"}
+            API_REPORTS_INSIGHTS_PATH.format(report_id), params={"format": "tar.gz"}
         )
     assert response.ok, f"response was not ok; status {response.status_code}"
     # reformat tarball to match json report
@@ -157,17 +156,17 @@ def test_get_insights_report_not_found_because_no_fingerprints(django_client):
     assert (
         fingerprint_count == 1
     ), f"unexpected fingerprint count {fingerprint_count} != 1"
-    response = django_client.get(INSIGHTS_API_PATH.format(report_id))
+    response = django_client.get(API_REPORTS_INSIGHTS_PATH.format(report_id))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_insights_report_invalid_id_not_found(django_client):
     """Fail to get an Insights report for an invalid id."""
-    response = django_client.get(INSIGHTS_API_PATH.format("invalid"))
+    response = django_client.get(API_REPORTS_INSIGHTS_PATH.format("invalid"))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_insights_report_unknown_id_not_found(django_client):
     """Fail to get an Insights for report id that doesn't exist."""
-    response = django_client.get(INSIGHTS_API_PATH.format("999"))
+    response = django_client.get(API_REPORTS_INSIGHTS_PATH.format("999"))
     assert response.status_code == status.HTTP_404_NOT_FOUND
