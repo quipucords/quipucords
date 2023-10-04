@@ -513,7 +513,7 @@ class SourceSerializer(NotEmptySerializer):
                 # The number of bits of this octet that we want to
                 # preserve
                 this_octet_bits = prefix_bits - 8 * i
-                assert 0 < this_octet_bits < 8  # noqa: PLR2004
+                SourceSerializer._validate_octet_bits(this_octet_bits)
                 # mask is this_octet_bits 1's followed by (8 -
                 # this_octet_bits) 0's.
                 mask = -1 << (8 - this_octet_bits)
@@ -523,6 +523,11 @@ class SourceSerializer(NotEmptySerializer):
                 ansible_out[i] = f"[{lower_bound}:{upper_bound}]"
 
         return ".".join(ansible_out)
+
+    @staticmethod
+    def _validate_octet_bits(this_octet_bits):
+        if not (0 < this_octet_bits < 8):  # noqa: PLR2004
+            raise ValueError(f"Invalid value for {this_octet_bits=}")
 
     @staticmethod
     def validate_port(port):

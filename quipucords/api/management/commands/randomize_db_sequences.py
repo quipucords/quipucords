@@ -40,7 +40,7 @@ class Command(BaseCommand):
         The random id is guaranteed to be > than MAX(model.id)
         """
         max_id = self._get_max_id(model)
-        random_id = random.randint(10000, 20000)
+        random_id = random.randint(10000, 20000)  # noqa: S311
         return random_id + max_id
 
     def _get_max_id(self, model):

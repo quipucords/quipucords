@@ -21,5 +21,5 @@ def start_debugger_if_required():
             logger.exception("debugpy is not installed, can't start debugger.")
             raise SystemExit()
 
-        debugpy.listen(("0.0.0.0", DEBUGPY_PORT))
+        debugpy.listen(("0.0.0.0", DEBUGPY_PORT))  # noqa: S104
         print("⏳ debugpy debugger can now be attached ⏳", flush=True)

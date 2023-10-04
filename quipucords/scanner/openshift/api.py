@@ -211,7 +211,8 @@ class OpenShiftApi:
     def retrieve_cluster(self, **kwargs) -> OCPCluster:
         """Retrieve cluster under OCP host."""
         clusters = self._list_clusters(**kwargs)
-        assert len(clusters) == 1, "More than one cluster in cluster API"
+        if len(clusters) > 1:
+            raise ValueError("More than one cluster in cluster API")
         cluster_entity = self._init_cluster(clusters[0])
         return cluster_entity
 

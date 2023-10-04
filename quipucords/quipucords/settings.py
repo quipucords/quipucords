@@ -229,10 +229,10 @@ MINIMUM_LENGTH_VALIDATOR = (
     "django.contrib.auth.password_validation.MinimumLengthValidator"
 )
 COMMON_PASSWORD_VALIDATOR = (
-    "django.contrib.auth.password_validation.CommonPasswordValidator"
+    "django.contrib.auth.password_validation.CommonPasswordValidator"  # noqa: S105
 )
 NUMERIC_PASSWORD_VALIDATOR = (
-    "django.contrib.auth.password_validation.NumericPasswordValidator"
+    "django.contrib.auth.password_validation.NumericPasswordValidator"  # noqa: S105
 )
 AUTH_PASSWORD_VALIDATORS = [
     {

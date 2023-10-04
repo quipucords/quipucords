@@ -57,12 +57,13 @@ def dynamic_scope(fixture_name, config):
 
 
 @pytest.fixture(scope=dynamic_scope)
-def discoverer_cache(request, testrun_uid):
+def discoverer_cache(request):
     """OCP dynamic client "discoverer" cache."""
     fname = "ocp-discovery.json"
     if request.config.getoption("--refresh-cassettes"):
         # persist cache file for whole test suite execution
-        _file = Path("/tmp/qpc") / testrun_uid / fname
+        tmp_path_factory = request.getfixturevalue("tmp_path_factory")
+        _file = tmp_path_factory.mktemp("ocp-cache") / fname
         _file.parent.mkdir(parents=True, exist_ok=True)
         yield _file
 
