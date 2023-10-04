@@ -1,13 +1,11 @@
 """Util for common report operations."""
 import io
-import json
 import logging
 import tarfile
 
 from rest_framework.renderers import JSONRenderer
 
 from quipucords.environment import server_version
-from tests.report_utils import extract_files_from_tarball
 
 logger = logging.getLogger(__name__)
 
