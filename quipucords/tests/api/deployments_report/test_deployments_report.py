@@ -17,7 +17,7 @@ from api.deployments_report.util import sanitize_row
 from constants import DataSources
 from tests.constants import API_REPORTS_DEPLOYMENTS_PATH
 from tests.factories import DeploymentReportFactory
-from tests.report_utils import extract_tarball_from_response
+from tests.report_utils import extract_files_from_tarball
 from tests.utils import fake_semver
 
 
@@ -175,7 +175,9 @@ def test_get_deployment_report_as_tarball(django_client, deployments_report):
         json_response.ok
     ), f"json response was not ok; status {json_response.status_code}"
 
-    extracted_files = extract_tarball_from_response(gzip_response, decode_json=True)
+    extracted_files = extract_files_from_tarball(
+        gzip_response.content, decode_json=True
+    )
     assert len(extracted_files) == 1
     extracted_file = list(extracted_files.values())[0]
     assert extracted_file == json_response.json()

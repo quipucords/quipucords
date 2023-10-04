@@ -45,7 +45,7 @@ from tests.constants import (
     FILENAME_SHA256SUM,
 )
 from tests.factories import DeploymentReportFactory
-from tests.report_utils import extract_tarball_from_response
+from tests.report_utils import extract_files_from_tarball
 
 TARBALL_ALWAYS_EXPECTED_FILENAMES = {
     FILENAME_SHA256SUM,
@@ -117,7 +117,7 @@ def test_report_tarball_sha256sum(django_client, deployment_with_logs):
     response = django_client.get(API_REPORTS_PATH.format(deployments_report.report.id))
     assert response.ok, response.text
 
-    files_contents = extract_tarball_from_response(response)
+    files_contents = extract_files_from_tarball(response.content)
     expected_filenames = TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
         {f"scan-job-{deployments_report.report.scanjob.id}-test.txt"}
     )
@@ -152,7 +152,7 @@ def test_report_tarball_details_json(
     )
     assert tarball_response.ok, tarball_response.text
 
-    files_contents = extract_tarball_from_response(tarball_response)
+    files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DETAILS_JSON in files_contents
     tarball_details_json = json.loads(files_contents[FILENAME_DETAILS_JSON].decode())
 
@@ -188,7 +188,7 @@ def test_report_tarball_deployments_json(
     )
     assert tarball_response.ok, tarball_response.text
 
-    files_contents = extract_tarball_from_response(tarball_response)
+    files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DEPLOYMENTS_JSON in files_contents
     tarball_deployments_json = json.loads(
         files_contents[FILENAME_DEPLOYMENTS_JSON].decode()
@@ -220,7 +220,7 @@ def test_report_details_csv(django_client, deployment_with_logs: DeploymentsRepo
     )
     assert tarball_response.ok, tarball_response.text
 
-    files_contents = extract_tarball_from_response(tarball_response)
+    files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DETAILS_CSV in files_contents
     tarball_details_csv = files_contents[FILENAME_DETAILS_CSV].decode()
 
@@ -260,7 +260,7 @@ def test_report_deployments_csv(django_client, deployment_with_logs: Deployments
     )
     assert tarball_response.ok, tarball_response.text
 
-    files_contents = extract_tarball_from_response(tarball_response)
+    files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DEPLOYMENTS_CSV in files_contents
 
     # Compare tarball deployments.csv contents with the standalone API's response.
