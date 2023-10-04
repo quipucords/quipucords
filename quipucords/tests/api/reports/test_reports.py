@@ -38,21 +38,21 @@ from tests.constants import (
     API_REPORTS_DEPLOYMENTS_PATH,
     API_REPORTS_DETAILS_PATH,
     API_REPORTS_PATH,
+    FILENAME_DEPLOYMENTS_CSV,
+    FILENAME_DEPLOYMENTS_JSON,
+    FILENAME_DETAILS_CSV,
+    FILENAME_DETAILS_JSON,
+    FILENAME_SHA256SUM,
 )
 from tests.factories import DeploymentReportFactory
 from tests.report_utils import extract_tarball_from_response
 
-DEPLOYMENTS_CSV_FILENAME = "deployments.csv"
-DEPLOYMENTS_JSON_FILENAME = "deployments.json"
-DETAILS_CSV_FILENAME = "details.csv"
-DETAILS_JSON_FILENAME = "details.json"
-SHA256SUM_FILENAME = "SHA256SUM"
 TARBALL_ALWAYS_EXPECTED_FILENAMES = {
-    SHA256SUM_FILENAME,
-    DEPLOYMENTS_CSV_FILENAME,
-    DEPLOYMENTS_JSON_FILENAME,
-    DETAILS_CSV_FILENAME,
-    DETAILS_JSON_FILENAME,
+    FILENAME_SHA256SUM,
+    FILENAME_DEPLOYMENTS_CSV,
+    FILENAME_DEPLOYMENTS_JSON,
+    FILENAME_DETAILS_CSV,
+    FILENAME_DETAILS_JSON,
 }
 
 
@@ -127,9 +127,9 @@ def test_report_tarball_sha256sum(django_client, deployment_with_logs):
 
     sha256sum_dict = dict(
         (line.split()[1], line.split()[0])  # swap order to look like {name: contents}
-        for line in files_contents[SHA256SUM_FILENAME].decode().splitlines()
+        for line in files_contents[FILENAME_SHA256SUM].decode().splitlines()
     )
-    assert expected_filenames.difference({SHA256SUM_FILENAME}) == set(
+    assert expected_filenames.difference({FILENAME_SHA256SUM}) == set(
         sha256sum_dict.keys()
     ), "incorrect files listed in SHA256SUM file"
 
@@ -153,8 +153,8 @@ def test_report_tarball_details_json(
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_tarball_from_response(tarball_response)
-    assert DETAILS_JSON_FILENAME in files_contents
-    tarball_details_json = json.loads(files_contents[DETAILS_JSON_FILENAME].decode())
+    assert FILENAME_DETAILS_JSON in files_contents
+    tarball_details_json = json.loads(files_contents[FILENAME_DETAILS_JSON].decode())
 
     # Compare tarball details.json contents with the standalone API's response.
     api_details_response = django_client.get(
@@ -189,9 +189,9 @@ def test_report_tarball_deployments_json(
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_tarball_from_response(tarball_response)
-    assert DEPLOYMENTS_JSON_FILENAME in files_contents
+    assert FILENAME_DEPLOYMENTS_JSON in files_contents
     tarball_deployments_json = json.loads(
-        files_contents[DEPLOYMENTS_JSON_FILENAME].decode()
+        files_contents[FILENAME_DEPLOYMENTS_JSON].decode()
     )
 
     # Compare tarball details.json contents with our model serialized.
@@ -221,8 +221,8 @@ def test_report_details_csv(django_client, deployment_with_logs: DeploymentsRepo
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_tarball_from_response(tarball_response)
-    assert DETAILS_CSV_FILENAME in files_contents
-    tarball_details_csv = files_contents[DETAILS_CSV_FILENAME].decode()
+    assert FILENAME_DETAILS_CSV in files_contents
+    tarball_details_csv = files_contents[FILENAME_DETAILS_CSV].decode()
 
     # Compare tarball details.csv contents with the standalone API's response.
     details_csv_response = django_client.get(
@@ -261,10 +261,10 @@ def test_report_deployments_csv(django_client, deployment_with_logs: Deployments
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_tarball_from_response(tarball_response)
-    assert DEPLOYMENTS_CSV_FILENAME in files_contents
+    assert FILENAME_DEPLOYMENTS_CSV in files_contents
 
     # Compare tarball deployments.csv contents with the standalone API's response.
-    tarball_deployments_csv = files_contents[DEPLOYMENTS_CSV_FILENAME].decode()
+    tarball_deployments_csv = files_contents[FILENAME_DEPLOYMENTS_CSV].decode()
     deployments_csv_response = django_client.get(
         API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id),
         headers={"Accept": "text/csv"},
