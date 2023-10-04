@@ -19,7 +19,7 @@ def commit():
     commit_info = os.environ.get("QUIPUCORDS_COMMIT", "").strip()
     if not commit_info:
         commit_info = subprocess.check_output(
-            ["git", "rev-parse", "--verify", "HEAD"]
+            ["git", "rev-parse", "--verify", "HEAD"]  # noqa: S603, S607
         ).strip()
         commit_info = commit_info.decode("utf-8")
     return commit_info

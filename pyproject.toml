@@ -88,6 +88,7 @@ select = [
     "PL",  # Pylint
     "BLE", # flake8-blind-except
     "PTH", # flake8-use-pathlib
+    "S",   # flake8-bandit
 ]
 ignore = [
     "D107",
@@ -112,9 +113,14 @@ known-first-party = [
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401", "D104"]
-"**/test_*.py" = [
+"**test**" = [
     "PLC1901", 
-    "PLR2004"
+    "PLR2004",
+    "S101",
+    "S105",
+    "S106",
+    "S107",
+    "S311",
 ]
 "quipucords/api/migrations/*.py" = ["D100", "D101"]
 

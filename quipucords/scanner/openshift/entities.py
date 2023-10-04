@@ -56,8 +56,10 @@ class OCPBaseEntity(BaseModel):
             raise NotImplementedError(
                 f"{cls.__name__} MUST implement an attribute '_kind'."
             )
-        assert isinstance(kind, str), "'_kind' attribute should be a str."
-        assert kind not in cls._OCP_ENTITIES, f"Entity with {kind=} already registered."
+        if not isinstance(kind, str):
+            raise RuntimeError("'_kind' attribute should be a str.")
+        if kind in cls._OCP_ENTITIES:
+            raise RuntimeError(f"Entity with {kind=} already registered.")
         return kind
 
 

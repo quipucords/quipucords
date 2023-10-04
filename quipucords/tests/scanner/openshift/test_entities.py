@@ -107,7 +107,7 @@ class TestOCPBaseEntity:
             name: str
 
         with pytest.raises(
-            AssertionError, match="Entity with kind='test-entity' already registered."
+            RuntimeError, match="Entity with kind='test-entity' already registered."
         ):
 
             class TestClass2(OCPBaseEntity):

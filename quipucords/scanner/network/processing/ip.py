@@ -23,7 +23,7 @@ import re
 
 from scanner.network.processing import process
 
-EXCLUDE_IPV4_ADDRESSES = {"127.0.0.1", "0.0.0.0"}
+EXCLUDE_IPV4_ADDRESSES = {"127.0.0.1", "0.0.0.0"}  # noqa: S104
 EXCLUDE_MAC_ADDRESSES = {"00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff"}
 MATCH_MAC_ADDRESS = re.compile("^[0-9a-f]{2}(?::[0-9a-f]{2}){5}$")
 

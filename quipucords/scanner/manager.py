@@ -40,9 +40,10 @@ class CeleryScanManager:
 
     def put(self, scan_job_runner: CeleryBasedScanJobRunner):
         """Process the given CeleryBasedScanJobRunner's job and tasks."""
-        assert isinstance(
-            scan_job_runner, CeleryBasedScanJobRunner
-        ), "CeleryScanManager only accepts CeleryBasedScanJobRunner runners."
+        if not isinstance(scan_job_runner, CeleryBasedScanJobRunner):
+            raise ValueError(
+                "CeleryScanManager only accepts CeleryBasedScanJobRunner runners."
+            )
         scan_job_runner.run()
 
 
@@ -140,10 +141,11 @@ class Manager(Thread):
 
         :param scanner: ScanJobRunner to run.
         """
-        assert isinstance(scanner, ProcessBasedScanJobRunner), (
-            "Non-multiprocessing ScanJobRunner can't be used alongside thread "
-            "based ScanManager."
-        )
+        if not isinstance(scanner, ProcessBasedScanJobRunner):
+            raise ValueError(
+                "Non-multiprocessing ScanJobRunner can't be used alongside thread "
+                "based ScanManager."
+            )
         self.scan_queue.insert(0, scanner)
         self.log_info()
 
@@ -161,7 +163,6 @@ class Manager(Thread):
             and self.current_job_runner.identifier == job_id
             and self.current_job_runner.is_alive()
         ):
-
             # record which job is terminated
             self.terminated_job_runner = self.current_job_runner
             self.current_job_runner = None

@@ -1,4 +1,6 @@
 """API messages for translation."""
+# S105 violations here are false positives
+# ruff: noqa: S105
 
 # fact messages
 FC_REQUIRED_ATTRIBUTE = "Required. May not be null or empty."
