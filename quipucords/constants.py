@@ -11,6 +11,7 @@ class DataSources(TextChoices):
     SATELLITE = "satellite", "satellite"
     OPENSHIFT = "openshift", "openshift"
     ANSIBLE = "ansible", "ansible"
+    ACS = "acs", "acs"
 
 
 ENCRYPTED_DATA_MASK = "********"

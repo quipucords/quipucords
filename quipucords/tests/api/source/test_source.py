@@ -68,6 +68,16 @@ def openshift_cred():
 
 
 @pytest.fixture
+def acs_cred():
+    """Return ACS credential object."""
+    return Credential.objects.create(
+        name="acs_cred1",
+        cred_type=DataSources.ACS,
+        auth_token="acs_token",
+    )
+
+
+@pytest.fixture
 def dummy_start():
     """Create a dummy method for testing."""
 
@@ -1442,6 +1452,75 @@ class TestSource:
             "name": "openshift_source_1",
             "hosts": ["1.2.3.4/5"],
             "credentials": [openshift_cred.id],
+        }
+        response = self.update_source(django_client, updated_data, initial["id"])
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        response = response.json()
+        assert response["hosts"][0] == messages.SOURCE_ONE_HOST
+
+    def test_acs_source_create(self, django_client, acs_cred):
+        """Ensure we can create a new ACS source."""
+        data = {
+            "name": "acs_source_1",
+            "source_type": DataSources.ACS,
+            "hosts": ["1.2.3.4"],
+            "credentials": [acs_cred.id],
+        }
+        self.create_expect_201(data, django_client)
+        assert Source.objects.count() == 1
+        assert Source.objects.get().name == "acs_source_1"
+
+    def test_acs_missing_host(self, django_client, acs_cred):
+        """Ensure hosts field is required when creating ACS credential."""
+        data = {
+            "name": "acs_source_1",
+            "source_type": DataSources.ACS,
+            "credentials": [acs_cred.id],
+        }
+        self.create_expect_400(data, django_client)
+
+    def test_acs_extra_unallowed_fields(self, django_client, acs_cred):
+        """Ensure unallowed fields are not accepted when creating ACS source."""
+        data = {
+            "name": "acs_source_1",
+            "source_type": DataSources.ACS,
+            "hosts": ["1.2.3.4"],
+            "credentials": [acs_cred.id],
+            "options": {"use_paramiko": True},
+        }
+        self.create_expect_400(data, django_client)
+
+    def test_update_acs_green_path(self, django_client, acs_cred):
+        """ACS source successful update."""
+        data = {
+            "name": "acs_source_1",
+            "source_type": DataSources.ACS,
+            "hosts": ["1.2.3.4"],
+            "credentials": [acs_cred.id],
+        }
+        initial = self.create_expect_201(data, django_client)
+        updated_data = {
+            "name": "acs_source_1",
+            "hosts": ["5.3.2.1"],
+            "credentials": [acs_cred.id],
+        }
+        response = self.update_source(django_client, updated_data, initial["id"])
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_update_acs_range_hosts(self, django_client, acs_cred):
+        """Fail update due to invalid host array."""
+        data = {
+            "name": "acs_source_1",
+            "source_type": DataSources.ACS,
+            "hosts": ["1.2.3.4"],
+            "credentials": [acs_cred.id],
+        }
+        initial = self.create_expect_201(data, django_client)
+
+        updated_data = {
+            "name": "acs_source_1",
+            "hosts": ["1.2.3.4/5"],
+            "credentials": [acs_cred.id],
         }
         response = self.update_source(django_client, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST

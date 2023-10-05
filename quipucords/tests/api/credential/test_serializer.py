@@ -9,6 +9,7 @@ from rest_framework.serializers import ListSerializer
 from api import messages
 from api.credential.serializer import (
     AuthTokenOrUserPassSerializer,
+    AuthTokenSerializer,
     CredentialSerializer,
     NetworkCredentialSerializer,
     UsernamePasswordSerializer,
@@ -536,6 +537,7 @@ class TestNetworkCredential:
         (DataSources.SATELLITE, UsernamePasswordSerializer),
         (DataSources.VCENTER, UsernamePasswordSerializer),
         (DataSources.ANSIBLE, UsernamePasswordSerializer),
+        (DataSources.ACS, AuthTokenSerializer),
     ),
 )
 class TestSerializerPolymorphism:
