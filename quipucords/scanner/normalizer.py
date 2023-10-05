@@ -1,5 +1,6 @@
 """normalizer module."""
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from logging import getLogger
 from typing import Any
@@ -7,33 +8,17 @@ from typing import Any
 logger = getLogger(__name__)
 
 
-class NormalizerMeta(type):
-    """
-    Type for Normalizer classes.
-
-    Customize class creation to provide the necessary magic for Normalizers.
-
-    This metaclass is meant to be used ONLY on BaseNormalizer.
-    """
-
-    def __new__(cls, name, bases, attrs):
-        """Blueprint for Normalizer classes."""
-        # we need fields to be accessible as a class attribute. This is the WHOLE reason
-        # for the existence of this metaclass (I wish python had a simpler api for this
-        # type of thing).
-        # Usually just creating a attribute on a base class would be enough
-        # for this behavior, but not when you are dealing with dicts or lists.
-        # (Creating 'fields' as a normal attribute on 'BaseNormalizer' class would
-        # result on it being shared between the base class and its subclasses.)
-        attrs["fields"] = {}
-        return super().__new__(cls, name, bases, attrs)
-
-
-class BaseNormalizer(metaclass=NormalizerMeta):
+class BaseNormalizer(ABC):
     """Base class for Normalizer classes."""
 
-    # must be set for other implementations
-    source_type = None
+    @property
+    @classmethod
+    @abstractmethod
+    def source_type() -> str:
+        """Class attribute specifying which source type is used for this class."""
+
+    # dict of normalized fact name to raw fact mappers.
+    fields: dict = None
 
     def __init__(self, raw_facts: dict, server_id: str = None) -> None:
         """Create a normalizer instance.
@@ -195,14 +180,30 @@ class FactMapper:
             raise AssertionError(
                 "FactMapper instances can only be bound to Normalizers"
             )
+        if normalizer.fields is None:
+            # concrete normalizer classes require class attribute 'fields' to map
+            # fact_name to FactMappers in the exact order they were created (see
+            # normalize method on BaseNormalizer and the method
+            # `_ensure_dependencies_exist` below).
+            # 'fields' dict can't be created at BaseNormalizer level otherwise all
+            # implementations will share it. Can't be done at normalizer instance level
+            # either because this method don't have access to it (we are dealing with
+            # class construction here).
+            # As odd as it seems to create something for another class here, given the
+            # symbiotic relationship between Normalizers and FactMappers, this seems to
+            # be the sweetspot for it and a good trade off.
+            normalizer.fields = {}
+        # ensure dependencies are created BEFORE this one
+        self._ensure_dependencies_exist(normalizer)
+        normalizer.fields[name] = self
         self.fact_name = name
-        # ensure dependencies are declared BEFORE this fact mapper
+
+    def _ensure_dependencies_exist(self, normalizer):
         for dep in self.dependencies:
             if dep not in normalizer.fields:
                 raise ValueError(
                     f"'{dep}' can't be found on normalizer '{normalizer.__name__}'"
                 )
-        normalizer.fields[self.fact_name] = self
 
 
 @dataclass
