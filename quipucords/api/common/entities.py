@@ -290,11 +290,12 @@ class ReportEntity:
             .filter(report__id=report_id)
             .get()
         )
-        # openshift/ansible sources won't make sense in insights reports.
+        # openshift/ansible/acs sources won't make sense in insights reports.
         fingerprints = list(
             SystemFingerprint.objects.filter(deployment_report=deployment_report)
             .exclude(sources__icontains=DataSources.OPENSHIFT)
             .exclude(sources__icontains=DataSources.ANSIBLE)
+            .exclude(sources__icontains=DataSources.ACS)
             .annotate(
                 product_names=StringAgg(
                     "products__name",

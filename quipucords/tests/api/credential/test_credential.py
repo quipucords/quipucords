@@ -767,8 +767,8 @@ class TestCredential:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_passphrase"]
 
-    def test_openshift_cred_create(self, django_client):
-        """Ensure we can create a new openshift credential."""
+    def test_openshift_cred_create_auth_token(self, django_client):
+        """Ensure we can create a new openshift credential with auth token."""
         data = {
             "name": "openshift_cred_1",
             "cred_type": DataSources.OPENSHIFT,
@@ -778,23 +778,56 @@ class TestCredential:
         assert Credential.objects.count() == 1
         assert Credential.objects.get().name == "openshift_cred_1"
 
-    def test_openshift_missing_auth_token(self, django_client):
-        """Ensure auth token is required when creating openshift credential."""
+    def test_openshift_cred_create_username_password(self, django_client):
+        """Ensure we can create a new openshift credential with user/pass."""
+        data = {
+            "name": "openshift_cred_2",
+            "cred_type": DataSources.OPENSHIFT,
+            "username": "user1",
+            "password": "pass1",
+        }
+        self.create_expect_201(data, django_client)
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "openshift_cred_2"
+
+    @pytest.mark.parametrize(
+        "cred_type, dict_key, message",
+        [
+            (DataSources.ACS, "auth_token", "This field is required."),
+            (DataSources.OPENSHIFT, "non_field_errors", messages.TOKEN_OR_USER_PASS),
+        ],
+    )
+    def test_sources_missing_required_auth_token(
+        self, django_client, cred_type, dict_key, message
+    ):
+        """Ensure auth token is required when creating openshift/acs credential."""
         url = reverse("cred-list")
         data = {
-            "name": "openshift_cred_1",
-            "cred_type": DataSources.OPENSHIFT,
+            "name": "cred_1",
+            "cred_type": cred_type,
         }
         response = django_client.post(url, json=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
+        assert response.json()[dict_key] == [message]
 
-    def test_openshift_extra_unallowed_fields(self, django_client):
-        """Ensure unallowed fields are not accepted when creating openshift cred."""
+    def test_acs_cred_create(self, django_client):
+        """Ensure we can create a new ACS credential."""
+        data = {
+            "name": "acs_cred_1",
+            "cred_type": DataSources.ACS,
+            "auth_token": "test_token",
+        }
+        self.create_expect_201(data, django_client)
+        assert Credential.objects.count() == 1
+        assert Credential.objects.get().name == "acs_cred_1"
+
+    @pytest.mark.parametrize("cred_type", (DataSources.ACS, DataSources.OPENSHIFT))
+    def test_ocp_acs_extra_unallowed_fields(self, django_client, cred_type):
+        """Ensure unallowed fields are not accepted when creating openshift/acs cred."""
         url = reverse("cred-list")
         data = {
-            "name": "openshift_cred_1",
-            "cred_type": DataSources.OPENSHIFT,
+            "name": "cred_1",
+            "cred_type": cred_type,
             "auth_token": "test_token",
             "become_password": "test_become_password",
         }
@@ -834,9 +867,13 @@ class TestCredential:
         credentials = {
             "name": "cred1",
             "cred_type": orig_type,
-            "username": "user1",
-            "password": "pass1",
         }
+        if orig_type == DataSources.ACS:
+            credentials["auth_token"] = "test_token"
+        else:
+            credentials["username"] = "user1"
+            credentials["password"] = "pass1"
+
         response = django_client.post(reverse("cred-list"), json=credentials)
         assert response.status_code == status.HTTP_201_CREATED
 
@@ -1019,6 +1056,52 @@ class TestCredentialSerialization:
                 "auth_token": ENCRYPTED_DATA_MASK,
             },
             "ocp-auth-token",
+        ),
+        (
+            {
+                "name": "ocp-user-pass",
+                "cred_type": DataSources.OPENSHIFT.value,
+                "username": "some-user",
+                "password": "some-password",
+            },
+            {
+                "id": mock.ANY,
+                "name": "ocp-user-pass",
+                "cred_type": DataSources.OPENSHIFT.value,
+                "username": "some-user",
+                "password": ENCRYPTED_DATA_MASK,
+            },
+            "ocp-user-pass",
+        ),
+        (
+            {
+                "name": "ansible",
+                "cred_type": DataSources.ANSIBLE.value,
+                "username": "some-user",
+                "password": "some-password",
+            },
+            {
+                "id": mock.ANY,
+                "name": "ansible",
+                "cred_type": DataSources.ANSIBLE.value,
+                "username": "some-user",
+                "password": ENCRYPTED_DATA_MASK,
+            },
+            "ansible",
+        ),
+        (
+            {
+                "name": "acs",
+                "cred_type": DataSources.ACS.value,
+                "auth_token": "token",
+            },
+            {
+                "id": mock.ANY,
+                "name": "acs",
+                "cred_type": DataSources.ACS.value,
+                "auth_token": ENCRYPTED_DATA_MASK,
+            },
+            "acs",
         ),
     )
 
