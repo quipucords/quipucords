@@ -16,7 +16,7 @@ def test_normalizer_creation():
         fact2 = FactMapper("raw2", str, dependencies=["fact1"])
 
     assert set(Normalizer.fields.keys()) == {"fact1", "fact2"}
-    assert BaseNormalizer.fields == {}
+    assert BaseNormalizer.fields is None
     assert Normalizer.fact1.fact_name == "fact1"
     assert Normalizer.fact1.raw_fact_keys == ["raw1"]
     assert Normalizer.fact1.dependencies == []
@@ -61,6 +61,7 @@ def test_validators(
         return True
 
     class N(BaseNormalizer):
+        source_type = faker.slug()
         even_fact = FactMapper("raw", int, validators=[_is_even, _not_zero])
 
     norm = N(raw_facts=raw_facts, server_id=faker.uuid4())
@@ -78,6 +79,8 @@ def test_dependency(faker):
         return int(fact1["final_answer"])
 
     class N(BaseNormalizer):
+        source_type = faker.slug()
+
         fact1 = FactMapper("le_json", json.loads)
         fact2 = FactMapper(
             None, dependencies=["fact1"], normalizer_func=_normalize_fact2
@@ -95,13 +98,13 @@ def test_dependency(faker):
             "has_error": False,
             "raw_fact_keys": ["le_json"],
             "server_id": server_id,
-            "source_type": None,
+            "source_type": N.source_type,
         },
         "fact2": {
             "has_error": False,
             "raw_fact_keys": ["le_json"],
             "server_id": server_id,
-            "source_type": None,
+            "source_type": N.source_type,
         },
     }
     # ensure data that would break a normalizer only affect one field
@@ -117,13 +120,13 @@ def test_dependency(faker):
             "has_error": False,
             "raw_fact_keys": ["le_json"],
             "server_id": server_id2,
-            "source_type": None,
+            "source_type": N.source_type,
         },
         "fact2": {
             "has_error": True,
             "raw_fact_keys": None,
             "server_id": server_id2,
-            "source_type": None,
+            "source_type": N.source_type,
         },
     }
 
@@ -157,6 +160,7 @@ class TestMultipleRawFacts:
         raw_facts = {"raw1": 2, "raw2": 3}
 
         class N(BaseNormalizer):
+            source_type = mocker.ANY
             fact = FactMapper(["raw1", "raw2"], normalizer)
 
         norm = N(raw_facts, mocker.ANY)
@@ -169,6 +173,7 @@ class TestMultipleRawFacts:
         caplog.set_level(logging.ERROR)
 
         class N(BaseNormalizer):
+            source_type = mocker.ANY
             fact = FactMapper(["raw1", "raw2"], self._normalizer_unknown_raw_fact)
 
         norm = N(raw_facts, mocker.ANY)
@@ -176,3 +181,18 @@ class TestMultipleRawFacts:
             AssertionError, match="Unexpected raw facts used for fact 'fact': {'raw3'}"
         ):
             norm.normalize()
+
+
+def test_multiple_normalizers():
+    """Ensure one normalizer class does not leak info to another."""
+    assert BaseNormalizer.fields is None
+
+    class N1(BaseNormalizer):
+        fact1 = FactMapper("some_raw_fact", str)
+
+    class N2(BaseNormalizer):
+        fact2 = FactMapper("another_raw_fact", str)
+
+    assert BaseNormalizer.fields is None
+    assert N1.fields == {"fact1": N1.fact1}
+    assert N2.fields == {"fact2": N2.fact2}
