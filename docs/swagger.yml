@@ -1450,6 +1450,16 @@ definitions:
             "infrastructure_type": "virtualized",
             "os_release": "Red Hat Enterprise Linux 7 (64-bit)",
             "infrastructure_vendor": "esxi3.lab.eng.rdu2.redhat.com",
+            "installed_products": [
+                {
+                    "id": "10",
+                    "name": "Product A"
+                },
+                {
+                    "id": "42",
+                    "name": "Product B"
+                }
+            ]
             "number_of_cpus": 16,
             "number_of_sockets": 4,
             "cores_per_socket": 8,
@@ -2421,6 +2431,12 @@ definitions:
           type: "string"
           description: "The insights client id"
           example: "b077190b74f14b3582e57ce8243ae356"
+        installed_products:
+          type: "array"
+          items:
+            type: "object"
+            description: "Installed Product"
+          description: "Installed Products"
         system_purpose:
           type: "object"
           description: "The system purpose"
