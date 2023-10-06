@@ -30,15 +30,12 @@ def extract_files_from_tarball(
     """
     if not isinstance(tarball_data, BytesIO):
         tarball_data = BytesIO(tarball_data)
+    files_data = {}
     with tarfile.open(fileobj=tarball_data) as tarball_file:
-        return dict(
-            [
-                (
-                    Path(filepath).name if strip_dirs else filepath,
-                    json.loads(tarball_file.extractfile(filepath).read().decode())
-                    if decode_json and filepath.lower().endswith(".json")
-                    else tarball_file.extractfile(filepath).read(),
-                )
-                for filepath in tarball_file.getnames()
-            ]
-        )
+        for filepath in tarball_file.getnames():
+            data = tarball_file.extractfile(filepath).read()
+            if decode_json and filepath.lower().endswith(".json"):
+                data = json.loads(data.decode())
+            key = Path(filepath).name if strip_dirs else filepath
+            files_data[key] = data
+    return files_data
