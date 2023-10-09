@@ -70,35 +70,14 @@ clean-db:
 	docker-compose stop qpc-db
 	docker-compose rm -f qpc-db
 
-lock-requirements: lock-main-requirements
-	rm -f requirements-build.txt requirements-build.in
-	$(MAKE) search-build-requirements
-	$(MAKE) lock-build-requirements
-	# run another rounds of search/lock for build requirements
-	# (build dependencies also have build dependencies after all :)
-	$(MAKE) search-build-requirements
-	$(MAKE) lock-build-requirements
-	$(MAKE) search-build-requirements
-	$(MAKE) lock-build-requirements
-	mv requirements-build.in tmp-requirements-build.in
-	cat tmp-requirements-build.in | sed 's/ //g' | sort -u  > requirements-build.in
-	rm tmp-requirements-build.in
+lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
 	poetry lock --no-update
 	poetry export -f requirements.txt --only=main --without-hashes -o requirements.txt
 
 lock-build-requirements:
-	poetry run pip-compile $(PIP_COMPILE_ARGS) -r --resolver=backtracking --quiet --allow-unsafe --output-file=requirements-build.txt requirements-build.in
-
-search-build-requirements:
-	# Note: this removes all [extras] from package names due to
-	# pybuild-deps not handling them as expected.
-	cat requirements*.txt | grep -vE '(^ )|(#)' | awk '{print $$1}' | \
-	sed 's/==/ /;s/\[[^\]*\]//' | sort -u | awk 'NF' | \
-	xargs -P$(PARALLEL_NUM) -n2 poetry run pybuild-deps find-build-deps | \
-	sort -u >> requirements-build.in
-
+	poetry run pybuild-deps compile -o requirements-build.txt
 
 update-requirements:
 	poetry update --no-cache
