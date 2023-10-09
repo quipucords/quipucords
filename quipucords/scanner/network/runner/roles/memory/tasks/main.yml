@@ -7,6 +7,7 @@
 
 - name: Get memory in kb
   raw: |
+    export LANG=C LC_ALL=C;
     set -o pipefail
     cat /proc/meminfo |
     grep MemTotal |

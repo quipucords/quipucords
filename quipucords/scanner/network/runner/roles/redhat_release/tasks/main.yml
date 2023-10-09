@@ -12,7 +12,7 @@
   ignore_errors: yes
 
 - name: gather internal_redhat_release fact
-  raw: rpm -q --queryformat "%{NAME}\n%{VERSION}\n%{RELEASE}\n" --whatprovides redhat-release
+  raw: export LANG=C LC_ALL=C; rpm -q --queryformat "%{NAME}\n%{VERSION}\n%{RELEASE}\n" --whatprovides redhat-release
   register: internal_redhat_release
   ignore_errors: yes
   when: 'internal_have_rpm'

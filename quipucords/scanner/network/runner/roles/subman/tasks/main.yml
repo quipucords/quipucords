@@ -6,7 +6,7 @@
 
 # subman_cpu_cpu fact
 - name: gather subman.cpu.cpu(s) fact
-  raw: subscription-manager facts --list | grep '^cpu.cpu(s).' | sed -n -e 's/^.*cpu.cpu(s).\s*//p'
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^cpu.cpu(s).' | sed -n -e 's/^.*cpu.cpu(s).\s*//p'
   register: internal_subman_cpu_cpu_cmd
   ignore_errors: yes
   become: yes
@@ -22,7 +22,7 @@
 
 # subman_cpu_core_per_socket fact
 - name: gather subman.cpu.core(s)_per_socket fact
-  raw: subscription-manager facts --list | grep '^cpu.core(s)_per_socket.' | sed -n -e 's/^.*cpu.core(s)_per_socket.\s*//p'
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^cpu.core(s)_per_socket.' | sed -n -e 's/^.*cpu.core(s)_per_socket.\s*//p'
   register: internal_subman_cpu_core_per_socket_cmd
   ignore_errors: yes
   become: yes
@@ -38,7 +38,7 @@
 
 # subman_cpu_cpu_socket fact
 - name: gather subman.cpu.cpu_socket(s) fact
-  raw: subscription-manager facts --list | grep '^cpu.cpu_socket(s).' | sed -n -e 's/^.*cpu.cpu_socket(s).\s*//p'
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^cpu.cpu_socket(s).' | sed -n -e 's/^.*cpu.cpu_socket(s).\s*//p'
   register: internal_subman_cpu_cpu_socket_cmd
   ignore_errors: yes
   become: yes
@@ -54,7 +54,7 @@
 
 # subman_virt_host_type fact
 - name: gather subman.virt.host_type fact
-  raw: subscription-manager facts --list | grep '^virt.host_type.' | sed -n -e 's/^.*virt.host_type.\s*//p'
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^virt.host_type.' | sed -n -e 's/^.*virt.host_type.\s*//p'
   register: internal_subman_virt_host_type_cmd
   ignore_errors: yes
   become: yes
@@ -69,7 +69,7 @@
 
 # subman_virt_is_guest fact
 - name: gather subman.virt.is_guest fact
-  raw: subscription-manager facts --list | grep '^virt.is_guest.' | sed -n -e 's/^.*virt.is_guest.\s*//p'
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^virt.is_guest.' | sed -n -e 's/^.*virt.is_guest.\s*//p'
   register: internal_subman_virt_is_guest_cmd
   ignore_errors: yes
   become: yes
@@ -86,7 +86,7 @@
 
 # subman_virt_uuid fact
 - name: gather subman.virt.uuid fact
-  raw: subscription-manager facts --list 2>/dev/null | grep '^virt.uuid.' | sed -n -e 's/^.*virt.uuid.\s*//p'
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list 2>/dev/null | grep '^virt.uuid.' | sed -n -e 's/^.*virt.uuid.\s*//p'
   register: internal_subman_virt_uuid_cmd
   ignore_errors: yes
   become: yes
@@ -102,7 +102,7 @@
 
 # subman_overall_status fact
 - name: gather subman.overall.status fact
-  raw: LANG=C subscription-manager status | grep -e 'Overall Status:'| cut -d ":" -f2
+  raw: export LANG=C LC_ALL=C; subscription-manager status | grep -e 'Overall Status:'| cut -d ":" -f2
   register: internal_subman_overall_status_cmd
   ignore_errors: yes
   become: yes
@@ -120,7 +120,7 @@
 
 # subman fact
 - name: gather subman.has_facts_file fact
-  raw: ls /etc/rhsm/facts 2>/dev/null | grep .facts | wc -l
+  raw: export LANG=C LC_ALL=C; ls /etc/rhsm/facts 2>/dev/null | grep .facts | wc -l
   register: internal_subman_facts_file_lines
   ignore_errors: yes
   when: 'internal_have_subscription_manager'
@@ -138,7 +138,7 @@
 
 # subman_consumed fact
 - name: gather internal_subman_consumed
-  raw: subscription-manager list --consumed 2>/dev/null | grep -e '^SKU' -e '^Subscription Name' | sed -n -e 's/SKU\s*.\s*//p' -e 's/Subscription Name\s*.\s*//p' | awk '{ ORS = (NR%2 ? " - " {{":"}} RS) } 1'
+  raw: export LANG=C LC_ALL=C; subscription-manager list --consumed 2>/dev/null | grep -e '^SKU' -e '^Subscription Name' | sed -n -e 's/SKU\s*.\s*//p' -e 's/Subscription Name\s*.\s*//p' | awk '{ ORS = (NR%2 ? " - " {{":"}} RS) } 1'
   register: internal_subman_consumed
   ignore_errors: yes
   become: yes
@@ -152,7 +152,8 @@
 #  subscription_manager_id fact
 - name: gather subscription_manager_id fact
   raw: |
-    subscription-manager identity 2>/dev/null | 
+    export LANG=C LC_ALL=C;
+    subscription-manager identity 2>/dev/null |
     grep 'system identity:' |
     sed 's/system identity:\s*//'
   register: internal_subscription_manager_id_cmd

@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "file_contents"
 
 - name: gather etc-issue.etc-issue fact
-  raw: if [ -f /etc/issue ] ; then cat /etc/issue 2>/dev/null ; fi
+  raw: export LANG=C LC_ALL=C; if [ -f /etc/issue ] ; then cat /etc/issue 2>/dev/null ; fi
   register: internal_etc_issue_cmd
   ignore_errors: yes
 
@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: gather instnum.instnum fact
-  raw: if [ -f /etc/sysconfig/rhn/install-num ] ; then cat /etc/sysconfig/rhn/install-num 2>/dev/null ; fi
+  raw: export LANG=C LC_ALL=C; if [ -f /etc/sysconfig/rhn/install-num ] ; then cat /etc/sysconfig/rhn/install-num 2>/dev/null ; fi
   register: internal_instnum_cmd
   ignore_errors: yes
 
@@ -25,7 +25,7 @@
   ignore_errors: yes
 
 - name: gather systemid fact
-  raw: if [ -f /etc/sysconfig/rhn/systemid ] ; then cat /etc/sysconfig/rhn/systemid 2>/dev/null ; fi
+  raw: export LANG=C LC_ALL=C; if [ -f /etc/sysconfig/rhn/systemid ] ; then cat /etc/sysconfig/rhn/systemid 2>/dev/null ; fi
   register: internal_systemid_cmd
   ignore_errors: yes
 
