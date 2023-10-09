@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "cpu"
 
 - name: gather internal_cpu_vendor_id
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^vendor_id\s*' | sed -n -e 's/^.*vendor_id\s*.\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^vendor_id\s*' | sed -n -e 's/^.*vendor_id\s*.\s*//p'
   register: internal_cpu_vendor_id
   ignore_errors: yes
 
@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: gather internal_cpu_model_name
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*.' | sed -n -e 's/^.*model name\s*.\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*.' | sed -n -e 's/^.*model name\s*.\s*//p'
   register: internal_cpu_model_name
   ignore_errors: yes
 
@@ -25,7 +25,7 @@
   ignore_errors: yes
 
 - name: gather internal_cpu_bogomips fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^bogomips\s*.' | sed -n -e 's/^.*bogomips\s*.\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^bogomips\s*.' | sed -n -e 's/^.*bogomips\s*.\s*//p'
   register: internal_cpu_bogomips
   ignore_errors: yes
 
@@ -35,7 +35,7 @@
   ignore_errors: yes
 
 - name: gather internal_cpu_cpu_family fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^cpu family\s*.' | sed -n -e 's/^.*cpu family\s*.\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^cpu family\s*.' | sed -n -e 's/^.*cpu family\s*.\s*//p'
   register: internal_cpu_cpu_family
   ignore_errors: yes
 
@@ -45,7 +45,7 @@
   ignore_errors: yes
 
 - name: gather internal_cpu_model_ver fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^model\s*:' | sed -n -e 's/^.*model\s*:\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^model\s*:' | sed -n -e 's/^.*model\s*:\s*//p'
   register: internal_cpu_model_ver
   ignore_errors: yes
 
@@ -55,7 +55,7 @@
   ignore_errors: yes
 
 - name: gather cpu.count fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^processor\s*.' | wc -l
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^processor\s*.' | wc -l
   register: internal_cpu_count_cmd
   ignore_errors: yes
 
@@ -65,7 +65,7 @@
   ignore_errors: yes
 
 - name: gather cpu.core_per_socket fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^cpu cores\s*.' | sed -n -e 's/^.*cpu cores\s*.\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^cpu cores\s*.' | sed -n -e 's/^.*cpu cores\s*.\s*//p'
   register: internal_cpu_core_per_socket_cmd
   ignore_errors: yes
 
@@ -75,7 +75,7 @@
   ignore_errors: yes
 
 - name: gather cpu.siblings fact
-  raw: cat /proc/cpuinfo 2>/dev/null | grep '^siblings\s*.' | sed -n -e 's/^.*siblings\s*.\s*//p'
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^siblings\s*.' | sed -n -e 's/^.*siblings\s*.\s*//p'
   register: internal_cpu_siblings_cmd
   ignore_errors: yes
 
@@ -90,7 +90,7 @@
   ignore_errors: yes
 
 - name: gather cpu.socket_count fact
-  raw: /usr/sbin/dmidecode -t 4 | egrep 'Designation|Status'
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -t 4 | egrep 'Designation|Status'
   register: internal_cpu_socket_count_dmi_cmd
   become: yes
   ignore_errors: yes
@@ -102,7 +102,7 @@
   ignore_errors: yes
 
 - name: gather cpu.socket_count fact with fallback
-  raw: cat /proc/cpuinfo 2>/dev/null | grep 'physical id' | sort -u | wc -l
+  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep 'physical id' | sort -u | wc -l
   register: internal_cpu_socket_count_cpuinfo_cmd
   ignore_errors: yes
 

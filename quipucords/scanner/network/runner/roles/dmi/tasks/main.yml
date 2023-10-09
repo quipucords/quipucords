@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "dmi"
 
 - name: gather dmi.bios-vendor fact
-  raw: /usr/sbin/dmidecode -s bios-vendor 2>/dev/null
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s bios-vendor 2>/dev/null
   register: internal_dmi_bios_vendor_cmd
   ignore_errors: yes
   become: yes
@@ -26,7 +26,7 @@
   when: '"stdout_lines" not in internal_dmi_bios_vendor_cmd'
 
 - name: gather dmi.bios-version fact
-  raw: /usr/sbin/dmidecode -s bios-version 2>/dev/null
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s bios-version 2>/dev/null
   register: internal_dmi_bios_version_cmd
   ignore_errors: yes
   become: yes
@@ -47,7 +47,7 @@
   when: '"stdout_lines" not in internal_dmi_bios_version_cmd'
 
 - name: gather dmi.system-manufacturer fact
-  raw: /usr/sbin/dmidecode 2>/dev/null | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode 2>/dev/null | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
   register: internal_dmi_system_manufacturer_cmd
   ignore_errors: yes
   become: yes
@@ -68,7 +68,7 @@
   when: '"stdout_lines" not in internal_dmi_system_manufacturer_cmd'
 
 - name: gather dmi.processor-family fact
-  raw: /usr/sbin/dmidecode -s processor-family 2>/dev/null
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s processor-family 2>/dev/null
   register: internal_dmi_processor_family_cmd
   ignore_errors: yes
   become: yes
@@ -89,7 +89,7 @@
   when: '"stdout_lines" not in internal_dmi_processor_family_cmd'
 
 - name: gather dmi.system-uuid fact
-  raw: /usr/sbin/dmidecode -s system-uuid 2>/dev/null
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s system-uuid 2>/dev/null
   register: internal_dmi_system_uuid_cmd
   ignore_errors: yes
   become: yes

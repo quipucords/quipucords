@@ -27,12 +27,12 @@
   # xargs -n 1 readlink: normalize home directory paths so the
   # 'unique' below really does deduplicate them.
 
-  raw: ps -A -o args | egrep --invert-match '(^sed)|(\| sed)' | sed -n -e 's/.*-Dkaraf.base=\([^[:space:]]*\).*/\1/pg;s/.*-Dkaraf.home=\([^[:space:]]*\).*/\1/pg' | xargs -n 1 --no-run-if-empty readlink --canonicalize
+  raw: export LANG=C LC_ALL=C; ps -A -o args | egrep --invert-match '(^sed)|(\| sed)' | sed -n -e 's/.*-Dkaraf.base=\([^[:space:]]*\).*/\1/pg;s/.*-Dkaraf.home=\([^[:space:]]*\).*/\1/pg' | xargs -n 1 --no-run-if-empty readlink --canonicalize
   register: internal_karaf_running_processes
   ignore_errors: yes
   when: 'jboss_fuse'
 
-- name: set karaf_running_process fact 
+- name: set karaf_running_process fact
   set_fact:
     karaf_running_processes: "{{ internal_karaf_running_processes }}"
   ignore_errors: yes
@@ -44,25 +44,25 @@
   # to get the KARAF_HOME. Just like the last task, we also use
   # realpath to normalize paths.
 
-  raw: locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize
+  raw: export LANG=C LC_ALL=C; locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize
   register: internal_karaf_locate_karaf_jar
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
-- name: set karaf_locate_karaf_jar fact 
+- name: set karaf_locate_karaf_jar fact
   set_fact:
     karaf_locate_karaf_jar: "{{ internal_karaf_locate_karaf_jar }}"
   ignore_errors: yes
 
 - name: Use find to look for karaf.jar
-  raw: find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
+  raw: export LANG=C LC_ALL=C; find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
   register: internal_karaf_find_karaf_jar
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and jboss_fuse_ext'
 
-- name: set karaf_find_karaf_jar fact 
+- name: set karaf_find_karaf_jar fact
   set_fact:
     karaf_find_karaf_jar: "{{ internal_karaf_find_karaf_jar }}"
   ignore_errors: yes
@@ -81,27 +81,27 @@
 # Look for fuse inside KARAF_HOME directories
 
 - name: check bin/fuse
-  raw: ls -1 "{{ item }}"/bin/fuse 2>/dev/null
+  raw: export LANG=C LC_ALL=C; ls -1 "{{ item }}"/bin/fuse 2>/dev/null
   register: internal_karaf_home_bin_fuse
   ignore_errors: yes
   become: yes
   with_items: "{{ karaf_homes }}"
   when: 'user_has_sudo and jboss_fuse'
 
-- name: set karaf_home_bin_fuse fact 
+- name: set karaf_home_bin_fuse fact
   set_fact:
     karaf_home_bin_fuse: "{{ internal_karaf_home_bin_fuse }}"
   ignore_errors: yes
 
 - name: check system/org/jboss/fuse
-  raw: ls -1 "{{ item }}"/system/org/jboss 2>/dev/null
+  raw: export LANG=C LC_ALL=C; ls -1 "{{ item }}"/system/org/jboss 2>/dev/null
   register: internal_karaf_home_system_org_jboss
   ignore_errors: yes
   become: yes
   with_items: "{{ karaf_homes }}"
   when: 'user_has_sudo and jboss_fuse'
 
-- name: set karaf_home_system_org_jboss fact 
+- name: set karaf_home_system_org_jboss fact
   set_fact:
     karaf_home_system_org_jboss: "{{ internal_karaf_home_system_org_jboss }}"
   ignore_errors: yes
@@ -110,50 +110,50 @@
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
 
 - name: look for fuse systemd service
-  raw: /usr/bin/systemctl list-unit-files --no-pager
+  raw: export LANG=C LC_ALL=C; /usr/bin/systemctl list-unit-files --no-pager
   register: internal_jboss_fuse_systemctl_unit_files
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and jboss_fuse and internal_have_systemctl'
 
-- name: set jboss_fuse_systemctl_unit_files fact 
+- name: set jboss_fuse_systemctl_unit_files fact
   set_fact:
     jboss_fuse_systemctl_unit_files: "{{ internal_jboss_fuse_systemctl_unit_files }}"
   ignore_errors: yes
 
 - name: look for fuse in chkconfig
-  raw: /sbin/chkconfig --list
+  raw: export LANG=C LC_ALL=C; /sbin/chkconfig --list
   register: internal_jboss_fuse_chkconfig
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and jboss_fuse and internal_have_chkconfig'
 
-- name: set jboss_fuse_chkconfig fact 
+- name: set jboss_fuse_chkconfig fact
   set_fact:
     jboss_fuse_chkconfig: "{{ internal_jboss_fuse_chkconfig }}"
   ignore_errors: yes
 
 - name: Use locate to look for camel-ver
-  raw: locate camel-core | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: export LANG=C LC_ALL=C; locate camel-core | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: internal_jboss_fuse_camel_ver
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
-- name: set jboss_fuse_camel_ver fact 
+- name: set jboss_fuse_camel_ver fact
   set_fact:
     jboss_fuse_camel_ver: "{{ internal_jboss_fuse_camel_ver }}"
   ignore_errors: yes
 
 - name: check /system/org/apache/camel/camel-core for camel-ver
-  raw: ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: export LANG=C LC_ALL=C; ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: internal_jboss_fuse_on_karaf_camel_ver
   ignore_errors: yes
   become: yes
   with_items: "{{ karaf_homes }}"
   when: 'user_has_sudo and jboss_fuse'
 
-- name: set jboss_fuse_on_karaf_camel_ver fact 
+- name: set jboss_fuse_on_karaf_camel_ver fact
   set_fact:
     jboss_fuse_on_karaf_camel_ver: "{{ internal_jboss_fuse_on_karaf_camel_ver }}"
   ignore_errors: yes
@@ -167,26 +167,26 @@
   when: 'jboss_fuse'
 
 - name: Use locate to look for activemq-ver
-  raw: locate activemq | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: export LANG=C LC_ALL=C; locate activemq | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: internal_jboss_fuse_activemq_ver
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
-- name: set jboss_fuse_activemq_ver fact 
+- name: set jboss_fuse_activemq_ver fact
   set_fact:
     jboss_fuse_activemq_ver: "{{ internal_jboss_fuse_activemq_ver }}"
   ignore_errors: yes
 
 - name: check /system/org/apache/activemq/activemq-camel for activemq-ver
-  raw: ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: export LANG=C LC_ALL=C; ls -1 '{{ item }}/system/org/apache/activemq/activemq-camel' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: internal_jboss_fuse_on_karaf_activemq_ver
   ignore_errors: yes
   become: yes
   with_items: "{{ karaf_homes }}"
   when: 'user_has_sudo and jboss_fuse'
 
-- name: set jboss_fuse_on_karaf_activemq_ver fact 
+- name: set jboss_fuse_on_karaf_activemq_ver fact
   set_fact:
     jboss_fuse_on_karaf_activemq_ver: "{{ internal_jboss_fuse_on_karaf_activemq_ver }}"
   ignore_errors: yes
@@ -200,26 +200,26 @@
   when: 'jboss_fuse'
 
 - name: Use locate to look for cxf-rt-ver
-  raw: locate cxf-rt | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: export LANG=C LC_ALL=C; locate cxf-rt | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: internal_jboss_fuse_cxf_ver
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_locate and jboss_fuse'
 
-- name: set jboss_fuse_cxf_ver fact 
+- name: set jboss_fuse_cxf_ver fact
   set_fact:
     jboss_fuse_cxf_ver: "{{ internal_jboss_fuse_cxf_ver }}"
   ignore_errors: yes
 
 - name: check /system/org/apache/cxf/cxf-rt-bindings-coloc for cxf-rt
-  raw: ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | grep fuse |sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
+  raw: export LANG=C LC_ALL=C; ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | grep fuse |sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
   register: internal_jboss_fuse_on_karaf_cxf_ver
   ignore_errors: yes
   become: yes
   with_items: "{{ karaf_homes }}"
   when: 'user_has_sudo and jboss_fuse'
 
-- name: set jboss_fuse_on_karaf_cxf_ver fact 
+- name: set jboss_fuse_on_karaf_cxf_ver fact
   set_fact:
     jboss_fuse_on_karaf_cxf_ver: "{{ internal_jboss_fuse_on_karaf_cxf_ver }}"
   ignore_errors: yes

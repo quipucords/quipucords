@@ -7,7 +7,7 @@
 
 # Use locate to look for business-central, decision-central, and kie-server
 - name: find business-central candidates
-  raw: locate --basename business-central | egrep '.*/business-central(.war)?/?$'
+  raw: export LANG=C LC_ALL=C; locate --basename business-central | egrep '.*/business-central(.war)?/?$'
   register: internal_jboss_brms_business_central_candidates_cmd
   ignore_errors: yes
   become: yes
@@ -25,7 +25,7 @@
   when: 'jboss_brms'
 
 - name: find decision-central candidates
-  raw: locate --basename decision-central | egrep '.*/decision-central(.war)?/?$'
+  raw: export LANG=C LC_ALL=C; locate --basename decision-central | egrep '.*/decision-central(.war)?/?$'
   register: internal_jboss_brms_decision_central_candidates
   ignore_errors: yes
   become: yes
@@ -38,7 +38,7 @@
   when: 'jboss_brms'
 
 - name: find kie-server candidates
-  raw: locate --basename 'kie-server*' | egrep --invert-match '(.*.xml)|(.*.jar)'
+  raw: export LANG=C LC_ALL=C; locate --basename 'kie-server*' | egrep --invert-match '(.*.xml)|(.*.jar)'
   register: internal_jboss_brms_kie_server_candidates_cmd
   ignore_errors: yes
   become: yes
@@ -56,7 +56,7 @@
   when: 'jboss_brms'
 
 - name: search filesystem for kie-server candidates
-  raw: find {{search_directories}} -xdev -name kie*.war 2> /dev/null
+  raw: export LANG=C LC_ALL=C; find {{search_directories}} -xdev -name kie*.war 2> /dev/null
   register: internal_jboss_brms_kie_search_candidates_cmd
   ignore_errors: yes
   become: yes
@@ -99,7 +99,7 @@
   when: 'jboss_brms'
 
 - name: cat MANIFEST.MF files
-  raw: cat '{{ item }}/META-INF/MANIFEST.MF' 2>/dev/null
+  raw: export LANG=C LC_ALL=C; cat '{{ item }}/META-INF/MANIFEST.MF' 2>/dev/null
   register: internal_jboss_brms_manifest_mf
   ignore_errors: yes
   become: yes
@@ -112,7 +112,7 @@
   ignore_errors: yes
 
 - name: look for kie-api files inside candidate directories
-  raw: ls -1 "{{ item }}"/WEB-INF/lib/kie-api* 2>/dev/null
+  raw: export LANG=C LC_ALL=C; ls -1 "{{ item }}"/WEB-INF/lib/kie-api* 2>/dev/null
   register: internal_jboss_brms_kie_in_business_central
   ignore_errors: yes
   become: yes
@@ -125,7 +125,7 @@
   ignore_errors: yes
 
 - name: look for all kie-api files on the system
-  raw: locate --basename 'kie-api*'
+  raw: export LANG=C LC_ALL=C; locate --basename 'kie-api*'
   register: internal_jboss_brms_locate_kie_api
   ignore_errors: yes
   become: yes
@@ -139,7 +139,7 @@
 # Tasks that do filesystem scans. This will scan linux systems for
 # JBoss BRMS or Drools Installations
 - name: Gather jboss.brms.kie-api-ver
-  raw: find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sort -u
+  raw: export LANG=C LC_ALL=C; find {{search_directories}} -xdev -name kie-api* 2> /dev/null | sort -u
   register: internal_jboss_brms_kie_api_ver
   ignore_errors: yes
   become: yes
@@ -151,7 +151,7 @@
   ignore_errors: yes
 
 - name: Gather jboss.brms.drools-core-ver
-  raw: find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sort -u
+  raw: export LANG=C LC_ALL=C; find {{search_directories}} -xdev -name drools-core* 2> /dev/null | sort -u
   register: internal_jboss_brms_drools_core_ver
   ignore_errors: yes
   become: yes
@@ -163,7 +163,7 @@
   ignore_errors: yes
 
 - name: Gather jboss.brms.kie-war-ver
-  raw: OIFS="$IFS"; IFS=$'\n'; for war in $(find {{search_directories}} -xdev -name kie*.war 2> /dev/null); do if [[ -d  "$war" ]]; then cat "$war"/META-INF/MANIFEST.MF 2> /dev/null | grep Implementation-Version | sed "s/Implementation-Version://g" | sed "s/ //g" | sed 's/\r$//' | sort -u; else fgrep -irsal kie-api "$war" | egrep -o "[0-9]\.[0-9]\.[0-9].*-" | sed "s/-$//g" | sed 's/\r$//' | sort -u; fi; done; IFS="$OIFS"
+  raw: export LANG=C LC_ALL=C; OIFS="$IFS"; IFS=$'\n'; for war in $(find {{search_directories}} -xdev -name kie*.war 2> /dev/null); do if [[ -d  "$war" ]]; then cat "$war"/META-INF/MANIFEST.MF 2> /dev/null | grep Implementation-Version | sed "s/Implementation-Version://g" | sed "s/ //g" | sed 's/\r$//' | sort -u; else fgrep -irsal kie-api "$war" | egrep -o "[0-9]\.[0-9]\.[0-9].*-" | sed "s/-$//g" | sed 's/\r$//' | sort -u; fi; done; IFS="$OIFS"
   register: internal_jboss_brms_kie_war_ver
   ignore_errors: yes
   become: yes

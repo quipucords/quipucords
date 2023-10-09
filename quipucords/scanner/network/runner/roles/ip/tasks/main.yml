@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "ip address show"
 
 - name: gather 'ip address show' fact
-  raw: /sbin/ip address show
+  raw: export LANG=C LC_ALL=C; /sbin/ip address show
   register: internal_ip_address_show_cmd
   ignore_errors: yes
   become: '{{user_has_sudo}}'

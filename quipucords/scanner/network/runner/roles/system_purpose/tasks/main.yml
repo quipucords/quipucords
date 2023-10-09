@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "system_purpose"
 
 - name: gather internal_system_purpose_json
-  raw: if [ -f /etc/rhsm/syspurpose/syspurpose.json ] ; then cat /etc/rhsm/syspurpose/syspurpose.json 2>/dev/null; fi
+  raw: export LANG=C LC_ALL=C; if [ -f /etc/rhsm/syspurpose/syspurpose.json ] ; then cat /etc/rhsm/syspurpose/syspurpose.json 2>/dev/null; fi
   register: internal_system_purpose_json
   ignore_errors: yes
 

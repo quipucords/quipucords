@@ -27,6 +27,7 @@
 
 - name: check which /etc/*release file exists
   raw: |
+    export LANG=C LC_ALL=C;
     for i in \
       /etc/debian_version \
       {{ internal_distro_standard_release|join(' ') }} \
@@ -47,7 +48,7 @@
     - 'internal_release_found["stdout_lines"][-1]|length > 0'
 
 - name: set internal_release_file_content based on internal_release_file
-  raw: cat {{ internal_release_file }}
+  raw: export LANG=C LC_ALL=C; cat {{ internal_release_file }}
   register: internal_release_file_content
   ignore_errors: yes
   when:
@@ -86,7 +87,7 @@
 # set facts using Linux Standard Base when no other release file was found
 
 - name: set os and version based on /etc/lsb-release output
-  raw: . /etc/lsb-release && echo "$DISTRIB_ID" && echo "$DISTRIB_RELEASE"
+  raw: export LANG=C LC_ALL=C; . /etc/lsb-release && echo "$DISTRIB_ID" && echo "$DISTRIB_RELEASE"
   register: internal_lsb_release
   ignore_errors: yes
   when:
@@ -94,7 +95,7 @@
     - 'internal_release_file == "/etc/lsb-release"'
 
 - name: set os and version using `lsb_release -si -sr`
-  raw: lsb_release -si -sr
+  raw: export LANG=C LC_ALL=C; lsb_release -si -sr
   register: internal_lsb_release
   ignore_errors: yes
   when:
@@ -115,7 +116,7 @@
 # set facts using uname if we still haven't identified the distro
 
 - name: set os and kernel release using `uname -s -r`
-  raw: uname -s -r
+  raw: export LANG=C LC_ALL=C; uname -s -r
   register: internal_uname_version
   ignore_errors: yes
   when: 'etc_release_name == ""'
@@ -133,7 +134,7 @@
 
 # gather etc machine id
 - name: Gather the etc machine id
-  raw: if [ -f /etc/machine-id ]; then cat /etc/machine-id; fi | tr -d '\r' | tr -d '\n'
+  raw: export LANG=C LC_ALL=C; if [ -f /etc/machine-id ]; then cat /etc/machine-id; fi | tr -d '\r' | tr -d '\n'
   register: internal_get_etc_machine_id
   ignore_errors: yes
 

@@ -14,7 +14,7 @@
 # directories. We will gather more information on the candidates to
 # make a determination.
 - name: locate --ignore-case jboss
-  raw: locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
+  raw: export LANG=C LC_ALL=C; locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
   register: internal_jboss_eap5_locate_jboss_homes
   ignore_errors: yes
   become: yes
@@ -27,7 +27,7 @@
 # It removes the extra '=' and ':'-delimited parts and produces
 # candidate EAP_HOME directories.
 - name: gather jboss.eap.processes
-  raw: ps -A -o comm -o args e --columns 10000 | egrep '^java.*(eap|jboss).*' | tr -s ' =:' '\n' | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
+  raw: export LANG=C LC_ALL=C; ps -A -o comm -o args e --columns 10000 | egrep '^java.*(eap|jboss).*' | tr -s ' =:' '\n' | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
   register: internal_jboss_eap5_process_jboss_homes
   ignore_errors: yes
   become: yes
@@ -47,7 +47,7 @@
 # Filters that will help us find true EAP_HOME directories
 
 - name: get version.txt from EAP_HOME candidates
-  raw: cat '{{ item }}/version.txt' 2>/dev/null
+  raw: export LANG=C LC_ALL=C; cat '{{ item }}/version.txt' 2>/dev/null
   register: internal_eap5_home_version_txt
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
@@ -59,7 +59,7 @@
   ignore_errors: yes
 
 - name: get readme.html from EAP_HOME candidates
-  raw: cat '{{ item }}/readme.html' 2>/dev/null
+  raw: export LANG=C LC_ALL=C; cat '{{ item }}/readme.html' 2>/dev/null
   register: internal_eap5_home_readme_html
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
@@ -71,7 +71,7 @@
   ignore_errors: yes
 
 - name: ls EAP_HOME/jboss-as
-  raw: ls -1 '{{ item }}/jboss-as' 2>/dev/null
+  raw: export LANG=C LC_ALL=C; ls -1 '{{ item }}/jboss-as' 2>/dev/null
   register: internal_eap5_home_ls_jboss_as
   ignore_errors: yes
   with_items: "{{ eap5_home_candidates }}"
@@ -83,7 +83,7 @@
   ignore_errors: yes
 
 - name: EAP_HOME/jboss-as/bin/run.jar
-  raw: java -jar '{{ item }}/jboss-as/bin/run.jar' --version
+  raw: export LANG=C LC_ALL=C; java -jar '{{ item }}/jboss-as/bin/run.jar' --version
   register: internal_eap5_home_run_jar_version
   ignore_errors: yes
   become: yes
@@ -98,7 +98,7 @@
 # This is similar to the previous command, but works even when the EAP
 # installation is broken.
 - name: run.jar manifest
-  raw: unzip -p '{{ item }}/jboss-as/bin/run.jar' META-INF/MANIFEST.MF
+  raw: export LANG=C LC_ALL=C; unzip -p '{{ item }}/jboss-as/bin/run.jar' META-INF/MANIFEST.MF
   register: internal_eap5_home_run_jar_manifest
   ignore_errors: yes
   become: yes

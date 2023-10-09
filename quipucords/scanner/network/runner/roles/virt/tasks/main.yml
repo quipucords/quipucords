@@ -5,7 +5,7 @@
     internal_host_started_processing_role: "virt"
 
 - name: check if privcmd exists
-  raw: if [ -e /proc/xen/privcmd ]; then echo "Y"; else echo "N"; fi
+  raw: export LANG=C LC_ALL=C; if [ -e /proc/xen/privcmd ]; then echo "Y"; else echo "N"; fi
   register: internal_xen_privcmd_found_cmd
   ignore_errors: yes
 
@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: check if kvm exists
-  raw: if [ -e /dev/kvm ]; then echo "Y"; else echo "N"; fi
+  raw: export LANG=C LC_ALL=C; if [ -e /dev/kvm ]; then echo "Y"; else echo "N"; fi
   register: internal_kvm_found_cmd
   ignore_errors: yes
 
@@ -25,7 +25,7 @@
   ignore_errors: yes
 
 - name: check for xen guests
-  raw: ps aux | grep xend | grep -v grep | wc -l
+  raw: export LANG=C LC_ALL=C; ps aux | grep xend | grep -v grep | wc -l
   register: internal_xen_guest_cmd
   ignore_errors: yes
 
@@ -35,7 +35,7 @@
   ignore_errors: yes
 
 - name: set system manufacturer
-  raw: /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
   register: internal_sys_manufacturer_cmd
   become: yes
   ignore_errors: yes
@@ -47,7 +47,7 @@
   ignore_errors: yes
 
 - name: check cpu model name for QEMU
-  raw: model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
+  raw: export LANG=C LC_ALL=C; model_name=$(cat /proc/cpuinfo 2>/dev/null | grep '^model name\s*:' | sed -n -e 's/^.*model name\s*:\s//p'); if [[ $model_name == *QEMU ]]; then echo "Y"; else echo "N"; fi
   register: internal_cpu_model_name_kvm_cmd
   ignore_errors: yes
 
@@ -67,7 +67,7 @@
   ignore_errors: yes
 
 - name: gather internal_virt_num_guests fact
-  raw: virsh -c qemu:///system --readonly list --all | wc -l
+  raw: export LANG=C LC_ALL=C; virsh -c qemu:///system --readonly list --all | wc -l
   register: internal_virt_num_guests
   ignore_errors: yes
   when: 'internal_have_virsh'
@@ -83,7 +83,7 @@
   ignore_errors: yes
 
 - name: gather virt.num_running_guests fact
-  raw: virsh -c qemu:///system --readonly list --uuid | wc -l
+  raw: export LANG=C LC_ALL=C; virsh -c qemu:///system --readonly list --uuid | wc -l
   register: internal_virt_num_running_guests
   ignore_errors: yes
   when: 'internal_have_virsh'
