@@ -16,11 +16,12 @@ ENV QUIPUCORDS_LOG_LEVEL=INFO
 ENV QPC_LOG_DIRECTORY=/var/log
 
 COPY scripts/dnf /usr/local/bin/dnf
-ARG BUILD_PACKAGES="crypto-policies-scripts gcc postgresql-devel python3.11-devel"
+ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.11-devel"
 RUN dnf install \
         git \
         glibc-langpack-en \
         jq \
+        libpq \
         make \
         openssh-clients \
         procps-ng \
