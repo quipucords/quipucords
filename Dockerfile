@@ -1,4 +1,4 @@
-FROM docker.io/redhat/ubi9-minimal
+FROM registry.access.redhat.com/ubi9/ubi-minimal
 
 ENV DJANGO_DB_PATH=/var/data/
 ENV DJANGO_DEBUG=False
