@@ -42,7 +42,7 @@ class Credential(models.Model):
     # Future refactoring idea: implement different credential types in separate models.
     username = models.CharField(max_length=64, null=True, blank=True)
     password = models.CharField(max_length=1024, null=True, blank=True)
-    auth_token = models.CharField(max_length=1024, null=True, blank=True)
+    auth_token = models.CharField(max_length=6000, null=True, blank=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True, blank=True)
     ssh_key = models.CharField(max_length=65536, null=True, blank=True)
     ssh_passphrase = models.CharField(max_length=1024, null=True, blank=True)
