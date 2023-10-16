@@ -94,10 +94,11 @@ QPC_DBMS=sqlite
 ## Initializing the Server
 
 ```
+export QPC_SERVER_PASSWORD="SuperAdmin1"
 make server-init
 ```
 
-Both of the above commands create a superuser with name `admin` and password of `qpcpassw0rd`.
+Both of the above commands create a superuser with name `admin` and password of `SuperAdmin1`.
 
 ## Running the Server
 Currently, quipucords needs quipucords-ui to run. In order to get it's latest version, run
