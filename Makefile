@@ -48,6 +48,7 @@ help:
 	@echo "  swagger-valid                 to run swagger-cli validation"
 	@echo "  setup-postgres                to create a default postgres container"
 	@echo "  server-init                   to run server initializion steps"
+	@echo "  server-set-superuser          to create or update the superuser"
 	@echo "  serve                         to run the server with default db"
 	@echo "  serve-swagger                 to run the openapi/swagger ui for quipucords"
 	@echo "  build-ui                      to build ui and place result in django server"

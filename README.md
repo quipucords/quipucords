@@ -94,8 +94,7 @@ QPC_DBMS=sqlite
 ## Initializing the Server
 
 ```
-export QPC_SERVER_PASSWORD="SuperAdmin1"
-make server-init
+make server-init QPC_SERVER_PASSWORD="SuperAdmin1"
 ```
 
 Both of the above commands create a superuser with name `admin` and password of `SuperAdmin1`.
@@ -134,6 +133,15 @@ If you intend to run on Mac OS, there are several more steps that are required.
     export LDFLAGS="-I$(brew --prefix)/opt/openssl/include -L$(brew --prefix)/opt/openssl/lib"
     poetry install
     ```
+
+## Updating the superuser's password
+
+```
+make server-set-superuser QPC_SERVER_PASSWORD="SuperAdmin2"
+```
+
+The above command updates the `admin` superuser password to `SuperAdmin2`.
+
 
 ## Linting
 To lint changes that are made to the source code, run the following command:
