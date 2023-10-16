@@ -221,31 +221,35 @@ elif QPC_DBMS == "postgres":
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-NAME = "NAME"
-USER_ATTRIBUTE_SIMILARITY_VALIDATOR = (
-    "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-)
-MINIMUM_LENGTH_VALIDATOR = (
-    "django.contrib.auth.password_validation.MinimumLengthValidator"
-)
-COMMON_PASSWORD_VALIDATOR = (
-    "django.contrib.auth.password_validation.CommonPasswordValidator"  # noqa: S105
-)
-NUMERIC_PASSWORD_VALIDATOR = (
-    "django.contrib.auth.password_validation.NumericPasswordValidator"  # noqa: S105
-)
+VALIDATOR_MODULE = "django.contrib.auth.password_validation"
+# Note: User.objects.make_random_password minimum length is 10 vs the default
+#       for the MinimumLengthValidator is 8. let's declare it here for consistency.
+QPC_MINIMUM_PASSWORD_LENGTH = 10
 AUTH_PASSWORD_VALIDATORS = [
     {
-        NAME: USER_ATTRIBUTE_SIMILARITY_VALIDATOR,
+        "NAME": f"{VALIDATOR_MODULE}.UserAttributeSimilarityValidator",
     },
     {
-        NAME: MINIMUM_LENGTH_VALIDATOR,
+        "NAME": f"{VALIDATOR_MODULE}.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": QPC_MINIMUM_PASSWORD_LENGTH,
+        },
     },
     {
-        NAME: COMMON_PASSWORD_VALIDATOR,
+        "NAME": f"{VALIDATOR_MODULE}.CommonPasswordValidator",  # noqa: S105
     },
     {
-        NAME: NUMERIC_PASSWORD_VALIDATOR,
+        # Let's reject additional common passwords for Quipucords
+        "NAME": f"{VALIDATOR_MODULE}.CommonPasswordValidator",  # noqa: S105
+        "OPTIONS": {
+            "password_list_path": BASE_DIR
+            / ".."
+            / "deploy"
+            / "rejected_common_passwords.txt"
+        },
+    },
+    {
+        "NAME": f"{VALIDATOR_MODULE}.NumericPasswordValidator",  # noqa: S105
     },
 ]
 
