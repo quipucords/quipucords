@@ -88,6 +88,8 @@ paths:
             - vcenter
             - satellite
             - openshift
+            - ansible
+            - acs
         - name: "page"
           in: "query"
           description: "Value for selecting a page of results"
@@ -286,6 +288,8 @@ paths:
             - vcenter
             - satellite
             - openshift
+            - ansible
+            - acs
         - name: "page"
           in: "query"
           description: "Value for selecting a page of results"
@@ -1207,6 +1211,8 @@ definitions:
             - vcenter
             - satellite
             - openshift
+            - ansible
+            - acs
         username:
           type: "string"
           example: "admin"
@@ -1403,6 +1409,8 @@ definitions:
           - vcenter
           - satellite
           - openshift
+          - ansible
+          - acs
       facts:
         type: "array"
         items:
@@ -2075,6 +2083,8 @@ definitions:
           - vcenter
           - satellite
           - openshift
+          - ansible
+          - acs
       port:
         type: "integer"
         format: "int32"
@@ -2143,6 +2153,8 @@ definitions:
           - vcenter
           - satellite
           - openshift
+          - ansible
+          - acs
   SourceMostRecentConnectionJob:
     type: "object"
     properties:
