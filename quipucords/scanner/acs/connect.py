@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from requests import ConnectionError as RequestConnError
 from requests import RequestException
+from rest_framework import status
 
 from api.models import ScanTask, SystemConnectionResult
 from scanner.acs.runner import ACSTaskRunner
@@ -28,12 +29,24 @@ class ConnectTaskRunner(ACSTaskRunner):
         self._init_stats()
         conn_result = SystemConnectionResult.FAILED
         try:
-            self.client.get(
-                "/v1/ping",
+            response = self.client.get(
+                "/v1/auth/status",
                 timeout=settings.QPC_CONNECT_TASK_TIMEOUT,
                 raise_for_status=True,
             )
-            conn_result = SystemConnectionResult.SUCCESS
+            if response.status_code == status.HTTP_200_OK:
+                conn_result = SystemConnectionResult.SUCCESS
+            elif response.status_code == status.HTTP_401_UNAUTHORIZED:
+                logger.error(
+                    "Authentication failed while connecting to '%s'.",
+                    self.system_name,
+                )
+            else:
+                logger.error(
+                    "Unexpected status code %d while connecting to '%s'.",
+                    response.status_code,
+                    self.system_name,
+                )
         except RequestException as exception:
             logger.exception("Unable to connect to '%s'.", self.system_name)
             if isinstance(exception, RequestConnError):
