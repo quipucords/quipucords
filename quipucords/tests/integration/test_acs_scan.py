@@ -26,7 +26,7 @@ def mocked_requests(requests_mock, live_server, max_date):
     for method in ("GET", "POST"):
         requests_mock.register_uri(method, django_url_matcher, real_http=True)
     acs_host = "https://acs.host:443"
-    requests_mock.get(f"{acs_host}/v1/ping")
+    requests_mock.get(f"{acs_host}/v1/auth/status")
     requests_mock.get(
         f"{acs_host}/v1/product/usage/secured-units/current",
         json={"numNodes": "3", "numCpuUnits": "20"},
