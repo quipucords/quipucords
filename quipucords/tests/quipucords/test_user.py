@@ -38,10 +38,15 @@ class TestUserPasswordValidators:
         with pytest.raises(ValidationError, match="This password is too common"):
             password_validation.validate_password("hello")
 
-    def test_reject_qpc_common_words(self):
+    def test_reject_qpc_common_words_qpc(self):
         """Test that we reject quipucords common words."""
         with pytest.raises(ValidationError, match="This password is too common"):
             password_validation.validate_password("qpcpassw0rd")
+
+    def test_reject_qpc_common_words_dsc(self):
+        """Test that we reject quipucords common words."""
+        with pytest.raises(ValidationError, match="This password is too common"):
+            password_validation.validate_password("dscpassw0rd")
 
     def test_reject_all_numeric(self):
         """Test that we reject all numeric passwords."""
