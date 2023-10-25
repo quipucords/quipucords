@@ -33,20 +33,11 @@ class TestUserPasswordValidators:
         with pytest.raises(ValidationError, match="This password is too short"):
             password_validation.validate_password("hjK4")
 
-    def test_reject_common_words(self):
+    @pytest.mark.parametrize("password", ["hello", "qpcpassw0rd", "dscpassw0rd"])
+    def test_reject_common_words(self, password):
         """Test that we reject common words."""
         with pytest.raises(ValidationError, match="This password is too common"):
-            password_validation.validate_password("hello")
-
-    def test_reject_qpc_common_words_qpc(self):
-        """Test that we reject quipucords common words."""
-        with pytest.raises(ValidationError, match="This password is too common"):
-            password_validation.validate_password("qpcpassw0rd")
-
-    def test_reject_qpc_common_words_dsc(self):
-        """Test that we reject quipucords common words."""
-        with pytest.raises(ValidationError, match="This password is too common"):
-            password_validation.validate_password("dscpassw0rd")
+            password_validation.validate_password(password)
 
     def test_reject_all_numeric(self):
         """Test that we reject all numeric passwords."""
