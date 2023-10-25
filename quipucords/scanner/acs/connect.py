@@ -6,7 +6,9 @@ from django.conf import settings
 from django.db import transaction
 from requests import ConnectionError as RequestConnError
 from requests import RequestException
+from requests.exceptions import RetryError
 from rest_framework import status
+from urllib3.exceptions import MaxRetryError
 
 from api.models import ScanTask, SystemConnectionResult
 from scanner.acs.runner import ACSTaskRunner
@@ -47,12 +49,19 @@ class ConnectTaskRunner(ACSTaskRunner):
                     response.status_code,
                     self.system_name,
                 )
-        except RequestException as exception:
-            logger.exception("Unable to connect to '%s'.", self.system_name)
-            if isinstance(exception, RequestConnError):
-                conn_result = SystemConnectionResult.UNREACHABLE
-            else:
-                conn_result = SystemConnectionResult.FAILED
+        except (MaxRetryError, RetryError, RequestConnError):
+            logger.exception(
+                """Connection error while connecting to '%s'.
+                Verify source information and try again.""",
+                self.system_name,
+            )
+            conn_result = SystemConnectionResult.UNREACHABLE
+        except RequestException:
+            logger.exception(
+                """Unable to connect to '%s'.
+                Unexpected exception while handling connection.""",
+                self.system_name,
+            )
         self._save_results(conn_result)
         if conn_result == SystemConnectionResult.SUCCESS:
             return self.success_message, ScanTask.COMPLETED
