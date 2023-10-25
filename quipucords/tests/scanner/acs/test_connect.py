@@ -2,6 +2,9 @@
 import logging
 
 import pytest
+from requests import ConnectionError
+from requests.exceptions import RetryError, TooManyRedirects
+from urllib3.exceptions import MaxRetryError
 
 from api.models import ScanTask
 from constants import DataSources
@@ -63,4 +66,57 @@ def test_connect_with_error(
     assert scan_task.systems_scanned == 0
     assert scan_task.systems_failed == 1
     assert scan_task.systems_unreachable == 0
+    assert err_message in caplog.text
+
+
+@pytest.mark.parametrize(
+    "exception, unreachable, failed, err_message",
+    [
+        (
+            MaxRetryError("Max retries exceeded", url=None),
+            1,
+            0,
+            "Verify source information and try again.",
+        ),
+        (
+            RetryError("Retry Error"),
+            1,
+            0,
+            "Verify source information and try again.",
+        ),
+        (
+            ConnectionError("Connection Error"),
+            1,
+            0,
+            "Verify source information and try again.",
+        ),
+        (
+            TooManyRedirects("Too many redirects Error"),
+            0,
+            1,
+            "Unexpected exception while handling connection.",
+        ),
+    ],
+)
+@pytest.mark.django_db
+def test_handling_connection_errors(  # noqa: PLR0913
+    mock_client,
+    scan_task: ScanTask,
+    exception,
+    unreachable,
+    failed,
+    err_message,
+    caplog,
+):
+    """Test handling ACS connection exceptions."""
+    caplog.set_level(logging.ERROR)
+    runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
+    mock_client.return_value.get.side_effect = exception
+    message, status = runner.execute_task(mock_client)
+    assert message == runner.failure_message
+    assert status == ScanTask.FAILED
+    assert scan_task.systems_count == 1
+    assert scan_task.systems_scanned == 0
+    assert scan_task.systems_failed == failed
+    assert scan_task.systems_unreachable == unreachable
     assert err_message in caplog.text
