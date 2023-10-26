@@ -13,4 +13,8 @@ else
 fi
 
 make server-migrate server-set-superuser -C /app
-gunicorn quipucords.wsgi -c $GUNICORN_CONF
+# We only start the server if both the DB
+# migration succeeds and the superuser is created.
+if [ $? -eq 0 ]; then
+    gunicorn quipucords.wsgi -c $GUNICORN_CONF
+fi
