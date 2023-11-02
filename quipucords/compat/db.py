@@ -29,7 +29,7 @@ class SQLiteStringAgg(Aggregate):
     def convert_value(self, value, expression, connection):
         """Convert NULL value to default_value."""
         # arguments-differ is a false positive here - see how django sql compiler
-        # handles this https://github.com/django/django/blob/f6f0699d01f5840437bfd236c76c797943ef8edc/django/db/models/sql/compiler.py#L1105-L1124 # noqa: 501
+        # handles this https://github.com/django/django/blob/f6f0699d01f5840437bfd236c76c797943ef8edc/django/db/models/sql/compiler.py#L1105-L1124 # noqa: E501
         # other checks were disable to respect the expected signature of this function
         if value is None:
             return self.default_value

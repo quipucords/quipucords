@@ -122,15 +122,14 @@ class FuseVersionProcessor(process.Processor):
             if item_name:
                 if item.get("rc", True):
                     pass
-                else:
-                    if item.get("stdout", "").strip() != "":  # noqa: PLR5501, PLC1901
-                        value = [
-                            version
-                            for version in item.get("stdout_lines", [])
-                            if version.strip()
-                        ]
-                        result["install_home"] = item_name
-                        result["version"] = list(set(value))
+                elif item.get("stdout", "").strip() != "":
+                    value = [
+                        version
+                        for version in item.get("stdout_lines", [])
+                        if version.strip()
+                    ]
+                    result["install_home"] = item_name
+                    result["version"] = list(set(value))
                 if result:
                     results.append(result)
         return results

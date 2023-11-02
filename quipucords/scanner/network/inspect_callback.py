@@ -188,13 +188,12 @@ class InspectResultCallback:
                         self.task_on_failed(event_dict)
                     elif event in unreachable:
                         self.task_on_unreachable(event_dict)
-                    else:
-                        if event not in runner_ignore:  # noqa: PLR5501
-                            self.scan_task.log_message(
-                                log_messages.TASK_UNEXPECTED_FAILURE
-                                % ("event_callback", event, event_dict),
-                                log_level=logging.ERROR,
-                            )
+                    elif event not in runner_ignore:
+                        self.scan_task.log_message(
+                            log_messages.TASK_UNEXPECTED_FAILURE
+                            % ("event_callback", event, event_dict),
+                            log_level=logging.ERROR,
+                        )
                 # Save last role for task logging later
                 if event == "playbook_on_task_start":
                     if event_data:
