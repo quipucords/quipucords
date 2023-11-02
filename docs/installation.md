@@ -1,87 +1,104 @@
 # Installation
 
-##  Installing and running the server and database containers 
+##  Installing and running the server and database containers
 The quipucords container image can be created from source. This quipucords repository includes a Dockerfile that contains instructions for the image creation of the server.
-You must have [Docker installed](https://docs.docker.com/engine/installation/) or [Podman installed](https://podman.io/getting-started/installation).
-The examples below all use `podman` but can be replaced with `docker` unless stated otherwise.
-1. Clone the repository:
+You must have[Podman installed](https://podman.io/getting-started/installation).
+
+1. Install `podman` if necessary.
+   * If running on Fedora/Centos/RHEL,
+      ```
+      sudo subscription-manager register
+      sudo dnf install -y podman
+      ```
+   * If running on macOS,
+      ```
+      brew install podman
+      podman machine init
+      podman machine start
+      ```
+2. Clone the quipucords source code repository.
    ```
    git clone git@github.com:quipucords/quipucords.git
    ```
-
-2. Build the container image:  
+3. Create some directories to share data between your host and containers.
    ```
+   mkdir -p "${HOME}"/.local/share/discovery/{data,log,sshkeys}
+   ```
+   **WARNING**: If you are running `podman` on macOS (not Linux), container volume mounts for those directories may fail unexpectedly. You may need to do the following before starting containers:
+   ```
+   podman machine stop
+   podman machine rm
+   podman machine init --volume "${HOME}"/.local/share/discovery/
+   podman machine start
+   ```
+4. Build the container image.
+   ```
+   cd quipucords
+   podman login registry.redhat.io
+   # complete any login prompts
    podman build -t quipucords .
    ```
-3. Run the container:  
-   The container can be run with either of the following methods:  
-
-      A. Run with podman pod (podman exclusive):
-         Register server to register.redhat.io:
-      ```
-         sudo su -
-         subscription-manager register
-         dnf install -y podman
-         podman login registry.redhat.io
-         #Make directories
-         mkdir -p /var/discovery/server/volumes/data
-         mkdir -p /var/discovery/server/volumes/log
-         mkdir -p /var/discovery/server/volumes/sshkeys
-     ```
-    At the prompt, enter your username for the Red Hat Container Catalog, also known as the registry.redhat.io image registry website.
-
-    Run the quipucords server container:
-     ```
-         podman run --name qpc-db \
-                    --pod new:quipucords-pod \
-                    --publish 9443:443 \
-                    --restart on-failure \
-                    -e POSTGRESQL_USER=qpc \
-                    -e POSTGRESQL_PASSWORD=qpc \
-                    -e POSTGRESQL_DATABASE=qpc-db \
-                    -v qpc-data:/var/lib/pgsql/data \
-                    -d postgres:12
-    ```
-    Run the quipucords database container:
-    ```
-         podman run \
-                --name discovery \
-                --restart on-failure \
-                --pod quipucords-pod \
-                -e DJANGO_DEBUG=False \
-                -e NETWORK_CONNECT_JOB_TIMEOUT=600 \
-                -e NETWORK_INSPECT_JOB_TIMEOUT=10800 \
-                -e PRODUCTION=True \
-                -e QPC_DBMS_HOST=qpc-db \
-                -e QPC_DBMS_PASSWORD=qpc \
-                -e QPC_DBMS_USER=qpc \
-                -e QPC_SERVER_TIMEOUT=5 \
-                -e QPC_SERVER_USERNAME=admin \
-                -e QPC_SERVER_PASSWORD=q1w2e3r4 \
-                -e QPC_SERVER_USER_EMAIL=admin@example.com \
-                -v /var/discovery/server/volumes/data/:/var/data:z \
-                -v /var/discovery/server/volumes/log/:/var/log:z \
-                -v /var/discovery/server/volumes/sshkeys/:/sshkeys:z \
-                -d quipucords
+5. Create a pod for your containers to share a network.
    ```
-   
-     B. Run with external Postgres container:
+   podman pod create --publish 9443:443 qpc-pod
+   ```
+6. Run a PostgreSQL database container. (optional, but recommended)
+
+   If you are comfortable running PostgreSQL elsewhere on your own, you may skip this step, but you will need to specify your own `QPC_DBMS_*` values later when you run the quipucords container. Alternatively, you can run quipucords with no PostgreSQL database, instead using a local Sqlite file. However, we generally do not recommend using Sqlite as your database.
+
+   If you wish to run PostgreSQL in its own container, run the following command:
+   ```
+   podman run \
+      --name qpc-psql \
+      --pod qpc-pod \
+      --restart on-failure \
+      -e POSTGRES_USER=qpc \
+      -e POSTGRES_PASSWORD=qpc \
+      -e POSTGRES_DATABASE=qpc-db \
+      -v qpc-db-data:/var/lib/pgsql/data \
+      -d postgres:12
+   ```
+   If at some future date you wish to reset your database, then you should stop the `qpc-db` container, remove it, remove its data volume, and recreate it using the previous command.
+   ```
+   podman stop qpc-psql
+   podman rm qpc-psql
+   podman volume rm qpc-db-data
+   # recreate it using the earlier `podman run ...` command
+   ```
+7. Run the quipucords server container.
+
+   **WARNING**: `podman` on macOS often fails to apply the `z` mount option. If if fails to start with an error like `Error: lsetxattr ... operation not supported`, try removing `:z` from each of the `-v` volume mount definitions.
 
    ```
-   ifconfig (get your computer's external IP if Postgres is local)
-   podman run -d --name quipucords -e "QPC_DBMS_PASSWORD=password" 
-   -e"QPC_DBMS_HOST=<ip_address_from_ifconfig>" -p 9443:443 -i quipucords
+   podman run \
+      --name qpc-server \
+      --restart on-failure \
+      --pod qpc-pod \
+      -e DJANGO_DEBUG=False \
+      -e NETWORK_CONNECT_JOB_TIMEOUT=600 \
+      -e NETWORK_INSPECT_JOB_TIMEOUT=10800 \
+      -e PRODUCTION=True \
+      -e QPC_DBMS_HOST=qpc-psql \
+      -e QPC_DBMS_PASSWORD=qpc \
+      -e QPC_DBMS_USER=qpc \
+      -e QPC_SERVER_TIMEOUT=5 \
+      -e QPC_SERVER_USERNAME=admin \
+      -e QPC_SERVER_PASSWORD=pleasechangethispassword \
+      -e QPC_SERVER_USER_EMAIL=admin@example.com \
+      -v "${HOME}"/.local/share/discovery/data/:/var/data:z \
+      -v "${HOME}"/.local/share/discovery/log/:/var/log:z \
+      -v "${HOME}"/.local/share/discovery/sshkeys/:/sshkeys:z \
+      -d quipucords
    ```
-     C. Run with SQlite 
-   
-   ```
-   podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quipucords
-   ```
-     D. For debugging purposes you may want to run the Docker image with the /app directory mapped to your local clone of quipucords and the logs mapped to a temporary directory. Mapping the /app directory allows you to rapidly change server code without having to rebuild the container. 
-   ```
-   podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -v 
-   /path/to/local/quipucords/:/app -v /tmp:/var/log -i quipucords
-   ```
+
+   If you decided to use the local Sqlite file instead of PostgreSQL, omit the `QPC_DBMS_*` values and instead specify `-e QPC_DBMS=sqlite`.
+
+   You should now be able to access the quipucords server from your host at `https://0.0.0.0:9443` using the values for `QPC_SERVER_USERNAME` and `QPC_SERVER_PASSWORD` as your login and password in both the CLI and the web UI.
+
+   You may adjust the `QPC_*` values as you like. Note that you must stop and remove the existing `qpc-server` container before changing those values.
+
+   For debugging purposes, may may want to map the `/app` to your local clone of quipucords. To do this, you may want to add an argument like `-v "${HOME}"/projects/quipucords/:/app`. By mapping this directory, you can rapidly change server code without having to rebuild the container.
+
 ##  Installing and running the server and database with Docker Compose
 
 1. Clone the repository:
@@ -89,28 +106,28 @@ The examples below all use `podman` but can be replaced with `docker` unless sta
    git clone git@github.com:quipucords/quipucords.git
    ```
 
-2. Build UI:  
-Currently, quipucords needs quipucords-ui to run while using Docker Compose installation method.  
+2. Build UI:
+Currently, quipucords needs quipucords-ui to run while using Docker Compose installation method.
 Both projects need to be on the same root folder, like shown below:
-/quipucords  
-   --quipucords  
+/quipucords
+   --quipucords
    --quipucords-ui
 
-   
-   See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.  
-   You will need to have NodeJS installed. See [Nodejs](<https://nodejs.org/>) official website for instructions.  
-   
+
+   See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.
+   You will need to have NodeJS installed. See [Nodejs](<https://nodejs.org/>) official website for instructions.
+
    On Mac:
    ```
    brew install yarn (if you don't already have yarn)
-   make build-ui 
+   make build-ui
    ```
- 
+
    On Linux:
-   
+
 ```
    npm install yarn (if you don't already have yarn)
-   make build-ui 
+   make build-ui
  ```
 3. Build the Docker image through Docker-compose:
 
@@ -125,7 +142,7 @@ Both projects need to be on the same root folder, like shown below:
    ```
    docker-compose up -d
    ```
-   _NOTE:_ The need to use ``sudo`` for this step is dependent upon on your system configuration.  
+   _NOTE:_ The need to use ``sudo`` for this step is dependent upon on your system configuration.
 
    For Mac users:
    ```
