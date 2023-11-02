@@ -717,11 +717,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
                             result_by_key[list_value] = value_dict
                         else:
                             number_duplicates += 1
+                elif result_by_key.get(id_key_value) is None:
+                    result_by_key[id_key_value] = value_dict
                 else:
-                    if result_by_key.get(id_key_value) is None:  # noqa: PLR5501
-                        result_by_key[id_key_value] = value_dict
-                    else:
-                        number_duplicates += 1
+                    number_duplicates += 1
             else:
                 key_not_found_list.append(value_dict)
         if number_duplicates:
