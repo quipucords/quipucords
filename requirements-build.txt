@@ -29,7 +29,9 @@ flit-core==3.9.0
     #   typing-extensions
     #   wheel
 hatchling==1.18.0
-    # via colorama
+    # via
+    #   colorama
+    #   urllib3
 packaging==23.2 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   hatchling
