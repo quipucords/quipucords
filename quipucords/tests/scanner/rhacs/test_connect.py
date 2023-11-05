@@ -1,4 +1,4 @@
-"""Test ACS ConnectTaskRunner."""
+"""Test RHACS ConnectTaskRunner."""
 import logging
 
 import pytest
@@ -8,8 +8,8 @@ from urllib3.exceptions import MaxRetryError
 
 from api.models import ScanTask
 from constants import DataSources
-from scanner.acs.connect import ConnectTaskRunner
-from scanner.acs.runner import ACSTaskRunner
+from scanner.rhacs.connect import ConnectTaskRunner
+from scanner.rhacs.runner import RHACSTaskRunner
 from tests.factories import ScanTaskFactory
 
 
@@ -17,7 +17,7 @@ from tests.factories import ScanTaskFactory
 def scan_task():
     """Return a ScanTask for testing."""
     return ScanTaskFactory(
-        source__source_type=DataSources.ACS,
+        source__source_type=DataSources.RHACS,
         source__hosts=["1.2.3.4"],
         source__port=4321,
         scan_type=ScanTask.SCAN_TYPE_CONNECT,
@@ -26,13 +26,13 @@ def scan_task():
 
 @pytest.fixture
 def mock_client(mocker):
-    """Return a mocked ACS client."""
-    return mocker.patch.object(ACSTaskRunner, "get_client")
+    """Return a mocked RHACS client."""
+    return mocker.patch.object(RHACSTaskRunner, "get_client")
 
 
 @pytest.mark.django_db
 def test_connect_successfully(mock_client, scan_task: ScanTask):
-    """Test connecting to ACS host with success."""
+    """Test connecting to RHACS host with success."""
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     mock_client.return_value.get.return_value.status_code = 200
     message, status = runner.execute_task(mock_client)
@@ -55,7 +55,7 @@ def test_connect_successfully(mock_client, scan_task: ScanTask):
 def test_connect_with_error(
     mock_client, err_status, err_message, scan_task: ScanTask, caplog
 ):
-    """Test connecting to ACS host with failure."""
+    """Test connecting to RHACS host with failure."""
     caplog.set_level(logging.ERROR)
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     mock_client.return_value.get.return_value.status_code = err_status
@@ -108,7 +108,7 @@ def test_handling_connection_errors(  # noqa: PLR0913
     err_message,
     caplog,
 ):
-    """Test handling ACS connection exceptions."""
+    """Test handling RHACS connection exceptions."""
     caplog.set_level(logging.ERROR)
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     mock_client.return_value.get.side_effect = exception

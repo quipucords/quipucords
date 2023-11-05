@@ -89,7 +89,7 @@ paths:
             - satellite
             - openshift
             - ansible
-            - acs
+            - rhacs
         - name: "page"
           in: "query"
           description: "Value for selecting a page of results"
@@ -289,7 +289,7 @@ paths:
             - satellite
             - openshift
             - ansible
-            - acs
+            - rhacs
         - name: "page"
           in: "query"
           description: "Value for selecting a page of results"
@@ -1212,7 +1212,7 @@ definitions:
             - satellite
             - openshift
             - ansible
-            - acs
+            - rhacs
         username:
           type: "string"
           example: "admin"
@@ -1410,7 +1410,7 @@ definitions:
           - satellite
           - openshift
           - ansible
-          - acs
+          - rhacs
       facts:
         type: "array"
         items:
@@ -2084,7 +2084,7 @@ definitions:
           - satellite
           - openshift
           - ansible
-          - acs
+          - rhacs
       port:
         type: "integer"
         format: "int32"
@@ -2154,7 +2154,7 @@ definitions:
           - satellite
           - openshift
           - ansible
-          - acs
+          - rhacs
   SourceMostRecentConnectionJob:
     type: "object"
     properties:

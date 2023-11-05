@@ -1,8 +1,8 @@
-"""Test ACS api client."""
+"""Test RHACS api client."""
 
 from unittest import mock
 
-from scanner.acs.api import ACSApi, HTTPBearerAuth
+from scanner.rhacs.api import HTTPBearerAuth, RHACSApi
 
 
 def test_http_bearer_auth():
@@ -18,9 +18,9 @@ def test_http_bearer_auth():
     assert modified_request.headers["Authorization"] == "Bearer " + auth_token
 
 
-def test_acsapi_instantiation_with_connection_info():
-    """Assert an instance of ACSApi is being created correctly."""
-    api = ACSApi.from_connection_info(
+def test_rhacsapi_instantiation_with_connection_info():
+    """Assert an instance of RHACSApi is being created correctly."""
+    api = RHACSApi.from_connection_info(
         host="localhost",
         protocol="https",
         port=8080,
