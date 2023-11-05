@@ -86,7 +86,7 @@ class CredentialSerializer(NotEmptySerializer):
                 DataSources.VCENTER: UsernamePasswordSerializer,
                 DataSources.SATELLITE: UsernamePasswordSerializer,
                 DataSources.ANSIBLE: UsernamePasswordSerializer,
-                DataSources.ACS: AuthTokenSerializer,
+                DataSources.RHACS: AuthTokenSerializer,
             },
         )
 

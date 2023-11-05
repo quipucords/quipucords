@@ -78,7 +78,7 @@ class SourceSerializer(NotEmptySerializer):
     credentials = CredentialsField(many=True, queryset=Credential.objects.all())
 
     HTTP_SOURCE_TYPES = (
-        DataSources.ACS,
+        DataSources.RHACS,
         DataSources.ANSIBLE,
         DataSources.OPENSHIFT,
         DataSources.SATELLITE,

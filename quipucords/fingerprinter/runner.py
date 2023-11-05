@@ -406,12 +406,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fingerprint_map,
         )
 
-        # openshift/ansible/acs fingerprints - These won't be deduplicated or merged
+        # openshift/ansible/rhacs fingerprints - These won't be deduplicated or merged
         fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.OPENSHIFT))
         fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.ANSIBLE))
-        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.ACS))
+        fingerprint_map[COMBINED_KEY].extend(fingerprint_map.pop(DataSources.RHACS))
         self._log_message_with_count(
-            "COMBINE with OPENSHIFT+ANSIBLE+ACS fingerprints",
+            "COMBINE with OPENSHIFT+ANSIBLE+RHACS fingerprints",
             fingerprint_map,
             total_only=True,
         )
@@ -1466,15 +1466,15 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         return fingerprint
 
-    def _process_acs_fact(self, source, fact):
-        """Generate fingerprints for ACS facts."""
+    def _process_rhacs_fact(self, source, fact):
+        """Generate fingerprints for RHACS facts."""
         fingerprint = {
             META_DATA_KEY: {},
             ENTITLEMENTS_KEY: [],
             PRODUCTS_KEY: [],
         }
         self._add_fact_to_fingerprint(
-            source, "N/A", fact, "name", fingerprint, fact_value="collected-from-acs"
+            source, "N/A", fact, "name", fingerprint, fact_value="collected-from-rhacs"
         )
         return fingerprint
 

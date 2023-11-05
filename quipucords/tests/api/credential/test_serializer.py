@@ -537,7 +537,7 @@ class TestNetworkCredential:
         (DataSources.SATELLITE, UsernamePasswordSerializer),
         (DataSources.VCENTER, UsernamePasswordSerializer),
         (DataSources.ANSIBLE, UsernamePasswordSerializer),
-        (DataSources.ACS, AuthTokenSerializer),
+        (DataSources.RHACS, AuthTokenSerializer),
     ),
 )
 class TestSerializerPolymorphism:

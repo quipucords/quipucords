@@ -68,11 +68,11 @@ def openshift_cred():
 
 
 @pytest.fixture
-def acs_cred():
-    """Return ACS credential object."""
+def rhacs_cred():
+    """Return RHACS credential object."""
     return Credential.objects.create(
         name="acs_cred1",
-        cred_type=DataSources.ACS,
+        cred_type=DataSources.RHACS,
         auth_token="acs_token",
     )
 
@@ -1458,69 +1458,69 @@ class TestSource:
         response = response.json()
         assert response["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_acs_source_create(self, django_client, acs_cred):
-        """Ensure we can create a new ACS source."""
+    def test_rhacs_source_create(self, django_client, rhacs_cred):
+        """Ensure we can create a new RHACS source."""
         data = {
             "name": "acs_source_1",
-            "source_type": DataSources.ACS,
+            "source_type": DataSources.RHACS,
             "hosts": ["1.2.3.4"],
-            "credentials": [acs_cred.id],
+            "credentials": [rhacs_cred.id],
         }
         self.create_expect_201(data, django_client)
         assert Source.objects.count() == 1
         assert Source.objects.get().name == "acs_source_1"
 
-    def test_acs_missing_host(self, django_client, acs_cred):
-        """Ensure hosts field is required when creating ACS credential."""
+    def test_rhacs_missing_host(self, django_client, rhacs_cred):
+        """Ensure hosts field is required when creating RHACS credential."""
         data = {
             "name": "acs_source_1",
-            "source_type": DataSources.ACS,
-            "credentials": [acs_cred.id],
+            "source_type": DataSources.RHACS,
+            "credentials": [rhacs_cred.id],
         }
         self.create_expect_400(data, django_client)
 
-    def test_acs_extra_unallowed_fields(self, django_client, acs_cred):
-        """Ensure unallowed fields are not accepted when creating ACS source."""
+    def test_rhacs_extra_unallowed_fields(self, django_client, rhacs_cred):
+        """Ensure unallowed fields are not accepted when creating RHACS source."""
         data = {
             "name": "acs_source_1",
-            "source_type": DataSources.ACS,
+            "source_type": DataSources.RHACS,
             "hosts": ["1.2.3.4"],
-            "credentials": [acs_cred.id],
+            "credentials": [rhacs_cred.id],
             "options": {"use_paramiko": True},
         }
         self.create_expect_400(data, django_client)
 
-    def test_update_acs_green_path(self, django_client, acs_cred):
-        """ACS source successful update."""
+    def test_update_rhacs_green_path(self, django_client, rhacs_cred):
+        """RHACS source successful update."""
         data = {
             "name": "acs_source_1",
-            "source_type": DataSources.ACS,
+            "source_type": DataSources.RHACS,
             "hosts": ["1.2.3.4"],
-            "credentials": [acs_cred.id],
+            "credentials": [rhacs_cred.id],
         }
         initial = self.create_expect_201(data, django_client)
         updated_data = {
             "name": "acs_source_1",
             "hosts": ["5.3.2.1"],
-            "credentials": [acs_cred.id],
+            "credentials": [rhacs_cred.id],
         }
         response = self.update_source(django_client, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_acs_range_hosts(self, django_client, acs_cred):
+    def test_update_rhacs_range_hosts(self, django_client, rhacs_cred):
         """Fail update due to invalid host array."""
         data = {
             "name": "acs_source_1",
-            "source_type": DataSources.ACS,
+            "source_type": DataSources.RHACS,
             "hosts": ["1.2.3.4"],
-            "credentials": [acs_cred.id],
+            "credentials": [rhacs_cred.id],
         }
         initial = self.create_expect_201(data, django_client)
 
         updated_data = {
             "name": "acs_source_1",
             "hosts": ["1.2.3.4/5"],
-            "credentials": [acs_cred.id],
+            "credentials": [rhacs_cred.id],
         }
         response = self.update_source(django_client, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
