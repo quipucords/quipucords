@@ -1,16 +1,16 @@
-"""ABC scan task runner for ACS scanner."""
+"""ABC scan task runner for RHACS scanner."""
 
 from abc import ABCMeta
 from functools import cached_property
 
 from api.models import ScanJob, ScanTask
 from api.vault import decrypt_data_as_unicode
-from scanner.acs.api import ACSApi
+from scanner.rhacs.api import RHACSApi
 from scanner.runner import ScanTaskRunner
 
 
-class ACSTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
-    """Specialized ScanTaskRunner for ACS scanner."""
+class RHACSTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
+    """Specialized ScanTaskRunner for RHACS scanner."""
 
     def __init__(self, scan_job: ScanJob, scan_task: ScanTask):
         """Initialize class."""
@@ -35,12 +35,12 @@ class ACSTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
     @classmethod
     def _get_connection_info(cls, scan_task: ScanTask):
         """
-        Get connection info for ACSApi.
+        Get connection info for RHACSApi.
 
         :param scan_task: The ScanTask with source/credentials to extract connection
          info.
         :returns: A dictionary that can be passed as kwargs to
-         `ACSApi.from_connection_info`
+         `RHACSApi.from_connection_info`
         """
         host = scan_task.source.get_hosts()[0]
         port = scan_task.source.port
@@ -55,14 +55,14 @@ class ACSTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         }
 
     @classmethod
-    def get_client(cls, scan_task: ScanTask) -> ACSApi:
+    def get_client(cls, scan_task: ScanTask) -> RHACSApi:
         """
-        Get an ACSApi properly initialized with source/credential info.
+        Get an RHACSApi properly initialized with source/credential info.
 
         :param scan_task: ScanTask for which we're creating the client
         """
         ocp_kwargs = cls._get_connection_info(scan_task)
-        return ACSApi.from_connection_info(**ocp_kwargs)
+        return RHACSApi.from_connection_info(**ocp_kwargs)
 
     @classmethod
     def _ssl_options(cls, scan_task: ScanTask):

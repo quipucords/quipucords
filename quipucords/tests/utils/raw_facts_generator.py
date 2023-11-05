@@ -19,7 +19,7 @@ def raw_facts_generator(source_type, n):
             DataSources.ANSIBLE: _ansible_raw_facts,
             DataSources.SATELLITE: _satellite_raw_facts,
             DataSources.VCENTER: _vcenter_raw_facts,
-            DataSources.ACS: _acs_raw_facts,
+            DataSources.RHACS: _rhacs_raw_facts,
         }
         raw_fact_func = func_map[source_type]
         for _ in range(n):
@@ -214,8 +214,8 @@ def _openshift_raw_facts_generator(number_of_facts):
         yield {"node": node}
 
 
-def _acs_raw_facts():
-    """Raw facts for ACS scans."""
+def _rhacs_raw_facts():
+    """Raw facts for RHACS scans."""
     return {
         "secured_units_current": {
             "numNodes": _faker.pyint(min_value=1, max_value=1000),

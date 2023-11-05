@@ -793,14 +793,14 @@ class TestCredential:
     @pytest.mark.parametrize(
         "cred_type, dict_key, message",
         [
-            (DataSources.ACS, "auth_token", "This field is required."),
+            (DataSources.RHACS, "auth_token", "This field is required."),
             (DataSources.OPENSHIFT, "non_field_errors", messages.TOKEN_OR_USER_PASS),
         ],
     )
     def test_sources_missing_required_auth_token(
         self, django_client, cred_type, dict_key, message
     ):
-        """Ensure auth token is required when creating openshift/acs credential."""
+        """Ensure auth token is required when creating openshift/rhacs credential."""
         url = reverse("cred-list")
         data = {
             "name": "cred_1",
@@ -810,20 +810,20 @@ class TestCredential:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()[dict_key] == [message]
 
-    def test_acs_cred_create(self, django_client):
-        """Ensure we can create a new ACS credential."""
+    def test_rhacs_cred_create(self, django_client):
+        """Ensure we can create a new RHACS credential."""
         data = {
             "name": "acs_cred_1",
-            "cred_type": DataSources.ACS,
+            "cred_type": DataSources.RHACS,
             "auth_token": "test_token",
         }
         self.create_expect_201(data, django_client)
         assert Credential.objects.count() == 1
         assert Credential.objects.get().name == "acs_cred_1"
 
-    @pytest.mark.parametrize("cred_type", (DataSources.ACS, DataSources.OPENSHIFT))
-    def test_ocp_acs_extra_unallowed_fields(self, django_client, cred_type):
-        """Ensure unallowed fields are not accepted when creating openshift/acs cred."""
+    @pytest.mark.parametrize("cred_type", (DataSources.RHACS, DataSources.OPENSHIFT))
+    def test_ocp_rhacs_extra_unallowed_fields(self, django_client, cred_type):
+        """Ensure unallowed fields are not accepted when creating ocp/rhacs cred."""
         url = reverse("cred-list")
         data = {
             "name": "cred_1",
@@ -868,7 +868,7 @@ class TestCredential:
             "name": "cred1",
             "cred_type": orig_type,
         }
-        if orig_type == DataSources.ACS:
+        if orig_type == DataSources.RHACS:
             credentials["auth_token"] = "test_token"
         else:
             credentials["username"] = "user1"
@@ -1092,13 +1092,13 @@ class TestCredentialSerialization:
         (
             {
                 "name": "acs",
-                "cred_type": DataSources.ACS.value,
+                "cred_type": DataSources.RHACS.value,
                 "auth_token": "token",
             },
             {
                 "id": mock.ANY,
                 "name": "acs",
-                "cred_type": DataSources.ACS.value,
+                "cred_type": DataSources.RHACS.value,
                 "auth_token": ENCRYPTED_DATA_MASK,
             },
             "acs",

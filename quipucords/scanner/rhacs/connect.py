@@ -11,13 +11,13 @@ from rest_framework import status
 from urllib3.exceptions import MaxRetryError
 
 from api.models import ScanTask, SystemConnectionResult
-from scanner.acs.runner import ACSTaskRunner
+from scanner.rhacs.runner import RHACSTaskRunner
 
 logger = getLogger(__name__)
 
 
-class ConnectTaskRunner(ACSTaskRunner):
-    """Connection phase task runner for ACS scanner."""
+class ConnectTaskRunner(RHACSTaskRunner):
+    """Connection phase task runner for RHACS scanner."""
 
     supports_partial_results = False
 
@@ -69,12 +69,12 @@ class ConnectTaskRunner(ACSTaskRunner):
 
     def _init_stats(self):
         """
-        Initialize ACS connection stats.
+        Initialize RHACS connection stats.
 
         This is called at the start of a scan to set the number of scan tasks.
         """
         self.scan_task.update_stats(
-            "INITIAL ACS CONNECT STATS.",
+            "INITIAL RHACS CONNECT STATS.",
             sys_count=1,
             sys_scanned=0,
             sys_failed=0,
@@ -95,7 +95,9 @@ class ConnectTaskRunner(ACSTaskRunner):
             task_connection_result=self.scan_task.connection_result,
         )
         sys_result.save()
-        self.scan_task.increment_stats("UPDATED ACS CONNECT STATS.", **increment_kwargs)
+        self.scan_task.increment_stats(
+            "UPDATED RHACS CONNECT STATS.", **increment_kwargs
+        )
 
     def _get_increment_kwargs(self, conn_result):
         return {

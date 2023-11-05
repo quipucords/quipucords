@@ -88,27 +88,27 @@ def expected_messages():
         "PROCESSING Source 1 of 6 - (name=network, type=network, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 network fingerprints",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=3, vcenter=0, satellite=0, openshift=0, ansible=0, acs=0, total=3)",
+        "(network=3, vcenter=0, satellite=0, openshift=0, ansible=0, rhacs=0, total=3)",
         "PROCESSING Source 2 of 6 - (name=vcenter, type=vcenter, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 vcenter fingerprints",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=3, vcenter=3, satellite=0, openshift=0, ansible=0, acs=0, total=6)",
+        "(network=3, vcenter=3, satellite=0, openshift=0, ansible=0, rhacs=0, total=6)",
         "PROCESSING Source 3 of 6 - (name=satellite, type=satellite, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 satellite fingerprints",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=3, vcenter=3, satellite=3, openshift=0, ansible=0, acs=0, total=9)",
+        "(network=3, vcenter=3, satellite=3, openshift=0, ansible=0, rhacs=0, total=9)",
         "PROCESSING Source 4 of 6 - (name=openshift, type=openshift, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 openshift fingerprints",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=0, acs=0, total=12)",
+        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=0, rhacs=0, total=12)",  # noqa: E501
         "PROCESSING Source 5 of 6 - (name=ansible, type=ansible, server=<ID>)",
         "SOURCE FINGERPRINTS - 3 ansible fingerprints",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=3, acs=0, total=15)",
-        "PROCESSING Source 6 of 6 - (name=acs, type=acs, server=<ID>)",
-        "SOURCE FINGERPRINTS - 3 acs fingerprints",
+        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=3, rhacs=0, total=15)",  # noqa: E501
+        "PROCESSING Source 6 of 6 - (name=rhacs, type=rhacs, server=<ID>)",
+        "SOURCE FINGERPRINTS - 3 rhacs fingerprints",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=3, acs=3, total=18)",
+        "(network=3, vcenter=3, satellite=3, openshift=3, ansible=3, rhacs=3, total=18)",  # noqa: E501
         "NETWORK DEDUPLICATION by keys ['subscription_manager_id', 'bios_uuid']",
         "NETWORK DEDUPLICATION RESULT - (before=3, after=2)",
         "SATELLITE DEDUPLICATION by keys ['subscription_manager_id']",
@@ -116,14 +116,14 @@ def expected_messages():
         "VCENTER DEDUPLICATION by keys ['vm_uuid']",
         "VCENTER DEDUPLICATION RESULT - (before=3, after=2)",
         "TOTAL FINGERPRINT COUNT - Fingerprints "
-        "(network=2, vcenter=2, satellite=2, openshift=3, ansible=3, acs=3, total=15)",
+        "(network=2, vcenter=2, satellite=2, openshift=3, ansible=3, rhacs=3, total=15)",  # noqa: E501
         "NETWORK and SATELLITE DEDUPLICATION by keys pairs [(network_key, "
         "satellite_key)]=[('subscription_manager_id', 'subscription_manager_id'), "
         "('mac_addresses', 'mac_addresses')]",
         "NETWORK and SATELLITE DEDUPLICATION START COUNT - Fingerprints "
-        "(network=2, vcenter=2, satellite=2, openshift=3, ansible=3, acs=3, total=15)",
+        "(network=2, vcenter=2, satellite=2, openshift=3, ansible=3, rhacs=3, total=15)",  # noqa: E501
         "NETWORK and SATELLITE DEDUPLICATION END COUNT - Fingerprints "
-        "(vcenter=2, openshift=3, ansible=3, acs=3, combined_fingerprints=2, total=13)",
+        "(vcenter=2, openshift=3, ansible=3, rhacs=3, combined_fingerprints=2, total=13)",  # noqa: E501
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION by keys pairs "
         "[(network_satellite_key, vcenter_key)]=[('bios_uuid', 'vm_uuid'), "
         "('mac_addresses', 'mac_addresses')]",
@@ -131,10 +131,10 @@ def expected_messages():
         "(we trust vcenter more than network/satellite): "
         "('cpu_count', 'infrastructure_type')",
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION START COUNT - Fingerprints "
-        "(vcenter=2, openshift=3, ansible=3, acs=3, combined_fingerprints=2, total=13)",
+        "(vcenter=2, openshift=3, ansible=3, rhacs=3, combined_fingerprints=2, total=13)",  # noqa: E501
         "NETWORK-SATELLITE and VCENTER DEDUPLICATION END COUNT - Fingerprints "
-        "(openshift=3, ansible=3, acs=3, combined_fingerprints=2, total=11)",
-        "COMBINE with OPENSHIFT+ANSIBLE+ACS fingerprints - Fingerprints (total=11)",
+        "(openshift=3, ansible=3, rhacs=3, combined_fingerprints=2, total=11)",
+        "COMBINE with OPENSHIFT+ANSIBLE+RHACS fingerprints - Fingerprints (total=11)",
     ]
 
 
@@ -146,7 +146,7 @@ def test_process_sources(
 
     fingerprints = task_runner._process_sources(report)  # noqa: W0212
     non_merged_fingerprints = [1, 2, 2]
-    # ocp/ansible/acs fingerprints wont be part of deduplication/merging process
+    # ocp/ansible/rhacs fingerprints wont be part of deduplication/merging process
     assert fingerprints == [1, 2] + 3 * non_merged_fingerprints
     assert [rec.message for rec in caplog.records] == expected_messages
 
