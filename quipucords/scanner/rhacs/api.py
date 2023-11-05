@@ -1,4 +1,4 @@
-"""ACS api adapter."""
+"""RHACS api adapter."""
 
 from logging import getLogger
 
@@ -21,15 +21,15 @@ class HTTPBearerAuth(AuthBase):
         return r
 
 
-class ACSApi(Session):
-    """Specialized Session for ACS."""
+class RHACSApi(Session):
+    """Specialized Session for RHACS."""
 
     @classmethod
     def from_connection_info(  # noqa: PLR0913
         cls, *, host, protocol, port, auth_token, ssl_verify: bool = True
     ):
         """
-        Initialize ACS session.
+        Initialize RHACS session.
 
         :param host: The host of the server. This can be a hostname or IP address.
         :param protocol: The protocol to use for connecting to the server.

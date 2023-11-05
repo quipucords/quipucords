@@ -1,4 +1,4 @@
-"""Inspection phase for ACS scanner."""
+"""Inspection phase for RHACS scanner."""
 
 from __future__ import annotations
 
@@ -9,14 +9,14 @@ from django.db import transaction
 from requests import RequestException
 
 from api.models import RawFact, ScanTask, SystemInspectionResult
-from scanner.acs.runner import ACSTaskRunner
 from scanner.exceptions import ScanFailureError
+from scanner.rhacs.runner import RHACSTaskRunner
 
 logger = getLogger(__name__)
 
 
-class InspectTaskRunner(ACSTaskRunner):
-    """Inspection phase task runner for ACS scanner."""
+class InspectTaskRunner(RHACSTaskRunner):
+    """Inspection phase task runner for RHACS scanner."""
 
     supports_partial_results = False
 
@@ -43,7 +43,7 @@ class InspectTaskRunner(ACSTaskRunner):
                 results[fact] = method()
             except RequestException:
                 logger.exception(
-                    "Error collecting fact '%s' for ACS host '%s'.",
+                    "Error collecting fact '%s' for RHACS host '%s'.",
                     fact,
                     self.system_name,
                 )
@@ -55,22 +55,22 @@ class InspectTaskRunner(ACSTaskRunner):
             return self.success_message, ScanTask.COMPLETED
         return self.failure_message, ScanTask.FAILED
 
-    def _fetch_acs_metric(self, endpoint):
-        """Fetch ACS metrics data from a given endpoint."""
+    def _fetch_rhacs_metric(self, endpoint):
+        """Fetch RHACS metrics data from a given endpoint."""
         response = self.client.get(endpoint)
         response.raise_for_status()
         return response.json()
 
     def get_secured_units_current(self):
-        """Retrieve ACS secured node/cpu units metrics."""
-        secured_units_current = self._fetch_acs_metric(
+        """Retrieve RHACS secured node/cpu units metrics."""
+        secured_units_current = self._fetch_rhacs_metric(
             "/v1/product/usage/secured-units/current"
         )
         return secured_units_current
 
     def get_secured_units_max(self):
-        """Retrieve ACS max secured node/cpu units metrics."""
-        secured_units_max = self._fetch_acs_metric(
+        """Retrieve RHACS max secured node/cpu units metrics."""
+        secured_units_max = self._fetch_rhacs_metric(
             "/v1/product/usage/secured-units/max"
         )
         return secured_units_max
