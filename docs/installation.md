@@ -122,6 +122,8 @@ So, you should proceed with this option _only_ if you really know what you are d
 
 2. Build the UI in the quipucords directory. See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for additional setup information. You must have NodeJS and yarn installed.
 
+   Even though the quipucords `Dockerfile` has instructions to fetch the latest UI assets from GitHub, this step requires you to rebuild the assets locally on your host because the `docker-compose.yml` file instructs the container to mount your host's code into `/app`, and that mounted directory effectively overwrites the existing UI assets that were in the container image.
+
    On Linux:
    ```
    cd quipucords
