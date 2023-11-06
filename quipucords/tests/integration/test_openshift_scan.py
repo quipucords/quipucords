@@ -76,8 +76,8 @@ def expected_cluster():
 
 
 @pytest.fixture
-def expected_acm_metrics():
-    """Return list of ACM metrics."""
+def expected_rhacm_metrics():
+    """Return list of RHACM metrics."""
     return [
         {
             "vendor": "Openshift",
@@ -122,7 +122,7 @@ def expected_facts(
     expected_node,
     expected_cluster,
     expected_operators,
-    expected_acm_metrics,
+    expected_rhacm_metrics,
 ):
     """Return a list of expected raw facts on OCP scans."""
     expected_node.cluster_uuid = expected_cluster.uuid
@@ -131,7 +131,7 @@ def expected_facts(
         {
             "cluster": _formatter(expected_cluster),
             "operators": _formatter(expected_operators),
-            "acm_metrics": expected_acm_metrics,
+            "rhacm_metrics": expected_rhacm_metrics,
         },
     ]
 
@@ -142,7 +142,7 @@ def patched_openshift_client(  # noqa: PLR0913
     expected_node,
     expected_cluster,
     expected_operators,
-    expected_acm_metrics,
+    expected_rhacm_metrics,
 ):
     """Mock OpenShiftApi forcing it to return expected entities."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
@@ -163,8 +163,8 @@ def patched_openshift_client(  # noqa: PLR0913
     )
     mocker.patch.object(
         OpenShiftApi,
-        "retrieve_acm_metrics",
-        return_value=expected_acm_metrics,
+        "retrieve_rhacm_metrics",
+        return_value=expected_rhacm_metrics,
     )
 
 
