@@ -216,13 +216,13 @@ class OpenShiftApi:
         cluster_entity = self._init_cluster(clusters[0])
         return cluster_entity
 
-    def retrieve_acm_metrics(self, **kwargs) -> list:
-        """Retrieve metrics on acm managed clusters."""
-        acm_metrics = []
+    def retrieve_rhacm_metrics(self, **kwargs) -> list:
+        """Retrieve metrics on RHACM managed clusters."""
+        rhacm_metrics = []
         for cluster in self._list_managed_clusters(**kwargs):
             managed_cluster_metrics = self._init_managed_cluster(cluster)
-            acm_metrics.append(managed_cluster_metrics)
-        return acm_metrics
+            rhacm_metrics.append(managed_cluster_metrics)
+        return rhacm_metrics
 
     def retrieve_pods(self, **kwargs) -> List[OCPPod]:
         """Retrieve OCP Pods."""
