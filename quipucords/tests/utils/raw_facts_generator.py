@@ -185,7 +185,7 @@ def _openshift_raw_facts_generator(number_of_facts):
     yield {
         "cluster": cluster,
         "operators": [],
-        "acm_metrics": [],
+        "rhacm_metrics": [],
     }
     for _ in range(number_of_facts):
         node = OCPNode(

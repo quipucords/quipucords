@@ -174,10 +174,10 @@ def test_csv_api(ocp_client: OpenShiftApi):
 
 
 @pytest.mark.vcr_primer(VCRCassettes.OCP_ACM, VCRCassettes.OCP_DISCOVERER_CACHE)
-def test_cluster_acm_api(ocp_client: OpenShiftApi):
+def test_cluster_rhacm_api(ocp_client: OpenShiftApi):
     """Test _managed_cluster_api."""
-    acm_metrics = ocp_client._list_managed_clusters()
-    assert acm_metrics
+    rhacm_metrics = ocp_client._list_managed_clusters()
+    assert rhacm_metrics
 
 
 @pytest.mark.vcr(VCRCassettes.OCP_CLUSTER, VCRCassettes.OCP_DISCOVERER_CACHE)
@@ -209,14 +209,14 @@ def test_retrieve_operators(ocp_client: OpenShiftApi):
     VCRCassettes.OCP_ACM,
     VCRCassettes.OCP_DISCOVERER_CACHE,
 )
-def test_retrieve_acm_metrics(ocp_client: OpenShiftApi):
-    """Test retrieve acm metrics method."""
-    # OCP instance used on VCR preparation should have ACM operator installed,
+def test_retrieve_rhacm_metrics(ocp_client: OpenShiftApi):
+    """Test retrieve RHACM metrics method."""
+    # OCP instance used on VCR preparation should have RHACM operator installed,
     # with active multiClusterHub instance
-    acm_metrics = ocp_client.retrieve_acm_metrics()
-    assert isinstance(acm_metrics, list)
-    min_cluster_msg = "This test requires at least 1 cluster managed through ACM."
-    assert len(acm_metrics) >= 1, min_cluster_msg
+    rhacm_metrics = ocp_client.retrieve_rhacm_metrics()
+    assert isinstance(rhacm_metrics, list)
+    min_cluster_msg = "This test requires at least 1 cluster managed through RHACM."
+    assert len(rhacm_metrics) >= 1, min_cluster_msg
 
     # The following assertion is based on the assumption that the provisioned cluster
     # has not undergone any additional config modifications. When creating the
@@ -235,10 +235,10 @@ def test_retrieve_acm_metrics(ocp_client: OpenShiftApi):
         "socket_worker",
         "created_via",
     ]
-    expected_data = [{key: mock.ANY for key in expected_keys}] * len(acm_metrics)
-    assert acm_metrics == expected_data
+    expected_data = [{key: mock.ANY for key in expected_keys}] * len(rhacm_metrics)
+    assert rhacm_metrics == expected_data
     # at least one cluster is available
-    assert any(cluster_metrics["available"] for cluster_metrics in acm_metrics)
+    assert any(cluster_metrics["available"] for cluster_metrics in rhacm_metrics)
 
 
 @pytest.mark.parametrize(
@@ -328,9 +328,9 @@ def test_init_managed_cluster(
         return_value=[mock_managed_cluster],
     )
 
-    acm_metrics = ocp_client.retrieve_acm_metrics()
+    rhacm_metrics = ocp_client.retrieve_rhacm_metrics()
 
-    assert acm_metrics == expected_metrics
+    assert rhacm_metrics == expected_metrics
 
 
 def test_optional_openshift_resource(caplog):
@@ -354,7 +354,7 @@ def test_optional_openshift_resource_missing(caplog):
         # Normally a call like this would be invoked on an OpenShiftApi client.
         # For the sake of testing, we simply want to force a client exception.
         # This emulates the client's behavior when the caller requests a resource that
-        # the server does not have, as may happen for optional features like ACM.
+        # the server does not have, as may happen for optional features like RHACM.
         raise ResourceNotFoundError
 
     caplog.set_level(logging.INFO)
