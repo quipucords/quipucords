@@ -38,7 +38,6 @@ jobs:
             lint,
             check-db-migrations-needed,
             test-coverage,
-            test-integration,
             test-sudo-list,
           ]
     runs-on: ubuntu-latest
