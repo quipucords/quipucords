@@ -195,6 +195,9 @@ class FactMapper:
             normalizer.fields = {}
         # ensure dependencies are created BEFORE this one
         self._ensure_dependencies_exist(normalizer)
+        # avoid mutating parent fields (required when inheriting indirectly from
+        # BaseNormalizer - e.g. BaseNormalizer -> ParentNormalizer -> ChildNormalizer)
+        normalizer.fields = normalizer.fields.copy()
         normalizer.fields[name] = self
         self.fact_name = name
 

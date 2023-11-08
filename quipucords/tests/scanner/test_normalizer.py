@@ -183,16 +183,71 @@ class TestMultipleRawFacts:
             norm.normalize()
 
 
-def test_multiple_normalizers():
-    """Ensure one normalizer class does not leak info to another."""
-    assert BaseNormalizer.fields is None
+class TestMultipleNormalizers:
+    """Test interaction between multiple normalizers."""
 
-    class N1(BaseNormalizer):
-        fact1 = FactMapper("some_raw_fact", str)
+    def test_distinct_fact_names(self):
+        """Ensure one normalizer class does not leak info to another."""
+        assert BaseNormalizer.fields is None
 
-    class N2(BaseNormalizer):
-        fact2 = FactMapper("another_raw_fact", str)
+        class N1(BaseNormalizer):
+            fact1 = FactMapper("some_raw_fact", str)
 
-    assert BaseNormalizer.fields is None
-    assert N1.fields == {"fact1": N1.fact1}
-    assert N2.fields == {"fact2": N2.fact2}
+        class N2(BaseNormalizer):
+            fact2 = FactMapper("another_raw_fact", str)
+
+        assert BaseNormalizer.fields is None
+        assert N1.fields == {"fact1": N1.fact1}
+        assert N2.fields == {"fact2": N2.fact2}
+
+    def test_same_fact_name(self):
+        """Ensure one normalizer class does not leak info to another."""
+        assert BaseNormalizer.fields is None
+
+        class N1(BaseNormalizer):
+            fact1 = FactMapper("foo", str)
+
+        class N2(BaseNormalizer):
+            fact1 = FactMapper("bar", str)
+
+        assert N1.fact1 != N2.fact1
+        assert BaseNormalizer.fields is None
+        assert N1.fields == {"fact1": N1.fact1}
+        assert N2.fields == {"fact1": N2.fact1}
+
+    def test_indirect_inheritance(self):
+        """Ensure Normalizers fields can behave properly when built with inheritance."""
+
+        class Parent(BaseNormalizer):
+            common_fact = FactMapper("some_fact", str)
+
+        class Child1(Parent):
+            fact1 = FactMapper("foo", str)
+
+        class Child2(Parent):
+            fact2 = FactMapper("bar", str)
+
+        assert Parent.fields == {"common_fact": Parent.common_fact}
+        assert Child1.fields == {
+            "fact1": Child1.fact1,
+            "common_fact": Child1.common_fact,
+        }
+        assert Child2.fields == {
+            "fact2": Child2.fact2,
+            "common_fact": Child2.common_fact,
+        }
+
+    def test_depending_on_another_class(self):
+        """Ensure a normalizer fact cant depend on another class fact."""
+
+        class N1(BaseNormalizer):
+            fact1 = FactMapper("raw1", str)
+
+        with pytest.raises(RuntimeError) as exc_info:
+
+            class N2(BaseNormalizer):
+                fact2 = FactMapper("raw2", str, dependencies=["fact1"])
+
+        exc_cause = exc_info.value.__cause__
+        assert isinstance(exc_cause, ValueError)
+        assert str(exc_cause) == "'fact1' can't be found on normalizer 'N2'"
