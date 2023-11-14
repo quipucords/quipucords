@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import datetime
 import json
+import logging
 import re
 from typing import Dict, List
 
 from pydantic import Field, validator
 
 from compat.pydantic import BaseModel, raises
+
+logger = logging.getLogger(__name__)
 
 
 def load_entity(data: dict) -> OCPBaseEntity:
@@ -19,7 +22,6 @@ def load_entity(data: dict) -> OCPBaseEntity:
 
 
 def _update_model_refs():
-
     for model in OCPBaseEntity._OCP_ENTITIES.values():
         model.update_forward_refs()
 
@@ -285,7 +287,13 @@ class LifecycleOperator(ClusterOperator):
     def from_raw_object(cls, raw_object):
         """Instantiate OLM operator using its equivalent api object."""
         installed_version = raw_object.status.currentCSV
-        package, version = installed_version.split(".", 1)
+        try:
+            package, version = installed_version.split(".", 1)
+        except (AttributeError, ValueError):
+            logger.error(
+                "Unexpected value for Cluster Service Version: '%s'", installed_version
+            )
+            package = version = None
         return LifecycleOperator(
             name=raw_object.metadata.name,
             created_at=raw_object.metadata.creationTimestamp,
@@ -300,7 +308,8 @@ class LifecycleOperator(ClusterOperator):
     @property
     def cluster_service_version(self):
         """Return currentCSV metadata."""
-        return f"{self.package}.{self.version}"
+        if self.package:
+            return f"{self.package}.{self.version}"
 
 
 # update nested model references - this should always be the last thing to run
