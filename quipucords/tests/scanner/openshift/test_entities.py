@@ -1,11 +1,13 @@
 """Test OCPEntities methods."""
 
+import logging
 from copy import deepcopy
 
 import pytest
 from pydantic import ValidationError
 
 from scanner.openshift.entities import (
+    LifecycleOperator,
     NodeResources,
     OCPBaseEntity,
     OCPCluster,
@@ -198,3 +200,36 @@ def test_memory_validator_with_inappropriate_values(value):
     with pytest.raises(ValidationError) as exc_info:
         NodeResources(memory_in_bytes=value)
     assert "value is not a valid integer" in str(exc_info.value)
+
+
+@pytest.fixture
+def raw_operator(mocker, faker):
+    """Return a mock object representing a raw OLM operator."""
+    raw_object = mocker.MagicMock()
+    raw_object.status.currentCSV = "package.version"
+    raw_object.status.lastUpdated = faker.date_time()
+    raw_object.metadata.name = faker.slug()
+    raw_object.metadata.namespace = faker.slug()
+    raw_object.metadata.creationTimestamp = faker.date_time()
+    raw_object.spec.source = faker.slug()
+    raw_object.spec.channel = faker.slug()
+    return raw_object
+
+
+@pytest.mark.parametrize(
+    "csv_value,error_msg",
+    [
+        (None, "Unexpected value for Cluster Service Version: 'None'"),
+        ("dotless_csv", "Unexpected value for Cluster Service Version: 'dotless_csv'"),
+    ],
+)
+def test_lifecycle_operator_malformed_csv(raw_operator, csv_value, caplog, error_msg):
+    """Ensure LifecycleOperator can parse raw operators with invalid 'CSV' value."""
+    raw_operator.status.currentCSV = csv_value
+    caplog.set_level(logging.ERROR)
+    operator = LifecycleOperator.from_raw_object(raw_operator)
+    assert isinstance(operator, LifecycleOperator)
+    assert operator.package is None
+    assert operator.version is None
+    assert operator.cluster_service_version is None
+    assert caplog.messages[-1] == error_msg
