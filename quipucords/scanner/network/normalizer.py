@@ -4,7 +4,12 @@ import ipaddress
 
 from constants import DataSources
 from fingerprinter import formatters
-from scanner.normalizer import BaseNormalizer, FactMapper, NormalizedResult, str_or_none
+from scanner.normalizer import (
+    FactMapper,
+    NormalizedResult,
+    SystemProfileNormalizer,
+    str_or_none,
+)
 
 
 def infrastructure_type_normalizer(
@@ -46,7 +51,7 @@ def network_interfaces(ip_addresses: list[str]):
     return [interface]
 
 
-class Normalizer(BaseNormalizer):
+class Normalizer(SystemProfileNormalizer):
     """Network Scan normalizer."""
 
     source_type = DataSources.NETWORK.value

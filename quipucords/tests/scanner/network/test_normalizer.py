@@ -135,3 +135,13 @@ class TestIPAddressNormalizer:
     def test_empty(self, input):
         """Test empty input."""
         assert ip_address_normalizer(input) == []
+
+
+def test_invalid_number_of_cpus(mocker):
+    """This is an example on how to indirectly test system profile validation."""
+    # cpu_core_count for this test is way bigger then the value accepted for
+    # number_of_cpus on system profile
+    raw_facts = {"cpu_core_count": 42_000_000_000}
+    n = Normalizer(raw_facts, mocker.ANY)
+    n.normalize()
+    n.facts["number_of_cpus"] is None
