@@ -38,7 +38,7 @@ packaging==23.2 ; python_version >= "3.11" and python_version < "3.12"
     #   setuptools-scm
 pathspec==0.11.2
     # via hatchling
-pbr==5.11.1
+pbr==6.0.0
     # via
     #   ansible-runner
     #   lockfile
@@ -61,11 +61,11 @@ setuptools-scm==8.0.4
     #   pluggy
     #   python-dateutil
     #   setuptools-rust
-trove-classifiers==2023.10.18
+trove-classifiers==2023.11.22
     # via hatchling
 typing-extensions==4.8.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
-wheel==0.41.3
+wheel==0.42.0
     # via
     #   async-timeout
     #   bcrypt
@@ -80,7 +80,7 @@ wheel==0.41.3
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==68.2.2 ; python_version >= "3.11" and python_version < "3.12"
+setuptools==69.0.2 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   ansible
     #   ansible-core
@@ -92,6 +92,7 @@ setuptools==68.2.2 ; python_version >= "3.11" and python_version < "3.12"
     #   click-repl
     #   cryptography
     #   django
+    #   django-cors-headers
     #   gitpython
     #   pathspec
     #   pluggy

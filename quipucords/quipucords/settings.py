@@ -113,6 +113,9 @@ if env.bool("QPC_URLLIB3_DISABLE_WARNINGS", False):
     urllib3.disable_warnings()
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOST_LIST", default=["*"])
+CORS_ALLOWED_ORIGIN_REGEXES = env.list(
+    "DJANGO_CORS_ALLOWED_ORIGIN_REGEXES", default=[".*"]
+)
 
 # Application definition
 
@@ -126,6 +129,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "corsheaders",
     "api",
 ]
 
@@ -140,6 +144,7 @@ MIDDLEWARE = [
     "api.common.middleware.ServerVersionMiddle",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
