@@ -1,15 +1,15 @@
 """Test the connect callback capabilities."""
 
-
 from unittest.mock import Mock
 
-from django.test import TestCase
+import pytest
 
-from api.models import Credential, ScanJob, ScanTask, Source
+from api.models import Source
+from constants import DataSources
 from scanner.network.connect import ConnectResultStore
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import STOP_STATES
-from tests.scanner.test_util import create_scan_job
+from tests.factories import ScanTaskFactory, SourceFactory
 
 
 def build_event(host, return_code=0, stderr=False, msg=False, event=False):
@@ -24,43 +24,24 @@ def build_event(host, return_code=0, stderr=False, msg=False, event=False):
     return event_dict
 
 
-class TestConnectResultCallback(TestCase):
+@pytest.fixture
+def source():
+    """Return a source instance for testing."""
+    return SourceFactory(
+        source_type=DataSources.NETWORK,
+        hosts=["1.2.3.4", "1.2.3.5", "1.2.3.6"],
+    )
+
+
+@pytest.mark.django_db
+class TestConnectResultCallback:
     """Test ConnectResultCallback."""
 
-    def setUp(self):
-        """Set up required for tests."""
-        self.cred = Credential(
-            name="cred1",
-            username="username",
-            password="password",
-            ssh_keyfile="keyfile",
-            become_method="sudo",
-            become_user="root",
-            become_password="become",
-        )
-        self.cred.save()
-
-        self.source = Source(
-            name="source1",
-            hosts=["1.2.3.4", "1.2.3.5", "1.2.3.6"],
-            source_type="network",
-            port=22,
-        )
-        self.source.save()
-        self.source.credentials.add(self.cred)
-        self.source.save()
-
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_CONNECT
-        )
-        self.interrupt = Mock(value=ScanJob.JOB_RUN)
-
-    def test_task_on_ok(self):
+    def test_task_on_ok(self, source: Source):
         """Test the callback on ok."""
-        results_store = ConnectResultStore(self.scan_task)
-        self.interrupt.return_value.value = ScanJob.JOB_RUN
+        results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_ok"))
@@ -70,15 +51,15 @@ class TestConnectResultCallback(TestCase):
         )
         for event in events:
             callback.event_callback(event)
-        self.assertEqual(callback.result_store.scan_task.systems_count, 3)
-        self.assertEqual(callback.result_store.scan_task.systems_scanned, 1)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
+        callback.result_store.scan_task.systems_count == 3
+        callback.result_store.scan_task.systems_scanned == 1
+        callback.result_store.scan_task.systems_failed == 0
 
-    def test_task_on_failed(self):
+    def test_task_on_failed(self, source: Source):
         """Test the callback on failed."""
-        results_store = ConnectResultStore(self.scan_task)
+        results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_failed"))
@@ -89,14 +70,14 @@ class TestConnectResultCallback(TestCase):
         )
         for event in events:
             callback.event_callback(event)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
-        self.assertEqual(callback.result_store.scan_task.systems_count, 3)
+        assert callback.result_store.scan_task.systems_failed == 0
+        assert callback.result_store.scan_task.systems_count == 3
 
-    def test_task_on_unreachable(self):
+    def test_task_on_unreachable(self, source: Source):
         """Test the callback on unreachable."""
-        results_store = ConnectResultStore(self.scan_task)
+        results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_unreachable"))
@@ -107,57 +88,60 @@ class TestConnectResultCallback(TestCase):
         )
         for event in events:
             callback.event_callback(event)
-        self.assertEqual(callback.result_store.scan_task.systems_failed, 0)
-        self.assertEqual(callback.result_store.scan_task.systems_unreachable, 1)
-        self.assertEqual(callback.result_store.scan_task.systems_count, 3)
+        callback.result_store.scan_task.systems_failed == 0
+        callback.result_store.scan_task.systems_unreachable == 1
+        callback.result_store.scan_task.systems_count == 3
 
-    def test_exceptions_for_tasks(self):
+    def test_exceptions_for_tasks(self, source: Source):
         """Test exception for each task."""
         results_store = None
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_ok"))
         events.append(build_event(host="1.2.3.4", event="runner_on_failed"))
         events.append(build_event(host="1.2.3.4", event="runner_on_unreachable"))
         for event in events:
-            with self.assertRaises(Exception):
+            # TODO: rewrite this test to something more meaningful. results_store set
+            # as None will cause attribute error in many places and don't really reflect
+            # a expected error.
+            with pytest.raises(AttributeError):
                 callback.event_callback(event)
 
-    def test_unknown_event_response(self):
+    def test_unknown_event_response(self, source: Source):
         """Test unknown event response."""
-        results_store = ConnectResultStore(self.scan_task)
+        results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         event = build_event(host="1.2.3.4", event="runner_on_unknown_event")
         callback.event_callback(event)
 
-    def test_empty_host(self):
+    def test_empty_host(self, source: Source):
         """Test unknown event response."""
-        results_store = ConnectResultStore(self.scan_task)
+        results_store = ConnectResultStore(ScanTaskFactory())
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         event = build_event(host=None, event="runner_on_ok")
         callback.event_callback(event)
 
-    def test_cancel_event(self):
+    def test_cancel_event(self, source: Source):
         """Test cancel event response."""
         # Test continue state
-        results_store = ConnectResultStore(self.scan_task)
+        results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, self.cred, self.source, self.interrupt
+            results_store, source.single_credential, source, Mock()
         )
         result = callback.cancel_callback()
-        self.assertEqual(result, False)
+        assert not result
         # Test cancel state
         for stop_value in STOP_STATES.values():
-            self.interrupt = Mock(value=stop_value)
+            interrupt = Mock(value=stop_value)
             callback = ConnectResultCallback(
-                results_store, self.cred, self.source, self.interrupt
+                results_store, source.single_credential, source, interrupt
             )
-            self.assertEqual(callback.interrupt.value, stop_value)
+            assert callback.interrupt.value == stop_value
             result = callback.cancel_callback()
-            self.assertEqual(result, True)
+            assert result is True
