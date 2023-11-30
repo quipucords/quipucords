@@ -10,6 +10,10 @@ from scanner.network.utils import STOP_STATES
 logger = logging.getLogger(__name__)
 
 
+class UnexpectedError(Exception):
+    """Unexpected error when parsing event data from Ansible Runner."""
+
+
 class ConnectResultCallback:
     """Record connection results.
 
@@ -34,12 +38,12 @@ class ConnectResultCallback:
                 )
             logger.debug("%s", {"host": host, "result": task_result})
         except Exception as error:
+            logger.exception("Uncaught exception during Ansible Runner event parsing")
             self.result_store.scan_task.log_message(
                 log_messages.TASK_UNEXPECTED_FAILURE
                 % ("task_on_ok", error, event_data),
                 log_level=logging.ERROR,
             )
-            traceback.print_exc()
             raise error
 
     def task_on_unreachable(self, event_data, host, task_result):
@@ -108,33 +112,42 @@ class ConnectResultCallback:
 
     def event_callback(self, event_dict=None):
         """Control the event callback for runner."""
+        try:
+            self._event_callback(event_dict)
+        except UnexpectedError as err:
+            logger.error(str(err))
+            event = event_dict.get("event")
+            self.result_store.scan_task.log_message(
+                log_messages.TASK_UNEXPECTED_FAILURE
+                % ("runner_event", event, event_dict),
+                log_level=logging.ERROR,
+            )
+
+    def _event_callback(self, event_dict=None):
+        """Control the event callback for runner."""
         if event_dict:
+            logger.debug("processing event callback")
+            logger.debug("event_dict=%s", event_dict)
             event = event_dict.get("event")
             event_data = event_dict.get("event_data")
-            unexpected_error = False
             ignore_states = ["runner_on_start"]
+            if event is None:
+                raise UnexpectedError("event is None")
             if event in ignore_states:
                 return
-            if "runner" in event:
+            if event.startswith("runner"):
                 host = event_data.get("host")
                 task_result = event_data.get("res")
-                if None not in (host, task_result):
-                    if event == "runner_on_ok":
-                        self.task_on_ok(event_data, host, task_result)
-                    elif event == "runner_on_unreachable":
-                        self.task_on_unreachable(event_data, host, task_result)
-                    elif event == "runner_on_failed":
-                        self.task_on_failed(event_data, host, task_result)
-                    else:
-                        unexpected_error = True
+                if host is None or task_result is None:
+                    raise UnexpectedError("Host or task_result is None")
+                if event == "runner_on_ok":
+                    self.task_on_ok(event_data, host, task_result)
+                elif event == "runner_on_unreachable":
+                    self.task_on_unreachable(event_data, host, task_result)
+                elif event == "runner_on_failed":
+                    self.task_on_failed(event_data, host, task_result)
                 else:
-                    unexpected_error = True
-                if unexpected_error:
-                    self.result_store.scan_task.log_message(
-                        log_messages.TASK_UNEXPECTED_FAILURE
-                        % ("runner_event", f"Unknown State ({event})", event_dict),
-                        log_level=logging.ERROR,
-                    )
+                    raise UnexpectedError(f"Unexpected event={event}")
 
     def cancel_callback(self):
         """Control the cancel callback for runner."""

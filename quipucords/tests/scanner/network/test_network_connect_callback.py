@@ -1,5 +1,6 @@
 """Test the connect callback capabilities."""
 
+import logging
 from unittest.mock import Mock
 
 import pytest
@@ -145,3 +146,17 @@ class TestConnectResultCallback:
             assert callback.interrupt.value == stop_value
             result = callback.cancel_callback()
             assert result is True
+
+    def test_unexpected_event(self):
+        """Test how event_callback handles an unexpected event."""
+        results_store = Mock()
+        callback = ConnectResultCallback(results_store, Mock(), Mock(), Mock())
+        event_data = {"some_data": "some_value"}
+        assert callback.event_callback(event_data) is None
+        expected_error = (
+            "UNEXPECTED FAILURE in runner_event. Error: None\n"
+            "Ansible result: {'some_data': 'some_value'}"
+        )
+        callback.result_store.scan_task.log_message.assert_called_with(
+            expected_error, log_level=logging.ERROR
+        )
