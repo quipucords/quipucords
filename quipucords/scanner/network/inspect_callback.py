@@ -168,20 +168,30 @@ class InspectResultCallback:
     def event_callback(self, event_dict=None):  # noqa: C901
         """Control the event callback for Ansible Runner."""
         try:
+            logger.debug("processing event callback")
+            logger.debug("event_dict=%s", event_dict)
             okay = ["runner_on_ok", "runner_item_on_ok"]
             failed = ["runner_on_failed", "runner_item_on_failed"]
             unreachable = ["runner_on_unreachable"]
             runner_ignore = ["runner_on_skipped", "runner_item_on_skipped"]
+            ignore_states = ["runner_on_start"]
             event = event_dict.get("event")
             event_data = event_dict.get("event_data")
 
-            ignore_states = ["runner_on_start"]
+            if not event:
+                self.scan_task.log_message(
+                    log_messages.TASK_UNEXPECTED_FAILURE
+                    % ("event_callback", event, event_dict),
+                    log_level=logging.ERROR,
+                )
+                return
+
             if event in ignore_states:
                 return
 
             if event_dict:
                 # Check if it is a task event
-                if "runner" in event:
+                if event.startswith("runner"):
                     if event in okay:
                         self.task_on_ok(event_dict)
                     elif event in failed:
@@ -195,11 +205,10 @@ class InspectResultCallback:
                             log_level=logging.ERROR,
                         )
                 # Save last role for task logging later
-                if event == "playbook_on_task_start":
-                    if event_data:
-                        event_role = event_data.get("role")
-                        if event_role != self.last_role:
-                            self.last_role = event_role
+                if event == "playbook_on_task_start" and event_data:
+                    event_role = event_data.get("role")
+                    if event_role != self.last_role:
+                        self.last_role = event_role
         except Exception as err_msg:  # noqa: BLE001
             raise AnsibleRunnerException(err_msg) from err_msg
 

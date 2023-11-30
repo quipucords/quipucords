@@ -299,6 +299,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
                 verbosity=verbosity_lvl,
             )
         except Exception as err_msg:  # noqa: BLE001
+            logger.exception("Uncaught exception during Ansible Runner execution")
             delete_ssh_keyfiles(inventory)
             raise AnsibleRunnerException(err_msg) from err_msg
 

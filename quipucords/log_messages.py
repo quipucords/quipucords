@@ -19,5 +19,5 @@ NETWORK_CALLBACK_ACK_STOP = (
     "NETWORK %s CALLBACK: Acknowledged request to %s but still processing."
 )
 NETWORK_PLAYBOOK_STOPPED = "NETWORK %s: Playbook status has been reported as %s."
-TASK_UNEXPECTED_FAILURE = "UNEXPECTED FAILURE in %s.  Error: %s\nAnsible result: %s"
+TASK_UNEXPECTED_FAILURE = "UNEXPECTED FAILURE in %s. Error: %s\nAnsible result: %s"
 TASK_PERMISSION_DENIED = "PERMISSION DENIED %s could not connect with cred %s."
