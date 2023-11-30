@@ -246,7 +246,7 @@ class InspectTaskRunner(ScanTaskRunner):
                     verbosity=verbosity_lvl,
                 )
             except Exception as error:
-                logger.exception("Unexpected error")
+                logger.exception("Uncaught exception during Ansible Runner execution")
                 delete_ssh_keyfiles(inventory)
                 raise AnsibleRunnerException(str(error)) from error
 

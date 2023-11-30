@@ -1,4 +1,5 @@
 """Test the inspect scanner capabilities."""
+import logging
 from multiprocessing import Value
 from pathlib import Path
 from unittest.mock import ANY, Mock, patch
@@ -394,3 +395,22 @@ class TestNetworkInspectScanner:
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
         assert "verbosity=1" in str(calls[0])
+
+
+class TestInspectCallback:
+    """TestCase for InspectResultCallback."""
+
+    def test_unexpected_event(self, mocker):
+        """Test how event_callback handles an unexpected event."""
+        callback = InspectResultCallback(
+            scan_task=mocker.Mock(), manager_interrupt=mocker.Mock()
+        )
+        event_data = {"some_data": "some_value"}
+        assert callback.event_callback(event_data) is None
+        expected_error = (
+            "UNEXPECTED FAILURE in event_callback. Error: None\n"
+            "Ansible result: {'some_data': 'some_value'}"
+        )
+        callback.scan_task.log_message.assert_called_with(
+            expected_error, log_level=logging.ERROR
+        )
