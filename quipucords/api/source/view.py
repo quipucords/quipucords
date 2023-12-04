@@ -118,42 +118,38 @@ class SourceViewSet(ModelViewSet):
             result.append(json_source)
         return Response(result)
 
-    @transaction.atomic
     def create(self, request, *args, **kwargs):
         """Create a source."""
-        response = super().create(request, args, kwargs)
-
-        # Modify json for response
-        json_source = response.data
-
         # check to see if a connection scan was requested
         # through query parameter
         scan = request.query_params.get("scan", False)
-        # If the scan was requested, create a connection scan
-        if scan:
-            if is_boolean(scan):
-                if convert_to_boolean(scan):
-                    # Grab the source id
-                    source_id = response.data["id"]
+        scan_job = None
+        with transaction.atomic():
+            response = super().create(request, args, kwargs)
 
-                    # Create the scan job
-                    scan_job = ScanJob.objects.create(
-                        scan_type=ScanTask.SCAN_TYPE_CONNECT
-                    )
-
-                    # Add the source
-                    scan_job.sources.add(source_id)
-                    json_source["most_recent_connect_scan"] = scan_job.id
-
-                    # Start the scan
-                    start_scan.send(sender=self.__class__, instance=scan_job)
-            else:
+            # Modify json for response
+            if not is_boolean(scan):
                 error = {"scan": [_(messages.SOURCE_CONNECTION_SCAN)]}
                 raise ValidationError(error)
 
-        # format source after creating scan to populate connection
-        format_source(json_source)
+            # If the scan was requested, create a connection scan
+            if convert_to_boolean(scan):
+                # Grab the source id
+                source_id = response.data["id"]
 
+                # Create the scan job
+                scan_job = ScanJob.objects.create(scan_type=ScanTask.SCAN_TYPE_CONNECT)
+
+                # Add the source
+                scan_job.sources.add(source_id)
+                response.data["most_recent_connect_scan"] = scan_job.id
+
+            # format source after creating scan to populate connection
+            format_source(response.data)
+        if scan_job:
+            # start the scan outside of the transaction to avoid celery trying to start
+            # the process with an id that doesn't exist in the DB yet.
+            start_scan.send(sender=self.__class__, instance=scan_job)
         return response
 
     def retrieve(self, request, pk=None):
