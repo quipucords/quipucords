@@ -51,6 +51,8 @@ class Credential(models.Model):
     )
     become_user = models.CharField(max_length=64, null=True, blank=True)
     become_password = models.CharField(max_length=1024, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     ENCRYPTED_FIELDS = [
         "password",

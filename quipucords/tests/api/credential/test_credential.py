@@ -1122,7 +1122,9 @@ class TestCredentialSerialization:
         """Test if data is masked as expected for list method."""
         results = []
         for input_data, output, _ in self.INPUT_OUTPUT_ID:
-            CredentialFactory(**input_data)
+            credential = CredentialFactory(**input_data)
+            output["created_at"] = credential.created_at.isoformat()
+            output["updated_at"] = credential.updated_at.isoformat()
             results.append(output)
         # sorting results to match default credentials api sorting
         results = sorted(results, key=lambda x: x["name"])

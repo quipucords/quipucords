@@ -1,4 +1,5 @@
 """Test credentials serializer."""
+import datetime
 from pathlib import Path
 from unittest import mock
 
@@ -585,12 +586,20 @@ class TestBaseCredentialSerializer:
         def _value_formatter(value):
             if isinstance(value, str) and Credential.is_encrypted(value):
                 return ENCRYPTED_DATA_MASK
+            elif isinstance(value, datetime.datetime):
+                return value.strftime("%Y-%m-%dT%H:%M:%S.%f")
             return value
 
         credentials = CredentialFactory.create_batch(10)
         serializer = CredentialSerializer(instance=credentials, many=True)
         assert isinstance(serializer, ListSerializer)
         assert serializer.child.__class__ == CredentialSerializer
+        for cred_data in serializer.data:
+            assert "created_at" in cred_data
+            assert "updated_at" in cred_data
+            assert cred_data["created_at"] is not None
+            assert cred_data["updated_at"] is not None
+
         expected_data = []
         # prep a list of credentials dict as the serializer would return
         for cred in credentials:
@@ -599,6 +608,8 @@ class TestBaseCredentialSerializer:
                 for k, v in model_to_dict(cred).items()
                 if v is not None
             }
+            cred_dict["created_at"] = _value_formatter(cred.created_at)
+            cred_dict["updated_at"] = _value_formatter(cred.updated_at)
             expected_data.append(cred_dict)
         assert serializer.data == expected_data
 
