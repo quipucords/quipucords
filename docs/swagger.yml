@@ -1225,6 +1225,10 @@ definitions:
           type: "string"
           example: "~/.ssh/id_rsa"
           description: "The connection private ssh keyfile for the credential"
+        ssh_key:
+          type: "string"
+          example: "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+          description: "Private SSH key content for authentication."
         auth_token:
           type: "string"
           example: "<someToken>"
@@ -1253,6 +1257,14 @@ definitions:
           type: "string"
           example: "********"
           description: "The privilege escalation password to be used when running a network scan."
+        created_at:
+          type: "string"
+          example: "2023-12-07T19:07:30.538943"
+          description: "Timestamp of credential creation in ISO 8601 format."
+        updated_at:
+          type: "string"
+          example: "2023-12-07T19:07:30.538943"
+          description: "Timestamp of the last update to the credential in ISO 8601 format."
         sources:
           type: "array"
           items:
