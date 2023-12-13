@@ -99,7 +99,7 @@ def log_all_environment_variables():
         env_list.append(env)
     mark = "-" * 20
     logger.info("%s BEGIN ENVIRONMENT VARIABLES %s", mark, mark)
-    logger.info("\n".join(env_list))
+    logger.info("\n".join(sorted(env_list)))
     logger.info("%s END ENVIRONMENT VARIABLES %s", mark, mark)
 
 
