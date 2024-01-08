@@ -12,6 +12,7 @@ from api.views import (
     SourceViewSet,
     UserViewSet,
     async_merge_reports,
+    credential_bulk_delete,
     deployments,
     details,
     insights,
@@ -30,6 +31,7 @@ ROUTER.register(r"jobs", ScanJobViewSet, basename="scanjob")
 ROUTER.register(r"users", UserViewSet, basename="users")
 
 urlpatterns = [
+    path("credentials/bulk_delete/", credential_bulk_delete),
     path("reports/<int:report_id>/details/", details),
     path("reports/<int:report_id>/deployments/", deployments),
     path("reports/<int:report_id>/insights/", insights),
