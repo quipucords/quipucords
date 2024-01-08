@@ -3,6 +3,7 @@
 # flake8: noqa
 
 from api.credential.view import CredentialViewSet
+from api.credential.view import credential_bulk_delete
 from api.deployments_report.view import deployments
 from api.details_report.view import DetailsReportsViewSet, details
 from api.insights_report.view import insights
