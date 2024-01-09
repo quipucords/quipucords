@@ -234,6 +234,35 @@ paths:
           description: "Not authorized"
         404:
           description: "Credential not found"
+  /credentials/bulk_delete/:
+    post:
+      tags:
+        - "Credential"
+      summary: "Bulk delete credentials"
+      description: "Bulk delete credentials by ids"
+      operationId: "bulkDeleteCredentials"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "List of Credential Ids to delete"
+        required: true
+        schema:
+          $ref: "#/definitions/CredentialIds"
+      responses:
+        200:
+          description: "Credentials deleted"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Not authorized"
+        404:
+          description: "Credential not found"
+        422:
+          description: "Unprocessable Entity"
   /sources/:
     post:
       tags:
@@ -1318,6 +1347,18 @@ definitions:
             items:
               $ref: "#/definitions/CredentialOut"
             description: "The paginated credentials"
+  CredentialIds:
+    type: "object"
+    required:
+      - ids
+    properties:
+      ids:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+        example: [141,165,222]
+        description: "The list of credentials ids"
   DeletionError:
     type: "object"
     required:
