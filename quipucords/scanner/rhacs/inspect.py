@@ -64,14 +64,14 @@ class InspectTaskRunner(RHACSTaskRunner):
     def get_secured_units_current(self):
         """Retrieve RHACS secured node/cpu units metrics."""
         secured_units_current = self._fetch_rhacs_metric(
-            "/v1/product/usage/secured-units/current"
+            "/v1/administration/usage/secured-units/current"
         )
         return secured_units_current
 
     def get_secured_units_max(self):
         """Retrieve RHACS max secured node/cpu units metrics."""
         secured_units_max = self._fetch_rhacs_metric(
-            "/v1/product/usage/secured-units/max"
+            "/v1/administration/usage/secured-units/max"
         )
         return secured_units_max
 

@@ -28,12 +28,12 @@ def mocked_requests(requests_mock, live_server, max_date):
     rhacs_host = "https://rhacs.host:443"
     requests_mock.get(f"{rhacs_host}/v1/auth/status")
     requests_mock.get(
-        f"{rhacs_host}/v1/product/usage/secured-units/current",
+        f"{rhacs_host}/v1/administration/usage/secured-units/current",
         json={"numNodes": "3", "numCpuUnits": "20"},
     )
 
     requests_mock.get(
-        f"{rhacs_host}/v1/product/usage/secured-units/max",
+        f"{rhacs_host}/v1/administration/usage/secured-units/max",
         json={
             "maxNodesAt": max_date,
             "maxNodes": "4",
