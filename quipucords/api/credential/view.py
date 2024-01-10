@@ -20,18 +20,12 @@ from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from api import messages
-from api.common.util import is_int
+from api.common.util import ids_to_str, is_int
 from api.exceptions import UnprocessableEntity
 from api.filters import ListFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializer
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
-
-
-def related_sources(pk):
-    """Return sources related to a credential."""
-    return Source.objects.filter(credentials__pk=pk).values("id", "name")
-
 
 auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
@@ -53,20 +47,34 @@ def credential_bulk_delete(request):
     ids = request.data.get("ids", [])
     if not ids:
         raise ParseError(detail=_("Missing list of credentials to delete 'ids'"))
+    all_ids = set(ids)  # Set to remove duplicates
 
     with transaction.atomic():
-        try:
-            for pk in ids:
-                cred = Credential.objects.get(pk=pk)
-                if related_sources(pk):
-                    raise ValidationError
-                cred.delete()
-        except Credential.DoesNotExist:
-            raise NotFound(detail=_(messages.CRED_ID_DOES_NOT_EXIST % pk))
-        except ValidationError:
-            raise UnprocessableEntity(
-                detail=_(messages.CRED_ID_DELETE_NOT_VALID_W_SOURCES % pk)
+        all_creds = Credential.objects.filter(id__in=all_ids)
+
+        # Check for Credentials that do not exist (404)
+        existing_ids = set([cred.id for cred in all_creds])
+        missing_ids = all_ids - existing_ids
+        if missing_ids:
+            raise NotFound(
+                detail=_(messages.CRED_IDS_DO_NOT_EXIST % ids_to_str(missing_ids))
             )
+
+        # Check for Credentials with related Sources (422)
+        cred_ids_and_sources = all_creds.prefetch_related("sources").values_list(
+            "id", "sources"
+        )
+        ids_with_sources = [cred[0] for cred in cred_ids_and_sources if cred[1]]
+        if ids_with_sources:
+            raise UnprocessableEntity(
+                detail=_(
+                    messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES
+                    % ids_to_str(ids_with_sources)
+                )
+            )
+
+        # Delete the Credentials
+        all_creds.delete()
 
     return Response(status=status.HTTP_200_OK)
 
@@ -114,7 +122,7 @@ class CredentialViewSet(ModelViewSet):
         """Delete a cred."""
         try:
             cred = Credential.objects.get(pk=pk)
-            sources = related_sources(pk)
+            sources = Source.objects.filter(credentials__pk=pk).values("id", "name")
             if sources:
                 message = messages.CRED_DELETE_NOT_VALID_W_SOURCES
                 error = {"detail": message}
