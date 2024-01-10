@@ -38,13 +38,14 @@ HC_NO_KEY_W_PASS = (
 )
 HC_NAME_ALREADY_EXISTS = "Host credential with name=%s already exists"
 CRED_TYPE_REQUIRED_CREATED = "cred_type is required for credential creation"
-CRED_ID_DOES_NOT_EXIST = "Credential id=%s does not exist."
 CRED_TYPE_NOT_ALLOWED_UPDATE = "cred_type is invalid for credential update"
 CRED_DELETE_NOT_VALID_W_SOURCES = (
     "Credential cannot be deleted because it is used by 1 or more sources."
 )
-CRED_ID_DELETE_NOT_VALID_W_SOURCES = (
-    "Credential id=%s cannot be deleted because it is used by 1 or more sources."
+CRED_IDS_DO_NOT_EXIST = "One or more credentials do not exist. ids=%s"
+CRED_IDS_DELETE_NOT_VALID_W_SOURCES = (
+    "One or more credentials cannot be deleted"
+    " because they are used by 1 or more sources. ids=%s"
 )
 UNKNOWN_CRED_TYPE = "Credential type invalid."
 FIELD_NOT_ALLOWED_FOR_DATA_SOURCE = "Field not allowed for '%s' credential."
