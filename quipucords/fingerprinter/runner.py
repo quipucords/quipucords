@@ -508,8 +508,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 fingerprint = self.process_facts_for_datasource(
                     source_type, source, fact
                 )
-            except KeyError:
-                self.scan_task.log_message.error(
+            except NotImplementedError:
+                self.scan_task.log_message(
                     "Could not process source, " f"unknown source type: {source_type}",
                     log_level=logging.ERROR,
                 )
