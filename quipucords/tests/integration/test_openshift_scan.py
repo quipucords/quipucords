@@ -5,7 +5,7 @@ from logging import getLogger
 
 import pytest
 
-from api.inspectresult.model import RawFactEncoder
+from api.common.util import RawFactEncoder
 from constants import DataSources
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
