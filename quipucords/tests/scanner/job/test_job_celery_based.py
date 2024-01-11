@@ -8,15 +8,20 @@ which bypasses several important layers of the Celery stack. Please choose
 carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
+import json
 from unittest.mock import patch
 
 import pytest
 from django.test import override_settings
 
+from api.common.common_report import create_report_version
+from api.common.util import RawFactEncoder
+from api.details_report.util import create_report
 from api.scantask.model import ScanTask
 from constants import DataSources
 from scanner import job, tasks
 from tests.factories import ScanJobFactory, ScanTaskFactory, SourceFactory
+from tests.utils import raw_facts_generator
 
 
 @pytest.fixture
@@ -110,6 +115,48 @@ def inspect_scan_job_multiple_sources():
         ),
     ]
     scan_job.tasks.set(scan_tasks)
+    return scan_job
+
+
+@pytest.fixture(params=(DataSources.values))
+def fingerprint_only_scanjob(request, faker):
+    """
+    Prepare a "fingerprint" type ScanJob of all possible data sources.
+
+    Note: tests consuming this fixture will run once for each kind of DataSource, as if
+    they were decorated by pytest.mark.parametrize.
+    """
+    source_type = request.param
+    raw_sources = [
+        {
+            "source_type": source_type,
+            "source_name": faker.slug(),
+            "server_id": faker.uuid4(),
+            "facts": list(raw_facts_generator(source_type, 1)),
+        }
+    ]
+    # force all objects to be friendly to JSON (de)serialization
+    sources_json_friendly = json.loads(json.dumps(raw_sources, cls=RawFactEncoder))
+    # create a "details report" with only the bare minimum information required by
+    # a valid Report instance
+    report = create_report(
+        create_report_version(),
+        {"sources": sources_json_friendly},
+        raise_exception=True,
+    )
+    scan_job = ScanJobFactory(
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+        status=ScanTask.PENDING,
+        report=report,
+    )
+
+    ScanTaskFactory(
+        job=scan_job,
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+        status=ScanTask.PENDING,
+        source=None,
+    )
+
     return scan_job
 
 
@@ -235,3 +282,24 @@ def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
     assert mock__celery_run_task_runner.call_count == 4  # 2 sources * 2 tasks
     mock__fingerprint.assert_called_once()
     mock__finalize_scan.assert_called_once()
+
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@pytest.mark.django_db
+def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
+    """Test that a fingerprint-only scanjob can be run successfully."""
+    assert (
+        not fingerprint_only_scanjob.report.deployment_report
+    ), "scanjob seems to be already completed"
+    job_runner = job.ScanJobRunner(fingerprint_only_scanjob)
+    assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
+    async_result = job_runner.run()
+    async_result.get()
+
+    fingerprint_only_scanjob.refresh_from_db()
+    assert fingerprint_only_scanjob.status == ScanTask.COMPLETED
+    # don't mind the lack of "s" in "report.deployment_report" - this shall be NUKED in
+    #  the near future
+    deployments_report = fingerprint_only_scanjob.report.deployment_report
+    assert deployments_report.id
+    assert deployments_report.system_fingerprints.count() == 1
