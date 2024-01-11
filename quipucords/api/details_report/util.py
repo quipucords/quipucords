@@ -159,17 +159,18 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_report(report_version, json_details_report):
+def create_report(report_version, json_details_report, raise_exception=False):
     """Create report.
 
     Fact collection consists of a Report record
     :param report_version: major.minor.patch version of report.
     :param json_details_report: dict representing a details report
+    :param raise_exception: raise exception on validation error
     :returns: The newly created Report
     """
     # Create new details report
     serializer = DetailsReportSerializer(data=json_details_report)
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=raise_exception):
         report = serializer.save()
         # removed by serializer since it is read-only.  Set again.
         report.report_version = report_version
