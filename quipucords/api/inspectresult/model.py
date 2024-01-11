@@ -2,15 +2,13 @@
 
 These models are used in the REST definitions
 """
-from datetime import datetime
-from json import JSONEncoder
 
 from django.db import models
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.util import RawFactEncoder
 from api.source.model import Source
-from compat.pydantic import BaseModel, PydanticErrorProxy
 
 
 class JobInspectionResult(models.Model):
@@ -58,20 +56,6 @@ class SystemInspectionResult(models.Model):
         """Metadata for model."""
 
         verbose_name_plural = _(messages.PLURAL_SYS_INSPECT_RESULTS_MSG)
-
-
-class RawFactEncoder(JSONEncoder):
-    """Customize the JSONField Encoder for RawFact values."""
-
-    def default(self, o):
-        """Update the default Encoder to handle types beyond just the basic ones."""
-        if isinstance(o, (BaseModel, PydanticErrorProxy)):
-            return o.dict()
-        if isinstance(o, datetime):
-            return o.isoformat()
-        if isinstance(o, set):
-            return sorted(o)
-        return super().default(o)
 
 
 class RawFact(models.Model):

@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from api.inspectresult.model import RawFactEncoder
+from api.common.util import RawFactEncoder
 
 
 class Migration(migrations.Migration):

@@ -4,7 +4,7 @@ import uuid
 
 from django.db import models
 
-from api.inspectresult.model import RawFactEncoder
+from api.common.util import RawFactEncoder
 
 
 class Report(models.Model):

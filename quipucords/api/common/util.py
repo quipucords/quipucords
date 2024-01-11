@@ -1,11 +1,13 @@
 """Util for common operations."""
 
 import logging
+from datetime import datetime
+from json import JSONEncoder
 from pathlib import Path
 
 from rest_framework.serializers import ValidationError
 
-from api.scantask.model import ScanTask
+from compat.pydantic import BaseModel, PydanticErrorProxy
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +141,9 @@ def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C9
 
     :returns: a JSON dict with some of the ScanJob's fields.
     """
+    # delay import scantask to avoid a circular import issue
+    from api.scantask.model import ScanTask
+
     (
         systems_count,
         systems_scanned,
@@ -193,3 +198,17 @@ def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C9
 def ids_to_str(id_list):
     """Convert a list of ids to a comma seperated string of sorted ids."""
     return ",".join([str(i) for i in sorted(id_list)])
+
+
+class RawFactEncoder(JSONEncoder):
+    """Customize the JSONField Encoder for RawFact values."""
+
+    def default(self, o):
+        """Update the default Encoder to handle types beyond just the basic ones."""
+        if isinstance(o, (BaseModel, PydanticErrorProxy)):
+            return o.dict()
+        if isinstance(o, datetime):
+            return o.isoformat()
+        if isinstance(o, set):
+            return sorted(o)
+        return super().default(o)
