@@ -73,7 +73,7 @@ def _network_raw_facts():
         "insights_client_id": _faker.uuid4(),
         "installed_products": fake_installed_products(),
         "subscription_manager_id": _faker.uuid4(),
-        "system_memory_bytes": _faker.pyint(max_value=2**65),  # max value for bigint
+        "system_memory_bytes": _faker.pyint(max_value=2**63),  # max value for bigint
         "system_purpose_json": None,
         "uname_processor": _faker.random_element(["x86_64", "ARM"]),
         "virt_type": _faker.random_element(["vmware", "xen", "kvm", None]),
@@ -82,7 +82,8 @@ def _network_raw_facts():
     # enough for testing
     facts["virt_virt"] = "virt-guest" if facts["virt_type"] else "virt-host"
     facts["virt_what_type"] = facts["virt_type"]
-    facts["cpu_core_per_socket"] = facts["cpu_core_count"] / facts["cpu_socket_count"]
+    # use integer division as a float will be invalid in fingerprint validation
+    facts["cpu_core_per_socket"] = facts["cpu_core_count"] // facts["cpu_socket_count"]
     return facts
 
 
@@ -112,10 +113,11 @@ def _vcenter_raw_facts():
 def _satellite_raw_facts():
     os_version = fake_major_minor_ver()
     major_ver = os_version.split(".")[0]
-    satellite_date_format = "%Y-%m-%d %H-%M-%S %Z"
+    satellite_date_format = "%Y-%m-%d %H:%M:%S"
     arch = _faker.random_element(["x86_64", "ARM"])
     return {
         "architecture": _faker.random_element([arch, None]),
+        "connection_timestamp": _faker.date_time().strftime(satellite_date_format),
         "cores": str(_faker.pyint(min_value=1, max_value=9)),
         "entitlements": [],
         "errata_out_of_date": _faker.pyint(min_value=0, max_value=1000),
@@ -135,7 +137,7 @@ def _satellite_raw_facts():
         "os_version": os_version,
         "packages_out_of_date": _faker.pyint(min_value=0, max_value=1000),
         "registration_time": _faker.date_time().strftime(satellite_date_format),
-        "uuid": _faker.pybool(),
+        "uuid": str(_faker.uuid4()),
         "virt_type": _faker.random_element(["vmware", "xen", "kvm", None]),
         "virtual": _faker.random_element(["hypervisor", None]),
         "virtual_host_name": _faker.hostname(),
