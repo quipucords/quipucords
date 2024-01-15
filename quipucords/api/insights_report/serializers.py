@@ -1,9 +1,11 @@
 """Insights report serializers."""
 
+import logging
 import socket
 from functools import partial
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework import fields
 from rest_framework.serializers import Serializer, SerializerMethodField, empty
 
@@ -13,6 +15,7 @@ from api.common.serializer import NotEmptyMixin
 from api.status import get_server_id
 from quipucords.environment import server_version
 
+logger = logging.getLogger(__name__)
 default_kwargs = {"required": False}
 
 
@@ -202,7 +205,14 @@ class YupanaPayloadSerializer(Serializer):
         if context is None:
             context = {}
         hostname = socket.getfqdn()
-        ipaddress = socket.gethostbyname(hostname)
+        try:
+            ipaddress = socket.gethostbyname(hostname)
+        except socket.gaierror:
+            # `gethostbyname` may fail if the local fqdn doesn't resolve.
+            # That can happen in networks with uncommon DNS configurations.
+            # See also: https://issues.redhat.com/browse/DISCOVERY-404
+            logger.warning(_("Unable to resolve hostname %s"), hostname)
+            ipaddress = ""
         context.update(hostname=hostname, ipaddress=ipaddress)
         super().__init__(instance=instance, data=data, context=context, **kwargs)
 
