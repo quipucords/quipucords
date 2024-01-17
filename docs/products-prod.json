@@ -1,0 +1,5932 @@
+{
+  "products": [
+    {
+      "active": false,
+      "id": 3,
+      "name": "Red Hat Enterprise Linux Entitlement",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 4,
+      "name": "Red Hat Enterprise Linux High Availability (for RHEL Entitlement)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 5,
+      "name": "Red Hat Enterprise Linux Load Balancer (for RHEL Entitlement)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 6,
+      "name": "Red Hat Enterprise Linux Resilient Storage (for RHEL Entitlement)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 7,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Entitlement)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 50,
+      "name": "JBoss Enterprise Application Platform 4 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 51,
+      "name": "JBoss Enterprise Application Platform 4 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 52,
+      "name": "JBoss Enterprise Application Platform 4.3.0 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 53,
+      "name": "JBoss Enterprise Application Platform 4.3.0 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 54,
+      "name": "JBoss Enterprise Application Platform 4.3.0-fp (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 55,
+      "name": "JBoss Enterprise Application Platform 4.3.0-fp (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 56,
+      "name": "JBoss Enterprise Web Server 1 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 57,
+      "name": "JBoss Enterprise Web Server 1 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 58,
+      "name": "JBoss Web Framework Kit 1 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 59,
+      "name": "JBoss Web Framework Kit 1 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 60,
+      "name": "Red Hat Application Stack 2 (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 61,
+      "name": "Red Hat Application Stack 2 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 62,
+      "name": "Red Hat Certificate Management System 8 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 63,
+      "name": "Red Hat Certificate Management System 8 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 64,
+      "name": "Red Hat Directory Server 8 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 65,
+      "name": "Red Hat Directory Server 8 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 66,
+      "name": "Red Hat Enterprise IPA 1 (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 67,
+      "name": "Red Hat Enterprise IPA 1 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 68,
+      "name": "Red Hat Enterprise Linux Desktop",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 69,
+      "name": "Red Hat Enterprise Linux Server",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 70,
+      "name": "Red Hat Enterprise Linux for x86_64 - Extended Update Support",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 71,
+      "name": "Red Hat Enterprise Linux Workstation",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 72,
+      "name": "Red Hat Enterprise Linux for IBM z Systems",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 73,
+      "name": "Red Hat Enterprise Linux for IBM z Systems - Extended Update Support",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 74,
+      "name": "Red Hat Enterprise Linux for Power, big endian",
+      "architectures": [
+        "ppc",
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 75,
+      "name": "Red Hat Enterprise Linux for Power, big endian - Extended Update Support",
+      "architectures": [
+        "ppc",
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 76,
+      "name": "Red Hat Enterprise Linux for Scientific Computing",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 77,
+      "name": "Red Hat Enterprise Linux for Web Servers",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 83,
+      "name": "Red Hat Enterprise Linux High Availability for x86_64",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 84,
+      "name": "Red Hat Enterprise Linux High Availability for x86_64 - Extended Update Support",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 85,
+      "name": "Red Hat Enterprise Linux Load Balancer (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 86,
+      "name": "Red Hat Enterprise Linux Load Balancer (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 87,
+      "name": "Red Hat Enterprise Linux Multimedia (for RHEL Client)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 88,
+      "name": "Red Hat Enterprise Linux Productivity Apps",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 89,
+      "name": "Red Hat Enterprise Linux Productivity Apps - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 90,
+      "name": "Red Hat Enterprise Linux Resilient Storage for x86_64",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 91,
+      "name": "Red Hat Enterprise Linux Resilient Storage for x86_64 - Extended Update Support",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 92,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 93,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 94,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 100,
+      "name": "Red Hat Enterprise Linux Virtualization (for RHEL Client)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 101,
+      "name": "Red Hat Enterprise Linux Virtualization (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 102,
+      "name": "Red Hat Enterprise Linux Virtualization (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 103,
+      "name": "Red Hat Enterprise Linux Workstation (for RHEL Client)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 104,
+      "name": "Red Hat Hardware Test Suite (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 105,
+      "name": "Red Hat Hardware Test Suite (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 106,
+      "name": "Red Hat Network Proxy 5.2 (for RHEL Mainframe)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 107,
+      "name": "Red Hat Network Proxy 5.2 (for RHEL Mainframe) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 108,
+      "name": "Red Hat Network Proxy 5.2 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 109,
+      "name": "Red Hat Network Proxy 5.2 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 110,
+      "name": "Red Hat Network Proxy 5.3 (for RHEL Mainframe)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 111,
+      "name": "Red Hat Network Proxy 5.3 (for RHEL Mainframe) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 112,
+      "name": "Red Hat Network Proxy 5.3 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 113,
+      "name": "Red Hat Network Proxy 5.3 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 114,
+      "name": "Red Hat Network Satellite 5.2 (for RHEL Mainframe)",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": false,
+      "id": 115,
+      "name": "Red Hat Network Satellite 5.2 (for RHEL Mainframe) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 116,
+      "name": "Red Hat Network Satellite 5.2 (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 117,
+      "name": "Red Hat Network Satellite 5.2 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 118,
+      "name": "Red Hat Network Satellite 5.3 (for RHEL Mainframe)",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": false,
+      "id": 119,
+      "name": "Red Hat Network Satellite 5.3 (for RHEL Mainframe) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 120,
+      "name": "Red Hat Network Satellite 5.3 (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 121,
+      "name": "Red Hat Network Satellite 5.3 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 122,
+      "name": "Red Hat Network Satellite 5.4 (for RHEL for IBM System z)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 123,
+      "name": "Red Hat Network Satellite 5.4 (for RHEL for IBM System z) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 124,
+      "name": "Red Hat Network Satellite 5.4 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 125,
+      "name": "Red Hat Network Satellite 5.4 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 126,
+      "name": "Red Hat S-JIS Support (for RHEL Server)",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 127,
+      "name": "Red Hat S-JIS Support (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 128,
+      "name": "Red Hat Software Test Suite 5 (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 129,
+      "name": "Red Hat Software Test Suite 5 (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 130,
+      "name": "Red Hat Update Infrastructure 1.1 (for RHEL Server)",
+      "architectures": []
+    },
+    {
+      "active": false,
+      "id": 131,
+      "name": "Red Hat Update Infrastructure 1.1 (for RHEL Server) - Extended Update Support",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 132,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 133,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 134,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 135,
+      "name": "Red Hat Enterprise Linux 6 Server HTB",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 142,
+      "name": "foo",
+      "architectures": []
+    },
+    {
+      "active": true,
+      "id": 143,
+      "name": "Red Hat Enterprise Identity Replication",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 146,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 147,
+      "name": "Red Hat Update Infrastructure",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 148,
+      "name": "Red Hat Enterprise Linux Server from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 149,
+      "name": "MRG Grid from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 150,
+      "name": "Red Hat Virtualization",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 151,
+      "name": "JBoss Enterprise Application Platform from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 152,
+      "name": "JBoss Enterprise Web Server from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 153,
+      "name": "JBoss Operations Network from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 154,
+      "name": "Red Hat Storage Software Appliance",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 155,
+      "name": "Red Hat Enterprise Linux 6 Workstation HTB",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 157,
+      "name": "Red Hat Enterprise Linux Server - Extended Update Support from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 159,
+      "name": "Red Hat Enterprise Linux High Availability (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 160,
+      "name": "Red Hat Enterprise Linux Load Balancer (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 161,
+      "name": "Red Hat Enterprise Linux Resilient Storage (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 162,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 165,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 166,
+      "name": "Red Hat Virtual Storage Appliance (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 167,
+      "name": "Red Hat CloudForms",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 168,
+      "name": "RHEL Software Test Suite (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 169,
+      "name": "Kernel Derivative Works for Bluegene/Q",
+      "architectures": [
+        "ppc",
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 170,
+      "name": "Kernel Derivative Works for HPC for Power Systems",
+      "architectures": [
+        "ppc",
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 171,
+      "name": "Red Hat Storage",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 172,
+      "name": "MRG Realtime",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 173,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL for IBM POWER)",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 174,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL for IBM POWER) - Extended Update Support",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 175,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 176,
+      "name": "Red Hat Developer Toolset (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 177,
+      "name": "Red Hat Developer Toolset (for RHEL HPC Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 178,
+      "name": "Red Hat Developer Toolset (for RHEL Client)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 179,
+      "name": "Red Hat Developer Toolset (for RHEL Workstation)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 180,
+      "name": "Red Hat Beta",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "ppc64le",
+        "s390",
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 181,
+      "name": "Red Hat EUCJP Support (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 182,
+      "name": "Red Hat EUCJP Support (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 183,
+      "name": "JBoss Enterprise Application Platform",
+      "architectures": [
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 184,
+      "name": "JBoss Enterprise Web Platform",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 185,
+      "name": "JBoss Enterprise Web Server",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 186,
+      "name": "Red Hat Gluster Storage Server for On-premise",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 187,
+      "name": "Red Hat Storage for Public Cloud (via RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 188,
+      "name": "Red Hat Gluster Storage Management Console (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 190,
+      "name": "Red Hat Developer Toolset (for RHEL Server EUS)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 191,
+      "name": "Red Hat OpenStack",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 192,
+      "name": "JBoss Enterprise Application Platform - ELS",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 193,
+      "name": "Red Hat OpenShift Enterprise Infrastructure",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 194,
+      "name": "Red Hat OpenShift Enterprise Application Node",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 195,
+      "name": "Red Hat Developer Toolset (for RHEL for IBM POWER)",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 196,
+      "name": "Red Hat Developer Toolset (for RHEL for IBM POWER) - Extended Update Support",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 197,
+      "name": "Red Hat OpenShift Enterprise Client Tools",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 198,
+      "name": "Red Hat OpenShift Enterprise JBoss EAP add-on",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 199,
+      "name": "Red Hat Hardware Certification Test Suite",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "s390",
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 200,
+      "name": "Red Hat Directory Server",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 201,
+      "name": "Red Hat Software Collections (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 202,
+      "name": "Red Hat Software Collections (for RHEL Client)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 203,
+      "name": "Red Hat Software Collections (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 204,
+      "name": "Red Hat Enterprise Linux Server - Extended Life Cycle Support",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 205,
+      "name": "Red Hat Software Collections Beta (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 206,
+      "name": "Red Hat Software Collections Beta (for RHEL Client)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 207,
+      "name": "Red Hat Software Collections Beta (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 208,
+      "name": "Red Hat OpenStack Certification Test Suite",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 209,
+      "name": "Red Hat Satellite 6 MDP",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 210,
+      "name": "Red Hat Satellite Tools 6 MDP",
+      "architectures": [
+        "ppc",
+        "ppc64",
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 211,
+      "name": "Red Hat Certificate System - Extended Life Cycle Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 212,
+      "name": "Red Hat Open vSwitch for NVP / NSX Supplemental",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 213,
+      "name": "Red Hat Open vSwitch Supplemental Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 214,
+      "name": "Red Hat Software Collections (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 215,
+      "name": "Red Hat OpenShift Online from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 216,
+      "name": "Red Hat Certificate System",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 217,
+      "name": "Red Hat Enterprise Linux EUS Compute Node",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 218,
+      "name": "Red Hat Enterprise Linux EUS Compute Node High Performance Networking",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 219,
+      "name": "Red Hat Enterprise Linux EUS Compute Node Scalable File System",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 220,
+      "name": "Red Hat OpenStack Beta",
+      "architectures": [
+        "ppc64le",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 221,
+      "name": "Red Hat OpenStack Beta Certification Test Suite",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 222,
+      "name": "Red Hat OpenShift Enterprise Infrastructure Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 223,
+      "name": "Red Hat OpenShift Enterprise Application Node Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 224,
+      "name": "Red Hat OpenShift Enterprise Client Tools Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 225,
+      "name": "Red Hat OpenShift Enterprise JBoss EAP add-on Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 226,
+      "name": "Red Hat Enterprise Linux 7 Release Candidate",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 227,
+      "name": "Red Hat Enterprise Linux 7 for IBM POWER Release Candidate",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 228,
+      "name": "Red Hat Enterprise Linux 7 for IBM z Systems Release Candidate",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 229,
+      "name": "Red Hat Enterprise Linux 7 Desktop High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 230,
+      "name": "Red Hat Enterprise Linux for x86_64 High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 231,
+      "name": "Red Hat Enterprise Linux 7 Workstation High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 232,
+      "name": "Red Hat Enterprise Linux for IBM z Systems High Touch Beta",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 233,
+      "name": "Red Hat Enterprise Linux for Power, little endian High Touch Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 234,
+      "name": "Red Hat Enterprise Linux 7 for HPC Compute Node High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 235,
+      "name": "Red Hat Enterprise Linux 7 Addons High Touch Beta",
+      "architectures": [
+        "ppc64",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 236,
+      "name": "Red Hat Enterprise Linux High Availability High Touch Beta",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 237,
+      "name": "Red Hat Enterprise Linux 7 Load Balancer High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 238,
+      "name": "Red Hat Enterprise Linux Resilient Storage High Touch Beta",
+      "architectures": [
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 239,
+      "name": "Red Hat Enterprise MRG Messaging",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 240,
+      "name": "Oracle Java (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 241,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 242,
+      "name": "Oracle Java (for RHEL Client)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 243,
+      "name": "Oracle Java (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 244,
+      "name": "Oracle Java (for RHEL Workstation)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 245,
+      "name": "Oracle Java (for RHEL Compute Node) - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 246,
+      "name": "Oracle Java (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 247,
+      "name": "Red Hat Enterprise Linux Atomic Host HTB",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 248,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 249,
+      "name": "Red Hat Enterprise Linux for SAP HANA for x86_64 Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 250,
+      "name": "Red Hat Satellite",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 251,
+      "name": "Red Hat Enterprise Linux Server - AUS",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 252,
+      "name": "Red Hat Enterprise Linux High Availability (for RHEL Server) - AUS",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 253,
+      "name": "Red Hat Enterprise Linux Load Balancer (for RHEL Server) - AUS",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 254,
+      "name": "Red Hat Enterprise Linux Resilient Storage (for RHEL Server) - AUS",
+      "architectures": [
+        "ia64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 255,
+      "name": "Red Hat Enterprise Linux Scalable File System (for RHEL Server) - AUS",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 256,
+      "name": "Oracle Java (for RHEL Server) - AUS",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 257,
+      "name": "Red Hat Satellite Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 258,
+      "name": "Red Hat Satellite Capsule Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 259,
+      "name": "MRG Grid",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 260,
+      "name": "Red Hat Enterprise MRG Messaging 2 for RHEL 7",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 261,
+      "name": "OLD Red Hat Enterprise Linux Server for ARM Development Preview",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 262,
+      "name": "Red Hat Satellite with Embedded Oracle",
+      "architectures": [
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 263,
+      "name": "Red Hat Satellite 5 Managed DB",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 264,
+      "name": "Red Hat Satellite Proxy",
+      "architectures": [
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 265,
+      "name": "Red Hat Satellite Legacy Beta",
+      "architectures": [
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 266,
+      "name": "MRG Management",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 267,
+      "name": "MRG Grid Execute",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 268,
+      "name": "Red Hat QuickStart Cloud Installer",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 269,
+      "name": "Red Hat Satellite Capsule",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 270,
+      "name": "Red Hat Gluster Storage Nagios Server",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 271,
+      "name": "Red Hat Enterprise Linux Atomic Host",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 272,
+      "name": "Red Hat Enterprise Linux Atomic Host Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 273,
+      "name": "Red Hat Container Images",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 274,
+      "name": "Red Hat Container Images Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 275,
+      "name": "Red Hat Container Images HTB",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 276,
+      "name": "Red Hat Virtualization for IBM Power LE",
+      "architectures": [
+        "ppc64",
+        "ppc64le",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 277,
+      "name": "Red Hat OpenShift Enterprise JBoss FUSE add-on",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 278,
+      "name": "Red Hat OpenShift Enterprise JBoss A-MQ add-on",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 279,
+      "name": "Red Hat Enterprise Linux for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 280,
+      "name": "Red Hat Enterprise Virtualization for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 281,
+      "name": "Red Hat Ceph Storage",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 282,
+      "name": "Red Hat Certification (for RHEL Server)",
+      "architectures": [
+        "aarch64",
+        "ia64",
+        "ppc",
+        "ppc64",
+        "ppc64le",
+        "s390",
+        "s390x",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 283,
+      "name": "Red Hat OpenStack Advanced",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 284,
+      "name": "Red Hat OpenStack Beta Advanced",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 285,
+      "name": "Red Hat Ceph Storage Calamari",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 286,
+      "name": "Red Hat Ceph Storage MON",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 287,
+      "name": "Red Hat Enterprise Linux for Real Time",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 288,
+      "name": "Red Hat Ceph Storage OSD",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 289,
+      "name": "Red Hat OpenShift Enterprise Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 290,
+      "name": "Red Hat OpenShift Container Platform",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 291,
+      "name": "Red Hat Enterprise MRG Messaging 3 for RHEL 7",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 292,
+      "name": "Red Hat Enterprise Linux for Power, little endian - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 293,
+      "name": "Red Hat Container Development Kit",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 294,
+      "name": "Red Hat Enterprise Linux Server for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 295,
+      "name": "Red Hat Enterprise Linux Server for ARM Beta",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 296,
+      "name": "Red Hat Certificate System with Advanced Access",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 298,
+      "name": "Red Hat Gluster Samba",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 299,
+      "name": "Red Hat Enterprise Linux Resilient Storage for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 300,
+      "name": "Red Hat Enterprise Linux High Availability for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 301,
+      "name": "Red Hat JBoss AMQ Clients",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 302,
+      "name": "Oracle Java (for Middleware)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 303,
+      "name": "Red Hat CloudForms Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 304,
+      "name": "Atomic Enterprise Platform Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 305,
+      "name": "Red Hat Atomic Platform",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 306,
+      "name": "Atomic Enterprise Platform HTB",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 307,
+      "name": "Red Hat JBoss Core Services",
+      "architectures": [
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 308,
+      "name": "Red Hat S-JIS Support (for RHEL Server) - AUS",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 310,
+      "name": "Red Hat Mobile Application Platform v4.0 Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 311,
+      "name": "Red Hat Single Sign-On",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 312,
+      "name": "Red Hat OpenStack - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 313,
+      "name": "Red Hat Enterprise Linux for Real Time for NFV",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 314,
+      "name": "Red Hat Storage Console",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 315,
+      "name": "Red Hat Storage Console Node",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 316,
+      "name": "Red Hat Mobile Application Platform",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 317,
+      "name": "dotNET on RHEL (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 318,
+      "name": "dotNET on RHEL Beta (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 319,
+      "name": "Red Hat Certification (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 320,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 321,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 322,
+      "name": "Red Hat AMQ Interconnect",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 323,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 325,
+      "name": "Release End2End Test",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 326,
+      "name": "Red Hat Enterprise Linux Fast Datapath Beta for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 328,
+      "name": "Red Hat Virtualization Host",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 329,
+      "name": "Red Hat Enterprise Linux Fast Datapath",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 331,
+      "name": "Red Hat Enterprise Linux Server - TUS",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 332,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power BE",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 333,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power BE - Extended Update Support",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 334,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 335,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power LE - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 336,
+      "name": "Red Hat Enterprise Linux for SAP Applications for System Z",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 337,
+      "name": "Red Hat Enterprise Linux for SAP Applications for System Z - Extended Update Support",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 338,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 339,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for Power LE - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 340,
+      "name": "dotNET on RHEL (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 341,
+      "name": "dotNET on RHEL Beta (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 342,
+      "name": "dotNET on RHEL (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 343,
+      "name": "dotNET on RHEL Beta (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 344,
+      "name": "dotNET on RHEL (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 345,
+      "name": "dotNET on RHEL Beta (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 347,
+      "name": "Red Hat Enterprise Linux KVM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 348,
+      "name": "Red Hat JBoss Middleware",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 349,
+      "name": "Red Hat JBoss Data Grid",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 350,
+      "name": "Red Hat Ceph Storage for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 351,
+      "name": "Red Hat 3scale API Management Platform",
+      "architectures": [
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 352,
+      "name": "Red Hat Software Collections (for RHEL Server for ARM)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 353,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for ARM)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 354,
+      "name": "Red Hat Software Collections (for RHEL Server for IBM Power)",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 355,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for IBM Power)",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 356,
+      "name": "Red Hat Software Collections (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 357,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 358,
+      "name": "Red Hat Software Collections (for RHEL Server for System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 359,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 360,
+      "name": "Red Hat Enterprise Linux Server - AUS from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 361,
+      "name": "JBoss Middleware Manager 7.0 Tech Preview",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 362,
+      "name": "Red Hat Enterprise Linux for Power, little endian Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 363,
+      "name": "Red Hat Enterprise Linux for ARM 64 Beta",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 364,
+      "name": "Red Hat Satellite - Extended Life Cycle Support",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 365,
+      "name": "Red Hat Satellite 5 Managed DB - Extended Life Cycle Support",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 366,
+      "name": "Red Hat Satellite Proxy - Extended Life Cycle Support",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 367,
+      "name": "Red Hat Satellite 5 Managed DB Beta",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 368,
+      "name": "Red Hat Satellite 5 Proxy Beta",
+      "architectures": [
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 369,
+      "name": "Red Hat Enterprise Linux Atomic Host from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 370,
+      "name": "Red Hat Enterprise Linux Atomic Host Beta from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 371,
+      "name": "Red Hat Enterprise Linux Server - Extended Life Cycle Support (for IBM z Systems)",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 373,
+      "name": "Red Hat Enterprise Linux Server - Extended Life Cycle Support (from RHUI)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 374,
+      "name": "Red Hat Enterprise Linux for SAP Solutions - Extended Update Support (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 375,
+      "name": "Red Hat Enterprise Linux for SAP Applications - Extended Update Support (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 376,
+      "name": "Red Hat Enterprise Linux Resilient Storage for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 377,
+      "name": "Red Hat Enterprise Linux Resilient Storage for IBM Power LE - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 380,
+      "name": "Red Hat Enterprise Linux High Availability for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 381,
+      "name": "Red Hat Enterprise Linux High Availability (for IBM Power LE) - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 382,
+      "name": "Red Hat Enterprise Linux Server for Power LE - Update Services for SAP Solutions",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 383,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power LE - Update Services for SAP Solutions",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 385,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for Power LE - Update Services for SAP Solutions",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 386,
+      "name": "Red Hat Enterprise Linux High Availability for Power LE - Update Services for SAP Solutions",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 387,
+      "name": "Red Hat Enterprise Linux for x86_64 - Update Services for SAP Solutions",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 388,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 - Update Services for SAP Solutions",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 389,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 - Update Services for SAP Solutions",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 390,
+      "name": "Red Hat Enterprise Linux High Availability for x86_64 - Update Services for SAP Solutions",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 391,
+      "name": "Red Hat Virtualization - ELS",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 392,
+      "name": "Red Hat Container Images for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 393,
+      "name": "Red Hat Container Images Beta for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 394,
+      "name": "Red Hat Developer Tools (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 395,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 396,
+      "name": "Red Hat Developer Tools (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 397,
+      "name": "Red Hat Developer Tools Beta (for RHEL Workstation)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 398,
+      "name": "Red Hat Developer Tools (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 399,
+      "name": "Red Hat Developer Tools Beta (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 400,
+      "name": "Red Hat Developer Tools (for RHEL Server for ARM)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 401,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for ARM)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 402,
+      "name": "Red Hat Developer Tools (for RHEL Server for IBM Power)",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 403,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for IBM Power)",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 404,
+      "name": "Red Hat Developer Tools (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 405,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 406,
+      "name": "Red Hat Developer Tools (for RHEL Server for System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 407,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 408,
+      "name": "Red Hat Ansible Engine",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 409,
+      "name": "Red Hat Ansible Engine Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 410,
+      "name": "Red Hat Software Collections (for RHEL Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 411,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 412,
+      "name": "Red Hat Software Collections (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 413,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 414,
+      "name": "Red Hat OpenShift Application Runtimes Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 415,
+      "name": "Red Hat Virtualization Manager",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 416,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 417,
+      "name": "Red Hat Developer Tools (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 418,
+      "name": "Red Hat Openshift Application Runtimes",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 419,
+      "name": "Red Hat Enterprise Linux for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 420,
+      "name": "Red Hat Enterprise Linux for Power 9",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 421,
+      "name": "Red Hat Virtualization - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 422,
+      "name": "Red Hat Virtualization for IBM Power LE - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 423,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 424,
+      "name": "Red Hat Developer Tools (for RHEL Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 425,
+      "name": "Red Hat OpenStack for IBM Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 426,
+      "name": "Red Hat OpenStack Beta for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 429,
+      "name": "Red Hat Gluster Storage Web Administration (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 430,
+      "name": "Red Hat Virtualization Host - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 431,
+      "name": "Red Hat Enterprise Linux for SAP Applications - Update Services for SAP Solutions (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 432,
+      "name": "Red Hat Enterprise Linux for SAP Solutions - Update Services for SAP Solutions (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 433,
+      "name": "Red Hat Enterprise Linux for IBM z Systems Beta",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 434,
+      "name": "Red Hat Enterprise Linux for IBM System z (Structure A)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 435,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 436,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Client)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 437,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Compute Node)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 438,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Workstation)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 439,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Compute Node) - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 440,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Server) - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 441,
+      "name": "Oracle Java (Restricted Maintenance) (for RHEL Server) - AUS",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 442,
+      "name": "Oracle Java (Restricted Maintenance) (for Middleware)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 443,
+      "name": "Red Hat Enterprise Linux FDIO Early Access (RHEL 7 Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 444,
+      "name": "Red Hat Enterprise Linux FDIO (RHEL 7 Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 445,
+      "name": "Red Hat Gluster Storage Server for On-premise from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 446,
+      "name": "Red Hat Software Collections (for RHEL Server for IBM System Z - Structure A)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 447,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for IBM System Z - Structure A)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 448,
+      "name": "Red Hat Developer Tools (for RHEL Server for IBM System Z [Structure A])",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 449,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for IBM System Z [Structure A])",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 450,
+      "name": "Red Hat Enterprise Linux High Availability (for RHEL Server) - Extended Update Support from RHUI",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 451,
+      "name": "Red Hat Enterprise Linux Load Balancer (for RHEL Server) - Extended Update Support from RHUI",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 452,
+      "name": "Red Hat Enterprise Linux Resilient Storage (for RHEL Server) - Extended Update Support from RHUI",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 453,
+      "name": "Red Hat Enterprise Linux High Performance Networking (for RHEL Server) - Extended Update Support from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 454,
+      "name": "Red Hat Enterprise Linux Server - Update Services for SAP Solutions (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 456,
+      "name": "Red Hat Enterprise Linux High Availability - Update Services for SAP Solutions (from RHUI)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 457,
+      "name": "Red Hat Ansible Engine from RHUI",
+      "architectures": [
+        "aarch64",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 458,
+      "name": "Red Hat OpenShift Service Mesh",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 459,
+      "name": "Red Hat Application Server v.2",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 460,
+      "name": "Red Hat Developer Suite v.3 ",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 461,
+      "name": "Red Hat Application Stack 1",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 462,
+      "name": "Red Hat Storage 2.1 Console",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 463,
+      "name": "Red Hat Network Satellite 5.1 (for RHEL Mainframe) ",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 464,
+      "name": "Red Hat Network Satellite 5.1 (for RHEL Server)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 465,
+      "name": "Red Hat Network Satellite 4.2,5.0 (for RHEL Server)",
+      "architectures": [
+        "x86"
+      ]
+    },
+    {
+      "active": true,
+      "id": 466,
+      "name": "Red Hat OpenStack Director Deployment Tools",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 467,
+      "name": "Red Hat OpenStack Director Deployment Tools for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 468,
+      "name": "Red Hat OpenStack Director Deployment Tools Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 469,
+      "name": "Red Hat OpenStack Director Deployment Tools Beta for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 470,
+      "name": "Release End2End Test (for Power, little endian)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 473,
+      "name": "Red Hat Container Native Virtualization",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 474,
+      "name": "Red Hat Enterprise Linux Fast Datapath (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 475,
+      "name": "Red Hat Enterprise Linux Fast Datapath Beta for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 476,
+      "name": "Red Hat Developer Tools from RHUI (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 477,
+      "name": "Red Hat Developer Tools Beta from RHUI (for RHEL Server)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 478,
+      "name": "Release End2End Test (for IBM System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 479,
+      "name": "Red Hat Enterprise Linux for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 480,
+      "name": "Red Hat Ansible Automation Platform",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 482,
+      "name": "Red Hat OpenShift Container Platform for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 483,
+      "name": "Red Hat OpenShift Container Platform Client Tools for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 484,
+      "name": "OpenJDK Java (for Middleware)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 485,
+      "name": "Red Hat OpenStack 7 Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 486,
+      "name": "Red Hat Enterprise Linux for x86_64 Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 487,
+      "name": "Red Hat Enterprise Linux High Availability Beta",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 488,
+      "name": "Red Hat Enterprise Linux Resilient Storage Beta",
+      "architectures": [
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 489,
+      "name": "Red Hat Enterprise Linux for ARM 64 High Touch Beta",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 491,
+      "name": "Red Hat CodeReady Linux Builder for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 492,
+      "name": "Red Hat CodeReady Linux Builder for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 493,
+      "name": "Red Hat CodeReady Linux Builder for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 494,
+      "name": "Red Hat CodeReady Linux Builder for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 495,
+      "name": "Red Hat CodeReady Linux Builder for x86_64 Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 496,
+      "name": "Red Hat CodeReady Linux Builder for Power, little endian Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 497,
+      "name": "Red Hat CodeReady Linux Builder for ARM 64 Beta",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 498,
+      "name": "Red Hat CodeReady Linux Builder for IBM z Systems Beta",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 499,
+      "name": "Red Hat Enterprise Linux for Real Time Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 500,
+      "name": "Red Hat Enterprise Linux for Real Time High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 501,
+      "name": "Red Hat Enterprise Linux for Real Time for NFV Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 502,
+      "name": "Red Hat Enterprise Linux for Real Time for NFV High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 510,
+      "name": "Red Hat Enterprise Linux High Availability (for RHEL 7 Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 512,
+      "name": "Red Hat Enterprise Linux Resilient Storage (for RHEL 7 Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 513,
+      "name": "Red Hat Enterprise Linux for x86_64 from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 514,
+      "name": "Red Hat Enterprise Linux for x86_64 Beta from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 515,
+      "name": "Red Hat Ceph Storage for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 516,
+      "name": "Red Hat Enterprise Linux Fast Datapath (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 517,
+      "name": "Red Hat Enterprise Linux Fast Datapath Beta (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 518,
+      "name": "Red Hat CoreOS",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 519,
+      "name": "Red Hat CoreOS Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 520,
+      "name": "Red Hat Ansible Runner",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 521,
+      "name": "Red Hat Openshift Application Runtimes for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 522,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 523,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 524,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization (for RHEL Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 525,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization (for RHEL Server for IBM System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 526,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 527,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization Beta (for RHEL Server for IBM Power LE)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 528,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization Beta (for RHEL Server for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 529,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization Beta (for RHEL Server for IBM System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 530,
+      "name": "Red Hat Enterprise Linux for ARM 64 from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 531,
+      "name": "Red Hat Satellite Tools 6 (for SLES)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 532,
+      "name": "Red Hat Ansible Runner for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 533,
+      "name": "Red Hat Enterprise Linux Server for ARM from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 534,
+      "name": "Red Hat Software Collections (for RHEL Server for ARM) from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 535,
+      "name": "Red Hat Software Collections Beta (for RHEL Server for ARM) from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 536,
+      "name": "Red Hat Enterprise Linux for ARM 64 Beta from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 537,
+      "name": "Red Hat Developer Tools (for RHEL Server for ARM) from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 538,
+      "name": "Red Hat Developer Tools Beta (for RHEL Server for ARM) from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 540,
+      "name": "Red Hat Ceph Storage MON for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 541,
+      "name": "Red Hat Ceph Storage OSD for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 542,
+      "name": "Red Hat CodeReady Linux Builder for x86_64 High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 543,
+      "name": "Red Hat CodeReady Linux Builder for Power, little endian High Touch Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 544,
+      "name": "Red Hat CodeReady Linux Builder for ARM 64 High Touch Beta",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 545,
+      "name": "Red Hat CodeReady Linux Builder for IBM z Systems High Touch Beta",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 546,
+      "name": "Red Hat CodeReady Workspaces for OpenShift",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 547,
+      "name": "Red Hat OpenShift Data Foundation",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 548,
+      "name": "Red Hat Discovery",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 549,
+      "name": "Red Hat Universal Base Image (do not use)",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 550,
+      "name": "Red Hat Mobile Services",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 551,
+      "name": "Red Hat NooBaa",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 552,
+      "name": "Red Hat Enterprise Linux for SAP HANA for Power, little endian Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 553,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 554,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power, little endian Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 555,
+      "name": "Red Hat Enterprise Linux for SAP Applications for IBM z Systems Beta",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 556,
+      "name": "Red Hat Enterprise Linux for SAP HANA for x86_64 High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 557,
+      "name": "Red Hat Enterprise Linux for SAP HANA for Power, little endian High Touch Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 558,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 High Touch Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 559,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power, little endian High Touch Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 560,
+      "name": "Red Hat Enterprise Linux for SAP Applications for IBM z Systems High Touch Beta",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 561,
+      "name": "Red Hat Quay Enterprise",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 562,
+      "name": "Red Hat CodeReady Linux Builder for x86_64 from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 563,
+      "name": "Red Hat CodeReady Linux Builder for ARM 64 from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 564,
+      "name": "Red Hat Virtualization Tools",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 565,
+      "name": "Red Hat Virtualization Tools for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 566,
+      "name": "Red Hat Virtualization Tools Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 567,
+      "name": "Red Hat Virtualization Tools for Power, little endian Beta",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 568,
+      "name": "Red Hat Enterprise Linux High Availability for x86_64 from RHUI",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 569,
+      "name": "Red Hat Enterprise Linux Resilient Storage for x86_64 from RHUI",
+      "architectures": [
+        "ia64",
+        "ppc",
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 570,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 (inactive)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 571,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for Power LE (inactive)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 572,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 573,
+      "name": "Red Hat OpenStack Director Deployment Tools Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 574,
+      "name": "Red Hat Ceph Storage Beta for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 575,
+      "name": "Red Hat Ceph Storage Beta for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 576,
+      "name": "Red Hat Directory Server Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 577,
+      "name": "Red Hat Certificate System Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 578,
+      "name": "Red Hat Enterprise Linux High Availability for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 579,
+      "name": "Red Hat Openshift Serverless",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 580,
+      "name": "Red Hat Enterprise Linux Fast Datapath (for IBM z Systems)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 581,
+      "name": "Red Hat Enterprise Linux Fast Datapath Beta (for IBM z Systems)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 582,
+      "name": "Red Hat OpenShift Container Platform for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": false,
+      "id": 583,
+      "name": "Red Hat Enterprise Linux Server - Extended Update Support - DISABLED",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 584,
+      "name": "Red Hat Enterprise Linux for ARM 64 - Extended Update Support",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 585,
+      "name": "Red Hat Enterprise Linux High Availability (for IBM z Systems) - Extended Update Support",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 586,
+      "name": "Red Hat Enterprise Linux High Availability (for ARM 64) - Extended Update Support",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 587,
+      "name": "Red Hat Enterprise Linux Resilient Storage for IBM z Systems - Extended Update Support",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 588,
+      "name": "Red Hat CodeReady Linux Builder for x86_64 - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 589,
+      "name": "Red Hat CodeReady Linux Builder for Power, little endian - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 590,
+      "name": "Red Hat CodeReady Linux Builder for IBM z Systems - Extended Update Support",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 591,
+      "name": "Red Hat CodeReady Linux Builder for ARM 64 - Extended Update Support",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 592,
+      "name": "Red Hat Enterprise Linux for SAP Applications for Power LE - Extended Update Support (inactive)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 593,
+      "name": "Red Hat Enterprise Linux for SAP Applications for System Z - Extended Update Support (inactive)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": false,
+      "id": 594,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for Power LE - Extended Update Support (inactive)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 595,
+      "name": "Red Hat OpenStack - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 596,
+      "name": "Red Hat Migration Toolkit",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 597,
+      "name": "Red Hat odo for OpenShift Container Platform",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 598,
+      "name": "Red Hat Satellite Tools 6 Beta (for SLES)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 599,
+      "name": "Red Hat JBoss Core Services from RHUI",
+      "architectures": [
+        "ppc64",
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 600,
+      "name": "Red Hat Single Sign-On from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 601,
+      "name": "Red Hat Enterprise Linux for SAP Applications (from RHUI) (inactive)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 602,
+      "name": "Red Hat Enterprise Linux for SAP Solutions (from RHUI) (inactive)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 603,
+      "name": "OpenShift Developer Tools and Services",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 604,
+      "name": "Red Hat OpenShift Pipelines",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 605,
+      "name": "Cinderlib",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 606,
+      "name": "Cinderlib for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 607,
+      "name": "Red Hat Enterprise Linux High Availability for x86_64 - Telecommunications Update Service",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 608,
+      "name": "Red Hat OpenShift distributed tracing",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 609,
+      "name": "Red Hat Advanced Cluster Management for Kubernetes",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 610,
+      "name": "Red Hat Build of Quarkus",
+      "architectures": [
+        "aarch64",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 611,
+      "name": "Red Hat Integration",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 612,
+      "name": "Red Hat AMQ Streams",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 613,
+      "name": "Cinderlib Beta",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 614,
+      "name": "Cinderlib Beta for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 615,
+      "name": "Red Hat Ceph Storage for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 616,
+      "name": "Red Hat Ceph Storage MON for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 617,
+      "name": "Red Hat Ceph Storage OSD for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 618,
+      "name": "Red Hat OpenShift Service Mesh for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 619,
+      "name": "Red Hat OpenShift Service Mesh for IBM Z",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 623,
+      "name": "Red Hat Enterprise Linux for Real Time - Telecommunications Update Service",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 624,
+      "name": "Red Hat Enterprise Linux for Real Time for NFV - Telecommunications Update Service",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 625,
+      "name": "Red Hat build of Eclipse OpenJ9",
+      "architectures": [
+        "ppc64le",
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 626,
+      "name": "Red Hat Enterprise Linux Hidden Content for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 627,
+      "name": "Red Hat Enterprise Linux Hidden Content for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 628,
+      "name": "Red Hat Enterprise Linux Hidden Content for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 629,
+      "name": "Red Hat Enterprise Linux Hidden Content for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 630,
+      "name": "Red Hat OpenShift Serverless for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 631,
+      "name": "Red Hat OpenShift Serverless for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 632,
+      "name": "Red Hat OpenShift Pipelines for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 633,
+      "name": "Red Hat OpenShift Pipelines for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 634,
+      "name": "Red Hat OpenShift Data Foundation for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 635,
+      "name": "Red Hat OpenShift Data Foundation for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 636,
+      "name": "Red Hat Enterprise Linux for SAP Applications for System Z - Extended Life Cycle Support",
+      "architectures": [
+        "s390",
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 637,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 638,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 639,
+      "name": "Red Hat OpenShift Service on AWS (ROSA)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 640,
+      "name": "Red Hat OpenShift distributed tracing for Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 641,
+      "name": "Red Hat OpenShift distributed tracing for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 642,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization EUS",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 643,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization (for RHEL Server for IBM Power LE) EUS",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 644,
+      "name": "Red Hat Enterprise Linux Advanced Virtualization (for RHEL Server for IBM System Z) EUS",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 645,
+      "name": "Red Hat OpenShift GitOps",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 646,
+      "name": "Red Hat Service Telemetry Framework",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 647,
+      "name": "Red Hat OpenShift Data Foundation Advanced",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 648,
+      "name": "Red Hat OpenShift Data Foundation Advanced for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 649,
+      "name": "Red Hat OpenShift Data Foundation Advanced for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 650,
+      "name": "Red Hat Ceph Storage - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 651,
+      "name": "Red Hat Ceph Storage MON - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 652,
+      "name": "Red Hat Ceph Storage OSD - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 653,
+      "name": "Red Hat Certificate System - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 654,
+      "name": "Red Hat CodeReady Linux Builder for x86_64 - Extended Update Support from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 655,
+      "name": "Red Hat Ceph Storage - Extended Life Cycle Support for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 656,
+      "name": "Red Hat Ceph Storage MON - Extended Life Cycle Support for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 657,
+      "name": "Red Hat Ceph Storage OSD - Extended Life Cycle Support for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 658,
+      "name": "Cost Management",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 659,
+      "name": "Red Hat Enterprise Linux Fast Datapath (for RHEL for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 660,
+      "name": "Red Hat Enterprise Linux Fast Datapath Beta (for RHEL for ARM 64)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 661,
+      "name": "Migration Toolkit for Virtualization",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 662,
+      "name": "Red Hat OpenShift Data Foundation - Extended Update Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 663,
+      "name": "Red Hat OpenShift Data Foundation for IBM Power, little endian - Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 664,
+      "name": "Red Hat OpenShift Data Foundation for IBM Z and LinuxONE - Extended Update Support",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 665,
+      "name": "Red Hat Advanced Cluster Security for Kubernetes",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 666,
+      "name": "Red Hat OpenStack 13 - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 667,
+      "name": "Red Hat OpenStack 13 for IBM Power - Extended Life Cycle Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 668,
+      "name": "Red Hat OpenStack 13 Director Deployment Tools - Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 669,
+      "name": "Red Hat OpenStack 13 Director Deployment Tools for IBM Power LE - Extended Life Cycle Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 670,
+      "name": "Convert2RHEL",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 671,
+      "name": "Red Hat Ceph Storage (OSD)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 672,
+      "name": "Red Hat Ceph Storage (MON)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 673,
+      "name": "Red Hat Ceph Storage (OSD) for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 674,
+      "name": "Red Hat Ceph Storage (MON) for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 675,
+      "name": "Red Hat Ceph Storage (OSD) for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 676,
+      "name": "Red Hat Ceph Storage (MON) for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 677,
+      "name": "Red Hat CodeReady Workspaces for OpenShift for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 678,
+      "name": "Red Hat CodeReady Workspaces for OpenShift for IBM z Systems",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 679,
+      "name": "OpenShift API for Data Protection",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 680,
+      "name": "Red Hat OpenShift Container Platform for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 681,
+      "name": "Red Hat OpenShift distributed tracing (old)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 682,
+      "name": "Red Hat OpenShift distributed tracing for Power, little endian (old)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 683,
+      "name": "Red Hat OpenShift distributed tracing for IBM Z and LinuxONE (old)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 684,
+      "name": "multicluster engine for Kubernetes",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 685,
+      "name": "identity configuration management for Kubernetes",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 686,
+      "name": "mirror registry for Red Hat OpenShift (mirror registry)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 687,
+      "name": "Cert Manager support for Red Hat OpenShift release",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 688,
+      "name": "Red Hat Fuse",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 689,
+      "name": "Red Hat AMQ Broker",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 690,
+      "name": "Red Hat Integration - Camel K",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 691,
+      "name": "Red Hat Integration - Camel Extensions for Quarkus",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 692,
+      "name": "Red Hat Integration - Service Registry",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 693,
+      "name": "Red Hat AMQ Online",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 694,
+      "name": "Red Hat Integration - Debezium",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 695,
+      "name": "Cryostat",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 696,
+      "name": "External DNS Operator",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 697,
+      "name": "Red Hat OpenShift Workload Availability",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 698,
+      "name": "Logging Subsystem for Red Hat OpenShift",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 699,
+      "name": "Logging Subsystem for Red Hat OpenShift for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 700,
+      "name": "Logging Subsystem for Red Hat OpenShift for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 701,
+      "name": "Logging Subsystem for Red Hat OpenShift for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 702,
+      "name": "Secondary Scheduler Operator for Red Hat OpenShift (OSSO)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 703,
+      "name": "Red Hat Service Interconnect",
+      "architectures": [
+        "aarch64",
+        "ppc64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 704,
+      "name": "Custom Metric Autoscaler",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 705,
+      "name": "Red Hat Web Terminal",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 706,
+      "name": "Red Hat Enterprise Linux Server for ARM 64 - 4 years of updates",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 707,
+      "name": "Red Hat Enterprise Linux Server for IBM z Systems - 4 years of updates",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 708,
+      "name": "Red Hat Enterprise Linux High Availability for ARM 64 - 4 years of updates",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 709,
+      "name": "Red Hat Enterprise Linux High Availability for IBM z Systems - 4 years of updates",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 710,
+      "name": "Red Hat Enterprise Linux Resilient Storage for x86_64 - 4 years of updates",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 711,
+      "name": "Red Hat Enterprise Linux Resilient Storage for Power LE - 4 years of updates",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 712,
+      "name": "Red Hat Enterprise Linux Resilient Storage for IBM z Systems - 4 years of updates",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 713,
+      "name": "Red Hat Enterprise Linux for Real Time for x86_64 - 4 years of updates",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 714,
+      "name": "Red Hat Enterprise Linux for Real Time for NFV for x86_64 - 4 years of updates",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 715,
+      "name": "Red Hat Enterprise Linux for SAP Applications for IBM z Systems - 4 years of updates",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 716,
+      "name": "Red Hat OpenShift GitOps for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 717,
+      "name": "Red Hat OpenShift GitOps for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 718,
+      "name": "Node Observability Operator",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 719,
+      "name": "Red Hat OpenShift Pipelines for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 720,
+      "name": "Red Hat OpenShift API Management",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 721,
+      "name": "AWS Load Balancer Operator",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 722,
+      "name": "Red Hat Directory Server - Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 723,
+      "name": "Red Hat Ansible Inside",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 724,
+      "name": "Red Hat Ansible Developer",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 725,
+      "name": "Network Observability (NETOBSERV)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 726,
+      "name": "Kernel Module Management",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 727,
+      "name": "Gatekeeper",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 728,
+      "name": "Red Hat OpenShift AI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 729,
+      "name": "Red Hat Enterprise Linux for ARM 64 - Extended Update Support from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 730,
+      "name": "Red Hat CodeReady Linux Builder for ARM 64 - Extended Update Support from RHUI",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 835,
+      "name": "Red Hat Migration Toolkit for Applications",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 836,
+      "name": "Red Hat Migration Toolkit for Runtimes",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 837,
+      "name": "Red Hat Advanced Cluster Security for Kubernetes for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 838,
+      "name": "Red Hat Advanced Cluster Security for Kubernetes for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 839,
+      "name": "Red Hat Integration - Camel for Spring Boot",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 840,
+      "name": "Red Hat OpenShift GitOps for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 841,
+      "name": "Quay.io",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 842,
+      "name": "Run Once Duration Override Operator",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 843,
+      "name": "Red Hat OpenShift Data Foundation for RHEL 9 ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 844,
+      "name": "Red Hat Enterprise Linux (for ARM 64) - Update Services for SAP Solutions",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 845,
+      "name": "Red Hat Enterprise Linux Server (for IBM z Systems) - Update Services for SAP Solutions",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 846,
+      "name": "Red Hat Enterprise Linux for Real Time for NFV - Update Services for SAP Solutions",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 847,
+      "name": "OpenShift Local for x86_64",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 848,
+      "name": "OpenShift Local for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 849,
+      "name": "Multicluster Global Hub",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 850,
+      "name": "Red Hat Container Native Virtualization for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 851,
+      "name": "Red Hat Developer Hub",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 852,
+      "name": "Network Observability (NETOBSERV) for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 853,
+      "name": "Network Observability (NETOBSERV) for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 854,
+      "name": "Network Observability (NETOBSERV) for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 855,
+      "name": "Red Hat Plug-ins for Backstage",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 856,
+      "name": "Red Hat Openshift Serverless for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 857,
+      "name": "Red Hat OpenShift Builds",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 858,
+      "name": "Red Hat OpenShift Build for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 859,
+      "name": "Red Hat OpenShift Builds for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 860,
+      "name": "Red Hat OpenShift Builds for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 861,
+      "name": "Red Hat OpenStack Dev Preview",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 862,
+      "name": "Red Hat OpenShift Service Mesh for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 863,
+      "name": "OpenShift API for Data Protection for ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 864,
+      "name": "Red Hat build of Keycloak",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 865,
+      "name": "OpenShift API for Data Protection for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 866,
+      "name": "OpenShift API for Data Protection for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 867,
+      "name": "Deployment Validation Operator",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 868,
+      "name": "Red Hat Quay for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 869,
+      "name": "Red Hat Quay for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 870,
+      "name": "Red Hat Quay",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 871,
+      "name": "Red Hat Ansible Private Partner Hub",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 872,
+      "name": "nbde tang server",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 873,
+      "name": "Red Hat Build of Apache Camel",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 874,
+      "name": "Red Hat OpenShift distributed tracing for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 875,
+      "name": "Cluster Observability Operator",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 876,
+      "name": "Red Hat Enterprise Linux for SAP Applications for x86_64 Beta from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 877,
+      "name": "Red Hat Enterprise Linux for SAP Solutions for x86_64 Beta from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 878,
+      "name": "OpenShift Virtualization for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 879,
+      "name": "OpenShift Virtualization",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 880,
+      "name": "Power monitoring for Red Hat OpenShift for ARM",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 881,
+      "name": "Power monitoring for Red Hat OpenShift for IBM Power, little endian",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 882,
+      "name": "Power monitoring for Red Hat OpenShift for IBM Z and LinuxONE",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 883,
+      "name": "Power monitoring for Red Hat OpenShift",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 884,
+      "name": "Cert Manager support for Red Hat OpenShift release for Power",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 885,
+      "name": "Cert Manager support for Red Hat OpenShift release for IBM Z",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 886,
+      "name": "Cert Manager support for Red Hat OpenShift release ARM 64",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10146,
+      "name": "SHADOW - Red Hat Enterprise Linux for SAP",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10150,
+      "name": "SHADOW - Red Hat Virtualization",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10191,
+      "name": "SHADOW - Red Hat OpenStack",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10220,
+      "name": "SHADOW - Red Hat OpenStack Beta",
+      "architectures": [
+        "ppc64le",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10241,
+      "name": "SHADOW - Red Hat Enterprise Linux for SAP Hana",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10266,
+      "name": "SHADOW - MRG Management",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10268,
+      "name": "SHADOW - Red Hat QuickStart Cloud Installer",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10276,
+      "name": "SHADOW - Red Hat Enterprise Virtualization for IBM Power",
+      "architectures": [
+        "ppc64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10311,
+      "name": "SHADOW - Red Hat Single Sign-On",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10328,
+      "name": "SHADOW - Red Hat Virtualization Host",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10340,
+      "name": "SHADOW - dotNET on RHEL (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10341,
+      "name": "SHADOW - dotNET on RHEL Beta (for RHEL Server) from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10369,
+      "name": "SHADOW - Red Hat Enterprise Linux Atomic Host from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10370,
+      "name": "SHADOW - Red Hat Enterprise Linux Atomic Host Beta from RHUI",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10373,
+      "name": "SHADOW - Red Hat Enterprise Linux Server - Extended Life Cycle Support (from RHUI)",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10391,
+      "name": "SHADOW - Red Hat Virtualization - ELS",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10415,
+      "name": "SHADOW - Red Hat Virtualization Manager",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10421,
+      "name": "SHADOW - Red Hat Virtualization - 2 Year Extended Update Support",
+      "architectures": [
+        "x86",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10422,
+      "name": "SHADOW - Red Hat Virtualization for IBM Power - 2 Year Extended Update Support",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10430,
+      "name": "SHADOW - Red Hat Virtualization Host - EUS",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10470,
+      "name": "SHADOW - Release End2End Test (for Power, little endian)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10478,
+      "name": "SHADOW - Release End2End Test (for IBM System Z)",
+      "architectures": [
+        "s390x"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10481,
+      "name": "SHADOW - Release End2End Test (for ARM)",
+      "architectures": [
+        "aarch64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10485,
+      "name": "SHADOW - Red Hat OpenStack 7 Extended Life Cycle Support",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10516,
+      "name": "SHADOW - Red Hat Enterprise Linux Fast Datapath (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10517,
+      "name": "SHADOW - Red Hat Enterprise Linux Fast Datapath Beta (for RHEL Server for IBM Power 9)",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10547,
+      "name": "SHADOW - Red Hat OpenShift Container Storage",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10549,
+      "name": "Red Hat Universal Base Image",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10550,
+      "name": "Red Hat Client Tools (Public)",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10605,
+      "name": "SHADOW - Cinderlib",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": false,
+      "id": 10606,
+      "name": "SHADOW - Cinderlib for IBM Power LE",
+      "architectures": [
+        "ppc64le"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10607,
+      "name": "Red Hat Ansible Automation Platform Pre-release",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10608,
+      "name": "Red Hat Update Infrastructure Pre-Release",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10609,
+      "name": "Red Hat Ansible Automation Platform for Azure (Billing)",
+      "architectures": [
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10610,
+      "name": "Red Hat Ansible Inside Pre-release",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 10611,
+      "name": "Red Hat Ansible Developer Pre-release",
+      "architectures": [
+        "aarch64",
+        "ppc64le",
+        "s390x",
+        "x86_64"
+      ]
+    },
+    {
+      "active": true,
+      "id": 20325,
+      "name": "Shadow - Release End2End Test - DevOps",
+      "architectures": [
+        "x86_64"
+      ]
+    }
+  ]
+}
