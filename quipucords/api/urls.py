@@ -1,6 +1,6 @@
 """Describes the urls and patterns for the API application."""
 
-from django.urls import path
+from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from api.views import (
@@ -30,7 +30,7 @@ ROUTER.register(r"scans", ScanViewSet, basename="scan")
 ROUTER.register(r"jobs", ScanJobViewSet, basename="scanjob")
 ROUTER.register(r"users", UserViewSet, basename="users")
 
-urlpatterns = [
+v1_urls = [
     path("credentials/bulk_delete/", credential_bulk_delete),
     path("reports/<int:report_id>/details/", details),
     path("reports/<int:report_id>/deployments/", deployments),
@@ -39,12 +39,11 @@ urlpatterns = [
     path("reports/merge/jobs/", async_merge_reports),
     path("reports/merge/jobs/<int:scan_job_id>/", async_merge_reports),
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
-]
-
-urlpatterns += [path("token/", QuipucordsExpiringAuthTokenView)]
-
-urlpatterns += [
+    path("token/", QuipucordsExpiringAuthTokenView),
     path("status/", status, name="server-status"),
+    *ROUTER.urls,
 ]
 
-urlpatterns += ROUTER.urls
+urlpatterns = [
+    path("v1/", include((v1_urls, "api"), namespace="v1")),
+]
