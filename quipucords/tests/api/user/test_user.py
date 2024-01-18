@@ -12,7 +12,7 @@ class TestUser:
 
     def test_current(self, qpc_user, django_client):
         """Test the current API endpoint."""
-        url = reverse("users-current")
+        url = reverse("v1:users-current")
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {"username": qpc_user.username}
