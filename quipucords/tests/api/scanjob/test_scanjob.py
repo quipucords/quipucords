@@ -4,8 +4,8 @@
 from unittest import mock
 
 import pytest
-from django.urls import reverse
 from rest_framework import status
+from rest_framework.reverse import reverse
 
 from api import messages
 from api.models import (
@@ -159,7 +159,7 @@ class TestScanJob:
     def test_successful_create(self, django_client, mocker):
         """A valid create request should succeed."""
         scan = ScanFactory()
-        url = reverse("scan-filtered-jobs", args=(scan.id,))
+        url = reverse("v1:scan-filtered-jobs", args=(scan.id,))
         # avoid triggering an actual scan
         mocker.patch("api.scan.view.start_scan")
         response = django_client.post(url)
@@ -170,7 +170,7 @@ class TestScanJob:
         """Get ScanJob details by primary key."""
         scan = ScanFactory()
         scanjob = scan.most_recent_scanjob
-        url = reverse("scanjob-detail", args=(scanjob.id,))
+        url = reverse("v1:scanjob-detail", args=(scanjob.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert "scan" in response.json()
@@ -194,7 +194,7 @@ class TestScanJob:
         )
         sys_result.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -232,7 +232,7 @@ class TestScanJob:
             task_connection_result=conn_result,
         )
         sys_result.save()
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url, params={param: "bad_param"})
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -253,7 +253,7 @@ class TestScanJob:
         )
         sys_result.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(
             url, params={"status": SystemConnectionResult.FAILED}
         )
@@ -290,7 +290,7 @@ class TestScanJob:
         )
         sys_result.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -346,7 +346,7 @@ class TestScanJob:
         )
         sys_result.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url, params={"ordering": "-name"})
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -424,7 +424,7 @@ class TestScanJob:
         )
         sys_result.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -521,7 +521,7 @@ class TestScanJob:
         sys_result3.save()
         sys_result4.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url, params={"source_id": source2.id})
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -598,7 +598,7 @@ class TestScanJob:
         sys_result3.save()
         sys_result4.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url, params={"page_size": 2})
         assert response.status_code == status.HTTP_200_OK
         next_url = (
@@ -662,7 +662,7 @@ class TestScanJob:
         sys_result.save()
         sys_result2.save()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -712,7 +712,7 @@ class TestScanJob:
         source.delete()
         credential.delete()
 
-        url = reverse("scanjob-connection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
@@ -724,14 +724,14 @@ class TestScanJob:
 
     def test_connection_not_found(self, django_client):
         """Get ScanJob connection results with 404."""
-        url = reverse("scanjob-detail", args="2") + "connection/"
+        url = reverse("v1:scanjob-detail", args="2") + "connection/"
         response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_connection_bad_request(self, django_client):
         """Get ScanJob connection results with 400."""
         # TODO IMO this should result in a 404, not 400 - change this behavior in v2
-        url = reverse("scanjob-detail", args="t") + "connection/"
+        url = reverse("v1:scanjob-detail", args="t") + "connection/"
         response = django_client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -759,7 +759,7 @@ class TestScanJob:
         fact.save()
 
         bad_param = "bad_param"
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         url += "?ordering=" + bad_param
         response = django_client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -788,7 +788,7 @@ class TestScanJob:
         fact.save()
 
         bad_param = "bad_param"
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         url += "?status=" + bad_param
         response = django_client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -817,7 +817,7 @@ class TestScanJob:
         fact.save()
 
         bad_param = "bad_param"
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         url += "?source_id=" + bad_param
         response = django_client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -845,7 +845,7 @@ class TestScanJob:
         )
         fact.save()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         url += "?status=" + SystemConnectionResult.FAILED
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -891,7 +891,7 @@ class TestScanJob:
         )
         fact2.save()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url, params={"page_size": 1})
         assert response.status_code == status.HTTP_200_OK
         next_url = (
@@ -974,7 +974,7 @@ class TestScanJob:
         )
         inspect_sys_result4.save()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url, params={"ordering": "-name"})
         assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
@@ -1085,7 +1085,7 @@ class TestScanJob:
         )
         inspect_sys_result4.save()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url, params={"source_id": source2.id})
         assert response.status_code == status.HTTP_200_OK
         json_resp = response.json()
@@ -1177,7 +1177,7 @@ class TestScanJob:
         )
         inspect_sys_result4.save()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
@@ -1256,7 +1256,7 @@ class TestScanJob:
         )
         fact.save()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
@@ -1304,7 +1304,7 @@ class TestScanJob:
 
         source.delete()
 
-        url = reverse("scanjob-inspection", args=(scan_job.id,))
+        url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
@@ -1325,26 +1325,26 @@ class TestScanJob:
 
     def test_inspection_not_found(self, django_client):
         """Get ScanJob connection results with 404."""
-        url = reverse("scanjob-detail", args="2") + "inspection/"
+        url = reverse("v1:scanjob-detail", args="2") + "inspection/"
         response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_inspection_bad_request(self, django_client):
         """Get ScanJob connection results with 400."""
-        url = reverse("scanjob-detail", args="t") + "inspection/"
+        url = reverse("v1:scanjob-detail", args="t") + "inspection/"
         response = django_client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_post_jobs_not_allowed(self, django_client):
         """Test post jobs not allowed."""
-        url = reverse("scanjob-detail", args=(1,))
+        url = reverse("v1:scanjob-detail", args=(1,))
         url = url[:-2]
         response = django_client.post(url, {})
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_list_not_allowed(self, django_client):
         """Test list all jobs not allowed."""
-        url = reverse("scanjob-detail", args=(1,))
+        url = reverse("v1:scanjob-detail", args=(1,))
         url = url[:-2]
         response = django_client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -1366,7 +1366,7 @@ class TestScanJob:
                 }
             },
         }
-        url = reverse("scanjob-detail", args=(scan.most_recent_scanjob.id,))
+        url = reverse("v1:scanjob-detail", args=(scan.most_recent_scanjob.id,))
         response = django_client.put(url, json=data)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -1381,7 +1381,7 @@ class TestScanJob:
             "scan_type": ScanTask.SCAN_TYPE_INSPECT,
             "options": {"disabled_optional_products": "bar"},
         }
-        url = reverse("scanjob-detail", args=(scan_job.id,))
+        url = reverse("v1:scanjob-detail", args=(scan_job.id,))
         response = django_client.put(url, json=data)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -1391,7 +1391,7 @@ class TestScanJob:
         scan_job = scan.most_recent_scanjob
 
         data = {"scan_type": ScanTask.SCAN_TYPE_INSPECT}
-        url = reverse("scanjob-detail", args=(scan_job.id,))
+        url = reverse("v1:scanjob-detail", args=(scan_job.id,))
         response = django_client.patch(url, json=data)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -1399,7 +1399,7 @@ class TestScanJob:
         """Delete a ScanJob is not supported."""
         scan_job = ScanJobFactory()
 
-        url = reverse("scanjob-detail", args=(scan_job.id,))
+        url = reverse("v1:scanjob-detail", args=(scan_job.id,))
         response = django_client.delete(url)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -1407,26 +1407,26 @@ class TestScanJob:
         """Pause a scanjob."""
         scan_job = ScanJobFactory()
 
-        url = reverse("scanjob-pause", args=(scan_job.id,))
+        url = reverse("v1:scanjob-pause", args=(scan_job.id,))
         response = django_client.put(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_pause_bad_id(self, django_client):
         """Pause a scanjob with bad id."""
-        url = reverse("scanjob-pause", args=("string",))
+        url = reverse("v1:scanjob-pause", args=("string",))
         response = django_client.put(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_cancel(self, django_client):
         """Cancel a scanjob."""
         scan_job = ScanJobFactory()
-        url = reverse("scanjob-cancel", args=(scan_job.id,))
+        url = reverse("v1:scanjob-cancel", args=(scan_job.id,))
         response = django_client.put(url)
         assert response.status_code == status.HTTP_200_OK
 
     def test_cancel_bad_id(self, django_client):
         """Cancel a scanjob with bad id."""
-        url = reverse("scanjob-cancel", args=("string",))
+        url = reverse("v1:scanjob-cancel", args=("string",))
         response = django_client.put(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -1434,13 +1434,13 @@ class TestScanJob:
         """Restart a scanjob."""
         scan_job = ScanJobFactory()
 
-        url = reverse("scanjob-restart", args=(scan_job.id,))
+        url = reverse("v1:scanjob-restart", args=(scan_job.id,))
         response = django_client.put(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_restart_bad_id(self, django_client):
         """Restart a scanjob with bad id."""
-        url = reverse("scanjob-restart", args=("string",))
+        url = reverse("v1:scanjob-restart", args=("string",))
         response = django_client.put(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -1657,7 +1657,7 @@ class TestScanJob:
         scan_job = scan.most_recent_scanjob
         # create another scanjob to ensure it wont appear in the filtered list
         ScanJobFactory()
-        url = reverse("scan-filtered-jobs", args=(scan.id,))
+        url = reverse("v1:scan-filtered-jobs", args=(scan.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
 
@@ -1682,7 +1682,7 @@ class TestScanJob:
     def test_filtered_list(self, django_client):
         """List filtered ScanJob objects."""
         scan = ScanFactory(most_recent_scanjob__report=None)
-        url = reverse("scan-filtered-jobs", args=(scan.id,))
+        url = reverse("v1:scan-filtered-jobs", args=(scan.id,))
 
         response = django_client.get(url, params={"status": ScanTask.PENDING})
         assert response.status_code == status.HTTP_200_OK
@@ -1750,7 +1750,7 @@ class TestScanJob:
 
         job_count = len(scan.jobs.all())
         assert job_count != 0
-        url = reverse("scan-detail", args=(scan_id,))
+        url = reverse("v1:scan-detail", args=(scan_id,))
         response = django_client.delete(url)
         assert response.status_code == status.HTTP_204_NO_CONTENT
         job_count = len(scan.jobs.all())

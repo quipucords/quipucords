@@ -33,7 +33,7 @@ class TestScanCreate:
             expected_scan_type = scan_type
         else:
             expected_scan_type = ScanTask.SCAN_TYPE_INSPECT
-        response = django_client.post(reverse("scan-list"), payload)
+        response = django_client.post(reverse("v1:scan-list"), payload)
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == {
             "id": mocker.ANY,
@@ -55,7 +55,7 @@ class TestScanCreate:
         # at view level).
         source = SourceFactory()
         payload = {"sources": [source.id]}
-        response = django_client.post(reverse("scan-list"), payload)
+        response = django_client.post(reverse("v1:scan-list"), payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"name": ["This field is required."]}
 
@@ -65,7 +65,7 @@ class TestScanCreate:
         # They are probably better done at Serializer level (assuming the logic is not
         # at view level).
         payload = {"name": faker.bothify("Scan ????-######")}
-        response = django_client.post(reverse("scan-list"), payload)
+        response = django_client.post(reverse("v1:scan-list"), payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Scan job must have one or more sources."]
@@ -83,7 +83,7 @@ class TestScanCreate:
             "sources": [source.id],
             "scan_type": scan_type,
         }
-        response = django_client.post(reverse("scan-list"), payload)
+        response = django_client.post(reverse("v1:scan-list"), payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"scan_type": [mocker.ANY]}
         error_message = response.json()["scan_type"][0]
@@ -105,7 +105,7 @@ class TestScanCreate:
             "sources": [source.id],
             "scan_type": "",
         }
-        response = django_client.post(reverse("scan-list"), json=payload)
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "scan_type": [
@@ -122,7 +122,7 @@ class TestScanCreate:
             "name": faker.bothify("Scan ????-######"),
             "sources": [faker.slug()],
         }
-        response = django_client.post(reverse("scan-list"), json=payload)
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Source identifiers must be integer values."]
@@ -137,7 +137,7 @@ class TestScanCreate:
             "name": faker.bothify("Scan ????-######"),
             "sources": [999999],
         }
-        response = django_client.post(reverse("scan-list"), json=payload)
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Source with id=999999 could not be found in database."]
@@ -155,7 +155,7 @@ class TestScanCreate:
                 }
             },
         }
-        response = django_client.post(reverse("scan-list"), json=payload)
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
         assert response.status_code == status.HTTP_201_CREATED
         DEFAULT_MAX_CONCURRENCY = 25
         assert response.json() == {
@@ -196,7 +196,7 @@ class TestScanCreate:
                 "max_concurrency": -5,
             },
         }
-        response = django_client.post(reverse("scan-list"), json=payload)
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -215,7 +215,7 @@ class TestScanCreate:
             "sources": [source.id],
             "options": {"disabled_optional_products": "foo"},
         }
-        response = django_client.post(reverse("scan-list"), json=payload)
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -236,7 +236,7 @@ class TestScanRetrieve:
         """Get Scan details by primary key."""
         scan = ScanFactory(most_recent_scanjob=None)
         source = scan.sources.first()
-        response = django_client.get(reverse("scan-detail", args=(scan.id,)))
+        response = django_client.get(reverse("v1:scan-detail", args=(scan.id,)))
         assert response.ok, response.json()
         assert response.json() == {
             "id": scan.id,
@@ -256,7 +256,7 @@ class TestScanRetrieve:
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
         # at view level - which SHOULD not be).
-        response = django_client.get(reverse("scan-detail", args=("invalid",)))
+        response = django_client.get(reverse("v1:scan-detail", args=("invalid",)))
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -267,7 +267,7 @@ class TestScanUpdate:
     def test_update(self, django_client, faker):
         """Completely update a scan."""
         scan = ScanFactory()
-        url = reverse("scan-detail", args=(scan.id,))
+        url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = django_client.get(url)
         assert original_response.ok
         original_json = original_response.json()
@@ -297,7 +297,7 @@ class TestScanUpdate:
     def test_partial_update_retains(self, django_client):
         """Test partial update retains unprovided info."""
         scan = ScanFactory()
-        url = reverse("scan-detail", args=(scan.id,))
+        url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = django_client.get(url)
         assert original_response.ok
         original_json = original_response.json()
@@ -324,7 +324,7 @@ class TestScanUpdate:
         original_source = scan.sources.first()
         new_source = SourceFactory()
         assert original_source.id != new_source.id
-        url = reverse("scan-detail", args=(scan.id,))
+        url = reverse("v1:scan-detail", args=(scan.id,))
         response = django_client.patch(url, json={"sources": [new_source.id]})
         assert response.ok, response.json()
         assert response.json() == {
@@ -344,7 +344,7 @@ class TestScanUpdate:
     def test_partial_update_enabled(self, django_client):
         """Test partial update retains unprovided info."""
         scan = ScanFactory(options=ScanOptionsFactory())
-        url = reverse("scan-detail", args=(scan.id,))
+        url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = django_client.get(url)
         assert original_response.ok
         original_json = original_response.json()
@@ -371,7 +371,7 @@ class TestScanUpdate:
     def test_partial_update_scan_type(self, django_client):
         """Test partial update retains unprovided info."""
         scan = ScanFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-        url = reverse("scan-detail", args=(scan.id,))
+        url = reverse("v1:scan-detail", args=(scan.id,))
         response = django_client.patch(
             url, json={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
         )
@@ -404,7 +404,7 @@ def test_expand_scan():
 def test_delete(django_client):
     """Delete a scan."""
     scan = ScanFactory()
-    url = reverse("scan-detail", args=(scan.id,))
+    url = reverse("v1:scan-detail", args=(scan.id,))
     response = django_client.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert Scan.objects.count() == 0
@@ -453,7 +453,7 @@ class TestScanList:
 
     def test_list(self, django_client, expected_scans):
         """List Scan objects."""
-        response = django_client.get(reverse("scan-list"))
+        response = django_client.get(reverse("v1:scan-list"))
         assert response.ok, response.json()
         assert response.json() == {
             "count": 2,
@@ -465,7 +465,7 @@ class TestScanList:
     def test_filtered_list(self, django_client, expected_scans):
         """Test filtered scan list."""
         response = django_client.get(
-            reverse("scan-list"), params={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
+            reverse("v1:scan-list"), params={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
         )
         assert response.ok, response.json()
         assert response.json() == {
@@ -479,7 +479,8 @@ class TestScanList:
     def test_list_by_scanjob_end_time(self, django_client, expected_scans):
         """List all scan objects, ordered by ScanJob start time."""
         response = django_client.get(
-            reverse("scan-list"), params={"ordering": "most_recent_scanjob__start_time"}
+            reverse("v1:scan-list"),
+            params={"ordering": "most_recent_scanjob__start_time"},
         )
         assert response.ok, response.json()
         assert response.json() == {

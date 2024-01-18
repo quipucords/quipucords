@@ -3,8 +3,8 @@
 import json
 
 from django.test import TestCase
-from django.urls import reverse
 from rest_framework import status
+from rest_framework.reverse import reverse
 
 from api import messages
 from api.common.common_report import create_report_version
@@ -40,7 +40,7 @@ class DetailsReportTest(LoggedUserMixin, TestCase):
 
     def create(self, data):
         """Call the create endpoint."""
-        url = reverse("reports-list")
+        url = reverse("v1:reports-list")
         return self.client.post(url, json.dumps(data), "application/json")
 
     def create_expect_400(self, data, expected_response=None):

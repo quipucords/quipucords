@@ -10,7 +10,7 @@ class TestStatus:
 
     def test_status_endpoint(self, django_client):
         """Test the status endpoint."""
-        url = reverse("server-status")
+        url = reverse("v1:server-status")
         response = django_client.get(url)
         assert response.headers.get("X-Server-Version")
         assert response.headers["X-Server-Version"] == server_version()

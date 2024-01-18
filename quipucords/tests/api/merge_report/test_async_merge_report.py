@@ -3,8 +3,8 @@
 from unittest import mock
 
 import pytest
-from django.urls import reverse
 from rest_framework import status
+from rest_framework.reverse import reverse
 
 from api import messages
 from api.common.common_report import create_report_version
@@ -455,7 +455,7 @@ class TestAsyncMergeReports:
 
     def test_by_id_merge_jobs_success(self, server_id, network_source, django_client):
         """Test report merge by id jobs success."""
-        url = reverse("reports-list")
+        url = reverse("v1:reports-list")
         sources1 = [
             {
                 "server_id": server_id,

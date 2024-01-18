@@ -4,8 +4,8 @@ from datetime import datetime
 from unittest.mock import patch
 
 import pytest
-from django.urls import reverse
 from rest_framework import status
+from rest_framework.reverse import reverse
 from rest_framework.serializers import ValidationError
 
 from api import messages
@@ -88,7 +88,7 @@ class TestSource:
 
     def create(self, data, django_client):
         """Call the create endpoint."""
-        url = reverse("source-list")
+        url = reverse("v1:source-list")
         return django_client.post(url, json=data, headers=ACCEPT_JSON_HEADER)
 
     def create_expect_400(self, data, django_client, expected_response=None):
@@ -108,7 +108,7 @@ class TestSource:
     @patch("api.source.view.start_scan", side_effect=dummy_start)
     def create_with_query(self, query, data, django_client, start_scan):
         """Create a source with query param, return the response as a dict."""
-        url = reverse("source-list")
+        url = reverse("v1:source-list")
         url += query
         return django_client.post(url, json=data, headers=ACCEPT_JSON_HEADER)
 
@@ -131,7 +131,7 @@ class TestSource:
     def get_source(self, django_client, params=None, url=None):
         """Call the retrieve endpoint."""
         if not url:
-            url = reverse("source-list")
+            url = reverse("v1:source-list")
         if params is not None:
             return django_client.get(url, params=params)
         else:
@@ -139,12 +139,12 @@ class TestSource:
 
     def update_source(self, django_client, data, source_id):
         """Call the update endpoint."""
-        url = reverse("source-detail", args=(source_id,))
+        url = reverse("v1:source-detail", args=(source_id,))
         return django_client.put(url=url, json=data)
 
     def partially_update_source(self, django_client, data, source_id):
         """Call the partialy update endpoint."""
-        url = reverse("source-detail", args=(source_id,))
+        url = reverse("v1:source-detail", args=(source_id,))
         return django_client.patch(url=url, json=data)
 
     def source_object_factory(self, data, django_client, range_number):
@@ -692,7 +692,7 @@ class TestSource:
         }
         initial = self.create_expect_201(data, django_client)
 
-        url = reverse("source-detail", args=(initial["id"],))
+        url = reverse("v1:source-detail", args=(initial["id"],))
         response = self.get_source(django_client, url=url)
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
@@ -707,7 +707,7 @@ class TestSource:
 
     def test_retrieve_bad_id(self, django_client):
         """Get details on a specific Source by bad primary key."""
-        url = reverse("source-detail", args=("string",))
+        url = reverse("v1:source-detail", args=("string",))
         response = self.get_source(django_client, url=url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -963,7 +963,7 @@ class TestSource:
         }
         response_source_creation = self.create_expect_201(data, django_client)
 
-        url = reverse("source-detail", args=(response_source_creation["id"],))
+        url = reverse("v1:source-detail", args=(response_source_creation["id"],))
         response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -985,7 +985,7 @@ class TestSource:
         )
         scan.sources.add(source)
 
-        url = reverse("source-detail", args=(source.id,))
+        url = reverse("v1:source-detail", args=(source.id,))
         response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
