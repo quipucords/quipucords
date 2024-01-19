@@ -1197,6 +1197,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self._add_fact_to_fingerprint(
             source, "vm.cluster", fact, "vm_cluster", fingerprint
         )
+        self._add_fact_to_fingerprint(
+            source, "installed_products", fact, "installed_products", fingerprint
+        )
 
         # VcenterRawFacts.MEMORY_SIZE is formatted in GB. lets convert it to mb
         # https://github.com/quipucords/quipucords/blob/bf1f034b6596ba01c9c89f766088108dd3f421fc/quipucords/scanner/vcenter/inspect.py#L190-L191
