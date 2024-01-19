@@ -1,19 +1,17 @@
 """Test the status API view."""
 
-from django.test import TestCase
-from django.urls import reverse
+from rest_framework.reverse import reverse
 
 from quipucords.environment import server_version
 
 
-class StatusTest(TestCase):
+class TestStatus:
     """Tests the status view."""
 
-    def test_status_endpoint(self):
+    def test_status_endpoint(self, django_client):
         """Test the status endpoint."""
         url = reverse("server-status")
-        response = self.client.get(url)
-        self.assertTrue(response.has_header("X-Server-Version"))
-        self.assertEqual(response["X-Server-Version"], server_version())
-        json_result = response.json()
-        self.assertEqual(json_result["api_version"], 1)
+        response = django_client.get(url)
+        assert response.headers.get("X-Server-Version")
+        assert response.headers["X-Server-Version"] == server_version()
+        assert response.json()["api_version"] == 1
