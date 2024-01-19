@@ -2,17 +2,18 @@
 
 from unittest.mock import ANY, Mock, patch
 
-from django.test import TestCase
+import pytest
 
 from api.models import Credential, ScanTask, Source, SourceOptions
 from scanner.vcenter.utils import vcenter_connect
 from tests.scanner.test_util import create_scan_job
 
 
-class VCenterUtilsTest(TestCase):
+@pytest.mark.django_db
+class TestVCenterUtilsTest:
     """Tests VCenter utils functions."""
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
@@ -35,9 +36,6 @@ class VCenterUtilsTest(TestCase):
             self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT
         )
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-
     def test_vcenter_connect(self):
         """Test the connection method."""
         mock_vcenter = Mock()
@@ -45,7 +43,7 @@ class VCenterUtilsTest(TestCase):
             "scanner.vcenter.utils.SmartConnectNoSSL", return_value=mock_vcenter
         ) as mock_smart_connect:
             vcenter = vcenter_connect(self.scan_task)
-            self.assertEqual(mock_vcenter, vcenter)
+            assert mock_vcenter == vcenter
             mock_smart_connect.assert_called_once_with(
                 host=ANY, user=ANY, pwd=ANY, port=ANY
             )
