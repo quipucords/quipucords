@@ -176,6 +176,42 @@ class ScanJobFactory(DjangoModelFactory):
         model = "api.ScanJob"
 
 
+class ScanFactory(DjangoModelFactory):
+    """Factory for Scan."""
+
+    name = factory.Faker("bothify", text="Scan ????-######")
+    scan_type = models.ScanTask.SCAN_TYPE_INSPECT
+    most_recent_scanjob = factory.SubFactory(ScanJobFactory)
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.Scan"
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        """Override DjangoModelFactory internal create method."""
+        sources = kwargs.pop("sources", [])
+        source = super()._create(*args, **kwargs)
+        # simple M2M fields are not supported as attributes on factory boy, hence this
+        source.sources.add(*sources)
+        return source
+
+    @factory.post_generation
+    def number_of_sources(obj: models.Scan, create, extracted, **kwargs):
+        """Create n sources associated to Scan."""
+        if not create:
+            return
+
+        if not obj.sources.count() and extracted is None:
+            # if no source was created, create at least one
+            extracted = 1
+
+        if extracted:
+            sources = [SourceFactory() for _ in range(extracted)]
+            obj.sources.add(*sources)
+
+
 class TaskConnectionResultFactory(DjangoModelFactory):
     """Factory for TaskConnectionResult model."""
 
@@ -285,3 +321,37 @@ class SourceFactory(DjangoModelFactory):
                 CredentialFactory(cred_type=obj.source_type) for _ in range(extracted)
             ]
             obj.credentials.add(*credentials)
+
+
+class ExtendedProductSearchOptionsFactory(DjangoModelFactory):
+    """Factory for ExtendedProductSearchOptions model."""
+
+    class Meta:
+        """Factory options."""
+
+        model = models.ExtendedProductSearchOptions
+
+
+class DisabledOptionalProductsOptionsFactory(DjangoModelFactory):
+    """Factory for DisabledOptionalProductsOptions model."""
+
+    class Meta:
+        """Factory options."""
+
+        model = models.DisabledOptionalProductsOptions
+
+
+class ScanOptionsFactory(DjangoModelFactory):
+    """Factory for ScanOptions model."""
+
+    disabled_optional_products = factory.SubFactory(
+        DisabledOptionalProductsOptionsFactory
+    )
+    enabled_extended_product_search = factory.SubFactory(
+        ExtendedProductSearchOptionsFactory
+    )
+
+    class Meta:
+        """Factory options."""
+
+        model = models.ScanOptions
