@@ -4,7 +4,7 @@ from datetime import datetime
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
-from django.test import TestCase
+import pytest
 from pyVmomi import vim
 
 from api.models import Credential, ScanJob, ScanTask, Source
@@ -17,12 +17,13 @@ def invalid_login():
     raise vim.fault.InvalidLogin()
 
 
-class InspectTaskRunnerTest(TestCase):
+@pytest.mark.django_db
+class TestVCenterInspectTaskRunnerTest:
     """Tests against the InspectTaskRunner class and functions."""
 
     runner = None
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         cred = Credential(
             name="cred1",
@@ -51,9 +52,6 @@ class InspectTaskRunnerTest(TestCase):
             scan_job=self.scan_job, scan_task=self.scan_task
         )
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-
     def test_get_nics(self):
         """Test the get_nics method."""
         guest = Mock()
@@ -72,18 +70,18 @@ class InspectTaskRunnerTest(TestCase):
             nics.append(nic)
         guest.net = nics
         mac_addresses, ip_addresses = get_nics(guest.net)
-        self.assertEqual(mac_addresses, ["mac0", "mac1"])
-        self.assertEqual(ip_addresses, ["ip0", "ip1"])
+        assert mac_addresses == ["mac0", "mac1"]
+        assert ip_addresses == ["ip0", "ip1"]
 
     def test__none(self):
         """Test get result method when no results exist."""
         results = self.scan_task.get_result().systems.first()
-        self.assertEqual(results, None)
+        assert results is None
 
     def test_get_result(self):
         """Test get results method when results exist."""
         results = self.scan_task.get_result()
-        self.assertEqual(results, self.scan_task.inspection_result)
+        assert results == self.scan_task.inspection_result
 
     def test_parse_parent_props(self):
         """Test the parse_parent_props_method."""
@@ -101,7 +99,7 @@ class InspectTaskRunnerTest(TestCase):
             "parent": str(folder),
         }
         results = self.runner.parse_parent_props(obj, props)
-        self.assertEqual(results, expected_facts)
+        assert results == expected_facts
 
     def test_parse_cluster_props(self):
         """Test the parse_cluster_props_method."""
@@ -119,7 +117,7 @@ class InspectTaskRunnerTest(TestCase):
 
         expected_facts = {"cluster.name": "cluster1", "cluster.datacenter": "dc1"}
         results = self.runner.parse_cluster_props(props, parents_dict)
-        self.assertEqual(results, expected_facts)
+        assert results == expected_facts
 
     def test_parse_host_props(self):
         """Test the parse_host_props_method."""
@@ -158,7 +156,7 @@ class InspectTaskRunnerTest(TestCase):
         }
 
         results = self.runner.parse_host_props(props, cluster_dict)
-        self.assertEqual(results, expected_facts)
+        assert results == expected_facts
 
     @patch("scanner.vcenter.inspect.datetime")
     def test_parse_vm_props(self, mock_dt):
@@ -236,9 +234,9 @@ class InspectTaskRunnerTest(TestCase):
             for raw_fact in sys_results.first().facts.all():
                 sys_fact[raw_fact.name] = raw_fact.value
 
-            self.assertEqual(1, len(sys_results))
-            self.assertEqual("vm1", sys_results.first().name)
-            self.assertEqual(expected_facts, sys_fact)
+            assert 1 == len(sys_results)
+            assert "vm1" == sys_results.first().name
+            assert expected_facts == sys_fact
 
     def test_retrieve_properties(self):
         """Test the retrieve_properties method."""
@@ -305,7 +303,7 @@ class InspectTaskRunnerTest(TestCase):
             InspectTaskRunner, "inspect", side_effect=invalid_login
         ) as mock_connect:
             status = self.runner.run(Value("i", ScanJob.JOB_RUN))
-            self.assertEqual(ScanTask.FAILED, status[1])
+            assert ScanTask.FAILED == status[1]
             mock_connect.assert_called_once_with()
 
     def test_prereq_failed(self):
@@ -313,21 +311,21 @@ class InspectTaskRunnerTest(TestCase):
         self.connect_scan_task.status = ScanTask.FAILED
         self.connect_scan_task.save()
         status = self.runner.run(Value("i", ScanJob.JOB_RUN))
-        self.assertEqual(ScanTask.FAILED, status[1])
+        assert ScanTask.FAILED == status[1]
 
     def test_run(self):
         """Test the run method."""
         with patch.object(InspectTaskRunner, "inspect") as mock_connect:
             status = self.runner.run(Value("i", ScanJob.JOB_RUN))
-            self.assertEqual(ScanTask.COMPLETED, status[1])
+            assert ScanTask.COMPLETED == status[1]
             mock_connect.assert_called_once_with()
 
     def test_cancel(self):
         """Test the cancel method."""
         status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        self.assertEqual(ScanTask.CANCELED, status[1])
+        assert ScanTask.CANCELED == status[1]
 
     def test_pause(self):
         """Test the pause method."""
         status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        self.assertEqual(ScanTask.PAUSED, status[1])
+        assert ScanTask.PAUSED == status[1]
