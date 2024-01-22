@@ -62,7 +62,7 @@ setuptools-scm @ https://files.pythonhosted.org/packages/0e/a3/b9a8b0adfe672bf0d
     #   python-dateutil
     #   setuptools-rust
     #   setuptools-scm
-trove-classifiers==2023.11.29
+trove-classifiers==2024.1.8
     # via hatchling
 typing-extensions==4.9.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
