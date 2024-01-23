@@ -31,12 +31,6 @@ pydantic = "^1.10.4"
 django-environ = "^0.10.0"
 celery = {extras = ["redis"], version = "^5.3.0"}
 more-itertools = "^9.1.0"
-# Note: packaging, setuptools, and gitpython are required by qpc, not necessarily quipucords.
-# We include them here because current downstream build process requires them to share dependencies definition.
-# We should consider removing these when we split the downstream build process to build separate container images.
-packaging = "^23.1"
-setuptools = "^68.0.0"
-gitpython = "^3.1.41"
 django-cors-headers = "^4.3.1"
 
 [tool.poetry.group.dev.dependencies]
