@@ -56,7 +56,7 @@ setuptools-rust==1.8.1
     # via
     #   bcrypt
     #   cryptography
-setuptools-scm==8.0.4
+setuptools-scm @ https://files.pythonhosted.org/packages/0e/a3/b9a8b0adfe672bf0df5901707aa929d30a97ee390ba651910186776746d2/setuptools_scm-8.0.4-py3-none-any.whl#sha256=b47844cd2a84b83b3187a5782c71128c28b4c94cad8bfb871da2784a5cb54c4f
     # via
     #   pluggy
     #   python-dateutil
