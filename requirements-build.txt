@@ -94,7 +94,6 @@ setuptools==69.0.3 ; python_version >= "3.11" and python_version < "3.12"
     #   cryptography
     #   django
     #   django-cors-headers
-    #   gitpython
     #   pathspec
     #   pluggy
     #   pyasn1
