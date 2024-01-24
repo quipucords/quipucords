@@ -38,7 +38,7 @@ urlpatterns = [
     path("reports/<int:report_id>/", reports),
     path("reports/merge/jobs/", async_merge_reports),
     path("reports/merge/jobs/<int:scan_job_id>/", async_merge_reports),
-    path("scans/<int:scan_id>/jobs/", jobs),
+    path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
 ]
 
 urlpatterns += [path("token/", QuipucordsExpiringAuthTokenView)]

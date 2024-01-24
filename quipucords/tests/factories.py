@@ -192,10 +192,15 @@ class ScanFactory(DjangoModelFactory):
     def _create(cls, *args, **kwargs):
         """Override DjangoModelFactory internal create method."""
         sources = kwargs.pop("sources", [])
-        source = super()._create(*args, **kwargs)
+        scan = super()._create(*args, **kwargs)
         # simple M2M fields are not supported as attributes on factory boy, hence this
-        source.sources.add(*sources)
-        return source
+        scan.sources.add(*sources)
+        if scan.most_recent_scanjob:
+            # set scan x scanjob relationship (dear future reader: this was tried - and
+            # miserably failed - with factory.SelfAttribute or factory.LazyAttribute)
+            scan.most_recent_scanjob.scan = scan
+            scan.most_recent_scanjob.save()
+        return scan
 
     @factory.post_generation
     def number_of_sources(obj: models.Scan, create, extracted, **kwargs):

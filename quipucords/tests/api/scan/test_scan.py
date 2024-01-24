@@ -234,7 +234,7 @@ class TestScanRetrieve:
 
     def test_retrieve(self, django_client, mocker):
         """Get Scan details by primary key."""
-        scan = ScanFactory()
+        scan = ScanFactory(most_recent_scanjob=None)
         source = scan.sources.first()
         response = django_client.get(reverse("scan-detail", args=(scan.id,)))
         assert response.ok, response.json()
@@ -242,7 +242,6 @@ class TestScanRetrieve:
             "id": scan.id,
             "name": scan.name,
             "scan_type": scan.scan_type,
-            "most_recent": mocker.ANY,
             "sources": [
                 {
                     "id": source.id,
@@ -286,6 +285,12 @@ class TestScanUpdate:
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
+            "jobs": [
+                {
+                    "id": scan.most_recent_scanjob.id,
+                    "report_id": scan.most_recent_scanjob.report_id,
+                }
+            ],
             **payload,
         }
 
@@ -302,6 +307,12 @@ class TestScanUpdate:
         assert response_update.json() == {
             "id": original_json["id"],
             "most_recent_scanjob": scan.most_recent_scanjob.id,
+            "jobs": [
+                {
+                    "id": scan.most_recent_scanjob.id,
+                    "report_id": scan.most_recent_scanjob.report_id,
+                }
+            ],
             "name": "NEW NAME",
             "scan_type": original_json["scan_type"],
             "sources": [original_json["sources"][0]["id"]],
@@ -319,6 +330,12 @@ class TestScanUpdate:
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
+            "jobs": [
+                {
+                    "id": scan.most_recent_scanjob.id,
+                    "report_id": scan.most_recent_scanjob.report_id,
+                }
+            ],
             "name": scan.name,
             "scan_type": scan.scan_type,
             "sources": [new_source.id],
@@ -422,6 +439,7 @@ class TestScanList:
                 "name": scan.name,
                 "scan_type": scan.scan_type,
                 "most_recent": mocker.ANY,
+                "jobs": mocker.ANY,
                 "sources": [
                     {
                         "id": source.id,
