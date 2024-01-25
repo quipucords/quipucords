@@ -2290,13 +2290,13 @@ pyasn1 = ">=0.4.6,<0.6.0"
 
 [[package]]
 name = "pybuild-deps"
-version = "0.1.3"
+version = "0.2.0"
 description = "A simple tool for detection of PEP-517 build dependencies."
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "pybuild_deps-0.1.3-py3-none-any.whl", hash = "sha256:68f4b04e3731cd59bdffa510cb5ae66be369fb7013c180a4ffac62ef846b9cd8"},
-    {file = "pybuild_deps-0.1.3.tar.gz", hash = "sha256:c2c857d9957a06260731ffa57dab86f6d323b47c66b6d209e034a03124ac4893"},
+    {file = "pybuild_deps-0.2.0-py3-none-any.whl", hash = "sha256:340af5c7df0294b561d08b46b0a936b2954c4a2ba1c05b8986d1431d33ba5bd7"},
+    {file = "pybuild_deps-0.2.0.tar.gz", hash = "sha256:992c1ccd56fb60d38b64df90b6050ad9d699a6668770256816ee0ef0d9265c01"},
 ]
 
 [package.dependencies]
@@ -3728,4 +3728,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "bef24b52b0f8edd43c181cf5b16abfd40997c5c9fcc551870e728ccd2bd912c8"
+content-hash = "1aabf306d2298042b1c2aae670de5a0d388e9a0d814f05c5a63ca30619247502"
