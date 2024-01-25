@@ -10,12 +10,12 @@ import csv
 
 import pytest
 from rest_framework import status
+from rest_framework.reverse import reverse
 
 from api.common.common_report import REPORT_TYPE_DEPLOYMENT
 from api.deployments_report.model import DeploymentsReport, SystemFingerprint
 from api.deployments_report.util import sanitize_row
 from constants import DataSources
-from tests.constants import API_REPORTS_DEPLOYMENTS_PATH
 from tests.factories import DeploymentReportFactory
 from tests.report_utils import extract_files_from_tarball
 from tests.utils import fake_semver
@@ -83,7 +83,7 @@ def test_get_deployments_report_as_csv(django_client, deployments_report):
     This effectively tests DeploymentCSVRenderer.
     """
     response = django_client.get(
-        API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id),
+        reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "text/csv"},
     )
     assert response.ok, f"response was not ok; status {response.status_code}"
@@ -132,7 +132,7 @@ def test_get_deployments_report_as_csv(django_client, deployments_report):
 def test_get_deployments_report_as_json(django_client, deployments_report):
     """Test deployments report rendering as JSON."""
     response = django_client.get(
-        API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id),
+        reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "application/json"},
     )
     assert response.ok, f"response was not ok; status {response.status_code}"
@@ -165,7 +165,7 @@ def test_get_deployment_report_as_tarball(django_client, deployments_report):
     This effectively tests ReportJsonGzipRenderer by extracting its response and
     comparing it to the response generated from the regular JSON API.
     """
-    path = API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id)
+    path = reverse("v1:reports-deployments", args=(deployments_report.report.id,))
     gzip_response = django_client.get(path, headers={"Accept": "application/json+gzip"})
     assert (
         gzip_response.ok
@@ -185,13 +185,14 @@ def test_get_deployment_report_as_tarball(django_client, deployments_report):
 
 def test_get_deployment_report_invalid_id_not_found(django_client):
     """Test getting a report for an invalid report ID responds with 404."""
-    response = django_client.get(API_REPORTS_DEPLOYMENTS_PATH.format("invalid"))
+    url = reverse("v1:reports-list") + "/invalid/deployments/"
+    response = django_client.get(url)
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_deployment_report_unknown_id_not_found(django_client):
     """Test getting a report for a report ID that does not exist responds with 404."""
-    response = django_client.get(API_REPORTS_DEPLOYMENTS_PATH.format("1"))
+    response = django_client.get(reverse("v1:reports-deployments", args=("1",)))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -201,6 +202,6 @@ def test_get_deployments_report_not_complete_424_failed(django_client):
         number_of_fingerprints=0, status=DeploymentsReport.STATUS_PENDING
     )
     response = django_client.get(
-        API_REPORTS_DEPLOYMENTS_PATH.format(deployments_report.report.id)
+        reverse("v1:reports-deployments", args=(deployments_report.report.id,))
     )
     assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY

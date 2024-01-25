@@ -13,7 +13,10 @@ from rest_framework.reverse import reverse
         ("v1:cred-bulk-delete", {}, "/api/v1/credentials/bulk_delete/"),
         # why reports (plural)? other named views use singular...
         ("v1:reports-list", {}, "/api/v1/reports/"),
+        ("v1:reports-detail", {"report_id": 1}, "/api/v1/reports/1/"),
         ("v1:reports-details", {"report_id": 1}, "/api/v1/reports/1/details/"),
+        ("v1:reports-deployments", {"report_id": 1}, "/api/v1/reports/1/deployments/"),
+        ("v1:reports-insights", {"report_id": 1}, "/api/v1/reports/1/insights/"),
         ("v1:reports-merge-jobs", {}, "/api/v1/reports/merge/jobs/"),
         (
             "v1:reports-merge-jobs-detail",

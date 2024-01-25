@@ -8,10 +8,6 @@ from tests.env import BaseURI, EnvVar, as_bool
 
 PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent.parent
 
-API_REPORTS_DEPLOYMENTS_PATH = "/api/v1/reports/{0}/deployments/"
-API_REPORTS_DETAILS_PATH = "/api/v1/reports/{0}/details/"
-API_REPORTS_INSIGHTS_PATH = "/api/v1/reports/{0}/insights/"
-API_REPORTS_PATH = "/api/v1/reports/{0}/"
 CLEANUP_DOCKER_LAYERS = False
 FILENAME_DEPLOYMENTS_CSV = "deployments.csv"
 FILENAME_DEPLOYMENTS_JSON = "deployments.json"
