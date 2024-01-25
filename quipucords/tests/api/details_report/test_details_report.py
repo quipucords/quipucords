@@ -5,6 +5,7 @@ import tarfile
 from io import BytesIO
 
 import pytest
+from rest_framework.reverse import reverse
 
 from api.models import Report
 from constants import DataSources
@@ -33,7 +34,7 @@ class TestDetailsReport:
     def test_retrieve_json(self, sources, django_client):
         """Test details report view in json format (the default)."""
         report = ReportFactory(sources=sources)
-        response = django_client.get(f"/api/v1/reports/{report.id}/details")
+        response = django_client.get(reverse("v1:reports-details", args=(report.id,)))
         assert response.ok, response.text
         assert response.json() == {
             "report_id": report.id,
@@ -46,7 +47,7 @@ class TestDetailsReport:
         """Test details report view in gziped json format."""
         report = ReportFactory(sources=sources)
         response = django_client.get(
-            f"/api/v1/reports/{report.id}/details",
+            reverse("v1:reports-details", args=(report.id,)),
             headers={"Accept": "application/json+gzip"},
         )
         assert response.ok, response.text
@@ -69,7 +70,7 @@ class TestDetailsReport:
         assert len(sources) == 1, "this test assumes sources has only one source."
         report: Report = ReportFactory(sources=sources, cached_csv=None)
         response = django_client.get(
-            f"/api/v1/reports/{report.id}/details",
+            reverse("v1:reports-details", args=(report.id,)),
             headers={"Accept": "text/csv"},
         )
         assert response.ok, response.text
