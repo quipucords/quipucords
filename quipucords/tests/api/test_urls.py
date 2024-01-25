@@ -8,9 +8,9 @@ from rest_framework.reverse import reverse
 @pytest.mark.parametrize(
     "name,kwargs,expected_url",
     (
-        ("v1:cred-list", {}, "/api/v1/credentials/"),
-        ("v1:cred-detail", {"pk": 1}, "/api/v1/credentials/1/"),
-        ("v1:cred-bulk-delete", {}, "/api/v1/credentials/bulk_delete/"),
+        ("v1:credentials-list", {}, "/api/v1/credentials/"),
+        ("v1:credentials-detail", {"pk": 1}, "/api/v1/credentials/1/"),
+        ("v1:credentials-bulk-delete", {}, "/api/v1/credentials/bulk_delete/"),
         # why reports (plural)? other named views use singular...
         ("v1:reports-list", {}, "/api/v1/reports/"),
         ("v1:reports-detail", {"report_id": 1}, "/api/v1/reports/1/"),
