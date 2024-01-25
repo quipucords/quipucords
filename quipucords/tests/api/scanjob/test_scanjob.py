@@ -602,7 +602,8 @@ class TestScanJob:
         response = django_client.get(url, params={"page_size": 2})
         assert response.status_code == status.HTTP_200_OK
         next_url = (
-            f"{live_server.url}/api/v1/jobs/{scan_job.id}/connection/"
+            f"{live_server.url}"
+            f"{reverse('v1:scanjob-connection', args=(scan_job.id,))}"
             "?page=2&page_size=2"
         )
         assert response.json() == {
@@ -895,7 +896,8 @@ class TestScanJob:
         response = django_client.get(url, params={"page_size": 1})
         assert response.status_code == status.HTTP_200_OK
         next_url = (
-            f"{live_server.url}/api/v1/jobs/{scan_job.id}/inspection/"
+            f"{live_server.url}"
+            f"{reverse('v1:scanjob-inspection', args=(scan_job.id,))}"
             "?page=2&page_size=1"
         )
         assert response.json() == {

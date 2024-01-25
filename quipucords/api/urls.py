@@ -31,13 +31,17 @@ ROUTER.register(r"jobs", ScanJobViewSet, basename="scanjob")
 ROUTER.register(r"users", UserViewSet, basename="users")
 
 v1_urls = [
-    path("credentials/bulk_delete/", credential_bulk_delete),
-    path("reports/<int:report_id>/details/", details),
+    path("credentials/bulk_delete/", credential_bulk_delete, name="cred-bulk-delete"),
+    path("reports/<int:report_id>/details/", details, name="reports-details"),
     path("reports/<int:report_id>/deployments/", deployments),
     path("reports/<int:report_id>/insights/", insights),
     path("reports/<int:report_id>/", reports),
-    path("reports/merge/jobs/", async_merge_reports),
-    path("reports/merge/jobs/<int:scan_job_id>/", async_merge_reports),
+    path("reports/merge/jobs/", async_merge_reports, name="reports-merge-jobs"),
+    path(
+        "reports/merge/jobs/<int:scan_job_id>/",
+        async_merge_reports,
+        name="reports-merge-jobs-detail",
+    ),
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
     path("token/", QuipucordsExpiringAuthTokenView),
     path("status/", status, name="server-status"),

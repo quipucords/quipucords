@@ -16,7 +16,6 @@ from constants import ENCRYPTED_DATA_MASK, DataSources
 from tests.factories import CredentialFactory, SourceFactory
 
 ACCEPT_JSON_HEADER = {"Accept": "application/json"}
-BULK_DELETE_ENDPOINT = "/api/v1/credentials/bulk_delete/"
 
 
 def alt_cred_type(cred_type):
@@ -892,7 +891,7 @@ class TestCredential:
         [1]: https://github.com/quipucords/qpc/blob/688d63a2350ea4ebaa20c3052d18f4d1267e1191/qpc/cred/utils.py#L83-L84
         """  # noqa: E501
         response = django_client.post(
-            "/api/v1/credentials/",
+            reverse("v1:cred-list"),
             json={
                 "name": "network",
                 "cred_type": "network",
@@ -1075,7 +1074,7 @@ class TestCredential:
         """Test if related sources are included in the output."""
         credential = CredentialFactory()
         source = SourceFactory(credentials=[credential])
-        response = django_client.get(f"/api/v1/credentials/{credential.id}/")
+        response = django_client.get(reverse("v1:cred-detail", args=(credential.id,)))
         assert response.ok
         resp_data = response.json()
         assert "sources" in resp_data
@@ -1091,7 +1090,9 @@ class TestCredentialBulkDelete:
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
         delete_request = {"ids": [cred1.id, cred2.id]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
 
@@ -1100,7 +1101,9 @@ class TestCredentialBulkDelete:
         cred1 = CredentialFactory()
         non_existent_id = generate_invalid_id(faker)
         delete_request = {"ids": [non_existent_id, cred1.id]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DO_NOT_EXIST % ids_to_str([non_existent_id])
@@ -1112,7 +1115,9 @@ class TestCredentialBulkDelete:
         cred1 = CredentialFactory()
         non_existent_id = generate_invalid_id(faker)
         delete_request = {"ids": [cred1.id, non_existent_id]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DO_NOT_EXIST % ids_to_str([non_existent_id])
@@ -1127,7 +1132,9 @@ class TestCredentialBulkDelete:
         cred2 = CredentialFactory()
         SourceFactory(credentials=[cred1])
         delete_request = {"ids": [cred1.id, cred2.id]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES % ids_to_str([cred1.id])
@@ -1142,7 +1149,9 @@ class TestCredentialBulkDelete:
         cred2 = CredentialFactory()
         SourceFactory(credentials=[cred2])
         delete_request = {"ids": [cred1.id, cred2.id]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES % ids_to_str([cred2.id])
@@ -1157,7 +1166,9 @@ class TestCredentialBulkDelete:
         referenced_cred = creds[-1]
         SourceFactory(credentials=[referenced_cred])
         delete_request = {"ids": [cred.id for cred in creds]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES
@@ -1178,7 +1189,9 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[creds[2]])
         SourceFactory(credentials=[creds[4]])
         delete_request = {"ids": [cred.id for cred in creds] + [inv_cred1, inv_cred2]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DO_NOT_EXIST % ids_to_str([inv_cred1, inv_cred2])
@@ -1198,7 +1211,9 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[ref_cred1])
         SourceFactory(credentials=[ref_cred2])
         delete_request = {"ids": [cred.id for cred in creds]}
-        response = django_client.post(BULK_DELETE_ENDPOINT, json=delete_request)
+        response = django_client.post(
+            reverse("v1:cred-bulk-delete"), json=delete_request
+        )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
             messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES
@@ -1373,7 +1388,7 @@ class TestCredentialSerialization:
     ):
         """Test if data is masked as expected for get method."""
         credential = CredentialFactory(**input_data)
-        response = django_client.get(f"/api/v1/credentials/{credential.id}/")
+        response = django_client.get(reverse("v1:cred-detail", args=(credential.id,)))
         assert response.ok
         assert response.json() == expected_output
 
@@ -1387,7 +1402,7 @@ class TestCredentialSerialization:
             results.append(output)
         # sorting results to match default credentials api sorting
         results = sorted(results, key=lambda x: x["name"])
-        response = django_client.get("/api/v1/credentials/")
+        response = django_client.get(reverse("v1:cred-list"))
         assert response.ok
         expected_output = {
             "count": len(self.INPUT_OUTPUT_ID),

@@ -12,8 +12,6 @@ from api.models import Credential, ScanTask, ServerInformation, Source
 from constants import DataSources
 from tests.scanner.test_util import create_scan_job
 
-REPORT_MERGE_URL = "/api/v1/reports/merge/jobs/"
-
 
 class TestAsyncMergeReports:
     """Tests against the Deployment reports function."""
@@ -44,7 +42,7 @@ class TestAsyncMergeReports:
 
     def merge_details_from_source_expect_201(self, data, django_client):
         """Create a source, return the response as a dict."""
-        response = django_client.post(REPORT_MERGE_URL, json=data)
+        response = django_client.post(reverse("v1:reports-merge-jobs"), json=data)
         if response.status_code != status.HTTP_201_CREATED:
             print("Failure cause: ")
             print(response.json())
@@ -53,7 +51,7 @@ class TestAsyncMergeReports:
 
     def merge_details_from_source_expect_400(self, data, django_client):
         """Create a source, return the response as a dict."""
-        response = django_client.post(REPORT_MERGE_URL, json=data)
+        response = django_client.post(reverse("v1:reports-merge-jobs"), json=data)
         if response.status_code != status.HTTP_400_BAD_REQUEST:
             print("Failure cause: ")
             print(response.json())
@@ -93,7 +91,7 @@ class TestAsyncMergeReports:
         job_id = response_json.pop("id")
         assert response_json == expected
 
-        url = f"{REPORT_MERGE_URL}{job_id}/"
+        url = reverse("v1:reports-merge-jobs-detail", args=(job_id,))
         get_response = django_client.get(url)
         assert get_response.status_code == status.HTTP_200_OK
 
@@ -135,7 +133,7 @@ class TestAsyncMergeReports:
         job_id = response_json.pop("id")
         assert response_json == expected
 
-        url = f"{REPORT_MERGE_URL}{job_id}/"
+        url = reverse("v1:reports-merge-jobs-detail", args=(job_id,))
         get_response = django_client.get(url)
         assert get_response.status_code == status.HTTP_200_OK
 
@@ -149,19 +147,21 @@ class TestAsyncMergeReports:
         )
         scan_job, _ = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
-        url = f"{REPORT_MERGE_URL}{scan_job.id}/"
+        url = reverse("v1:reports-merge-jobs-detail", args=(scan_job.id,))
         get_response = django_client.get(url)
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
         scan_job.scan_type = ScanTask.SCAN_TYPE_FINGERPRINT
         scan_job.save()
-        url = f"{REPORT_MERGE_URL}{scan_job.id}/"
+        url = reverse("v1:reports-merge-jobs-detail", args=(scan_job.id,))
         get_response = django_client.get(url)
         assert get_response.status_code == status.HTTP_200_OK
 
     def test_create_report_merge_bad_url(self, django_client):
         """Create merge report job bad url."""
-        get_response = django_client.post(f"{REPORT_MERGE_URL}1/")
+        get_response = django_client.post(
+            reverse("v1:reports-merge-jobs-detail", args=(1,))
+        )
         assert get_response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
     def test_empty_request_body(self, django_client):
@@ -385,7 +385,7 @@ class TestAsyncMergeReports:
     ##############################################################
     def merge_details_by_ids(self, data, django_client):
         """Call the create endpoint."""
-        return django_client.put(REPORT_MERGE_URL, json=data)
+        return django_client.put(reverse("v1:reports-merge-jobs"), json=data)
 
     def merge_details_by_ids_expect_201(self, data, django_client):
         """Create a source, return the response as a dict."""
