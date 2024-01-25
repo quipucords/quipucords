@@ -75,7 +75,7 @@ class TestCredential:
 
     def create(self, data, django_client):
         """Call the create endpoint."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         return django_client.post(url, json=data)
 
     def create_expect_400(self, data, django_client):
@@ -175,7 +175,7 @@ class TestCredential:
         """
         cred_type = random.choice([ds for ds in DataSources])
         expected_error = {"name": ["This field is required."]}
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "username": "user1",
             "password": "pass1",
@@ -196,7 +196,7 @@ class TestCredential:
         cred_type = random.choice(
             [ds for ds in DataSources if ds not in (DataSources.RHACS,)]
         )
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": cred_type,
@@ -212,7 +212,7 @@ class TestCredential:
         Ensure we cannot create a new host credential object without a password,
         an ssh_keyfile, or an ssh_key.
         """
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "username": "user1",
@@ -230,7 +230,7 @@ class TestCredential:
         Ensure we cannot create a new host credential object an ssh_keyfile
         that cannot be found on the server.
         """
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "username": "user1",
@@ -249,7 +249,7 @@ class TestCredential:
         Ensure we cannot create a new host credential object with both
         an ssh_keyfile and ssh_key specified.
         """
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         ssh_keyfile = tmp_path / faker.file_name(extension="pem")
         ssh_keyfile.touch()
         data = {
@@ -270,7 +270,7 @@ class TestCredential:
         Ensure we cannot create a new host credential object with both
         a password and ssh_key specified.
         """
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
@@ -289,7 +289,7 @@ class TestCredential:
         Ensure we cannot create a new host credential object with a passphrase
         and no ssh_keyfile or ssh_key.
         """
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
@@ -309,7 +309,7 @@ class TestCredential:
         long name.
         """
         expected_error = {"name": ["Ensure this field has no more than 64 characters."]}
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "A" * 100,
             "username": "user1",
@@ -329,7 +329,7 @@ class TestCredential:
         expected_error = {
             "username": ["Ensure this field has no more than 64 characters."]
         }
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "username": "A" * 100,
@@ -349,7 +349,7 @@ class TestCredential:
         expected_error = {
             "password": ["Ensure this field has no more than 1024 characters."]
         }
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "username": "user1",
@@ -369,7 +369,7 @@ class TestCredential:
         expected_error = {
             "become_password": ["Ensure this field has no more than 1024 characters."]
         }
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "username": "user1",
@@ -390,7 +390,7 @@ class TestCredential:
         expected_error = {
             "ssh_keyfile": ["Ensure this field has no more than 1024 characters."]
         }
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "username": "user1",
@@ -403,7 +403,7 @@ class TestCredential:
 
     def test_hostcred_list_view(self, django_client):
         """Tests the list view set of the Credential API."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
 
@@ -425,7 +425,7 @@ class TestCredential:
         }
         self.create_expect_201(data, django_client)
 
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         resp = django_client.get(url)
         assert resp.status_code == status.HTTP_200_OK
         json_resp = resp.json()
@@ -456,7 +456,7 @@ class TestCredential:
 
         data = {"name": "cred2", "username": "user23", "password": "pass2"}
         data[field] = "newvalue"
-        url = reverse("v1:cred-detail", args=(resp["id"],))
+        url = reverse("v1:credentials-detail", args=(resp["id"],))
         resp = django_client.put(url, json=data)
         assert resp.status_code == status.HTTP_200_OK
 
@@ -479,7 +479,7 @@ class TestCredential:
         resp2 = self.create_expect_201(data, django_client)
 
         data = {"name": "cred1", "username": "user2", "password": "pass2"}
-        url = reverse("v1:cred-detail", args=(resp2["id"],))
+        url = reverse("v1:credentials-detail", args=(resp2["id"],))
         resp = django_client.put(url, json=data)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -487,7 +487,7 @@ class TestCredential:
         """Tests the get view set of the Credential API."""
         cred = Credential(name="cred2", username="user2", password="pass2")
         cred.save()
-        url = reverse("v1:cred-detail", args=(cred.pk,))
+        url = reverse("v1:credentials-detail", args=(cred.pk,))
         resp = django_client.get(url, headers=ACCEPT_JSON_HEADER)
         assert resp.status_code == status.HTTP_200_OK
         json_resp = resp.json()
@@ -497,7 +497,7 @@ class TestCredential:
 
     def test_hostcred_get_bad_id(self, django_client):
         """Tests the get view set of the Credential API with a bad id."""
-        url = reverse("v1:cred-detail", args=("string",))
+        url = reverse("v1:credentials-detail", args=("string",))
         resp = django_client.get(url, headers=ACCEPT_JSON_HEADER)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -505,7 +505,7 @@ class TestCredential:
         """Tests the delete view set of the Credential API."""
         cred = Credential(name="cred2", username="user2", password="pass2")
         cred.save()
-        url = reverse("v1:cred-detail", args=(cred.pk,))
+        url = reverse("v1:credentials-detail", args=(cred.pk,))
         resp = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
         assert resp.status_code == status.HTTP_204_NO_CONTENT
 
@@ -522,7 +522,7 @@ class TestCredential:
         source.credentials.add(cred)
         source.save()
 
-        url = reverse("v1:cred-detail", args=(cred.pk,))
+        url = reverse("v1:credentials-detail", args=(cred.pk,))
         resp = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         resp_json = resp.json()
@@ -558,7 +558,7 @@ class TestCredential:
     def test_vc_create_missing_password(self, django_client):
         """Test VCenter without password."""
         expected_error = {"password": ["This field is required."]}
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.VCENTER,
@@ -571,7 +571,7 @@ class TestCredential:
 
     def test_vc_create_extra_keyfile(self, django_client):
         """Test VCenter without password."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.VCENTER,
@@ -589,7 +589,7 @@ class TestCredential:
     @pytest.mark.parametrize("method", (m[0] for m in Credential.BECOME_METHOD_CHOICES))
     def test_negative_create_extra_become(self, django_client, cred_type, method):
         """Test non-network source with extra become method."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": cred_type,
@@ -689,7 +689,7 @@ class TestCredential:
     @pytest.mark.parametrize("method", ["not-a-method", 86])
     def test_hostcred_negative_set_become_method(self, django_client, method):
         """Test invalid become method when creating credential."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
@@ -702,7 +702,7 @@ class TestCredential:
 
     def test_vc_create_extra_keyfile_pass(self, django_client):
         """Test VCenter with extra keyfile passphase."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.VCENTER,
@@ -743,7 +743,7 @@ class TestCredential:
     def test_sat_create_missing_password(self, django_client):
         """Test Satellite without password."""
         expected_error = {"password": ["This field is required."]}
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.SATELLITE,
@@ -767,14 +767,14 @@ class TestCredential:
         assert Credential.objects.get().name == "cred1"
 
         update_data = {"name": "newName", "ssh_keyfile": "random_path"}
-        url = reverse("v1:cred-detail", args=(initial["id"],))
+        url = reverse("v1:credentials-detail", args=(initial["id"],))
         response = django_client.patch(url, json=update_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_keyfile"]
 
     def test_sat_create_extra_keyfile(self, django_client):
         """Test Satellite without password."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.SATELLITE,
@@ -788,7 +788,7 @@ class TestCredential:
 
     def test_sat_create_extra_becomepass(self, django_client):
         """Test Satellite with extra become password."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.SATELLITE,
@@ -802,7 +802,7 @@ class TestCredential:
 
     def test_sat_create_extra_keyfile_pass(self, django_client):
         """Test Satellite with extra keyfile passphase."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.SATELLITE,
@@ -848,7 +848,7 @@ class TestCredential:
         self, django_client, cred_type, dict_key, message
     ):
         """Ensure auth token is required when creating openshift/rhacs credential."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred_1",
             "cred_type": cred_type,
@@ -871,7 +871,7 @@ class TestCredential:
     @pytest.mark.parametrize("cred_type", (DataSources.RHACS, DataSources.OPENSHIFT))
     def test_ocp_rhacs_extra_unallowed_fields(self, django_client, cred_type):
         """Ensure unallowed fields are not accepted when creating ocp/rhacs cred."""
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred_1",
             "cred_type": cred_type,
@@ -891,7 +891,7 @@ class TestCredential:
         [1]: https://github.com/quipucords/qpc/blob/688d63a2350ea4ebaa20c3052d18f4d1267e1191/qpc/cred/utils.py#L83-L84
         """  # noqa: E501
         response = django_client.post(
-            reverse("v1:cred-list"),
+            reverse("v1:credentials-list"),
             json={
                 "name": "network",
                 "cred_type": "network",
@@ -921,11 +921,11 @@ class TestCredential:
             credentials["username"] = "user1"
             credentials["password"] = "pass1"
 
-        response = django_client.post(reverse("v1:cred-list"), json=credentials)
+        response = django_client.post(reverse("v1:credentials-list"), json=credentials)
         assert response.status_code == status.HTTP_201_CREATED
 
         credentials["cred_type"] = new_type
-        url = reverse("v1:cred-detail", args=(response.json()["id"],))
+        url = reverse("v1:credentials-detail", args=(response.json()["id"],))
         resp = django_client.put(url, json=credentials)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert resp.json() == {
@@ -943,13 +943,13 @@ class TestCredential:
             "username": "some-user",
             "ssh_keyfile": str(ssh_keyfile1),
         }
-        response = django_client.post(reverse("v1:cred-list"), json=data)
+        response = django_client.post(reverse("v1:credentials-list"), json=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         ssh_keyfile2 = tmp_path / faker.file_name(extension="pem")
         ssh_keyfile2.touch()
         cred_id = response.json().get("id")
-        url = reverse("v1:cred-detail", args=(cred_id,))
+        url = reverse("v1:credentials-detail", args=(cred_id,))
         data = {"name": credential_name, "ssh_keyfile": str(ssh_keyfile2)}
         response = django_client.patch(url, json=data)
 
@@ -969,13 +969,13 @@ class TestCredential:
             "username": "some-user",
             "password": "some-password",
         }
-        response = django_client.post(reverse("v1:cred-list"), json=data)
+        response = django_client.post(reverse("v1:credentials-list"), json=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         ssh_keyfile = tmp_path / faker.file_name(extension="pem")
         ssh_keyfile.touch()
         cred_id = response.json().get("id")
-        url = reverse("v1:cred-detail", args=(cred_id,))
+        url = reverse("v1:credentials-detail", args=(cred_id,))
         data = {
             "name": credential_name,
             "password": None,
@@ -1001,11 +1001,11 @@ class TestCredential:
             "username": "some-user",
             "ssh_keyfile": str(ssh_keyfile1),
         }
-        response = django_client.post(reverse("v1:cred-list"), json=data)
+        response = django_client.post(reverse("v1:credentials-list"), json=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         cred_id = response.json().get("id")
-        url = reverse("v1:cred-detail", args=(cred_id,))
+        url = reverse("v1:credentials-detail", args=(cred_id,))
         data = {
             "name": credential_name,
             "password": "some-password",
@@ -1030,11 +1030,11 @@ class TestCredential:
             "cred_type": DataSources.NETWORK,
             "ssh_key": openssh_key,
         }
-        response = django_client.post(reverse("v1:cred-list"), json=data)
+        response = django_client.post(reverse("v1:credentials-list"), json=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         cred_id = response.json()["id"]
-        url = reverse("v1:cred-detail", args=(cred_id,))
+        url = reverse("v1:credentials-detail", args=(cred_id,))
         updated_data = {
             "ssh_key": updated_openssh_key,
         }
@@ -1052,7 +1052,7 @@ class TestCredential:
         Ensure we cannot update a host credential object with both
         a password and ssh_key specified.
         """
-        url = reverse("v1:cred-list")
+        url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
@@ -1063,7 +1063,7 @@ class TestCredential:
         assert response.status_code == status.HTTP_201_CREATED
 
         cred_id = response.json().get("id")
-        url = reverse("v1:cred-detail", args=(cred_id,))
+        url = reverse("v1:credentials-detail", args=(cred_id,))
         data.update({"ssh_key": openssh_key})
         response = django_client.patch(url, json=data)
 
@@ -1074,7 +1074,9 @@ class TestCredential:
         """Test if related sources are included in the output."""
         credential = CredentialFactory()
         source = SourceFactory(credentials=[credential])
-        response = django_client.get(reverse("v1:cred-detail", args=(credential.id,)))
+        response = django_client.get(
+            reverse("v1:credentials-detail", args=(credential.id,))
+        )
         assert response.ok
         resp_data = response.json()
         assert "sources" in resp_data
@@ -1091,7 +1093,7 @@ class TestCredentialBulkDelete:
         cred2 = CredentialFactory()
         delete_request = {"ids": [cred1.id, cred2.id]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
@@ -1102,7 +1104,7 @@ class TestCredentialBulkDelete:
         non_existent_id = generate_invalid_id(faker)
         delete_request = {"ids": [non_existent_id, cred1.id]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == _(
@@ -1116,7 +1118,7 @@ class TestCredentialBulkDelete:
         non_existent_id = generate_invalid_id(faker)
         delete_request = {"ids": [cred1.id, non_existent_id]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == _(
@@ -1133,7 +1135,7 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[cred1])
         delete_request = {"ids": [cred1.id, cred2.id]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
@@ -1150,7 +1152,7 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[cred2])
         delete_request = {"ids": [cred1.id, cred2.id]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
@@ -1167,7 +1169,7 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[referenced_cred])
         delete_request = {"ids": [cred.id for cred in creds]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
@@ -1190,7 +1192,7 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[creds[4]])
         delete_request = {"ids": [cred.id for cred in creds] + [inv_cred1, inv_cred2]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json()["detail"] == _(
@@ -1212,7 +1214,7 @@ class TestCredentialBulkDelete:
         SourceFactory(credentials=[ref_cred2])
         delete_request = {"ids": [cred.id for cred in creds]}
         response = django_client.post(
-            reverse("v1:cred-bulk-delete"), json=delete_request
+            reverse("v1:credentials-bulk-delete"), json=delete_request
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert response.json()["detail"] == _(
@@ -1388,7 +1390,9 @@ class TestCredentialSerialization:
     ):
         """Test if data is masked as expected for get method."""
         credential = CredentialFactory(**input_data)
-        response = django_client.get(reverse("v1:cred-detail", args=(credential.id,)))
+        response = django_client.get(
+            reverse("v1:credentials-detail", args=(credential.id,))
+        )
         assert response.ok
         assert response.json() == expected_output
 
@@ -1402,7 +1406,7 @@ class TestCredentialSerialization:
             results.append(output)
         # sorting results to match default credentials api sorting
         results = sorted(results, key=lambda x: x["name"])
-        response = django_client.get(reverse("v1:cred-list"))
+        response = django_client.get(reverse("v1:credentials-list"))
         assert response.ok
         expected_output = {
             "count": len(self.INPUT_OUTPUT_ID),
