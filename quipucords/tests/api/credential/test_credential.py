@@ -95,11 +95,14 @@ class TestCredential:
         host_cred = self.create_credential()
         assert isinstance(host_cred, Credential)
 
-    def test_hostcred_create(self, django_client):
+    @pytest.mark.parametrize(
+        "cred_type", (ds for ds in DataSources if ds != DataSources.RHACS)
+    )
+    def test_hostcred_create(self, django_client, cred_type):
         """Ensure we can create a new host credential object via API."""
         data = {
             "name": "cred1",
-            "cred_type": DataSources.NETWORK,
+            "cred_type": cred_type,
             "username": "user1",
             "password": "pass1",
         }
@@ -171,13 +174,16 @@ class TestCredential:
 
         Ensure we cannot create a new host credential object without a name.
         """
+        cred_type = random.choice([ds for ds in DataSources])
         expected_error = {"name": ["This field is required."]}
         url = reverse("v1:cred-list")
         data = {
             "username": "user1",
             "password": "pass1",
-            "cred_type": DataSources.NETWORK,
+            "cred_type": cred_type,
         }
+        if cred_type == DataSources.RHACS:
+            data["auth_token"] = "auth token"
         response = django_client.post(url, json=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
@@ -188,10 +194,13 @@ class TestCredential:
         Ensure we cannot create a new host credential object without a
         username.
         """
+        cred_type = random.choice(
+            [ds for ds in DataSources if ds not in (DataSources.RHACS,)]
+        )
         url = reverse("v1:cred-list")
         data = {
             "name": "cred1",
-            "cred_type": DataSources.NETWORK,
+            "cred_type": cred_type,
             "password": "pass1",
         }
         response = django_client.post(url, json=data)
@@ -434,24 +443,21 @@ class TestCredential:
 
     def test_hostcred_update_view(self, django_client):
         """Tests the update view set of the Credential API."""
+        cred_type = random.choice(
+            [ds for ds in DataSources if ds not in (DataSources.RHACS,)]
+        )
+        field = random.choice(["name", "username", "password"])
         data = {
             "name": "cred1",
-            "cred_type": DataSources.NETWORK,
+            "cred_type": cred_type,
             "username": "user1",
             "password": "pass1",
         }
-        self.create_expect_201(data, django_client)
-
-        data = {
-            "name": "cred2",
-            "cred_type": DataSources.NETWORK,
-            "username": "user2",
-            "password": "pass2",
-        }
-        resp2 = self.create_expect_201(data, django_client)
+        resp = self.create_expect_201(data, django_client)
 
         data = {"name": "cred2", "username": "user23", "password": "pass2"}
-        url = reverse("v1:cred-detail", args=(resp2["id"],))
+        data[field] = "newvalue"
+        url = reverse("v1:cred-detail", args=(resp["id"],))
         resp = django_client.put(url, json=data)
         assert resp.status_code == status.HTTP_200_OK
 
@@ -477,6 +483,18 @@ class TestCredential:
         url = reverse("v1:cred-detail", args=(resp2["id"],))
         resp = django_client.put(url, json=data)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_hostcred_retrieve_view(self, django_client):
+        """Tests the get view set of the Credential API."""
+        cred = Credential(name="cred2", username="user2", password="pass2")
+        cred.save()
+        url = reverse("v1:cred-detail", args=(cred.pk,))
+        resp = django_client.get(url, headers=ACCEPT_JSON_HEADER)
+        assert resp.status_code == status.HTTP_200_OK
+        json_resp = resp.json()
+        assert json_resp.get("name") == "cred2"
+        assert json_resp.get("username") == "user2"
+        assert json_resp.get("password") == ENCRYPTED_DATA_MASK
 
     def test_hostcred_get_bad_id(self, django_client):
         """Tests the get view set of the Credential API with a bad id."""
@@ -566,16 +584,23 @@ class TestCredential:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_keyfile"]
 
-    def test_vc_create_extra_become_pass(self, django_client):
-        """Test VCenter with extra become password."""
+    @pytest.mark.parametrize(
+        "cred_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
+    )
+    @pytest.mark.parametrize("method", (m[0] for m in Credential.BECOME_METHOD_CHOICES))
+    def test_negative_create_extra_become(self, django_client, cred_type, method):
+        """Test non-network source with extra become method."""
         url = reverse("v1:cred-list")
         data = {
             "name": "cred1",
-            "cred_type": DataSources.VCENTER,
+            "cred_type": cred_type,
             "username": "user1",
             "password": "pass1",
+            "become_method": method,
             "become_password": "pass2",
         }
+        if cred_type == DataSources.RHACS:
+            data["auth_token"] = "auth token"
         response = django_client.post(url, json=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["become_password"]
@@ -606,18 +631,19 @@ class TestCredential:
         assert Credential.objects.count() == 1
         assert Credential.objects.get().become_method == "sudo"
 
-    def test_hostcred_set_become_method(self, django_client):
+    @pytest.mark.parametrize("method", (m[0] for m in Credential.BECOME_METHOD_CHOICES))
+    def test_hostcred_set_become_method(self, django_client, method):
         """Ensure we can set the credentials become method."""
         data = {
             "name": "cred1",
             "cred_type": DataSources.NETWORK,
             "username": "user1",
             "password": "pass1",
-            "become_method": "doas",
+            "become_method": method,
         }
         self.create_expect_201(data, django_client)
         assert Credential.objects.count() == 1
-        assert Credential.objects.get().become_method == "doas"
+        assert Credential.objects.get().become_method == method
 
     def test_hostcred_default_become_user(self, django_client):
         """Ensure we can set the default become_user via API."""
@@ -660,6 +686,20 @@ class TestCredential:
         assert (
             decrypt_data_as_unicode(Credential.objects.get().become_password) == "pass"
         )
+
+    @pytest.mark.parametrize("method", ["not-a-method", 86])
+    def test_hostcred_negative_set_become_method(self, django_client, method):
+        """Test invalid become method when creating credential."""
+        url = reverse("v1:cred-list")
+        data = {
+            "name": "cred1",
+            "cred_type": DataSources.NETWORK,
+            "username": "user1",
+            "password": "pass1",
+            "become_method": method,
+        }
+        response = django_client.post(url, json=data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_vc_create_extra_keyfile_pass(self, django_client):
         """Test VCenter with extra keyfile passphase."""
@@ -919,6 +959,66 @@ class TestCredential:
         assert response_ssh_keyfile == str(ssh_keyfile2)
         assert response_ssh_keyfile != str(ssh_keyfile1)
 
+    def test_hostcred_update_password_to_ssh_keyfile(
+        self, tmp_path, django_client, faker
+    ):
+        """Verify credential can be changed to use SSH key instead of password."""
+        credential_name = "credential"
+        data = {
+            "name": credential_name,
+            "cred_type": DataSources.NETWORK,
+            "username": "some-user",
+            "password": "some-password",
+        }
+        response = django_client.post(reverse("v1:cred-list"), json=data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        ssh_keyfile = tmp_path / faker.file_name(extension="pem")
+        ssh_keyfile.touch()
+        cred_id = response.json().get("id")
+        url = reverse("v1:cred-detail", args=(cred_id,))
+        data = {
+            "name": credential_name,
+            "password": None,
+            "ssh_keyfile": str(ssh_keyfile),
+        }
+        response = django_client.patch(url, json=data)
+
+        assert response.status_code == status.HTTP_200_OK
+        json_resp = response.json()
+        assert not json_resp.get("password")
+        assert json_resp.get("ssh_keyfile") == str(ssh_keyfile)
+
+    def test_hostcred_update_ssh_keyfile_to_password(
+        self, tmp_path, django_client, faker
+    ):
+        """Verify credential can be changed to use password instead of SSH key."""
+        credential_name = "credential"
+        ssh_keyfile1 = tmp_path / faker.file_name(extension="pem")
+        ssh_keyfile1.touch()
+        data = {
+            "name": credential_name,
+            "cred_type": DataSources.NETWORK,
+            "username": "some-user",
+            "ssh_keyfile": str(ssh_keyfile1),
+        }
+        response = django_client.post(reverse("v1:cred-list"), json=data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        cred_id = response.json().get("id")
+        url = reverse("v1:cred-detail", args=(cred_id,))
+        data = {
+            "name": credential_name,
+            "password": "some-password",
+            "ssh_keyfile": None,
+        }
+        response = django_client.patch(url, json=data)
+
+        assert response.status_code == status.HTTP_200_OK
+        json_resp = response.json()
+        assert not json_resp.get("ssh_keyfile")
+        assert json_resp.get("password") == ENCRYPTED_DATA_MASK
+
     def test_hostcred_update_ssh_value(
         self, django_client, faker, openssh_key, updated_openssh_key
     ):
@@ -946,6 +1046,30 @@ class TestCredential:
         assert cred.name == cred_name
         assert cred.username == cred_username
         assert decrypt_data_as_unicode(cred.ssh_key) == updated_openssh_key
+
+    def test_hc_update_err_pwd_and_ssh_key(self, django_client, openssh_key):
+        """Test update API with both password and ssh_key.
+
+        Ensure we cannot update a host credential object with both
+        a password and ssh_key specified.
+        """
+        url = reverse("v1:cred-list")
+        data = {
+            "name": "cred1",
+            "cred_type": DataSources.NETWORK,
+            "username": "user1",
+            "password": "pass1",
+        }
+        response = django_client.post(url, json=data)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        cred_id = response.json().get("id")
+        url = reverse("v1:cred-detail", args=(cred_id,))
+        data.update({"ssh_key": openssh_key})
+        response = django_client.patch(url, json=data)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["non_field_errors"] == [messages.HC_PWD_NOT_WITH_KEY]
 
     def test_related_source_detail(self, django_client):
         """Test if related sources are included in the output."""
