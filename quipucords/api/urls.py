@@ -33,9 +33,11 @@ ROUTER.register(r"users", UserViewSet, basename="users")
 v1_urls = [
     path("credentials/bulk_delete/", credential_bulk_delete, name="cred-bulk-delete"),
     path("reports/<int:report_id>/details/", details, name="reports-details"),
-    path("reports/<int:report_id>/deployments/", deployments),
-    path("reports/<int:report_id>/insights/", insights),
-    path("reports/<int:report_id>/", reports),
+    path(
+        "reports/<int:report_id>/deployments/", deployments, name="reports-deployments"
+    ),
+    path("reports/<int:report_id>/insights/", insights, name="reports-insights"),
+    path("reports/<int:report_id>/", reports, name="reports-detail"),
     path("reports/merge/jobs/", async_merge_reports, name="reports-merge-jobs"),
     path(
         "reports/merge/jobs/<int:scan_job_id>/",
