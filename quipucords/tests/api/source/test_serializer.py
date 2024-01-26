@@ -8,6 +8,18 @@ from constants import DataSources
 
 
 @pytest.fixture
+def network_cred_id():
+    """Return network credential."""
+    network_credential = Credential.objects.create(
+        name="network_cred",
+        cred_type=DataSources.NETWORK,
+        username="username",
+        password="password",
+    )
+    return network_credential.id
+
+
+@pytest.fixture
 def openshift_cred_id():
     """Return openshift credential."""
     openshift_credential = Credential.objects.create(
@@ -45,6 +57,30 @@ def openshift_source(openshift_cred_id):
     source.credentials.add(openshift_cred_id)
     source.save()
     return source
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "hosts_input,hosts_formatted",
+    (
+        ("192.0.2.[0:255]", "192.0.2.[0:255]"),
+        ("192.0.2.0/24", "192.0.2.[0:255]"),
+        ("192.0.2.0/16", "192.0.[0:255].[0:255]"),
+        ("192.0.2.123/4", "[192:207].[0:255].[0:255].[0:255]"),
+        ("192.0.2.123/0", "[0:255].[0:255].[0:255].[0:255]"),
+    ),
+)
+def test_cidr_normalization(network_cred_id, hosts_input, hosts_formatted):
+    """Test CIDR is translated to Ansible host notation."""
+    data = {
+        "name": "source",
+        "source_type": DataSources.NETWORK,
+        "hosts": [hosts_input],
+        "credentials": [network_cred_id],
+    }
+    serializer = SourceSerializer(data=data)
+    assert serializer.is_valid()
+    assert serializer.validated_data.get("hosts") == [hosts_formatted]
 
 
 @pytest.mark.django_db
