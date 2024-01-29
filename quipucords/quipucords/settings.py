@@ -282,9 +282,10 @@ DJANGO_LOGGING_LEVEL = env.str("DJANGO_LOG_LEVEL", "INFO")
 CELERY_LOGGING_LEVEL = env.str("CELERY_LOGGING_LEVEL", "INFO")
 QUIPUCORDS_LOGGING_LEVEL = env.str("QUIPUCORDS_LOG_LEVEL", "INFO")
 LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
-VERBOSE_FORMATTING = (
+QUIPUCORDS_LOGGING_VERBOSE_FORMAT = env.str(
+    "QUIPUCORDS_LOGGING_VERBOSE_FORMAT",
     "[%(levelname)s %(asctime)s pid=%(process)d tid=%(thread)d "
-    "%(pathname)s:%(funcName)s:%(lineno)d] %(message)s"
+    "%(pathname)s:%(funcName)s:%(lineno)d] %(message)s",
 )
 LOG_DIRECTORY = Path(env.str("QPC_LOG_DIRECTORY", str(DEFAULT_DATA_DIR / "logs")))
 LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(LOG_DIRECTORY / "app.log")))
@@ -294,7 +295,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": VERBOSE_FORMATTING,
+            "format": QUIPUCORDS_LOGGING_VERBOSE_FORMAT,
             "datefmt": "%Y-%m-%dT%H:%M:%S",
         },
         "simple": {
