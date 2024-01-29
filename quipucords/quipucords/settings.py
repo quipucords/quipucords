@@ -283,7 +283,8 @@ CELERY_LOGGING_LEVEL = env.str("CELERY_LOGGING_LEVEL", "INFO")
 QUIPUCORDS_LOGGING_LEVEL = env.str("QUIPUCORDS_LOG_LEVEL", "INFO")
 LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
 VERBOSE_FORMATTING = (
-    "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+    "[%(levelname)s %(asctime)s pid=%(process)d tid=%(thread)d "
+    "%(pathname)s:%(funcName)s:%(lineno)d] %(message)s"
 )
 LOG_DIRECTORY = Path(env.str("QPC_LOG_DIRECTORY", str(DEFAULT_DATA_DIR / "logs")))
 LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(LOG_DIRECTORY / "app.log")))
@@ -292,8 +293,14 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {"format": VERBOSE_FORMATTING},
-        "simple": {"format": "%(levelname)s %(message)s"},
+        "verbose": {
+            "format": VERBOSE_FORMATTING,
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+        },
+        "simple": {
+            "format": "%(levelname)s %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+        },
     },
     "handlers": {
         "console": {"class": "logging.StreamHandler", "formatter": LOGGING_FORMATTER},
