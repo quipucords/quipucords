@@ -360,7 +360,7 @@ LOGGING = {
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
 # Reverse default behavior for better readability in log files
-os.environ.setdefault("ANSIBLE_NOCOLOR", "False")
+os.environ.setdefault("ANSIBLE_NOCOLOR", "True")
 
 QPC_EXCLUDE_INTERNAL_FACTS = env.bool("QPC_EXCLUDE_INTERNAL_FACTS", False)
 QPC_TOKEN_EXPIRE_HOURS = env.int("QPC_TOKEN_EXPIRE_HOURS", 24)
