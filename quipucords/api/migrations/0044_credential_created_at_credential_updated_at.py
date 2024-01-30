@@ -31,5 +31,5 @@ class Migration(migrations.Migration):
             name="updated_at",
             field=models.DateTimeField(auto_now=True, db_index=True),
         ),
-        migrations.RunPython(update_timestamps),
+        migrations.RunPython(update_timestamps, reverse_code=migrations.RunPython.noop),
     ]
