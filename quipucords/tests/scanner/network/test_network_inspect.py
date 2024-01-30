@@ -21,6 +21,7 @@ from api.models import (
     SystemConnectionResult,
 )
 from api.serializers import SourceSerializer
+from constants import SCAN_JOB_LOG
 from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.inspect import construct_inventory
@@ -400,11 +401,9 @@ class TestNetworkInspectScanner:
 class TestInspectCallback:
     """TestCase for InspectResultCallback."""
 
-    def test_unexpected_event(self, mocker):
+    def test_unexpected_event(self):
         """Test how event_callback handles an unexpected event."""
-        callback = InspectResultCallback(
-            scan_task=mocker.Mock(), manager_interrupt=mocker.Mock()
-        )
+        callback = InspectResultCallback(scan_task=Mock(), manager_interrupt=Mock())
         event_data = {"some_data": "some_value"}
         assert callback.event_callback(event_data) is None
         expected_error = (
@@ -414,3 +413,56 @@ class TestInspectCallback:
         callback.scan_task.log_message.assert_called_with(
             expected_error, log_level=logging.ERROR
         )
+
+
+class TestAnsibleLogCollector:
+    """Test if ansible logs are properly collected."""
+
+    def test_with_multiple_inspection_groups(self, mocker, settings):
+        """Ensure all logs are collected when inspection have multiple groups."""
+        # mock functions with side-effects writing to files or db - we don't need those
+        # for this test purpose because they generate input for the main functions we
+        # will patch later
+        mocker.patch("scanner.network.inspect.write_to_yaml")
+        mocker.patch("scanner.network.inspect.delete_ssh_keyfiles")
+        mocker.patch("scanner.network.inspect.InspectResultCallback")
+        # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
+        # this test requires
+        mocker.patch(
+            "scanner.network.inspect.construct_inventory",
+            Mock(return_value=(("group1", "group2"), Mock())),
+        )
+        # mock representing the output of ansible_runner.run
+        ansible_runner_obj = Mock()
+        ansible_runner_obj.stdout.read.side_effect = lambda: "ansible stdout"
+        ansible_runner_obj.stderr.read.side_effect = lambda: "ansible stderr"
+        ansible_runner_obj.status = "successful"
+        mocker.patch(
+            "scanner.network.inspect.ansible_runner.run",
+            Mock(return_value=ansible_runner_obj),
+        )
+        # we should be using a scanjob from db, but that would make the test
+        # unnecessarily slow (just by initializing db in a test we "lose" 2 seconds
+        # while this unit test alone takes less than half a second)
+        scanjob = Mock(id=999)
+        scanjob.options.get_extra_vars.side_effect = lambda: {}
+        # InspectTaskRunner requires scanjob and scan_task
+        inspect_runner = InspectTaskRunner(scanjob, Mock())
+        # sanity check expected files
+        stdout_log: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
+            scan_job_id=scanjob.id, output_type="ansible-stdout"
+        )
+        assert not stdout_log.exists()
+        stderr_log: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
+            scan_job_id=scanjob.id, output_type="ansible-stderr"
+        )
+        assert not stderr_log.exists()
+        # finally, call the method that will "execute" the inspection scan
+        # and persist logs
+        inspect_runner._inspect_scan(Mock(), Mock())
+        assert stdout_log.exists()
+        assert stderr_log.exists()
+        # rationale: since we have 2 inspection groups, content from ansible runner
+        # output shall be saved twice
+        assert stdout_log.read_text().splitlines() == 2 * ["ansible stdout"]
+        assert stderr_log.read_text().splitlines() == 2 * ["ansible stderr"]
