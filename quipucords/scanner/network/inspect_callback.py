@@ -5,11 +5,13 @@ import logging
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.conf import settings
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 import log_messages
 from api.models import RawFact, SystemInspectionResult
 from scanner.network.processing import process
 from scanner.network.utils import STOP_STATES, raw_facts_template
+from utils import sanitize_for_utf8_compatibility
 
 logger = logging.getLogger(__name__)
 
@@ -148,8 +150,16 @@ class InspectResultCallback:
             if result_value == process.NO_DATA:
                 result_value = None  # noqa: PLW2901
 
+            new_result_value = sanitize_for_utf8_compatibility(result_value)
+            if result_value != new_result_value:
+                logger.warning(
+                    _("Sanitized value for '%s' changed from its original value."),
+                    result_key,
+                )
             stored_fact = RawFact(
-                name=result_key, value=result_value, system_inspection_result=sys_result
+                name=result_key,
+                value=new_result_value,
+                system_inspection_result=sys_result,
             )
             stored_fact.save()
 
