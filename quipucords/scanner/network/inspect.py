@@ -290,8 +290,11 @@ class InspectTaskRunner(ScanTaskRunner):
                 scan_job_id=self.scan_job.id,
                 output_type=f"ansible-{output}",
             )
-            file_handle = getattr(runner_obj, output)
-            output_path.write_text(file_handle.read())
+            with output_path.open("a") as file_obj:
+                log_contents = getattr(runner_obj, output).read()
+                if log_contents and not log_contents.endswith("\n"):
+                    log_contents += "\n"
+                file_obj.write(log_contents)
 
     def _obtain_discovery_data(self):
         """Obtain discover scan data.  Either via new scan or paused scan.
