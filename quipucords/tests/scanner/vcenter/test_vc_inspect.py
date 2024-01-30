@@ -229,6 +229,7 @@ class TestVCenterInspectTaskRunnerTest:
                 "vm.state": "poweredOn",
                 "vm.last_check_in": "2000-01-01 04:20:00",
                 "vm.uuid": "1111",
+                "installed_products": [],
             }
             sys_fact = {}
             for raw_fact in sys_results.first().facts.all():

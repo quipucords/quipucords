@@ -117,6 +117,7 @@ class VcenterRawFacts:
     STATE = "vm.state"
     TEMPLATE = "vm.is_template"
     UUID = "vm.uuid"
+    INSTALLED_PRODUCTS = "installed_products"
 
 
 class ClusterRawFacts:

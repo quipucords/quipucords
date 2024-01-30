@@ -12,6 +12,7 @@ TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=15
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
 QUIPUCORDS_UI_RELEASE ?= latest
+PRODUCTS_JSON := docs/products-prod.json
 GITHUB_API_TOKEN_SECRET ?= /run/secrets/gh_api_token
 GITHUB_API_TOKEN := $(file < $(GITHUB_API_TOKEN_SECRET))
 ifneq ($(GITHUB_API_TOKEN),)
@@ -43,6 +44,7 @@ help:
 	@echo "  lock-requirements             to lock all python dependencies"
 	@echo "  update-requirements           to update all python dependencies"
 	@echo "  check-requirements            to check python dependency files"
+	@echo "  update-product-list           to update the product list"
 	@echo "  test                          to run unit tests"
 	@echo "  test-coverage                 to run unit tests and measure test coverage"
 	@echo "  swagger-valid                 to run swagger-cli validation"
@@ -144,6 +146,9 @@ setup-postgres:
 
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
+
+update-product-list:
+	@$(PYTHON) scripts/update_product_list.py $(PRODUCTS_JSON)
 
 serve:
 	$(PYTHON) quipucords/manage.py runserver --nostatic

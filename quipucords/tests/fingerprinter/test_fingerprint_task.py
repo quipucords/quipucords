@@ -105,6 +105,7 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
     "vm_host_socket_count": "vm.host.cpu_count",
     "vm_state": "vm.state",
     "vm_uuid": "vm.uuid",
+    "installed_products": "installed_products",
 }
 
 PRODUCTS = [
@@ -1381,6 +1382,7 @@ def test_scan_all_facts_with_null_value_in_process_vcenter_scan(
         fingerprint_name: None for fingerprint_name in EXPECTED_FINGERPRINT_MAP_VCENTER
     }
     expected_fingerprints["is_redhat"] = False
+    expected_fingerprints["installed_products"] = None
     expected_fingerprints["infrastructure_type"] = SystemFingerprint.VIRTUALIZED
     expected_fingerprints[PRODUCTS_KEY] = []
     expected_fingerprints[ENTITLEMENTS_KEY] = []

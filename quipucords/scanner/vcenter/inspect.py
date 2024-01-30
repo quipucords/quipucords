@@ -14,6 +14,7 @@ from scanner.vcenter.utils import (
     raw_facts_template,
     vcenter_connect,
 )
+from utils import product_name_to_id
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,16 @@ def get_nics(guest_net):
                     if ":" not in ip_addr.ipAddress:  # Only grab ipv4 addrs
                         ip_addresses.append(ip_addr.ipAddress)
     return mac_addresses, ip_addresses
+
+
+def add_additional_vm_facts(facts):
+    """Add additional/derived facts for the vCenter VM."""
+    vm_os = facts[VcenterRawFacts.OS]
+    vm_prod_id = product_name_to_id(vm_os)
+    installed_products = []
+    if vm_prod_id:
+        installed_products = [{"id": vm_prod_id, "name": vm_os}]
+    facts[VcenterRawFacts.INSTALLED_PRODUCTS] = installed_products
 
 
 class InspectTaskRunner(ScanTaskRunner):
@@ -188,6 +199,8 @@ class InspectTaskRunner(ScanTaskRunner):
                     )
 
         vm_name = facts[VcenterRawFacts.NAME]
+
+        add_additional_vm_facts(facts)
 
         logger.debug("system %s facts=%s", vm_name, facts)
 
