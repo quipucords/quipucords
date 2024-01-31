@@ -61,7 +61,7 @@ setuptools-scm==8.0.4
     #   pluggy
     #   python-dateutil
     #   setuptools-rust
-trove-classifiers==2024.1.8
+trove-classifiers==2024.1.31
     # via hatchling
 typing-extensions==4.9.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
