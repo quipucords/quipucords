@@ -11,13 +11,14 @@ from rest_framework.serializers import (
     IntegerField,
     JSONField,
     PrimaryKeyRelatedField,
+    SerializerMethodField,
     ValidationError,
 )
 
 from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
-from api.models import Credential, Source, SourceOptions
+from api.models import Credential, Source
 from constants import DataSources
 from utils import get_from_object_or_dict
 
@@ -46,25 +47,26 @@ class CredentialsField(PrimaryKeyRelatedField):
         return display
 
 
-class SourceOptionsSerializer(NotEmptySerializer):
-    """Serializer for the SourceOptions model."""
-
-    ssl_protocol = ValidStringChoiceField(
-        required=False, choices=SourceOptions.SSL_PROTOCOL_CHOICES
-    )
-    ssl_cert_verify = BooleanField(allow_null=True, required=False)
-    disable_ssl = BooleanField(allow_null=True, required=False)
-    use_paramiko = BooleanField(allow_null=True, required=False)
-
-    class Meta:
-        """Metadata for serializer."""
-
-        model = SourceOptions
-        fields = ["ssl_protocol", "ssl_cert_verify", "disable_ssl", "use_paramiko"]
-
-
 class SourceSerializer(NotEmptySerializer):
     """Serializer for the Source model."""
+
+    options = SerializerMethodField("source_options")
+
+    def source_options(self, obj):
+        """Return the v1 compatible options attribute for the source object."""
+        if (
+            obj.ssl_protocol
+            or obj.ssl_cert_verify
+            or obj.disable_ssl
+            or obj.use_paramiko
+        ):
+            return dict(
+                ssl_protocol=obj.ssl_protocol,
+                ssl_cert_verify=obj.ssl_cert_verify,
+                disable_ssl=obj.disable_ssl,
+                use_paramiko=obj.use_paramiko,
+            )
+        return None
 
     name = CharField(required=True, max_length=64)
     source_type = ValidStringChoiceField(
@@ -74,7 +76,13 @@ class SourceSerializer(NotEmptySerializer):
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = JSONField(required=True)
     exclude_hosts = JSONField(required=False)
-    options = SourceOptionsSerializer(required=False, many=False)
+    ssl_protocol = ValidStringChoiceField(
+        required=False, choices=Source.SSL_PROTOCOL_CHOICES
+    )
+    ssl_cert_verify = BooleanField(allow_null=True, required=False)
+    disable_ssl = BooleanField(allow_null=True, required=False)
+    use_paramiko = BooleanField(allow_null=True, required=False)
+
     credentials = CredentialsField(many=True, queryset=Credential.objects.all())
 
     HTTP_SOURCE_TYPES = (
@@ -91,7 +99,19 @@ class SourceSerializer(NotEmptySerializer):
         """Metadata for the serializer."""
 
         model = Source
-        fields = "__all__"
+        fields = (
+            "name",
+            "source_type",
+            "port",
+            "hosts",
+            "exclude_hosts",
+            "ssl_protocol",
+            "ssl_cert_verify",
+            "disable_ssl",
+            "use_paramiko",
+            "options",
+            "credentials",
+        )
 
     @classmethod
     def validate_opts(cls, options, source_type):
@@ -156,12 +176,10 @@ class SourceSerializer(NotEmptySerializer):
         if credentials and len(credentials) == 1:
             SourceSerializer.check_credential_type(source_type, credentials[0])
 
+    @staticmethod
     def _options_with_ssl_cert_verify_true(self, source):
         """Add options to source with ssl_cert_verify flag set to true."""
-        options = SourceOptions()
-        options.ssl_cert_verify = True
-        options.save()
-        source.options = options
+        source.ssl_cert_verify = True
 
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
@@ -195,9 +213,10 @@ class SourceSerializer(NotEmptySerializer):
 
         if options:
             SourceSerializer.validate_opts(options, source_type)
-            options = SourceOptions.objects.create(**options)
-            options.save()
-            source.options = options
+            source.ssl_protocol = options.get("ssl_protocol")
+            source.ssl_cert_verify = options.get("ssl_vert_verify")
+            source.disable_ssl = options.get("disable_ssl")
+            source.use_paramiko = options.get("use_paramiko")
         elif not options and source_type in self.HTTP_SOURCE_TYPES:
             self._options_with_ssl_cert_verify_true(source)
 
@@ -256,9 +275,10 @@ class SourceSerializer(NotEmptySerializer):
         if options:
             SourceSerializer.validate_opts(options, source_type)
             if instance.options is None:
-                options = SourceOptions.objects.create(**options)
-                options.save()
-                instance.options = options
+                instance.ssl_protocol = options.get("ssl_protocol")
+                instance.ssl_cert_verify = options.get("ssl_vert_verify")
+                instance.disable_ssl = options.get("disable_ssl")
+                instance.use_paramiko = options.get("use_paramiko")
             else:
                 self.update_options(options, instance.options)
 
