@@ -11,8 +11,8 @@ from api.credential.model import Credential
 from constants import DataSources
 
 
-class SourceOptions(models.Model):
-    """The source options allows configuration of a sources."""
+class Source(models.Model):
+    """A source connects a list of credentials and a list of hosts."""
 
     SSL_PROTOCOL_SSLv23 = "SSLv23"
     SSL_PROTOCOL_TLSv1 = "TLSv1"
@@ -32,6 +32,11 @@ class SourceOptions(models.Model):
         SSL_PROTOCOL_TLSv1_2: ssl.PROTOCOL_TLSv1_2,
     }
 
+    name = models.CharField(max_length=64, unique=True)
+    source_type = models.CharField(
+        max_length=12, choices=DataSources.choices, null=False
+    )
+    port = models.IntegerField(null=True)
     ssl_protocol = models.CharField(
         max_length=10, choices=SSL_PROTOCOL_CHOICES, null=True
     )
@@ -39,24 +44,6 @@ class SourceOptions(models.Model):
     ssl_cert_verify = models.BooleanField(null=True)
     disable_ssl = models.BooleanField(null=True)
     use_paramiko = models.BooleanField(null=True)
-
-    def get_ssl_protocol(self):
-        """Obtain the SSL protocol to be used."""
-        protocol = None
-        if self.ssl_protocol:
-            protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
-        return protocol
-
-
-class Source(models.Model):
-    """A source connects a list of credentials and a list of hosts."""
-
-    name = models.CharField(max_length=64, unique=True)
-    source_type = models.CharField(
-        max_length=12, choices=DataSources.choices, null=False
-    )
-    port = models.IntegerField(null=True)
-    options = models.OneToOneField(SourceOptions, null=True, on_delete=models.CASCADE)
     credentials = models.ManyToManyField(Credential, related_name="sources")
     hosts = models.JSONField(unique=False, null=False, default=list)
     exclude_hosts = models.JSONField(unique=False, null=True)
@@ -78,6 +65,13 @@ class Source(models.Model):
         :returns: excluded hosts as a python list. Empty list if none exist.
         """
         return self.exclude_hosts or []
+
+    def get_ssl_protocol(self):
+        """Obtain the SSL protocol to be used."""
+        protocol = None
+        if self.ssl_protocol:
+            protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
+        return protocol
 
     @cached_property
     def single_credential(self) -> Credential:

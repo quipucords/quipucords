@@ -29,5 +29,5 @@ from api.scan.model import (
 )
 from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask
-from api.source.model import Source, SourceOptions
+from api.source.model import Source
 from api.status.model import ServerInformation
