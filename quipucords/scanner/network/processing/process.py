@@ -162,7 +162,6 @@ class ProcessorMeta(abc.ABCMeta):
     def __init__(cls, name, bases, dct):
         """Register cls in the PROCESSORS dictionary."""
         if "KEY" not in dct:
-
             raise Exception(f"Processor {name} does not have a KEY")
 
         # Setting a falsey KEY means "yes, I did this on purpose, I

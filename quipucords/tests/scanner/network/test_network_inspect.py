@@ -1,5 +1,4 @@
 """Test the inspect scanner capabilities."""
-import logging
 from multiprocessing import Value
 from pathlib import Path
 from unittest.mock import ANY, Mock, patch
@@ -24,7 +23,7 @@ from constants import SCAN_JOB_LOG
 from scanner.network import InspectTaskRunner
 from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
 from scanner.network.inspect import construct_inventory
-from scanner.network.inspect_callback import InspectResultCallback
+from scanner.network.inspect_callback import InspectCallback
 from scanner.network.utils import delete_ssh_keyfiles, is_gen_ssh_keyfile
 from tests.api.credential.test_credential import generate_openssh_pkey
 from tests.scanner.test_util import create_scan_job
@@ -324,10 +323,8 @@ class TestNetworkInspectScanner:
 
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
-        callback = InspectResultCallback(
-            scan_task=self.scan_task, manager_interrupt=self.interrupt
-        )
-        # cleaned unused variabled from event_dict
+        callback = InspectCallback(manager_interrupt=self.interrupt)
+        # cleaned unused variable from event_dict
         event_dict = {
             "runner_ident": "f2100bac-7d64-43d2-8e6a-022c6f5104ac",
             "event": "runner_on_unreachable",
@@ -395,23 +392,6 @@ class TestNetworkInspectScanner:
         assert "verbosity=1" in str(calls[0])
 
 
-class TestInspectCallback:
-    """TestCase for InspectResultCallback."""
-
-    def test_unexpected_event(self):
-        """Test how event_callback handles an unexpected event."""
-        callback = InspectResultCallback(scan_task=Mock(), manager_interrupt=Mock())
-        event_data = {"some_data": "some_value"}
-        assert callback.event_callback(event_data) is None
-        expected_error = (
-            "UNEXPECTED FAILURE in event_callback. Error: None\n"
-            "Ansible result: {'some_data': 'some_value'}"
-        )
-        callback.scan_task.log_message.assert_called_with(
-            expected_error, log_level=logging.ERROR
-        )
-
-
 class TestAnsibleLogCollector:
     """Test if ansible logs are properly collected."""
 
@@ -422,7 +402,7 @@ class TestAnsibleLogCollector:
         # will patch later
         mocker.patch("scanner.network.inspect.write_to_yaml")
         mocker.patch("scanner.network.inspect.delete_ssh_keyfiles")
-        mocker.patch("scanner.network.inspect.InspectResultCallback")
+        mocker.patch("scanner.network.inspect.InspectCallback")
         # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
         # this test requires
         mocker.patch(
