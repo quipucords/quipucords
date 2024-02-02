@@ -17,7 +17,7 @@ class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
     def _get_connection_info(cls, scan_task: ScanTask):
         host = scan_task.source.get_hosts()[0]
         port = scan_task.source.port
-        ssl_enabled, ssl_verify = cls._ssl_options(scan_task)
+        ssl_enabled, ssl_verify = scan_task.source.get_ssl_options()
         credential = scan_task.source.single_credential
         conn_info = {
             "host": host,
@@ -41,25 +41,3 @@ class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         ocp_kwargs = cls._get_connection_info(scan_task)
         return OpenShiftApi.with_config_info(**ocp_kwargs)
 
-    @classmethod
-    def _ssl_options(cls, scan_task: ScanTask):
-        """
-        Get ssl related options for scan_task.
-
-        Note: this logic should be enforced on SourceOptionsSerializer.
-        Should be fixed in a subsequent PR.
-
-        :return: ssl_enabled, ssl_verify
-        :rtype: (bool, bool)
-        """
-        ssl_enabled = not scan_task.source.disable_ssl
-        if ssl_enabled is None:
-            ssl_enabled = True
-
-        ssl_verify = False
-        if ssl_enabled:
-            ssl_verify = scan_task.source.ssl_cert_verify
-            if ssl_verify is None:
-                ssl_verify = True
-
-        return ssl_enabled, ssl_verify

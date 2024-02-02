@@ -73,6 +73,17 @@ class Source(models.Model):
             protocol = self.SSL_PROTOCOL_MAPPING.get(self.ssl_protocol)
         return protocol
 
+    def get_ssl_options(self):
+        """Returns the ssl_enabled and ssl_verify booleans."""
+        ssl_enabled = not self.disable_ssl
+        ssl_verify = False
+        if ssl_enabled:
+            ssl_verify = self.ssl_cert_verify
+            if ssl_verify is None:
+                ssl_verify = True
+
+        return ssl_enabled, ssl_verify
+
     @cached_property
     def single_credential(self) -> Credential:
         """Retrieve related credential - for sources that only map to one credential."""
