@@ -60,10 +60,9 @@ def get_sat5_client(scan_task, options=None):
         user = options.get("user")
         password = options.get("password")
     else:
-        ssl_verify = True
-        source_options = scan_task.source.options
-        if source_options:
-            ssl_verify = source_options.ssl_cert_verify
+        ssl_verify = scan_task.source.ssl_cert_verify
+        if ssl_verify is None:
+            ssl_verify = True
         host, port, user, password = get_connect_data(scan_task)
 
     ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
@@ -117,10 +116,9 @@ def execute_request(  # noqa: PLR0913
         user = options.get("user")
         password = options.get("password")
     else:
-        ssl_verify = True
-        source_options = scan_task.source.options
-        if source_options:
-            ssl_verify = source_options.ssl_cert_verify
+        ssl_verify = scan_task.source.ssl_cert_verify
+        if ssl_verify is None:
+            ssl_verify = True
         host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
 

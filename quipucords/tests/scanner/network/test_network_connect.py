@@ -10,7 +10,7 @@ from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
 
 from api.connresult.model import SystemConnectionResult
-from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source, SourceOptions
+from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source
 from api.serializers import SourceSerializer
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
@@ -105,14 +105,12 @@ class TestNetworkConnectTaskRunner:
         self.scan_task2.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
 
         # Scans with options & no excluded hosts
-        source_options = SourceOptions(use_paramiko=True)
-        source_options.save()
         self.source3 = Source(
             name="source3",
             hosts=["1.2.3.4", "1.2.3.5", "1.2.3.6"],
             source_type="network",
             port=22,
-            options=source_options,
+            use_paramiko=True,
         )
         self.source3.save()
         self.source3.credentials.add(self.cred)

@@ -162,9 +162,8 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         connection_port = self.scan_task.source.port
 
-        if self.scan_task.source.options is not None:
-            use_paramiko = self.scan_task.source.options.use_paramiko
-        else:
+        use_paramiko = self.scan_task.source.use_paramiko
+        if use_paramiko is None:
             use_paramiko = False
 
         if self.scan_job.options is not None:

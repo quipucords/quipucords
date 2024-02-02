@@ -770,9 +770,8 @@ class TestSource:
                 "source_type": DataSources.VCENTER,
                 "port": 443,
                 "hosts": ["1.2.3.4"],
-                "options": {
-                    "ssl_cert_verify": True,
-                },
+                "ssl_cert_verify": True,
+                "options": {"ssl_cert_verify": True},
                 "credentials": [cred_for_response],
             }
             results.append(result_dict)

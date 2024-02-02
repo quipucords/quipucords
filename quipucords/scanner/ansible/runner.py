@@ -75,13 +75,14 @@ class AnsibleTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
 
         :returns: ssl_enabled (bool), ssl_verify (bool)
         """
-        # assume ssl_enabled/ssl_verify = True when option is not set
-        if not scan_task.source.options:
-            return True, True
+        # assume ssl_enabled/ssl_verify = True when not set
 
-        ssl_enabled = not scan_task.source.options.disable_ssl
-        if ssl_enabled:
-            ssl_verify = getattr(scan_task.source.options, "ssl_cert_verify", True)
-        else:
-            ssl_verify = False
+        ssl_enabled = scan_task.source.disable_ssl
+        if ssl_enabled is None:
+            ssl_enabled = True
+
+        ssl_verify = scan_task.source.ssl_cert_verify
+        if ssl_verify is None:
+            ssl_verify = True
+
         return ssl_enabled, ssl_verify
