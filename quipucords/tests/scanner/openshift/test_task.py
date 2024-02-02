@@ -20,35 +20,35 @@ def _disable_k8s_clients(mocker):
 @pytest.mark.parametrize(
     "source_kwargs,expected_protocol,ssl_verify",
     [
-        ({"source__options": None}, "https", True),
+        ({}, "https", True),
         (
             {
-                "source__options__ssl_cert_verify": True,
-                "source__options__disable_ssl": False,
+                "source__ssl_cert_verify": True,
+                "source__disable_ssl": False,
             },
             "https",
             True,
         ),
         (
             {
-                "source__options__ssl_cert_verify": False,
-                "source__options__disable_ssl": False,
+                "source__ssl_cert_verify": False,
+                "source__disable_ssl": False,
             },
             "https",
             False,
         ),
         (
             {
-                "source__options__ssl_cert_verify": False,
-                "source__options__disable_ssl": True,
+                "source__ssl_cert_verify": False,
+                "source__disable_ssl": True,
             },
             "http",
             False,
         ),
         (
             {
-                "source__options__ssl_cert_verify": True,
-                "source__options__disable_ssl": True,
+                "source__ssl_cert_verify": True,
+                "source__disable_ssl": True,
             },
             "http",
             False,

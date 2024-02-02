@@ -54,19 +54,18 @@ class SourceSerializer(NotEmptySerializer):
 
     def source_options(self, obj):
         """Return the v1 compatible options attribute for the source object."""
-        if (
-            obj.ssl_protocol
-            or obj.ssl_cert_verify
-            or obj.disable_ssl
-            or obj.use_paramiko
-        ):
-            return dict(
-                ssl_protocol=obj.ssl_protocol,
-                ssl_cert_verify=obj.ssl_cert_verify,
-                disable_ssl=obj.disable_ssl,
-                use_paramiko=obj.use_paramiko,
-            )
-        return None
+        result_options = {}
+        if obj.ssl_protocol is not None:
+            result_options["ssl_protocol"] = obj.ssl_protocol
+        if obj.ssl_cert_verify is not None:
+            result_options["ssl_cert_verify"] = obj.ssl_cert_verify
+        if obj.disable_ssl is not None:
+            result_options["disable_ssl"] = obj.disable_ssl
+        if obj.use_paramiko is not None:
+            result_options["use_paramiko"] = obj.use_paramiko
+        if result_options == {}:
+            return None
+        return result_options
 
     name = CharField(required=True, max_length=64)
     source_type = ValidStringChoiceField(
@@ -100,6 +99,7 @@ class SourceSerializer(NotEmptySerializer):
 
         model = Source
         fields = (
+            "id",
             "name",
             "source_type",
             "port",
@@ -111,6 +111,7 @@ class SourceSerializer(NotEmptySerializer):
             "use_paramiko",
             "options",
             "credentials",
+            "most_recent_connect_scan",
         )
 
     @classmethod
@@ -176,11 +177,6 @@ class SourceSerializer(NotEmptySerializer):
         if credentials and len(credentials) == 1:
             SourceSerializer.check_credential_type(source_type, credentials[0])
 
-    @staticmethod
-    def _options_with_ssl_cert_verify_true(self, source):
-        """Add options to source with ssl_cert_verify flag set to true."""
-        source.ssl_cert_verify = True
-
     def validate(self, attrs):
         """Validate if fields received are appropriate for each credential."""
         source_type = get_from_object_or_dict(self.instance, attrs, "source_type")
@@ -218,7 +214,7 @@ class SourceSerializer(NotEmptySerializer):
             source.disable_ssl = options.get("disable_ssl")
             source.use_paramiko = options.get("use_paramiko")
         elif not options and source_type in self.HTTP_SOURCE_TYPES:
-            self._options_with_ssl_cert_verify_true(source)
+            source.ssl_cert_verify = True
 
         source.hosts = hosts_list
         if exclude_hosts_list:

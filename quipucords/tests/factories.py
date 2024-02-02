@@ -281,21 +281,11 @@ class CredentialFactory(DjangoModelFactory):
         return None
 
 
-class SourceOptions(DjangoModelFactory):
-    """Factory for SourceOptions model."""
-
-    class Meta:
-        """Factory options."""
-
-        model = models.SourceOptions
-
-
 class SourceFactory(DjangoModelFactory):
     """Factory for Source model."""
 
     name = factory.Faker("slug")
     source_type = factory.Iterator(DataSources.values)
-    options = factory.SubFactory(SourceOptions)
 
     class Meta:
         """Factory options."""

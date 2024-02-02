@@ -52,12 +52,14 @@ class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         :return: ssl_enabled, ssl_verify
         :rtype: (bool, bool)
         """
-        if not scan_task.source.options:
-            return True, True
+        ssl_enabled = not scan_task.source.disable_ssl
+        if ssl_enabled is None:
+            ssl_enabled = True
 
-        ssl_enabled = not scan_task.source.options.disable_ssl
+        ssl_verify = False
         if ssl_enabled:
-            ssl_verify = getattr(scan_task.source.options, "ssl_cert_verify", True)
-        else:
-            ssl_verify = False
+            ssl_verify = scan_task.source.ssl_cert_verify
+            if ssl_verify is None:
+                ssl_verify = True
+
         return ssl_enabled, ssl_verify

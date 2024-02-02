@@ -17,7 +17,6 @@ from api.models import (
     ScanOptions,
     ScanTask,
     Source,
-    SourceOptions,
     SystemConnectionResult,
 )
 from api.serializers import SourceSerializer
@@ -299,10 +298,8 @@ class TestNetworkInspectScanner:
     def test_scan_with_options(self, mock_run):
         """Setup second scan with scan and source options."""
         # setup source with paramiko option for scan
-        source_options = SourceOptions()
-        source_options.save()
         self.source = Source(
-            name="source2", port=22, options=source_options, hosts=["1.2.3.4"]
+            name="source2", port=22, hosts=["1.2.3.4"], use_paramiko=True
         )
         self.source.save()
         self.source.credentials.add(self.cred)

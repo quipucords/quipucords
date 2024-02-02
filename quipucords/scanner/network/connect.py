@@ -152,9 +152,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         else:
             forks = ScanOptions.get_default_forks()
 
-        if self.scan_task.source.options is not None:
-            use_paramiko = self.scan_task.source.options.use_paramiko
-        else:
+        use_paramiko = self.scan_task.source.use_paramiko
+        if use_paramiko is None:
             use_paramiko = False
 
         connection_port = source["port"]

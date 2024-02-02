@@ -4,7 +4,7 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 
-from api.models import Credential, ScanTask, Source, SourceOptions
+from api.models import Credential, ScanTask, Source
 from scanner.vcenter.utils import vcenter_connect
 from tests.scanner.test_util import create_scan_job
 
@@ -24,11 +24,9 @@ class TestVCenterUtilsTest:
         )
         self.cred.save()
 
-        options = SourceOptions(disable_ssl=True)
-        options.save()
-
-        self.source = Source(name="source1", port=22, hosts=["1.2.3.4"])
-        self.source.options = options
+        self.source = Source(
+            name="source1", port=22, hosts=["1.2.3.4"], disable_ssl=True
+        )
         self.source.save()
         self.source.credentials.add(self.cred)
 

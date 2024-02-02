@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from api.models import DeploymentsReport, Source, SourceOptions, SystemFingerprint
+from api.models import DeploymentsReport, Source, SystemFingerprint
 from constants import DataSources
 from tests.factories import (
     DeploymentReportFactory,
@@ -86,20 +86,20 @@ class TestDeploymentReportFactoryReportID:
 class TestSourceFactory:
     """Test SourceFactory."""
 
-    def test_option_default(self):
-        """Test SourceFactory option default behavior."""
+    def test_default(self):
+        """Test SourceFactory default behavior."""
         source = SourceFactory()
         assert isinstance(source, Source)
         assert source.id
-        assert isinstance(source.options, SourceOptions)
-        assert source.options.id
 
-    def test_option_none(self):
-        """Test SourceFactory option set to none."""
-        source = SourceFactory(options=None)
+    def test_default_ssl(self):
+        """Test SourceFactory default ssl options set to none."""
+        source = SourceFactory()
         assert isinstance(source, Source)
         assert source.id
-        assert source.options is None
+        assert source.ssl_cert_verify is None
+        assert source.disable_ssl is None
+        assert source.use_paramiko is None
 
 
 @pytest.mark.django_db

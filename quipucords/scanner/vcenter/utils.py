@@ -24,14 +24,14 @@ def vcenter_connect(scan_task):
     host = scan_task.source.get_hosts()[0]
     password = decrypt_data_as_unicode(credential.password)
     port = scan_task.source.port
-    options = source.options
 
-    if options:
-        if options.disable_ssl and options.disable_ssl is True:
-            disable_ssl = True
-        if options.ssl_cert_verify is not None:
-            ssl_cert_verify = options.ssl_cert_verify
-        ssl_protocol = options.get_ssl_protocol()
+    if source.disable_ssl is True:
+        disable_ssl = True
+
+    if source.ssl_cert_verify is not None:
+        ssl_cert_verify = source.ssl_cert_verify
+
+    ssl_protocol = source.get_ssl_protocol()
 
     if disable_ssl:
         vcenter = SmartConnectNoSSL(host=host, user=user, pwd=password, port=port)

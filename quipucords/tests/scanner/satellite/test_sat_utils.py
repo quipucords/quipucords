@@ -5,7 +5,7 @@ from unittest.mock import ANY, patch
 import pytest
 import requests_mock
 
-from api.models import Credential, ScanTask, Source, SourceOptions
+from api.models import Credential, ScanTask, Source
 from constants import DataSources
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
@@ -49,13 +49,11 @@ class TestSatelliteUtils:
         )
         self.cred.save()
 
-        self.source = Source(name="source1", port=443, hosts=["1.2.3.4"])
+        self.source = Source(
+            name="source1", port=443, hosts=["1.2.3.4"], ssl_cert_verify=False
+        )
         self.source.save()
         self.source.credentials.add(self.cred)
-        self.options = SourceOptions(ssl_cert_verify=False)
-        self.options.save()
-        self.source.options = self.options
-        self.source.save()
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT

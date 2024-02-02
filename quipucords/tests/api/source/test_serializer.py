@@ -2,7 +2,7 @@
 import pytest
 
 from api import messages
-from api.models import Credential, Source, SourceOptions
+from api.models import Credential, Source
 from api.source.serializer import SourceSerializer
 from constants import DataSources
 
@@ -52,7 +52,7 @@ def openshift_source(openshift_cred_id):
         source_type=DataSources.OPENSHIFT,
         port=222,
         hosts=["1.2.3.4"],
-        options=SourceOptions.objects.create(ssl_cert_verify=True),
+        ssl_cert_verify=True,
     )
     source.credentials.add(openshift_cred_id)
     source.save()
@@ -127,7 +127,7 @@ def test_openshift_source_green_path(openshift_cred_id):
     source: Source = serializer.save()
     assert source.port == 222
     assert source.hosts == ["1.2.3.4"]
-    assert source.options.ssl_cert_verify
+    assert source.ssl_cert_verify
 
 
 @pytest.mark.django_db
@@ -167,11 +167,11 @@ def test_openshift_source_update(openshift_source, openshift_cred_id):
 @pytest.mark.django_db
 def test_openshift_source_update_options(openshift_source, openshift_cred_id):
     """Test if serializer updates fields correctly when options are present."""
-    assert openshift_source.options.ssl_cert_verify
+    assert openshift_source.ssl_cert_verify
     updated_data = {
         "name": "source_updated",
         "hosts": ["5.4.3.2"],
-        "options": {"ssl_cert_verify": False},
+        "ssl_cert_verify": False,
         "credentials": [openshift_cred_id],
     }
     serializer = SourceSerializer(data=updated_data, instance=openshift_source)
@@ -179,4 +179,4 @@ def test_openshift_source_update_options(openshift_source, openshift_cred_id):
     serializer.save()
     assert openshift_source.name == "source_updated"
     assert openshift_source.source_type == DataSources.OPENSHIFT
-    assert not openshift_source.options.ssl_cert_verify
+    assert not openshift_source.ssl_cert_verify
