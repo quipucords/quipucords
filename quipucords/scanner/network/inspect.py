@@ -250,6 +250,13 @@ class InspectTaskRunner(ScanTaskRunner):
                 delete_ssh_keyfiles(inventory)
                 raise AnsibleRunnerException(str(error)) from error
 
+            log_message = (
+                "INSPECT PROCESSING GROUP ANSIBLE RUNNER COMPLETED"
+                f" group {group_name}: {runner_obj.status=}"
+                f" {runner_obj.rc=} {runner_obj.stats=}"
+            )
+            self.scan_task.log_message(log_message, log_level=logging.DEBUG)
+
             # Let's delete any private ssh key files that we generated
             delete_ssh_keyfiles(inventory)
             # save stdout and stderr from ansible
@@ -281,6 +288,13 @@ class InspectTaskRunner(ScanTaskRunner):
 
             # Always run this as our scans are more tolerant of errors
             call.finalize_failed_hosts()
+
+            log_message = (
+                "INSPECT PROCESSING GROUP COMPLETED"
+                f" group {group_name}: {scan_result=}"
+                f" {error_msg=}"
+            )
+            self.scan_task.log_message(log_message, log_level=logging.DEBUG)
         return error_msg, scan_result
 
     def _persist_ansible_logs(self, runner_obj: ansible_runner.Runner):
