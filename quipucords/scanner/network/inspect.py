@@ -5,9 +5,11 @@ from pathlib import Path
 import ansible_runner
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.conf import settings
+from django.db import transaction
 from django.forms import model_to_dict
 
 import log_messages
+from api.inspectresult.model import RawFact
 from api.models import (
     ScanJob,
     ScanOptions,
@@ -19,11 +21,13 @@ from api.vault import write_to_yaml
 from constants import SCAN_JOB_LOG
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerException
-from scanner.network.inspect_callback import InspectResultCallback
+from scanner.network.inspect_callback import AnsibleResults, InspectCallback
+from scanner.network.processing.process import NO_DATA, process
 from scanner.network.utils import (
     check_manager_interrupt,
     construct_inventory,
     delete_ssh_keyfiles,
+    raw_facts_template,
 )
 from scanner.runner import ScanTaskRunner
 
@@ -204,7 +208,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 f" {(idx + 1):d} of {len(group_names):d}"
             )
             self.scan_task.log_message(log_message)
-            call = InspectResultCallback(self.scan_task, manager_interrupt)
+            call = InspectCallback(manager_interrupt)
 
             # Build Ansible Runner Parameters
             runner_settings = {
@@ -258,6 +262,9 @@ class InspectTaskRunner(ScanTaskRunner):
 
             # Let's delete any private ssh key files that we generated
             delete_ssh_keyfiles(inventory)
+            # persist facts
+            for result in call.iter_results():
+                self._persist_results(result)
             # save stdout and stderr from ansible
             self._persist_ansible_logs(runner_obj)
 
@@ -283,10 +290,9 @@ class InspectTaskRunner(ScanTaskRunner):
                     error_msg = log_messages.NETWORK_TIMEOUT_ERR
                 else:
                     error_msg = log_messages.NETWORK_UNKNOWN_ERR
+                # TODO: refactor this - this logic is incorrect. The result of
+                # the whole scan is only taking into consideration the last group.
                 scan_result = ScanTask.FAILED
-
-            # Always run this as our scans are more tolerant of errors
-            call.finalize_failed_hosts()
 
             log_message = (
                 "INSPECT PROCESSING GROUP COMPLETED"
@@ -295,6 +301,89 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             self.scan_task.log_message(log_message, log_level=logging.DEBUG)
         return error_msg, scan_result
+
+    @transaction.atomic
+    def _persist_results(self, ansible_results: AnsibleResults):
+        facts = self._post_process_facts(ansible_results)
+        self.scan_task.log_message(
+            f"host scan complete for {ansible_results.host}."
+            f" Status: {ansible_results.status}. Facts {facts}",
+            log_level=logging.DEBUG,
+        )
+        sys_result = SystemInspectionResult(
+            name=ansible_results.host,
+            status=ansible_results.status,
+            source=self.scan_task.source,
+            task_inspection_result=self.scan_task.inspection_result,
+        )
+        sys_result.save()
+        raw_facts = []
+        for fact_key, fact_value in facts.items():
+            raw_facts.append(
+                RawFact(
+                    name=fact_key,
+                    value=fact_value,
+                    system_inspection_result=sys_result,
+                )
+            )
+        RawFact.objects.bulk_create(raw_facts)
+        increment_kwargs = self._get_scan_task_increment_kwargs(ansible_results.status)
+        self.scan_task.increment_stats(ansible_results.host, **increment_kwargs)
+
+    def _post_process_facts(self, ansible_results):
+        logger.debug(
+            "[host=%s] post processing facts. Unprocessed facts=%s",
+            ansible_results.host,
+            ansible_results.facts,
+        )
+        facts = {}
+        for fact_key, fact_value in ansible_results.facts.items():
+            try:
+                processed_fact = process(
+                    scan_task=self.scan_task,
+                    previous_host_facts=facts,
+                    fact_key=fact_key,
+                    fact_value=fact_value,
+                    host=ansible_results.host,
+                )
+            except Exception:
+                logger.exception(
+                    "[host=%s] Unexpected error ocurred during fact '%s' processing",
+                    ansible_results.host,
+                    fact_key,
+                )
+                continue
+            if processed_fact == NO_DATA:
+                processed_fact = None
+            facts[fact_key] = processed_fact
+
+        if settings.QPC_EXCLUDE_INTERNAL_FACTS:
+            # remove internal facts before saving result
+            facts = {
+                fact_key: fact_value
+                for fact_key, fact_value in facts.items()
+                if not fact_key.startswith("internal_")
+            }
+        # # use templates as a boilerplate with "none" values
+        final_facts = raw_facts_template()
+        final_facts.update(facts)
+        return final_facts
+
+    def _get_scan_task_increment_kwargs(self, result):
+        return {
+            SystemInspectionResult.SUCCESS: {
+                "increment_sys_scanned": True,
+                "prefix": "CONNECTED",
+            },
+            SystemInspectionResult.FAILED: {
+                "increment_sys_failed": True,
+                "prefix": "FAILED",
+            },
+            SystemInspectionResult.UNREACHABLE: {
+                "increment_sys_unreachable": True,
+                "prefix": "UNREACHABLE",
+            },
+        }[result]
 
     def _persist_ansible_logs(self, runner_obj: ansible_runner.Runner):
         """Persist ansible logs."""
