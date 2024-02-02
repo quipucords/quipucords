@@ -44,7 +44,7 @@ class AnsibleTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         """
         host = scan_task.source.get_hosts()[0]
         port = scan_task.source.port
-        ssl_enabled, ssl_verify = cls._ssl_options(scan_task)
+        ssl_enabled, ssl_verify = scan_task.source.get_ssl_options()
         credential = scan_task.source.single_credential
         return {
             "host": host,
@@ -65,24 +65,3 @@ class AnsibleTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         ocp_kwargs = cls._get_connection_info(scan_task)
         return AnsibleControllerApi.from_connection_info(**ocp_kwargs)
 
-    @classmethod
-    def _ssl_options(cls, scan_task: ScanTask):
-        """
-        Get ssl related options for scan_task.
-
-        Note: this logic should be enforced on SourceOptionsSerializer, which
-        should be fixed in a subsequent PR.
-
-        :returns: ssl_enabled (bool), ssl_verify (bool)
-        """
-        # assume ssl_enabled/ssl_verify = True when not set
-
-        ssl_enabled = scan_task.source.disable_ssl
-        if ssl_enabled is None:
-            ssl_enabled = True
-
-        ssl_verify = scan_task.source.ssl_cert_verify
-        if ssl_verify is None:
-            ssl_verify = True
-
-        return ssl_enabled, ssl_verify
