@@ -40,4 +40,3 @@ class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         """Get an OpenShiftApi properly initialized with source/credential info."""
         ocp_kwargs = cls._get_connection_info(scan_task)
         return OpenShiftApi.with_config_info(**ocp_kwargs)
-

@@ -64,4 +64,3 @@ class AnsibleTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         """
         ocp_kwargs = cls._get_connection_info(scan_task)
         return AnsibleControllerApi.from_connection_info(**ocp_kwargs)
-

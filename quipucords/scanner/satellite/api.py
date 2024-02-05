@@ -117,7 +117,7 @@ class SatelliteInterface(ABC):
             )
         host, port, user, password = utils.get_connect_data(self.inspect_scan_task)
 
-        ssl_cert_verify = self.inspect_scan_task.source
+        ssl_cert_verify = self.inspect_scan_task.source.ssl_cert_verify
         if ssl_cert_verify is None:
             ssl_cert_verify = True
 

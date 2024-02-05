@@ -52,6 +52,22 @@ class Source(models.Model):
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
     )
 
+    @property
+    def options(self):
+        """Return the v1 compatible options attribute for the source object."""
+        result_options = {}
+        if self.ssl_protocol is not None:
+            result_options["ssl_protocol"] = self.ssl_protocol
+        if self.ssl_cert_verify is not None:
+            result_options["ssl_cert_verify"] = self.ssl_cert_verify
+        if self.disable_ssl is not None:
+            result_options["disable_ssl"] = self.disable_ssl
+        if self.use_paramiko is not None:
+            result_options["use_paramiko"] = self.use_paramiko
+        # if result_options == {}:
+        #    return None
+        return result_options
+
     def get_hosts(self):
         """Access hosts as python list instead of str.
 
@@ -74,7 +90,7 @@ class Source(models.Model):
         return protocol
 
     def get_ssl_options(self):
-        """Returns the ssl_enabled and ssl_verify booleans."""
+        """Return the ssl_enabled and ssl_verify booleans."""
         ssl_enabled = not self.disable_ssl
         ssl_verify = False
         if ssl_enabled:
