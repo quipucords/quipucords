@@ -1,6 +1,6 @@
 """Test the API application."""
 
-
+import random
 from unittest import mock
 
 import pytest
@@ -19,13 +19,14 @@ from api.models import (
     SystemInspectionResult,
 )
 from api.scan.serializer import ExtendedProductSearchOptionsSerializer
-from api.scanjob.serializer import ScanJobSerializer
+from api.scanjob.serializer import ScanJobSerializerV1
 from api.scanjob.view import expand_scanjob
 from tests.factories import (
     CredentialFactory,
     ScanFactory,
     ScanJobFactory,
     ScanOptionsFactory,
+    ScanTaskFactory,
     SourceFactory,
 )
 from tests.scanner.test_util import (
@@ -1466,7 +1467,7 @@ class TestScanJob:
         )
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
 
@@ -1498,7 +1499,7 @@ class TestScanJob:
             )
 
         scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
 
@@ -1541,7 +1542,7 @@ class TestScanJob:
 
         json_disabled, json_enabled_ext = scan_options_products(expected_vars)
 
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         assert (
             json_scan.get("options").get("disabled_optional_products") == json_disabled
@@ -1574,7 +1575,7 @@ class TestScanJob:
 
         json_disabled, _ = scan_options_products(expected_vars)
 
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         assert (
             json_scan.get("options").get("disabled_optional_products") == json_disabled
@@ -1606,7 +1607,7 @@ class TestScanJob:
 
         _, json_enabled_ext = scan_options_products(expected_vars)
 
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         assert json_scan.get("options").get("disabled_optional_products") is None
         assert (
@@ -1672,7 +1673,7 @@ class TestScanJob:
 
         json_disabled, json_enabled_ext = scan_options_products(expected_vars)
 
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         assert (
             json_scan.get("options").get("disabled_optional_products") == json_disabled
@@ -1710,7 +1711,7 @@ class TestScanJob:
 
         json_disabled, json_enabled_ext = scan_options_products(expected_vars)
 
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         # jboss_eap is calculated based on all the other values - it's easier this way
         assert json_scan.get("options").get(
@@ -1751,7 +1752,7 @@ class TestScanJob:
 
         json_disabled, json_enabled_ext = scan_options_products(expected_vars)
 
-        serializer = ScanJobSerializer(scan_job)
+        serializer = ScanJobSerializerV1(scan_job)
         json_scan = serializer.data
         assert (
             json_scan.get("options").get("disabled_optional_products") == json_disabled
@@ -1868,3 +1869,189 @@ class TestScanJob:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         job_count = len(scan.jobs.all())
         assert job_count == 0
+
+
+@pytest.mark.django_db
+class TestScanJobViewSetV2:
+    """Test v2 ScanJob ViewSet."""
+
+    @pytest.fixture
+    def scanjob(self):
+        """Return a inspect scanjob with associated tasks."""
+        source = SourceFactory()
+        scan = ScanFactory(sources=[source])
+        scanjob = scan.most_recent_scanjob
+        scanjob.sources.add(source)
+        # with the following numbers, we expect count=10, failed=2, scanned=3 and
+        # unreachable=5 - see ScanJobQuerySet and it's test for more details
+        ScanTaskFactory(
+            job=scanjob,
+            systems_count=10,
+            systems_failed=1,
+            systems_scanned=6,
+            systems_unreachable=3,
+            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        )
+        ScanTaskFactory(
+            job=scanjob,
+            systems_count=6,
+            systems_failed=1,
+            systems_scanned=3,
+            systems_unreachable=2,
+            scan_type=ScanTask.SCAN_TYPE_INSPECT,
+        )
+        return scanjob
+
+    def test_retrieve(self, django_client, scanjob):
+        """Test retrieving a single ScanJob."""
+        source = scanjob.sources.first()
+        url = reverse("v2:job-detail", args=(scanjob.id,))
+        response = django_client.get(url)
+        assert response.ok
+        assert response.json() == {
+            "id": scanjob.id,
+            "end_time": scanjob.end_time.isoformat(),
+            "report_id": scanjob.report_id,
+            "scan_id": scanjob.scan.id,
+            "scan_type": scanjob.scan_type,
+            "sources": [
+                {
+                    "id": source.id,
+                    "name": source.name,
+                    "source_type": source.source_type,
+                }
+            ],
+            "start_time": scanjob.start_time.isoformat(),
+            "status": scanjob.status,
+            "status_message": scanjob.status_message,
+            "systems_count": 10,
+            "systems_failed": 2,
+            "systems_scanned": 3,
+            "systems_unreachable": 5,
+        }
+
+    def test_list(self, django_client, scanjob):
+        """Test endpoint for listing scanjobs."""
+        source = scanjob.sources.first()
+        url = reverse("v2:job-list")
+        response = django_client.get(url)
+        assert response.ok
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    "id": scanjob.id,
+                    "end_time": scanjob.end_time.isoformat(),
+                    "report_id": scanjob.report_id,
+                    "scan_id": scanjob.scan.id,
+                    "scan_type": scanjob.scan_type,
+                    "sources": [
+                        {
+                            "id": source.id,
+                            "name": source.name,
+                            "source_type": source.source_type,
+                        }
+                    ],
+                    "start_time": scanjob.start_time.isoformat(),
+                    "status": scanjob.status,
+                    "status_message": scanjob.status_message,
+                    "systems_count": 10,
+                    "systems_failed": 2,
+                    "systems_scanned": 3,
+                    "systems_unreachable": 5,
+                }
+            ],
+        }
+
+    def test_filter_by_scanid(
+        self, django_client, mocker, django_assert_max_num_queries
+    ):
+        """Test filtering scanjob list view by scan id."""
+        scan = ScanFactory()
+        scanjob = scan.most_recent_scanjob
+        # fingerprint type "scans" don't have an actual scan
+        scanjob_scanless = ScanJobFactory(scan=None)
+        assert scanjob.scan_id
+        assert scanjob_scanless.scan_id is None
+
+        url = reverse("v2:job-list")
+        # since this listing has more than 1 scanjob, let's make sure all annotations
+        # and prefetches are working so this view don't have N+1 issues
+        with django_assert_max_num_queries(1):
+            response = django_client.get(url)
+        assert response.ok
+        assert response.json() == {
+            "count": 2,
+            "next": None,
+            "previous": None,
+            "results": [mocker.ANY, mocker.ANY],
+        }
+        # this is also testing default ordering (-id)
+        assert [result["id"] for result in response.json()["results"]] == [
+            scanjob_scanless.id,
+            scanjob.id,
+        ]
+        # filter by scan_id
+        response2 = django_client.get(url, params={"scan_id": scanjob.scan_id})
+        assert response2.ok
+        assert response2.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [mocker.ANY],
+        }
+        assert response2.json()["results"][0]["id"] == scanjob.id
+        assert response2.json()["results"][0]["scan_id"] == scanjob.scan_id
+        # filter scanless jobs
+        response3 = django_client.get(url, params={"scan_id__isnull": True})
+        assert response3.ok
+        assert response3.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [mocker.ANY],
+        }
+        assert response3.json()["results"][0]["id"] == scanjob_scanless.id
+        assert response3.json()["results"][0]["scan_id"] is None
+
+    def test_filter_by_scan_type(self, django_client, mocker):
+        """Test filtering scanjob list by scan_type."""
+        for scan_type, _ in ScanTask.SCANTASK_TYPE_CHOICES:
+            ScanJobFactory(scan_type=scan_type)
+        # pick a random type for the sake of this test
+        chosen_type, _ = random.choice(ScanTask.SCANTASK_TYPE_CHOICES)
+        scanjob = ScanJob.objects.get(scan_type=chosen_type)
+        url = reverse("v2:job-list")
+        response = django_client.get(url, params={"scan_type": chosen_type})
+        assert response.ok
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [mocker.ANY],
+        }
+        result = response.json()["results"][0]
+        assert result["id"] == scanjob.id
+        assert result["scan_type"] == chosen_type
+
+    def test_filter_by_status(self, django_client, mocker):
+        """Test filtering scanjob list by status."""
+        for scanjob_status, _ in ScanTask.STATUS_CHOICES:
+            ScanJobFactory(status=scanjob_status)
+        # pick a random status for the sake of this test
+        chosen_status, _ = random.choice(ScanTask.STATUS_CHOICES)
+        scanjob = ScanJob.objects.get(status=chosen_status)
+        url = reverse("v2:job-list")
+        response = django_client.get(url, params={"status": chosen_status})
+        assert response.ok
+        assert response.json() == {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [mocker.ANY],
+        }
+        result = response.json()["results"][0]
+        assert result["id"] == scanjob.id
+        assert result["status"] == chosen_status
