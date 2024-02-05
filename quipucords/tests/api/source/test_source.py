@@ -1507,6 +1507,7 @@ class TestSource:
             "source_type": "satellite",
             "port": 22,
             "hosts": ["1.2.3.4"],
+            "ssl_cert_verify": False,
             "options": {"ssl_cert_verify": False},
             "credentials": [{"id": sat_cred.id, "name": "sat_cred1"}],
         }

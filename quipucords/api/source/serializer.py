@@ -8,10 +8,10 @@ from django.utils.translation import gettext as _
 from rest_framework.serializers import (
     BooleanField,
     CharField,
+    DictField,
     IntegerField,
     JSONField,
     PrimaryKeyRelatedField,
-    SerializerMethodField,
     ValidationError,
 )
 
@@ -50,23 +50,6 @@ class CredentialsField(PrimaryKeyRelatedField):
 class SourceSerializer(NotEmptySerializer):
     """Serializer for the Source model."""
 
-    options = SerializerMethodField("source_options")
-
-    def source_options(self, obj):
-        """Return the v1 compatible options attribute for the source object."""
-        result_options = {}
-        if obj.ssl_protocol is not None:
-            result_options["ssl_protocol"] = obj.ssl_protocol
-        if obj.ssl_cert_verify is not None:
-            result_options["ssl_cert_verify"] = obj.ssl_cert_verify
-        if obj.disable_ssl is not None:
-            result_options["disable_ssl"] = obj.disable_ssl
-        if obj.use_paramiko is not None:
-            result_options["use_paramiko"] = obj.use_paramiko
-        if result_options == {}:
-            return None
-        return result_options
-
     name = CharField(required=True, max_length=64)
     source_type = ValidStringChoiceField(
         required=False,
@@ -83,6 +66,7 @@ class SourceSerializer(NotEmptySerializer):
     use_paramiko = BooleanField(allow_null=True, required=False)
 
     credentials = CredentialsField(many=True, queryset=Credential.objects.all())
+    options = DictField(required=False, default={})
 
     HTTP_SOURCE_TYPES = (
         DataSources.RHACS,
@@ -206,14 +190,17 @@ class SourceSerializer(NotEmptySerializer):
         options = validated_data.pop("options", None)
 
         source = Source.objects.create(**validated_data)
+        source_options = source.options
 
-        if options:
+        if source_options:
+            SourceSerializer.validate_opts(source_options, source_type)
+        elif options:
             SourceSerializer.validate_opts(options, source_type)
             source.ssl_protocol = options.get("ssl_protocol")
             source.ssl_cert_verify = options.get("ssl_vert_verify")
             source.disable_ssl = options.get("disable_ssl")
             source.use_paramiko = options.get("use_paramiko")
-        elif not options and source_type in self.HTTP_SOURCE_TYPES:
+        elif source_type in self.HTTP_SOURCE_TYPES:
             source.ssl_cert_verify = True
 
         source.hosts = hosts_list
@@ -268,21 +255,17 @@ class SourceSerializer(NotEmptySerializer):
         if credentials:
             instance.credentials.set(credentials)
 
+        # If SSL options were specified via the options property,
+        # let's validate those and overwrite the instance's properties.
         if options:
             SourceSerializer.validate_opts(options, source_type)
-            if instance.options is None:
-                instance.ssl_protocol = options.get("ssl_protocol")
-                instance.ssl_cert_verify = options.get("ssl_vert_verify")
-                instance.disable_ssl = options.get("disable_ssl")
-                instance.use_paramiko = options.get("use_paramiko")
-            else:
-                self.update_options(options, instance.options)
+            self.update_options(options, instance)
 
         instance.save()
         return instance
 
     @staticmethod
-    def update_options(options, instance_options):
+    def update_options(options, instance):
         """Update the incoming options overlapping the existing options.
 
         :param options: the passed in options
@@ -293,14 +276,13 @@ class SourceSerializer(NotEmptySerializer):
         disable_ssl = options.pop("disable_ssl", None)
         use_paramiko = options.pop("use_paramiko", None)
         if ssl_protocol is not None:
-            instance_options.ssl_protocol = ssl_protocol
+            instance.ssl_protocol = ssl_protocol
         if ssl_cert_verify is not None:
-            instance_options.ssl_cert_verify = ssl_cert_verify
+            instance.ssl_cert_verify = ssl_cert_verify
         if disable_ssl is not None:
-            instance_options.disable_ssl = disable_ssl
+            instance.disable_ssl = disable_ssl
         if use_paramiko is not None:
-            instance_options.use_paramiko = use_paramiko
-        instance_options.save()
+            instance.use_paramiko = use_paramiko
 
     @staticmethod
     def check_credential_type(source_type, credential):
