@@ -5,6 +5,7 @@ from rest_framework.serializers import (
     CharField,
     DateTimeField,
     IntegerField,
+    ModelSerializer,
     PrimaryKeyRelatedField,
     ValidationError,
 )
@@ -97,7 +98,7 @@ class TaskField(PrimaryKeyRelatedField):
         return serializer.data
 
 
-class ScanJobSerializer(NotEmptySerializer):
+class ScanJobSerializerV1(NotEmptySerializer):
     """Serializer for the ScanJob model."""
 
     scan = ScanField(required=True, many=False, queryset=Scan.objects.all())
@@ -138,3 +139,43 @@ class ScanJobSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.SJ_REQ_SOURCES))
 
         return sources
+
+
+class InternalSourceSerializer(ModelSerializer):
+    """Summarized source serializer for ScanJobSerializer."""
+
+    class Meta:
+        """Serializer metadata."""
+
+        model = Source
+        fields = ["id", "name", "source_type"]
+
+
+class ScanJobSerializerV2(ModelSerializer):
+    """ScanJob serializer for api v2."""
+
+    sources = InternalSourceSerializer(many=True)
+    systems_count = IntegerField(read_only=True)
+    systems_scanned = IntegerField(read_only=True)
+    systems_failed = IntegerField(read_only=True)
+    systems_unreachable = IntegerField(read_only=True)
+
+    class Meta:
+        """Metadata for serializer."""
+
+        model = ScanJob
+        fields = [
+            "id",
+            "scan_id",
+            "report_id",
+            "scan_type",
+            "status",
+            "status_message",
+            "start_time",
+            "end_time",
+            "sources",
+            "systems_count",
+            "systems_scanned",
+            "systems_failed",
+            "systems_unreachable",
+        ]
