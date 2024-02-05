@@ -19,7 +19,7 @@ from api.common.common_report import REPORT_TYPE_DETAILS
 from api.common.util import is_int
 from api.details_report.util import create_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
-from api.serializers import ScanJobSerializer
+from api.serializers import ScanJobSerializerV1
 from api.signal.scanjob_signal import start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
@@ -81,7 +81,7 @@ def _get_async_merge_report_status(merge_job_id):
     merge_job = get_object_or_404(ScanJob.objects.all(), pk=merge_job_id)
     if merge_job.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    job_serializer = ScanJobSerializer(merge_job)
+    job_serializer = ScanJobSerializerV1(merge_job)
     response_data = job_serializer.data
     return Response(response_data, status=status.HTTP_200_OK)
 
@@ -110,7 +110,7 @@ def _create_async_merge_report_job(details_report_data):
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=details_report
     )
     merge_job.log_current_status()
-    job_serializer = ScanJobSerializer(merge_job)
+    job_serializer = ScanJobSerializerV1(merge_job)
     response_data = job_serializer.data
 
     # start fingerprint job

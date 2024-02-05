@@ -7,7 +7,8 @@ from api.views import (
     CredentialViewSet,
     DetailsReportsViewSet,
     QuipucordsExpiringAuthTokenView,
-    ScanJobViewSet,
+    ScanJobViewSetV1,
+    ScanJobViewSetV2,
     ScanViewSet,
     SourceViewSet,
     UserViewSet,
@@ -21,17 +22,18 @@ from api.views import (
     status,
 )
 
-ROUTER = SimpleRouter()
-
-ROUTER.register(r"credentials", CredentialViewSet, basename="credentials")
-ROUTER.register(r"reports", DetailsReportsViewSet, basename="reports")
-ROUTER.register(r"sources", SourceViewSet, basename="source")
-ROUTER.register(r"scans", ScanViewSet, basename="scan")
-ROUTER.register(r"jobs", ScanJobViewSet, basename="scanjob")
-ROUTER.register(r"users", UserViewSet, basename="users")
+ROUTER_V1 = SimpleRouter()
+ROUTER_V1.register(r"credentials", CredentialViewSet, basename="credentials")
+ROUTER_V1.register(r"reports", DetailsReportsViewSet, basename="reports")
+ROUTER_V1.register(r"sources", SourceViewSet, basename="source")
+ROUTER_V1.register(r"scans", ScanViewSet, basename="scan")
+ROUTER_V1.register(r"jobs", ScanJobViewSetV1, basename="scanjob")
+ROUTER_V1.register(r"users", UserViewSet, basename="users")
 
 ROUTER_V2 = SimpleRouter()
 ROUTER_V2.register(r"sources", SourceViewSet, basename="source")
+ROUTER_V2.register(r"jobs", ScanJobViewSetV2, basename="job")
+
 
 v1_urls = [
     path(
@@ -54,7 +56,7 @@ v1_urls = [
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
     path("token/", QuipucordsExpiringAuthTokenView),
     path("status/", status, name="server-status"),
-    *ROUTER.urls,
+    *ROUTER_V1.urls,
 ]
 
 v2_urls = [
