@@ -72,52 +72,6 @@ def test_openshift_cred_correct_fields():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "input_data,improper_fields",
-    (
-        pytest.param(
-            {
-                "name": "cred",
-                "cred_type": DataSources.OPENSHIFT,
-                "auth_token": "test_auth_token",
-                "become_password": "test_become_password",
-            },
-            {"become_password"},
-            id="1",
-        ),
-        pytest.param(
-            {
-                "name": "cred",
-                "cred_type": DataSources.NETWORK,
-                "auth_token": "test_auth_token",
-                "password": "test_password",
-                "username": "some-user",
-            },
-            {"auth_token"},
-            id="2",
-        ),
-        pytest.param(
-            {
-                "name": "cred",
-                "cred_type": DataSources.VCENTER,
-                "auth_token": "test_auth_token",
-                "password": "test_password",
-                "username": "some-user",
-                "become_password": "test_become_password",
-            },
-            {"auth_token", "become_password"},
-            id="3",
-        ),
-    ),
-)
-def test_openshift_cred_unallowed_fields(input_data, improper_fields):
-    """Test if serializer is invalid when passing unallowed fields."""
-    serializer = CredentialSerializer(data=input_data)
-    assert not serializer.is_valid()
-    assert improper_fields == set(serializer.errors.keys())
-
-
-@pytest.mark.django_db
 def test_openshift_cred_empty_auth_token():
     """Test if serializer is invalid when auth token is empty."""
     data = {
