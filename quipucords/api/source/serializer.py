@@ -47,7 +47,7 @@ class CredentialsField(PrimaryKeyRelatedField):
         return display
 
 
-class SourceSerializer(NotEmptySerializer):
+class SourceSerializerBase(NotEmptySerializer):
     """Serializer for the Source model."""
 
     name = CharField(required=True, max_length=64)
@@ -82,21 +82,6 @@ class SourceSerializer(NotEmptySerializer):
         """Metadata for the serializer."""
 
         model = Source
-        fields = (
-            "id",
-            "name",
-            "source_type",
-            "port",
-            "hosts",
-            "exclude_hosts",
-            "ssl_protocol",
-            "ssl_cert_verify",
-            "disable_ssl",
-            "use_paramiko",
-            "options",
-            "credentials",
-            "most_recent_connect_scan",
-        )
 
     @classmethod
     def validate_opts(cls, options, source_type):
@@ -197,7 +182,7 @@ class SourceSerializer(NotEmptySerializer):
         elif options:
             SourceSerializer.validate_opts(options, source_type)
             source.ssl_protocol = options.get("ssl_protocol")
-            source.ssl_cert_verify = options.get("ssl_vert_verify")
+            source.ssl_cert_verify = options.get("ssl_cert_verify")
             source.disable_ssl = options.get("disable_ssl")
             source.use_paramiko = options.get("use_paramiko")
         elif source_type in self.HTTP_SOURCE_TYPES:
@@ -577,3 +562,47 @@ class SourceSerializer(NotEmptySerializer):
             exclude_hosts_list,
         )
         return attrs
+
+
+class SourceSerializerV1(SourceSerializerBase):
+    """V1 Serializer for the Source model."""
+
+    class Meta:
+        """Metadata for the serializer."""
+
+        model = Source
+        fields = (
+            "id",
+            "name",
+            "source_type",
+            "port",
+            "hosts",
+            "exclude_hosts",
+            "options",
+            "credentials",
+            "most_recent_connect_scan",
+        )
+
+
+class SourceSerializer(SourceSerializerBase):
+    """V2 Serializer for the Source model."""
+
+    # Dropping options in preference for showing the direct ssl option attributes.
+    class Meta:
+        """Metadata for the serializer."""
+
+        model = Source
+        fields = (
+            "id",
+            "name",
+            "source_type",
+            "port",
+            "hosts",
+            "exclude_hosts",
+            "ssl_protocol",
+            "ssl_cert_verify",
+            "disable_ssl",
+            "use_paramiko",
+            "credentials",
+            "most_recent_connect_scan",
+        )
