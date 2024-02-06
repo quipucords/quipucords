@@ -64,8 +64,6 @@ class Source(models.Model):
             result_options["disable_ssl"] = self.disable_ssl
         if self.use_paramiko is not None:
             result_options["use_paramiko"] = self.use_paramiko
-        # if result_options == {}:
-        #    return None
         return result_options
 
     def get_hosts(self):

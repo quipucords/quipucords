@@ -23,7 +23,7 @@ from api.common.util import (
 )
 from api.filters import ListFilter
 from api.models import Scan, ScanJob, ScanTask, Source
-from api.serializers import SourceSerializer
+from api.serializers import SourceSerializer, SourceSerializerV1
 from api.signal.scanjob_signal import start_scan
 from api.source.util import expand_credential
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -87,11 +87,17 @@ class SourceViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     queryset = Source.objects.all()
-    serializer_class = SourceSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = SourceFilter
     ordering_fields = ("name", "source_type", "most_recent_connect_scan__start_time")
     ordering = ("name",)
+
+    def get_serializer_class(self):
+        """Return the Serializer Class for this request."""
+        if self.request.version == "v1":
+            return SourceSerializerV1
+        else:
+            return SourceSerializer
 
     def list(self, request):
         """List the sources."""
@@ -109,7 +115,7 @@ class SourceViewSet(ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         for source in queryset:
-            serializer = SourceSerializer(source)
+            serializer = self.get_serializer(source)
             json_source = serializer.data
 
             # Create expanded host cred JSON
@@ -159,7 +165,7 @@ class SourceViewSet(ModelViewSet):
             raise ValidationError(error)
 
         source = get_object_or_404(self.queryset, pk=pk)
-        serializer = SourceSerializer(source)
+        serializer = self.get_serializer(source)
         json_source = serializer.data
 
         # Create expanded host cred JSON

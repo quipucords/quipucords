@@ -30,6 +30,9 @@ ROUTER.register(r"scans", ScanViewSet, basename="scan")
 ROUTER.register(r"jobs", ScanJobViewSet, basename="scanjob")
 ROUTER.register(r"users", UserViewSet, basename="users")
 
+ROUTER_V2 = SimpleRouter()
+ROUTER_V2.register(r"sources", SourceViewSet, basename="source")
+
 v1_urls = [
     path(
         "credentials/bulk_delete/",
@@ -54,6 +57,11 @@ v1_urls = [
     *ROUTER.urls,
 ]
 
+v2_urls = [
+    *ROUTER_V2.urls,
+]
+
 urlpatterns = [
     path("v1/", include((v1_urls, "api"), namespace="v1")),
+    path("v2/", include((v2_urls, "api"), namespace="v2")),
 ]

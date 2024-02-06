@@ -770,7 +770,6 @@ class TestSource:
                 "source_type": DataSources.VCENTER,
                 "port": 443,
                 "hosts": ["1.2.3.4"],
-                "ssl_cert_verify": True,
                 "options": {"ssl_cert_verify": True},
                 "credentials": [cred_for_response],
             }
@@ -1507,7 +1506,6 @@ class TestSource:
             "source_type": "satellite",
             "port": 22,
             "hosts": ["1.2.3.4"],
-            "ssl_cert_verify": False,
             "options": {"ssl_cert_verify": False},
             "credentials": [{"id": sat_cred.id, "name": "sat_cred1"}],
         }
