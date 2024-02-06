@@ -1,6 +1,7 @@
 """Test the API application."""
-
+import datetime
 import random
+import time
 from unittest import mock
 
 import pytest
@@ -153,6 +154,33 @@ class TestCredential:
         assert cred.name == "cred1"
         assert decrypt_data_as_unicode(cred.ssh_key) == openssh_key
         assert decrypt_data_as_unicode(cred.ssh_passphrase) == ssh_passphrase
+
+    def test_hostcred_create_with_unexpected_input_fields(self, django_client):
+        """Creating a credential ignores unexpected or read-only fields."""
+        bogus_id = int(time.time())  # arbitrarily large and unlikely integer
+        data = {
+            "name": "cred1",
+            "cred_type": DataSources.NETWORK,
+            "username": "user1",
+            "password": "pass1",
+            "id": bogus_id,  # effectively a read-only field
+            "created_at": "bogus",  # model field not in serializer
+            "updated_at": "other",  # model field not in serializer
+            "camelot": "it's only a model",  # completely unknown field
+            "auth_token": "DEADBEEF",  # field for a different serializer
+        }
+        self.create_expect_201(data, django_client)
+        assert Credential.objects.count() == 1
+        credential = Credential.objects.get()
+        assert credential.id != bogus_id
+        assert credential.name == "cred1"
+        assert isinstance(credential.created_at, datetime.datetime)
+        assert isinstance(credential.updated_at, datetime.datetime)
+        assert not hasattr(credential, "camelot")
+        # Due to current polymorphism, auth_token *exists* but should *not*
+        # be set here. This is a network-type credential, and the auth_token
+        # field is not used by the NetworkCredentialSerializer.
+        assert not credential.auth_token
 
     def test_hostcred_create_double(self, django_client):
         """Create with duplicate name should fail."""
@@ -569,26 +597,17 @@ class TestCredential:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
-    def test_vc_create_extra_keyfile(self, django_client):
-        """Test VCenter without password."""
-        url = reverse("v1:credentials-list")
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.VCENTER,
-            "username": "user1",
-            "password": "pass1",
-            "ssh_keyfile": "keyfile",
-        }
-        response = django_client.post(url, json=data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["ssh_keyfile"]
-
     @pytest.mark.parametrize(
         "cred_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     @pytest.mark.parametrize("method", (m[0] for m in Credential.BECOME_METHOD_CHOICES))
-    def test_negative_create_extra_become(self, django_client, cred_type, method):
-        """Test non-network source with extra become method."""
+    def test_create_despite_unexpected_fields(self, django_client, cred_type, method):
+        """
+        Test non-network source with network-specific fields like become_method.
+
+        Because become_method and become_password only belong to network-type
+        credentials, they should be ignored when saving other credential types.
+        """
         url = reverse("v1:credentials-list")
         data = {
             "name": "cred1",
@@ -597,12 +616,18 @@ class TestCredential:
             "password": "pass1",
             "become_method": method,
             "become_password": "pass2",
+            "ssh_passphrase": "pass2",
+            "ssh_keyfile": "/foo/bar",
         }
         if cred_type == DataSources.RHACS:
             data["auth_token"] = "auth token"
         response = django_client.post(url, json=data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["become_password"]
+        assert response.status_code == status.HTTP_201_CREATED
+        response_json = response.json()
+        assert "become_method" not in response_json
+        assert "become_password" not in response_json
+        assert "ssh_keyfile" not in response_json
+        assert "ssh_passphrase" not in response_json
 
     def test_vcentercred_update(self, django_client):
         """Ensure we can create and update a vcenter credential."""
@@ -700,20 +725,6 @@ class TestCredential:
         response = django_client.post(url, json=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_vc_create_extra_keyfile_pass(self, django_client):
-        """Test VCenter with extra keyfile passphase."""
-        url = reverse("v1:credentials-list")
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.VCENTER,
-            "username": "user1",
-            "password": "pass1",
-            "ssh_passphrase": "pass2",
-        }
-        response = django_client.post(url, json=data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["ssh_passphrase"]
-
     def test_sat_cred_create(self, django_client):
         """Ensure we can create a new satellite credential."""
         data = {
@@ -753,66 +764,6 @@ class TestCredential:
         response = django_client.post(url, json=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
-
-    def test_sat_cred_update_ssh_key_not_allowed(self, django_client):
-        """Ensure Satellite update doesn't allow adding ssh_keyfile."""
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.SATELLITE,
-            "username": "user1",
-            "password": "pass1",
-        }
-        initial = self.create_expect_201(data, django_client)
-        assert Credential.objects.count() == 1
-        assert Credential.objects.get().name == "cred1"
-
-        update_data = {"name": "newName", "ssh_keyfile": "random_path"}
-        url = reverse("v1:credentials-detail", args=(initial["id"],))
-        response = django_client.patch(url, json=update_data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["ssh_keyfile"]
-
-    def test_sat_create_extra_keyfile(self, django_client):
-        """Test Satellite without password."""
-        url = reverse("v1:credentials-list")
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.SATELLITE,
-            "username": "user1",
-            "password": "pass1",
-            "ssh_keyfile": "keyfile",
-        }
-        response = django_client.post(url, json=data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["ssh_keyfile"]
-
-    def test_sat_create_extra_becomepass(self, django_client):
-        """Test Satellite with extra become password."""
-        url = reverse("v1:credentials-list")
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.SATELLITE,
-            "username": "user1",
-            "password": "pass1",
-            "become_password": "pass2",
-        }
-        response = django_client.post(url, json=data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["become_password"]
-
-    def test_sat_create_extra_keyfile_pass(self, django_client):
-        """Test Satellite with extra keyfile passphase."""
-        url = reverse("v1:credentials-list")
-        data = {
-            "name": "cred1",
-            "cred_type": DataSources.SATELLITE,
-            "username": "user1",
-            "password": "pass1",
-            "ssh_passphrase": "pass2",
-        }
-        response = django_client.post(url, json=data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["ssh_passphrase"]
 
     def test_openshift_cred_create_auth_token(self, django_client):
         """Ensure we can create a new openshift credential with auth token."""
@@ -867,20 +818,6 @@ class TestCredential:
         self.create_expect_201(data, django_client)
         assert Credential.objects.count() == 1
         assert Credential.objects.get().name == "acs_cred_1"
-
-    @pytest.mark.parametrize("cred_type", (DataSources.RHACS, DataSources.OPENSHIFT))
-    def test_ocp_rhacs_extra_unallowed_fields(self, django_client, cred_type):
-        """Ensure unallowed fields are not accepted when creating ocp/rhacs cred."""
-        url = reverse("v1:credentials-list")
-        data = {
-            "name": "cred_1",
-            "cred_type": cred_type,
-            "auth_token": "test_token",
-            "become_password": "test_become_password",
-        }
-        response = django_client.post(url, json=data)
-        assert response.status_code, status.HTTP_400_BAD_REQUEST
-        assert response.json()["become_password"]
 
     def test_network_ssh_keyfile_allow_none(self, django_client):
         """

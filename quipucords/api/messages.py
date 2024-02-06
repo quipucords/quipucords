@@ -48,7 +48,6 @@ CRED_IDS_DELETE_NOT_VALID_W_SOURCES = (
     " because they are used by 1 or more sources. ids=%s"
 )
 UNKNOWN_CRED_TYPE = "Credential type invalid."
-FIELD_NOT_ALLOWED_FOR_DATA_SOURCE = "Field not allowed for '%s' credential."
 
 # source messages
 SOURCE_NAME_ALREADY_EXISTS = "Source with name=%s already exists"
