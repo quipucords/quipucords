@@ -3,7 +3,7 @@
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
-from django.test import TestCase
+import pytest
 from requests import exceptions
 
 from api.models import Credential, ScanJob, ScanTask, Source
@@ -39,10 +39,10 @@ def mock_exception(param1, param2):
     raise Exception()
 
 
-class InspectTaskRunnerTest(TestCase):
+class TestInspectTaskRunner:
     """Tests Satellite connect capabilities."""
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
@@ -57,9 +57,6 @@ class InspectTaskRunnerTest(TestCase):
         self.source.save()
         self.source.credentials.add(self.cred)
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-
     def create_scan_job(self):
         """Create scan job for tests."""
         scan_job, inspect_task = create_scan_job(
@@ -69,6 +66,7 @@ class InspectTaskRunnerTest(TestCase):
         inspect_task.update_stats("TEST_SAT.", sys_scanned=0)
         return scan_job, inspect_task
 
+    @pytest.mark.django_db
     def test_run_failed_prereq(self):
         """Test the running connect task with no source options."""
         scan_job, inspect_task = self.create_scan_job()
@@ -78,8 +76,9 @@ class InspectTaskRunnerTest(TestCase):
         task = InspectTaskRunner(scan_job, inspect_task)
         status = task.run(Value("i", ScanJob.JOB_RUN))
 
-        self.assertEqual(status[1], ScanTask.FAILED)
+        assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_unknown_sat(self):
         """Test running the inspect scan for unknown sat."""
         scan_job, inspect_task = self.create_scan_job()
@@ -89,8 +88,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_sat5_bad_status(self):
         """Test the running inspect task for Satellite 5."""
         scan_job, inspect_task = self.create_scan_job()
@@ -101,8 +101,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_sat6_bad_status(self):
         """Test the running inspect task for Sat 6 with bad status."""
         scan_job, inspect_task = self.create_scan_job()
@@ -114,8 +115,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_sat6_bad_api_version(self):
         """Test the running inspect task for Sat6 with bad api version."""
         scan_job, inspect_task = self.create_scan_job()
@@ -127,8 +129,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_with_conn_err(self):
         """Test the running inspect task with connection error."""
         scan_job, inspect_task = self.create_scan_job()
@@ -139,8 +142,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_with_auth_err(self):
         """Test the running inspect task with satellite auth error."""
         scan_job, inspect_task = self.create_scan_job()
@@ -152,8 +156,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_with_sat_err(self):
         """Test the running inspect task with satellite error."""
         scan_job, inspect_task = self.create_scan_job()
@@ -164,8 +169,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_with_timeout(self):
         """Test the running inspect task with timeout error."""
         scan_job, inspect_task = self.create_scan_job()
@@ -176,8 +182,9 @@ class InspectTaskRunnerTest(TestCase):
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
-            self.assertEqual(status[1], ScanTask.FAILED)
+            assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_with_excep(self):
         """Test the running inspect task with general exception."""
         scan_job, inspect_task = self.create_scan_job()
@@ -186,11 +193,12 @@ class InspectTaskRunnerTest(TestCase):
         with patch(
             "scanner.satellite.runner.utils.status", side_effect=mock_exception
         ) as mock_sat_status:
-            with self.assertRaises(Exception):
+            with pytest.raises(Exception):
                 status = task.run(Value("i", ScanJob.JOB_RUN))
                 mock_sat_status.assert_called_once_with(ANY)
-                self.assertEqual(status[1], ScanTask.FAILED)
+                assert status[1] == ScanTask.FAILED
 
+    @pytest.mark.django_db
     def test_run_with_sat(self):
         """Test the running inspect task with satellite."""
         scan_job, inspect_task = self.create_scan_job()
@@ -204,20 +212,22 @@ class InspectTaskRunnerTest(TestCase):
                 status = task.run(Value("i", ScanJob.JOB_RUN))
                 mock_sat_status.assert_called_once_with(ANY)
                 mock_facts.assert_called_once_with(ANY)
-                self.assertEqual(status[1], ScanTask.COMPLETED)
+                assert status[1] == ScanTask.COMPLETED
 
+    @pytest.mark.django_db
     def test_run_with_sat_cancel(self):
         """Test the running inspect task with satellite cancelled."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
         status = task.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        self.assertEqual(status[1], ScanTask.CANCELED)
+        assert status[1] == ScanTask.CANCELED
 
+    @pytest.mark.django_db
     def test_run_with_sat_pause(self):
         """Test the running inspect task with satellite paused."""
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
         status = task.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        self.assertEqual(status[1], ScanTask.PAUSED)
+        assert status[1] == ScanTask.PAUSED

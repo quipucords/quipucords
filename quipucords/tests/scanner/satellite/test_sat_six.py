@@ -2,8 +2,8 @@
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
+import pytest
 import requests_mock
-from django.test import TestCase
 from faker import Faker
 
 from api.models import (
@@ -33,10 +33,10 @@ from tests.scanner.test_util import create_scan_job
 fake = Faker()
 
 
-class SatelliteSixV1Test(TestCase):
+class TestSatelliteSixV1:
     """Tests Satellite 6 v1 functions."""
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
@@ -76,9 +76,7 @@ class SatelliteSixV1Test(TestCase):
         sys_result.save()
         self.api.connect_scan_task.save()
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-
+    @pytest.mark.django_db
     def test_get_orgs(self):
         """Test the method to get orgs."""
         orgs_url = "https://{sat_host}:{port}/katello/api/v2/organizations"
@@ -88,9 +86,10 @@ class SatelliteSixV1Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             orgs = self.api.get_orgs()
             orgs2 = self.api.get_orgs()
-            self.assertEqual(orgs, [1, 7, 8])
-            self.assertEqual(orgs, orgs2)
+            assert orgs == [1, 7, 8]
+            assert orgs == orgs2
 
+    @pytest.mark.django_db
     def test_get_orgs_with_err(self):
         """Test the method to get orgs with err."""
         orgs_url = "https://{sat_host}:{port}/katello/api/v2/organizations"
@@ -98,9 +97,10 @@ class SatelliteSixV1Test(TestCase):
             url = construct_url(orgs_url, "1.2.3.4")
             jsonresult = {"results": [{"id": 1}, {"id": 7}, {"id": 8}], "per_page": 100}
             mocker.get(url, status_code=500, json=jsonresult)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.get_orgs()
 
+    @pytest.mark.django_db
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_host_count(self, mock_get_orgs):
         """Test the method host_count."""
@@ -117,8 +117,9 @@ class SatelliteSixV1Test(TestCase):
             }
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
-            self.assertEqual(systems_count, 3)
+            assert systems_count == 3
 
+    @pytest.mark.django_db
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_host_count_with_err(self, mock_get_orgs):
         """Test the method host_count with err."""
@@ -134,9 +135,10 @@ class SatelliteSixV1Test(TestCase):
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.host_count()
 
+    @pytest.mark.django_db
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_hosts(self, mock_get_orgs):
         """Test the method hosts."""
@@ -158,10 +160,11 @@ class SatelliteSixV1Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
             hosts = self.api.hosts()
-            self.assertEqual(systems_count, 3)
-            self.assertEqual(len(hosts), 3)
-            self.assertEqual(hosts, ["sys1_1", "sys2_2", "sys3_3"])
+            assert systems_count == 3
+            assert len(hosts) == 3
+            assert hosts == ["sys1_1", "sys2_2", "sys3_3"]
 
+    @pytest.mark.django_db
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_hosts_with_err(self, mock_get_orgs):
         """Test the method hosts."""
@@ -177,9 +180,10 @@ class SatelliteSixV1Test(TestCase):
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.hosts()
 
+    @pytest.mark.django_db
     def test_host_fields(self):
         """Test the method host_fields."""
         host_field_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}"
@@ -248,8 +252,9 @@ class SatelliteSixV1Test(TestCase):
                 "os_name": "RedHat",
                 "os_version": "7.4",
             }
-            self.assertEqual(host_info, expected)
+            assert host_info == expected
 
+    @pytest.mark.django_db
     def test_prepare_hosts_s61(self):
         """Test the prepare_hosts method for satellite 6.1."""
         url1 = (
@@ -294,9 +299,10 @@ class SatelliteSixV1Test(TestCase):
             return_value=connect_data_return_value,
         ) as mock_connect:
             host_params = SatelliteSixV1.prepare_hosts(self.api, chunk)
-            self.assertEqual(expected, host_params)
+            assert expected == host_params
             mock_connect.assert_called_once_with(ANY)
 
+    @pytest.mark.django_db
     def test_request_host_details_err(self):
         """Test request_host_details for error mark a failed system."""
         host_field_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}"
@@ -325,10 +331,11 @@ class SatelliteSixV1Test(TestCase):
                 "host_fields_response": {},
                 "host_subscriptions_response": {},
             }
-            self.assertEqual(result, expected)
+            assert result == expected
             inspect_result = self.scan_task.inspection_result
-            self.assertEqual(len(inspect_result.systems.all()), 0)
+            assert len(inspect_result.systems.all()) == 0
 
+    @pytest.mark.django_db
     def test_post_processing(self):
         """Test process_results method with mock data."""
         fields_return_value = {
@@ -432,15 +439,16 @@ class SatelliteSixV1Test(TestCase):
                 process_results(self.api, [result], 1)
                 inspect_results = self.scan_task.inspection_result.systems.all()
                 sys_1_result = inspect_results.filter(name="sys_1").first()
-                self.assertEqual(sys_1_result.name, "sys_1")
-                self.assertEqual(sys_1_result.status, "success")
+                assert sys_1_result.name == "sys_1"
+                assert sys_1_result.status == "success"
                 result = {}
                 for fact in sys_1_result.facts.all():
                     result[fact.name] = fact.value
-                self.assertEqual(result, expected)
+                assert result == expected
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)
 
+    @pytest.mark.django_db
     @patch("scanner.satellite.six.SatelliteSixV1.get_orgs")
     def test_hosts_facts_with_err(self, mock_get_orgs):
         """Test the hosts_facts method."""
@@ -451,7 +459,7 @@ class SatelliteSixV1Test(TestCase):
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
             mocker.get(url, status_code=500)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
     @patch(
@@ -465,6 +473,7 @@ class SatelliteSixV1Test(TestCase):
             }
         ],
     )
+    @pytest.mark.django_db
     def test_hosts_facts(self, mock_pool):
         """Test the method hosts."""
         hosts_url = (
@@ -486,8 +495,9 @@ class SatelliteSixV1Test(TestCase):
                     mocker.get(url, status_code=200, json=jsonresult)
                     self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
                     inspect_result = self.scan_task.inspection_result
-                    self.assertEqual(len(inspect_result.systems.all()), 1)
+                    assert len(inspect_result.systems.all()) == 1
 
+    @pytest.mark.django_db
     def test_hosts_facts_multiple_orgs_duplicate_hosts(self):
         """
         Assert hosts_facts correctly de-dupes hosts across multiple orgs.
@@ -552,10 +562,10 @@ class SatelliteSixV1Test(TestCase):
             )
 
 
-class SatelliteSixV2Test(TestCase):
+class TestSatelliteSixV2:
     """Tests Satellite 6 v2 functions."""
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
@@ -595,9 +605,7 @@ class SatelliteSixV2Test(TestCase):
         sys_result.save()
         self.api.connect_scan_task.save()
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-
+    @pytest.mark.django_db
     def test_host_count(self):
         """Test the method host_count."""
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
@@ -610,8 +618,9 @@ class SatelliteSixV2Test(TestCase):
             }
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
-            self.assertEqual(systems_count, 3)
+            assert systems_count == 3
 
+    @pytest.mark.django_db
     def test_host_count_with_err(self):
         """Test the method host_count with error."""
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
@@ -623,9 +632,10 @@ class SatelliteSixV2Test(TestCase):
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.host_count()
 
+    @pytest.mark.django_db
     def test_hosts(self):
         """Test the method hosts."""
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
@@ -643,10 +653,11 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             systems_count = self.api.host_count()
             hosts = self.api.hosts()
-            self.assertEqual(systems_count, 3)
-            self.assertEqual(len(hosts), 3)
-            self.assertEqual(hosts, ["sys1_1", "sys2_2", "sys3_3"])
+            assert systems_count == 3
+            assert len(hosts) == 3
+            assert hosts == ["sys1_1", "sys2_2", "sys3_3"]
 
+    @pytest.mark.django_db
     def test_hosts_with_err(self):
         """Test the method hosts with error."""
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
@@ -658,9 +669,10 @@ class SatelliteSixV2Test(TestCase):
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.hosts()
 
+    @pytest.mark.django_db
     def test_processing_fields_with_err(self):
         """Test the post_processing with error."""
         host_field_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}"
@@ -688,13 +700,14 @@ class SatelliteSixV2Test(TestCase):
                 "host_fields_response": {},
                 "host_subscriptions_response": {},
             }
-            self.assertEqual(result, expected)
+            assert result == expected
             process_results(self.api, [result], 1)
             inspect_results = self.scan_task.inspection_result.systems.all()
             sys_1_result = inspect_results.filter(name="sys_1").first()
-            self.assertEqual(sys_1_result.name, "sys_1")
-            self.assertEqual(sys_1_result.status, "failed")
+            assert sys_1_result.name == "sys_1"
+            assert sys_1_result.status == "failed"
 
+    @pytest.mark.django_db
     def test_host_fields(self):
         """Test the method host_fields."""
         host_field_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}"
@@ -763,8 +776,9 @@ class SatelliteSixV2Test(TestCase):
                 "os_name": "RedHat",
                 "os_version": "7.4",
             }
-            self.assertEqual(host_info, expected)
+            assert host_info == expected
 
+    @pytest.mark.django_db
     def test_get_https_with_err(self):
         """Test the host subscriptons method with bad status code."""
         sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
@@ -793,8 +807,9 @@ class SatelliteSixV2Test(TestCase):
                 "host_fields_response": {},
                 "host_subscriptions_response": {},
             }
-            self.assertEqual(result, expected)
+            assert result == expected
 
+    @pytest.mark.django_db
     def test_processing_subs_err_nojson(self):
         """Test the flow of post processing with bad code and not json."""
         sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
@@ -820,9 +835,10 @@ class SatelliteSixV2Test(TestCase):
             process_results(self.api, [result], 1)
             inspect_results = self.scan_task.inspection_result.systems.all()
             sys_1_result = inspect_results.filter(name="sys_1").first()
-            self.assertEqual(sys_1_result.name, "sys_1")
-            self.assertEqual(sys_1_result.status, "failed")
+            assert sys_1_result.name == "sys_1"
+            assert sys_1_result.status == "failed"
 
+    @pytest.mark.django_db
     def test_host_not_subscribed(self):
         """Test the host subscriptons method for not subscribed error."""
         sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
@@ -853,9 +869,10 @@ class SatelliteSixV2Test(TestCase):
         process_results(self.api, [result], 1)
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys_1").first()
-        self.assertEqual(sys_1_result.name, "sys_1")
-        self.assertEqual(sys_1_result.status, "failed")
+        assert sys_1_result.name == "sys_1"
+        assert sys_1_result.status == "failed"
 
+    @pytest.mark.django_db
     def test_host_subscriptons(self):
         """Test the host subscriptons method."""
         sub_url = "https://{sat_host}:{port}/api/v2/hosts/{host_id}/subscriptions"
@@ -906,8 +923,9 @@ class SatelliteSixV2Test(TestCase):
                     },
                 ]
             }
-            self.assertEqual(subs, expected)
+            assert subs == expected
 
+    @pytest.mark.django_db
     def test_post_processing_err(self):
         """Test error flow & check that a failed system is marked."""
         response = {
@@ -919,9 +937,10 @@ class SatelliteSixV2Test(TestCase):
         process_results(self.api, [response], 1)
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys_1").first()
-        self.assertEqual(sys_1_result.name, "sys_1")
-        self.assertEqual(sys_1_result.status, "failed")
+        assert sys_1_result.name == "sys_1"
+        assert sys_1_result.status == "failed"
 
+    @pytest.mark.django_db
     def test_post_processing(self):
         """Test process_results method with mock data."""
         fields_return_value = {
@@ -1022,24 +1041,25 @@ class SatelliteSixV2Test(TestCase):
                 process_results(self.api, [result], 1)
                 inspect_results = self.scan_task.inspection_result.systems.all()
                 sys_1_result = inspect_results.filter(name="sys_1").first()
-                self.assertEqual(sys_1_result.name, "sys_1")
-                self.assertEqual(sys_1_result.status, "success")
+                assert sys_1_result.name == "sys_1"
+                assert sys_1_result.status == "success"
                 result = {}
                 for fact in sys_1_result.facts.all():
                     result[fact.name] = fact.value
-                self.assertEqual(result, expected)
+                assert result == expected
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)
                 mock_fields.assert_called_once_with(ANY, ANY)
                 mock_subs.assert_called_once_with(ANY)
 
+    @pytest.mark.django_db
     def test_hosts_facts_with_err(self):
         """Test the hosts_facts method."""
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4")
             mocker.get(url, status_code=500)
-            with self.assertRaises(SatelliteException):
+            with pytest.raises(SatelliteException):
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
     @patch(
@@ -1053,6 +1073,7 @@ class SatelliteSixV2Test(TestCase):
             }
         ],
     )
+    @pytest.mark.django_db
     def test_hosts_facts(self, mock_pool):
         """Test the hosts_facts method."""
         scan_options = ScanOptions(max_concurrency=10)
@@ -1092,4 +1113,4 @@ class SatelliteSixV2Test(TestCase):
             mocker.get(url, status_code=200, json=jsonresult)
             api.hosts_facts(Value("i", ScanJob.JOB_RUN))
             inspect_result = scan_task.inspection_result
-            self.assertEqual(len(inspect_result.systems.all()), 1)
+            assert len(inspect_result.systems.all()) == 1

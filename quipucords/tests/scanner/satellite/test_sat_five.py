@@ -3,7 +3,7 @@ import xmlrpc.client
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
-from django.test import TestCase
+import pytest
 
 from api.models import (
     Credential,
@@ -26,10 +26,10 @@ def mock_xml_fault(param1, param2):
     raise xmlrpc.client.Fault(faultCode=500, faultString="fault")
 
 
-class SatelliteFiveTest(TestCase):
+class TestSatelliteFive:
     """Tests Satellite 5 functions."""
 
-    def setUp(self):
+    def setup_method(self, _test_method):
         """Create test case setup."""
         self.cred = Credential(
             name="cred1",
@@ -69,9 +69,7 @@ class SatelliteFiveTest(TestCase):
         sys_result.save()
         self.api.connect_scan_task.save()
 
-    def tearDown(self):
-        """Cleanup test case setup."""
-
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_host_count(self, mock_serverproxy):
         """Test the method host_count."""
@@ -80,16 +78,18 @@ class SatelliteFiveTest(TestCase):
         client.auth.logout.return_value = "key"
         client.system.list_user_systems.return_value = ["sys1", "sys2", "sys3"]
         systems_count = self.api.host_count()
-        self.assertEqual(systems_count, 3)
+        assert systems_count == 3
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_host_count_with_err(self, mock_serverproxy):
         """Test the method host_count with error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
+        with pytest.raises(SatelliteException):
             self.api.host_count()
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_hosts(self, mock_serverproxy):
         """Test the method hosts."""
@@ -104,18 +104,20 @@ class SatelliteFiveTest(TestCase):
         client.system.list_user_systems.return_value = systems
         systems_count = self.api.host_count()
         hosts = self.api.hosts()
-        self.assertEqual(systems_count, 3)
-        self.assertEqual(len(hosts), 3)
-        self.assertEqual(hosts, ["sys1_1", "sys2_2", "sys3_3"])
+        assert systems_count == 3
+        assert len(hosts) == 3
+        assert hosts == ["sys1_1", "sys2_2", "sys3_3"]
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_hosts_with_err(self, mock_serverproxy):
         """Test the method hosts with error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
+        with pytest.raises(SatelliteException):
             self.api.hosts()
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_host_details_virt_host(self, mock_serverproxy):
         """Test host_details method with mock data for virt host."""
@@ -172,13 +174,14 @@ class SatelliteFiveTest(TestCase):
         self.api.process_results([raw_result], virt, {1: 2}, [])
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys1_1").first()
-        self.assertEqual(sys_1_result.name, "sys1_1")
-        self.assertEqual(sys_1_result.status, "success")
+        assert sys_1_result.name == "sys1_1"
+        assert sys_1_result.status == "success"
         result = {}
         for fact in sys_1_result.facts.all():
             result[fact.name] = fact.value
-        self.assertEqual(result, expected)
+        assert result == expected
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_host_details_virt_guest(self, mock_serverproxy):
         """Test host_details method with mock data for virt guest."""
@@ -227,13 +230,14 @@ class SatelliteFiveTest(TestCase):
         self.api.process_results([raw_result], virt, {1: 2}, [])
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys1_1").first()
-        self.assertEqual(sys_1_result.name, "sys1_1")
-        self.assertEqual(sys_1_result.status, "success")
+        assert sys_1_result.name == "sys1_1"
+        assert sys_1_result.status == "success"
         result = {}
         for fact in sys_1_result.facts.all():
             result[fact.name] = fact.value
-        self.assertEqual(result, expected)
+        assert result == expected
 
+    @pytest.mark.django_db
     def test_prepare_hosts_s5(self):
         """Test the prepare_hosts method for satellite 5."""
         expected = [
@@ -269,9 +273,10 @@ class SatelliteFiveTest(TestCase):
             return_value=connect_data_return_value,
         ) as mock_connect:
             host_params = self.api.prepare_hosts(chunk)
-            self.assertEqual(expected, host_params)
+            assert expected == host_params
             mock_connect.assert_called_once_with(ANY)
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_host_details_with_err(self, mock_serverproxy):
         """Test the host details with an error."""
@@ -290,21 +295,23 @@ class SatelliteFiveTest(TestCase):
         self.api.process_results([raw_result], virt, {1: 2}, [])
         inspect_results = self.scan_task.inspection_result.systems.all()
         sys_1_result = inspect_results.filter(name="sys2_2").first()
-        self.assertEqual(sys_1_result.name, "sys2_2")
-        self.assertEqual(sys_1_result.status, "failed")
+        assert sys_1_result.name == "sys2_2"
+        assert sys_1_result.status == "failed"
         result = {}
         for fact in sys_1_result.facts.all():
             result[fact.name] = fact.value
-        self.assertEqual(result, {})
+        assert result == {}
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_virtual_guests_with_err(self, mock_serverproxy):
         """Test the virtual_guests method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
+        with pytest.raises(SatelliteException):
             self.api.virtual_guests(1)
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_virtual_guests(self, mock_serverproxy):
         """Test the virtual_guests method with an error."""
@@ -314,16 +321,18 @@ class SatelliteFiveTest(TestCase):
         guests = [{"id": 2}]
         client.system.list_virtual_guests.return_value = guests
         virt_guests = self.api.virtual_guests(1)
-        self.assertEqual(virt_guests, ({2: 1}, 1))
+        assert virt_guests == ({2: 1}, 1)
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_virtual_hosts_with_err(self, mock_serverproxy):
         """Test the virtual_hosts method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
+        with pytest.raises(SatelliteException):
             self.api.virtual_hosts()
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_virtual_hosts(self, mock_serverproxy):
         """Test the virtual_hosts method."""
@@ -338,17 +347,19 @@ class SatelliteFiveTest(TestCase):
         virtual_hosts, virtual_guests = self.api.virtual_hosts()
         virt_host = {1: {"id": 1, "name": "host1", "uuid": 1, "num_virtual_guests": 1}}
         virt_guest = {2: 1}
-        self.assertEqual(virtual_hosts, virt_host)
-        self.assertEqual(virtual_guests, virt_guest)
+        assert virtual_hosts == virt_host
+        assert virtual_guests == virt_guest
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_physical_hosts_with_err(self, mock_serverproxy):
         """Test the phyiscal_hosts method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
+        with pytest.raises(SatelliteException):
             self.api.physical_hosts()
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_physical_hosts(self, mock_serverproxy):
         """Test the physical_hosts method."""
@@ -358,16 +369,18 @@ class SatelliteFiveTest(TestCase):
         hosts = [{"id": 1, "name": "host1"}]
         client.system.list_physical_systems.return_value = hosts
         phyiscal_hosts = self.api.physical_hosts()
-        self.assertEqual(phyiscal_hosts, [1])
+        assert phyiscal_hosts == [1]
 
+    @pytest.mark.django_db
     @patch("xmlrpc.client.ServerProxy")
     def test_hosts_facts_with_err(self, mock_serverproxy):
         """Test the hosts_facts method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with self.assertRaises(SatelliteException):
+        with pytest.raises(SatelliteException):
             self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
+    @pytest.mark.django_db
     @patch(
         "multiprocessing.pool.Pool.starmap",
         return_value=[
@@ -403,6 +416,6 @@ class SatelliteFiveTest(TestCase):
             ) as mock_physical:
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
                 inspect_result = self.scan_task.inspection_result
-                self.assertEqual(len(inspect_result.systems.all()), 1)
+                assert len(inspect_result.systems.all()) == 1
                 mock_vhosts.assert_called_once_with()
                 mock_physical.assert_called_once_with()
