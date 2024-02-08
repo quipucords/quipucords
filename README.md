@@ -33,13 +33,13 @@ The Python packages that are required for running quipucords on a system can be 
 "tool.poetry.dependencies". Packages for development and testing are in the section "tool.poetry.group.dev.dependencies".
 Finally, python packages for compiling quipucords from source can be found in `requirements-build.txt`.
 # <a name="installation"></a> Installation
-quipucords server is delivered as a container image on quay.io. As so, the only requirement for 
+quipucords server is delivered as a container image on quay.io. As so, the only requirement for
 it is having `podman`, `docker` or any alternative to those.
 
 ## Quick installation
 
 ```
-podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quay.io/quipucords/quipucords:latest
+podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:8443 -i quay.io/quipucords/quipucords:latest
 ```
 Then open a browser and head to https://localhost:9443
 
@@ -107,7 +107,7 @@ make fetch-ui
 make server-static
 ```
 
-If you prefer to build it from source, then `make build-ui` rule will be used instead. 
+If you prefer to build it from source, then `make build-ui` rule will be used instead.
 See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.
 
 To run the development server, run the following command:

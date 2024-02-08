@@ -84,4 +84,5 @@ RUN make server-static
 RUN git config --file /app/.gitconfig --add safe.directory /app
 
 EXPOSE 8000
+EXPOSE 8443
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]

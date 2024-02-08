@@ -6,7 +6,7 @@ import environ
 
 env = environ.Env()
 
-QPC_SERVER_PORT = env.int("QPC_SERVER_PORT", 443)
+QPC_SERVER_PORT = env.int("QPC_SERVER_PORT", 8443)
 
 
 bind = f"0.0.0.0:{QPC_SERVER_PORT}"
