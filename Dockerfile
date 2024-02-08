@@ -18,20 +18,21 @@ ENV QPC_LOG_DIRECTORY=/var/log
 COPY scripts/dnf /usr/local/bin/dnf
 ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.11-devel"
 RUN dnf install \
-        git \
-        glibc-langpack-en \
-        jq \
-        libpq \
-        make \
-        openssh-clients \
-        procps-ng \
-        python3.11 \
-        python3.11-pip \
-        sshpass \
-        tar \
-        which \
-        ${BUILD_PACKAGES} \
-        -y &&\
+    git \
+    glibc-langpack-en \
+    jq \
+    libpq \
+    make \
+    openssh-clients \
+    procps-ng \
+    python3.11 \
+    python3.11-pip \
+    shadow-utils \
+    sshpass \
+    tar \
+    which \
+    ${BUILD_PACKAGES} \
+    -y &&\
     dnf clean all &&\
     python3.11 -m venv /opt/venv
 
@@ -45,6 +46,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN dnf remove ${BUILD_PACKAGES} -y && \
     dnf clean all
+RUN useradd -M -s /bin/bash -d /app quipucords
 
 # Fetch UI code
 COPY Makefile .
@@ -58,10 +60,11 @@ COPY deploy/ssl /etc/ssl/qpc
 COPY deploy  /deploy
 
 # Create log directories
+RUN mkdir -p /var/log && chown -R quipucords /var/log
 VOLUME /var/log
 
 # Create /var/data
-RUN mkdir -p /var/data
+RUN mkdir -p /var/data && chown -R quipucords /var/data
 VOLUME /var/data
 
 # Copy server code
@@ -70,11 +73,15 @@ COPY . .
 # Install quipucords as package
 RUN pip install -v -e .
 
+# Make the app run as the quipucords user
+RUN chown -R quipucords /app
+USER quipucords
+
 # Collect static files
 RUN make server-static
 
 # Allow git to run in /app
-RUN git config --file /.gitconfig --add safe.directory /app
+RUN git config --file /app/.gitconfig --add safe.directory /app
 
 EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
