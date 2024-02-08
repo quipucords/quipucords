@@ -21,4 +21,9 @@ from api.inspectresult.serializer import (
 from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import ScanJobSerializer, SourceField
 from api.scantask.serializer import ScanTaskSerializer
-from api.source.serializer import CredentialsField, SourceSerializer, SourceSerializerV1
+from api.source.serializer import (
+    CredentialsField,
+    SourceSerializer,
+    SourceSerializerV1,
+    SourceSerializerV2,
+)

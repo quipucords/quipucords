@@ -171,7 +171,7 @@ def test_openshift_source_update_options(openshift_source, openshift_cred_id):
     updated_data = {
         "name": "source_updated",
         "hosts": ["5.4.3.2"],
-        "ssl_cert_verify": False,
+        "options": {"ssl_cert_verify": False},
         "credentials": [openshift_cred_id],
     }
     serializer = SourceSerializer(data=updated_data, instance=openshift_source)

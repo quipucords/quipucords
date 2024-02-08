@@ -23,7 +23,7 @@ from api.common.util import (
 )
 from api.filters import ListFilter
 from api.models import Scan, ScanJob, ScanTask, Source
-from api.serializers import SourceSerializer, SourceSerializerV1
+from api.serializers import SourceSerializerV1, SourceSerializerV2
 from api.signal.scanjob_signal import start_scan
 from api.source.util import expand_credential
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
@@ -97,7 +97,7 @@ class SourceViewSet(ModelViewSet):
         if self.request.version == "v1":
             return SourceSerializerV1
         else:
-            return SourceSerializer
+            return SourceSerializerV2
 
     def list(self, request):
         """List the sources."""
