@@ -15,7 +15,7 @@ from rest_framework.serializers import (
     ValidationError,
 )
 
-from api import messages
+from api import API_VERSION, messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import check_for_existing_name
 from api.models import Credential, Source
@@ -50,6 +50,11 @@ class CredentialsField(PrimaryKeyRelatedField):
 class SourceSerializerBase(NotEmptySerializer):
     """Serializer for the Source model."""
 
+    def __init__(self, *args, **kwargs):
+        if self is SourceSerializerBase:
+            raise Exception("SourceSerializerBase must be subclassed.")
+        super().__init__(*args, **kwargs)
+
     name = CharField(required=True, max_length=64)
     source_type = ValidStringChoiceField(
         required=False,
@@ -58,15 +63,8 @@ class SourceSerializerBase(NotEmptySerializer):
     port = IntegerField(required=False, min_value=0, allow_null=True)
     hosts = JSONField(required=True)
     exclude_hosts = JSONField(required=False)
-    ssl_protocol = ValidStringChoiceField(
-        required=False, choices=Source.SSL_PROTOCOL_CHOICES
-    )
-    ssl_cert_verify = BooleanField(allow_null=True, required=False)
-    disable_ssl = BooleanField(allow_null=True, required=False)
-    use_paramiko = BooleanField(allow_null=True, required=False)
 
     credentials = CredentialsField(many=True, queryset=Credential.objects.all())
-    options = DictField(required=False, default={})
 
     HTTP_SOURCE_TYPES = (
         DataSources.RHACS,
@@ -77,11 +75,13 @@ class SourceSerializerBase(NotEmptySerializer):
     )
 
     SSH_SOURCE_TYPES = (DataSources.NETWORK,)
+    SSL_OPTIONS = ["ssl_cert_verify", "ssl_protocol", "disable_ssl", "use_paramiko"]
 
     class Meta:
         """Metadata for the serializer."""
 
         model = Source
+        fields = "__all__"
 
     @classmethod
     def validate_opts(cls, options, source_type):
@@ -110,6 +110,17 @@ class SourceSerializerBase(NotEmptySerializer):
             )
         else:
             raise NotImplementedError
+
+    def update_options(self, options, instance):
+        """Update the incoming options overlapping the instance options.
+
+        :param options: the passed in options
+        :param instance: the existing instance
+        """
+        for ssl_option in self.SSL_OPTIONS:
+            value = options.pop(ssl_option, None)
+            if value is not None:
+                setattr(instance, ssl_option, value)
 
     @classmethod
     def _check_for_disallowed_fields(cls, options, message, valid_fields, source_type):
@@ -157,9 +168,9 @@ class SourceSerializerBase(NotEmptySerializer):
             raise ValidationError({"source_type": messages.UNKNOWN_SOURCE_TYPE})
         return validated_data
 
-    @transaction.atomic
-    def create(self, validated_data):
+    def create_base(self, validated_data):
         """Create a source."""
+        # Note: Superclass create should be wrapped as an atomic transaction.
         name = validated_data.get("name")
         check_for_existing_name(
             Source.objects, name, _(messages.SOURCE_NAME_ALREADY_EXISTS % name)
@@ -172,19 +183,12 @@ class SourceSerializerBase(NotEmptySerializer):
         credentials = validated_data.pop("credentials")
         hosts_list = validated_data.pop("hosts", None)
         exclude_hosts_list = validated_data.pop("exclude_hosts", None)
-        options = validated_data.pop("options", None)
 
         source = Source.objects.create(**validated_data)
         source_options = source.options
 
         if source_options:
             SourceSerializer.validate_opts(source_options, source_type)
-        elif options:
-            SourceSerializer.validate_opts(options, source_type)
-            source.ssl_protocol = options.get("ssl_protocol")
-            source.ssl_cert_verify = options.get("ssl_cert_verify")
-            source.disable_ssl = options.get("disable_ssl")
-            source.use_paramiko = options.get("use_paramiko")
         elif source_type in self.HTTP_SOURCE_TYPES:
             source.ssl_cert_verify = True
 
@@ -198,9 +202,10 @@ class SourceSerializerBase(NotEmptySerializer):
         source.save()
         return source
 
-    @transaction.atomic
-    def update(self, instance, validated_data):
+    @staticmethod
+    def update_base(instance, validated_data):
         """Update a source."""
+        # Note: Superclass update should be wrapped as an atomic transaction.
         # If we ever add optional fields to Source, we need to
         # add logic here to clear them on full update even if they are
         # not supplied.
@@ -215,11 +220,9 @@ class SourceSerializerBase(NotEmptySerializer):
         if "source_type" in validated_data:
             error = {"source_type": [_(messages.SOURCE_TYPE_INV)]}
             raise ValidationError(error)
-        source_type = instance.source_type
         credentials = validated_data.pop("credentials", None)
         hosts_list = validated_data.pop("hosts", None)
         exclude_hosts_list = validated_data.pop("exclude_hosts", None)
-        options = validated_data.pop("options", None)
 
         for name, value in validated_data.items():
             setattr(instance, name, value)
@@ -240,34 +243,8 @@ class SourceSerializerBase(NotEmptySerializer):
         if credentials:
             instance.credentials.set(credentials)
 
-        # If SSL options were specified via the options property,
-        # let's validate those and overwrite the instance's properties.
-        if options:
-            SourceSerializer.validate_opts(options, source_type)
-            self.update_options(options, instance)
-
         instance.save()
         return instance
-
-    @staticmethod
-    def update_options(options, instance):
-        """Update the incoming options overlapping the existing options.
-
-        :param options: the passed in options
-        :param instance_options: the existing options
-        """
-        ssl_protocol = options.pop("ssl_protocol", None)
-        ssl_cert_verify = options.pop("ssl_cert_verify", None)
-        disable_ssl = options.pop("disable_ssl", None)
-        use_paramiko = options.pop("use_paramiko", None)
-        if ssl_protocol is not None:
-            instance.ssl_protocol = ssl_protocol
-        if ssl_cert_verify is not None:
-            instance.ssl_cert_verify = ssl_cert_verify
-        if disable_ssl is not None:
-            instance.disable_ssl = disable_ssl
-        if use_paramiko is not None:
-            instance.use_paramiko = use_paramiko
 
     @staticmethod
     def check_credential_type(source_type, credential):
@@ -567,6 +544,8 @@ class SourceSerializerBase(NotEmptySerializer):
 class SourceSerializerV1(SourceSerializerBase):
     """V1 Serializer for the Source model."""
 
+    options = DictField(required=False, default={})
+
     class Meta:
         """Metadata for the serializer."""
 
@@ -583,9 +562,45 @@ class SourceSerializerV1(SourceSerializerBase):
             "most_recent_connect_scan",
         )
 
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create a V1 source."""
+        options = validated_data.pop("options", None)
+        instance = super().create_base(validated_data)
+        if options:
+            source_type = instance.source_type
+            self.validate_opts(options, source_type)
+            instance.ssl_protocol = options.get("ssl_protocol")
+            instance.ssl_cert_verify = options.get("ssl_cert_verify")
+            instance.disable_ssl = options.get("disable_ssl")
+            instance.use_paramiko = options.get("use_paramiko")
+            instance.save()
+        return instance
 
-class SourceSerializer(SourceSerializerBase):
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Update a V1 source."""
+        options = validated_data.pop("options", None)
+        instance = super().update_base(instance, validated_data)
+        # If SSL options were specified via the options property,
+        # let's validate those and overwrite the instance's properties.
+        if options:
+            source_type = instance.source_type
+            self.validate_opts(options, source_type)
+            self.update_options(options, instance)
+            instance.save()
+        return instance
+
+
+class SourceSerializerV2(SourceSerializerBase):
     """V2 Serializer for the Source model."""
+
+    ssl_protocol = ValidStringChoiceField(
+        required=False, choices=Source.SSL_PROTOCOL_CHOICES
+    )
+    ssl_cert_verify = BooleanField(allow_null=True, required=False)
+    disable_ssl = BooleanField(allow_null=True, required=False)
+    use_paramiko = BooleanField(allow_null=True, required=False)
 
     # Dropping options in preference for showing the direct ssl option attributes.
     class Meta:
@@ -606,3 +621,33 @@ class SourceSerializer(SourceSerializerBase):
             "credentials",
             "most_recent_connect_scan",
         )
+
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create a V2 source."""
+        instance = super().create_base(validated_data)
+        return instance
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Update a V2 source."""
+        ssl_options = {}
+        for ssl_option in self.SSL_OPTIONS:
+            value = validated_data.pop(ssl_option, None)
+            if value is not None:
+                ssl_options[ssl_option] = value
+        instance = super().update_base(instance, validated_data)
+        if ssl_options:
+            source_type = instance.source_type
+            self.validate_opts(ssl_options, source_type)
+            self.update_options(ssl_options, instance)
+            instance.save()
+        return instance
+
+
+# Let's define the SourceSerializer based on the API_VERSION
+match API_VERSION:
+    case 2:
+        SourceSerializer = SourceSerializerV2
+    case _:
+        SourceSerializer = SourceSerializerV1
