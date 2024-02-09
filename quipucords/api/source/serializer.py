@@ -16,7 +16,11 @@ from rest_framework.serializers import (
 )
 
 from api import API_VERSION, messages
-from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
+from api.common.serializer import (
+    ModelSerializer,
+    NotEmptySerializer,
+    ValidStringChoiceField,
+)
 from api.common.util import check_for_existing_name
 from api.models import Credential, Source
 from constants import DataSources
@@ -47,7 +51,7 @@ class CredentialsField(PrimaryKeyRelatedField):
         return display
 
 
-class SourceSerializerBase(NotEmptySerializer):
+class SourceSerializerBase(ModelSerializer):
     """Serializer for the Source model."""
 
     def __init__(self, *args, **kwargs):
@@ -541,7 +545,7 @@ class SourceSerializerBase(NotEmptySerializer):
         return attrs
 
 
-class SourceSerializerV1(SourceSerializerBase):
+class SourceSerializerV1(NotEmptySerializer, SourceSerializerBase):
     """V1 Serializer for the Source model."""
 
     options = DictField(required=False, default={})
