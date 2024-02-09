@@ -2322,6 +2322,11 @@ class TestSourceV2:
                 "port": 22,
                 "hosts": ["1.2.3.4"],
                 "credentials": [cred_for_response],
+                "exclude_hosts": None,
+                "disable_ssl": None,
+                "ssl_cert_verify": None,
+                "ssl_protocol": None,
+                "use_paramiko": None,
             }
             results.append(result_dict)
         expected = {"count": 3, "next": None, "previous": None, "results": results}
@@ -2363,7 +2368,11 @@ class TestSourceV2:
                 "port": 443,
                 "hosts": ["1.2.3.4"],
                 "ssl_cert_verify": True,
+                "ssl_protocol": None,
+                "use_paramiko": None,
+                "disable_ssl": None,
                 "credentials": [cred_for_response],
+                "exclude_hosts": None,
             }
             results.append(result_dict)
         expected = {"count": 2, "next": None, "previous": None, "results": results}
@@ -2780,7 +2789,12 @@ class TestSourceV2:
                 "source_type": DataSources.NETWORK,
                 "port": 22,
                 "hosts": ["1.2.3.4"],
+                "ssl_protocol": None,
+                "ssl_cert_verify": None,
+                "disable_ssl": None,
+                "use_paramiko": None,
                 "credentials": [cred_for_response],
+                "exclude_hosts": None,
             }
             results.append(result_dict)
 
@@ -3099,7 +3113,11 @@ class TestSourceV2:
             "port": 22,
             "hosts": ["1.2.3.4"],
             "ssl_cert_verify": False,
+            "ssl_protocol": None,
+            "use_paramiko": None,
+            "disable_ssl": None,
             "credentials": [{"id": sat_cred.id, "name": "sat_cred1"}],
+            "exclude_hosts": None,
         }
         assert response.json() == expected
 
