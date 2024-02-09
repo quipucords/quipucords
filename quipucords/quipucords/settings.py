@@ -44,7 +44,10 @@ class RelativePathnameFormatter(logging.Formatter):
 
     def format(self, record):
         """Add a relative_pathname attribute."""
-        record.relative_pathname = Path(record.pathname).relative_to(BASE_DIR)
+        if Path(record.pathname).is_relative_to(BASE_DIR) is True:
+            record.relative_pathname = Path(record.pathname).relative_to(BASE_DIR)
+        else:
+            record.relative_pathname = record.pathname
         return super().format(record)
 
 
