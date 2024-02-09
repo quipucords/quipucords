@@ -36,6 +36,18 @@ PRODUCTION = env.bool("PRODUCTION", False)
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 
+class RelativePathnameFormatter(logging.Formatter):
+    """Define a custom formatter to add a relative pathname."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def format(self, record):
+        """Add a relative_pathname attribute."""
+        record.relative_pathname = Path(record.pathname).relative_to(BASE_DIR)
+        return super().format(record)
+
+
 def create_random_key():
     """Create a randomized string."""
     return "".join(
@@ -296,7 +308,7 @@ LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
 QUIPUCORDS_LOGGING_VERBOSE_FORMAT = env.str(
     "QUIPUCORDS_LOGGING_VERBOSE_FORMAT",
     "[%(levelname)s %(asctime)s pid=%(process)d tid=%(thread)d "
-    "%(pathname)s:%(funcName)s:%(lineno)d] %(message)s",
+    "%(relative_pathname)s:%(funcName)s:%(lineno)d] %(message)s",
 )
 LOG_DIRECTORY = Path(env.str("QPC_LOG_DIRECTORY", str(DEFAULT_DATA_DIR / "logs")))
 LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(LOG_DIRECTORY / "app.log")))
@@ -306,6 +318,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
+            "()": RelativePathnameFormatter,
             "format": QUIPUCORDS_LOGGING_VERBOSE_FORMAT,
             "datefmt": "%Y-%m-%dT%H:%M:%S",
         },
