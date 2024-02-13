@@ -39,4 +39,4 @@ class UserViewSet(viewsets.GenericViewSet):
         if instance:
             token = Token.objects.create(user=instance)
 
-        return Response()
+        return Response(headers={"Clear-Site-Data": '"cookies", "storage"'})
