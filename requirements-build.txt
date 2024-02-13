@@ -80,7 +80,7 @@ wheel==0.42.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.0.3 ; python_version >= "3.11" and python_version < "3.12"
+setuptools==69.1.0 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   ansible
     #   ansible-core
