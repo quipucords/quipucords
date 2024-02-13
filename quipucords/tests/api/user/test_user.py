@@ -23,3 +23,13 @@ def test_logout_sends_clear_header(qpc_user, django_client):
     assert response.status_code == status.HTTP_200_OK
     assert "Clear-Site-Data" in response.headers
     assert response.text == ""
+
+
+def test_logout_deletes_token(qpc_user, django_client):
+    """Test that user logout deletes its auth tokens."""
+    auth_token, _ = Token.objects.get_or_create(user=qpc_user)
+    assert auth_token is not None
+    logout_url = reverse("v1:users-logout")
+    response = django_client.put(logout_url)
+    assert response.status_code == status.HTTP_200_OK
+    assert Token.objects.filter(user=qpc_user).count() == 0
