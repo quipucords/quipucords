@@ -145,6 +145,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "corsheaders",
+    "axes",  # django-axes
     "api",
 ]
 
@@ -154,6 +155,12 @@ if env.bool("QPC_ENABLE_DJANGO_EXTENSIONS", False):
 if not PRODUCTION:
     INSTALLED_APPS.append("coverage")
 
+AUTHENTICATION_BACKENDS = [
+    # AxesStandaloneBackend should be the first backend.
+    "axes.backends.AxesStandaloneBackend",
+    # Django ModelBackend is the default authentication backend.
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 MIDDLEWARE = [
     "api.common.middleware.ServerVersionMiddle",
@@ -166,6 +173,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+    # It only formats user lockout messages and renders Axes lockout responses
+    # on failed user authentication attempts from login views.
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "quipucords.urls"
@@ -418,6 +429,12 @@ REDIS_URL = f"redis://{REDIS_AUTH}{REDIS_HOST}:{REDIS_PORT}"
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", False)
+
+# Axes configuration
+
+# See also: https://django-axes.readthedocs.io/en/latest/4_configuration.html
+AXES_COOLOFF_TIME = 1  # time in hours
+AXES_LOCKOUT_PARAMETERS = ["ip_address", "username"]
 
 # Load Feature Flags
 QPC_FEATURE_FLAGS = FeatureFlag()
