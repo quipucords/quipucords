@@ -58,6 +58,7 @@ setuptools-rust==1.8.1
     #   cryptography
 setuptools-scm==8.0.4
     # via
+    #   django-axes
     #   pluggy
     #   python-dateutil
     #   setuptools-rust
@@ -72,6 +73,7 @@ wheel==0.42.0
     #   cachetools
     #   click-repl
     #   cryptography
+    #   django-axes
     #   pynacl
     #   python-dateutil
     #   python-string-utils
@@ -92,6 +94,7 @@ setuptools==69.1.0 ; python_version >= "3.11" and python_version < "3.12"
     #   click-repl
     #   cryptography
     #   django
+    #   django-axes
     #   django-cors-headers
     #   pathspec
     #   pluggy
