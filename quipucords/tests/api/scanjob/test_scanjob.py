@@ -28,7 +28,11 @@ from tests.factories import (
     ScanOptionsFactory,
     SourceFactory,
 )
-from tests.scanner.test_util import create_scan_job, create_scan_job_two_tasks
+from tests.scanner.test_util import (
+    create_scan_job,
+    create_scan_job_two_tasks,
+    scan_options_products,
+)
 
 
 @pytest.mark.django_db
@@ -1470,6 +1474,46 @@ class TestScanJob:
         assert json_scan.get("systems_failed") == 1
         assert json_scan.get("systems_scanned") == 1
 
+    def test_expand_scanjob_calc(self):
+        """Test view expand_scanjob calculations."""
+        scan_job, scan_tasks = create_scan_job_two_tasks(
+            SourceFactory(), SourceFactory(), scan_type=ScanTask.SCAN_TYPE_INSPECT
+        )
+        scan_job.status = ScanTask.RUNNING
+        scan_job.save()
+        counts = (
+            (15, 10, 2, 3),  # connect source 1
+            (40, 39, 0, 1),  # connect source 2
+            (10, 9, 1, 0),  # inspect source 1
+            (39, 30, 2, 7),  # inspect source 2
+        )
+        for task, count_spec in zip(scan_tasks, counts):
+            count, scanned, failed, unreachable = count_spec
+            task.update_stats(
+                f"test-{count}",
+                sys_count=count,
+                sys_scanned=scanned,
+                sys_failed=failed,
+                sys_unreachable=unreachable,
+            )
+
+        scan_job = ScanJob.objects.filter(pk=scan_job.id).first()
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        json_scan = expand_scanjob(json_scan)
+
+        assert json_scan.get("systems_count") == 55
+        assert json_scan.get("systems_scanned") == 39
+        assert json_scan.get("systems_failed") == 5
+        assert json_scan.get("systems_unreachable") == 11
+
+        for json_task, count_spec in zip(json_scan.get("tasks"), counts):
+            count, scanned, failed, unreachable = count_spec
+            assert json_task.get("systems_count") == count
+            assert json_task.get("systems_scanned") == scanned
+            assert json_task.get("systems_failed") == failed
+            assert json_task.get("systems_unreachable") == unreachable
+
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""
         extended = ExtendedProductSearchOptions.objects.create()
@@ -1495,6 +1539,18 @@ class TestScanJob:
         }
         assert extra_vars == expected_vars
 
+        json_disabled, json_enabled_ext = scan_options_products(expected_vars)
+
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        assert (
+            json_scan.get("options").get("disabled_optional_products") == json_disabled
+        )
+        assert (
+            json_scan.get("options").get("enabled_extended_product_search")
+            == json_enabled_ext
+        )
+
     def test_get_extra_vars_missing_disable_product(self):
         """Tests the get_extra_vars with extended search None."""
         disabled = DisabledOptionalProductsOptions.objects.create()
@@ -1515,6 +1571,15 @@ class TestScanJob:
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
+
+        json_disabled, _ = scan_options_products(expected_vars)
+
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        assert (
+            json_scan.get("options").get("disabled_optional_products") == json_disabled
+        )
+        assert json_scan.get("options").get("enabled_extended_product_search") is None
 
     def test_get_extra_vars_missing_extended_search(self):
         """Tests the get_extra_vars with disabled products None."""
@@ -1538,6 +1603,16 @@ class TestScanJob:
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
+
+        _, json_enabled_ext = scan_options_products(expected_vars)
+
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        assert json_scan.get("options").get("disabled_optional_products") is None
+        assert (
+            json_scan.get("options").get("enabled_extended_product_search")
+            == json_enabled_ext
+        )
 
     def test_get_extra_vars_missing_search_directories_empty(self):
         """Tests the get_extra_vars with search_directories empty."""
@@ -1595,6 +1670,17 @@ class TestScanJob:
         }
         assert extra_vars == expected_vars
 
+        json_disabled, json_enabled_ext = scan_options_products(expected_vars)
+
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        assert (
+            json_scan.get("options").get("disabled_optional_products") == json_disabled
+        )
+        assert json_scan.get("options").get(
+            "enabled_extended_product_search"
+        ) == json_enabled_ext | {"search_directories": ["a", "b"]}
+
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
         extended = ExtendedProductSearchOptions.objects.create()
@@ -1621,6 +1707,19 @@ class TestScanJob:
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
+
+        json_disabled, json_enabled_ext = scan_options_products(expected_vars)
+
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        # jboss_eap is calculated based on all the other values - it's easier this way
+        assert json_scan.get("options").get(
+            "disabled_optional_products"
+        ) == json_disabled | {"jboss_eap": True}
+        assert (
+            json_scan.get("options").get("enabled_extended_product_search")
+            == json_enabled_ext
+        )
 
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
@@ -1649,6 +1748,18 @@ class TestScanJob:
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
+
+        json_disabled, json_enabled_ext = scan_options_products(expected_vars)
+
+        serializer = ScanJobSerializer(scan_job)
+        json_scan = serializer.data
+        assert (
+            json_scan.get("options").get("disabled_optional_products") == json_disabled
+        )
+        assert (
+            json_scan.get("options").get("enabled_extended_product_search")
+            == json_enabled_ext
+        )
 
     # ############################################################
     # # Scan Job tests /jobs path

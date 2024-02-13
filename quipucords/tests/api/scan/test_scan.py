@@ -1,5 +1,6 @@
 """Test the API application."""
 
+import random
 import re
 from datetime import timedelta
 
@@ -227,6 +228,27 @@ class TestScanCreate:
             }
         }
 
+    @pytest.mark.parametrize("option_value", ("hamburger", "87", 42, "*", []))
+    def test_create_disable_optional_products_value_type(
+        self, django_client, faker, option_value
+    ):
+        """Test invalid type for disabled_optional_products value."""
+        source = SourceFactory()
+        payload = {
+            "name": faker.bothify("Scan ????-######"),
+            "sources": [source.id],
+            "options": {"disabled_optional_products": {"jboss_eap": option_value}},
+        }
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {
+            "options": {
+                "disabled_optional_products": {
+                    "jboss_eap": ["Must be a valid boolean."]
+                }
+            }
+        }
+
 
 @pytest.mark.django_db
 class TestScanRetrieve:
@@ -339,6 +361,66 @@ class TestScanUpdate:
             "name": scan.name,
             "scan_type": scan.scan_type,
             "sources": [new_source.id],
+        }
+
+    def test_partial_update_options(self, django_client):
+        """Test partial update of options on sources."""
+        scan = ScanFactory()
+        url = reverse("v1:scan-detail", args=(scan.id,))
+        max_concurrency = random.randint(1, 49)
+        payload = {
+            "options": {
+                "disabled_optional_products": {
+                    "jboss_ws": True,
+                },
+                "max_concurrency": max_concurrency,
+            },
+        }
+        response = django_client.patch(url, json=payload)
+        assert response.ok, response.json()
+        assert response.json() == {
+            "id": scan.id,
+            "most_recent_scanjob": scan.most_recent_scanjob.id,
+            "jobs": [
+                {
+                    "id": scan.most_recent_scanjob.id,
+                    "report_id": scan.most_recent_scanjob.report_id,
+                }
+            ],
+            "options": {
+                "disabled_optional_products": {
+                    "jboss_brms": False,
+                    "jboss_eap": False,
+                    "jboss_fuse": False,
+                    "jboss_ws": True,
+                },
+                "max_concurrency": max_concurrency,
+            },
+            "name": scan.name,
+            "scan_type": scan.scan_type,
+            "sources": [s.id for s in scan.sources.all()],
+        }
+
+    def test_partial_update_name(self, django_client):
+        """Test partial update on sources."""
+        scan = ScanFactory()
+        new_scan_data = ScanFactory.build()
+        url = reverse("v1:scan-detail", args=(scan.id,))
+        assert scan.name != new_scan_data.name
+        response = django_client.patch(url, json={"name": new_scan_data.name})
+        assert response.ok, response.json()
+        assert response.json() == {
+            "id": scan.id,
+            "most_recent_scanjob": scan.most_recent_scanjob.id,
+            "jobs": [
+                {
+                    "id": scan.most_recent_scanjob.id,
+                    "report_id": scan.most_recent_scanjob.report_id,
+                }
+            ],
+            "name": new_scan_data.name,
+            "scan_type": scan.scan_type,
+            "sources": [s.id for s in scan.sources.all()],
         }
 
     def test_partial_update_enabled(self, django_client):
