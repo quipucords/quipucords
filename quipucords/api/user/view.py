@@ -31,12 +31,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=["put"])
     def logout(self, request):
         """Log out the current authenticated user."""
-        instance = request.user
+        if user := request.user:
+            Token.objects.filter(user=user).all().delete()
         logout(request)
-        token = Token.objects.filter(user=instance).first()
-        if token:
-            token.delete()
-        if instance:
-            token = Token.objects.create(user=instance)
-
         return Response(headers={"Clear-Site-Data": '"cookies", "storage"'})
