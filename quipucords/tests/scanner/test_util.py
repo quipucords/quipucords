@@ -79,3 +79,26 @@ def create_scan_job_two_tasks(
             task.status_complete()
 
     return scan_job, scan_tasks
+
+
+def scan_options_products(expected_vars_dict):
+    """Turn expected_extra_vars into options JSON.
+
+    This is roughly reverse operation for
+    ScanOptions.get_extra_vars(), except it doesn't handle all the complexity
+    of jboss_eap disabled option for simplicity
+
+    :param expected_vars_dict: return value of ScanOptions.get_extra_vars()
+    :return: 2-tuple of dicts that can be compared to serializer.data
+    """
+    disabled_optional_products = {
+        key: not expected_vars_dict[key]
+        for key in ("jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws")
+    }
+
+    enabled_extended_product_search = {
+        key: expected_vars_dict[f"{key}_ext"]
+        for key in ("jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws")
+    }
+
+    return (disabled_optional_products, enabled_extended_product_search)
