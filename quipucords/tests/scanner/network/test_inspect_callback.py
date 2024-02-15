@@ -277,6 +277,7 @@ def local_inventory(tmp_path):
     return str(inventory_file)
 
 
+@pytest.mark.slow
 @pytest.mark.integration
 def test_inspect_callback_with_inspect_playbook(mocker, settings, local_inventory):
     """Smoketest InspectCallback integration with ansible_runner."""

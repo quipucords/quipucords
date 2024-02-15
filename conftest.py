@@ -176,6 +176,8 @@ def pytest_configure(config):
         )
     # document quipucords custom markers
     markers = [
+        "container: marks tests as container-dependent"
+        " (deselect with '-m \"not container\"')",
         "dbcompat: marks tests using our db compat module.",
         "integration: marks tests as integration tests"
         " (deselect with '-m \"not integration\"')",
