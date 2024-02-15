@@ -433,8 +433,23 @@ CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", False)
 # Axes configuration
 
 # See also: https://django-axes.readthedocs.io/en/latest/4_configuration.html
-AXES_COOLOFF_TIME = 1  # time in hours
+AXES_ENABLED = env.bool("QUIPUCORDS_AXES_ENABLED", True)
+AXES_FAILURE_LIMIT = env.int("QUIPUCORDS_AXES_FAILURE_LIMIT", 3)
+AXES_LOCK_OUT_AT_FAILURE = env.bool("QUIPUCORDS_AXES_LOCK_OUT_AT_FAILURE", True)
+AXES_COOLOFF_TIME = env.int("QUIPUCORDS_AXES_COOLOFF_TIME", 1)  # time in hours
 AXES_LOCKOUT_PARAMETERS = ["ip_address", "username"]
+
+if not AXES_ENABLED or not AXES_LOCK_OUT_AT_FAILURE:
+    logger.warning(
+        "Account login failure lockout is DISABLED "
+        "(QUIPUCORDS_AXES_ENABLED=%(AXES_ENABLED)s, "
+        "QUIPUCORDS_AXES_LOCK_OUT_AT_FAILURE=%(AXES_LOCK_OUT_AT_FAILURE)s). "
+        "This may be a security risk!",
+        {
+            "AXES_ENABLED": AXES_ENABLED,
+            "AXES_LOCK_OUT_AT_FAILURE": AXES_LOCK_OUT_AT_FAILURE,
+        },
+    )
 
 # Load Feature Flags
 QPC_FEATURE_FLAGS = FeatureFlag()
