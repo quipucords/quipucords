@@ -7,7 +7,8 @@ PYDIRS	= quipucords
 PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 PARALLEL_NUM ?= $(shell $(PYTHON) -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
-TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=15
+TEST_TIMEOUT ?= 15
+TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT)
 
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
@@ -102,9 +103,10 @@ test-case:
 test-coverage:
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords --cov-append" QPC_DBMS=sqlite
+	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m 'slow and (not container)' --cov=quipucords --cov-append"
 
 test-integration:
-	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m slow"
+	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
 
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml

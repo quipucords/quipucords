@@ -312,6 +312,7 @@ def test_sanity_check_raw_fact_matches(
     assert network_scan_fingerprints == set(fingerprint_fact_map.keys())
 
 
+@pytest.mark.container
 @pytest.mark.slow
 @pytest.mark.integration
 class TestNetworkScan:
