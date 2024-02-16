@@ -5,24 +5,23 @@ import json
 from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework.serializers import (
-    BooleanField,
     CharField,
-    IntegerField,
-    JSONField,
+    DictField,
     PrimaryKeyRelatedField,
     ValidationError,
 )
 
 from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
-from api.common.util import check_for_existing_name, check_path_validity
-from api.models import (
-    DisabledOptionalProductsOptions,
-    ExtendedProductSearchOptions,
-    Scan,
-    ScanOptions,
-    Source,
+from api.common.util import (
+    check_for_existing_name,
+    check_path_validity,
+    convert_to_boolean,
+    convert_to_int,
+    is_boolean,
+    is_int,
 )
+from api.models import Scan, Source
 from api.scantask.serializer import SourceField
 
 try:
@@ -31,26 +30,40 @@ except AttributeError:
     JsonExceptionClass = ValueError
 
 
-class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
-    """The extended production search options of a scan."""
+class JobField(PrimaryKeyRelatedField):
+    """Representation of the source associated with a scan job."""
 
-    jboss_eap = BooleanField(required=False)
-    jboss_fuse = BooleanField(required=False)
-    jboss_brms = BooleanField(required=False)
-    jboss_ws = BooleanField(required=False)
-    search_directories = JSONField(required=False)
+    def to_representation(self, value):
+        """Create output representation."""
+        job = {"id": value.id}
+        if value.report_id is not None:
+            job["report_id"] = value.report_id
+        return job
+
+
+class ScanSerializer(NotEmptySerializer):
+    """Serializer for the Scan model."""
+
+    name = CharField(required=True, read_only=False, max_length=64)
+    sources = SourceField(many=True, queryset=Source.objects.all())
+    scan_type = ValidStringChoiceField(required=False, choices=Scan.SCAN_TYPE_CHOICES)
+    options = DictField(required=False, default={})
+    jobs = JobField(required=False, many=True, read_only=True)
 
     class Meta:
         """Metadata for serializer."""
 
-        model = ExtendedProductSearchOptions
+        model = Scan
         fields = [
-            "jboss_eap",
-            "jboss_fuse",
-            "jboss_brms",
-            "jboss_ws",
-            "search_directories",
+            "id",
+            "name",
+            "sources",
+            "scan_type",
+            "options",
+            "jobs",
+            "most_recent_scanjob",
         ]
+        read_only_fields = ["most_recent_scanjob"]
 
     @staticmethod
     def validate_search_directories(search_directories):
@@ -77,84 +90,6 @@ class ExtendedProductSearchOptionsSerializer(NotEmptySerializer):
             ) from exception
         return search_directories
 
-
-class DisableOptionalProductsOptionsSerializer(NotEmptySerializer):
-    """The extended production search options of a scan."""
-
-    jboss_eap = BooleanField(required=False)
-    jboss_fuse = BooleanField(required=False)
-    jboss_brms = BooleanField(required=False)
-    jboss_ws = BooleanField(required=False)
-
-    class Meta:
-        """Metadata for serializer."""
-
-        model = DisabledOptionalProductsOptions
-        fields = ["jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws"]
-
-
-class ScanOptionsSerializer(NotEmptySerializer):
-    """Serializer for the ScanOptions model."""
-
-    max_concurrency = IntegerField(
-        required=False,
-        min_value=1,
-        max_value=200,
-        default=ScanOptions.get_default_forks(),
-    )
-    disabled_optional_products = DisableOptionalProductsOptionsSerializer(
-        required=False
-    )
-    enabled_extended_product_search = ExtendedProductSearchOptionsSerializer(
-        required=False
-    )
-
-    class Meta:
-        """Metadata for serializer."""
-
-        model = ScanOptions
-        fields = [
-            "max_concurrency",
-            "disabled_optional_products",
-            "enabled_extended_product_search",
-        ]
-
-
-class JobField(PrimaryKeyRelatedField):
-    """Representation of the source associated with a scan job."""
-
-    def to_representation(self, value):
-        """Create output representation."""
-        job = {"id": value.id}
-        if value.report_id is not None:
-            job["report_id"] = value.report_id
-        return job
-
-
-class ScanSerializer(NotEmptySerializer):
-    """Serializer for the Scan model."""
-
-    name = CharField(required=True, read_only=False, max_length=64)
-    sources = SourceField(many=True, queryset=Source.objects.all())
-    scan_type = ValidStringChoiceField(required=False, choices=Scan.SCAN_TYPE_CHOICES)
-    options = ScanOptionsSerializer(required=False, many=False)
-    jobs = JobField(required=False, many=True, read_only=True)
-
-    class Meta:
-        """Metadata for serializer."""
-
-        model = Scan
-        fields = [
-            "id",
-            "name",
-            "sources",
-            "scan_type",
-            "options",
-            "jobs",
-            "most_recent_scanjob",
-        ]
-        read_only_fields = ["most_recent_scanjob"]
-
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
@@ -162,32 +97,8 @@ class ScanSerializer(NotEmptySerializer):
         check_for_existing_name(
             Scan.objects, name, _(messages.SCAN_NAME_ALREADY_EXISTS % name)
         )
-
-        options = validated_data.pop("options", None)
         scan = super().create(validated_data)
-
-        if options:
-            optional_products = options.pop("disabled_optional_products", None)
-            extended_search = options.pop("enabled_extended_product_search", None)
-            options = ScanOptions.objects.create(**options)
-            if optional_products:
-                optional_products = DisabledOptionalProductsOptions.objects.create(
-                    **optional_products
-                )
-                options.disabled_optional_products = optional_products
-
-            if extended_search:
-                extended_search = ExtendedProductSearchOptions.objects.create(
-                    **extended_search
-                )
-                options.enabled_extended_product_search = extended_search
-
-            if optional_products or extended_search:
-                options.save()
-
-            scan.options = options
-            scan.save()
-
+        scan.save()
         return scan
 
     @transaction.atomic
@@ -208,44 +119,23 @@ class ScanSerializer(NotEmptySerializer):
             return self._do_full_update(instance, validated_data)
         return self._do_partial_update(instance, validated_data)
 
-    @staticmethod
-    def _do_full_update(instance, validated_data):
+    def _do_full_update(self, instance, validated_data):
         """Perform full update of scan."""
         name = validated_data.pop("name", None)
+        options = validated_data.pop("options", None)
         scan_type = validated_data.pop("scan_type", None)
         sources = validated_data.pop("sources", None)
-        options = validated_data.pop("options", None)
 
         instance.name = name
         instance.scan_type = scan_type
         instance.sources.set(sources)
         if options:
-            optional_products = options.pop("disabled_optional_products", None)
-            extended_search = options.pop("enabled_extended_product_search", None)
-            options = ScanOptions.objects.create(**options)
-            if optional_products:
-                optional_products = DisabledOptionalProductsOptions.objects.create(
-                    **optional_products
-                )
-                options.disabled_optional_products = optional_products
-
-            if extended_search:
-                extended_search = ExtendedProductSearchOptions.objects.create(
-                    **extended_search
-                )
-                options.enabled_extended_product_search = extended_search
-
-            if optional_products or extended_search:
-                options.save()
-
             instance.options = options
-
         instance.save()
         return instance
 
-    @staticmethod
-    def _do_partial_update(instance, validated_data):  # noqa: PLR0912, PLR0915, C901
-        """Peform partial update of a scan."""
+    def _do_partial_update(self, instance, validated_data):
+        """Perform partial update of a scan."""
         name = validated_data.pop("name", None)
         scan_type = validated_data.pop("scan_type", None)
         sources = validated_data.pop("sources", None)
@@ -259,99 +149,8 @@ class ScanSerializer(NotEmptySerializer):
             instance.sources.set(sources)
 
         options = validated_data.pop("options", None)
-        if not options:
-            instance.save()
-            return instance
-
-        # grab the new options
-        optional_products = options.pop("disabled_optional_products", None)
-        extended_search = options.pop("enabled_extended_product_search", None)
-
-        # Update base options
         if options:
-            options_instance = instance.options
-            if not options_instance:
-                options_instance = ScanOptions.objects.create(**options)
-                instance.options = options_instance
-                instance.save()
-            else:
-                max_concurrency = options.pop("max_concurrency", None)
-                if max_concurrency is not None:
-                    options_instance.max_concurrency = max_concurrency
-                    options_instance.save()
-
-            if not optional_products and not extended_search:
-                instance.save()
-                return instance
-        # Update disable optional products
-        if optional_products:
-            optional_products_instance = instance.options.disabled_optional_products
-            if not optional_products_instance:
-                # Need to create a new one
-                optional_products_instance = (
-                    DisabledOptionalProductsOptions.objects.create(**optional_products)
-                )
-                instance.options.disabled_optional_products = optional_products_instance
-                instance.options.save()
-            else:
-                # Existing values so update
-                if optional_products.get(ScanOptions.JBOSS_EAP, None) is not None:
-                    optional_products_instance.jboss_eap = optional_products.get(
-                        ScanOptions.JBOSS_EAP, None
-                    )
-                if optional_products.get(ScanOptions.JBOSS_FUSE, None) is not None:
-                    optional_products_instance.jboss_fuse = optional_products.get(
-                        ScanOptions.JBOSS_FUSE, None
-                    )
-                if optional_products.get(ScanOptions.JBOSS_BRMS, None) is not None:
-                    optional_products_instance.jboss_brms = optional_products.get(
-                        ScanOptions.JBOSS_BRMS, None
-                    )
-                if optional_products.get(ScanOptions.JBOSS_WS, None) is not None:
-                    optional_products_instance.jboss_ws = optional_products.get(
-                        ScanOptions.JBOSS_WS, None
-                    )
-                optional_products_instance.save()
-
-        # Update extended product search
-        if extended_search:
-            extended_search_instance = instance.options.enabled_extended_product_search
-            if not extended_search_instance:
-                # Create a new one
-                extended_search_instance = ExtendedProductSearchOptions.objects.create(
-                    **extended_search
-                )
-                instance.options.enabled_extended_product_search = (
-                    extended_search_instance
-                )
-                instance.options.save()
-            else:
-                # Update existing instance
-                # Grab the new extended search options
-                if extended_search.get(ScanOptions.JBOSS_EAP, None) is not None:
-                    extended_search_instance.jboss_eap = extended_search.get(
-                        ScanOptions.JBOSS_EAP, None
-                    )
-
-                if extended_search.get(ScanOptions.JBOSS_FUSE, None) is not None:
-                    extended_search_instance.jboss_fuse = extended_search.get(
-                        ScanOptions.JBOSS_FUSE, None
-                    )
-
-                if extended_search.get(ScanOptions.JBOSS_BRMS, None) is not None:
-                    extended_search_instance.jboss_brms = extended_search.get(
-                        ScanOptions.JBOSS_BRMS, None
-                    )
-
-                if extended_search.get(ScanOptions.JBOSS_WS, None) is not None:
-                    extended_search_instance.jboss_ws = extended_search.get(
-                        ScanOptions.JBOSS_WS, None
-                    )
-                if extended_search.get("search_directories", None) is not None:
-                    extended_search_instance.search_directories = extended_search.get(
-                        "search_directories", None
-                    )
-                extended_search_instance.save()
+            self.update_options(instance, options)
 
         instance.save()
         return instance
@@ -363,3 +162,132 @@ class ScanSerializer(NotEmptySerializer):
             raise ValidationError(_(messages.SJ_REQ_SOURCES))
 
         return sources
+
+    @staticmethod
+    def validate_options(options):  # noqa C901 PLR0912
+        """Make sure the options specified are valid."""
+        if options:
+            max_concurrency = options.get("max_concurrency", None)
+            if max_concurrency:
+                if is_int(max_concurrency):
+                    max_concurrency = convert_to_int(max_concurrency)
+                    if max_concurrency < 1:
+                        errors = {
+                            "max_concurrency": [
+                                "Ensure this value is greater than or equal to 1."
+                            ]
+                        }
+                        raise ValidationError(errors)
+                else:
+                    errors = {
+                        "max_concurrency": ["Ensure this value is a positive integer."]
+                    }
+                    raise ValidationError(errors)
+            disabled_optional_products = options.get("disabled_optional_products", None)
+            if disabled_optional_products is not None:
+                if isinstance(disabled_optional_products, str):
+                    errors = {
+                        "disabled_optional_products": {
+                            "non_field_errors": [
+                                "Invalid data. Expected a dictionary, but got str."
+                            ]
+                        }
+                    }
+                    raise ValidationError(errors)
+                bad_prods = {}
+                for prod in Scan.SUPPORTED_PRODUCTS:
+                    flag = disabled_optional_products.get(prod, None)
+                    if flag is not None and is_boolean(flag) is False:
+                        bad_prods[prod] = ["Must be a valid boolean."]
+                if bad_prods:
+                    errors = {"disabled_optional_products": bad_prods}
+                    raise ValidationError(errors)
+            enabled_extended_product_search = options.get(
+                "enabled_extended_product_search", None
+            )
+            if enabled_extended_product_search is not None:
+                if isinstance(enabled_extended_product_search, str):
+                    errors = {
+                        "enabled_extended_product_search": {
+                            "non_field_errors": [
+                                "Invalid data. Expected a dictionary, but got str."
+                            ]
+                        }
+                    }
+                    raise ValidationError(errors)
+                bad_prods = {}
+                for prod in Scan.SUPPORTED_PRODUCTS:
+                    flag = enabled_extended_product_search.get(prod, None)
+                    if flag is not None and is_boolean(flag) is False:
+                        bad_prods[prod] = ["Must be a valid boolean."]
+                if bad_prods:
+                    errors = {"enabled_extended_product_search": bad_prods}
+                    raise ValidationError(errors)
+                search_directories = enabled_extended_product_search.get(
+                    Scan.EXT_PRODUCT_SEARCH_DIRS, None
+                )
+                if search_directories is not None:
+                    ScanSerializer.validate_search_directories(search_directories)
+        return options
+
+    def update_options(self, instance, options):
+        """Update the options for the Scan."""
+        max_concurrency = options.pop("max_concurrency", None)
+        if max_concurrency is not None:
+            instance.max_concurrency = max_concurrency
+
+        disabled_products = options.pop("disabled_optional_products", None)
+        if disabled_products:
+            self.update_optional_products(instance, disabled_products)
+
+        extended_search = options.pop("enabled_extended_product_search", None)
+        if extended_search:
+            self.update_enabled_extended_product_search(instance, extended_search)
+
+    @staticmethod
+    def update_optional_products(instance, disabled_products):
+        """Update the enabled_optional_products."""
+        optional_products_instance = instance.enabled_optional_products
+        if not optional_products_instance:
+            # Need to create a new ones
+            enabled_optional_products = {}
+            for prod in Scan.SUPPORTED_PRODUCTS:
+                flag = disabled_products.get(prod, False)
+                enabled_optional_products[prod] = not convert_to_boolean(flag)
+            instance.enabled_optional_products = enabled_optional_products
+        else:
+            # Existing values to update
+            enabled_optional_products = optional_products_instance
+            for prod in Scan.SUPPORTED_PRODUCTS:
+                flag = disabled_products.get(prod, None)
+                if flag is not None:
+                    enabled_optional_products[prod] = not convert_to_boolean(flag)
+            instance.enabled_optional_products = enabled_optional_products
+
+    @staticmethod
+    def update_enabled_extended_product_search(instance, extended_search):
+        """Update the enabled_extended_product_search."""
+        extended_search_instance = instance.enabled_extended_product_search
+        if not extended_search_instance:
+            # Need to create a new ones
+            enabled_extended_product_search = {}
+            for prod in Scan.SUPPORTED_PRODUCTS:
+                flag = extended_search.get(prod, None)
+                if flag is not None:
+                    enabled_extended_product_search[prod] = convert_to_boolean(flag)
+            search_directories = extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
+            if search_directories:
+                enabled_extended_product_search[
+                    Scan.EXT_PRODUCT_SEARCH_DIRS
+                ] = search_directories
+            instance.enabled_extended_product_search = enabled_extended_product_search
+        else:
+            # Existing values to update
+            for prod in Scan.SUPPORTED_PRODUCTS:
+                flag = extended_search.get(prod, None)
+                if flag is not None:
+                    extended_search_instance[prod] = convert_to_boolean(flag)
+            if extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None) is not None:
+                extended_search_instance[
+                    Scan.EXT_PRODUCT_SEARCH_DIRS
+                ] = extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS)

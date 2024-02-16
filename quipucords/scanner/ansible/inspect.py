@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import transaction
 from requests import RequestException
 
-from api.models import RawFact, ScanOptions, ScanTask, SystemInspectionResult
+from api.models import RawFact, Scan, ScanTask, SystemInspectionResult
 from scanner.ansible.runner import AnsibleTaskRunner
 from scanner.exceptions import ScanFailureError
 
@@ -72,9 +72,9 @@ class InspectTaskRunner(AnsibleTaskRunner):
     def max_concurrency(self):
         """Return scan job max concurrency option."""
         try:
-            return self.scan_task.job.options.max_concurrency
+            return self.scan_task.job.options.get("max_concurrency")
         except AttributeError:
-            return ScanOptions.get_default_forks()
+            return Scan.get_default_forks()
 
     def get_hosts(self) -> list[dict]:
         """Retrieve ansible managed hosts/nodes."""

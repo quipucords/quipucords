@@ -11,8 +11,8 @@ from django.forms import model_to_dict
 import log_messages
 from api.inspectresult.model import RawFact
 from api.models import (
+    Scan,
     ScanJob,
-    ScanOptions,
     ScanTask,
     SystemConnectionResult,
     SystemInspectionResult,
@@ -171,16 +171,14 @@ class InspectTaskRunner(ScanTaskRunner):
             use_paramiko = False
 
         if self.scan_job.options is not None:
-            forks = self.scan_job.options.max_concurrency
-            extra_vars = self.scan_job.options.get_extra_vars()
+            forks = self.scan_job.options.get("max_concurrency")
+            extra_vars = self.scan_job.get_extra_vars()
         else:
-            forks = ScanOptions.get_default_forks()
-            extra_vars = ScanOptions.get_default_extra_vars()
+            forks = Scan.get_default_forks()
+            extra_vars = Scan.get_default_extra_vars()
 
-        if extra_vars.get(ScanOptions.EXT_PRODUCT_SEARCH_DIRS) is None:
-            extra_vars[ScanOptions.EXT_PRODUCT_SEARCH_DIRS] = " ".join(
-                DEFAULT_SCAN_DIRS
-            )
+        if extra_vars.get(Scan.EXT_PRODUCT_SEARCH_DIRS) is None:
+            extra_vars[Scan.EXT_PRODUCT_SEARCH_DIRS] = " ".join(DEFAULT_SCAN_DIRS)
 
         extra_vars["ansible_ssh_timeout"] = settings.QPC_SSH_INSPECT_TIMEOUT
 
