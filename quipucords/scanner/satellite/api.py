@@ -11,7 +11,7 @@ from more_itertools import chunked
 
 from api.models import (
     RawFact,
-    ScanOptions,
+    Scan,
     ScanTask,
     SystemConnectionResult,
     SystemInspectionResult,
@@ -49,9 +49,9 @@ class SatelliteInterface(ABC):
         """Set context for interface."""
         self.scan_job = scan_job
         if scan_job.options is None:
-            self.max_concurrency = ScanOptions.get_default_forks()
+            self.max_concurrency = Scan.get_default_forks()
         else:
-            self.max_concurrency = scan_job.options.max_concurrency
+            self.max_concurrency = scan_job.options.get("max_concurrency")
 
         if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             self.connect_scan_task = scan_task

@@ -12,8 +12,8 @@ from django.forms import model_to_dict
 import log_messages
 from api.models import (
     Credential,
+    Scan,
     ScanJob,
-    ScanOptions,
     ScanTask,
     SystemConnectionResult,
 )
@@ -148,9 +148,9 @@ class ConnectTaskRunner(ScanTaskRunner):
         source = serializer.data
 
         if self.scan_job.options is not None:
-            forks = self.scan_job.options.max_concurrency
+            forks = self.scan_job.options.get("max_concurrency")
         else:
-            forks = ScanOptions.get_default_forks()
+            forks = Scan.get_default_forks()
 
         use_paramiko = self.scan_task.source.use_paramiko
         if use_paramiko is None:

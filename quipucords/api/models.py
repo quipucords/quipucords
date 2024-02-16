@@ -21,12 +21,7 @@ from api.inspectresult.model import (
     SystemInspectionResult,
     TaskInspectionResult,
 )
-from api.scan.model import (
-    DisabledOptionalProductsOptions,
-    ExtendedProductSearchOptions,
-    Scan,
-    ScanOptions,
-)
+from api.scan.model import Scan
 from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask
 from api.source.model import Source

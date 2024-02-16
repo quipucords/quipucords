@@ -13,12 +13,7 @@ from api import messages
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
 from api.inspectresult.model import JobInspectionResult, TaskInspectionResult
 from api.reports.model import Report
-from api.scan.model import (
-    DisabledOptionalProductsOptions,
-    ExtendedProductSearchOptions,
-    Scan,
-    ScanOptions,
-)
+from api.scan.model import Scan
 from api.scanjob.queryset import ScanJobQuerySet
 from api.scantask.model import ScanTask
 from api.source.model import Source
@@ -48,7 +43,6 @@ class ScanJob(models.Model):
     status_message = models.TextField(
         null=True, default=_(messages.SJ_STATUS_MSG_CREATED)
     )
-    options = models.OneToOneField(ScanOptions, null=True, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
@@ -76,64 +70,25 @@ class ScanJob(models.Model):
         verbose_name_plural = _(messages.PLURAL_SCAN_JOBS_MSG)
         ordering = ["-id"]
 
-    def copy_scan_disabled_product_options(self):
-        """Copy scan disabled products options."""
-        new_disabled_optional_products = None
-        if (
-            self.scan
-            and self.scan.options
-            and self.scan.options.disabled_optional_products
-        ):
-            old_disabled_optional_products = (
-                self.scan.options.disabled_optional_products
-            )
-            new_disabled_optional_products = (
-                DisabledOptionalProductsOptions.objects.create(
-                    jboss_eap=old_disabled_optional_products.jboss_eap,
-                    jboss_fuse=old_disabled_optional_products.jboss_fuse,
-                    jboss_brms=old_disabled_optional_products.jboss_brms,
-                    jboss_ws=old_disabled_optional_products.jboss_ws,
-                )
-            )
-        return new_disabled_optional_products
+    @property
+    def options(self):
+        """Return the options property from the related Scan."""
+        if self.scan:
+            return self.scan.options
+        return None
 
-    def copy_scan_extended_product_options(self):
-        """Copy extended product search to the job."""
-        new_extended_products = None
-        if (
-            self.scan
-            and self.scan.options
-            and self.scan.options.enabled_extended_product_search
-        ):
-            old_extended_products = self.scan.options.enabled_extended_product_search
-            new_extended_products = ExtendedProductSearchOptions.objects.create(
-                jboss_eap=old_extended_products.jboss_eap,
-                jboss_fuse=old_extended_products.jboss_fuse,
-                jboss_brms=old_extended_products.jboss_brms,
-                jboss_ws=old_extended_products.jboss_ws,
-            )
-            if old_extended_products.search_directories:
-                new_extended_products.search_directories = (
-                    old_extended_products.search_directories
-                )
+    def get_extra_vars(self):
+        """Return the extra vars from the related Scan."""
+        if self.scan:
+            return self.scan.get_extra_vars()
+        return {}
 
-        return new_extended_products
-
-    def copy_scan_options(self):
-        """Copy scan options to the job."""
+    def copy_scan_details(self):
+        """Copy scan details to the job."""
         scan = self.scan
         if scan is not None:
             self.sources.add(*scan.sources.all())
             self.scan_type = scan.scan_type
-            if scan.options is not None:
-                disable_options = self.copy_scan_disabled_product_options()
-                extended_search = self.copy_scan_extended_product_options()
-                scan_job_options = ScanOptions.objects.create(
-                    max_concurrency=scan.options.max_concurrency,
-                    disabled_optional_products=disable_options,
-                    enabled_extended_product_search=extended_search,
-                )
-                self.options = scan_job_options
             self.save()
 
     def log_current_status(self, show_status_message=False, log_level=logging.INFO):
@@ -266,7 +221,7 @@ class ScanJob(models.Model):
 
         Change job state from CREATED TO PENDING.
         """
-        self.copy_scan_options()
+        self.copy_scan_details()
 
         target_status = ScanTask.PENDING
         has_error = self.validate_status_change(target_status, [ScanTask.CREATED])

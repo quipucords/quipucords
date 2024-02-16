@@ -1,9 +1,11 @@
 """Module for serializing all model object for database storage."""
 
+from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework.serializers import (
     CharField,
     DateTimeField,
+    DictField,
     IntegerField,
     ModelSerializer,
     PrimaryKeyRelatedField,
@@ -14,7 +16,7 @@ from api import messages
 from api.common.serializer import NotEmptySerializer, ValidStringChoiceField
 from api.common.util import convert_to_int, is_int
 from api.models import Scan, ScanJob, ScanTask, Source
-from api.scan.serializer import ScanOptionsSerializer
+from api.scan.serializer import ScanSerializer
 from api.scantask.serializer import ScanTaskSerializer, SourceField
 
 SCAN_KEY = "scan"
@@ -109,7 +111,7 @@ class ScanJobSerializerV1(NotEmptySerializer):
     status = ValidStringChoiceField(read_only=True, choices=ScanTask.STATUS_CHOICES)
     status_message = CharField(read_only=True)
     tasks = TaskField(many=True, read_only=True)
-    options = ScanOptionsSerializer(read_only=True, many=False)
+    options = DictField(required=False, default={})
     report_id = IntegerField(read_only=True)
     start_time = DateTimeField(required=False, read_only=True)
     end_time = DateTimeField(required=False, read_only=True)
@@ -132,6 +134,20 @@ class ScanJobSerializerV1(NotEmptySerializer):
             "end_time",
         ]
 
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create a scan."""
+        _options = validated_data.pop("options", None)
+        scan = super().create(validated_data)
+        return scan
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Update a scan."""
+        _options = validated_data.pop("options", None)
+        instance = super().update(instance, validated_data)
+        return instance
+
     @staticmethod
     def validate_sources(sources):
         """Make sure the source is present."""
@@ -139,6 +155,13 @@ class ScanJobSerializerV1(NotEmptySerializer):
             raise ValidationError(_(messages.SJ_REQ_SOURCES))
 
         return sources
+
+    @staticmethod
+    def validate_options(options):
+        """Validate the options using the ScanSerializer validator."""
+        if options is not None:
+            ScanSerializer.validate_options(options)
+        return options
 
 
 class InternalSourceSerializer(ModelSerializer):
