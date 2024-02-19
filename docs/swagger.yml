@@ -248,7 +248,7 @@ paths:
       parameters:
       - in: "body"
         name: "body"
-        description: "List of Credential Ids to delete"
+        description: "List of Credential Ids to delete or the string 'all'"
         required: true
         schema:
           $ref: "#/definitions/BulkDeleteParameters"
@@ -1349,18 +1349,13 @@ definitions:
             description: "The paginated credentials"
   BulkDeleteParameters:
     type: "object"
+    required:
+      - ids
     properties:
-      all:
-        type: "boolean"
-        description: "Delete all credentials"
-        default: false
       ids:
-        type: "array"
-        items:
-          type: "integer"
-          format: "int64"
+        type: object
         example: [141,165,222]
-        description: "The list of credentials ids"
+        description: "The list of ids for specific objects to delete, or the string 'all' to delete all objects"
   DeletionError:
     type: "object"
     required:

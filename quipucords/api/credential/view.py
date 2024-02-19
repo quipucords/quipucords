@@ -20,7 +20,7 @@ from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from api import messages
-from api.common.util import ids_to_str, is_int
+from api.common.util import DELETE_ALL_IDS_MAGIC_STRING, ids_to_str, is_int
 from api.exceptions import UnprocessableEntity
 from api.filters import ListFilter
 from api.models import Credential, Source
@@ -37,32 +37,34 @@ perm_classes = (IsAuthenticated,)
 def credential_bulk_delete(request):
     """Bulk delete credentials.
 
-    input:      "ids" : [ ] - List of ids to delete
-                "all" : bool - If True, ignore "ids" and delete all credentials.
+    input:      "ids" : List of ids to delete, or string DELETE_ALL_IDS_MAGIC_STRING
     returns:    200 OK - upon successfully deleting all credentials.
                 400 Bad Request - ids list is missing or empty.
                 404 Not Found - If one or more credentials specified do not exist.
                 422 Unprocessable Entity - If one or more credentials could
                                            not be deleted.
     """
-    ids = set(request.data.get("ids", []))  # Set to remove duplicates
-    delete_all = request.data.get("all", False)
-    if not isinstance(delete_all, bool):
+    ids = request.data.get("ids")
+    if (
+        not isinstance(ids, (list, str))
+        or (isinstance(ids, str) and ids != DELETE_ALL_IDS_MAGIC_STRING)
+        or (isinstance(ids, list) and len(ids) == 0)
+    ):
         raise ParseError(
-            detail=_("Optional 'all' parameter must be true or false boolean if set.")
+            detail=_(
+                "Missing 'ids' list of credential ids "
+                "or '%(DELETE_ALL_IDS_MAGIC_STRING)s' string"
+            ).format({"DELETE_ALL_IDS_MAGIC_STRING": DELETE_ALL_IDS_MAGIC_STRING})
         )
-    if not ids and not delete_all:
-        raise ParseError(
-            detail=_("Missing list of credentials to delete 'ids' or 'all' parameter")
-        )
+    elif not isinstance(ids, str):
+        ids = set(ids)  # remove duplicates
 
     with transaction.atomic():
-        if delete_all:
-            all_creds = Credential.objects.all()
-        else:
-            all_creds = Credential.objects.filter(id__in=ids)
+        creds = Credential.objects.all()
+        if ids != DELETE_ALL_IDS_MAGIC_STRING:
+            creds = creds.filter(id__in=ids)
             # Check for Credentials that do not exist (404)
-            existing_ids = set([cred.id for cred in all_creds])
+            existing_ids = set([cred.id for cred in creds])
             missing_ids = ids - existing_ids
             if missing_ids:
                 raise NotFound(
@@ -70,7 +72,7 @@ def credential_bulk_delete(request):
                 )
 
         # Check for Credentials with related Sources (422)
-        cred_ids_and_sources = all_creds.prefetch_related("sources").values_list(
+        cred_ids_and_sources = creds.prefetch_related("sources").values_list(
             "id", "sources"
         )
         ids_with_sources = [cred[0] for cred in cred_ids_and_sources if cred[1]]
@@ -83,7 +85,7 @@ def credential_bulk_delete(request):
             )
 
         # Delete the Credentials
-        all_creds.delete()
+        creds.delete()
 
     return Response(status=status.HTTP_200_OK)
 
