@@ -11,6 +11,8 @@ from compat.pydantic import BaseModel, PydanticErrorProxy
 
 logger = logging.getLogger(__name__)
 
+DELETE_ALL_IDS_MAGIC_STRING = "all"  # special input value for bulk delete APIs
+
 
 def is_int(value):
     """Check if a value is convertable to int.
