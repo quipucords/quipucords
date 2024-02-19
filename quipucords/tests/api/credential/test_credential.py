@@ -1024,8 +1024,8 @@ class TestCredential:
 class TestCredentialBulkDelete:
     """Tests the Credential bulk_delete function."""
 
-    def test_bulk_delete_success(self, django_client, faker):
-        """Test that bulk delete deletes all requested credentials."""
+    def test_bulk_delete_specific_ids(self, django_client):
+        """Test that bulk delete deletes all requested credential IDs."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
         delete_request = {"ids": [cred1.id, cred2.id]}
@@ -1034,6 +1034,30 @@ class TestCredentialBulkDelete:
         )
         assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
+
+    def test_bulk_delete_all_ids(self, django_client):
+        """Test that bulk delete deletes all credentials."""
+        cred1 = CredentialFactory()
+        cred2 = CredentialFactory()
+        delete_request = {"all": True}
+        response = django_client.post(
+            reverse("v1:credentials-bulk-delete"), json=delete_request
+        )
+        assert response.ok
+        assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
+        assert Credential.objects.count() == 0
+
+    def test_bulk_delete_prefers_all_over_specific_ids(self, django_client):
+        """Test that bulk delete prefers "all" over specific "ids"."""
+        cred1 = CredentialFactory()
+        cred2 = CredentialFactory()
+        delete_request = {"all": True, "ids": [cred1.id]}
+        response = django_client.post(
+            reverse("v1:credentials-bulk-delete"), json=delete_request
+        )
+        assert response.ok
+        assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
+        assert Credential.objects.count() == 0
 
     def test_bulk_delete_atomic_if_first_does_not_exist(self, django_client, faker):
         """Test bulk delete is atomic if the first credential does not exist."""
