@@ -251,7 +251,7 @@ paths:
         description: "List of Credential Ids to delete"
         required: true
         schema:
-          $ref: "#/definitions/CredentialIds"
+          $ref: "#/definitions/BulkDeleteParameters"
       responses:
         200:
           description: "Credentials deleted"
@@ -1347,11 +1347,13 @@ definitions:
             items:
               $ref: "#/definitions/CredentialOut"
             description: "The paginated credentials"
-  CredentialIds:
+  BulkDeleteParameters:
     type: "object"
-    required:
-      - ids
     properties:
+      all:
+        type: "boolean"
+        description: "Delete all credentials"
+        default: false
       ids:
         type: "array"
         items:

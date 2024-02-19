@@ -38,27 +38,36 @@ def credential_bulk_delete(request):
     """Bulk delete credentials.
 
     input:      "ids" : [ ] - List of ids to delete
+                "all" : bool - If True, ignore "ids" and delete all credentials.
     returns:    200 OK - upon successfully deleting all credentials.
                 400 Bad Request - ids list is missing or empty.
                 404 Not Found - If one or more credentials specified do not exist.
                 422 Unprocessable Entity - If one or more credentials could
                                            not be deleted.
     """
-    ids = request.data.get("ids", [])
-    if not ids:
-        raise ParseError(detail=_("Missing list of credentials to delete 'ids'"))
-    all_ids = set(ids)  # Set to remove duplicates
+    ids = set(request.data.get("ids", []))  # Set to remove duplicates
+    delete_all = request.data.get("all", False)
+    if not isinstance(delete_all, bool):
+        raise ParseError(
+            detail=_("Optional 'all' parameter must be true or false boolean if set.")
+        )
+    if not ids and not delete_all:
+        raise ParseError(
+            detail=_("Missing list of credentials to delete 'ids' or 'all' parameter")
+        )
 
     with transaction.atomic():
-        all_creds = Credential.objects.filter(id__in=all_ids)
-
-        # Check for Credentials that do not exist (404)
-        existing_ids = set([cred.id for cred in all_creds])
-        missing_ids = all_ids - existing_ids
-        if missing_ids:
-            raise NotFound(
-                detail=_(messages.CRED_IDS_DO_NOT_EXIST % ids_to_str(missing_ids))
-            )
+        if delete_all:
+            all_creds = Credential.objects.all()
+        else:
+            all_creds = Credential.objects.filter(id__in=ids)
+            # Check for Credentials that do not exist (404)
+            existing_ids = set([cred.id for cred in all_creds])
+            missing_ids = ids - existing_ids
+            if missing_ids:
+                raise NotFound(
+                    detail=_(messages.CRED_IDS_DO_NOT_EXIST % ids_to_str(missing_ids))
+                )
 
         # Check for Credentials with related Sources (422)
         cred_ids_and_sources = all_creds.prefetch_related("sources").values_list(
