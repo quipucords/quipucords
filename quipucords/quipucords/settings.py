@@ -203,6 +203,8 @@ WSGI_APPLICATION = "quipucords.wsgi.application"
 
 DEFAULT_PAGINATION_CLASS = "api.common.pagination.StandardResultsSetPagination"
 
+QUIPUCORDS_THROTTLE_RATE_ANON = env.str("QUIPUCORDS_THROTTLE_RATE_ANON", "2/second")
+QUIPUCORDS_THROTTLE_RATE_USER = env.str("QUIPUCORDS_THROTTLE_RATE_USER", "20/second")
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_PAGINATION_CLASS": DEFAULT_PAGINATION_CLASS,
@@ -211,6 +213,14 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": QUIPUCORDS_THROTTLE_RATE_ANON,
+        "user": QUIPUCORDS_THROTTLE_RATE_USER,
+    },
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
     "DEFAULT_VERSION": "v1",
 }
