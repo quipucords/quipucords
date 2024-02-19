@@ -21,7 +21,7 @@
 
 # If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be in /opt.
 - name: search for JWS_HOME in search directories
-  raw: export LANG=C LC_ALL=C; find {{search_directories}} -type d 2>/dev/null | egrep '*(ews|jws)*[0-99]\.[0-99]$'
+  raw: export LANG=C LC_ALL=C; find {{search_directories}} -type d 2>/dev/null | egrep '(ews|jws).*[0-99]\.[0-99]$'
   register: internal_jws_find_home_from_search
   ignore_errors: yes
   when: 'jboss_ws_ext'
@@ -56,7 +56,7 @@
 
 # ------------------------------ DETECT JWS/EWS -------------------------------
 - name: check jws presence with yum
-  raw: export LANG=C LC_ALL=C; yum grouplist jws3 jws3plus jws5 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'
+  raw: export LANG=C LC_ALL=C; yum grouplist jws3 jws3plus jws5 jws6 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'
   register: internal_jws_installed_with_rpm
   ignore_errors: yes
   when: 'jboss_ws'
@@ -133,8 +133,8 @@
 
   # Ver 5.x.x has a jws5-tomcat.service unit installed.
   # Only provides major version (5).
-- name: find JWS version 5
-  raw: export LANG=C LC_ALL=C; systemctl status jws5-tomcat.service 2>/dev/null | grep "Apache Tomcat Web" | grep -o jws5
+- name: find JWS version through systemctl
+  raw: export LANG=C LC_ALL=C; systemctl status 'jws*-tomcat.service' 2>/dev/null | grep "Apache Tomcat Web" | grep -o 'jws[0-9]\+'
   register: internal_jws_version_5_systemctl
   ignore_errors: yes
   when: 'internal_have_systemctl and jboss_ws'
