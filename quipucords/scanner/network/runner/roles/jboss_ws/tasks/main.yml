@@ -56,14 +56,24 @@
 
 # ------------------------------ DETECT JWS/EWS -------------------------------
 - name: check jws presence with yum
-  raw: export LANG=C LC_ALL=C; yum grouplist jws3 jws3plus jws5 jws6 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'
+  raw: "export LANG=C LC_ALL=C; yum grouplist {{item}} 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'"
   register: internal_jws_installed_with_rpm
+  with_items:
+    - jws3
+    - jws3plus
+    - jws5
+    - jws6
   ignore_errors: yes
   when: 'jboss_ws'
 
 - name: set jws_installed_with_rpm fact
   set_fact:
-    jws_installed_with_rpm: "{{internal_jws_installed_with_rpm}}"
+    jws_installed_with_rpm: "{{
+      internal_jws_installed_with_rpm['results']
+        | selectattr('rc', 'eq', '0')
+        | first
+        | default(internal_jws_installed_with_rpm['results'][-1])
+      }}"
   ignore_errors: yes
 
   # If tomcat was installed with a Redhat product, a 'redhat' string can be found in certain files
