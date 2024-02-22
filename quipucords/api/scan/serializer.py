@@ -65,31 +65,6 @@ class ScanSerializer(NotEmptySerializer):
         ]
         read_only_fields = ["most_recent_scanjob"]
 
-    @staticmethod
-    def validate_search_directories(search_directories):
-        """Validate search directories."""
-        try:
-            search_directories_list = search_directories
-            if not isinstance(search_directories_list, list):
-                raise ValidationError(
-                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-                )
-            for directory in search_directories_list:
-                if not isinstance(directory, str):
-                    raise ValidationError(
-                        _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-                    )
-            invalid_paths = check_path_validity(search_directories_list)
-            if bool(invalid_paths):
-                raise ValidationError(
-                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-                )
-        except JsonExceptionClass as exception:
-            raise ValidationError(
-                _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-            ) from exception
-        return search_directories
-
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
@@ -164,71 +139,127 @@ class ScanSerializer(NotEmptySerializer):
         return sources
 
     @staticmethod
-    def validate_options(options):  # noqa C901 PLR0912
+    def validate_options(options):
         """Make sure the options specified are valid."""
         if options:
-            max_concurrency = options.get("max_concurrency", None)
-            if max_concurrency:
-                if is_int(max_concurrency):
-                    max_concurrency = convert_to_int(max_concurrency)
-                    if max_concurrency < 1:
-                        errors = {
-                            "max_concurrency": [
-                                "Ensure this value is greater than or equal to 1."
-                            ]
-                        }
-                        raise ValidationError(errors)
-                else:
-                    errors = {
-                        "max_concurrency": ["Ensure this value is a positive integer."]
-                    }
-                    raise ValidationError(errors)
-            disabled_optional_products = options.get("disabled_optional_products", None)
-            if disabled_optional_products is not None:
-                if isinstance(disabled_optional_products, str):
-                    errors = {
-                        "disabled_optional_products": {
-                            "non_field_errors": [
-                                "Invalid data. Expected a dictionary, but got str."
-                            ]
-                        }
-                    }
-                    raise ValidationError(errors)
-                bad_prods = {}
-                for prod in Scan.SUPPORTED_PRODUCTS:
-                    flag = disabled_optional_products.get(prod, None)
-                    if flag is not None and is_boolean(flag) is False:
-                        bad_prods[prod] = ["Must be a valid boolean."]
-                if bad_prods:
-                    errors = {"disabled_optional_products": bad_prods}
-                    raise ValidationError(errors)
-            enabled_extended_product_search = options.get(
-                "enabled_extended_product_search", None
+            ScanSerializer.validate_max_concurrency(
+                options.get("max_concurrency", None)
             )
-            if enabled_extended_product_search is not None:
-                if isinstance(enabled_extended_product_search, str):
-                    errors = {
-                        "enabled_extended_product_search": {
-                            "non_field_errors": [
-                                "Invalid data. Expected a dictionary, but got str."
-                            ]
-                        }
-                    }
-                    raise ValidationError(errors)
-                bad_prods = {}
-                for prod in Scan.SUPPORTED_PRODUCTS:
-                    flag = enabled_extended_product_search.get(prod, None)
-                    if flag is not None and is_boolean(flag) is False:
-                        bad_prods[prod] = ["Must be a valid boolean."]
-                if bad_prods:
-                    errors = {"enabled_extended_product_search": bad_prods}
-                    raise ValidationError(errors)
-                search_directories = enabled_extended_product_search.get(
-                    Scan.EXT_PRODUCT_SEARCH_DIRS, None
-                )
-                if search_directories is not None:
-                    ScanSerializer.validate_search_directories(search_directories)
+            ScanSerializer.validate_disabled_optional_products(
+                options.get("disabled_optional_products", None)
+            )
+            ScanSerializer.validate_enabled_extended_product_search(
+                options.get("enabled_extended_product_search", None)
+            )
         return options
+
+    @staticmethod
+    def validate_max_concurrency(max_concurrency):
+        """Validate max_concurrency."""
+        if max_concurrency is None:
+            return None
+
+        if is_int(max_concurrency):
+            max_concurrency_int = convert_to_int(max_concurrency)
+            if max_concurrency_int < 1:
+                errors = {
+                    "max_concurrency": [
+                        "Ensure this value is greater than or equal to 1."
+                    ]
+                }
+                raise ValidationError(errors)
+        else:
+            errors = {"max_concurrency": ["Ensure this value is a positive integer."]}
+            raise ValidationError(errors)
+
+        return max_concurrency
+
+    @staticmethod
+    def validate_disabled_optional_products(disabled_optional_products):
+        """Validate disabled_optional_products."""
+        if disabled_optional_products is None:
+            return None
+
+        if isinstance(disabled_optional_products, str):
+            errors = {
+                "disabled_optional_products": {
+                    "non_field_errors": [
+                        "Invalid data. Expected a dictionary, but got str."
+                    ]
+                }
+            }
+            raise ValidationError(errors)
+
+        bad_prods = {}
+        for prod in Scan.SUPPORTED_PRODUCTS:
+            flag = disabled_optional_products.get(prod, None)
+            if flag is not None and is_boolean(flag) is False:
+                bad_prods[prod] = ["Must be a valid boolean."]
+        if bad_prods:
+            errors = {"disabled_optional_products": bad_prods}
+            raise ValidationError(errors)
+
+        return disabled_optional_products
+
+    @staticmethod
+    def validate_enabled_extended_product_search(enabled_extended_product_search):
+        """Validate enabled_extended_product_search."""
+        if enabled_extended_product_search is None:
+            return None
+
+        if isinstance(enabled_extended_product_search, str):
+            errors = {
+                "enabled_extended_product_search": {
+                    "non_field_errors": [
+                        "Invalid data. Expected a dictionary, but got str."
+                    ]
+                }
+            }
+            raise ValidationError(errors)
+
+        bad_prods = {}
+        for prod in Scan.SUPPORTED_PRODUCTS:
+            flag = enabled_extended_product_search.get(prod, None)
+            if flag is not None and is_boolean(flag) is False:
+                bad_prods[prod] = ["Must be a valid boolean."]
+        if bad_prods:
+            errors = {"enabled_extended_product_search": bad_prods}
+            raise ValidationError(errors)
+
+        ScanSerializer.validate_search_directories(
+            enabled_extended_product_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
+        )
+
+        return enabled_extended_product_search
+
+    @staticmethod
+    def validate_search_directories(search_directories):
+        """Validate search directories."""
+        if search_directories is None:
+            return None
+
+        try:
+            search_directories_list = search_directories
+            if not isinstance(search_directories_list, list):
+                raise ValidationError(
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                )
+            for directory in search_directories_list:
+                if not isinstance(directory, str):
+                    raise ValidationError(
+                        _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                    )
+            invalid_paths = check_path_validity(search_directories_list)
+            if bool(invalid_paths):
+                raise ValidationError(
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                )
+        except JsonExceptionClass as exception:
+            raise ValidationError(
+                _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+            ) from exception
+
+        return search_directories
 
     def update_options(self, instance, options):
         """Update the options for the Scan."""
