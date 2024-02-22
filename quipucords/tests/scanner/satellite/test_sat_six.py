@@ -10,7 +10,6 @@ from api.models import (
     Credential,
     JobConnectionResult,
     ScanJob,
-    ScanOptions,
     ScanTask,
     Source,
     SystemConnectionResult,
@@ -1076,8 +1075,7 @@ class TestSatelliteSixV2:
     @pytest.mark.django_db
     def test_hosts_facts(self, mock_pool):
         """Test the hosts_facts method."""
-        scan_options = ScanOptions(max_concurrency=10)
-        scan_options.save()
+        scan_options = {"max_concurrency": 10}
         scan_job, scan_task = create_scan_job(
             self.source,
             ScanTask.SCAN_TYPE_INSPECT,

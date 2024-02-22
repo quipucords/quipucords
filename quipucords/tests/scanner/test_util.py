@@ -48,7 +48,7 @@ def create_scan_job_two_tasks(
     """Create a new scan job with two sources.
 
     :param source: the source for the scan job
-    :param sourc2: the second source for the scan job
+    :param source2: the second source for the scan job
     :param scan_type: Either connect or inspect
     :param scan_options: Job scan options
     :return: the scan job and task
@@ -101,4 +101,4 @@ def scan_options_products(expected_vars_dict):
         for key in ("jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws")
     }
 
-    return (disabled_optional_products, enabled_extended_product_search)
+    return disabled_optional_products, enabled_extended_product_search

@@ -9,7 +9,7 @@ import yaml
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
 from api.models import SystemInspectionResult
-from api.scan.model import ScanOptions
+from api.scan.model import Scan
 from log_messages import TASK_UNEXPECTED_FAILURE
 from scanner.network.inspect_callback import InspectCallback
 
@@ -288,7 +288,7 @@ def test_inspect_callback_with_inspect_playbook(mocker, settings, local_inventor
         inventory=local_inventory,
         event_handler=callback.event_callback,
         playbook=playbook_path,
-        extravars=ScanOptions.get_default_extra_vars(),
+        extravars=Scan.get_default_extra_vars(),
     )
     assert runner_obj.status == "successful"
     all_results = list(callback.iter_results())

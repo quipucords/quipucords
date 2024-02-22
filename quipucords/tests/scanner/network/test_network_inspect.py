@@ -11,9 +11,7 @@ from rest_framework.reverse import reverse
 
 from api.models import (
     Credential,
-    ExtendedProductSearchOptions,
     ScanJob,
-    ScanOptions,
     ScanTask,
     Source,
     SystemConnectionResult,
@@ -304,10 +302,7 @@ class TestNetworkInspectScanner:
         self.source.credentials.add(self.cred)
 
         # setup scan with options
-        extended = ExtendedProductSearchOptions()
-        extended.save()
-        scan_options = ScanOptions(enabled_extended_product_search=extended)
-        scan_options.save()
+        scan_options = {"enabled_extended_product_search": {"search_directories": []}}
 
         self.scan_job, self.scan_task = create_scan_job(
             self.source, ScanTask.SCAN_TYPE_INSPECT, "scan2", scan_options=scan_options
@@ -422,7 +417,7 @@ class TestAnsibleLogCollector:
         # unnecessarily slow (just by initializing db in a test we "lose" 2 seconds
         # while this unit test alone takes less than half a second)
         scanjob = Mock(id=999)
-        scanjob.options.get_extra_vars.side_effect = lambda: {}
+        scanjob.get_extra_vars.side_effect = lambda: {}
         # InspectTaskRunner requires scanjob and scan_task
         inspect_runner = InspectTaskRunner(scanjob, Mock())
         # sanity check expected files

@@ -10,7 +10,7 @@ from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
 
 from api.connresult.model import SystemConnectionResult
-from api.models import Credential, ScanJob, ScanOptions, ScanTask, Source
+from api.models import Credential, Scan, ScanJob, ScanTask, Source
 from api.serializers import SourceSerializer
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
@@ -116,14 +116,13 @@ class TestNetworkConnectTaskRunner:
         self.source3.credentials.add(self.cred)
         self.source3.save()
 
-        scan_options = ScanOptions(max_concurrency=2)
-        scan_options.save()
+        scan_options = {"max_concurrency": 2}
 
         self.scan_job3, self.scan_task3 = create_scan_job(
             self.source3, ScanTask.SCAN_TYPE_CONNECT, "source3", scan_options
         )
         self.scan_task3.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
-        self.concurrency = ScanOptions.get_default_forks()
+        self.concurrency = Scan.get_default_forks()
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
