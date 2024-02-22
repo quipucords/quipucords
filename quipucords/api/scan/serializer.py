@@ -168,6 +168,14 @@ class ScanSerializer(NotEmptySerializer):
                     ]
                 }
                 raise ValidationError(errors)
+            if max_concurrency_int > Scan.get_max_forks():
+                errors = {
+                    "max_concurrency": [
+                        "Ensure this value is less than"
+                        f" or equal to {Scan.get_max_forks()}."
+                    ]
+                }
+                raise ValidationError(errors)
         else:
             errors = {"max_concurrency": ["Ensure this value is a positive integer."]}
             raise ValidationError(errors)
@@ -238,26 +246,26 @@ class ScanSerializer(NotEmptySerializer):
         if search_directories is None:
             return None
 
+        search_directories_validation_errors = {
+            "enabled_extended_product_search": {
+                Scan.EXT_PRODUCT_SEARCH_DIRS: [
+                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
+                ]
+            }
+        }
+
         try:
             search_directories_list = search_directories
             if not isinstance(search_directories_list, list):
-                raise ValidationError(
-                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-                )
+                raise ValidationError(search_directories_validation_errors)
             for directory in search_directories_list:
                 if not isinstance(directory, str):
-                    raise ValidationError(
-                        _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-                    )
+                    raise ValidationError(search_directories_validation_errors)
             invalid_paths = check_path_validity(search_directories_list)
             if bool(invalid_paths):
-                raise ValidationError(
-                    _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-                )
+                raise ValidationError(search_directories_validation_errors)
         except JsonExceptionClass as exception:
-            raise ValidationError(
-                _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
-            ) from exception
+            raise ValidationError(search_directories_validation_errors) from exception
 
         return search_directories
 
