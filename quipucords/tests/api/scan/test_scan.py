@@ -71,6 +71,7 @@ class TestScanCreate:
         assert response.json() == {
             "id": mocker.ANY,
             "name": payload["name"],
+            "options": {"max_concurrency": 25},
             "scan_type": expected_scan_type,
             "sources": [
                 {
@@ -237,6 +238,27 @@ class TestScanCreate:
             }
         }
 
+    def test_create_large_forks(self, django_client, faker):
+        """Test valid number of forks with a large number of forks specified."""
+        source = SourceFactory()
+        payload = {
+            "name": faker.bothify("Scan ????-######"),
+            "sources": [source.id],
+            "options": {
+                "max_concurrency": 10000,
+            },
+        }
+        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {
+            "options": {
+                "max_concurrency": [
+                    "Ensure this value is less than"
+                    f" or equal to {Scan.get_max_forks()}."
+                ]
+            }
+        }
+
     def test_create_disable_optional_products_type(self, django_client, faker):
         """Test invalid type for disabled_optional_products type."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
@@ -296,6 +318,7 @@ class TestScanRetrieve:
             "id": scan.id,
             "name": scan.name,
             "scan_type": scan.scan_type,
+            "options": {"max_concurrency": 25},
             "sources": [
                 {
                     "id": source.id,
@@ -339,6 +362,7 @@ class TestScanUpdate:
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
+            "options": {"max_concurrency": 25},
             "jobs": [
                 {
                     "id": scan.most_recent_scanjob.id,
@@ -369,6 +393,7 @@ class TestScanUpdate:
             ],
             "name": "NEW NAME",
             "scan_type": original_json["scan_type"],
+            "options": {"max_concurrency": 25},
             "sources": [original_json["sources"][0]["id"]],
         }
 
@@ -392,6 +417,7 @@ class TestScanUpdate:
             ],
             "name": scan.name,
             "scan_type": scan.scan_type,
+            "options": {"max_concurrency": 25},
             "sources": [new_source.id],
         }
 
@@ -452,6 +478,7 @@ class TestScanUpdate:
             ],
             "name": new_scan_data.name,
             "scan_type": scan.scan_type,
+            "options": {"max_concurrency": 25},
             "sources": [s.id for s in scan.sources.all()],
         }
 
@@ -557,6 +584,7 @@ class TestScanList:
                 "scan_type": scan.scan_type,
                 "most_recent": mocker.ANY,
                 "jobs": mocker.ANY,
+                "options": {"max_concurrency": 25},
                 "sources": [
                     {
                         "id": source.id,

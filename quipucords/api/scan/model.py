@@ -17,6 +17,7 @@ from api.source.model import Source
 
 logger = logging.getLogger(__name__)
 DEFAULT_MAX_CONCURRENCY = 25
+UPPER_MAX_CONCURRENCY = 200
 
 
 class Scan(models.Model):
@@ -80,13 +81,15 @@ class Scan(models.Model):
     def options(self):
         """Return the v1 compatible Scan options."""
         scan_options = dict()
-        scan_options.setdefault("max_concurrency", DEFAULT_MAX_CONCURRENCY)
         scan_options["max_concurrency"] = self.max_concurrency
         if self.enabled_extended_product_search:
             product_search = {}
-            for key, val in self.enabled_extended_product_search.items():
-                if val is not None:
-                    product_search[key] = val
+            enabled_products = self.enabled_extended_product_search
+            for prod in Scan.SUPPORTED_PRODUCTS:
+                product_search[prod] = enabled_products.get(prod, False)
+            search_dir = enabled_products.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
+            if search_dir is not None:
+                product_search[Scan.EXT_PRODUCT_SEARCH_DIRS] = search_dir
             scan_options["enabled_extended_product_search"] = product_search
         if self.enabled_optional_products:
             disabled_products = {}
@@ -94,9 +97,7 @@ class Scan(models.Model):
                 if val is not None:
                     disabled_products[key] = not val
             scan_options["disabled_optional_products"] = disabled_products
-        if self.enabled_extended_product_search or self.enabled_optional_products:
-            return scan_options
-        return None
+        return scan_options
 
     @options.setter
     def options(self, value):
@@ -129,6 +130,11 @@ class Scan(models.Model):
     def get_default_forks():
         """Create the default number of forks."""
         return DEFAULT_MAX_CONCURRENCY
+
+    @staticmethod
+    def get_max_forks():
+        """Create the maximum number of forks."""
+        return UPPER_MAX_CONCURRENCY
 
     @staticmethod
     def get_default_extra_vars():
