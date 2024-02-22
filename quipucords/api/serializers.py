@@ -19,7 +19,7 @@ from api.inspectresult.serializer import (
     TaskInspectionResultSerializer,
 )
 from api.scan.serializer import ScanSerializer
-from api.scanjob.serializer import ScanJobSerializer, SourceField
+from api.scanjob.serializer import ScanJobSerializerV1, SourceField
 from api.scantask.serializer import ScanTaskSerializer
 from api.source.serializer import (
     CredentialsField,

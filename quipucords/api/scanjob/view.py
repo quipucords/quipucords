@@ -18,9 +18,9 @@ from api import messages
 from api.common.pagination import StandardResultsSetPagination
 from api.common.util import is_int
 from api.models import Credential, RawFact, ScanJob, ScanTask, Source
-from api.scanjob.serializer import expand_scanjob
+from api.scanjob.serializer import ScanJobSerializerV2, expand_scanjob
 from api.serializers import (
-    ScanJobSerializer,
+    ScanJobSerializerV1,
     SystemConnectionResultSerializer,
     SystemInspectionResultSerializer,
 )
@@ -76,7 +76,7 @@ def expand_system_inspection(system):
         system["facts"] = facts
 
 
-class ScanJobFilter(FilterSet):
+class ScanJobFilterV1(FilterSet):
     """Filter for sources by name."""
 
     class Meta:
@@ -86,7 +86,21 @@ class ScanJobFilter(FilterSet):
         fields = ["status", "scan_type"]
 
 
-class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class ScanJobFilterV2(FilterSet):
+    """Filter for ScanJobs."""
+
+    class Meta:
+        """Metadata for filterset."""
+
+        model = ScanJob
+        fields = {
+            "status": ["exact"],
+            "scan_type": ["exact"],
+            "scan_id": ["exact", "isnull"],
+        }
+
+
+class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
     authentication_classes = (
@@ -96,9 +110,9 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
-    serializer_class = ScanJobSerializer
+    serializer_class = ScanJobSerializerV1
     filter_backends = (DjangoFilterBackend, OrderingFilter)
-    filterset_class = ScanJobFilter
+    filterset_class = ScanJobFilterV1
     ordering_fields = ("id", "scan_type", "status", "start_time", "end_time")
     ordering = ("id",)
 
@@ -109,7 +123,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             raise ValidationError(error)
 
         scan = get_object_or_404(self.queryset, pk=pk)
-        serializer = ScanJobSerializer(scan)
+        serializer = ScanJobSerializerV1(scan)
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan)
@@ -239,7 +253,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             # Kill job before changing job state
             pause_scan.send(sender=self.__class__, instance=scan)
             scan.status_pause()
-            serializer = ScanJobSerializer(scan)
+            serializer = ScanJobSerializerV1(scan)
             json_scan = serializer.data
             json_scan = expand_scanjob(json_scan)
             return Response(json_scan, status=200)
@@ -264,7 +278,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         # Kill job before changing job state
         cancel_scan.send(sender=self.__class__, instance=scan)
         scan.status_cancel()
-        serializer = ScanJobSerializer(scan)
+        serializer = ScanJobSerializerV1(scan)
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan, status=200)
@@ -281,7 +295,7 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             # Update job state before starting job
             scan.status_restart()
             restart_scan.send(sender=self.__class__, instance=scan)
-            serializer = ScanJobSerializer(scan)
+            serializer = ScanJobSerializerV1(scan)
             json_scan = serializer.data
             json_scan = expand_scanjob(json_scan)
             return Response(json_scan, status=200)
@@ -291,3 +305,19 @@ class ScanJobViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         err_msg = _(messages.NO_RESTART)
         return JsonResponse({"non_field_errors": [err_msg]}, status=400)
+
+
+class ScanJobViewSetV2(viewsets.ReadOnlyModelViewSet):
+    """A viewset for ScanJobs."""
+
+    authentication_classes = (
+        QuipucordsExpiringTokenAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
+    queryset = ScanJob.objects.prefetch_related("sources").with_counts()
+    serializer_class = ScanJobSerializerV2
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = ScanJobFilterV2
+    ordering_fields = ("id", "scan_type", "status", "start_time", "end_time")
+    ordering = ("-id",)

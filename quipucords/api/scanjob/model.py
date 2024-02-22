@@ -19,6 +19,7 @@ from api.scan.model import (
     Scan,
     ScanOptions,
 )
+from api.scanjob.queryset import ScanJobQuerySet
 from api.scantask.model import ScanTask
 from api.source.model import Source
 
@@ -66,6 +67,8 @@ class ScanJob(models.Model):
     )
 
     report = models.OneToOneField(Report, null=True, on_delete=models.CASCADE)
+
+    objects = ScanJobQuerySet.as_manager()
 
     class Meta:
         """Metadata for model."""

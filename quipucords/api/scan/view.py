@@ -27,7 +27,7 @@ from api.common.util import expand_scanjob_with_times, is_int
 from api.filters import ListFilter
 from api.models import Scan, ScanJob, ScanTask, Source
 from api.scanjob.serializer import expand_scanjob
-from api.serializers import ScanJobSerializer, ScanSerializer
+from api.serializers import ScanJobSerializerV1, ScanSerializer
 from api.signal.scanjob_signal import cancel_scan, start_scan
 from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
@@ -89,21 +89,21 @@ def jobs(request, scan_id=None):
         page = paginator.paginate_queryset(job_queryset, request)
 
         if page is not None:
-            serializer = ScanJobSerializer(page, many=True)
+            serializer = ScanJobSerializerV1(page, many=True)
             for scan in serializer.data:
                 json_scan = expand_scanjob(scan)
                 result.append(json_scan)
             return paginator.get_paginated_response(serializer.data)
 
         for job in job_queryset:
-            job_serializer = ScanJobSerializer(job)
+            job_serializer = ScanJobSerializerV1(job)
             job_json = job_serializer.data
             job_json = expand_scanjob(job_serializer.data)
             result.append(job_json)
         return Response(result)
     job_data = {}
     job_data["scan"] = scan_id
-    job_serializer = ScanJobSerializer(data=job_data)
+    job_serializer = ScanJobSerializerV1(data=job_data)
     job_serializer.is_valid(raise_exception=True)
     job_serializer.save()
     scanjob_obj = ScanJob.objects.get(pk=job_serializer.data["id"])
