@@ -5,27 +5,29 @@ from unittest import mock
 
 import pytest
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.reverse import reverse
 
 from api import messages
 from api.models import (
-    DisabledOptionalProductsOptions,
-    ExtendedProductSearchOptions,
     RawFact,
+    Scan,
     ScanJob,
-    ScanOptions,
     ScanTask,
     SystemConnectionResult,
     SystemInspectionResult,
 )
-from api.scan.serializer import ExtendedProductSearchOptionsSerializer
+from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import ScanJobSerializerV1
 from api.scanjob.view import expand_scanjob
+from tests.api.scan.test_scan import (
+    disabled_optional_products_default,
+    enabled_extended_product_search_default,
+)
 from tests.factories import (
     CredentialFactory,
     ScanFactory,
     ScanJobFactory,
-    ScanOptionsFactory,
     ScanTaskFactory,
     SourceFactory,
 )
@@ -42,7 +44,12 @@ class TestScanJob:
 
     def test_queue_task(self, django_client):
         """Test create queue state change."""
-        scan_options = ScanOptionsFactory()
+        scan_options = {
+            "disabled_optional_products": disabled_optional_products_default(),
+            "enabled_extended_product_search": (
+                enabled_extended_product_search_default()
+            ),
+        }
         scan = ScanFactory(options=scan_options)
         # Create Job
         scan_job = ScanJob.objects.create(scan=scan)
@@ -1447,16 +1454,16 @@ class TestScanJob:
 
     def test_get_extra_vars(self):
         """Tests the get_extra_vars method with empty dict."""
-        extended = ExtendedProductSearchOptions.objects.create()
-        disabled = DisabledOptionalProductsOptions.objects.create()
-        scan_options = ScanOptions.objects.create(
-            disabled_optional_products=disabled,
-            enabled_extended_product_search=extended,
-        )
+        scan_options = {
+            "disabled_optional_products": disabled_optional_products_default(),
+            "enabled_extended_product_search": (
+                enabled_extended_product_search_default()
+            ),
+        }
         scan_job, _ = create_scan_job(
             SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
-        extra_vars = scan_job.options.get_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
 
         expected_vars = {
             "jboss_eap": True,
@@ -1484,12 +1491,13 @@ class TestScanJob:
 
     def test_get_extra_vars_missing_disable_product(self):
         """Tests the get_extra_vars with extended search None."""
-        disabled = DisabledOptionalProductsOptions.objects.create()
-        scan_options = ScanOptions.objects.create(disabled_optional_products=disabled)
+        scan_options = {
+            "disabled_optional_products": disabled_optional_products_default()
+        }
         scan_job, _ = create_scan_job(
             SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
-        extra_vars = scan_job.options.get_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
 
         expected_vars = {
             "jboss_eap": True,
@@ -1514,14 +1522,15 @@ class TestScanJob:
 
     def test_get_extra_vars_missing_extended_search(self):
         """Tests the get_extra_vars with disabled products None."""
-        extended = ExtendedProductSearchOptions.objects.create()
-        scan_options = ScanOptions.objects.create(
-            enabled_extended_product_search=extended
-        )
+        scan_options = {
+            "enabled_extended_product_search": (
+                enabled_extended_product_search_default()
+            ),
+        }
         scan_job, _ = create_scan_job(
             SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
-        extra_vars = scan_job.options.get_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
 
         expected_vars = {
             "jboss_eap": True,
@@ -1547,46 +1556,40 @@ class TestScanJob:
 
     def test_get_extra_vars_missing_search_directories_empty(self):
         """Tests the get_extra_vars with search_directories empty."""
-        extended = {"search_directories": []}
-        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
-        assert serializer.is_valid()
+        search_directories = []
+        ScanSerializer.validate_search_directories(search_directories)
 
     def test_get_extra_vars_missing_search_directories_w_int(self, django_client):
         """Tests the get_extra_vars with search_directories contains int."""
-        extended = {"search_directories": [1]}
-        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
-        assert not serializer.is_valid()
+        with pytest.raises(ValidationError):
+            ScanSerializer.validate_search_directories([1])
 
     def test_get_extra_vars_missing_search_directories_w_not_path(self, django_client):
         """Tests the get_extra_vars with search_directories no path."""
-        extended = {"search_directories": ["a"]}
-        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
-        assert not serializer.is_valid()
+        with pytest.raises(ValidationError):
+            ScanSerializer.validate_search_directories(["a"])
 
     def test_get_extra_vars_missing_search_directories_w_path(self):
         """Tests the get_extra_vars with search_directories no path."""
-        extended = {"search_directories": ["/a"]}
-        serializer = ExtendedProductSearchOptionsSerializer(data=extended)
-        assert serializer.is_valid()
+        ScanSerializer.validate_search_directories(["/a"])
 
     def test_get_extra_vars_extended_search(self):
         """Tests the get_extra_vars method with extended search."""
-        extended = ExtendedProductSearchOptions.objects.create(
-            jboss_eap=True,
-            jboss_fuse=True,
-            jboss_brms=True,
-            jboss_ws=True,
-            search_directories=["a", "b"],
-        )
-        disabled = DisabledOptionalProductsOptions.objects.create()
-        scan_options = ScanOptions.objects.create(
-            disabled_optional_products=disabled,
-            enabled_extended_product_search=extended,
-        )
+        extended = {
+            Scan.JBOSS_EAP: True,
+            Scan.JBOSS_FUSE: True,
+            Scan.JBOSS_BRMS: True,
+            Scan.JBOSS_WS: True,
+            Scan.EXT_PRODUCT_SEARCH_DIRS: ["a", "b"],
+        }
+        scan_options = {
+            "disabled_optional_products": disabled_optional_products_default(),
+            "enabled_extended_product_search": extended,
+        }
         scan_job, _ = create_scan_job(
             SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
-        extra_vars = scan_job.options.get_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
 
         expected_vars = {
             "jboss_eap": True,
@@ -1614,18 +1617,22 @@ class TestScanJob:
 
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
-        extended = ExtendedProductSearchOptions.objects.create()
-        disabled = DisabledOptionalProductsOptions.objects.create(
-            jboss_eap=True, jboss_fuse=True, jboss_brms=False, jboss_ws=False
-        )
-        scan_options = ScanOptions.objects.create(
-            disabled_optional_products=disabled,
-            enabled_extended_product_search=extended,
-        )
+        disabled = {
+            Scan.JBOSS_EAP: True,
+            Scan.JBOSS_FUSE: True,
+            Scan.JBOSS_BRMS: False,
+            Scan.JBOSS_WS: False,
+        }
+        scan_options = {
+            "disabled_optional_products": disabled,
+            "enabled_extended_product_search": (
+                enabled_extended_product_search_default()
+            ),
+        }
         scan_job, _ = create_scan_job(
             SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
-        extra_vars = scan_job.options.get_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
 
         expected_vars = {
             "jboss_eap": True,
@@ -1654,19 +1661,22 @@ class TestScanJob:
 
     def test_get_extra_vars_false(self):
         """Tests the get_extra_vars method with all False."""
-        extended = ExtendedProductSearchOptions.objects.create()
-        disabled = DisabledOptionalProductsOptions.objects.create(
-            jboss_eap=True, jboss_fuse=True, jboss_brms=True, jboss_ws=True
-        )
-        scan_options = ScanOptions.objects.create(
-            disabled_optional_products=disabled,
-            enabled_extended_product_search=extended,
-        )
+        extended = enabled_extended_product_search_default()
+        disabled = {
+            Scan.JBOSS_EAP: True,
+            Scan.JBOSS_FUSE: True,
+            Scan.JBOSS_BRMS: True,
+            Scan.JBOSS_WS: True,
+        }
+        scan_options = {
+            "disabled_optional_products": disabled,
+            "enabled_extended_product_search": extended,
+        }
         scan_job, _ = create_scan_job(
             SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
         )
 
-        extra_vars = scan_job.options.get_extra_vars()
+        extra_vars = scan_job.get_extra_vars()
 
         expected_vars = {
             "jboss_eap": False,

@@ -316,37 +316,3 @@ class SourceFactory(DjangoModelFactory):
                 CredentialFactory(cred_type=obj.source_type) for _ in range(extracted)
             ]
             obj.credentials.add(*credentials)
-
-
-class ExtendedProductSearchOptionsFactory(DjangoModelFactory):
-    """Factory for ExtendedProductSearchOptions model."""
-
-    class Meta:
-        """Factory options."""
-
-        model = models.ExtendedProductSearchOptions
-
-
-class DisabledOptionalProductsOptionsFactory(DjangoModelFactory):
-    """Factory for DisabledOptionalProductsOptions model."""
-
-    class Meta:
-        """Factory options."""
-
-        model = models.DisabledOptionalProductsOptions
-
-
-class ScanOptionsFactory(DjangoModelFactory):
-    """Factory for ScanOptions model."""
-
-    disabled_optional_products = factory.SubFactory(
-        DisabledOptionalProductsOptionsFactory
-    )
-    enabled_extended_product_search = factory.SubFactory(
-        ExtendedProductSearchOptionsFactory
-    )
-
-    class Meta:
-        """Factory options."""
-
-        model = models.ScanOptions

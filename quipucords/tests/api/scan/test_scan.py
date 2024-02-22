@@ -11,8 +11,40 @@ from rest_framework.reverse import reverse
 from api.models import Scan, ScanTask
 from api.scan.serializer import ScanSerializer
 from api.scan.view import expand_scan
-from tests.factories import ScanFactory, ScanOptionsFactory, SourceFactory
+from tests.factories import ScanFactory, SourceFactory
 from tests.scanner.test_util import create_scan_job
+
+
+def disabled_optional_products_default():
+    """Return the default disabled_optional_products."""
+    disabled_optional_products = {}
+    for prod in Scan.SUPPORTED_PRODUCTS:
+        disabled_optional_products[prod] = False
+    return disabled_optional_products
+
+
+def enabled_optional_products_default():
+    """Return the default enabled_optional_products."""
+    enabled_optional_products = {}
+    for prod in Scan.SUPPORTED_PRODUCTS:
+        enabled_optional_products[prod] = True
+    return enabled_optional_products
+
+
+def enabled_extended_product_search_default():
+    """Return the default enabled_extended_product_search."""
+    enabled_extended_product_search = {}
+    for prod in Scan.SUPPORTED_PRODUCTS:
+        enabled_extended_product_search[prod] = False
+    return enabled_extended_product_search
+
+
+def scan_options_default():
+    """Return default scan_options."""
+    return {
+        "disabled_optional_products": disabled_optional_products_default(),
+        "enabled_extended_product_search": enabled_extended_product_search_default(),
+    }
 
 
 @pytest.mark.django_db
@@ -425,7 +457,10 @@ class TestScanUpdate:
 
     def test_partial_update_enabled(self, django_client):
         """Test partial update retains unprovided info."""
-        scan = ScanFactory(options=ScanOptionsFactory())
+        scan = ScanFactory(
+            enabled_extended_product_search=enabled_extended_product_search_default(),
+            enabled_optional_products=enabled_optional_products_default(),
+        )
         url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = django_client.get(url)
         assert original_response.ok
