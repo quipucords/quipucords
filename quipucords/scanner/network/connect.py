@@ -148,7 +148,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         source = serializer.data
 
         if self.scan_job.options is not None:
-            forks = self.scan_job.options.get("max_concurrency")
+            forks = self.scan_job.options.get(Scan.MAX_CONCURRENCY)
         else:
             forks = Scan.get_default_forks()
 

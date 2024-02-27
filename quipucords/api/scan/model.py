@@ -47,6 +47,9 @@ class Scan(models.Model):
     SUPPORTED_PRODUCTS = PRODUCTS.keys()
 
     EXT_PRODUCT_SEARCH_DIRS = "search_directories"
+    MAX_CONCURRENCY = "max_concurrency"
+    DISABLED_OPTIONAL_PRODUCTS = "disabled_optional_products"
+    ENABLED_EXTENDED_PRODUCT_SEARCH = "enabled_extended_product_search"
 
     name = models.CharField(max_length=64, unique=True)
     sources = models.ManyToManyField(Source)
@@ -73,7 +76,7 @@ class Scan(models.Model):
     def options(self):
         """Return the v1 compatible Scan options."""
         scan_options = dict()
-        scan_options["max_concurrency"] = self.max_concurrency
+        scan_options[Scan.MAX_CONCURRENCY] = self.max_concurrency
         if self.enabled_extended_product_search:
             product_search = {}
             enabled_products = self.enabled_extended_product_search
@@ -85,22 +88,22 @@ class Scan(models.Model):
             search_dir = enabled_products.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
             if search_dir is not None:
                 product_search[Scan.EXT_PRODUCT_SEARCH_DIRS] = search_dir
-            scan_options["enabled_extended_product_search"] = product_search
+            scan_options[Scan.ENABLED_EXTENDED_PRODUCT_SEARCH] = product_search
         if self.enabled_optional_products:
             disabled_products = {}
             for key, val in self.enabled_optional_products.items():
                 if val is not None:
                     disabled_products[key] = not val
-            scan_options["disabled_optional_products"] = disabled_products
+            scan_options[Scan.DISABLED_OPTIONAL_PRODUCTS] = disabled_products
         return scan_options
 
     @options.setter
     def options(self, value):
         """Implement the v1 compatible Scan options setter."""
-        max_concurrency = value.get("max_concurrency", None)
+        max_concurrency = value.get(Scan.MAX_CONCURRENCY, None)
         if max_concurrency is not None:
             self.max_concurrency = convert_to_int(max_concurrency)
-        disabled_products = value.get("disabled_optional_products", None)
+        disabled_products = value.get(Scan.DISABLED_OPTIONAL_PRODUCTS, None)
         if disabled_products is not None:
             enabled_products = {}
             for prod in self.SUPPORTED_PRODUCTS:
@@ -110,7 +113,7 @@ class Scan(models.Model):
                 else:
                     enabled_products[prod] = True
             self.enabled_optional_products = enabled_products
-        extended_search = value.get("enabled_extended_product_search", None)
+        extended_search = value.get(Scan.ENABLED_EXTENDED_PRODUCT_SEARCH, None)
         if extended_search is not None:
             enabled_extended_product_search = {}
             for prod in Scan.SUPPORTED_PRODUCTS:

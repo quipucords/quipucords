@@ -171,7 +171,7 @@ class InspectTaskRunner(ScanTaskRunner):
             use_paramiko = False
 
         if self.scan_job.options is not None:
-            forks = self.scan_job.options.get("max_concurrency")
+            forks = self.scan_job.options.get(Scan.MAX_CONCURRENCY)
             extra_vars = self.scan_job.get_extra_vars()
         else:
             forks = Scan.get_default_forks()

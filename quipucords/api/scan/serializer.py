@@ -143,13 +143,13 @@ class ScanSerializer(NotEmptySerializer):
         """Make sure the options specified are valid."""
         if options:
             ScanSerializer.validate_max_concurrency(
-                options.get("max_concurrency", None)
+                options.get(Scan.MAX_CONCURRENCY, None)
             )
             ScanSerializer.validate_disabled_optional_products(
-                options.get("disabled_optional_products", None)
+                options.get(Scan.DISABLED_OPTIONAL_PRODUCTS, None)
             )
             ScanSerializer.validate_enabled_extended_product_search(
-                options.get("enabled_extended_product_search", None)
+                options.get(Scan.ENABLED_EXTENDED_PRODUCT_SEARCH, None)
             )
         return options
 
@@ -163,21 +163,23 @@ class ScanSerializer(NotEmptySerializer):
             max_concurrency_int = convert_to_int(max_concurrency)
             if max_concurrency_int < 1:
                 errors = {
-                    "max_concurrency": [
+                    Scan.MAX_CONCURRENCY: [
                         "Ensure this value is greater than or equal to 1."
                     ]
                 }
                 raise ValidationError(errors)
             if max_concurrency_int > Scan.get_max_forks():
                 errors = {
-                    "max_concurrency": [
+                    Scan.MAX_CONCURRENCY: [
                         "Ensure this value is less than"
                         f" or equal to {Scan.get_max_forks()}."
                     ]
                 }
                 raise ValidationError(errors)
         else:
-            errors = {"max_concurrency": ["Ensure this value is a positive integer."]}
+            errors = {
+                Scan.MAX_CONCURRENCY: ["Ensure this value is a positive integer."]
+            }
             raise ValidationError(errors)
 
         return max_concurrency
@@ -190,7 +192,7 @@ class ScanSerializer(NotEmptySerializer):
 
         if isinstance(disabled_optional_products, str):
             errors = {
-                "disabled_optional_products": {
+                Scan.DISABLED_OPTIONAL_PRODUCTS: {
                     "non_field_errors": [
                         "Invalid data. Expected a dictionary, but got str."
                     ]
@@ -204,7 +206,7 @@ class ScanSerializer(NotEmptySerializer):
             if flag is not None and is_boolean(flag) is False:
                 bad_prods[prod] = ["Must be a valid boolean."]
         if bad_prods:
-            errors = {"disabled_optional_products": bad_prods}
+            errors = {Scan.DISABLED_OPTIONAL_PRODUCTS: bad_prods}
             raise ValidationError(errors)
 
         return disabled_optional_products
@@ -217,7 +219,7 @@ class ScanSerializer(NotEmptySerializer):
 
         if isinstance(enabled_extended_product_search, str):
             errors = {
-                "enabled_extended_product_search": {
+                Scan.ENABLED_EXTENDED_PRODUCT_SEARCH: {
                     "non_field_errors": [
                         "Invalid data. Expected a dictionary, but got str."
                     ]
@@ -231,7 +233,7 @@ class ScanSerializer(NotEmptySerializer):
             if flag is not None and is_boolean(flag) is False:
                 bad_prods[prod] = ["Must be a valid boolean."]
         if bad_prods:
-            errors = {"enabled_extended_product_search": bad_prods}
+            errors = {Scan.ENABLED_EXTENDED_PRODUCT_SEARCH: bad_prods}
             raise ValidationError(errors)
 
         ScanSerializer.validate_search_directories(
@@ -247,7 +249,7 @@ class ScanSerializer(NotEmptySerializer):
             return None
 
         search_directories_validation_errors = {
-            "enabled_extended_product_search": {
+            Scan.ENABLED_EXTENDED_PRODUCT_SEARCH: {
                 Scan.EXT_PRODUCT_SEARCH_DIRS: [
                     _(messages.SCAN_OPTIONS_EXTENDED_SEARCH_DIR_NOT_LIST)
                 ]
@@ -271,15 +273,15 @@ class ScanSerializer(NotEmptySerializer):
 
     def update_options(self, instance, options):
         """Update the options for the Scan."""
-        max_concurrency = options.pop("max_concurrency", None)
+        max_concurrency = options.pop(Scan.MAX_CONCURRENCY, None)
         if max_concurrency is not None:
             instance.max_concurrency = max_concurrency
 
-        disabled_products = options.pop("disabled_optional_products", None)
+        disabled_products = options.pop(Scan.DISABLED_OPTIONAL_PRODUCTS, None)
         if disabled_products:
             self.update_optional_products(instance, disabled_products)
 
-        extended_search = options.pop("enabled_extended_product_search", None)
+        extended_search = options.pop(Scan.ENABLED_EXTENDED_PRODUCT_SEARCH, None)
         if extended_search:
             self.update_enabled_extended_product_search(instance, extended_search)
 
