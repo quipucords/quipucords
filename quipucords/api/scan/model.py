@@ -3,6 +3,7 @@
 These models are used in the REST definitions.
 """
 import logging
+from collections import namedtuple
 
 from django.db import models
 from django.utils.translation import gettext as _
@@ -18,6 +19,9 @@ from api.source.model import Source
 logger = logging.getLogger(__name__)
 DEFAULT_MAX_CONCURRENCY = 25
 UPPER_MAX_CONCURRENCY = 200
+PROD_DEF = namedtuple(
+    "Product", ["name", "enabled", "ext_name", "ext_enabled", "extra_var_opt"]
+)
 
 
 class Scan(models.Model):
@@ -28,31 +32,19 @@ class Scan(models.Model):
         (ScanTask.SCAN_TYPE_INSPECT, ScanTask.SCAN_TYPE_INSPECT),
     )
 
-    SUPPORTED_PRODUCTS = ["jboss_eap", "jboss_fuse", "jboss_ws", "jboss_brms"]
-
     JBOSS_EAP = "jboss_eap"
-    JBOSS_EAP_EXT = "jboss_eap_ext"
-    EXT_JBOSS_EAP = False
-    MODEL_OPT_JBOSS_EAP = True
-    EXTRA_VAR_OPT_JBOSS_EAP = MODEL_OPT_JBOSS_EAP
-
     JBOSS_FUSE = "jboss_fuse"
-    JBOSS_FUSE_EXT = "jboss_fuse_ext"
-    EXT_JBOSS_FUSE = False
-    MODEL_OPT_JBOSS_FUSE = True
-    EXTRA_VAR_OPT_JBOSS_FUSE = MODEL_OPT_JBOSS_FUSE
-
     JBOSS_WS = "jboss_ws"
-    JBOSS_WS_EXT = "jboss_ws_ext"
-    EXT_JBOSS_WS = False
-    MODEL_OPT_JBOSS_WS = True
-    EXTRA_VAR_OPT_JBOSS_WS = MODEL_OPT_JBOSS_WS
-
     JBOSS_BRMS = "jboss_brms"
-    JBOSS_BRMS_EXT = "jboss_brms_ext"
-    EXT_JBOSS_BRMS = False
-    MODEL_OPT_JBOSS_BRMS = True
-    EXTRA_VAR_OPT_JBOSS_BRMS = MODEL_OPT_JBOSS_BRMS
+
+    PRODUCTS = {
+        JBOSS_EAP: PROD_DEF(JBOSS_EAP, True, f"{JBOSS_EAP}_ext", False, True),
+        JBOSS_FUSE: PROD_DEF(JBOSS_FUSE, True, f"{JBOSS_FUSE}_ext", False, True),
+        JBOSS_WS: PROD_DEF(JBOSS_WS, True, f"{JBOSS_WS}_ext", False, True),
+        JBOSS_BRMS: PROD_DEF(JBOSS_BRMS, True, f"{JBOSS_BRMS}_ext", False, True),
+    }
+
+    SUPPORTED_PRODUCTS = PRODUCTS.keys()
 
     EXT_PRODUCT_SEARCH_DIRS = "search_directories"
 
@@ -86,7 +78,10 @@ class Scan(models.Model):
             product_search = {}
             enabled_products = self.enabled_extended_product_search
             for prod in Scan.SUPPORTED_PRODUCTS:
-                product_search[prod] = enabled_products.get(prod, False)
+                prod_def = Scan.PRODUCTS[prod]
+                product_search[prod_def.name] = enabled_products.get(
+                    prod_def.name, prod_def.ext_enabled
+                )
             search_dir = enabled_products.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
             if search_dir is not None:
                 product_search[Scan.EXT_PRODUCT_SEARCH_DIRS] = search_dir
@@ -142,16 +137,11 @@ class Scan(models.Model):
 
         :returns: a dictionary representing extra vars
         """
-        defaults = {
-            Scan.JBOSS_EAP: Scan.EXTRA_VAR_OPT_JBOSS_EAP,
-            Scan.JBOSS_FUSE: Scan.EXTRA_VAR_OPT_JBOSS_FUSE,
-            Scan.JBOSS_BRMS: Scan.EXTRA_VAR_OPT_JBOSS_BRMS,
-            Scan.JBOSS_WS: Scan.EXTRA_VAR_OPT_JBOSS_WS,
-            Scan.JBOSS_EAP_EXT: Scan.EXT_JBOSS_EAP,
-            Scan.JBOSS_FUSE_EXT: Scan.EXT_JBOSS_FUSE,
-            Scan.JBOSS_BRMS_EXT: Scan.EXT_JBOSS_BRMS,
-            Scan.JBOSS_WS_EXT: Scan.EXT_JBOSS_WS,
-        }
+        defaults = {}
+        for prod in Scan.SUPPORTED_PRODUCTS:
+            prod_def = Scan.PRODUCTS[prod]
+            defaults[prod_def.name] = prod_def.extra_var_opt
+            defaults[prod_def.ext_name] = prod_def.ext_enabled
         return defaults
 
     def get_search_directories(self):
@@ -188,18 +178,11 @@ class Scan(models.Model):
         # Scan for EAP if fuse or brms are in scan
         extended_search = self.enabled_extended_product_search
         if extended_search is not None:
-            extra_vars[self.JBOSS_EAP_EXT] = extended_search.get(
-                self.JBOSS_EAP, self.EXT_JBOSS_EAP
-            )
-            extra_vars[self.JBOSS_FUSE_EXT] = extended_search.get(
-                self.JBOSS_FUSE, self.EXT_JBOSS_FUSE
-            )
-            extra_vars[self.JBOSS_BRMS_EXT] = extended_search.get(
-                self.JBOSS_BRMS, self.EXT_JBOSS_BRMS
-            )
-            extra_vars[self.JBOSS_WS_EXT] = extended_search.get(
-                self.JBOSS_WS, self.EXT_JBOSS_WS
-            )
+            for prod in Scan.SUPPORTED_PRODUCTS:
+                prod_def = Scan.PRODUCTS[prod]
+                extra_vars[prod_def.ext_name] = extended_search.get(
+                    prod_def.name, prod_def.ext_enabled
+                )
 
             # Add search directories if it is not None, not empty
             search_directories = extended_search.get(self.EXT_PRODUCT_SEARCH_DIRS, None)

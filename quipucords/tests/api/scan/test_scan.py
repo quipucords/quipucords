@@ -19,7 +19,8 @@ def disabled_optional_products_default():
     """Return the default disabled_optional_products."""
     disabled_optional_products = {}
     for prod in Scan.SUPPORTED_PRODUCTS:
-        disabled_optional_products[prod] = False
+        prod_def = Scan.PRODUCTS[prod]
+        disabled_optional_products[prod_def.name] = not prod_def.enabled
     return disabled_optional_products
 
 
@@ -27,7 +28,8 @@ def enabled_optional_products_default():
     """Return the default enabled_optional_products."""
     enabled_optional_products = {}
     for prod in Scan.SUPPORTED_PRODUCTS:
-        enabled_optional_products[prod] = True
+        prod_def = Scan.PRODUCTS[prod]
+        enabled_optional_products[prod_def.name] = prod_def.enabled
     return enabled_optional_products
 
 
@@ -35,7 +37,8 @@ def enabled_extended_product_search_default():
     """Return the default enabled_extended_product_search."""
     enabled_extended_product_search = {}
     for prod in Scan.SUPPORTED_PRODUCTS:
-        enabled_extended_product_search[prod] = False
+        prod_def = Scan.PRODUCTS[prod]
+        enabled_extended_product_search[prod_def.name] = prod_def.ext_enabled
     return enabled_extended_product_search
 
 
