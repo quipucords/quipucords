@@ -131,3 +131,6 @@ var/
 
 # vagrant data
 .vagrant/
+
+# test profiling results
+prof/
