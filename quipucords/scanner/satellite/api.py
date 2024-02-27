@@ -51,7 +51,7 @@ class SatelliteInterface(ABC):
         if scan_job.options is None:
             self.max_concurrency = Scan.get_default_forks()
         else:
-            self.max_concurrency = scan_job.options.get("max_concurrency")
+            self.max_concurrency = scan_job.options.get(Scan.MAX_CONCURRENCY)
 
         if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             self.connect_scan_task = scan_task

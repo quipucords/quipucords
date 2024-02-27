@@ -72,7 +72,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
     def max_concurrency(self):
         """Return scan job max concurrency option."""
         try:
-            return self.scan_task.job.options.get("max_concurrency")
+            return self.scan_task.job.options.get(Scan.MAX_CONCURRENCY)
         except AttributeError:
             return Scan.get_default_forks()
 
