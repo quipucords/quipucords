@@ -17,7 +17,7 @@ from rest_framework.serializers import ValidationError
 from api import messages
 from api.common.pagination import StandardResultsSetPagination
 from api.common.util import is_int
-from api.models import Credential, RawFact, ScanJob, ScanTask, Source
+from api.models import Credential, ScanJob, ScanTask, Source
 from api.scanjob.serializer import ScanJobSerializerV2, expand_scanjob
 from api.serializers import (
     ScanJobSerializerV1,
@@ -65,15 +65,6 @@ def expand_system_inspection(system):
     :param system: A dictionary for a inspection system result.
     """
     expand_source(system)
-    if "facts" in system.keys():
-        facts = []
-        fact_ids = system["facts"]
-        for fact_id in fact_ids:
-            raw_fact = (
-                RawFact.objects.filter(id=fact_id).values("name", "value").first()
-            )
-            facts.append(raw_fact)
-        system["facts"] = facts
 
 
 class ScanJobFilterV1(FilterSet):
