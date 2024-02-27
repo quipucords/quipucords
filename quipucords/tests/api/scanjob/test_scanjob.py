@@ -1576,10 +1576,10 @@ class TestScanJob:
     def test_get_extra_vars_extended_search(self):
         """Tests the get_extra_vars method with extended search."""
         extended = {
-            Scan.JBOSS_EAP: True,
-            Scan.JBOSS_FUSE: True,
-            Scan.JBOSS_BRMS: True,
-            Scan.JBOSS_WS: True,
+            "jboss_eap": True,
+            "jboss_fuse": True,
+            "jboss_brms": True,
+            "jboss_ws": True,
             Scan.EXT_PRODUCT_SEARCH_DIRS: ["a", "b"],
         }
         scan_options = {
@@ -1618,10 +1618,10 @@ class TestScanJob:
     def test_get_extra_vars_mixed(self):
         """Tests the get_extra_vars method with mixed values."""
         disabled = {
-            Scan.JBOSS_EAP: True,
-            Scan.JBOSS_FUSE: True,
-            Scan.JBOSS_BRMS: False,
-            Scan.JBOSS_WS: False,
+            "jboss_eap": True,
+            "jboss_fuse": True,
+            "jboss_brms": False,
+            "jboss_ws": False,
         }
         scan_options = {
             "disabled_optional_products": disabled,
@@ -1663,10 +1663,10 @@ class TestScanJob:
         """Tests the get_extra_vars method with all False."""
         extended = enabled_extended_product_search_default()
         disabled = {
-            Scan.JBOSS_EAP: True,
-            Scan.JBOSS_FUSE: True,
-            Scan.JBOSS_BRMS: True,
-            Scan.JBOSS_WS: True,
+            "jboss_eap": True,
+            "jboss_fuse": True,
+            "jboss_brms": True,
+            "jboss_ws": True,
         }
         scan_options = {
             "disabled_optional_products": disabled,
