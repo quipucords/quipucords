@@ -53,8 +53,8 @@ def credential_bulk_delete(request):
         raise ParseError(
             detail=_(
                 "Missing 'ids' list of credential ids "
-                "or '%(DELETE_ALL_IDS_MAGIC_STRING)s' string"
-            ).format({"DELETE_ALL_IDS_MAGIC_STRING": DELETE_ALL_IDS_MAGIC_STRING})
+                "or '{DELETE_ALL_IDS_MAGIC_STRING}' string"
+            ).format(DELETE_ALL_IDS_MAGIC_STRING=DELETE_ALL_IDS_MAGIC_STRING)
         )
     elif not isinstance(ids, str):
         ids = set(ids)  # remove duplicates
