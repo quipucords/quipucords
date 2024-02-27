@@ -918,7 +918,6 @@ class TestScanJob:
                         "name": source.name,
                         "source_type": source.source_type,
                     },
-                    "facts": [{"name": "fact_key2", "value": "fact_value2"}],
                 }
             ],
         }
@@ -943,13 +942,6 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        fact = RawFact(
-            name="fact_key",
-            value="fact_value",
-            system_inspection_result=inspect_sys_result,
-        )
-        fact.save()
-
         inspect_sys_result2 = SystemInspectionResult(
             name="Foo2",
             status=SystemConnectionResult.SUCCESS,
@@ -957,13 +949,6 @@ class TestScanJob:
             task_inspection_result=inspection_result,
         )
         inspect_sys_result2.save()
-
-        fact2 = RawFact(
-            name="fact_key2",
-            value="fact_value2",
-            system_inspection_result=inspect_sys_result2,
-        )
-        fact2.save()
 
         inspect_sys_result3 = SystemInspectionResult(
             name="Foo3",
@@ -998,7 +983,6 @@ class TestScanJob:
                         "name": source2.name,
                         "source_type": source2.source_type,
                     },
-                    "facts": [],
                 },
                 {
                     "name": "Foo3",
@@ -1008,7 +992,6 @@ class TestScanJob:
                         "name": source2.name,
                         "source_type": source2.source_type,
                     },
-                    "facts": [],
                 },
                 {
                     "name": "Foo2",
@@ -1018,7 +1001,6 @@ class TestScanJob:
                         "name": source1.name,
                         "source_type": source1.source_type,
                     },
-                    "facts": [{"name": "fact_key2", "value": "fact_value2"}],
                 },
                 {
                     "name": "Foo1",
@@ -1028,7 +1010,6 @@ class TestScanJob:
                         "name": source1.name,
                         "source_type": source1.source_type,
                     },
-                    "facts": [{"name": "fact_key", "value": "fact_value"}],
                 },
             ],
         }
@@ -1054,13 +1035,6 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        fact = RawFact(
-            name="fact_key",
-            value="fact_value",
-            system_inspection_result=inspect_sys_result,
-        )
-        fact.save()
-
         inspect_sys_result2 = SystemInspectionResult(
             name="Foo2",
             status=SystemConnectionResult.SUCCESS,
@@ -1068,13 +1042,6 @@ class TestScanJob:
             task_inspection_result=inspection_result,
         )
         inspect_sys_result2.save()
-
-        fact2 = RawFact(
-            name="fact_key2",
-            value="fact_value2",
-            system_inspection_result=inspect_sys_result2,
-        )
-        fact2.save()
 
         inspect_sys_result3 = SystemInspectionResult(
             name="Foo3",
@@ -1109,7 +1076,6 @@ class TestScanJob:
                         "name": source2.name,
                         "source_type": source2.source_type,
                     },
-                    "facts": [],
                 },
                 {
                     "name": "Foo4",
@@ -1119,7 +1085,6 @@ class TestScanJob:
                         "name": source2.name,
                         "source_type": source2.source_type,
                     },
-                    "facts": [],
                 },
             ],
         }
@@ -1146,13 +1111,6 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        fact = RawFact(
-            name="fact_key",
-            value="fact_value",
-            system_inspection_result=inspect_sys_result,
-        )
-        fact.save()
-
         inspect_sys_result2 = SystemInspectionResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
@@ -1160,13 +1118,6 @@ class TestScanJob:
             task_inspection_result=inspection_result,
         )
         inspect_sys_result2.save()
-
-        fact2 = RawFact(
-            name="fact_key2",
-            value="fact_value2",
-            system_inspection_result=inspect_sys_result2,
-        )
-        fact2.save()
 
         inspect_sys_result3 = SystemInspectionResult(
             name="Foo",
@@ -1201,7 +1152,6 @@ class TestScanJob:
                         "name": source2.name,
                         "source_type": source2.source_type,
                     },
-                    "facts": [],
                 },
                 {
                     "name": "Foo",
@@ -1211,7 +1161,6 @@ class TestScanJob:
                         "name": source2.name,
                         "source_type": source2.source_type,
                     },
-                    "facts": [],
                 },
                 {
                     "name": "Foo",
@@ -1221,7 +1170,6 @@ class TestScanJob:
                         "name": source1.name,
                         "source_type": source1.source_type,
                     },
-                    "facts": [{"name": "fact_key", "value": "fact_value"}],
                 },
                 {
                     "name": "Foo",
@@ -1231,7 +1179,6 @@ class TestScanJob:
                         "name": source1.name,
                         "source_type": source1.source_type,
                     },
-                    "facts": [{"name": "fact_key2", "value": "fact_value2"}],
                 },
             ],
         }
@@ -1256,13 +1203,6 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        fact = RawFact(
-            name="fact_key",
-            value="fact_value",
-            system_inspection_result=inspect_sys_result,
-        )
-        fact.save()
-
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url)
         assert response.status_code == status.HTTP_200_OK
@@ -1280,7 +1220,6 @@ class TestScanJob:
                         "name": source1.name,
                         "source_type": source1.source_type,
                     },
-                    "facts": [{"name": "fact_key", "value": "fact_value"}],
                 }
             ],
         }
@@ -1301,14 +1240,6 @@ class TestScanJob:
             task_inspection_result=inspection_result,
         )
         inspect_sys_result.save()
-
-        fact = RawFact(
-            name="fact_key",
-            value="fact_value",
-            system_inspection_result=inspect_sys_result,
-        )
-        fact.save()
-
         source.delete()
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
@@ -1324,7 +1255,6 @@ class TestScanJob:
                     "name": "Foo",
                     "status": "success",
                     "source": "deleted",
-                    "facts": [{"name": "fact_key", "value": "fact_value"}],
                 }
             ],
         }
