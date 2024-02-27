@@ -49,6 +49,7 @@ def credential_bulk_delete(request):
         not isinstance(ids, (list, str))
         or (isinstance(ids, str) and ids != DELETE_ALL_IDS_MAGIC_STRING)
         or (isinstance(ids, list) and len(ids) == 0)
+        or (isinstance(ids, list) and any([not isinstance(_id, int) for _id in ids]))
     ):
         raise ParseError(
             detail=_(

@@ -1047,7 +1047,7 @@ class TestCredentialBulkDelete:
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
         assert Credential.objects.count() == 0
 
-    @pytest.mark.parametrize("bad_ids", ["1", False, None])
+    @pytest.mark.parametrize("bad_ids", ["1", False, None, [1, "2"]])
     def test_bulk_delete_rejects_invalid_inputs(self, bad_ids, django_client):
         """Test that bulk delete rejects unexpected value types in "ids"."""
         delete_request = {"ids": bad_ids}
