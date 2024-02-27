@@ -77,6 +77,13 @@ class ScanJob(models.Model):
             return self.scan.options
         return None
 
+    @options.setter
+    def options(self, value):
+        """Set the options property for the related Scan."""
+        if self.scan:
+            self.scan.options = value
+            self.scan.save()
+
     def get_extra_vars(self):
         """Return the extra vars from the related Scan."""
         if self.scan:

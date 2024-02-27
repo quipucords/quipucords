@@ -137,16 +137,12 @@ class ScanJobSerializerV1(NotEmptySerializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a scan."""
-        _options = validated_data.pop("options", None)
-        scan = super().create(validated_data)
-        return scan
+        return super().create(validated_data)
 
     @transaction.atomic
     def update(self, instance, validated_data):
         """Update a scan."""
-        _options = validated_data.pop("options", None)
-        instance = super().update(instance, validated_data)
-        return instance
+        return super().update(instance, validated_data)
 
     @staticmethod
     def validate_sources(sources):
