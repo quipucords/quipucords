@@ -169,14 +169,28 @@ class Scan(models.Model):
         enable_products = self.enabled_optional_products
         if enable_products is not None:
             extra_vars[self.JBOSS_EAP] = (
-                enable_products[self.JBOSS_BRMS]
-                or enable_products[self.JBOSS_FUSE]
-                or enable_products[self.JBOSS_EAP]
-                or enable_products[self.JBOSS_WS]
+                enable_products.get(
+                    self.JBOSS_BRMS, Scan.PRODUCTS[self.JBOSS_BRMS].enabled
+                )
+                or enable_products.get(
+                    self.JBOSS_FUSE, Scan.PRODUCTS[self.JBOSS_FUSE].enabled
+                )
+                or enable_products.get(
+                    self.JBOSS_EAP, Scan.PRODUCTS[self.JBOSS_EAP].enabled
+                )
+                or enable_products.get(
+                    self.JBOSS_WS, Scan.PRODUCTS[self.JBOSS_WS].enabled
+                )
             )
-            extra_vars[self.JBOSS_FUSE] = enable_products[self.JBOSS_FUSE]
-            extra_vars[self.JBOSS_BRMS] = enable_products[self.JBOSS_BRMS]
-            extra_vars[self.JBOSS_WS] = enable_products[self.JBOSS_WS]
+            extra_vars[self.JBOSS_FUSE] = enable_products.get(
+                self.JBOSS_FUSE, Scan.PRODUCTS[self.JBOSS_FUSE].enabled
+            )
+            extra_vars[self.JBOSS_BRMS] = enable_products.get(
+                self.JBOSS_BRMS, Scan.PRODUCTS[self.JBOSS_BRMS].enabled
+            )
+            extra_vars[self.JBOSS_WS] = enable_products.get(
+                self.JBOSS_WS, Scan.PRODUCTS[self.JBOSS_WS].enabled
+            )
 
         # Scan for EAP if fuse or brms are in scan
         extended_search = self.enabled_extended_product_search
