@@ -51,6 +51,7 @@ class InspectResult(models.Model):
     task_inspection_result = models.ForeignKey(
         TaskInspectionResult, on_delete=models.CASCADE, related_name="systems"
     )
+    tasks = models.ManyToManyField("ScanTask", related_name="inspect_results")
 
     class Meta:
         """Metadata for model."""
