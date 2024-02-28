@@ -26,6 +26,7 @@ from tests.api.scan.test_scan import (
 )
 from tests.factories import (
     CredentialFactory,
+    InspectResultFactory,
     ScanFactory,
     ScanJobFactory,
     ScanTaskFactory,
@@ -1997,3 +1998,47 @@ class TestScanJobViewSetV2:
         result = response.json()["results"][0]
         assert result["id"] == scanjob.id
         assert result["status"] == chosen_status
+
+
+@pytest.fixture
+def scanjob_with_inspect_results():
+    """ScanJob with 3 InspectResults."""
+    inspection_results = InspectResultFactory.create_batch(3)
+    scanjob = ScanJobFactory()
+    task = ScanTaskFactory(job=scanjob)
+    task.inspect_results.add(*inspection_results)
+    return scanjob
+
+
+@pytest.mark.django_db
+def test_delete_inspect_results(scanjob_with_inspect_results):
+    """Test ScanJob.delete_inspect_results method."""
+    scanjob = scanjob_with_inspect_results
+    assert InspectResult.objects.filter(tasks__job=scanjob).exists()
+    scanjob.delete_inspect_results()
+    assert not InspectResult.objects.filter(tasks__job=scanjob).exists()
+
+
+@pytest.mark.django_db
+def test_delete_inspect_results_bound_to_other_scanjobs(
+    scanjob_with_inspect_results,
+):
+    """Ensure only InspectResults uniquely bound to a ScanJob are deleted."""
+    inspect_res = InspectResult.objects.first()
+    other_scanjob = ScanJobFactory()
+    task = ScanTaskFactory(job=other_scanjob)
+    inspect_res.tasks.add(task)
+    # save id in a variable so we can check later for existence
+    inspect_res_id = inspect_res.id
+
+    scanjob = scanjob_with_inspect_results
+    assert InspectResult.objects.filter(tasks__job=scanjob).count() == 3
+    scanjob.delete_inspect_results()
+    assert InspectResult.objects.filter(tasks__job=scanjob).count() == 1
+    assert InspectResult.objects.filter(id=inspect_res_id).exists()
+    # get rid of other_scanjob should make delete_inspection_results clear the results
+    # (scantask will be deleted in cascade)
+    other_scanjob.delete()
+    scanjob.delete_inspect_results()
+    assert InspectResult.objects.filter(tasks__job=scanjob).count() == 0
+    assert not InspectResult.objects.filter(id=inspect_res_id).exists()

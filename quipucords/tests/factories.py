@@ -295,3 +295,14 @@ class SourceFactory(DjangoModelFactory):
                 CredentialFactory(cred_type=obj.source_type) for _ in range(extracted)
             ]
             obj.credentials.add(*credentials)
+
+
+class InspectResultFactory(DjangoModelFactory):
+    """Factory for InspectResultFactory."""
+
+    name = factory.Faker("ipv4")
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.InspectResult"
