@@ -11,6 +11,7 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
+from api.inspectresult.model import InspectResult
 from api.reports.model import Report
 from api.scan.model import Scan
 from api.scanjob.queryset import ScanJobQuerySet
@@ -237,11 +238,10 @@ class ScanJob(models.Model):
         if self.tasks:
             # It appears the initialization didn't complete
             # so remove partial results
+            self.delete_inspect_results()
             self.tasks.all().delete()
             if self.connection_results is not None:
                 self.connection_results.task_results.all().delete()
-            if self.inspection_results is not None:
-                self.inspection_results.task_results.all().delete()
             if self.report and self.report.deployment_report:
                 self.report.deployment_report.system_fingerprints.delete()
 
@@ -266,6 +266,12 @@ class ScanJob(models.Model):
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
         self.log_current_status()
+
+    def delete_inspect_results(self):
+        """Delete InspectResults exclusively related to this ScanJob."""
+        InspectResult.objects.filter(tasks__job_id=self.id).exclude(
+            tasks__in=ScanTask.objects.exclude(job_id=self.id)
+        ).delete()
 
     def _create_connection_tasks(self):
         """Create initial connection tasks.
