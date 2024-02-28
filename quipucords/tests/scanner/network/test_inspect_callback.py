@@ -8,8 +8,7 @@ import pytest
 import yaml
 from ansible.parsing.yaml.dumper import AnsibleDumper
 
-from api.models import SystemInspectionResult
-from api.scan.model import Scan
+from api.models import InspectResult, Scan
 from log_messages import TASK_UNEXPECTED_FAILURE
 from scanner.network.inspect_callback import InspectCallback
 
@@ -245,13 +244,13 @@ class TestInspectCallback:
     @pytest.mark.parametrize(
         "facts,is_unreachable,expected_status",
         (
-            ({"host_done": True}, False, SystemInspectionResult.SUCCESS),
+            ({"host_done": True}, False, InspectResult.SUCCESS),
             # maybe we should consider the next one successful
-            ({"host_done": True}, True, SystemInspectionResult.UNREACHABLE),
-            ({"pineapple": "abacaxi"}, True, SystemInspectionResult.UNREACHABLE),
-            ({"strawberry": "morango"}, False, SystemInspectionResult.FAILED),
-            ({"host_done": "some string"}, False, SystemInspectionResult.FAILED),
-            ({"host_done": False}, False, SystemInspectionResult.FAILED),
+            ({"host_done": True}, True, InspectResult.UNREACHABLE),
+            ({"pineapple": "abacaxi"}, True, InspectResult.UNREACHABLE),
+            ({"strawberry": "morango"}, False, InspectResult.FAILED),
+            ({"host_done": "some string"}, False, InspectResult.FAILED),
+            ({"host_done": False}, False, InspectResult.FAILED),
         ),
     )
     def test_results(self, mocker, facts, is_unreachable, expected_status):
@@ -295,6 +294,6 @@ def test_inspect_callback_with_inspect_playbook(mocker, settings, local_inventor
     assert len(all_results) == 1
     results = all_results[0]
     assert results.host == "localhost"
-    assert results.status == SystemInspectionResult.SUCCESS
+    assert results.status == InspectResult.SUCCESS
     # spot check at least one fact we expect to always work
     assert results.facts["uname_hostname"] == os.uname().nodename

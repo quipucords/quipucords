@@ -18,7 +18,7 @@ from api.reports.model import Report
 from api.inspectresult.model import (
     JobInspectionResult,
     RawFact,
-    SystemInspectionResult,
+    InspectResult,
     TaskInspectionResult,
 )
 from api.scan.model import Scan

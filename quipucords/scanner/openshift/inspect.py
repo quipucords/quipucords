@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import transaction
 
-from api.models import RawFact, ScanTask, SystemInspectionResult
+from api.models import InspectResult, RawFact, ScanTask
 from scanner.exceptions import ScanFailureError
 from scanner.openshift import metrics
 from scanner.openshift.api import OpenShiftApi
@@ -121,7 +121,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def _persist_cluster_facts(self, cluster, other_facts):
         inspection_status = self._infer_inspection_status(cluster)
-        system_result = SystemInspectionResult(
+        system_result = InspectResult(
             name=cluster.name,
             status=inspection_status,
             source=self.scan_task.source,
@@ -134,9 +134,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         RawFact.objects.bulk_create(other_raw_facts)
         return system_result
 
-    def _persist_facts(self, node: OCPNode) -> SystemInspectionResult:
+    def _persist_facts(self, node: OCPNode) -> InspectResult:
         inspection_status = self._infer_inspection_status(node)
-        sys_result = SystemInspectionResult(
+        sys_result = InspectResult(
             name=node.name,
             status=inspection_status,
             source=self.scan_task.source,
@@ -148,7 +148,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         return sys_result
 
     def _entity_as_raw_fact(
-        self, entity: OCPBaseEntity, inspection_result: SystemInspectionResult
+        self, entity: OCPBaseEntity, inspection_result: InspectResult
     ) -> RawFact:
         return RawFact(
             name=entity.kind,
@@ -157,7 +157,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         )
 
     def _entities_as_raw_facts(
-        self, inspection_result: SystemInspectionResult, entities: dict
+        self, inspection_result: InspectResult, entities: dict
     ) -> list[RawFact]:
         def _pydantic_encoder(value):
             return value.dict()
@@ -175,16 +175,16 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def _infer_inspection_status(self, entity):
         if entity.errors:
-            return SystemInspectionResult.FAILED
-        return SystemInspectionResult.SUCCESS
+            return InspectResult.FAILED
+        return InspectResult.SUCCESS
 
     def _get_increment_kwargs(self, inspection_status):
         return {
-            SystemInspectionResult.SUCCESS: {
+            InspectResult.SUCCESS: {
                 "increment_sys_scanned": True,
                 "prefix": "INSPECTED",
             },
-            SystemInspectionResult.FAILED: {
+            InspectResult.FAILED: {
                 "increment_sys_failed": True,
                 "prefix": "FAILED",
             },

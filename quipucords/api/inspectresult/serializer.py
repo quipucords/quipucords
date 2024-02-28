@@ -3,9 +3,9 @@ from rest_framework.serializers import CharField, ChoiceField, JSONField
 
 from api.common.serializer import NotEmptySerializer
 from api.models import (
+    InspectResult,
     JobInspectionResult,
     RawFact,
-    SystemInspectionResult,
     TaskInspectionResult,
 )
 
@@ -28,14 +28,12 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
     """Serializer for the SystemInspectionResult model."""
 
     name = CharField(required=True, max_length=1024)
-    status = ChoiceField(
-        required=True, choices=SystemInspectionResult.CONN_STATUS_CHOICES
-    )
+    status = ChoiceField(required=True, choices=InspectResult.CONN_STATUS_CHOICES)
 
     class Meta:
         """Metadata for serializer."""
 
-        model = SystemInspectionResult
+        model = InspectResult
         fields = ["name", "status", "source"]
         qpc_allow_empty_fields = ["source"]
 

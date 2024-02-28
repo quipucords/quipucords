@@ -33,7 +33,7 @@ class TaskInspectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_TASK_INSPECT_RESULTS_MSG)
 
 
-class SystemInspectionResult(models.Model):
+class InspectResult(models.Model):
     """A model the of captured system data."""
 
     SUCCESS = "success"
@@ -64,7 +64,7 @@ class RawFact(models.Model):
     name = models.CharField(max_length=1024)
     value = models.JSONField(null=True, encoder=RawFactEncoder)
     system_inspection_result = models.ForeignKey(
-        SystemInspectionResult, on_delete=models.CASCADE, related_name="facts"
+        InspectResult, on_delete=models.CASCADE, related_name="facts"
     )
 
     class Meta:

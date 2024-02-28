@@ -3,11 +3,11 @@
 import pytest
 
 from api.models import (
+    InspectResult,
     JobInspectionResult,
     RawFact,
     ScanJob,
     ScanTask,
-    SystemInspectionResult,
     TaskInspectionResult,
 )
 from tests.utils.facts import random_name, random_value
@@ -29,7 +29,7 @@ def inspection_scantask(raw_facts_list):
         job_inspection_result=JobInspectionResult.objects.create()
     )
     for i, facts in enumerate(raw_facts_list):
-        system_inspection_result = SystemInspectionResult.objects.create(
+        system_inspection_result = InspectResult.objects.create(
             name=i,
             task_inspection_result=task_inspection_result,
         )

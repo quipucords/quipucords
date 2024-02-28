@@ -5,7 +5,7 @@ from datetime import datetime
 from django.db import transaction
 from pyVmomi import vim, vmodl
 
-from api.models import RawFact, ScanTask, SystemInspectionResult
+from api.models import InspectResult, RawFact, ScanTask
 from scanner.runner import ScanTaskRunner
 from scanner.vcenter.utils import (
     ClusterRawFacts,
@@ -191,9 +191,9 @@ class InspectTaskRunner(ScanTaskRunner):
 
         logger.debug("system %s facts=%s", vm_name, facts)
 
-        sys_result = SystemInspectionResult(
+        sys_result = InspectResult(
             name=vm_name,
-            status=SystemInspectionResult.SUCCESS,
+            status=InspectResult.SUCCESS,
             source=self.scan_task.source,
             task_inspection_result=self.scan_task.inspection_result,
         )

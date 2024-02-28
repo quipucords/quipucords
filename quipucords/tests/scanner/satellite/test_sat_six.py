@@ -8,12 +8,12 @@ from faker import Faker
 
 from api.models import (
     Credential,
+    InspectResult,
     JobConnectionResult,
     ScanJob,
     ScanTask,
     Source,
     SystemConnectionResult,
-    SystemInspectionResult,
     TaskConnectionResult,
 )
 from constants import DataSources
@@ -69,7 +69,7 @@ class TestSatelliteSixV1:
         conn_result = self.api.connect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name="sys1_1",
-            status=SystemInspectionResult.SUCCESS,
+            status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
         sys_result.save()
@@ -431,7 +431,7 @@ class TestSatelliteSixV1:
             ) as mock_subs:
                 result = {
                     "unique_name": "sys_1",
-                    "system_inspection_result": SystemInspectionResult.SUCCESS,
+                    "system_inspection_result": InspectResult.SUCCESS,
                     "host_fields_response": fields_return_value,
                     "host_subscriptions_response": subs_return_value,
                 }
@@ -598,7 +598,7 @@ class TestSatelliteSixV2:
         conn_result = self.api.connect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name="sys1_1",
-            status=SystemInspectionResult.SUCCESS,
+            status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
         sys_result.save()
@@ -929,7 +929,7 @@ class TestSatelliteSixV2:
         """Test error flow & check that a failed system is marked."""
         response = {
             "unique_name": "sys_1",
-            "system_inspection_result": SystemInspectionResult.FAILED,
+            "system_inspection_result": InspectResult.FAILED,
             "host_fields_response": {},
             "host_subscriptions_response": {},
         }
@@ -1033,7 +1033,7 @@ class TestSatelliteSixV2:
             ) as mock_subs:
                 result = {
                     "unique_name": "sys_1",
-                    "system_inspection_result": SystemInspectionResult.SUCCESS,
+                    "system_inspection_result": InspectResult.SUCCESS,
                     "host_fields_response": fields_return_value,
                     "host_subscriptions_response": subs_return_value,
                 }
@@ -1093,7 +1093,7 @@ class TestSatelliteSixV2:
 
         sys_result = SystemConnectionResult(
             name="sys1_1",
-            status=SystemInspectionResult.SUCCESS,
+            status=InspectResult.SUCCESS,
             task_connection_result=api.connect_scan_task.connection_result,
         )
         sys_result.save()

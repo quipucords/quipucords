@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Generator
 
 import log_messages
-from api.inspectresult.model import SystemInspectionResult
+from api.inspectresult.model import InspectResult
 from scanner.network.utils import STOP_STATES
 from utils.misc import sanitize_for_utf8_compatibility
 
@@ -41,13 +41,13 @@ class InspectCallback:
         """Yield host completion state and ansible facts."""
         for host, facts in self._ansible_facts.items():
             if host in self._unreachable_hosts:
-                host_status = SystemInspectionResult.UNREACHABLE
+                host_status = InspectResult.UNREACHABLE
             elif facts.get(HOST_DONE, False) is True:
                 # host_done is the last fact - we assume a host is successfully scanned
                 # if this fact is set to true
-                host_status = SystemInspectionResult.SUCCESS
+                host_status = InspectResult.SUCCESS
             else:
-                host_status = SystemInspectionResult.FAILED
+                host_status = InspectResult.FAILED
             yield AnsibleResults(host=host, status=host_status, facts=facts)
 
     def task_on_ok(self, event_dict: dict):
