@@ -74,7 +74,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
         try:
             return self.scan_task.job.options.get(Scan.MAX_CONCURRENCY)
         except AttributeError:
-            return Scan.get_default_forks()
+            return Scan.DEFAULT_MAX_CONCURRENCY
 
     def get_hosts(self) -> list[dict]:
         """Retrieve ansible managed hosts/nodes."""

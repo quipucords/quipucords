@@ -150,7 +150,7 @@ class ConnectTaskRunner(ScanTaskRunner):
         if self.scan_job.options is not None:
             forks = self.scan_job.options.get(Scan.MAX_CONCURRENCY)
         else:
-            forks = Scan.get_default_forks()
+            forks = Scan.DEFAULT_MAX_CONCURRENCY
 
         use_paramiko = self.scan_task.source.use_paramiko
         if use_paramiko is None:

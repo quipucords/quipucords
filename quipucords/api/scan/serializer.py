@@ -168,11 +168,11 @@ class ScanSerializer(NotEmptySerializer):
                     ]
                 }
                 raise ValidationError(errors)
-            if max_concurrency_int > Scan.get_max_forks():
+            if max_concurrency_int > Scan.UPPER_MAX_CONCURRENCY:
                 errors = {
                     Scan.MAX_CONCURRENCY: [
                         "Ensure this value is less than"
-                        f" or equal to {Scan.get_max_forks()}."
+                        f" or equal to {Scan.UPPER_MAX_CONCURRENCY}."
                     ]
                 }
                 raise ValidationError(errors)

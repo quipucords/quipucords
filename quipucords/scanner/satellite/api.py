@@ -49,7 +49,7 @@ class SatelliteInterface(ABC):
         """Set context for interface."""
         self.scan_job = scan_job
         if scan_job.options is None:
-            self.max_concurrency = Scan.get_default_forks()
+            self.max_concurrency = Scan.DEFAULT_MAX_CONCURRENCY
         else:
             self.max_concurrency = scan_job.options.get(Scan.MAX_CONCURRENCY)
 
