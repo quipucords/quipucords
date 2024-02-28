@@ -36,7 +36,7 @@ def inspection_scantask(raw_facts_list):
         raw_fact_instances = [
             RawFact(
                 name=fact_name,
-                system_inspection_result=system_inspection_result,
+                inspect_result=system_inspection_result,
                 value=fact_value,
             )
             for fact_name, fact_value in facts.items()

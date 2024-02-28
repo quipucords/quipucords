@@ -767,7 +767,7 @@ class TestScanJob:
         fact = RawFact(
             name="fact_key",
             value="fact_value",
-            system_inspection_result=inspect_sys_result,
+            inspect_result=inspect_sys_result,
         )
         fact.save()
 
@@ -796,7 +796,7 @@ class TestScanJob:
         fact = RawFact(
             name="fact_key",
             value="fact_value",
-            system_inspection_result=inspect_sys_result,
+            inspect_result=inspect_sys_result,
         )
         fact.save()
 
@@ -825,7 +825,7 @@ class TestScanJob:
         fact = RawFact(
             name="fact_key",
             value="fact_value",
-            system_inspection_result=inspect_sys_result,
+            inspect_result=inspect_sys_result,
         )
         fact.save()
 
@@ -854,7 +854,7 @@ class TestScanJob:
         fact = RawFact(
             name="fact_key",
             value="fact_value",
-            system_inspection_result=inspect_sys_result,
+            inspect_result=inspect_sys_result,
         )
         fact.save()
 
@@ -885,7 +885,7 @@ class TestScanJob:
         fact = RawFact(
             name="fact_key",
             value="fact_value",
-            system_inspection_result=inspect_sys_result,
+            inspect_result=inspect_sys_result,
         )
         fact.save()
 
@@ -900,7 +900,7 @@ class TestScanJob:
         fact2 = RawFact(
             name="fact_key2",
             value="fact_value2",
-            system_inspection_result=inspect_sys_result2,
+            inspect_result=inspect_sys_result2,
         )
         fact2.save()
 
@@ -1799,7 +1799,7 @@ class TestScanJob:
         )
 
         RawFact.objects.create(
-            name="fact_key", value="fact_value", system_inspection_result=sys_result
+            name="fact_key", value="fact_value", inspect_result=sys_result
         )
 
         scan_job.save()

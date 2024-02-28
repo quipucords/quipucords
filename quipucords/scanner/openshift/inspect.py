@@ -153,7 +153,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         return RawFact(
             name=entity.kind,
             value=entity,
-            system_inspection_result=inspection_result,
+            inspect_result=inspection_result,
         )
 
     def _entities_as_raw_facts(
@@ -167,7 +167,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             raw_fact = RawFact(
                 name=collection_name,
                 value=entity,
-                system_inspection_result=inspection_result,
+                inspect_result=inspection_result,
             )
             raw_fact_list.append(raw_fact)
 

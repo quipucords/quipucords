@@ -197,7 +197,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 RawFact(
                     name=fact_name,
                     value=fact_value,
-                    system_inspection_result=inspection_result,
+                    inspect_result=inspection_result,
                 )
             )
         return raw_facts

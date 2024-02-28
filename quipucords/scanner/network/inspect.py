@@ -321,7 +321,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 RawFact(
                     name=fact_key,
                     value=fact_value,
-                    system_inspection_result=sys_result,
+                    inspect_result=sys_result,
                 )
             )
         RawFact.objects.bulk_create(raw_facts)
