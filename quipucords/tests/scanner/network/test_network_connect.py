@@ -122,7 +122,7 @@ class TestNetworkConnectTaskRunner:
             self.source3, ScanTask.SCAN_TYPE_CONNECT, "source3", scan_options
         )
         self.scan_task3.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
-        self.concurrency = Scan.get_default_forks()
+        self.concurrency = Scan.DEFAULT_MAX_CONCURRENCY
 
     def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""

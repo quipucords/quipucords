@@ -111,7 +111,7 @@ class ScanJobSerializerV1(NotEmptySerializer):
     status = ValidStringChoiceField(read_only=True, choices=ScanTask.STATUS_CHOICES)
     status_message = CharField(read_only=True)
     tasks = TaskField(many=True, read_only=True)
-    options = DictField(required=False, default={})
+    options = DictField(required=False, default=dict)
     report_id = IntegerField(read_only=True)
     start_time = DateTimeField(required=False, read_only=True)
     end_time = DateTimeField(required=False, read_only=True)

@@ -17,8 +17,6 @@ from api.scantask.model import ScanTask
 from api.source.model import Source
 
 logger = logging.getLogger(__name__)
-DEFAULT_MAX_CONCURRENCY = 25
-UPPER_MAX_CONCURRENCY = 200
 PROD_DEF = namedtuple(
     "Product", ["name", "enabled", "ext_name", "ext_enabled", "extra_var_opt"]
 )
@@ -50,6 +48,9 @@ class Scan(models.Model):
     MAX_CONCURRENCY = "max_concurrency"
     DISABLED_OPTIONAL_PRODUCTS = "disabled_optional_products"
     ENABLED_EXTENDED_PRODUCT_SEARCH = "enabled_extended_product_search"
+
+    DEFAULT_MAX_CONCURRENCY = 25
+    UPPER_MAX_CONCURRENCY = 200
 
     name = models.CharField(max_length=64, unique=True)
     sources = models.ManyToManyField(Source)
@@ -123,16 +124,6 @@ class Scan(models.Model):
                 Scan.EXT_PRODUCT_SEARCH_DIRS
             ] = extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
             self.enabled_extended_product_search = enabled_extended_product_search
-
-    @staticmethod
-    def get_default_forks():
-        """Create the default number of forks."""
-        return DEFAULT_MAX_CONCURRENCY
-
-    @staticmethod
-    def get_max_forks():
-        """Create the maximum number of forks."""
-        return UPPER_MAX_CONCURRENCY
 
     @staticmethod
     def get_default_extra_vars():

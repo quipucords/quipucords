@@ -174,7 +174,7 @@ class InspectTaskRunner(ScanTaskRunner):
             forks = self.scan_job.options.get(Scan.MAX_CONCURRENCY)
             extra_vars = self.scan_job.get_extra_vars()
         else:
-            forks = Scan.get_default_forks()
+            forks = Scan.DEFAULT_MAX_CONCURRENCY
             extra_vars = Scan.get_default_extra_vars()
 
         if extra_vars.get(Scan.EXT_PRODUCT_SEARCH_DIRS) is None:

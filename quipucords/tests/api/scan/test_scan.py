@@ -257,7 +257,7 @@ class TestScanCreate:
             "options": {
                 "max_concurrency": [
                     "Ensure this value is less than"
-                    f" or equal to {Scan.get_max_forks()}."
+                    f" or equal to {Scan.UPPER_MAX_CONCURRENCY}."
                 ]
             }
         }
