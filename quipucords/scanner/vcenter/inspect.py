@@ -201,9 +201,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         for key, val in facts.items():
             if val is not None:
-                stored_fact = RawFact(
-                    name=key, value=val, system_inspection_result=sys_result
-                )
+                stored_fact = RawFact(name=key, value=val, inspect_result=sys_result)
                 stored_fact.save()
 
         self.scan_task.increment_stats(vm_name, increment_sys_scanned=True)

@@ -99,7 +99,7 @@ class SatelliteInterface(ABC):
             for key, val in facts.items():
                 if val is not None:
                     stored_fact = RawFact(
-                        name=key, value=val, system_inspection_result=sys_result
+                        name=key, value=val, inspect_result=sys_result
                     )
                     stored_fact.save()
 

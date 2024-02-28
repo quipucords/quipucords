@@ -63,7 +63,7 @@ class RawFact(models.Model):
 
     name = models.CharField(max_length=1024)
     value = models.JSONField(null=True, encoder=RawFactEncoder)
-    system_inspection_result = models.ForeignKey(
+    inspect_result = models.ForeignKey(
         InspectResult, on_delete=models.CASCADE, related_name="facts"
     )
 
