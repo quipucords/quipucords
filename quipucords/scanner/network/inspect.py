@@ -11,11 +11,11 @@ from django.forms import model_to_dict
 import log_messages
 from api.inspectresult.model import RawFact
 from api.models import (
+    InspectResult,
     Scan,
     ScanJob,
     ScanTask,
     SystemConnectionResult,
-    SystemInspectionResult,
 )
 from api.vault import write_to_yaml
 from constants import SCAN_JOB_LOG
@@ -138,9 +138,9 @@ class InspectTaskRunner(ScanTaskRunner):
         unreachable_hosts = connected_hosts - scanned_hosts
 
         for host in unreachable_hosts:
-            sys_result = SystemInspectionResult(
+            sys_result = InspectResult(
                 name=host,
-                status=SystemInspectionResult.UNREACHABLE,
+                status=InspectResult.UNREACHABLE,
                 source=self.scan_task.source,
                 task_inspection_result=self.scan_task.inspection_result,
             )
@@ -308,7 +308,7 @@ class InspectTaskRunner(ScanTaskRunner):
             f" Status: {ansible_results.status}. Facts {facts}",
             log_level=logging.DEBUG,
         )
-        sys_result = SystemInspectionResult(
+        sys_result = InspectResult(
             name=ansible_results.host,
             status=ansible_results.status,
             source=self.scan_task.source,
@@ -369,15 +369,15 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _get_scan_task_increment_kwargs(self, result):
         return {
-            SystemInspectionResult.SUCCESS: {
+            InspectResult.SUCCESS: {
                 "increment_sys_scanned": True,
                 "prefix": "CONNECTED",
             },
-            SystemInspectionResult.FAILED: {
+            InspectResult.FAILED: {
                 "increment_sys_failed": True,
                 "prefix": "FAILED",
             },
-            SystemInspectionResult.UNREACHABLE: {
+            InspectResult.UNREACHABLE: {
                 "increment_sys_unreachable": True,
                 "prefix": "UNREACHABLE",
             },
@@ -414,11 +414,11 @@ class InspectTaskRunner(ScanTaskRunner):
                 connected.append((result.name, cred_data))
 
         for result in self.scan_task.inspection_result.systems.all():
-            if result.status == SystemInspectionResult.SUCCESS:
+            if result.status == InspectResult.SUCCESS:
                 completed.append(result.name)
-            elif result.status == SystemInspectionResult.FAILED:
+            elif result.status == InspectResult.FAILED:
                 failed.append(result.name)
-            elif result.status == SystemInspectionResult.UNREACHABLE:
+            elif result.status == InspectResult.UNREACHABLE:
                 unreachable.append(result.name)
             else:
                 nostatus.append(result.name)

@@ -7,12 +7,12 @@ import pytest
 
 from api.models import (
     Credential,
+    InspectResult,
     JobConnectionResult,
     ScanJob,
     ScanTask,
     Source,
     SystemConnectionResult,
-    SystemInspectionResult,
     TaskConnectionResult,
 )
 from constants import DataSources
@@ -63,7 +63,7 @@ class TestSatelliteFive:
         conn_result = self.api.connect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name="sys1_1",
-            status=SystemInspectionResult.SUCCESS,
+            status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
         sys_result.save()
@@ -395,7 +395,7 @@ class TestSatelliteFive:
                 "subs": [],
                 "network_devices": [],
                 "registration_date": "",
-                "system_inspection_result": SystemInspectionResult.SUCCESS,
+                "system_inspection_result": InspectResult.SUCCESS,
             }
         ],
     )

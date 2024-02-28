@@ -10,11 +10,11 @@ from django.db import transaction
 from more_itertools import chunked
 
 from api.models import (
+    InspectResult,
     RawFact,
     Scan,
     ScanTask,
     SystemConnectionResult,
-    SystemInspectionResult,
 )
 from api.scanjob.model import ScanJob
 from scanner.exceptions import ScanCancelException, ScanPauseException
@@ -80,14 +80,14 @@ class SatelliteInterface(ABC):
         self.connect_scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @transaction.atomic
-    def record_inspect_result(self, name, facts, status=SystemInspectionResult.SUCCESS):
+    def record_inspect_result(self, name, facts, status=InspectResult.SUCCESS):
         """Record a new result.
 
         :param name: The host name
         :param facts: The dictionary of facts
         :param status: The status of the inspection
         """
-        sys_result = SystemInspectionResult(
+        sys_result = InspectResult(
             name=name,
             source=self.source,
             status=status,
@@ -95,7 +95,7 @@ class SatelliteInterface(ABC):
         )
         sys_result.save()
 
-        if status == SystemInspectionResult.SUCCESS:
+        if status == InspectResult.SUCCESS:
             for key, val in facts.items():
                 if val is not None:
                     stored_fact = RawFact(
@@ -103,9 +103,9 @@ class SatelliteInterface(ABC):
                     )
                     stored_fact.save()
 
-        if status == SystemInspectionResult.SUCCESS:
+        if status == InspectResult.SUCCESS:
             self.inspect_scan_task.increment_stats(name, increment_sys_scanned=True)
-        elif status == SystemInspectionResult.UNREACHABLE:
+        elif status == InspectResult.UNREACHABLE:
             self.inspect_scan_task.increment_stats(name, increment_sys_unreachable=True)
         else:
             self.inspect_scan_task.increment_stats(name, increment_sys_failed=True)

@@ -7,7 +7,7 @@ from functools import partial
 import celery
 from more_itertools import unique_everseen
 
-from api.models import SystemInspectionResult
+from api.models import InspectResult
 from api.scantask.model import ScanTask
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException, SatelliteInterface
@@ -104,7 +104,7 @@ def _request_host_details(  # noqa: PLR0913
         registration_date = client.system.get_registration_date(key, host_id)
 
         client.auth.logout(key)
-        system_inspection_result = SystemInspectionResult.SUCCESS
+        system_inspection_result = InspectResult.SUCCESS
         results["uuid"] = uuid
         results["cpu"] = cpu
         results["system_details"] = system_details
@@ -116,7 +116,7 @@ def _request_host_details(  # noqa: PLR0913
     except xmlrpc.client.Fault as xml_error:
         error_message = f"Satellite 5 fault error encountered: {xml_error}\n"
         logger.error(error_message)
-        system_inspection_result = SystemInspectionResult.FAILED
+        system_inspection_result = InspectResult.FAILED
 
     results["host_name"] = host_name
     results["host_id"] = host_id
@@ -208,7 +208,7 @@ class SatelliteFive(SatelliteInterface):
             system_inspection_result = raw_result["system_inspection_result"]
 
             details = {}
-            if system_inspection_result == SystemInspectionResult.SUCCESS:
+            if system_inspection_result == InspectResult.SUCCESS:
                 uuid = raw_result["uuid"]
                 cpu = raw_result["cpu"]
                 host_id = raw_result["host_id"]

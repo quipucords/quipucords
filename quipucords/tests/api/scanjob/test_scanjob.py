@@ -10,12 +10,12 @@ from rest_framework.reverse import reverse
 
 from api import messages
 from api.models import (
+    InspectResult,
     RawFact,
     Scan,
     ScanJob,
     ScanTask,
     SystemConnectionResult,
-    SystemInspectionResult,
 )
 from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import ScanJobSerializerV1
@@ -756,7 +756,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_task.inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source,
@@ -785,7 +785,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_task.inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source,
@@ -814,7 +814,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_task.inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source,
@@ -843,7 +843,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_task.inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source,
@@ -874,7 +874,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_task.inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source,
@@ -889,7 +889,7 @@ class TestScanJob:
         )
         fact.save()
 
-        inspect_sys_result2 = SystemInspectionResult(
+        inspect_sys_result2 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
             source=source,
@@ -941,7 +941,7 @@ class TestScanJob:
         inspection_result = scan_tasks[2].inspection_result
         inspection_result2 = scan_tasks[3].inspection_result
         # Create an inspection system result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo1",
             status=SystemConnectionResult.SUCCESS,
             source=source1,
@@ -949,7 +949,7 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        inspect_sys_result2 = SystemInspectionResult(
+        inspect_sys_result2 = InspectResult(
             name="Foo2",
             status=SystemConnectionResult.SUCCESS,
             source=source1,
@@ -957,7 +957,7 @@ class TestScanJob:
         )
         inspect_sys_result2.save()
 
-        inspect_sys_result3 = SystemInspectionResult(
+        inspect_sys_result3 = InspectResult(
             name="Foo3",
             status=SystemConnectionResult.FAILED,
             source=source2,
@@ -965,7 +965,7 @@ class TestScanJob:
         )
         inspect_sys_result3.save()
 
-        inspect_sys_result4 = SystemInspectionResult(
+        inspect_sys_result4 = InspectResult(
             name="Foo4",
             status=SystemConnectionResult.FAILED,
             source=source2,
@@ -1034,7 +1034,7 @@ class TestScanJob:
         # Create an inspection system result
         inspection_result = scan_tasks[2].inspection_result
         inspection_result2 = scan_tasks[3].inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo1",
             status=SystemConnectionResult.SUCCESS,
             source=source1,
@@ -1042,7 +1042,7 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        inspect_sys_result2 = SystemInspectionResult(
+        inspect_sys_result2 = InspectResult(
             name="Foo2",
             status=SystemConnectionResult.SUCCESS,
             source=source1,
@@ -1050,7 +1050,7 @@ class TestScanJob:
         )
         inspect_sys_result2.save()
 
-        inspect_sys_result3 = SystemInspectionResult(
+        inspect_sys_result3 = InspectResult(
             name="Foo3",
             status=SystemConnectionResult.FAILED,
             source=source2,
@@ -1058,7 +1058,7 @@ class TestScanJob:
         )
         inspect_sys_result3.save()
 
-        inspect_sys_result4 = SystemInspectionResult(
+        inspect_sys_result4 = InspectResult(
             name="Foo4",
             status=SystemConnectionResult.FAILED,
             source=source2,
@@ -1110,7 +1110,7 @@ class TestScanJob:
         # Create an inspection system result
         inspection_result = scan_tasks[2].inspection_result
         inspection_result2 = scan_tasks[3].inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source1,
@@ -1118,7 +1118,7 @@ class TestScanJob:
         )
         inspect_sys_result.save()
 
-        inspect_sys_result2 = SystemInspectionResult(
+        inspect_sys_result2 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source1,
@@ -1126,7 +1126,7 @@ class TestScanJob:
         )
         inspect_sys_result2.save()
 
-        inspect_sys_result3 = SystemInspectionResult(
+        inspect_sys_result3 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
             source=source2,
@@ -1134,7 +1134,7 @@ class TestScanJob:
         )
         inspect_sys_result3.save()
 
-        inspect_sys_result4 = SystemInspectionResult(
+        inspect_sys_result4 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
             source=source2,
@@ -1202,7 +1202,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_tasks[2].inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
             source=source1,
@@ -1240,7 +1240,7 @@ class TestScanJob:
 
         # Create an inspection system result
         inspection_result = scan_task.inspection_result
-        inspect_sys_result = SystemInspectionResult(
+        inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             source=source,
@@ -1792,7 +1792,7 @@ class TestScanJob:
         )
         # Create an inspection system result
         inspect_result = scan_task.inspection_result
-        sys_result = SystemInspectionResult.objects.create(
+        sys_result = InspectResult.objects.create(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
             task_inspection_result=inspect_result,

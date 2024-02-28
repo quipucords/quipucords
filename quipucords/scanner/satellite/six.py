@@ -12,7 +12,7 @@ import requests
 from more_itertools import unique_everseen
 from requests.exceptions import Timeout
 
-from api.models import ScanTask, SystemInspectionResult
+from api.models import InspectResult, ScanTask
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteException, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
@@ -388,17 +388,17 @@ def _request_host_details(  # noqa: PLR0913
                 f"Invalid response code {host_subscriptions_response.status_code}"
                 f" for url: {host_subscriptions_url}"
             )
-        system_inspection_result = SystemInspectionResult.SUCCESS
+        system_inspection_result = InspectResult.SUCCESS
         host_fields_json = host_fields_response.json()
         host_subscriptions_json = host_subscriptions_response.json()
     except SatelliteException as sat_error:
         error_message = f"Satellite 6 unknown error encountered: {sat_error}\n"
         logger.error(error_message)
-        system_inspection_result = SystemInspectionResult.FAILED
+        system_inspection_result = InspectResult.FAILED
     except Timeout as timeout_error:
         error_message = f"Satellite 6 timeout error encountered: {timeout_error}\n"
         logger.error(error_message)
-        system_inspection_result = SystemInspectionResult.FAILED
+        system_inspection_result = InspectResult.FAILED
     results["unique_name"] = unique_name
     results["system_inspection_result"] = system_inspection_result
     results["host_fields_response"] = host_fields_json
@@ -417,7 +417,7 @@ def process_results(self, results, api_version):
         host_fields_response = raw_result["host_fields_response"]
         host_subscriptions_response = raw_result["host_subscriptions_response"]
         details = {}
-        if system_inspection_result == SystemInspectionResult.SUCCESS:
+        if system_inspection_result == InspectResult.SUCCESS:
             details.update(host_fields(api_version, host_fields_response))
             details.update(host_subscriptions(host_subscriptions_response))
             logger.debug("name=%s, host_details=%s", name, details)

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import transaction
 from requests import RequestException
 
-from api.models import RawFact, ScanTask, SystemInspectionResult
+from api.models import InspectResult, RawFact, ScanTask
 from scanner.exceptions import ScanFailureError
 from scanner.rhacs.runner import RHACSTaskRunner
 
@@ -35,7 +35,7 @@ class InspectTaskRunner(RHACSTaskRunner):
         self._check_prerequisites()
 
         results = {}
-        inspection_status = SystemInspectionResult.SUCCESS
+        inspection_status = InspectResult.SUCCESS
         collectable_facts = ("secured_units_current", "secured_units_max")
         for fact in collectable_facts:
             method = getattr(self, f"get_{fact}")
@@ -47,7 +47,7 @@ class InspectTaskRunner(RHACSTaskRunner):
                     fact,
                     self.system_name,
                 )
-                inspection_status = SystemInspectionResult.FAILED
+                inspection_status = InspectResult.FAILED
 
         self.save_results(inspection_status, results)
 
@@ -90,16 +90,14 @@ class InspectTaskRunner(RHACSTaskRunner):
         increment_kwargs = self._get_increment_kwargs(system.status)
         self.scan_task.increment_stats(self.system_name, **increment_kwargs)
 
-    def _persist_facts(
-        self, inspection_status, facts_dict: dict
-    ) -> SystemInspectionResult:
+    def _persist_facts(self, inspection_status, facts_dict: dict) -> InspectResult:
         """
         Persist facts to database.
 
         :param inspection_status: status of the inspection
         :param facts_dict: dictionary of facts to persist
         """
-        sys_result = SystemInspectionResult(
+        sys_result = InspectResult(
             name=self.system_name,
             status=inspection_status,
             source=self.scan_task.source,
@@ -111,7 +109,7 @@ class InspectTaskRunner(RHACSTaskRunner):
         return sys_result
 
     def _facts_dict_as_raw_facts(
-        self, inspection_result: SystemInspectionResult, **facts_dict
+        self, inspection_result: InspectResult, **facts_dict
     ) -> list[RawFact]:
         """
         Convert a dictionary of facts to a list of RawFacts.
@@ -142,11 +140,11 @@ class InspectTaskRunner(RHACSTaskRunner):
 
     def _get_increment_kwargs(self, inspection_status):
         return {
-            SystemInspectionResult.SUCCESS: {
+            InspectResult.SUCCESS: {
                 "increment_sys_scanned": True,
                 "prefix": "INSPECTED",
             },
-            SystemInspectionResult.FAILED: {
+            InspectResult.FAILED: {
                 "increment_sys_failed": True,
                 "prefix": "FAILED",
             },
