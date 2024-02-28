@@ -2,6 +2,7 @@
 
 These models are used in the REST definitions.
 """
+
 import logging
 from datetime import datetime
 from functools import cached_property
@@ -12,7 +13,6 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.scantask.queryset import ScanTaskQuerySet
 from api.source.model import Source
 
 logger = logging.getLogger(__name__)
@@ -70,9 +70,6 @@ class ScanTask(models.Model):
     connection_result = models.OneToOneField(
         TaskConnectionResult, null=True, on_delete=models.SET_NULL
     )
-
-    # custom queryset / object manager
-    objects = ScanTaskQuerySet.as_manager()
 
     @cached_property
     def scan_job_task_count(self):
@@ -355,8 +352,13 @@ class ScanTask(models.Model):
         """Access inspection facts."""
         if self.scan_type != ScanTask.SCAN_TYPE_INSPECT:
             return []
-        raw_facts_queryset = self.__class__.objects.filter(id=self.id).raw_facts()
-        return list(raw_facts_queryset.raw_facts_per_system().values())
+        fact_list = []
+        for inspect_result in self.inspect_results.prefetch_related("facts").all():
+            fact_dict = {
+                raw_fact.name: raw_fact.value for raw_fact in inspect_result.facts.all()
+            }
+            fact_list.append(fact_dict)
+        return fact_list
 
     # inspect task
     @transaction.atomic
