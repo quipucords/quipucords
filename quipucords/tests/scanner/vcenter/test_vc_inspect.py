@@ -75,13 +75,13 @@ class TestVCenterInspectTaskRunnerTest:
 
     def test__none(self):
         """Test get result method when no results exist."""
-        results = self.scan_task.get_result().systems.first()
+        results = self.scan_task.inspect_results.first()
         assert results is None
 
     def test_get_result(self):
         """Test get results method when results exist."""
-        results = self.scan_task.get_result()
-        assert results == self.scan_task.inspection_result
+        results = list(self.scan_task.get_result())
+        assert results == list(self.scan_task.inspect_results.all())
 
     def test_parse_parent_props(self):
         """Test the parse_parent_props_method."""
@@ -208,9 +208,7 @@ class TestVCenterInspectTaskRunnerTest:
             return_value=(mac_addresses, ip_addresses),
         ):
             self.runner.parse_vm_props(props, host_dict)
-
-            inspect_result = self.scan_task.inspection_result
-            sys_results = inspect_result.systems.all()
+            sys_results = self.scan_task.inspect_results.all()
             expected_facts = {
                 "vm.cluster": "cluster1",
                 "vm.cpu_count": 4,
@@ -268,15 +266,18 @@ class TestVCenterInspectTaskRunnerTest:
             ANY
         ).objects = objects_second_page
 
-        with patch.object(
-            InspectTaskRunner, "parse_parent_props"
-        ) as mock_parse_parent_props, patch.object(
-            InspectTaskRunner, "parse_cluster_props"
-        ) as mock_parse_cluster_props, patch.object(
-            InspectTaskRunner, "parse_host_props"
-        ) as mock_parse_host_props, patch.object(
-            InspectTaskRunner, "parse_vm_props"
-        ) as mock_parse_vm_props:
+        with (
+            patch.object(
+                InspectTaskRunner, "parse_parent_props"
+            ) as mock_parse_parent_props,
+            patch.object(
+                InspectTaskRunner, "parse_cluster_props"
+            ) as mock_parse_cluster_props,
+            patch.object(
+                InspectTaskRunner, "parse_host_props"
+            ) as mock_parse_host_props,
+            patch.object(InspectTaskRunner, "parse_vm_props") as mock_parse_vm_props,
+        ):
 
             self.runner.retrieve_properties(content)
             mock_parse_parent_props.assert_called_with(ANY, ANY)

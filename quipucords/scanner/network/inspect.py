@@ -142,7 +142,6 @@ class InspectTaskRunner(ScanTaskRunner):
                 name=host,
                 status=InspectResult.UNREACHABLE,
                 source=self.scan_task.source,
-                task_inspection_result=self.scan_task.inspection_result,
             )
             sys_result.save()
 
@@ -312,9 +311,9 @@ class InspectTaskRunner(ScanTaskRunner):
             name=ansible_results.host,
             status=ansible_results.status,
             source=self.scan_task.source,
-            task_inspection_result=self.scan_task.inspection_result,
         )
         sys_result.save()
+        sys_result.tasks.add(self.scan_task)
         raw_facts = []
         for fact_key, fact_value in facts.items():
             raw_facts.append(
@@ -413,7 +412,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 cred_data = model_to_dict(host_cred)
                 connected.append((result.name, cred_data))
 
-        for result in self.scan_task.inspection_result.systems.all():
+        for result in self.scan_task.inspect_results.all():
             if result.status == InspectResult.SUCCESS:
                 completed.append(result.name)
             elif result.status == InspectResult.FAILED:

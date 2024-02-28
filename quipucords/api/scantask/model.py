@@ -397,7 +397,7 @@ class ScanTask(models.Model):
             TaskInspectionResult, or Report)
         """
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            return self.inspection_result
+            return self.inspect_results.all()
         elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:

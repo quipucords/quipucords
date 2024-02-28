@@ -172,7 +172,7 @@ class TestSatelliteFive:
             logging_options=logging_options,
         )
         self.api.process_results([raw_result], virt, {1: 2}, [])
-        inspect_results = self.scan_task.inspection_result.systems.all()
+        inspect_results = self.scan_task.inspect_results.all()
         sys_1_result = inspect_results.filter(name="sys1_1").first()
         assert sys_1_result.name == "sys1_1"
         assert sys_1_result.status == "success"
@@ -228,7 +228,7 @@ class TestSatelliteFive:
             logging_options=None,
         )
         self.api.process_results([raw_result], virt, {1: 2}, [])
-        inspect_results = self.scan_task.inspection_result.systems.all()
+        inspect_results = self.scan_task.inspect_results.all()
         sys_1_result = inspect_results.filter(name="sys1_1").first()
         assert sys_1_result.name == "sys1_1"
         assert sys_1_result.status == "success"
@@ -293,7 +293,7 @@ class TestSatelliteFive:
         )
 
         self.api.process_results([raw_result], virt, {1: 2}, [])
-        inspect_results = self.scan_task.inspection_result.systems.all()
+        inspect_results = self.scan_task.inspect_results.all()
         sys_1_result = inspect_results.filter(name="sys2_2").first()
         assert sys_1_result.name == "sys2_2"
         assert sys_1_result.status == "failed"
@@ -415,7 +415,6 @@ class TestSatelliteFive:
                 SatelliteFive, "physical_hosts", return_value=[]
             ) as mock_physical:
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
-                inspect_result = self.scan_task.inspection_result
-                assert len(inspect_result.systems.all()) == 1
+                assert self.scan_task.inspect_results.count() == 1
                 mock_vhosts.assert_called_once_with()
                 mock_physical.assert_called_once_with()
