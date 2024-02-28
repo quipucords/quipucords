@@ -11,7 +11,6 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
-from api.inspectresult.model import JobInspectionResult, TaskInspectionResult
 from api.reports.model import Report
 from api.scan.model import Scan
 from api.scanjob.queryset import ScanJobQuerySet
@@ -53,11 +52,6 @@ class ScanJob(models.Model):
     sources = models.ManyToManyField(Source)
     connection_results = models.OneToOneField(
         JobConnectionResult, null=True, on_delete=models.CASCADE
-    )
-
-    # only inspection job
-    inspection_results = models.OneToOneField(
-        JobInspectionResult, null=True, on_delete=models.CASCADE
     )
 
     report = models.OneToOneField(Report, null=True, on_delete=models.CASCADE)
@@ -239,13 +233,6 @@ class ScanJob(models.Model):
             job_conn_result = JobConnectionResult.objects.create()
             self.connection_results = job_conn_result
             self.save()
-        if (
-            self.inspection_results is None
-            and self.scan_type == ScanTask.SCAN_TYPE_INSPECT
-        ):
-            job_inspect_result = JobInspectionResult.objects.create()
-            self.inspection_results = job_inspect_result
-            self.save()
 
         if self.tasks:
             # It appears the initialization didn't complete
@@ -336,16 +323,7 @@ class ScanJob(models.Model):
                 inspect_task.prerequisites.add(conn_task)
                 self.tasks.add(inspect_task)
                 inspect_tasks.append(conn_task)
-
-                # Create task result
-                inspect_task_result = TaskInspectionResult.objects.create(
-                    job_inspection_result=self.inspection_results
-                )
-
-                # Add the inspect task result to task
-                inspect_task.inspection_result = inspect_task_result
                 inspect_task.save()
-
                 count += 1
         return inspect_tasks
 
