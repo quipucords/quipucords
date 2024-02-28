@@ -13,10 +13,8 @@ from api.deployments_report.serializer import (
 )
 from api.details_report.serializer import DetailsReportSerializer
 from api.inspectresult.serializer import (
-    JobInspectionResultSerializer,
     RawFactSerializer,
     SystemInspectionResultSerializer,
-    TaskInspectionResultSerializer,
 )
 from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import ScanJobSerializerV1, SourceField

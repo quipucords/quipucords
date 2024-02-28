@@ -12,7 +12,6 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.inspectresult.model import TaskInspectionResult
 from api.scantask.queryset import ScanTaskQuerySet
 from api.source.model import Source
 
@@ -65,16 +64,11 @@ class ScanTask(models.Model):
     end_time = models.DateTimeField(null=True)
 
     # Connect/Inspect task fields
-    source = models.ForeignKey(Source, null=True, on_delete=models.CASCADE)
+    source = models.ForeignKey(Source, null=True, on_delete=models.SET_NULL)
 
     # Connect task field
     connection_result = models.OneToOneField(
-        TaskConnectionResult, null=True, on_delete=models.CASCADE
-    )
-
-    # Inspect task field
-    inspection_result = models.OneToOneField(
-        TaskInspectionResult, null=True, on_delete=models.CASCADE
+        TaskConnectionResult, null=True, on_delete=models.SET_NULL
     )
 
     # custom queryset / object manager

@@ -11,28 +11,6 @@ from api.common.util import RawFactEncoder
 from api.source.model import Source
 
 
-class JobInspectionResult(models.Model):
-    """The results of a inspection scan."""
-
-    class Meta:
-        """Metadata for model."""
-
-        verbose_name_plural = _(messages.PLURAL_JOB_INSPECT_RESULTS_MSG)
-
-
-class TaskInspectionResult(models.Model):
-    """The captured inspection results from a scan."""
-
-    job_inspection_result = models.ForeignKey(
-        JobInspectionResult, on_delete=models.CASCADE, related_name="task_results"
-    )
-
-    class Meta:
-        """Metadata for model."""
-
-        verbose_name_plural = _(messages.PLURAL_TASK_INSPECT_RESULTS_MSG)
-
-
 class InspectResult(models.Model):
     """A model the of captured system data."""
 
@@ -48,9 +26,6 @@ class InspectResult(models.Model):
     name = models.CharField(max_length=1024)
     status = models.CharField(max_length=12, choices=CONN_STATUS_CHOICES)
     source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True)
-    task_inspection_result = models.ForeignKey(
-        TaskInspectionResult, on_delete=models.CASCADE, related_name="systems"
-    )
     tasks = models.ManyToManyField("ScanTask", related_name="inspect_results")
 
     class Meta:

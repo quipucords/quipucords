@@ -5,7 +5,6 @@ from django.contrib import admin
 from api.models import (
     Credential,
     JobConnectionResult,
-    JobInspectionResult,
     Report,
     Scan,
     ScanJob,
@@ -22,4 +21,3 @@ admin.site.register(SystemFingerprint)
 admin.site.register(Scan)
 admin.site.register(ScanJob)
 admin.site.register(JobConnectionResult)
-admin.site.register(JobInspectionResult)
