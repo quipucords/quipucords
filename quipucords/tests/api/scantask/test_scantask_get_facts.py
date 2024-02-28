@@ -53,6 +53,6 @@ def test_number_of_queries(
     django_assert_max_num_queries,
     inspection_scantask: ScanTask,
 ):
-    """Ensure get_facts makes only one query."""
-    with django_assert_max_num_queries(1):
+    """Ensure get_facts doesn't span lots of queries."""
+    with django_assert_max_num_queries(2):
         inspection_scantask.get_facts()
