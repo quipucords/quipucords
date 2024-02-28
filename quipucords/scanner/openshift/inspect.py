@@ -125,9 +125,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             name=cluster.name,
             status=inspection_status,
             source=self.scan_task.source,
-            task_inspection_result=self.scan_task.inspection_result,
         )
         system_result.save()
+        system_result.tasks.add(self.scan_task)
         raw_fact = self._entity_as_raw_fact(cluster, system_result)
         raw_fact.save()
         other_raw_facts = self._entities_as_raw_facts(system_result, other_facts)
@@ -140,9 +140,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             name=node.name,
             status=inspection_status,
             source=self.scan_task.source,
-            task_inspection_result=self.scan_task.inspection_result,
         )
         sys_result.save()
+        sys_result.tasks.add(self.scan_task)
         raw_fact = self._entity_as_raw_fact(node, sys_result)
         raw_fact.save()
         return sys_result

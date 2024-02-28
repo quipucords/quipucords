@@ -195,9 +195,9 @@ class InspectTaskRunner(ScanTaskRunner):
             name=vm_name,
             status=InspectResult.SUCCESS,
             source=self.scan_task.source,
-            task_inspection_result=self.scan_task.inspection_result,
         )
         sys_result.save()
+        sys_result.tasks.add(self.scan_task)
 
         for key, val in facts.items():
             if val is not None:

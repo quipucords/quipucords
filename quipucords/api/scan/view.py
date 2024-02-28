@@ -257,24 +257,12 @@ class ScanViewSet(ModelViewSet):
                             task_connection_result.systems.all().delete()
                             task_connection_result.delete()
 
-                    if job.inspection_results is not None:
+                    if job.tasks is not None:
                         logger.info(
-                            "Deleting inspection results associated with job %s",
+                            "Deleting inspect results associated with job %s",
                             job.id,
                         )
-                        for (
-                            task_inspection_result
-                        ) in job.inspection_results.task_results.all():
-                            logger.info(
-                                "Deleting inspection results associated with job %s",
-                                job.id,
-                            )
-                            for system in task_inspection_result.systems.all():
-                                system.facts.all().delete()
-                                system.delete()
-                            task_inspection_result.delete()
-
-                    if job.tasks is not None:
+                        job.delete_inspect_results()
                         logger.info(
                             "Deleting scan tasks associated with job %s", job.id
                         )

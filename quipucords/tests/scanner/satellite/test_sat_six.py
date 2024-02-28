@@ -331,8 +331,7 @@ class TestSatelliteSixV1:
                 "host_subscriptions_response": {},
             }
             assert result == expected
-            inspect_result = self.scan_task.inspection_result
-            assert len(inspect_result.systems.all()) == 0
+            assert self.scan_task.inspect_results.count() == 0
 
     @pytest.mark.django_db
     def test_post_processing(self):
@@ -436,7 +435,7 @@ class TestSatelliteSixV1:
                     "host_subscriptions_response": subs_return_value,
                 }
                 process_results(self.api, [result], 1)
-                inspect_results = self.scan_task.inspection_result.systems.all()
+                inspect_results = self.scan_task.inspect_results.all()
                 sys_1_result = inspect_results.filter(name="sys_1").first()
                 assert sys_1_result.name == "sys_1"
                 assert sys_1_result.status == "success"
@@ -493,8 +492,7 @@ class TestSatelliteSixV1:
                     }
                     mocker.get(url, status_code=200, json=jsonresult)
                     self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
-                    inspect_result = self.scan_task.inspection_result
-                    assert len(inspect_result.systems.all()) == 1
+                    assert self.scan_task.inspect_results.count() == 1
 
     @pytest.mark.django_db
     def test_hosts_facts_multiple_orgs_duplicate_hosts(self):
@@ -701,7 +699,7 @@ class TestSatelliteSixV2:
             }
             assert result == expected
             process_results(self.api, [result], 1)
-            inspect_results = self.scan_task.inspection_result.systems.all()
+            inspect_results = self.scan_task.inspect_results.all()
             sys_1_result = inspect_results.filter(name="sys_1").first()
             assert sys_1_result.name == "sys_1"
             assert sys_1_result.status == "failed"
@@ -832,7 +830,7 @@ class TestSatelliteSixV2:
             )
 
             process_results(self.api, [result], 1)
-            inspect_results = self.scan_task.inspection_result.systems.all()
+            inspect_results = self.scan_task.inspect_results.all()
             sys_1_result = inspect_results.filter(name="sys_1").first()
             assert sys_1_result.name == "sys_1"
             assert sys_1_result.status == "failed"
@@ -866,7 +864,7 @@ class TestSatelliteSixV2:
             )
 
         process_results(self.api, [result], 1)
-        inspect_results = self.scan_task.inspection_result.systems.all()
+        inspect_results = self.scan_task.inspect_results.all()
         sys_1_result = inspect_results.filter(name="sys_1").first()
         assert sys_1_result.name == "sys_1"
         assert sys_1_result.status == "failed"
@@ -934,7 +932,7 @@ class TestSatelliteSixV2:
             "host_subscriptions_response": {},
         }
         process_results(self.api, [response], 1)
-        inspect_results = self.scan_task.inspection_result.systems.all()
+        inspect_results = self.scan_task.inspect_results.all()
         sys_1_result = inspect_results.filter(name="sys_1").first()
         assert sys_1_result.name == "sys_1"
         assert sys_1_result.status == "failed"
@@ -1038,7 +1036,7 @@ class TestSatelliteSixV2:
                     "host_subscriptions_response": subs_return_value,
                 }
                 process_results(self.api, [result], 1)
-                inspect_results = self.scan_task.inspection_result.systems.all()
+                inspect_results = self.scan_task.inspect_results.all()
                 sys_1_result = inspect_results.filter(name="sys_1").first()
                 assert sys_1_result.name == "sys_1"
                 assert sys_1_result.status == "success"
@@ -1110,5 +1108,4 @@ class TestSatelliteSixV2:
             }
             mocker.get(url, status_code=200, json=jsonresult)
             api.hosts_facts(Value("i", ScanJob.JOB_RUN))
-            inspect_result = scan_task.inspection_result
-            assert len(inspect_result.systems.all()) == 1
+            assert scan_task.inspect_results.count() == 1

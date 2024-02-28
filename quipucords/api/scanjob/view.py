@@ -17,6 +17,7 @@ from rest_framework.serializers import ValidationError
 from api import messages
 from api.common.pagination import StandardResultsSetPagination
 from api.common.util import is_int
+from api.inspectresult.model import InspectResult
 from api.models import Credential, ScanJob, ScanTask, Source
 from api.scanjob.serializer import ScanJobSerializerV2, expand_scanjob
 from api.serializers import (
@@ -204,17 +205,9 @@ class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
         try:
             scan_job = get_object_or_404(self.queryset, pk=pk)
-            all_tasks = scan_job.inspection_results.task_results.all()
         except ValueError:
             return Response(status=400)
-        system_result_queryset = None
-        for task_result in all_tasks:
-            if system_result_queryset is None:
-                system_result_queryset = task_result.systems.all()
-            else:
-                system_result_queryset = (
-                    system_result_queryset | task_result.systems.all()
-                )
+        system_result_queryset = InspectResult.objects.filter(tasks__job=scan_job)
         # create ordered queryset and assign the paginator
         paginator = StandardResultsSetPagination()
         ordered_query_set = system_result_queryset.order_by(ordering_filter)
