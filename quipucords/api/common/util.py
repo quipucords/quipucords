@@ -197,11 +197,6 @@ def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C9
     return job_json
 
 
-def ids_to_str(id_list):
-    """Convert a list of ids to a comma seperated string of sorted ids."""
-    return ",".join([str(i) for i in sorted(id_list)])
-
-
 class RawFactEncoder(JSONEncoder):
     """Customize the JSONField Encoder for RawFact values."""
 
