@@ -12,7 +12,7 @@ from urllib.parse import urljoin
 import pytest
 from django.contrib.auth import get_user_model
 from django.core import management
-from django.test import override_settings
+from django.test import Client, override_settings
 
 
 @pytest.fixture(scope="session")
@@ -70,7 +70,15 @@ def qpc_user(qpc_user_pass, faker):
 
 @pytest.fixture
 def django_client(live_server, qpc_user, qpc_user_pass):
-    """HTTP client which connects to django live server."""
+    """
+    HTTP client which connects to django live server.
+
+    If you are considering using this fixture, please know that its setup is
+    surprisingly slow. On modern hardware, we have seen it add up to 400ms
+    to each test that uses it. Unless you are sure that you need the full
+    live server or need to assert output using the requests library, please
+    consider using the `client_logged_in` fixture instead.
+    """
     from compat.requests import Session
     from tests.utils.http import QPCAuth
 
@@ -83,6 +91,33 @@ def django_client(live_server, qpc_user, qpc_user_pass):
         ),
     )
     return client
+
+
+@pytest.fixture
+def qpc_user_simple(faker):
+    """
+    Create simpler qpc test user with no password.
+
+    For tests that don't actually need a password, this is much faster than qpc_user.
+    """
+    return get_user_model().objects.create(username=faker.user_name())
+
+
+@pytest.fixture
+def client_logged_in(qpc_user_simple) -> Client:
+    """
+    Create a simpler Django test client with logged-in user.
+
+    For tests that don't actually need a full live server, this is much faster than
+    django_client. Note that the client_logged_in interface (django.test.Client) is
+    different from the django_client interface (requests.Request).
+    """
+    # Why this override_settings? See:
+    # https://whitenoise.readthedocs.io/en/stable/django.html#whitenoise-makes-my-tests-run-slow
+    with override_settings(WHITENOISE_AUTOREFRESH=True):
+        client = Client()
+        client.force_login(user=qpc_user_simple)
+        yield client
 
 
 @pytest.fixture(scope="module")
