@@ -5,12 +5,11 @@ import time
 from unittest import mock
 
 import pytest
-from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
-from api.common.util import DELETE_ALL_IDS_MAGIC_STRING, ids_to_str
+from api.common.util import DELETE_ALL_IDS_MAGIC_STRING
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
 from constants import ENCRYPTED_DATA_MASK, DataSources
@@ -1032,7 +1031,7 @@ class TestCredentialBulkDelete:
         response = django_client.post(
             reverse("v1:credentials-bulk-delete"), json=delete_request
         )
-        assert response.ok
+        assert response.status_code == status.HTTP_200_OK
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
 
     def test_bulk_delete_all_ids(self, django_client):
@@ -1043,7 +1042,7 @@ class TestCredentialBulkDelete:
         response = django_client.post(
             reverse("v1:credentials-bulk-delete"), json=delete_request
         )
-        assert response.ok
+        assert response.status_code == status.HTTP_200_OK
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
         assert Credential.objects.count() == 0
 
@@ -1056,7 +1055,7 @@ class TestCredentialBulkDelete:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_bulk_delete_empty_list_error(self, django_client):
+    def test_bulk_delete_empty_list_ok(self, django_client):
         """Test that bulk delete requires some IDs."""
         delete_request = {"ids": []}
         response = django_client.post(
@@ -1064,132 +1063,63 @@ class TestCredentialBulkDelete:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_bulk_delete_atomic_if_first_does_not_exist(self, django_client, faker):
-        """Test bulk delete is atomic if the first credential does not exist."""
-        cred1 = CredentialFactory()
-        non_existent_id = generate_invalid_id(faker)
-        delete_request = {"ids": [non_existent_id, cred1.id]}
-        response = django_client.post(
-            reverse("v1:credentials-bulk-delete"), json=delete_request
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DO_NOT_EXIST % ids_to_str([non_existent_id])
-        )
-        assert Credential.objects.get(pk=cred1.id).name == cred1.name
-
-    def test_bulk_delete_atomic_if_second_does_not_exist(self, django_client, faker):
-        """Test bulk deletes is atomic if the second credential does not exist."""
-        cred1 = CredentialFactory()
-        non_existent_id = generate_invalid_id(faker)
-        delete_request = {"ids": [cred1.id, non_existent_id]}
-        response = django_client.post(
-            reverse("v1:credentials-bulk-delete"), json=delete_request
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DO_NOT_EXIST % ids_to_str([non_existent_id])
-        )
-        assert Credential.objects.get(pk=cred1.id).name == cred1.name
-
-    def test_bulk_delete_does_not_delete_first_referenced_credential(
-        self, django_client
-    ):
-        """Test that bulk delete does not delete first referenced credential."""
+    def test_bulk_delete_ignores_missing_ids(self, django_client, faker):
+        """Test bulk delete succeeds and reports missing IDs."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
-        SourceFactory(credentials=[cred1])
-        delete_request = {"ids": [cred1.id, cred2.id]}
+        non_existent_id = generate_invalid_id(faker)
+        delete_request = {"ids": [non_existent_id, cred1.id, cred2.id]}
         response = django_client.post(
             reverse("v1:credentials-bulk-delete"), json=delete_request
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES % ids_to_str([cred1.id])
-        )
-        assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 2
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()
+        assert set(response_json["deleted"]) == set([cred1.id, cred2.id])
+        assert response_json["missing"] == [non_existent_id]
+        assert response_json["skipped"] == []
+        assert not Credential.objects.filter(pk__in=[cred1.id, cred2.id]).exists()
 
-    def test_bulk_delete_does_not_delete_second_referenced_credential(
-        self, django_client
-    ):
-        """Test that bulk delete does not delete second referenced credential."""
+    def test_bulk_delete_ignores_errors(self, django_client):
+        """Test bulk delete succeeds and reports skipped IDs."""
+        cred = CredentialFactory()
+        cred_in_use = CredentialFactory()
+        source1 = SourceFactory(credentials=[cred_in_use])
+        source2 = SourceFactory(credentials=[cred_in_use])
+        delete_request = {"ids": [cred_in_use.id, cred.id]}
+        response = django_client.post(
+            reverse("v1:credentials-bulk-delete"), json=delete_request
+        )
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()
+        assert response_json["deleted"] == [cred.id]
+        assert response_json["missing"] == []
+        assert len(response_json["skipped"]) == 1
+        assert response_json["skipped"][0]["credential"] == cred_in_use.id
+        assert set(response_json["skipped"][0]["sources"]) == set(
+            [source1.id, source2.id]
+        )
+        assert not Credential.objects.filter(pk=cred.id).exists()
+        assert Credential.objects.filter(pk=cred_in_use.id).exists()
+
+    def test_bulk_delete_all(self, django_client, faker):
+        """Test bulk delete succeeds with magic "all" token."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
-        SourceFactory(credentials=[cred2])
-        delete_request = {"ids": [cred1.id, cred2.id]}
+        cred_in_use = CredentialFactory()
+        source = SourceFactory(credentials=[cred_in_use])
+        delete_request = {"ids": DELETE_ALL_IDS_MAGIC_STRING}
         response = django_client.post(
             reverse("v1:credentials-bulk-delete"), json=delete_request
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES % ids_to_str([cred2.id])
-        )
-        assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 2
-
-    def test_bulk_delete_atomic_handles_multiple_credentials(self, django_client):
-        """Test that bulk delete atomic operation works with multiple credentials."""
-        creds = []
-        for __ in range(6):
-            creds.append(CredentialFactory())
-        referenced_cred = creds[-1]
-        SourceFactory(credentials=[referenced_cred])
-        delete_request = {"ids": [cred.id for cred in creds]}
-        response = django_client.post(
-            reverse("v1:credentials-bulk-delete"), json=delete_request
-        )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES
-            % ids_to_str([referenced_cred.id])
-        )
-        assert len(
-            Credential.objects.filter(id__in=[cred.id for cred in creds])
-        ) == len(creds)
-
-    def test_bulk_delete_errors_with_all_non_existent_credentials_first(
-        self, django_client, faker
-    ):
-        """Test that bulk delete returns the 404 for all missing credentials."""
-        creds = []
-        for __ in range(6):
-            creds.append(CredentialFactory())
-        inv_cred1, inv_cred2 = generate_invalid_id(faker), generate_invalid_id(faker)
-        SourceFactory(credentials=[creds[2]])
-        SourceFactory(credentials=[creds[4]])
-        delete_request = {"ids": [cred.id for cred in creds] + [inv_cred1, inv_cred2]}
-        response = django_client.post(
-            reverse("v1:credentials-bulk-delete"), json=delete_request
-        )
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DO_NOT_EXIST % ids_to_str([inv_cred1, inv_cred2])
-        )
-        assert len(
-            Credential.objects.filter(id__in=[cred.id for cred in creds])
-        ) == len(creds)
-
-    def test_bulk_delete_errors_with_all_credentials_with_sources(
-        self, django_client, faker
-    ):
-        """Test that bulk delete returns the 422 for all credentials with sources."""
-        creds = []
-        for __ in range(6):
-            creds.append(CredentialFactory())
-        ref_cred1, ref_cred2 = creds[2], creds[4]
-        SourceFactory(credentials=[ref_cred1])
-        SourceFactory(credentials=[ref_cred2])
-        delete_request = {"ids": [cred.id for cred in creds]}
-        response = django_client.post(
-            reverse("v1:credentials-bulk-delete"), json=delete_request
-        )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-        assert response.json()["detail"] == _(
-            messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES
-            % ids_to_str([ref_cred1.id, ref_cred2.id])
-        )
-        assert len(
-            Credential.objects.filter(id__in=[cred.id for cred in creds])
-        ) == len(creds)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()
+        assert set(response_json["deleted"]) == set([cred1.id, cred2.id])
+        assert response_json["missing"] == []
+        assert response_json["skipped"] == [
+            {"credential": cred_in_use.id, "sources": [source.id]}
+        ]
+        assert not Credential.objects.exclude(pk=cred_in_use.id).exists()
+        assert Credential.objects.filter(pk=cred_in_use.id).exists()
 
 
 @pytest.mark.django_db

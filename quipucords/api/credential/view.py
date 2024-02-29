@@ -1,5 +1,5 @@
 """Describes the views associated with the API models."""
-
+from itertools import groupby
 
 from django.db import transaction
 from django.http import Http404
@@ -12,7 +12,7 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
-from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.exceptions import ParseError
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,8 +20,7 @@ from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from api import messages
-from api.common.util import DELETE_ALL_IDS_MAGIC_STRING, ids_to_str, is_int
-from api.exceptions import UnprocessableEntity
+from api.common.util import DELETE_ALL_IDS_MAGIC_STRING, is_int
 from api.filters import ListFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializer
@@ -64,31 +63,48 @@ def credential_bulk_delete(request):
         creds = Credential.objects.all()
         if ids != DELETE_ALL_IDS_MAGIC_STRING:
             creds = creds.filter(id__in=ids)
-            # Check for Credentials that do not exist (404)
-            existing_ids = set([cred.id for cred in creds])
-            missing_ids = ids - existing_ids
-            if missing_ids:
-                raise NotFound(
-                    detail=_(messages.CRED_IDS_DO_NOT_EXIST % ids_to_str(missing_ids))
-                )
-
-        # Check for Credentials with related Sources (422)
-        cred_ids_and_sources = creds.prefetch_related("sources").values_list(
-            "id", "sources"
+        credential_ids_requested = ids if isinstance(ids, set) else set()
+        credential_ids_found = set(creds.values_list("id", flat=True))
+        credential_ids_with_sources = (
+            creds.exclude(sources=None)
+            .prefetch_related("sources")
+            .values_list("id", "sources")
+            .order_by("id")  # later groupby needs sorted input
         )
-        ids_with_sources = [cred[0] for cred in cred_ids_and_sources if cred[1]]
-        if ids_with_sources:
-            raise UnprocessableEntity(
-                detail=_(
-                    messages.CRED_IDS_DELETE_NOT_VALID_W_SOURCES
-                    % ids_to_str(ids_with_sources)
-                )
-            )
+        creds.filter(sources=None).delete()
 
-        # Delete the Credentials
-        creds.delete()
+    credential_ids_missing = credential_ids_requested - credential_ids_found
+    credential_ids_skipped = []
 
-    return Response(status=status.HTTP_200_OK)
+    for credential_id, grouper in groupby(
+        credential_ids_with_sources, key=lambda c: c[0]
+    ):
+        credential_ids_skipped.append(
+            {
+                "credential": credential_id,
+                "sources": [g[1] for g in grouper],
+            }
+        )
+    credential_ids_deleted = credential_ids_found - set(
+        c["credential"] for c in credential_ids_skipped
+    )
+
+    message = _(
+        "Deleted {count_deleted} credentials. "
+        "Could not find {count_missing} credentials. "
+        "Failed to delete {count_failed} credentials."
+    ).format(
+        count_deleted=len(credential_ids_deleted),
+        count_missing=len(credential_ids_missing),
+        count_failed=len(credential_ids_skipped),
+    )
+    response_data = {
+        "message": message,
+        "deleted": credential_ids_deleted,
+        "missing": credential_ids_missing,
+        "skipped": credential_ids_skipped,
+    }
+    return Response(data=response_data, status=status.HTTP_200_OK)
 
 
 class CredentialFilter(FilterSet):
