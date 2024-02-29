@@ -3,12 +3,15 @@
 from datetime import datetime
 from unittest.mock import patch
 
+import pytest
 from django.core import management
 from django.test import TestCase
 
 from api import messages
+from api.inspectresult.model import InspectResult, RawFact
 from api.models import Credential, Scan, ScanJob, ScanTask, Source
 from api.serializers import ScanTaskSerializer
+from tests.factories import InspectResultFactory, ScanTaskFactory
 
 
 def dummy_start():
@@ -208,8 +211,9 @@ class ScanTaskTest(TestCase):
         self.assertEqual(0, task_instance_a.systems_count)
         self.assertEqual(0, task_instance_b.systems_count)
 
-        with patch.object(task_instance_a, "refresh_from_db"), patch.object(
-            task_instance_b, "refresh_from_db"
+        with (
+            patch.object(task_instance_a, "refresh_from_db"),
+            patch.object(task_instance_b, "refresh_from_db"),
         ):
             task_instance_a.increment_stats("foo", increment_sys_count=True)
             task_instance_b.increment_stats("foo", increment_sys_count=True)
@@ -244,3 +248,26 @@ class ScanTaskTest(TestCase):
         self.assertEqual(0, task.systems_scanned)
         self.assertEqual(0, task.systems_failed)
         self.assertEqual(0, task.systems_unreachable)
+
+
+@pytest.mark.django_db
+def test_cleanup_facts():
+    """Test ScanTask.cleanup_facts method."""
+    scan_task = ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    results = InspectResultFactory.create_batch(5)
+    scan_task.inspect_results.add(*results)
+    assert scan_task.get_result().count() == 5
+    identity_key = "identity-key"
+    # add a raw fact with identity key to "protect" one of the results
+    protected_result_id = results[0].id
+    RawFact.objects.create(
+        name=identity_key, inspect_result_id=protected_result_id, value="some-value"
+    )
+    # other results won't be protected even with identity-key because value is not valid
+    # or absent
+    RawFact.objects.create(name=identity_key, inspect_result=results[1], value="")
+    RawFact.objects.create(name=identity_key, inspect_result=results[2], value=None)
+    RawFact.objects.create(name=identity_key, inspect_result=results[3], value={})
+    scan_task.cleanup_facts(identity_key)
+    assert scan_task.get_result().count() == 1
+    assert InspectResult.objects.filter(id=protected_result_id).exists()

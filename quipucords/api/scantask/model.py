@@ -13,6 +13,7 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
+from api.inspectresult.model import RawFact
 from api.source.model import Source
 
 logger = logging.getLogger(__name__)
@@ -368,23 +369,18 @@ class ScanTask(models.Model):
         :param identity_key: A key that identifies the system.  If
         key not present, the system is discarded.
         """
-        if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            system_results = self.get_result()
-            if system_results:
-                # Process all results that were save to db
-                for system_result in system_results.systems.all():
-                    fact = {}
-                    for raw_fact in system_result.facts.all():
-                        if not raw_fact.value or raw_fact.value == "":  # noqa: PLC1901
-                            continue
-                        # Load values as JSON
-                        fact[raw_fact.name] = raw_fact.value
-
-                    if fact.get(identity_key) is None:
-                        system_result.facts.all().delete()
-                        system_result.delete()
-
-    # all tasks
+        if self.scan_type != ScanTask.SCAN_TYPE_INSPECT:
+            return
+        valid_identity_raw_facts = (
+            RawFact.objects.filter(
+                inspect_result__in=self.inspect_results.all(),
+                name=identity_key,
+            )
+            .exclude(value__isnull=True)
+            .exclude(value="")
+            .exclude(value={})
+        )
+        self.inspect_results.exclude(facts__in=valid_identity_raw_facts).delete()
 
     def get_result(self):
         """Access results from ScanTask.
