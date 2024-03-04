@@ -52,19 +52,19 @@ pycparser==2.21 ; python_version >= "3.11" and python_version < "3.12"
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
-setuptools-rust==1.8.1
+setuptools-rust==1.9.0
     # via
     #   bcrypt
     #   cryptography
-setuptools-scm==8.0.4
+setuptools-scm==7.1.0
     # via
     #   django-axes
     #   pluggy
     #   python-dateutil
     #   setuptools-rust
-trove-classifiers==2024.1.31
+trove-classifiers==2024.3.3
     # via hatchling
-typing-extensions==4.9.0 ; python_version >= "3.11" and python_version < "3.12"
+typing-extensions==4.10.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
 wheel==0.42.0
     # via
@@ -82,7 +82,7 @@ wheel==0.42.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.1.0 ; python_version >= "3.11" and python_version < "3.12"
+setuptools==69.1.1 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   ansible
     #   ansible-core
