@@ -243,7 +243,7 @@ class ScanJob(models.Model):
             if self.connection_results is not None:
                 self.connection_results.task_results.all().delete()
             if self.report and self.report.deployment_report:
-                self.report.deployment_report.system_fingerprints.delete()
+                self.report.deployment_report.system_fingerprints.all().delete()
 
         # Create tasks
         conn_tasks = self._create_connection_tasks()
