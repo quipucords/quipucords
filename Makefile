@@ -101,9 +101,18 @@ test-case:
 	$(MAKE) test -e TEST_OPTS="${TEST_OPTS} $(pattern)"
 
 test-coverage:
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords --cov-append" QPC_DBMS=sqlite
-	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m 'slow and (not container)' --cov=quipucords --cov-append"
+	# We seem to have encountered a bug with pytest-cov or coverage.
+	# We were using --cov-append on each test run, but sometimes it failed and
+	# overwrote the .coverage file, resulting in apparent missing test coverage.
+	# Our workaround is to explicitly write to separate files and then explicitly
+	# combine them to a single .coverage file.
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres COVERAGE_FILE=.coverage.notslow
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QPC_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
+	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m 'slow and (not container)' --cov=quipucords" COVERAGE_FILE=.coverage.notcontainer
+	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.notcontainer
+	poetry run coverage report
+	# We must run `coverage xml` explicitly to make GitHub codecov action happy.
+	poetry run coverage xml
 
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
