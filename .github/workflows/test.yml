@@ -84,4 +84,8 @@ jobs:
 
       - name: Report coverage
         if: ${{ success() && contains(matrix.type, 'test-coverage') }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true # optional (default = false)
+          token: ${{ secrets.CODECOV_TOKEN }} # required
+          # verbose: true # optional (default = false)
