@@ -57,7 +57,7 @@ class TestScanCreate:
     @pytest.mark.parametrize(
         "scan_type", [ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_INSPECT, None]
     )
-    def test_successful_create(self, django_client, faker, scan_type, mocker):
+    def test_successful_create(self, client_logged_in, faker, scan_type, mocker):
         """Ensure a scan is successfully created."""
         source = SourceFactory()
         payload = {
@@ -69,7 +69,9 @@ class TestScanCreate:
             expected_scan_type = scan_type
         else:
             expected_scan_type = ScanTask.SCAN_TYPE_INSPECT
-        response = django_client.post(reverse("v1:scan-list"), payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == {
             "id": mocker.ANY,
@@ -85,31 +87,43 @@ class TestScanCreate:
             ],
         }
 
-    def test_create_no_name(self, django_client):
+    def test_create_no_name(self, client_logged_in):
         """A create request MUST have a name."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
         # at view level).
         source = SourceFactory()
         payload = {"sources": [source.id]}
-        response = django_client.post(reverse("v1:scan-list"), payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"name": ["This field is required."]}
 
-    def test_create_no_source(self, django_client, faker):
+    @pytest.mark.parametrize(
+        "extra_payload,expected_error_message",
+        (
+            ({}, "This field is required."),
+            ({"sources": []}, "Scan job must have one or more sources."),
+        ),
+    )
+    def test_create_no_source(
+        self, extra_payload, expected_error_message, client_logged_in, faker
+    ):
         """A create request MUST have a source."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
         # at view level).
         payload = {"name": faker.bothify("Scan ????-######")}
-        response = django_client.post(reverse("v1:scan-list"), payload)
+        payload.update(extra_payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json() == {
-            "sources": ["Scan job must have one or more sources."]
-        }
+        assert response.json() == {"sources": [expected_error_message]}
 
     @pytest.mark.parametrize("scan_type", [ScanTask.SCAN_TYPE_FINGERPRINT, "banana"])
-    def test_invalid_scan_type(self, django_client, faker, scan_type, mocker):
+    def test_invalid_scan_type(self, client_logged_in, faker, scan_type, mocker):
         """Ensure a scan is successfully created."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
@@ -120,7 +134,9 @@ class TestScanCreate:
             "sources": [source.id],
             "scan_type": scan_type,
         }
-        response = django_client.post(reverse("v1:scan-list"), payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"scan_type": [mocker.ANY]}
         error_message = response.json()["scan_type"][0]
@@ -131,7 +147,7 @@ class TestScanCreate:
         assert matched_pattern
         assert matched_pattern.group(1) == scan_type
 
-    def test_create_blank_scan_type(self, django_client, faker):
+    def test_create_blank_scan_type(self, client_logged_in, faker):
         """A create request must not have a blank scan_type."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
@@ -142,7 +158,9 @@ class TestScanCreate:
             "sources": [source.id],
             "scan_type": "",
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "scan_type": [
@@ -150,7 +168,7 @@ class TestScanCreate:
             ]
         }
 
-    def test_create_invalid_sources_type(self, django_client, faker):
+    def test_create_invalid_sources_type(self, client_logged_in, faker):
         """A create request must have integer ids."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
@@ -159,13 +177,15 @@ class TestScanCreate:
             "name": faker.bothify("Scan ????-######"),
             "sources": [faker.slug()],
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Source identifiers must be integer values."]
         }
 
-    def test_create_invalid_sources_id(self, django_client, faker):
+    def test_create_invalid_sources_id(self, client_logged_in, faker):
         """A create request must have integer ids."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
@@ -174,13 +194,15 @@ class TestScanCreate:
             "name": faker.bothify("Scan ????-######"),
             "sources": [999999],
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Source with id=999999 could not be found in database."]
         }
 
-    def test_create_with_options(self, django_client, mocker):
+    def test_create_with_options(self, client_logged_in, mocker):
         """A valid create request should with valid options input."""
         source = SourceFactory()
         payload = {
@@ -192,7 +214,9 @@ class TestScanCreate:
                 }
             },
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_201_CREATED
         DEFAULT_MAX_CONCURRENCY = 25
         assert response.json() == {
@@ -220,7 +244,7 @@ class TestScanCreate:
             ],
         }
 
-    def test_create_invalid_forks(self, django_client, faker):
+    def test_create_invalid_forks(self, client_logged_in, faker):
         """Test valid number of forks."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
@@ -233,7 +257,9 @@ class TestScanCreate:
                 "max_concurrency": -5,
             },
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -241,7 +267,7 @@ class TestScanCreate:
             }
         }
 
-    def test_create_large_forks(self, django_client, faker):
+    def test_create_large_forks(self, client_logged_in, faker):
         """Test valid number of forks with a large number of forks specified."""
         source = SourceFactory()
         payload = {
@@ -251,7 +277,9 @@ class TestScanCreate:
                 "max_concurrency": 10000,
             },
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -262,7 +290,7 @@ class TestScanCreate:
             }
         }
 
-    def test_create_disable_optional_products_type(self, django_client, faker):
+    def test_create_disable_optional_products_type(self, client_logged_in, faker):
         """Test invalid type for disabled_optional_products type."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
@@ -273,7 +301,9 @@ class TestScanCreate:
             "sources": [source.id],
             "options": {"disabled_optional_products": "foo"},
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -287,7 +317,7 @@ class TestScanCreate:
 
     @pytest.mark.parametrize("option_value", ("hamburger", "87", 42, "*", []))
     def test_create_disable_optional_products_value_type(
-        self, django_client, faker, option_value
+        self, client_logged_in, faker, option_value
     ):
         """Test invalid type for disabled_optional_products value."""
         source = SourceFactory()
@@ -296,7 +326,9 @@ class TestScanCreate:
             "sources": [source.id],
             "options": {"disabled_optional_products": {"jboss_eap": option_value}},
         }
-        response = django_client.post(reverse("v1:scan-list"), json=payload)
+        response = client_logged_in.post(
+            reverse("v1:scan-list"), data=payload, content_type="application/json"
+        )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -311,12 +343,12 @@ class TestScanCreate:
 class TestScanRetrieve:
     """Test ScanViewSet retrieve."""
 
-    def test_retrieve(self, django_client, mocker):
+    def test_retrieve(self, client_logged_in, mocker):
         """Get Scan details by primary key."""
         scan = ScanFactory(most_recent_scanjob=None)
         source = scan.sources.first()
-        response = django_client.get(reverse("v1:scan-detail", args=(scan.id,)))
-        assert response.ok, response.json()
+        response = client_logged_in.get(reverse("v1:scan-detail", args=(scan.id,)))
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
             "name": scan.name,
@@ -331,12 +363,12 @@ class TestScanRetrieve:
             ],
         }
 
-    def test_retrieve_bad_id(self, django_client):
+    def test_retrieve_bad_id(self, client_logged_in):
         """Attempt to get scan details with bad pk."""
         # TODO: this and many other negative tests here seem to be in the wrong place.
         # They are probably better done at Serializer level (assuming the logic is not
         # at view level - which SHOULD not be).
-        response = django_client.get(reverse("v1:scan-detail", args=("invalid",)))
+        response = client_logged_in.get(reverse("v1:scan-detail", args=("invalid",)))
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -344,12 +376,12 @@ class TestScanRetrieve:
 class TestScanUpdate:
     """Test ScanViewSet update."""
 
-    def test_update(self, django_client, faker):
+    def test_update(self, client_logged_in, faker):
         """Completely update a scan."""
         scan = ScanFactory()
         url = reverse("v1:scan-detail", args=(scan.id,))
-        original_response = django_client.get(url)
-        assert original_response.ok
+        original_response = client_logged_in.get(url)
+        assert original_response.status_code == status.HTTP_200_OK
         original_json = original_response.json()
 
         new_source = SourceFactory()
@@ -358,8 +390,10 @@ class TestScanUpdate:
             "sources": [new_source.id],
             "scan_type": ScanTask.SCAN_TYPE_CONNECT,
         }
-        response = django_client.put(url, json=payload)
-        assert response.ok, response.json()
+        response = client_logged_in.put(
+            url, data=payload, content_type="application/json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() != original_json
 
         assert response.json() == {
@@ -375,16 +409,18 @@ class TestScanUpdate:
             **payload,
         }
 
-    def test_partial_update_retains(self, django_client):
+    def test_partial_update_retains(self, client_logged_in):
         """Test partial update retains unprovided info."""
         scan = ScanFactory()
         url = reverse("v1:scan-detail", args=(scan.id,))
-        original_response = django_client.get(url)
-        assert original_response.ok
+        original_response = client_logged_in.get(url)
+        assert original_response.status_code == status.HTTP_200_OK
         original_json = original_response.json()
 
-        response_update = django_client.patch(url, json={"name": "NEW NAME"})
-        assert response_update.ok
+        response_update = client_logged_in.patch(
+            url, data={"name": "NEW NAME"}, content_type="application/json"
+        )
+        assert response_update.status_code == status.HTTP_200_OK
         assert response_update.json() == {
             "id": original_json["id"],
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -400,15 +436,17 @@ class TestScanUpdate:
             "sources": [original_json["sources"][0]["id"]],
         }
 
-    def test_partial_update_sources(self, django_client):
+    def test_partial_update_sources(self, client_logged_in):
         """Test partial update on sources."""
         scan = ScanFactory()
         original_source = scan.sources.first()
         new_source = SourceFactory()
         assert original_source.id != new_source.id
         url = reverse("v1:scan-detail", args=(scan.id,))
-        response = django_client.patch(url, json={"sources": [new_source.id]})
-        assert response.ok, response.json()
+        response = client_logged_in.patch(
+            url, data={"sources": [new_source.id]}, content_type="application/json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -424,7 +462,7 @@ class TestScanUpdate:
             "sources": [new_source.id],
         }
 
-    def test_partial_update_options(self, django_client):
+    def test_partial_update_options(self, client_logged_in):
         """Test partial update of options on sources."""
         scan = ScanFactory()
         url = reverse("v1:scan-detail", args=(scan.id,))
@@ -437,8 +475,10 @@ class TestScanUpdate:
                 "max_concurrency": max_concurrency,
             },
         }
-        response = django_client.patch(url, json=payload)
-        assert response.ok, response.json()
+        response = client_logged_in.patch(
+            url, data=payload, content_type="application/json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -462,14 +502,16 @@ class TestScanUpdate:
             "sources": [s.id for s in scan.sources.all()],
         }
 
-    def test_partial_update_name(self, django_client):
+    def test_partial_update_name(self, client_logged_in):
         """Test partial update on sources."""
         scan = ScanFactory()
         new_scan_data = ScanFactory.build()
         url = reverse("v1:scan-detail", args=(scan.id,))
         assert scan.name != new_scan_data.name
-        response = django_client.patch(url, json={"name": new_scan_data.name})
-        assert response.ok, response.json()
+        response = client_logged_in.patch(
+            url, data={"name": new_scan_data.name}, content_type="application/json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -485,15 +527,15 @@ class TestScanUpdate:
             "sources": [s.id for s in scan.sources.all()],
         }
 
-    def test_partial_update_enabled(self, django_client):
+    def test_partial_update_enabled(self, client_logged_in):
         """Test partial update retains unprovided info."""
         scan = ScanFactory(
             enabled_extended_product_search=enabled_extended_product_search_default(),
             enabled_optional_products=enabled_optional_products_default(),
         )
         url = reverse("v1:scan-detail", args=(scan.id,))
-        original_response = django_client.get(url)
-        assert original_response.ok
+        original_response = client_logged_in.get(url)
+        assert original_response.status_code == status.HTTP_200_OK
         original_json = original_response.json()
 
         payload = {
@@ -503,11 +545,15 @@ class TestScanUpdate:
                 }
             }
         }
-        response_patch = django_client.patch(url, json=payload)
-        assert response_patch.ok, response_patch.json()
+        response_patch = client_logged_in.patch(
+            url, data=payload, content_type="application/json"
+        )
+        assert response_patch.status_code == status.HTTP_200_OK, response_patch.json()
 
-        updated_response = django_client.get(url)
-        assert updated_response.ok, updated_response.json()
+        updated_response = client_logged_in.get(url)
+        assert (
+            updated_response.status_code == status.HTTP_200_OK
+        ), updated_response.json()
         assert updated_response.json() != original_json
         expected_result = original_json
         expected_result["options"]["enabled_extended_product_search"][
@@ -515,14 +561,16 @@ class TestScanUpdate:
         ] = ["/some/path/"]
         assert updated_response.json() == expected_result
 
-    def test_partial_update_scan_type(self, django_client):
+    def test_partial_update_scan_type(self, client_logged_in):
         """Test partial update retains unprovided info."""
         scan = ScanFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         url = reverse("v1:scan-detail", args=(scan.id,))
-        response = django_client.patch(
-            url, json={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
+        response = client_logged_in.patch(
+            url,
+            data={"scan_type": ScanTask.SCAN_TYPE_CONNECT},
+            content_type="application/json",
         )
-        assert response.ok, response.json()
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["scan_type"] == ScanTask.SCAN_TYPE_CONNECT
 
 
@@ -548,11 +596,11 @@ def test_expand_scan():
 
 
 @pytest.mark.django_db
-def test_delete(django_client):
+def test_delete(client_logged_in):
     """Delete a scan."""
     scan = ScanFactory()
     url = reverse("v1:scan-detail", args=(scan.id,))
-    response = django_client.delete(url)
+    response = client_logged_in.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert Scan.objects.count() == 0
 
@@ -599,10 +647,10 @@ class TestScanList:
             expected_results.append(data)
         return expected_results
 
-    def test_list(self, django_client, expected_scans):
+    def test_list(self, client_logged_in, expected_scans):
         """List Scan objects."""
-        response = django_client.get(reverse("v1:scan-list"))
-        assert response.ok, response.json()
+        response = client_logged_in.get(reverse("v1:scan-list"))
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -610,12 +658,12 @@ class TestScanList:
             "results": expected_scans,
         }
 
-    def test_filtered_list(self, django_client, expected_scans):
+    def test_filtered_list(self, client_logged_in, expected_scans):
         """Test filtered scan list."""
-        response = django_client.get(
-            reverse("v1:scan-list"), params={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
+        response = client_logged_in.get(
+            reverse("v1:scan-list"), data={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
         )
-        assert response.ok, response.json()
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "count": 1,
             "next": None,
@@ -624,13 +672,13 @@ class TestScanList:
             "results": [expected_scans[0]],
         }
 
-    def test_list_by_scanjob_end_time(self, django_client, expected_scans):
+    def test_list_by_scanjob_end_time(self, client_logged_in, expected_scans):
         """List all scan objects, ordered by ScanJob start time."""
-        response = django_client.get(
+        response = client_logged_in.get(
             reverse("v1:scan-list"),
-            params={"ordering": "most_recent_scanjob__start_time"},
+            data={"ordering": "most_recent_scanjob__start_time"},
         )
-        assert response.ok, response.json()
+        assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "count": 2,
             "next": None,
