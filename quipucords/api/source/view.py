@@ -185,7 +185,7 @@ class SourceViewSet(ModelViewSet):
 
     @transaction.atomic
     def destroy(self, request, pk):
-        """Delete a cred."""
+        """Delete a source."""
         try:
             source = Source.objects.get(pk=pk)
             scans = Scan.objects.filter(sources__pk=pk).values(IDENTIFIER_KEY, NAME_KEY)
