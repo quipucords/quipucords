@@ -259,10 +259,6 @@ paths:
           description: "Invalid input"
         401:
           description: "Not authorized"
-        404:
-          description: "Credential not found"
-        422:
-          description: "Unprocessable Entity"
   /sources/:
     post:
       tags:
