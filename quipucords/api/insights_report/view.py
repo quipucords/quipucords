@@ -2,13 +2,7 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-    renderer_classes,
-)
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
@@ -19,16 +13,13 @@ from api.exceptions import FailedDependencyError
 from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
 from api.insights_report.serializers import YupanaPayloadSerializer
 from api.models import DeploymentsReport, SystemFingerprint
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
-auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
 
 
 @api_view(["GET"])
-@authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, InsightsGzipRenderer, BrowsableAPIRenderer))
 def insights(request, report_id=None):

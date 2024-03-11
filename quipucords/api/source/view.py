@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -26,7 +25,6 @@ from api.models import Scan, ScanJob, ScanTask, Source
 from api.serializers import SourceSerializerV1, SourceSerializerV2
 from api.signal.scanjob_signal import start_scan
 from api.source.util import expand_credential
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 IDENTIFIER_KEY = "id"
 NAME_KEY = "name"
@@ -80,10 +78,6 @@ class SourceFilter(FilterSet):
 class SourceViewSet(ModelViewSet):
     """A view set for Sources."""
 
-    authentication_classes = (
-        QuipucordsExpiringTokenAuthentication,
-        SessionAuthentication,
-    )
     permission_classes = (IsAuthenticated,)
 
     queryset = Source.objects.all()

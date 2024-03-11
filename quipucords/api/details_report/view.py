@@ -5,10 +5,8 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import mixins, status, viewsets
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import (
     api_view,
-    authentication_classes,
     permission_classes,
     renderer_classes,
 )
@@ -25,17 +23,14 @@ from api.details_report.csv_renderer import DetailsCSVRenderer
 from api.details_report.util import create_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
 from api.serializers import DetailsReportSerializer
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 from scanner.job import ScanJobRunner
 
 logger = logging.getLogger(__name__)
 
-auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
 
 
 @api_view(["GET"])
-@authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes(
     (JSONRenderer, BrowsableAPIRenderer, DetailsCSVRenderer, ReportJsonGzipRenderer)
@@ -61,10 +56,6 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     This is internal API for a sync way to create a report.
     """
 
-    authentication_classes = (
-        QuipucordsExpiringTokenAuthentication,
-        SessionAuthentication,
-    )
     permission_classes = (IsAuthenticated,)
 
     queryset = Report.objects.all()
