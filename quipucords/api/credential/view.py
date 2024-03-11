@@ -22,14 +22,28 @@ from api.serializers import CredentialSerializer
 
 @api_view(["post"])
 def credential_bulk_delete(request):
-    """Bulk delete credentials.
+    """
+    Bulk delete credentials.
+
+    Response payload contains IDs of credentials deleted, skipped, and not found.
+    Example response:
+
+        {
+            "message": \
+                "Deleted 3 credentials. "\
+                "Could not find 0 credentials. "\
+                "Failed to delete 2 credentials.",
+            "deleted": [1, 2, 3],
+            "missing": [],
+            "skipped": [
+                {"credential": 6, "sources": [1]},
+                {"credential": 7, "sources": [2, 3]},
+            ],
+        }
 
     input:      "ids" : List of ids to delete, or string DELETE_ALL_IDS_MAGIC_STRING
-    returns:    200 OK - upon successfully deleting all credentials.
+    returns:    200 OK - upon successfully deleting any credentials.
                 400 Bad Request - ids list is missing or empty.
-                404 Not Found - If one or more credentials specified do not exist.
-                422 Unprocessable Entity - If one or more credentials could
-                                           not be deleted.
     """
     ids = request.data.get("ids")
     if (
