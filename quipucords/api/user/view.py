@@ -3,13 +3,10 @@ import logging
 
 from django.contrib.auth import logout
 from rest_framework import viewsets
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +14,6 @@ logger = logging.getLogger(__name__)
 class UserViewSet(viewsets.GenericViewSet):
     """User view for logout and user data."""
 
-    authentication_classes = (
-        QuipucordsExpiringTokenAuthentication,
-        SessionAuthentication,
-    )
     permission_classes = (IsAuthenticated,)
 
     @action(detail=False, methods=["get"])

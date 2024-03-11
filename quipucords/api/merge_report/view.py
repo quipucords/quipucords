@@ -4,12 +4,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -21,16 +16,13 @@ from api.details_report.util import create_report, validate_details_report_json
 from api.models import Report, ScanJob, ScanTask
 from api.serializers import ScanJobSerializerV1
 from api.signal.scanjob_signal import start_scan
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
-auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
 
 
 @api_view(["get", "put", "post"])
-@authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 def async_merge_reports(request, scan_job_id=None):
     """Merge reports asynchronously."""
