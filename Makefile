@@ -142,7 +142,11 @@ server-randomize-sequences:
 	$(PYTHON) quipucords/manage.py randomize_db_sequences --settings quipucords.settings
 
 celery-worker:
-	$(PYTHON) -m celery --app quipucords --workdir quipucords worker
+	@if [ -n "${QPC_CELERY_WORKER_MIN_CONCURRENCY}" -a -n "${QPC_CELERY_WORKER_MAX_CONCURRENCY}" ]; then \
+		$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QPC_CELERY_WORKER_MAX_CONCURRENCY},${QPC_CELERY_WORKER_MIN_CONCURRENCY}; \
+	else \
+		$(PYTHON) -m celery --app quipucords --workdir quipucords worker; \
+	fi
 
 server-set-superuser:
 	cat ./deploy/setup_user.py | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
