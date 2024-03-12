@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from rest_framework import mixins, viewsets
-from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
@@ -26,7 +25,6 @@ from api.serializers import (
     SystemInspectionResultSerializer,
 )
 from api.signal.scanjob_signal import cancel_scan, pause_scan, restart_scan
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
@@ -95,10 +93,6 @@ class ScanJobFilterV2(FilterSet):
 class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """A view set for ScanJob."""
 
-    authentication_classes = (
-        QuipucordsExpiringTokenAuthentication,
-        SessionAuthentication,
-    )
     permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
@@ -294,10 +288,6 @@ class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 class ScanJobViewSetV2(viewsets.ReadOnlyModelViewSet):
     """A viewset for ScanJobs."""
 
-    authentication_classes = (
-        QuipucordsExpiringTokenAuthentication,
-        SessionAuthentication,
-    )
     permission_classes = (IsAuthenticated,)
     queryset = ScanJob.objects.prefetch_related("sources").with_counts()
     serializer_class = ScanJobSerializerV2

@@ -4,13 +4,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-    renderer_classes,
-)
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
@@ -21,16 +15,13 @@ from api.common.report_json_gzip_renderer import ReportJsonGzipRenderer
 from api.common.util import is_int
 from api.deployments_report.csv_renderer import DeploymentCSVRenderer
 from api.models import DeploymentsReport
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
-auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
 
 
 @api_view(["GET"])
-@authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 @renderer_classes(
     (JSONRenderer, BrowsableAPIRenderer, DeploymentCSVRenderer, ReportJsonGzipRenderer)

@@ -9,12 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -29,7 +24,6 @@ from api.models import Scan, ScanJob, ScanTask, Source
 from api.scanjob.serializer import expand_scanjob
 from api.serializers import ScanJobSerializerV1, ScanSerializer
 from api.signal.scanjob_signal import cancel_scan, start_scan
-from api.user.authentication import QuipucordsExpiringTokenAuthentication
 
 logger = logging.getLogger(__name__)
 
@@ -64,12 +58,10 @@ JOB_VALID_STATUS = [
 ]
 
 
-auth_classes = (QuipucordsExpiringTokenAuthentication, SessionAuthentication)
 perm_classes = (IsAuthenticated,)
 
 
 @api_view(["get", "post"])
-@authentication_classes(auth_classes)
 @permission_classes(perm_classes)
 def jobs(request, scan_id=None):
     """Get the jobs of a scan."""
@@ -167,10 +159,6 @@ class ScanFilter(FilterSet):
 class ScanViewSet(ModelViewSet):
     """A view set for Scan."""
 
-    authentication_classes = (
-        QuipucordsExpiringTokenAuthentication,
-        SessionAuthentication,
-    )
     permission_classes = (IsAuthenticated,)
 
     queryset = Scan.objects.all()
