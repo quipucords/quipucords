@@ -9,7 +9,6 @@ from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
@@ -92,8 +91,6 @@ class ScanJobFilterV2(FilterSet):
 
 class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """A view set for ScanJob."""
-
-    permission_classes = (IsAuthenticated,)
 
     queryset = ScanJob.objects.all()
     serializer_class = ScanJobSerializerV1
@@ -288,7 +285,6 @@ class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 class ScanJobViewSetV2(viewsets.ReadOnlyModelViewSet):
     """A viewset for ScanJobs."""
 
-    permission_classes = (IsAuthenticated,)
     queryset = ScanJob.objects.prefetch_related("sources").with_counts()
     serializer_class = ScanJobSerializerV2
     filter_backends = (DjangoFilterBackend, OrderingFilter)
