@@ -4,8 +4,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 
@@ -19,11 +18,8 @@ from api.signal.scanjob_signal import start_scan
 
 logger = logging.getLogger(__name__)
 
-perm_classes = (IsAuthenticated,)
-
 
 @api_view(["get", "put", "post"])
-@permission_classes(perm_classes)
 def async_merge_reports(request, scan_job_id=None):
     """Merge reports asynchronously."""
     if request.method == "GET":

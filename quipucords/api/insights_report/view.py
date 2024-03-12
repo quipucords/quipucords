@@ -2,9 +2,8 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 
@@ -16,11 +15,8 @@ from api.models import DeploymentsReport, SystemFingerprint
 
 logger = logging.getLogger(__name__)
 
-perm_classes = (IsAuthenticated,)
-
 
 @api_view(["GET"])
-@permission_classes(perm_classes)
 @renderer_classes((JSONRenderer, InsightsGzipRenderer, BrowsableAPIRenderer))
 def insights(request, report_id=None):
     """Lookup and return an Insights system report."""
