@@ -104,7 +104,7 @@ class ConnectTaskRunner(ScanTaskRunner):
             error_message += f"Connect scan failed for {self.scan_task}. {vm_error}"
             return error_message, ScanTask.FAILED
         except gaierror as error:
-            error_message = f"Unable to connect to VCenter source {source.name}%s.\n"
+            error_message = f"Unable to connect to VCenter source {source.name}.\n"
             error_message += f"Reason for failure: {error}"
             return error_message, ScanTask.FAILED
 
