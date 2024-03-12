@@ -9,6 +9,8 @@ BINDIR  = bin
 PARALLEL_NUM ?= $(shell $(PYTHON) -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
 TEST_TIMEOUT ?= 15
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT) --durations=10
+QPC_CELERY_WORKER_MIN_CONCURRENCY ?= 10
+QPC_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
@@ -142,11 +144,7 @@ server-randomize-sequences:
 	$(PYTHON) quipucords/manage.py randomize_db_sequences --settings quipucords.settings
 
 celery-worker:
-	@if [ -n "${QPC_CELERY_WORKER_MIN_CONCURRENCY}" -a -n "${QPC_CELERY_WORKER_MAX_CONCURRENCY}" ]; then \
-		$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QPC_CELERY_WORKER_MAX_CONCURRENCY},${QPC_CELERY_WORKER_MIN_CONCURRENCY}; \
-	else \
-		$(PYTHON) -m celery --app quipucords --workdir quipucords worker; \
-	fi
+	$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QPC_CELERY_WORKER_MAX_CONCURRENCY},${QPC_CELERY_WORKER_MIN_CONCURRENCY}
 
 server-set-superuser:
 	cat ./deploy/setup_user.py | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
