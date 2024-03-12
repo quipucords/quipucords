@@ -6,10 +6,9 @@ from django.http import Http404
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.exceptions import ParseError
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
@@ -20,11 +19,8 @@ from api.filters import ListFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializer
 
-perm_classes = (IsAuthenticated,)
-
 
 @api_view(["post"])
-@permission_classes(perm_classes)
 def credential_bulk_delete(request):
     """Bulk delete credentials.
 
@@ -116,8 +112,6 @@ class CredentialFilter(FilterSet):
 
 class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model."""
-
-    permission_classes = (IsAuthenticated,)
 
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer

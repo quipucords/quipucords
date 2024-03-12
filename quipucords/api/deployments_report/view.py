@@ -4,8 +4,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, renderer_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -18,11 +17,8 @@ from api.models import DeploymentsReport
 
 logger = logging.getLogger(__name__)
 
-perm_classes = (IsAuthenticated,)
-
 
 @api_view(["GET"])
-@permission_classes(perm_classes)
 @renderer_classes(
     (JSONRenderer, BrowsableAPIRenderer, DeploymentCSVRenderer, ReportJsonGzipRenderer)
 )

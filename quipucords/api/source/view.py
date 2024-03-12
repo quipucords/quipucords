@@ -8,7 +8,6 @@ from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
@@ -77,8 +76,6 @@ class SourceFilter(FilterSet):
 
 class SourceViewSet(ModelViewSet):
     """A view set for Sources."""
-
-    permission_classes = (IsAuthenticated,)
 
     queryset = Source.objects.all()
     filter_backends = (DjangoFilterBackend, OrderingFilter)
