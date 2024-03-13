@@ -19,6 +19,7 @@ from api.views import (
     insights,
     jobs,
     reports,
+    source_bulk_delete,
     status,
 )
 
@@ -40,6 +41,11 @@ v1_urls = [
         "credentials/bulk_delete/",
         credential_bulk_delete,
         name="credentials-bulk-delete",
+    ),
+    path(
+        "sources/bulk_delete/",
+        source_bulk_delete,
+        name="sources-bulk-delete",
     ),
     path("reports/<int:report_id>/details/", details, name="reports-details"),
     path(
