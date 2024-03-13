@@ -11,7 +11,7 @@ from api.merge_report.view import async_merge_reports
 from api.reports.view import reports
 from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSetV1, ScanJobViewSetV2
-from api.source.view import SourceViewSet
+from api.source.view import SourceViewSet, source_bulk_delete
 from api.status.view import status
 from api.user.token_view import QuipucordsExpiringAuthTokenView
 from api.user.view import UserViewSet

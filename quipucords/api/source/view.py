@@ -1,5 +1,6 @@
 """Describes the views associated with the API models."""
-
+from collections import defaultdict
+from itertools import groupby
 
 from django.db import transaction
 from django.http import Http404
@@ -7,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import ParseError
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -14,6 +17,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from api import messages
 from api.common.util import (
+    DELETE_ALL_IDS_MAGIC_STRING,
     convert_to_boolean,
     expand_scanjob_with_times,
     is_boolean,
@@ -54,6 +58,119 @@ def format_source(json_source):
 
         json_source["connection"] = json_scan_job
     return json_source
+
+
+@api_view(["post"])
+def source_bulk_delete(request):
+    """
+    Bulk delete sources.
+
+    Response payload contains IDs of sources deleted, skipped, and not found.
+    Example response:
+
+        {
+            "message": \
+                "Deleted 3 sources. "\
+                "Could not find 0 sources. "\
+                "Failed to delete 2 sources.",
+            "deleted": [1, 2, 3],
+            "missing": [],
+            "skipped": [
+                {"source": 6, "scans": [8], "scanjobs": [], "scantasks": []},
+                {
+                    "source": 7,
+                    "scans": [9, 10],
+                    "scanjobs": [11, 12],
+                    "scantasks": [13, 14, 15, 16],
+                },
+            ],
+        }
+
+    input:      "ids" : List of ids to delete, or string DELETE_ALL_IDS_MAGIC_STRING
+    returns:    200 OK - upon successfully deleting any sources.
+                400 Bad Request - ids list is missing or empty.
+    """
+    ids = request.data.get("ids")
+    if (
+        not isinstance(ids, (list, str))
+        or (isinstance(ids, str) and ids != DELETE_ALL_IDS_MAGIC_STRING)
+        or (isinstance(ids, list) and len(ids) == 0)
+        or (isinstance(ids, list) and any([not isinstance(_id, int) for _id in ids]))
+    ):
+        raise ParseError(
+            detail=_(
+                "Missing 'ids' list of source ids "
+                "or '{DELETE_ALL_IDS_MAGIC_STRING}' string"
+            ).format(DELETE_ALL_IDS_MAGIC_STRING=DELETE_ALL_IDS_MAGIC_STRING)
+        )
+    elif not isinstance(ids, str):
+        ids = set(ids)  # remove duplicates
+
+    with transaction.atomic():
+        sources = Source.objects.all()
+        if ids != DELETE_ALL_IDS_MAGIC_STRING:
+            sources = sources.filter(id__in=ids)
+        source_ids_requested = ids if isinstance(ids, set) else set()
+        source_ids_found = set(sources.values_list("id", flat=True))
+        source_ids_with_scans = (
+            sources.exclude(scan=None)
+            .prefetch_related("scan")
+            .values_list("id", "scan")
+            .order_by("id")  # later groupby needs sorted input
+        )
+        source_ids_with_scanjobs = (
+            sources.exclude(scanjob=None)
+            .prefetch_related("scanjob")
+            .values_list("id", "scanjob")
+            .order_by("id")  # later groupby needs sorted input
+        )
+        source_ids_with_scantasks = (
+            sources.exclude(scantask=None)
+            .prefetch_related("scantask")
+            .values_list("id", "scantask")
+            .order_by("id")  # later groupby needs sorted input
+        )
+        sources.filter(scan=None, scanjob=None, scantask=None).delete()
+
+    source_ids_missing = source_ids_requested - source_ids_found
+
+    _source_ids_skipped = defaultdict(dict)
+    for source_id, grouper in groupby(source_ids_with_scans, key=lambda c: c[0]):
+        _source_ids_skipped[source_id]["scans"] = [g[1] for g in grouper]
+    for source_id, grouper in groupby(source_ids_with_scanjobs, key=lambda c: c[0]):
+        _source_ids_skipped[source_id]["scanjobs"] = [g[1] for g in grouper]
+    for source_id, grouper in groupby(source_ids_with_scantasks, key=lambda c: c[0]):
+        _source_ids_skipped[source_id]["scantasks"] = [g[1] for g in grouper]
+
+    source_ids_skipped = []
+    for source_id, details in _source_ids_skipped.items():
+        full_details = {
+            "source": source_id,
+            "scans": [],
+            "scanjobs": [],
+            "scantasks": [],
+        }
+        full_details.update(details)
+        source_ids_skipped.append(full_details)
+
+    source_ids_deleted = source_ids_found - set(c["source"] for c in source_ids_skipped)
+
+    message = _(
+        "Deleted {count_deleted} sources. "
+        "Could not find {count_missing} sources. "
+        "Failed to delete {count_failed} sources."
+    ).format(
+        count_deleted=len(source_ids_deleted),
+        count_missing=len(source_ids_missing),
+        count_failed=len(source_ids_skipped),
+    )
+    response_data = {
+        "message": message,
+        "deleted": source_ids_deleted,
+        "missing": source_ids_missing,
+        "skipped": source_ids_skipped,
+    }
+    return Response(data=response_data, status=status.HTTP_200_OK)
 
 
 class SourceFilter(FilterSet):

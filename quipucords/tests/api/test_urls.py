@@ -25,6 +25,7 @@ from rest_framework.reverse import reverse
         ),
         ("v1:source-list", {}, "/api/v1/sources/"),
         ("v1:source-detail", {"pk": 1}, "/api/v1/sources/1/"),
+        ("v1:sources-bulk-delete", {}, "/api/v1/sources/bulk_delete/"),
         ("v1:scan-list", {}, "/api/v1/scans/"),
         ("v1:scan-detail", {"pk": 1}, "/api/v1/scans/1/"),
         ("v1:scan-filtered-jobs", {"scan_id": 1}, "/api/v1/scans/1/jobs/"),
