@@ -13,7 +13,12 @@ from api.common.util import DELETE_ALL_IDS_MAGIC_STRING
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
 from constants import ENCRYPTED_DATA_MASK, DataSources
-from tests.factories import CredentialFactory, SourceFactory
+from tests.factories import (
+    CredentialFactory,
+    SourceFactory,
+    generate_invalid_id,
+    generate_openssh_pkey,
+)
 
 ACCEPT_JSON_HEADER = {"Accept": "application/json"}
 
@@ -23,20 +28,6 @@ def alt_cred_type(cred_type):
     cred_types = DataSources.values.copy()
     cred_types.remove(cred_type)
     return random.choice(cred_types)
-
-
-def generate_openssh_pkey(faker):
-    """Generate a random OpenSSH private key."""
-    pkey = "-----BEGIN OPENSSH EXAMPLE KEY-----\n"
-    for __ in range(5):
-        pkey += f"{faker.lexify('?' * 70)}\n"
-    pkey += "-----END OPENSSH EXAMPLE KEY-----\n"
-    return pkey
-
-
-def generate_invalid_id(faker):
-    """Return an invalid Credential id that will likely not exist."""
-    return faker.pyint(min_value=990000, max_value=999999)
 
 
 @pytest.mark.django_db
