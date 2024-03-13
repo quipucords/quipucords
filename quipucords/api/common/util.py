@@ -5,13 +5,15 @@ from datetime import datetime
 from json import JSONEncoder
 from pathlib import Path
 
+from django.utils.translation import gettext as _
+from rest_framework.exceptions import ParseError
 from rest_framework.serializers import ValidationError
 
 from compat.pydantic import BaseModel, PydanticErrorProxy
 
 logger = logging.getLogger(__name__)
 
-DELETE_ALL_IDS_MAGIC_STRING = "all"  # special input value for bulk delete APIs
+ALL_IDS_MAGIC_STRING = "all"  # special API input value for not filtering IDs
 
 
 def is_int(value):
@@ -209,3 +211,27 @@ class RawFactEncoder(JSONEncoder):
         if isinstance(o, set):
             return sorted(o)
         return super().default(o)
+
+
+def set_of_ids_or_all_str(ids) -> set[int] | str:
+    """
+    Given an input, return a list of integers or the magic "all" string.
+
+    Some of our APIs (e.g. bulk delete) accept a dynamic "ids" argument as a filter.
+    This function consolidates the checking and conversion of that dynamic argument.
+    This function may raise ParseError if the input is invalid.
+    """
+    if (
+        not isinstance(ids, (list, str))
+        or (isinstance(ids, str) and ids != ALL_IDS_MAGIC_STRING)
+        or (isinstance(ids, list) and len(ids) == 0)
+        or (isinstance(ids, list) and any([not isinstance(_id, int) for _id in ids]))
+    ):
+        raise ParseError(
+            detail=_("Missing 'ids' list of ids or '{token}' string").format(
+                token=ALL_IDS_MAGIC_STRING
+            )
+        )
+    elif not isinstance(ids, str):
+        ids = set(ids)  # remove duplicates
+    return ids

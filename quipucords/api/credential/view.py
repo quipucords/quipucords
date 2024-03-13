@@ -7,14 +7,13 @@ from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import ParseError
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
 from api import messages
-from api.common.util import DELETE_ALL_IDS_MAGIC_STRING, is_int
+from api.common.util import ALL_IDS_MAGIC_STRING, is_int, set_of_ids_or_all_str
 from api.filters import ListFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializer
@@ -41,29 +40,15 @@ def credential_bulk_delete(request):
             ],
         }
 
-    input:      "ids" : List of ids to delete, or string DELETE_ALL_IDS_MAGIC_STRING
+    input:      "ids" : List of ids to delete, or string ALL_IDS_MAGIC_STRING
     returns:    200 OK - upon successfully deleting any credentials.
                 400 Bad Request - ids list is missing or empty.
     """
-    ids = request.data.get("ids")
-    if (
-        not isinstance(ids, (list, str))
-        or (isinstance(ids, str) and ids != DELETE_ALL_IDS_MAGIC_STRING)
-        or (isinstance(ids, list) and len(ids) == 0)
-        or (isinstance(ids, list) and any([not isinstance(_id, int) for _id in ids]))
-    ):
-        raise ParseError(
-            detail=_(
-                "Missing 'ids' list of credential ids "
-                "or '{DELETE_ALL_IDS_MAGIC_STRING}' string"
-            ).format(DELETE_ALL_IDS_MAGIC_STRING=DELETE_ALL_IDS_MAGIC_STRING)
-        )
-    elif not isinstance(ids, str):
-        ids = set(ids)  # remove duplicates
+    ids = set_of_ids_or_all_str(request.data.get("ids"))
 
     with transaction.atomic():
         creds = Credential.objects.all()
-        if ids != DELETE_ALL_IDS_MAGIC_STRING:
+        if ids != ALL_IDS_MAGIC_STRING:
             creds = creds.filter(id__in=ids)
         credential_ids_requested = ids if isinstance(ids, set) else set()
         credential_ids_found = set(creds.values_list("id", flat=True))

@@ -3,7 +3,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from api.common.util import DELETE_ALL_IDS_MAGIC_STRING
+from api.common.util import ALL_IDS_MAGIC_STRING
 from api.source.model import Source
 from tests.factories import (
     ScanFactory,
@@ -35,7 +35,7 @@ class TestSourceBulkDelete:
         """Test that bulk delete deletes all sources."""
         source1 = SourceFactory()
         source2 = SourceFactory()
-        delete_request = {"ids": DELETE_ALL_IDS_MAGIC_STRING}
+        delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
@@ -117,7 +117,7 @@ class TestSourceBulkDelete:
         scan2job = ScanJobFactory(scan=scan2)
         scan2job.sources.add(source_in_use2)
         scan2task = ScanTaskFactory(job=scan2job, source=source_in_use2)
-        delete_request = {"ids": DELETE_ALL_IDS_MAGIC_STRING}
+        delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
