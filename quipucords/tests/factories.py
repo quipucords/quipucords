@@ -306,3 +306,17 @@ class InspectResultFactory(DjangoModelFactory):
         """Factory options."""
 
         model = "api.InspectResult"
+
+
+def generate_invalid_id(faker: factory.Faker) -> int:
+    """Return a large number that likely does not exist as a real model object id."""
+    return faker.pyint(min_value=990000, max_value=999999)
+
+
+def generate_openssh_pkey(faker: factory.Faker) -> str:
+    """Generate a random OpenSSH private key."""
+    pkey = "-----BEGIN OPENSSH EXAMPLE KEY-----\n"
+    for __ in range(5):
+        pkey += f"{faker.lexify('?' * 70)}\n"
+    pkey += "-----END OPENSSH EXAMPLE KEY-----\n"
+    return pkey

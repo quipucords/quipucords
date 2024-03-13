@@ -20,7 +20,7 @@ from scanner.network.utils import (
     delete_ssh_keyfiles,
     is_gen_ssh_keyfile,
 )
-from tests.api.credential.test_credential import generate_openssh_pkey
+from tests.factories import generate_openssh_pkey
 from tests.scanner.test_util import create_scan_job
 
 

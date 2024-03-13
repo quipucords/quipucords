@@ -5,8 +5,13 @@ from rest_framework import status
 
 from api.common.util import DELETE_ALL_IDS_MAGIC_STRING
 from api.source.model import Source
-from tests.api.credential.test_credential import generate_invalid_id
-from tests.factories import ScanFactory, ScanJobFactory, ScanTaskFactory, SourceFactory
+from tests.factories import (
+    ScanFactory,
+    ScanJobFactory,
+    ScanTaskFactory,
+    SourceFactory,
+    generate_invalid_id,
+)
 
 
 @pytest.mark.django_db
