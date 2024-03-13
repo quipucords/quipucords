@@ -12,7 +12,6 @@ This *README* file contains information about the installation and development o
 - [Installation](#installation)
 - [Development](#development)
 - [Advanced Topics](#advanced)
-- [Issues](#issues)
 - [Authors](#authors)
 - [Contributing](#contributing)
 - [Copyright and License](#copyright)
@@ -22,9 +21,10 @@ Before installing quipucords on a system, review the following guidelines about 
 
  * quipucords is written to run as a container image.
  * The system that quipucords is installed on must have access to the systems to be discovered and inspected.
- * The target systems must be running SSH.
- * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain files, such as privilege escalation required for the ``systemctl`` command.
- * The user account that quipucords uses for a machine requires an sh shell or a similar shell. For example, the shell *cannot* be a /sbin/nologin or /bin/false shell.
+ * For network-type scans:
+   * The target systems must be running SSH.
+   * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain restricted files, such as `sudo` privilege escalation required for the `systemctl` command.
+   * The user account that is used as a credential for a scan requires the `bash` shell. The shell *cannot* be `/sbin/nologin`, `/bin/false`, or other programs.
 
 ## Dependencies
 
@@ -53,11 +53,11 @@ To work with the quipucords code, begin by cloning the repository:
 git clone git@github.com:quipucords/quipucords.git
 ```
 
-quipucords currently supports Python 3.9. If you do not have Python on your system, follow these [instructions](https://www.python.org/downloads/).
+quipucords currently supports Python 3.11. Use your system package manager to ensure the correct version is available for your local environment.
 
 ## Initial setup
 
-This project uses poetry to manage it's python dependencies. To install them all, just run the following
+This project uses poetry to manage its python dependencies. To install them all, just run the following
 ```
 poetry install
 ```
@@ -156,9 +156,6 @@ make test
 
 To test quipucords against virtual machines running on a cloud provider, view the documentation found [here](docs/public_cloud.md).
 
-# <a name="issues"></a> Issues
-To report bugs for quipucords [open issues](https://github.com/quipucords/quipucords/issues) against this repository in Github. Complete the issue template when opening a new bug to improve investigation and resolution time.
-
 
 # <a name="authors"></a> Authors
 Authorship and current maintainer information can be found in [AUTHORS](AUTHORS.md).
@@ -169,6 +166,6 @@ See the [CONTRIBUTING](CONTRIBUTING.md) guide for information about contributing
 
 
 # <a name="copyright"></a> Copyright and License
-Copyright 2017-2023, Red Hat, Inc.
+Copyright 2017-2024, Red Hat, Inc.
 
 quipucords is released under the [GNU Public License version 3](LICENSE).
