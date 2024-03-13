@@ -1110,23 +1110,16 @@ class TestCredentialBulkDelete:
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
         assert Credential.objects.count() == 0
 
-    @pytest.mark.parametrize("bad_ids", ["1", False, None, [1, "2"]])
-    def test_bulk_delete_rejects_invalid_inputs(self, bad_ids, client_logged_in):
-        """Test that bulk delete rejects unexpected value types in "ids"."""
-        delete_request = {"ids": bad_ids}
-        response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
-            data=delete_request,
-            content_type="application/json",
-        )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+    def test_bulk_delete_rejects_invalid_inputs(self, client_logged_in):
+        """
+        Test that bulk delete rejects unexpected value types in "ids".
 
-    def test_bulk_delete_empty_list_bad_request(self, client_logged_in):
-        """Test that bulk delete requires some IDs."""
-        delete_request = {"ids": []}
+        Note: test_set_of_ids_or_all_str covers bad inputs more exhaustively.
+        """
+        invalid_delete_params = {"ids": []}
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
-            data=delete_request,
+            data=invalid_delete_params,
             content_type="application/json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
