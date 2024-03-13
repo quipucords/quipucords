@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
-from api.common.util import DELETE_ALL_IDS_MAGIC_STRING
+from api.common.util import ALL_IDS_MAGIC_STRING
 from api.models import Credential, Source
 from api.vault import decrypt_data_as_unicode
 from constants import ENCRYPTED_DATA_MASK, DataSources
@@ -1100,7 +1100,7 @@ class TestCredentialBulkDelete:
         """Test that bulk delete deletes all credentials."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
-        delete_request = {"ids": DELETE_ALL_IDS_MAGIC_STRING}
+        delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
@@ -1121,7 +1121,7 @@ class TestCredentialBulkDelete:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_bulk_delete_empty_list_ok(self, client_logged_in):
+    def test_bulk_delete_empty_list_bad_request(self, client_logged_in):
         """Test that bulk delete requires some IDs."""
         delete_request = {"ids": []}
         response = client_logged_in.post(
@@ -1179,7 +1179,7 @@ class TestCredentialBulkDelete:
         cred2 = CredentialFactory()
         cred_in_use = CredentialFactory()
         source = SourceFactory(credentials=[cred_in_use])
-        delete_request = {"ids": DELETE_ALL_IDS_MAGIC_STRING}
+        delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,

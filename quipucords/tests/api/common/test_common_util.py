@@ -6,8 +6,10 @@ import tarfile
 from collections import OrderedDict
 
 import pytest
+from rest_framework.exceptions import ParseError
 
 from api.common.common_report import CSVHelper, create_tar_buffer, encode_content
+from api.common.util import ALL_IDS_MAGIC_STRING, set_of_ids_or_all_str
 from tests.report_utils import extract_files_from_tarball
 
 
@@ -153,3 +155,27 @@ def test_extract_tar_gz_content_good(csv_helper):
     assert set(extracted_files.keys()) == set(files_data.keys())
     for extracted_name, extracted_data in extracted_files.items():
         assert extracted_data == files_data[extracted_name]
+
+
+@pytest.mark.parametrize(
+    "input_ids,expected_ids,expect_exception",
+    [
+        [[1], {1}, False],
+        [[1, 2, 3], {1, 2, 3}, False],
+        [[], None, True],
+        [True, None, True],
+        [None, None, True],
+        [[1, "2"], None, True],
+        ["[1, 2, 3]", None, True],
+        [["1", "2", "3"], None, True],
+        ["spam", None, True],
+        [ALL_IDS_MAGIC_STRING, ALL_IDS_MAGIC_STRING, False],
+    ],
+)
+def test_set_of_ids_or_all_str(input_ids, expected_ids, expect_exception):
+    """Test set_of_ids_or_all_str returns expected values or raises ParseError."""
+    if expect_exception:
+        with pytest.raises(ParseError):
+            set_of_ids_or_all_str(input_ids)
+    else:
+        assert expected_ids == set_of_ids_or_all_str(input_ids)
