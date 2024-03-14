@@ -17,7 +17,12 @@ from rest_framework.viewsets import ModelViewSet
 
 from api import messages
 from api.common.pagination import StandardResultsSetPagination
-from api.common.util import expand_scanjob_with_times, is_int
+from api.common.util import (
+    ALL_IDS_MAGIC_STRING,
+    expand_scanjob_with_times,
+    is_int,
+    set_of_ids_or_all_str,
+)
 from api.filters import ListFilter
 from api.models import Scan, ScanJob, ScanTask, Source
 from api.scanjob.serializer import expand_scanjob
@@ -133,6 +138,95 @@ def expand_scan(json_scan):
     return json_scan
 
 
+def _destroy_scan(scan: Scan, sender=None) -> None:
+    """Delete a scan, its jobs, and results tasks.
+
+    :param scan: the Scan to be deleted
+    :param sender: optional sender for cancel_scan signal
+    """
+    logger.info("Deleting scan jobs associated with scan %s", scan.id)
+    if scan.jobs is not None:
+        jobs_to_cancel = scan.jobs.exclude(
+            Q(status=ScanTask.FAILED)
+            | Q(status=ScanTask.CANCELED)
+            | Q(status=ScanTask.COMPLETED)
+        )
+        if jobs_to_cancel:
+            for job in jobs_to_cancel:
+                job.status_cancel()
+                cancel_scan.send(sender=sender, instance=job)
+
+        for job in scan.jobs.all():
+            logger.info("Deleting job %s and its results", job.id)
+            if job.connection_results is not None:
+                logger.info(
+                    "Deleting connection results associated with job %s",
+                    job.id,
+                )
+                for task_connection_result in job.connection_results.task_results.all():
+                    task_connection_result.systems.all().delete()
+                    task_connection_result.delete()
+
+            if job.tasks is not None:
+                logger.info(
+                    "Deleting inspect results associated with job %s",
+                    job.id,
+                )
+                job.delete_inspect_results()
+                logger.info("Deleting scan tasks associated with job %s", job.id)
+                job.tasks.all().delete()
+                job.delete()
+
+    logger.info("Deleting scan %s", scan.id)
+    scan.delete()
+
+
+@api_view(["post"])
+def scan_bulk_delete(request):
+    """
+    Bulk delete scans.
+
+    Response payload contains IDs of scans deleted and not found.
+    Example response:
+
+        {
+            "message": "Deleted 3 scans. Could not find 0 scans.",
+            "deleted": [1, 2, 3],
+            "missing": [],
+        }
+
+    input:      "ids" : List of ids to delete, or string ALL_IDS_MAGIC_STRING
+    returns:    200 OK - upon successfully deleting any scans.
+                400 Bad Request - ids list is missing or empty.
+    """
+    ids = set_of_ids_or_all_str(request.data.get("ids"))
+    with transaction.atomic():
+        scans = Scan.objects.all()
+        if ids != ALL_IDS_MAGIC_STRING:
+            scans = scans.filter(id__in=ids)
+        scan_ids_requested = ids if isinstance(ids, set) else set()
+        scan_ids_found = set(scans.values_list("id", flat=True))
+
+        for scan in scans:
+            _destroy_scan(scan)
+
+    scan_ids_missing = scan_ids_requested - scan_ids_found
+    scan_ids_deleted = scan_ids_found
+
+    message = _(
+        "Deleted {count_deleted} scans. Could not find {count_missing} scans."
+    ).format(
+        count_deleted=len(scan_ids_deleted),
+        count_missing=len(scan_ids_missing),
+    )
+    response_data = {
+        "message": message,
+        "deleted": scan_ids_deleted,
+        "missing": scan_ids_missing,
+    }
+    return Response(data=response_data, status=status.HTTP_200_OK)
+
+
 class ScanFilter(FilterSet):
     """Filter for sources by name."""
 
@@ -213,45 +307,7 @@ class ScanViewSet(ModelViewSet):
         """Delete a scan, its jobs, and the results."""
         try:
             scan = Scan.objects.get(pk=pk)
-            logger.info("Deleting scan jobs associated with scan %s", pk)
-            if scan.jobs is not None:
-                jobs_to_cancel = scan.jobs.exclude(
-                    Q(status=ScanTask.FAILED)
-                    | Q(status=ScanTask.CANCELED)
-                    | Q(status=ScanTask.COMPLETED)
-                )
-                if jobs_to_cancel:
-                    for job in jobs_to_cancel:
-                        job.status_cancel()
-                        cancel_scan.send(sender=self.__class__, instance=job)
-
-                for job in scan.jobs.all():
-                    logger.info("Deleting job %s and its results", job.id)
-                    if job.connection_results is not None:
-                        logger.info(
-                            "Deleting connection results associated with job %s",
-                            job.id,
-                        )
-                        for (
-                            task_connection_result
-                        ) in job.connection_results.task_results.all():
-                            task_connection_result.systems.all().delete()
-                            task_connection_result.delete()
-
-                    if job.tasks is not None:
-                        logger.info(
-                            "Deleting inspect results associated with job %s",
-                            job.id,
-                        )
-                        job.delete_inspect_results()
-                        logger.info(
-                            "Deleting scan tasks associated with job %s", job.id
-                        )
-                        job.tasks.all().delete()
-                        job.delete()
-
-            logger.info("Deleting scan %s", pk)
-            scan.delete()
+            _destroy_scan(scan=scan, sender=self.__class__)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Scan.DoesNotExist as exception:
             raise Http404 from exception
