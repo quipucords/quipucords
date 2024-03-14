@@ -476,3 +476,25 @@ QPC_ENABLE_CELERY_SCAN_MANAGER = env.bool("QPC_ENABLE_CELERY_SCAN_MANAGER", Fals
 # Old hidden/buried configurations that should be removed or renamed
 MAX_TIMEOUT_ORDERLY_SHUTDOWN = env.int("MAX_TIMEOUT_ORDERLY_SHUTDOWN", 30)
 QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
+
+# Defining both local memory and Redis as Django back-end caches.
+#
+# For now, we're keeping the default as local memory cache, this way
+# the application will continue to work without the Celery scan manager enabled.
+# Once quipucords only supports the Celery Scan Manager and Redis, we can then
+# switch the default to be Redis.
+QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "redis": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "KEY_PREFIX": "discovery",
+        "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+    },
+}
+
+# Let's define various cache TTL's
+QPC_SCAN_JOB_TTL = env.int("QPC_SCAN_JOB_TTL", default=24 * 3600)
