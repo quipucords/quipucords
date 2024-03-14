@@ -32,7 +32,7 @@ hatchling==1.21.1
     # via
     #   colorama
     #   urllib3
-packaging==23.2 ; python_version >= "3.11" and python_version < "3.12"
+packaging==24.0 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   hatchling
     #   setuptools-scm
@@ -66,7 +66,7 @@ trove-classifiers==2024.3.3
     # via hatchling
 typing-extensions==4.10.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
-wheel==0.42.0
+wheel==0.43.0
     # via
     #   async-timeout
     #   bcrypt
@@ -82,7 +82,7 @@ wheel==0.42.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.1.1 ; python_version >= "3.11" and python_version < "3.12"
+setuptools==69.2.0 ; python_version >= "3.11" and python_version < "3.12"
     # via
     #   ansible
     #   ansible-core
