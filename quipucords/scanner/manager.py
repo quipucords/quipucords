@@ -6,7 +6,9 @@ import logging
 from threading import Thread, Timer
 from time import sleep
 
+from celery.result import AsyncResult
 from django.conf import settings
+from django.core.cache import caches
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
@@ -17,10 +19,18 @@ from scanner.job import (
 )
 
 logger = logging.getLogger(__name__)
+redis_cache = caches["redis"]
+
+
+def scan_job_celery_task_id_key(scan_job_id):
+    """Return the key to store the celery task id for a given scan job id."""
+    return f"scan-job-{scan_job_id}-celery-task-id"
 
 
 class CeleryScanManager:
     """Drop-in replacement for Manager that uses Celery tasks instead of Processes."""
+
+    log_prefix = "CELERY SCAN MANAGER"
 
     def __init__(self):
         """Log a warning about this scan manager being incomplete."""
@@ -30,9 +40,27 @@ class CeleryScanManager:
         """Return true to make the common manager interface happy."""
         return True
 
-    def kill(self, *args, **kwargs):
-        """Raise an exception because Celery-based killing is not yet implemented."""
-        raise NotImplementedError
+    def kill(self, job: ScanJob, command: str):
+        """Kill a ScanJob Celery task.
+
+        :param job: The ScanJob to kill.
+        :param command: string "cancel" or "pause".
+        :returns: True if killed, False otherwise.
+        """
+        scan_job_id = job.id
+        celery_task_id = redis_cache.get(scan_job_celery_task_id_key(scan_job_id))
+        if celery_task_id is None:
+            logger.warning(
+                f"{self.log_prefix}: Could not kill the scan job {scan_job_id},"
+                " no related Celery Task found"
+            )
+            return False
+        logger.info(
+            f"{self.log_prefix}: Canceling the Celery Task {celery_task_id}"
+            f" for scan job {scan_job_id}"
+        )
+        AsyncResult(str(celery_task_id)).revoke(terminate=True, signal="SIGKILL")
+        return True
 
     def start(self):
         """Return true to make the common manager interface happy."""
@@ -44,7 +72,17 @@ class CeleryScanManager:
             raise ValueError(
                 "CeleryScanManager only accepts CeleryBasedScanJobRunner runners."
             )
-        scan_job_runner.run()
+        celery_task_id = scan_job_runner.run()
+        scan_job_id = scan_job_runner.scan_job.id
+        redis_cache.set(
+            scan_job_celery_task_id_key(scan_job_id),
+            celery_task_id,
+            timeout=settings.QPC_SCAN_JOB_TTL,
+        )
+        logger.info(
+            f"{self.log_prefix}: Started the Celery Task {celery_task_id}"
+            f" for scan job {scan_job_id}"
+        )
 
 
 class DisabledManager:
