@@ -1,4 +1,12 @@
-"""Tests for quipucords.api.scan.view.scan_bulk_delete."""
+"""
+Tests for quipucords.api.scan.view.scan_bulk_delete.
+
+Several tests in TestScanBulkDelete overlap significantly with tests in
+TestSourceBulkDelete and TestCredentialBulkDelete because their underlying
+functionality is very similar.
+
+@TODO abstract bulk delete logic tests and deduplicate their code (DRY!)
+"""
 import pytest
 from django.urls import reverse
 from rest_framework import status
