@@ -1,4 +1,11 @@
-"""Tests for quipucords.api.source.view."""
+"""Tests for quipucords.api.source.view.
+
+Several tests in TestCredentialBulkDelete overlap significantly with tests in
+TestSourceBulkDelete and TestScanBulkDelete because their underlying
+functionality is very similar.
+
+@TODO abstract bulk delete logic tests and deduplicate their code (DRY!)
+"""
 import datetime
 import random
 import time
