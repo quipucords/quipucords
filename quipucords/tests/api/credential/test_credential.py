@@ -1,4 +1,4 @@
-"""Test the API application."""
+"""Tests for quipucords.api.source.view."""
 import datetime
 import random
 import time
