@@ -102,14 +102,27 @@ class TestSourceBulkDelete:
     def test_bulk_delete_all(self, client_logged_in):
         """Test bulk delete succeeds with magic "all" token."""
         source1 = SourceFactory()
+        source1_in_use = SourceFactory()
+        scan1 = ScanFactory(sources=[source1_in_use])
+        assert scan1.sources.filter(pk=source1_in_use.id).exists()
+
         source2 = SourceFactory()
-        source_in_use1 = SourceFactory()
-        scan1 = ScanFactory(sources=[source_in_use1])
-        source_in_use2 = SourceFactory()
-        scan2 = ScanFactory(sources=[source_in_use2])
+        source2_in_use = SourceFactory()
+        scan2 = ScanFactory(sources=[source2_in_use])
         scan2job = ScanJobFactory(scan=scan2)
-        scan2job.sources.add(source_in_use2)
-        scan2task = ScanTaskFactory(job=scan2job, source=source_in_use2)
+        scan2job.sources.add(source2_in_use)
+        scan2task = ScanTaskFactory(job=scan2job, source=source2_in_use)
+        assert scan2.sources.filter(pk=source2_in_use.id).exists()
+        assert scan2task.source == source2_in_use
+
+        # Note that scan3task is directly related to source3_in_use
+        # but its ScanJob has no Scan. This means it should not prevent
+        # source3_in_use from being deleted.
+        source3_in_use = SourceFactory()
+        scan3task = ScanTaskFactory(source=source3_in_use)
+        assert scan3task.source == source3_in_use
+        assert scan3task.job.scan is None
+
         delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
@@ -118,24 +131,18 @@ class TestSourceBulkDelete:
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
-        assert set(response_json["deleted"]) == set([source1.id, source2.id])
+        assert set(response_json["deleted"]) == {
+            source1.id,
+            source2.id,
+            source3_in_use.id,
+        }
         assert response_json["missing"] == []
 
         # Note that lists like "skipped" may not be sorted.
         expected_skipped = sorted(
             [
-                {
-                    "source": source_in_use1.id,
-                    "scans": [scan1.id],
-                    "scanjobs": [],
-                    "scantasks": [],
-                },
-                {
-                    "source": source_in_use2.id,
-                    "scans": [scan2.id],
-                    "scanjobs": [scan2job.id],
-                    "scantasks": [scan2task.id],
-                },
+                {"source": source1_in_use.id, "scans": [scan1.id]},
+                {"source": source2_in_use.id, "scans": [scan2.id]},
             ],
             key=lambda skipped: skipped["source"],
         )
@@ -145,8 +152,16 @@ class TestSourceBulkDelete:
         assert expected_skipped == actual_skipped
 
         assert not Source.objects.exclude(
-            pk__in=[source_in_use1.id, source_in_use2.id]
+            pk__in=[source1_in_use.id, source2_in_use.id]
         ).exists()
         assert Source.objects.filter(
-            pk__in=[source_in_use1.id, source_in_use2.id]
+            pk__in=[source1_in_use.id, source2_in_use.id]
         ).exists()
+
+        # Note that even though ScanJobs and ScanTasks may reference a Source,
+        # at the time of this writing, we simply break the relationship and
+        # orphan those objects. This *may* result in jobs and tasks that are
+        # otherwise unreachable and unusable by the end user. See also discussion:
+        # https://redhat-internal.slack.com/archives/C02QSNF1UKE/p1710439062155129?thread_ts=1710430876.780099&cid=C02QSNF1UKE  # noqa
+        scan3task.refresh_from_db()
+        assert scan3task.source is None

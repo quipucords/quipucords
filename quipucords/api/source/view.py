@@ -1,5 +1,4 @@
 """Describes the views associated with the API models."""
-from collections import defaultdict
 from itertools import groupby
 
 from django.db import transaction
@@ -76,13 +75,8 @@ def source_bulk_delete(request):
             "deleted": [1, 2, 3],
             "missing": [],
             "skipped": [
-                {"source": 6, "scans": [8], "scanjobs": [], "scantasks": []},
-                {
-                    "source": 7,
-                    "scans": [9, 10],
-                    "scanjobs": [11, 12],
-                    "scantasks": [13, 14, 15, 16],
-                },
+                {"source": 6, "scans": [8]},
+                {"source": 7, "scans": [9, 10]},
             ],
         }
 
@@ -104,40 +98,15 @@ def source_bulk_delete(request):
             .values_list("id", "scan")
             .order_by("id")  # later groupby needs sorted input
         )
-        source_ids_with_scanjobs = (
-            sources.exclude(scanjob=None)
-            .prefetch_related("scanjob")
-            .values_list("id", "scanjob")
-            .order_by("id")  # later groupby needs sorted input
-        )
-        source_ids_with_scantasks = (
-            sources.exclude(scantask=None)
-            .prefetch_related("scantask")
-            .values_list("id", "scantask")
-            .order_by("id")  # later groupby needs sorted input
-        )
-        sources.filter(scan=None, scanjob=None, scantask=None).delete()
+        sources.filter(scan=None).delete()
 
     source_ids_missing = source_ids_requested - source_ids_found
 
-    _source_ids_skipped = defaultdict(dict)
-    for source_id, grouper in groupby(source_ids_with_scans, key=lambda c: c[0]):
-        _source_ids_skipped[source_id]["scans"] = [g[1] for g in grouper]
-    for source_id, grouper in groupby(source_ids_with_scanjobs, key=lambda c: c[0]):
-        _source_ids_skipped[source_id]["scanjobs"] = [g[1] for g in grouper]
-    for source_id, grouper in groupby(source_ids_with_scantasks, key=lambda c: c[0]):
-        _source_ids_skipped[source_id]["scantasks"] = [g[1] for g in grouper]
-
     source_ids_skipped = []
-    for source_id, details in _source_ids_skipped.items():
-        full_details = {
-            "source": source_id,
-            "scans": [],
-            "scanjobs": [],
-            "scantasks": [],
-        }
-        full_details.update(details)
-        source_ids_skipped.append(full_details)
+    for source_id, grouper in groupby(source_ids_with_scans, key=lambda c: c[0]):
+        source_ids_skipped.append(
+            {"source": source_id, "scans": [g[1] for g in grouper]}
+        )
 
     source_ids_deleted = source_ids_found - set(c["source"] for c in source_ids_skipped)
 
