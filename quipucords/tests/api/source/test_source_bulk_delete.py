@@ -1,4 +1,4 @@
-"""Tests for quipucords.api.source.source_bulk_delete."""
+"""Tests for quipucords.api.source.view.source_bulk_delete."""
 import pytest
 from django.urls import reverse
 from rest_framework import status
