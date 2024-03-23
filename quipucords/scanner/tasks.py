@@ -3,15 +3,56 @@
 import logging
 
 import celery
+from django.conf import settings
+from django.core.cache import caches
 
 from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask
 from fingerprinter.runner import FingerprintTaskRunner
+from quipucords.celery import app as celery_app
 from scanner.get_scanner import get_scanner
 from scanner.job import create_report_for_scan_job, run_task_runner
 from scanner.runner import ScanTaskRunner
 
 logger = logging.getLogger(__name__)
+celery_inspect = celery_app.control.inspect()
+redis_cache = caches["redis"]
+
+
+def scan_job_celery_task_id_key(scan_job_id: int):
+    """Return the key to store the celery task id for a given scan job id."""
+    return f"scan-job-{scan_job_id}-celery-task-id"
+
+
+def get_scan_job_celery_task_id(scan_job_id: int):
+    """Return the celery task id for a given scan job id."""
+    return redis_cache.get(scan_job_celery_task_id_key(scan_job_id))
+
+
+def set_scan_job_celery_task_id(
+    scan_job_id: int, celery_task_id: str, key_timeout=None
+):
+    """Set the celery task id for the scan job id."""
+    if key_timeout is None:
+        key_timeout = settings.QPC_SCAN_JOB_TTL
+    key = scan_job_celery_task_id_key(scan_job_id)
+    redis_cache.set(key, celery_task_id, key_timeout)
+
+
+def celery_task_is_revoked(task: celery.Task, celery_task_id: str):
+    """Return a boolean if the celery task is specified has been revoked."""
+    worker_hostname = task.request.hostname
+    revoked_tasks = celery_inspect.revoked()[worker_hostname]
+    is_revoked = celery_task_id in revoked_tasks
+    return is_revoked
+
+
+def scan_job_is_canceled(task: celery.Task, scan_job_id: int):
+    """Return a boolean indicating if the scan job is cancelled."""
+    celery_task_id = get_scan_job_celery_task_id(scan_job_id)
+    if celery_task_id is None:
+        return False
+    return celery_task_is_revoked(task, celery_task_id)
 
 
 def get_task_runner_class(source_type, scan_type) -> type[ScanTaskRunner]:
@@ -47,20 +88,29 @@ def _celery_run_task_runner(
     scan_task = ScanTask.objects.get(id=scan_task_id)
     runner_class = get_task_runner_class(source_type, scan_type)
     runner: ScanTaskRunner = runner_class(scan_task.job, scan_task)
-    success = (task_status := run_task_runner(runner)) == ScanTask.COMPLETED
+    scan_job_id = scan_task.job.id
+
+    if scan_job_is_canceled(task_instance, scan_job_id):
+        logger.info(
+            f"Scan Job {scan_job_id} canceled, skipping scan task {scan_task_id}."
+        )
+        success = False
+        task_status = ScanTask.CANCELED
+    else:
+        success = (task_status := run_task_runner(runner)) == ScanTask.COMPLETED
     if not success:
         # If this task failed, we do not want subsequent tasks in its chain to run.
         task_instance.request.chain = None
     return success, scan_task_id, task_status
 
 
-@celery.shared_task
-def fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
+@celery.shared_task(bind=True)
+def fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
     """Wrap _fingerprint to call it as an async Celery task."""
-    return _fingerprint(scan_task_id)
+    return _fingerprint(self, scan_task_id)
 
 
-def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
+def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
     """Create and assign the Report, and update the related ScanJob status.
 
     This task should run once after all inspection tasks have collected and stored
@@ -72,6 +122,11 @@ def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
     # It is safe to assume one will always exist at this point.
     scan_task = ScanTask.objects.get(id=scan_task_id)
     scan_job = scan_task.job
+
+    if scan_job_is_canceled(self, scan_job.id):
+        logger.info(f"Scan Job {scan_job.id} canceled, skipping fingerprint")
+        scan_job.status_fail("Scan Job was Canceled")
+        return False, scan_task_id, ScanTask.CANCELED
 
     if not (report := scan_job.report):
         report, error_message = create_report_for_scan_job(scan_job)
@@ -96,18 +151,23 @@ def _fingerprint(scan_task_id: int) -> tuple[bool, int, str]:
     return success, scan_task_id, task_status
 
 
-@celery.shared_task
-def finalize_scan(scan_job_id: int):
+@celery.shared_task(bind=True)
+def finalize_scan(self: celery.Task, scan_job_id: int):
     """Wrap _finalize_scan to call it as an async Celery task."""
-    return _finalize_scan(scan_job_id)
+    return _finalize_scan(self, scan_job_id)
 
 
-def _finalize_scan(scan_job_id: int):
+def _finalize_scan(self: celery.Task, scan_job_id: int):
     """Set ScanJob status and log failures after running all other ScanJob tasks.
 
     This logic follows the basic pattern established in SyncScanJobRunner.run.
     """
     scan_job = ScanJob.objects.get(id=scan_job_id)
+    if scan_job_is_canceled(self, scan_job.id):
+        logger.info(f"Scan Job {scan_job_id} canceled, skipping finalize_scan")
+        scan_job.status_cancel()
+        return
+
     failed_tasks = (
         ScanTask.objects.filter(job_id=scan_job_id)
         .exclude(status=ScanTask.COMPLETED)
