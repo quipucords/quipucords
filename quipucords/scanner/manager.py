@@ -8,7 +8,6 @@ from time import sleep
 
 from celery.result import AsyncResult
 from django.conf import settings
-from django.core.cache import caches
 from django.db.models import Q
 
 from api.models import ScanJob, ScanTask
@@ -17,14 +16,9 @@ from scanner.job import (
     ProcessBasedScanJobRunner,
     ScanJobRunner,
 )
+from scanner.tasks import get_scan_job_celery_task_id, set_scan_job_celery_task_id
 
 logger = logging.getLogger(__name__)
-redis_cache = caches["redis"]
-
-
-def scan_job_celery_task_id_key(scan_job_id):
-    """Return the key to store the celery task id for a given scan job id."""
-    return f"scan-job-{scan_job_id}-celery-task-id"
 
 
 class CeleryScanManager:
@@ -34,6 +28,7 @@ class CeleryScanManager:
 
     def __init__(self):
         """Log a warning about this scan manager being incomplete."""
+        logger.info("%s: Celery Scan manager instance created.", self.log_prefix)
         logger.warning("%s is not yet fully functional.", __class__.__name__)
 
     def is_alive(self):
@@ -48,18 +43,26 @@ class CeleryScanManager:
         :returns: True if killed, False otherwise.
         """
         scan_job_id = job.id
-        celery_task_id = redis_cache.get(scan_job_celery_task_id_key(scan_job_id))
+        job.status = ScanJob.JOB_TERMINATE_CANCEL
+        job.status_cancel()
+        for scan_task in job.tasks.values():
+            scan_task_id = scan_task["id"]
+            task = ScanTask.objects.get(id=scan_task_id)
+            task.status = ScanTask.CANCELED
+        celery_task_id = get_scan_job_celery_task_id(scan_job_id)
         if celery_task_id is None:
             logger.warning(
                 f"{self.log_prefix}: Could not kill the scan job {scan_job_id},"
                 " no related Celery Task found"
             )
             return False
+
         logger.info(
             f"{self.log_prefix}: Canceling the Celery Task {celery_task_id}"
             f" for scan job {scan_job_id}"
         )
-        AsyncResult(str(celery_task_id)).revoke(terminate=True, signal="SIGKILL")
+        celery_task = AsyncResult(str(celery_task_id))
+        celery_task.revoke()
         return True
 
     def start(self):
@@ -74,11 +77,7 @@ class CeleryScanManager:
             )
         celery_task_id = scan_job_runner.run()
         scan_job_id = scan_job_runner.scan_job.id
-        redis_cache.set(
-            scan_job_celery_task_id_key(scan_job_id),
-            celery_task_id,
-            timeout=settings.QPC_SCAN_JOB_TTL,
-        )
+        set_scan_job_celery_task_id(scan_job_id, str(celery_task_id))
         logger.info(
             f"{self.log_prefix}: Started the Celery Task {celery_task_id}"
             f" for scan job {scan_job_id}"
