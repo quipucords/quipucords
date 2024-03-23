@@ -484,17 +484,29 @@ QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
 # Once quipucords only supports the Celery Scan Manager and Redis, we can then
 # switch the default to be Redis.
 QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-    "redis": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
-        "KEY_PREFIX": "discovery",
-        "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
-    },
-}
+
+# For test environments, we only want to communicate with the local memory cache.
+if os.environ.get("QUIPUCORDS_ENVIRONMENT") == "test":
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+        "redis": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+        "redis": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "KEY_PREFIX": "discovery",
+            "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+        },
+    }
 
 # Let's define various cache TTL's
 QPC_SCAN_JOB_TTL = env.int("QPC_SCAN_JOB_TTL", default=24 * 3600)
