@@ -486,7 +486,8 @@ QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
 QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
 
 # For test environments, we only want to communicate with the local memory cache.
-if os.environ.get("QUIPUCORDS_ENVIRONMENT") == "test":
+QUIPUCORDS_ENVIRONMENT = env("QUIPUCORDS_ENVIRONMENT", default="production")
+if QUIPUCORDS_ENVIRONMENT == "test":
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
