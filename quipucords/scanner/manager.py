@@ -45,10 +45,11 @@ class CeleryScanManager:
         scan_job_id = job.id
         job.status = ScanJob.JOB_TERMINATE_CANCEL
         job.status_cancel()
-        for scan_task in job.tasks.values():
-            scan_task_id = scan_task["id"]
-            task = ScanTask.objects.get(id=scan_task_id)
-            task.status = ScanTask.CANCELED
+        if job.tasks is not None:
+            for scan_task in job.tasks.all():
+                scan_task_id = scan_task.id
+                task = ScanTask.objects.get(id=scan_task_id)
+                task.status = ScanTask.CANCELED
         celery_task_id = get_scan_job_celery_task_id(scan_job_id)
         if celery_task_id is None:
             logger.warning(
