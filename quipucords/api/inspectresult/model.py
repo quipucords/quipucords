@@ -3,13 +3,102 @@
 These models are used in the REST definitions
 """
 
-from django.db import models
+from django.db import connection, models
+from django.db.models.expressions import RawSQL
 from django.utils.translation import gettext as _
 
 from api import messages
 from api.common.util import RawFactEncoder
 from api.source.model import Source
 from constants import DataSources
+
+RAW_QUERY_POSTGRES = """
+with raw_agg as (
+    select
+        ir.id,
+        ir.result_set_id,
+        (
+        select
+            json_object_agg(raw.name, raw.value) as raw_facts
+        from
+            api_rawfact raw
+        where
+            raw.inspect_result_id = ir.id
+    )
+from
+	api_inspectresult as ir
+)
+select
+	json_agg(raw_agg.raw_facts) as raw_fact_list
+from raw_agg
+where
+    raw_agg.result_set_id=api_resultset.id
+group by
+	raw_agg.result_set_id
+"""
+
+# RAW_QUERY_POSTGRES = """
+# with raw_agg as (
+# select
+# 	ir.id,
+# 	ir.result_set_id,
+# 	json_object_agg(raw.name, raw.value) as raw_facts
+# from
+# 	api_inspectresult ir
+# inner join
+# 	api_rawfact raw on raw.inspect_result_id = ir.id
+# group by
+# 	ir.id
+# )
+# select
+# 	json_agg(raw_agg.raw_facts) as raw_fact_list
+# from
+# 	raw_agg
+# where
+#     raw_agg.result_set_id=api_resultset.id
+# group by
+# 	raw_agg.result_set_id
+# """
+
+RAW_QUERY_SQLITE = """
+with raw_agg(ir_id, result_set_id, raw_facts) as (
+	select
+		ir.id,
+        ir.result_set_id,
+        json_group_object(raw.name, json(raw.value)) as raw_facts
+	from
+		api_inspectresult ir
+	inner join
+		api_rawfact raw on ir.id = raw.inspect_result_id
+    group by
+        ir.id
+)
+select
+	json_group_array(json(raw_agg.raw_facts)) as raw_fact_list
+from raw_agg
+where
+    raw_agg.result_set_id=api_resultset.id
+group by
+	raw_agg.result_set_id
+"""
+
+
+class ResultSetQuerySet(models.QuerySet):
+    """Custom QuerySet for ResultSet model."""
+
+    def with_raw_facts(self):
+        """Annotate results with raw facts."""
+        if connection.vendor == "postgresql":
+            raw_sql = RAW_QUERY_POSTGRES
+            raw_sql_kw = {}
+        elif connection.vendor == "sqlite":
+            raw_sql = RAW_QUERY_SQLITE
+            raw_sql_kw = {"output_field": models.JSONField()}
+        else:
+            raise NotImplementedError(
+                f"with_raw_facts not implemented for {connection.vendor=}"
+            )
+        return self.annotate(facts=RawSQL(raw_sql, params=(), **raw_sql_kw))
 
 
 class ResultSet(models.Model):
@@ -36,6 +125,8 @@ class ResultSet(models.Model):
 
     tasks = models.ManyToManyField("ScanTask", related_name="result_sets")
     source = models.ForeignKey(Source, on_delete=models.SET_NULL, null=True)
+
+    objects = ResultSetQuerySet.as_manager()
 
 
 class InspectResult(models.Model):
