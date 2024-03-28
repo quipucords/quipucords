@@ -12,7 +12,8 @@ from urllib.parse import urljoin
 import pytest
 from django.contrib.auth import get_user_model
 from django.core import management
-from django.test import Client, override_settings
+from django.test import Client as DjangoClient
+from django.test import override_settings
 
 
 @pytest.fixture(scope="session")
@@ -101,6 +102,28 @@ def qpc_user_simple(faker):
     For tests that don't actually need a password, this is much faster than qpc_user.
     """
     return get_user_model().objects.create(username=faker.user_name())
+
+
+class Client(DjangoClient):
+    """Django client for tests with some QoL changes."""
+
+    def post(self, *args, **kwargs):
+        """POST request."""
+        # set application/json as default for improved ergonomics
+        kwargs.setdefault("content_type", "application/json")
+        return super().post(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        """PUT request."""
+        # set application/json as default for improved ergonomics
+        kwargs.setdefault("content_type", "application/json")
+        return super().put(*args, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        """PATCH request."""
+        # set application/json as default for improved ergonomics
+        kwargs.setdefault("content_type", "application/json")
+        return super().patch(*args, **kwargs)
 
 
 @pytest.fixture
