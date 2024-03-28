@@ -4,7 +4,7 @@ import uuid
 
 from django.db import models
 
-from api.common.util import RawFactEncoder
+from api.inspectresult.model import ResultSet
 
 
 class Report(models.Model):
@@ -16,7 +16,6 @@ class Report(models.Model):
     # ---------------------------- legacy fields ----------------------------
     # legacy data that should be (re)moved when we transition to the paradigm
     # of "normalization phase"
-    sources = models.JSONField(null=False, default=list, encoder=RawFactEncoder)
     deployment_report = models.OneToOneField(
         "DeploymentsReport", models.CASCADE, related_name="report", null=True
     )
