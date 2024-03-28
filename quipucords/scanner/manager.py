@@ -263,7 +263,7 @@ class Manager(Thread):
                     self.termination_elapsed_time += self.run_queue_sleep_time
                     if (
                         self.termination_elapsed_time
-                        == settings.MAX_TIMEOUT_ORDERLY_SHUTDOWN
+                        >= settings.MAX_TIMEOUT_ORDERLY_SHUTDOWN
                     ):
                         self.terminated_job_runner.scan_job.log_message(
                             "FORCEFUL TERMINATION OF JOB PROCESS"
