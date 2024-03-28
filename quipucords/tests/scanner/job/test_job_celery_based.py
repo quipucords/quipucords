@@ -288,6 +288,7 @@ def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
 @pytest.mark.django_db
+@pytest.mark.dbcompat
 def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     """Test that a fingerprint-only scanjob can be run successfully."""
     assert (

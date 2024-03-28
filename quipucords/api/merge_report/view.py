@@ -50,7 +50,7 @@ def _convert_ids_to_json(report_request_json):
     report_type = None
 
     for report in reports:
-        sources = sources + report.sources
+        sources = sources + list(report.sources)
         if not report_version and report.report_version:
             report_version = report.report_version
             report_type = REPORT_TYPE_DETAILS

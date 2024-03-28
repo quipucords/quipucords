@@ -33,6 +33,7 @@ from api.deployments_report.util import create_deployments_csv
 from api.deployments_report.view import build_cached_json_report
 from api.details_report.serializer import DetailsReportSerializer
 from api.details_report.util import create_details_csv
+from api.inspectresult.model import InspectGroup
 from api.reports.model import Report
 from constants import SCAN_JOB_LOG
 from tests.constants import (
@@ -300,3 +301,37 @@ def test_report_deployments_csv(
     # Why 7? We expect two separate table headers in the file, one section marker,
     # three blank lines, and at least one line per table. Yes, this CSV is a mess. >:(
     assert len(tarball_deployments_csv_lines) >= 7
+
+
+@pytest.mark.dbcompat
+@pytest.mark.django_db
+def test_sources_query_is_isolated():
+    """Ensure the custom query for facts isolates results properly."""
+    facts1 = {"orange": "laranja"}
+    facts2 = {"potato": "batata"}
+    r1 = ReportFactory(sources=[{"facts": [facts1]}])
+    r2 = ReportFactory(sources=[{"facts": [facts2]}])
+
+    igroups = InspectGroup.objects.with_raw_facts().order_by("id").all()
+    assert len(igroups) == 2
+    assert igroups[0].facts == [facts1]
+    assert igroups[1].facts == [facts2]
+
+    assert list(r1.sources) == [
+        {
+            "source_type": igroups[0].source_type,
+            "source_name": igroups[0].source_name,
+            "server_id": igroups[0].server_id,
+            "report_version": igroups[0].server_version,
+            "facts": [facts1],
+        }
+    ]
+    assert list(r2.sources) == [
+        {
+            "source_type": igroups[1].source_type,
+            "source_name": igroups[1].source_name,
+            "server_id": igroups[1].server_id,
+            "report_version": igroups[1].server_version,
+            "facts": [facts2],
+        }
+    ]
