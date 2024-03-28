@@ -65,16 +65,19 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             report_version = create_report_version()
 
         # Create FC model and save data
-        report = create_report(create_report_version(), request.data)
-        scan_job = ScanJob.objects.create(
-            scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=report
-        )
+        scan_job = ScanJob.objects.create(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT)
         if warn_deprecated:
             scan_job.log_message(
                 _(messages.FC_MISSING_REPORT_VERSION), log_level=logging.WARNING
             )
 
         scan_job.queue()
+        report = create_report(
+            report_version=create_report_version(),
+            json_details_report=request.data,
+            scan_job=scan_job,
+        )
+
         runner = ScanJobRunner(scan_job)
         runner.run()
 

@@ -1,7 +1,9 @@
 """Satellite API Interface."""
+
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
+from functools import cached_property
 from multiprocessing import Pool, Value
 
 import celery
@@ -9,6 +11,7 @@ from django.conf import settings
 from django.db import transaction
 from more_itertools import chunked
 
+from api.inspectresult.model import ResultSet
 from api.models import (
     InspectResult,
     RawFact,
@@ -17,6 +20,8 @@ from api.models import (
     SystemConnectionResult,
 )
 from api.scanjob.model import ScanJob
+from api.status.misc import get_server_id
+from quipucords.environment import server_version
 from scanner.exceptions import ScanCancelException, ScanPauseException
 from scanner.satellite import utils
 
@@ -79,6 +84,18 @@ class SatelliteInterface(ABC):
 
         self.connect_scan_task.increment_stats(name, increment_sys_scanned=True)
 
+    @cached_property
+    def _result_set(self):
+        result_set = ResultSet.objects.create(
+            source_type=self.inspect_scan_task.source.source_type,
+            source_name=self.inspect_scan_task.source.name,
+            server_id=get_server_id(),
+            server_version=server_version(),
+            source=self.inspect_scan_task.source,
+        )
+        result_set.tasks.add(self.inspect_scan_task)
+        return result_set
+
     @transaction.atomic
     def record_inspect_result(self, name, facts, status=InspectResult.SUCCESS):
         """Record a new result.
@@ -87,14 +104,9 @@ class SatelliteInterface(ABC):
         :param facts: The dictionary of facts
         :param status: The status of the inspection
         """
-        sys_result = InspectResult(
-            name=name,
-            source=self.source,
-            status=status,
+        sys_result = InspectResult.objects.create(
+            name=name, status=status, result_set=self._result_set
         )
-        sys_result.save()
-        sys_result.tasks.add(self.inspect_scan_task)
-
         if status == InspectResult.SUCCESS:
             for key, val in facts.items():
                 if val is not None:

@@ -11,6 +11,7 @@ from api.common.util import RawFactEncoder
 from api.source.model import Source
 from constants import DataSources
 
+
 class ResultSet(models.Model):
     """
     Model representing a collection of results and their common metadata.
