@@ -106,6 +106,7 @@ class TestSourceFactory:
 class TestReportFactory:
     """Test ReportFactory."""
 
+    @pytest.mark.dbcompat
     @pytest.mark.parametrize("source_type", DataSources.values)
     def test_source_generation(self, source_type):
         """Test automatic generation of Details facts is not breaking anything."""

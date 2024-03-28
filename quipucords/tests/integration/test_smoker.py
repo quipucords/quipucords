@@ -117,6 +117,7 @@ class Smoker:
         """Return the latest report id from performed scan."""
         return scan_response.json()["most_recent"]["report_id"]
 
+    @pytest.mark.dbcompat
     def test_details_report(
         self,
         client_logged_in,
