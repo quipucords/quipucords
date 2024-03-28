@@ -13,6 +13,7 @@ from constants import DataSources
 from tests.scanner.test_util import create_scan_job
 
 
+@pytest.mark.django_db
 class TestAsyncMergeReports:
     """Tests against the Deployment reports function."""
 
@@ -40,29 +41,39 @@ class TestAsyncMergeReports:
         """Return a Server Id."""
         return ServerInformation.create_or_retrieve_server_id()
 
-    def merge_details_from_source_expect_201(self, data, django_client):
+    @pytest.fixture
+    def expected_inspect_task_json(self):
+        """Return expected inspect task json."""
+        return {
+            "scan_type": "inspect",
+            "sequence_number": 1,
+            "status": "completed",
+            "status_message": "Task is complete.",
+            "systems_count": 0,
+            "systems_failed": 0,
+            "systems_scanned": 0,
+            "systems_unreachable": 0,
+        }
+
+    def merge_details_from_source_expect_201(self, data, client_logged_in):
         """Create a source, return the response as a dict."""
-        response = django_client.post(reverse("v1:reports-merge-jobs"), json=data)
-        if response.status_code != status.HTTP_201_CREATED:
-            print("Failure cause: ")
-            print(response.json())
-        assert response.status_code == status.HTTP_201_CREATED
+        response = client_logged_in.post(reverse("v1:reports-merge-jobs"), data)
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()
 
-    def merge_details_from_source_expect_400(self, data, django_client):
+    def merge_details_from_source_expect_400(self, data, client_logged_in):
         """Create a source, return the response as a dict."""
-        response = django_client.post(reverse("v1:reports-merge-jobs"), json=data)
-        if response.status_code != status.HTTP_400_BAD_REQUEST:
-            print("Failure cause: ")
-            print(response.json())
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        response = client_logged_in.post(reverse("v1:reports-merge-jobs"), data)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
         return response.json()
 
     ##############################################################
     # Test Async Report Merge
     ##############################################################
 
-    def test_greenpath_create(self, server_id, network_source, django_client):
+    def test_greenpath_create(
+        self, server_id, network_source, client_logged_in, expected_inspect_task_json
+    ):
         """Create report merge job object via API."""
         request_json = {
             "report_type": "details",
@@ -78,7 +89,7 @@ class TestAsyncMergeReports:
         }
 
         response_json = self.merge_details_from_source_expect_201(
-            request_json, django_client
+            request_json, client_logged_in
         )
 
         expected = {
@@ -92,11 +103,11 @@ class TestAsyncMergeReports:
         assert response_json == expected
 
         url = reverse("v1:reports-merge-jobs-detail", args=(job_id,))
-        get_response = django_client.get(url)
+        get_response = client_logged_in.get(url)
         assert get_response.status_code == status.HTTP_200_OK
 
     def test_success_create_with_identical_sources(
-        self, server_id, network_source, django_client
+        self, server_id, network_source, client_logged_in, expected_inspect_task_json
     ):
         """Create report merge job with two identical sources."""
         request_json = {
@@ -120,7 +131,7 @@ class TestAsyncMergeReports:
         }
 
         response_json = self.merge_details_from_source_expect_201(
-            request_json, django_client
+            request_json, client_logged_in
         )
 
         expected = {
@@ -134,10 +145,10 @@ class TestAsyncMergeReports:
         assert response_json == expected
 
         url = reverse("v1:reports-merge-jobs-detail", args=(job_id,))
-        get_response = django_client.get(url)
+        get_response = client_logged_in.get(url)
         assert get_response.status_code == status.HTTP_200_OK
 
-    def test_404_if_not_fingerprint_job(self, faker, django_client):
+    def test_404_if_not_fingerprint_job(self, faker, client_logged_in):
         """Test report job status only returns merge jobs."""
         source = Source.objects.create(
             name=faker.slug(),
@@ -148,48 +159,48 @@ class TestAsyncMergeReports:
         scan_job, _ = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
         url = reverse("v1:reports-merge-jobs-detail", args=(scan_job.id,))
-        get_response = django_client.get(url)
+        get_response = client_logged_in.get(url)
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
         scan_job.scan_type = ScanTask.SCAN_TYPE_FINGERPRINT
         scan_job.save()
         url = reverse("v1:reports-merge-jobs-detail", args=(scan_job.id,))
-        get_response = django_client.get(url)
+        get_response = client_logged_in.get(url)
         assert get_response.status_code == status.HTTP_200_OK
 
-    def test_create_report_merge_bad_url(self, django_client):
+    def test_create_report_merge_bad_url(self, client_logged_in):
         """Create merge report job bad url."""
-        get_response = django_client.post(
+        get_response = client_logged_in.post(
             reverse("v1:reports-merge-jobs-detail", args=(1,))
         )
         assert get_response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
-    def test_empty_request_body(self, django_client):
+    def test_empty_request_body(self, client_logged_in):
         """Test empty request body."""
         request_json = {}
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert response_json["report_type"] == messages.FC_REQUIRED_ATTRIBUTE
 
-    def test_missing_sources(self, django_client):
+    def test_missing_sources(self, client_logged_in):
         """Test missing sources attribute."""
         request_json = {"report_type": "details"}
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert response_json["sources"] == messages.FC_REQUIRED_ATTRIBUTE
 
-    def test_empty_sources(self, django_client):
+    def test_empty_sources(self, client_logged_in):
         """Test empty sources attribute."""
         request_json = {"report_type": "details", "sources": []}
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert response_json["sources"] == messages.FC_REQUIRED_ATTRIBUTE
 
     def test_source_missing_report_version(
-        self, server_id, network_source, django_client
+        self, server_id, network_source, client_logged_in
     ):
         """Test source missing report version."""
         request_json = {
@@ -204,7 +215,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -213,11 +224,11 @@ class TestAsyncMergeReports:
             == messages.FC_REQUIRED_ATTRIBUTE
         )
 
-    def test_source_missing_name(self, django_client):
+    def test_source_missing_name(self, client_logged_in):
         """Test source is missing source_name."""
         request_json = {"report_type": "details", "sources": [{"foo": "abc"}]}
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -226,11 +237,11 @@ class TestAsyncMergeReports:
             == messages.FC_REQUIRED_ATTRIBUTE
         )
 
-    def test_source_empty_name(self, django_client):
+    def test_source_empty_name(self, client_logged_in):
         """Test source has empty source_name."""
         request_json = {"report_type": "details", "sources": [{"source_name": ""}]}
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -239,7 +250,7 @@ class TestAsyncMergeReports:
             == messages.FC_REQUIRED_ATTRIBUTE
         )
 
-    def test_source_name_not_string(self, server_id, network_source, django_client):
+    def test_source_name_not_string(self, server_id, network_source, client_logged_in):
         """Test source has source_name that is not a string."""
         request_json = {
             "report_type": "details",
@@ -253,7 +264,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -262,7 +273,7 @@ class TestAsyncMergeReports:
             == messages.FC_SOURCE_NAME_NOT_STR
         )
 
-    def test_missing_source_type(self, server_id, network_source, django_client):
+    def test_missing_source_type(self, server_id, network_source, client_logged_in):
         """Test source_type is missing."""
         request_json = {
             "report_type": "details",
@@ -275,7 +286,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -284,7 +295,7 @@ class TestAsyncMergeReports:
             == messages.FC_REQUIRED_ATTRIBUTE
         )
 
-    def test_empty_source_type(self, server_id, network_source, django_client):
+    def test_empty_source_type(self, server_id, network_source, client_logged_in):
         """Test source_type is empty."""
         request_json = {
             "report_type": "details",
@@ -298,7 +309,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -307,7 +318,7 @@ class TestAsyncMergeReports:
             == messages.FC_REQUIRED_ATTRIBUTE
         )
 
-    def test_invalid_source_type(self, server_id, network_source, django_client):
+    def test_invalid_source_type(self, server_id, network_source, client_logged_in):
         """Test source_type has invalid_value."""
         request_json = {
             "report_type": "details",
@@ -321,7 +332,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -333,7 +344,7 @@ class TestAsyncMergeReports:
             == messages.FC_MUST_BE_ONE_OF % valid_choices
         )
 
-    def test_source_missing_facts(self, server_id, network_source, django_client):
+    def test_source_missing_facts(self, server_id, network_source, client_logged_in):
         """Test source missing facts attr."""
         request_json = {
             "report_type": "details",
@@ -347,7 +358,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -356,7 +367,7 @@ class TestAsyncMergeReports:
             == messages.FC_REQUIRED_ATTRIBUTE
         )
 
-    def test_source_empty_facts(self, server_id, network_source, django_client):
+    def test_source_empty_facts(self, server_id, network_source, client_logged_in):
         """Test source has empty facts list."""
         request_json = {
             "report_type": "details",
@@ -371,7 +382,7 @@ class TestAsyncMergeReports:
             ],
         }
         response_json = self.merge_details_from_source_expect_400(
-            request_json, django_client
+            request_json, client_logged_in
         )
         assert len(response_json["valid_sources"]) == 0
         assert len(response_json["invalid_sources"]) == 1
@@ -383,77 +394,73 @@ class TestAsyncMergeReports:
     ##############################################################
     # Test PUT Async Report Merge
     ##############################################################
-    def merge_details_by_ids(self, data, django_client):
+    def merge_details_by_ids(self, data, client_logged_in):
         """Call the create endpoint."""
-        return django_client.put(reverse("v1:reports-merge-jobs"), json=data)
+        return client_logged_in.put(reverse("v1:reports-merge-jobs"), data)
 
-    def merge_details_by_ids_expect_201(self, data, django_client):
+    def merge_details_by_ids_expect_201(self, data, client_logged_in):
         """Create a source, return the response as a dict."""
-        response = self.merge_details_by_ids(data, django_client)
-        if response.status_code != status.HTTP_201_CREATED:
-            print("Failure cause: ")
-            print(response.json())
-        assert response.status_code == status.HTTP_201_CREATED
+        response = self.merge_details_by_ids(data, client_logged_in)
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()
 
-    def merge_details_by_ids_expect_400(self, data, django_client):
+    def merge_details_by_ids_expect_400(self, data, client_logged_in):
         """Create a source, return the response as a dict."""
-        response = self.merge_details_by_ids(data, django_client)
-        if response.status_code != status.HTTP_400_BAD_REQUEST:
-            print("Failure cause: ")
-            print(response.json())
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        response = self.merge_details_by_ids(data, client_logged_in)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
         return response.json()
 
-    def test_sync_merge_empty_body(self, django_client):
+    def test_sync_merge_empty_body(self, client_logged_in):
         """Test report merge by id with empty body."""
-        data = None
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        data = ""
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_REQUIRED]}
 
-    def test_by_id_merge_empty_dict(self, django_client):
+    def test_by_id_merge_empty_dict(self, client_logged_in):
         """Test report merge by id with empty dict."""
         data = {}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_REQUIRED]}
 
-    def test_by_id_merge_jobs_not_list(self, django_client):
+    def test_by_id_merge_jobs_not_list(self, client_logged_in):
         """Test report merge by id with not list."""
         data = {"reports": 5}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_NOT_LIST]}
 
-    def test_by_id_merge_jobs_list_too_short(self, django_client):
+    def test_by_id_merge_jobs_list_too_short(self, client_logged_in):
         """Test report merge by id with list too short."""
         data = {"reports": [5]}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_TOO_SHORT]}
 
-    def test_by_id_merge_jobs_list_empty(self, django_client):
+    def test_by_id_merge_jobs_list_empty(self, client_logged_in):
         """Test report merge by id with an empty list."""
         data = {"reports": []}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_TOO_SHORT]}
 
-    def test_by_id_merge_jobs_list_contains_string(self, django_client):
+    def test_by_id_merge_jobs_list_contains_string(self, client_logged_in):
         """Test report merge by id with containing str."""
         data = {"reports": [5, "hello"]}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_NOT_INT]}
 
-    def test_by_id_merge_jobs_list_contains_duplicates(self, django_client):
+    def test_by_id_merge_jobs_list_contains_duplicates(self, client_logged_in):
         """Test report merge by id with containing duplicates."""
         data = {"reports": [5, 5]}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_NOT_UNIQUE]}
 
-    def test_by_id_merge_jobs_list_contains_invalid_job_ids(self, django_client):
+    def test_by_id_merge_jobs_list_contains_invalid_job_ids(self, client_logged_in):
         """Test report merge by id with containing duplicates."""
         data = {"reports": [5, 6]}
-        json_response = self.merge_details_by_ids_expect_400(data, django_client)
+        json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_NOT_FOUND % "5, 6"]}
 
-    def test_by_id_merge_jobs_success(self, server_id, network_source, django_client):
+    def test_by_id_merge_jobs_success(
+        self, server_id, network_source, client_logged_in
+    ):
         """Test report merge by id jobs success."""
         url = reverse("v1:reports-list")
         sources1 = [
@@ -475,23 +482,21 @@ class TestAsyncMergeReports:
             }
         ]
         request_json = {"report_type": "details", "sources": sources1}
-        response = django_client.post(url, json=request_json)
-        if response.status_code != status.HTTP_201_CREATED:
-            print(response.json())
+        response = client_logged_in.post(url, data=request_json)
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         response_json = response.json()
         assert response_json["sources"] == sources1
         report1_id = response_json["report_id"]
 
         request_json = {"report_type": "details", "sources": sources2}
-        response = django_client.post(url, json=request_json)
-        if response.status_code != status.HTTP_201_CREATED:
-            print(response.json())
+        response = client_logged_in.post(url, data=request_json)
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         response_json = response.json()
         assert response_json["sources"] == sources2
         report2_id = response_json["report_id"]
 
         data = {"reports": [report1_id, report2_id]}
-        json_response = self.merge_details_by_ids_expect_201(data, django_client)
+        json_response = self.merge_details_by_ids_expect_201(data, client_logged_in)
         expected = {
             "id": mock.ANY,
             "report_id": mock.ANY,
