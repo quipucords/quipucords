@@ -127,7 +127,7 @@ class Client(DjangoClient):
 
 
 @pytest.fixture
-def client_logged_in(qpc_user_simple) -> Client:
+def client_logged_in(qpc_user_simple, settings) -> Client:
     """
     Create a simpler Django test client with logged-in user.
 
@@ -137,10 +137,14 @@ def client_logged_in(qpc_user_simple) -> Client:
     """
     # Why this override_settings? See:
     # https://whitenoise.readthedocs.io/en/stable/django.html#whitenoise-makes-my-tests-run-slow
-    with override_settings(WHITENOISE_AUTOREFRESH=True):
-        client = Client()
-        client.force_login(user=qpc_user_simple)
-        yield client
+    settings.WHITENOISE_AUTOREFRESH = True
+    # for some reason removing DEFAULT_THROTTLING_CLASSES+RATES has no effect on
+    # throttling configuration, but it can at least be raised so tests won't be rate
+    # limited.
+    settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]["user"] = "9000/second"
+    client = Client()
+    client.force_login(user=qpc_user_simple)
+    yield client
 
 
 @pytest.fixture(scope="module")
