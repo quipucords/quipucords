@@ -7,6 +7,8 @@ from time import sleep
 from unittest import mock
 
 import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from api.models import ScanTask
 from constants import DataSources
@@ -45,49 +47,56 @@ class Smoker:
         assert self.SOURCE_TYPE in DataSources.values
 
     @pytest.fixture
-    def credential_id(self, django_client, credential_payload):
+    def credential_id(self, client_logged_in, credential_payload):
         """Create credentials through api and return credentials identifier."""
         credential_payload.setdefault("cred_type", self.SOURCE_TYPE)
-        response = django_client.post(
-            "credentials/",
-            json=credential_payload,
+        response = client_logged_in.post(
+            reverse("v1:credentials-list"),
+            data=credential_payload,
         )
-        assert response.ok, response.text
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()["id"]
 
     @pytest.fixture
-    def source_id(self, django_client, credential_id, source_payload):
+    def source_id(self, client_logged_in, credential_id, source_payload):
         """Register source through api and return its identifier."""
         source_payload.setdefault("credentials", [credential_id])
         source_payload.setdefault("source_type", self.SOURCE_TYPE)
         source_payload.setdefault("name", self.SOURCE_NAME)
-        response = django_client.post(
-            "sources/",
-            json=source_payload,
+        response = client_logged_in.post(
+            reverse("v1:source-list"),
+            data=source_payload,
         )
-        assert response.ok, response.text
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()["id"]
 
     @pytest.fixture
-    def scan_id(self, django_client, source_id):
+    def scan_id(self, client_logged_in, source_id):
         """Create a scan and return its identifier."""
-        create_scan_response = django_client.post(
-            "scans/",
-            json={"name": "test scan", "sources": [source_id]},
+        create_scan_response = client_logged_in.post(
+            reverse("v1:scan-list"),
+            data={"name": "test scan", "sources": [source_id]},
         )
-        assert create_scan_response.ok, create_scan_response.text
+        assert (
+            create_scan_response.status_code == status.HTTP_201_CREATED
+        ), create_scan_response.json()
         scan_id = create_scan_response.json()["id"]
         return scan_id
 
     @pytest.fixture
-    def scan_response(self, django_client, scan_id, scan_manager):
+    def scan_response(self, client_logged_in, scan_id, scan_manager):
         """Start a scan job and poll its results endpoint until completion."""
-        create_scan_job_response = django_client.post(f"scans/{scan_id}/jobs/")
-        assert create_scan_job_response.ok, create_scan_job_response.text
+        create_scan_job_response = client_logged_in.post(
+            reverse("v1:scan-filtered-jobs", args=(scan_id,))
+        )
+        scan_detail_url = reverse("v1:scan-detail", args=(scan_id,))
+        assert (
+            create_scan_job_response.status_code == status.HTTP_201_CREATED
+        ), create_scan_job_response.json()
         scan_manager.work()
-        response = django_client.get(f"scans/{scan_id}/")
+        response = client_logged_in.get(scan_detail_url)
         attempts = 1
-        assert response.ok, response.text
+        assert response.status_code == status.HTTP_200_OK, response.json()
 
         completed_status = {ScanTask.COMPLETED, ScanTask.CANCELED, ScanTask.FAILED}
         while (
@@ -96,8 +105,8 @@ class Smoker:
             attempts += 1
             backoff = 2**attempts
             sleep(backoff)
-            response = django_client.get(f"scans/{scan_id}/")
-            assert response.ok, response.text
+            response = client_logged_in.get(scan_detail_url)
+            assert response.status_code == status.HTTP_200_OK, response.json()
 
         assert scan_status == ScanTask.COMPLETED, response.json()
 
@@ -110,13 +119,15 @@ class Smoker:
 
     def test_details_report(
         self,
-        django_client,
+        client_logged_in,
         report_id,
         expected_facts,
     ):
         """Sanity check details report."""
-        response = django_client.get(f"reports/{report_id}/details/")
-        assert response.ok, response.text
+        response = client_logged_in.get(
+            reverse("v1:reports-details", args=(report_id,))
+        )
+        assert response.status_code == status.HTTP_200_OK, response.content.decode()
         report_details_dict = response.json()
         expected_details_report = {
             "report_id": report_id,
@@ -157,15 +168,17 @@ class Smoker:
 
     def test_deployments_report(  # noqa: PLR0913
         self,
-        django_client,
+        client_logged_in,
         expected_fingerprint_metadata,
         fingerprint_fact_map,
         report_id,
         expected_fingerprints,
     ):
         """Sanity check report deployments json structure."""
-        response = django_client.get(f"reports/{report_id}/deployments/")
-        assert response.ok, response.json()
+        response = client_logged_in.get(
+            reverse("v1:reports-deployments", args=(report_id,))
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
 
         report_deployments_dict = response.json()
         assert report_deployments_dict == {
@@ -206,17 +219,27 @@ class Smoker:
         assert target_fingerprints == expected_fingerprints
 
     def test_compare_standalone_json_reports_with_tarball(
-        self, django_client, report_id
+        self, client_logged_in, report_id
     ):
         """Compare individual reports with the ones bundled on the tarball endpoint."""
-        details_response = django_client.get(f"reports/{report_id}/details/")
-        assert details_response.ok, details_response.json()
+        details_response = client_logged_in.get(
+            reverse("v1:reports-details", args=(report_id,))
+        )
+        assert (
+            details_response.status_code == status.HTTP_200_OK
+        ), details_response.json()
 
-        deployments_response = django_client.get(f"reports/{report_id}/deployments/")
-        assert deployments_response.ok, deployments_response.json()
+        deployments_response = client_logged_in.get(
+            reverse("v1:reports-deployments", args=(report_id,))
+        )
+        assert (
+            deployments_response.status_code == status.HTTP_200_OK
+        ), deployments_response.json()
 
-        full_report_response = django_client.get(f"reports/{report_id}/")
-        assert full_report_response.ok
+        full_report_response = client_logged_in.get(
+            reverse("v1:reports-detail", args=(report_id,))
+        )
+        assert full_report_response.status_code == status.HTTP_200_OK
 
         with tarfile.open(fileobj=BytesIO(full_report_response.content)) as tarball:
             tarball_details_dict = load_json_from_tarball(

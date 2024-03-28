@@ -76,20 +76,23 @@ def assert_response_dict_roughly_matches_actual_fingerprint(
         assert response_dict["ip_addresses"] == system_fingerprint.ip_addresses
 
 
-def test_get_deployments_report_as_csv(django_client, deployments_report):
+@pytest.mark.django_db
+def test_get_deployments_report_as_csv(client_logged_in, deployments_report):
     """
     Test deployments report rendering as CSV.
 
     This effectively tests DeploymentCSVRenderer.
     """
-    response = django_client.get(
+    response = client_logged_in.get(
         reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "text/csv"},
     )
-    assert response.ok, f"response was not ok; status {response.status_code}"
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"response was not ok; status {response.status_code}"
 
     # Sanity-check the basic structure of the tarball deployments.csv directly.
-    deployments_csv_data = list(csv.reader(response.text.splitlines()))
+    deployments_csv_data = list(csv.reader(response.content.decode().splitlines()))
     # We expect a table header, one line in the first table, two blank lines, a section
     # marker, another table header, one line per system fingerprint in the second table,
     # and another blank line at the end. (1 + 1 + 2 + 1 + 1 + n + 1, or 7 + n)
@@ -129,13 +132,16 @@ def test_get_deployments_report_as_csv(django_client, deployments_report):
     )
 
 
-def test_get_deployments_report_as_json(django_client, deployments_report):
+@pytest.mark.django_db
+def test_get_deployments_report_as_json(client_logged_in, deployments_report):
     """Test deployments report rendering as JSON."""
-    response = django_client.get(
+    response = client_logged_in.get(
         reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "application/json"},
     )
-    assert response.ok, f"response was not ok; status {response.status_code}"
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"response was not ok; status {response.status_code}"
 
     deployments_json = response.json()
     deployments_json_fingerprints = deployments_json.pop("system_fingerprints")
@@ -158,7 +164,8 @@ def test_get_deployments_report_as_json(django_client, deployments_report):
     )
 
 
-def test_get_deployment_report_as_tarball(django_client, deployments_report):
+@pytest.mark.django_db
+def test_get_deployment_report_as_tarball(client_logged_in, deployments_report):
     """
     Test deployments report rendering as a JSON file inside a tarball (tar.gz).
 
@@ -166,13 +173,15 @@ def test_get_deployment_report_as_tarball(django_client, deployments_report):
     comparing it to the response generated from the regular JSON API.
     """
     path = reverse("v1:reports-deployments", args=(deployments_report.report.id,))
-    gzip_response = django_client.get(path, headers={"Accept": "application/json+gzip"})
+    gzip_response = client_logged_in.get(
+        path, headers={"Accept": "application/json+gzip"}
+    )
     assert (
-        gzip_response.ok
+        gzip_response.status_code == status.HTTP_200_OK
     ), f"gzip response was not ok; status {gzip_response.status_code}"
-    json_response = django_client.get(path, headers={"Accept": "application/json"})
+    json_response = client_logged_in.get(path, headers={"Accept": "application/json"})
     assert (
-        json_response.ok
+        json_response.status_code == status.HTTP_200_OK
     ), f"json response was not ok; status {json_response.status_code}"
 
     extracted_files = extract_files_from_tarball(
@@ -183,25 +192,28 @@ def test_get_deployment_report_as_tarball(django_client, deployments_report):
     assert extracted_file == json_response.json()
 
 
-def test_get_deployment_report_invalid_id_not_found(django_client):
+@pytest.mark.django_db
+def test_get_deployment_report_invalid_id_not_found(client_logged_in):
     """Test getting a report for an invalid report ID responds with 404."""
     url = reverse("v1:reports-list") + "/invalid/deployments/"
-    response = django_client.get(url)
+    response = client_logged_in.get(url)
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_deployment_report_unknown_id_not_found(django_client):
+@pytest.mark.django_db
+def test_get_deployment_report_unknown_id_not_found(client_logged_in):
     """Test getting a report for a report ID that does not exist responds with 404."""
-    response = django_client.get(reverse("v1:reports-deployments", args=("1",)))
+    response = client_logged_in.get(reverse("v1:reports-deployments", args=("1",)))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_deployments_report_not_complete_424_failed(django_client):
+@pytest.mark.django_db
+def test_get_deployments_report_not_complete_424_failed(client_logged_in):
     """Test getting a report with incomplete status responds with 424."""
     deployments_report = DeploymentReportFactory(
         number_of_fingerprints=0, status=DeploymentsReport.STATUS_PENDING
     )
-    response = django_client.get(
+    response = client_logged_in.get(
         reverse("v1:reports-deployments", args=(deployments_report.report.id,))
     )
     assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY

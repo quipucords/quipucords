@@ -24,6 +24,7 @@ import tarfile
 from io import BytesIO
 
 import pytest
+from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
 
@@ -65,13 +66,14 @@ def get_serialized_report_data(report: Report) -> dict:
     return report_data
 
 
-def test_report_without_logs(django_client, caplog):
+@pytest.mark.django_db
+def test_report_without_logs(client_logged_in, caplog):
     """Explicitly test report without logs."""
     caplog.set_level(logging.WARNING)
     deployment = DeploymentReportFactory.create()
     report_id = deployment.report.id
-    response = django_client.get(reverse("v1:reports-detail", args=(report_id,)))
-    assert response.ok, response.text
+    response = client_logged_in.get(reverse("v1:reports-detail", args=(report_id,)))
+    assert response.status_code == status.HTTP_200_OK, response.content.decode()
     assert f"No logs were found for report_id={report_id}" in caplog.messages
     expected_files = {
         f"report_id_{report_id}/{fname}" for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES
@@ -93,12 +95,13 @@ def deployment_with_logs(settings, faker):
     return deployments_report
 
 
-def test_report_with_logs(django_client, deployment_with_logs):
+@pytest.mark.django_db
+def test_report_with_logs(client_logged_in, deployment_with_logs):
     """Test if scan job logs are included in tarball when present."""
     report = deployment_with_logs.report
     scan_job_id = report.scanjob.id
-    response = django_client.get(reverse("v1:reports-detail", args=(report.id,)))
-    assert response.ok, response.text
+    response = client_logged_in.get(reverse("v1:reports-detail", args=(report.id,)))
+    assert response.status_code == status.HTTP_200_OK, response.content.decode()
     expected_files = {
         f"report_id_{report.id}/{fname}"
         for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
@@ -109,13 +112,14 @@ def test_report_with_logs(django_client, deployment_with_logs):
         assert set(tarball.getnames()) == expected_files
 
 
-def test_report_tarball_sha256sum(django_client, deployment_with_logs):
+@pytest.mark.django_db
+def test_report_tarball_sha256sum(client_logged_in, deployment_with_logs):
     """Verify SHA256SUM files and digests are correct."""
     deployments_report = deployment_with_logs
-    response = django_client.get(
+    response = client_logged_in.get(
         reverse("v1:reports-detail", args=(deployments_report.report.id,))
     )
-    assert response.ok, response.text
+    assert response.status_code == status.HTTP_200_OK, response.content.decode()
     files_contents = extract_files_from_tarball(response.content)
     expected_filenames = TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
         {f"scan-job-{deployments_report.report.scanjob.id}-test.txt"}
@@ -140,27 +144,32 @@ def test_report_tarball_sha256sum(django_client, deployment_with_logs):
         ), f"incorrect SHA256SUM digest for {name}"
 
 
+@pytest.mark.django_db
 def test_report_tarball_details_json(
-    django_client, deployment_with_logs: DeploymentsReport
+    client_logged_in, deployment_with_logs: DeploymentsReport
 ):
     """Test report tarball contains expected details.json."""
     deployments_report = deployment_with_logs
     report = deployments_report.report
-    tarball_response = django_client.get(
+    tarball_response = client_logged_in.get(
         reverse("v1:reports-detail", args=(deployments_report.report.id,))
     )
-    assert tarball_response.ok, tarball_response.text
+    assert (
+        tarball_response.status_code == status.HTTP_200_OK
+    ), tarball_response.content.decode()
 
     files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DETAILS_JSON in files_contents
     tarball_details_json = json.loads(files_contents[FILENAME_DETAILS_JSON].decode())
 
     # Compare tarball details.json contents with the standalone API's response.
-    api_details_response = django_client.get(
+    api_details_response = client_logged_in.get(
         reverse("v1:reports-details", args=(deployments_report.report.id,)),
         headers={"Accept": "application/json"},
     )
-    assert api_details_response.ok, api_details_response.text
+    assert (
+        api_details_response.status_code == status.HTTP_200_OK
+    ), api_details_response.content.decode()
     api_details_json = api_details_response.json()
     assert tarball_details_json == api_details_json
 
@@ -177,15 +186,18 @@ def test_report_tarball_details_json(
     assert tarball_details_json["report_platform_id"] == str(report.report_platform_id)
 
 
+@pytest.mark.django_db
 def test_report_tarball_deployments_json(
-    django_client, deployment_with_logs: DeploymentsReport
+    client_logged_in, deployment_with_logs: DeploymentsReport
 ):
     """Test report tarball contains expected deployments.json."""
     deployments_report = deployment_with_logs
-    tarball_response = django_client.get(
+    tarball_response = client_logged_in.get(
         reverse("v1:reports-detail", args=(deployments_report.report.id,))
     )
-    assert tarball_response.ok, tarball_response.text
+    assert (
+        tarball_response.status_code == status.HTTP_200_OK
+    ), tarball_response.content.decode()
 
     files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DEPLOYMENTS_JSON in files_contents
@@ -198,11 +210,13 @@ def test_report_tarball_deployments_json(
     assert model_data_as_json == tarball_deployments_json
 
     # Compare tarball deployments.json contents with the standalone API's response.
-    api_deployments_response = django_client.get(
+    api_deployments_response = client_logged_in.get(
         reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "application/json"},
     )
-    assert api_deployments_response.ok, api_deployments_response.text
+    assert (
+        api_deployments_response.status_code == status.HTTP_200_OK
+    ), api_deployments_response.content.decode()
     api_deployments_json = api_deployments_response.json()
     assert tarball_deployments_json == api_deployments_json
 
@@ -211,25 +225,30 @@ def test_report_tarball_deployments_json(
     assert tarball_deployments_json["report_type"] == REPORT_TYPE_DEPLOYMENT
 
 
-def test_report_details_csv(django_client, deployment_with_logs: DeploymentsReport):
+@pytest.mark.django_db
+def test_report_details_csv(client_logged_in, deployment_with_logs: DeploymentsReport):
     """Test report tarball contains expected details.csv."""
     deployments_report = deployment_with_logs
-    tarball_response = django_client.get(
+    tarball_response = client_logged_in.get(
         reverse("v1:reports-detail", args=(deployments_report.report.id,))
     )
-    assert tarball_response.ok, tarball_response.text
+    assert (
+        tarball_response.status_code == status.HTTP_200_OK
+    ), tarball_response.content.decode()
 
     files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DETAILS_CSV in files_contents
     tarball_details_csv = files_contents[FILENAME_DETAILS_CSV].decode()
 
     # Compare tarball details.csv contents with the standalone API's response.
-    details_csv_response = django_client.get(
+    details_csv_response = client_logged_in.get(
         reverse("v1:reports-details", args=(deployments_report.report.id,)),
         headers={"Accept": "text/csv"},
     )
-    assert details_csv_response.ok, details_csv_response.text
-    assert details_csv_response.text == tarball_details_csv
+    assert (
+        details_csv_response.status_code == status.HTTP_200_OK
+    ), details_csv_response.content.decode()
+    assert details_csv_response.content.decode() == tarball_details_csv
 
     # Compare tarball details.csv contents with our model serialized.
     serialized_report_data = get_serialized_report_data(deployments_report.report)
@@ -251,25 +270,32 @@ def test_report_details_csv(django_client, deployment_with_logs: DeploymentsRepo
     assert len(tarball_details_csv_lines) >= 12
 
 
-def test_report_deployments_csv(django_client, deployment_with_logs: DeploymentsReport):
+@pytest.mark.django_db
+def test_report_deployments_csv(
+    client_logged_in, deployment_with_logs: DeploymentsReport
+):
     """Test report tarball contains expected deployments.csv."""
     deployments_report = deployment_with_logs
-    tarball_response = django_client.get(
+    tarball_response = client_logged_in.get(
         reverse("v1:reports-detail", args=(deployments_report.report.id,))
     )
-    assert tarball_response.ok, tarball_response.text
+    assert (
+        tarball_response.status_code == status.HTTP_200_OK
+    ), tarball_response.content.decode()
 
     files_contents = extract_files_from_tarball(tarball_response.content)
     assert FILENAME_DEPLOYMENTS_CSV in files_contents
 
     # Compare tarball deployments.csv contents with the standalone API's response.
     tarball_deployments_csv = files_contents[FILENAME_DEPLOYMENTS_CSV].decode()
-    deployments_csv_response = django_client.get(
+    deployments_csv_response = client_logged_in.get(
         reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "text/csv"},
     )
-    assert deployments_csv_response.ok, deployments_csv_response.text
-    assert deployments_csv_response.text == tarball_deployments_csv
+    assert (
+        deployments_csv_response.status_code == status.HTTP_200_OK
+    ), deployments_csv_response.content.decode()
+    assert deployments_csv_response.content.decode() == tarball_deployments_csv
 
     # Compare tarball deployments.csv contents with our model serialized.
     model_data_as_json = build_cached_json_report(deployments_report)

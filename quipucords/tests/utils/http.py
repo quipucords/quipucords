@@ -27,5 +27,5 @@ class QPCAuth(requests.auth.AuthBase):
         auth_response = self._qpc_client.post(
             "api/v1/token/", {"username": self._username, "password": self._password}
         )
-        assert auth_response.ok, auth_response.text
+        assert auth_response.ok, auth_response.content.decode()
         return auth_response.json()["token"]

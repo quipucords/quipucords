@@ -124,73 +124,73 @@ def dummy_start():
 class TestSource:
     """Test the basic Source infrastructure."""
 
-    def create(self, data, django_client):
+    def create(self, data, client_logged_in):
         """Call the create endpoint."""
         url = reverse("v1:source-list")
-        return django_client.post(url, json=data, headers=ACCEPT_JSON_HEADER)
+        return client_logged_in.post(url, data=data, headers=ACCEPT_JSON_HEADER)
 
-    def create_expect_400(self, data, django_client, expected_response=None):
+    def create_expect_400(self, data, client_logged_in, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         if expected_response:
             response_json = response.json()
             assert response_json == expected_response
 
-    def create_expect_201(self, data, django_client):
+    def create_expect_201(self, data, client_logged_in):
         """Create a source, return the response as a dict."""
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     @patch("api.source.view.start_scan", side_effect=dummy_start)
-    def create_with_query(self, query, data, django_client, start_scan):
+    def create_with_query(self, query, data, client_logged_in, start_scan):
         """Create a source with query param, return the response as a dict."""
         url = reverse("v1:source-list")
         url += query
-        return django_client.post(url, json=data, headers=ACCEPT_JSON_HEADER)
+        return client_logged_in.post(url, data=data, headers=ACCEPT_JSON_HEADER)
 
-    def create_expect_201_with_query(self, query, data, django_client):
+    def create_expect_201_with_query(self, query, data, client_logged_in):
         """Create a valid source with a query parameter."""
-        response = self.create_with_query(query, data, django_client)
+        response = self.create_with_query(query, data, client_logged_in)
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     def create_expect_400_with_query(
-        self, query, data, django_client, expected_response=None
+        self, query, data, client_logged_in, expected_response=None
     ):
         """Create an expect HTTP 400 with a query param."""
-        response = self.create_with_query(query, data, django_client)
+        response = self.create_with_query(query, data, client_logged_in)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         if expected_response:
             response_json = response.json()
             assert response_json == expected_response
 
-    def get_source(self, django_client, params=None, url=None):
+    def get_source(self, client_logged_in, params=None, url=None):
         """Call the retrieve endpoint."""
         if not url:
             url = reverse("v1:source-list")
         if params is not None:
-            return django_client.get(url, params=params)
+            return client_logged_in.get(url, params)
         else:
-            return django_client.get(url)
+            return client_logged_in.get(url)
 
-    def update_source(self, django_client, data, source_id):
+    def update_source(self, client_logged_in, data, source_id):
         """Call the update endpoint."""
         url = reverse("v1:source-detail", args=(source_id,))
-        return django_client.put(url=url, json=data)
+        return client_logged_in.put(url, data=data)
 
-    def partially_update_source(self, django_client, data, source_id):
+    def partially_update_source(self, client_logged_in, data, source_id):
         """Call the partialy update endpoint."""
         url = reverse("v1:source-detail", args=(source_id,))
-        return django_client.patch(url=url, json=data)
+        return client_logged_in.patch(url, data=data)
 
-    def source_object_factory(self, data, django_client, range_number):
+    def source_object_factory(self, data, client_logged_in, range_number):
         """Create source objects and return list with name and ids."""
         source_list = []
         for index in range(range_number):
             data["name"] = data["name"] + str(index)
-            response = self.create_expect_201(data, django_client)
+            response = self.create_expect_201(data, client_logged_in)
 
             source_info = {"name": data["name"], "id": response["id"]}
             source_list.append(source_info)
@@ -272,7 +272,7 @@ class TestSource:
         }
         assert out == expected
 
-    def test_source_create_with_false_scan(self, django_client, net_cred):
+    def test_source_create_with_false_scan(self, client_logged_in, net_cred):
         """Test creating a source with a valid scan query param of False."""
         query = "?scan=False"
         data = {
@@ -282,10 +282,10 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response = self.create_expect_201_with_query(query, data, django_client)
+        response = self.create_expect_201_with_query(query, data, client_logged_in)
         assert "id" in response
 
-    def test_source_create_with_true_scan(self, django_client, net_cred):
+    def test_source_create_with_true_scan(self, client_logged_in, net_cred):
         """Test creating source with valid scan query param of True."""
         query = "?scan=True"
         data = {
@@ -295,9 +295,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201_with_query(query, data, django_client)
+        self.create_expect_201_with_query(query, data, client_logged_in)
 
-    def test_source_create_with_invalid_scan(self, django_client, net_cred):
+    def test_source_create_with_invalid_scan(self, client_logged_in, net_cred):
         """Test the source create method with invalid query param."""
         query = "?scan=Foo"
         data = {
@@ -307,10 +307,10 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400_with_query(query, data, django_client)
+        self.create_expect_400_with_query(query, data, client_logged_in)
 
     @pytest.mark.parametrize("source_type", (ds for ds in DataSources))
-    def test_successful_create(self, django_client, valid_cred, source_type):
+    def test_successful_create(self, client_logged_in, valid_cred, source_type):
         """A valid create request should succeed."""
         valid_cred_obj = valid_cred(source_type)
         data = {
@@ -320,7 +320,7 @@ class TestSource:
             "port": "22",
             "credentials": [valid_cred_obj.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
     @pytest.mark.parametrize(
@@ -335,7 +335,7 @@ class TestSource:
         ),
     )
     def test_successful_create_no_port(
-        self, django_client, valid_cred, source_type, default_port
+        self, client_logged_in, valid_cred, source_type, default_port
     ):
         """A valid create request should succeed without port."""
         valid_cred_obj = valid_cred(source_type)
@@ -345,13 +345,13 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [valid_cred_obj.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
         assert response.get("port") == default_port
 
     @pytest.mark.parametrize("source_type", (ds for ds in DataSources))
     def test_successful_create_custom_port(
-        self, django_client, valid_cred, source_type
+        self, client_logged_in, valid_cred, source_type
     ):
         """A valid create request should succeed."""
         port = random.randint(1, 65535)
@@ -363,11 +363,11 @@ class TestSource:
             "port": str(port),
             "credentials": [valid_cred_obj.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
         assert response.get("port") == port
 
-    def test_double_create(self, django_client, net_cred):
+    def test_double_create(self, client_logged_in, net_cred):
         """A duplicate create should fail."""
         data = {
             "name": "source1",
@@ -376,11 +376,11 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_multiple_hosts(self, django_client, net_cred):
+    def test_create_multiple_hosts(self, client_logged_in, net_cred):
         """A valid create request with two hosts."""
         data = {
             "name": "source1",
@@ -389,9 +389,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
 
-    def test_create_no_name(self, django_client, net_cred):
+    def test_create_no_name(self, client_logged_in, net_cred):
         """A create request must have a name."""
         data = {
             "hosts": "1.2.3.4",
@@ -399,9 +399,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_name(self, django_client, net_cred):
+    def test_create_empty_name(self, client_logged_in, net_cred):
         """Empty name is not valid."""
         data = {
             "name": "",
@@ -410,9 +410,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_invalid_name(self, django_client, net_cred):
+    def test_create_invalid_name(self, client_logged_in, net_cred):
         """A create request must have a string name."""
         data = {
             "name": 1,
@@ -421,9 +421,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_unprintable_name(self, django_client, net_cred):
+    def test_create_unprintable_name(self, client_logged_in, net_cred):
         """The Source name must be printable."""
         data = {
             "name": "\r\n",
@@ -432,9 +432,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_no_host(self, django_client, net_cred):
+    def test_create_no_host(self, client_logged_in, net_cred):
         """A Source needs a host."""
         data = {
             "name": "source1",
@@ -442,9 +442,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_host(self, django_client, net_cred):
+    def test_create_empty_host(self, client_logged_in, net_cred):
         """An empty array is not a host identifier."""
         data = {
             "name": "source1",
@@ -453,9 +453,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_host_empty_string(self, django_client, net_cred):
+    def test_create_host_empty_string(self, client_logged_in, net_cred):
         """An empty string is not a host identifier."""
         data = {
             "name": "source1",
@@ -464,9 +464,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_hosts_not_array(self, django_client, net_cred):
+    def test_create_hosts_not_array(self, client_logged_in, net_cred):
         """Test error when hosts is not an array."""
         data = {
             "name": "source1",
@@ -475,9 +475,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_hosts_not_array_of_strings(self, django_client, net_cred):
+    def test_create_hosts_not_array_of_strings(self, client_logged_in, net_cred):
         """Test error when hosts is not an array of strings."""
         data = {
             "name": "source1",
@@ -486,9 +486,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_long_name(self, django_client, net_cred):
+    def test_create_long_name(self, client_logged_in, net_cred):
         """A long source name."""
         data = {
             "name": "A" * 100,
@@ -497,9 +497,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_ip(self, django_client, net_cred):
+    def test_create_empty_ip(self, client_logged_in, net_cred):
         """An empty string passed with valid ips."""
         data = {
             "name": "source1",
@@ -509,12 +509,12 @@ class TestSource:
             "credentials": [net_cred.id],
         }
 
-        resp_json = self.create_expect_201(data, django_client)
+        resp_json = self.create_expect_201(data, client_logged_in)
         resp_hosts = resp_json.get("hosts")
         assert len(resp_hosts) == 1
         assert resp_hosts == ["10.10.181.9"]
 
-    def test_create_valid_hosts(self, django_client, net_cred):
+    def test_create_valid_hosts(self, client_logged_in, net_cred):
         """Test valid host patterns."""
         data = {
             "name": "source1",
@@ -537,9 +537,9 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
 
-    def test_create_valid_exclude_hosts(self, django_client, net_cred):
+    def test_create_valid_exclude_hosts(self, client_logged_in, net_cred):
         """Test valid exclude host patterns."""
         data = {
             "name": "source1",
@@ -563,9 +563,9 @@ class TestSource:
             "credentials": [net_cred.id],
         }
 
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
 
-    def test_create_invalid_hosts(self, django_client, net_cred):
+    def test_create_invalid_hosts(self, client_logged_in, net_cred):
         """Test invalid host patterns."""
         hosts = [
             "192.1..2",
@@ -591,11 +591,11 @@ class TestSource:
             "credentials": [net_cred.id],
         }
 
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == 400
         assert len(response.json()["hosts"]) == len(hosts)
 
-    def test_create_bad_host_pattern(self, django_client, net_cred):
+    def test_create_bad_host_pattern(self, client_logged_in, net_cred):
         """Test a invalid host pattern."""
         hosts = ["10.1.1.1-10.1.1.254"]
 
@@ -606,12 +606,12 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == 400
         assert len(response.json()["hosts"]) == len(hosts)
 
     @pytest.mark.parametrize("bad_port", ("string*!", "-1", "False", -1, False))
-    def test_create_bad_port(self, django_client, net_cred, bad_port):
+    def test_create_bad_port(self, client_logged_in, net_cred, bad_port):
         """Some values are not a valid ssh port."""
         data = {
             "name": "source1",
@@ -620,9 +620,9 @@ class TestSource:
             "port": bad_port,
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_no_credentials(self, django_client):
+    def test_create_no_credentials(self, client_logged_in):
         """A Source needs credentials."""
         data = {
             "name": "source1",
@@ -630,9 +630,9 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "port": "22",
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_credentials(self, django_client):
+    def test_create_empty_credentials(self, client_logged_in):
         """The empty string is not a valid credential list."""
         data = {
             "name": "source1",
@@ -642,9 +642,9 @@ class TestSource:
             "credentials": [],
         }
 
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_credential_does_not_exist(self, django_client):
+    def test_create_credential_does_not_exist(self, client_logged_in):
         """A random int is not a valid credential id."""
         data = {
             "name": "source1",
@@ -654,9 +654,9 @@ class TestSource:
             "credentials": [42],
         }
 
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_credential_not_valid_id(self, django_client):
+    def test_create_credential_not_valid_id(self, client_logged_in):
         """A random int is not a valid credential id."""
         data = {
             "name": "source1",
@@ -665,9 +665,9 @@ class TestSource:
             "port": "22",
             "credentials": ["hi"],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_negative_credential_id(self, django_client):
+    def test_create_negative_credential_id(self, client_logged_in):
         """Negative numbers are not a valid id."""
         data = {
             "name": "source1",
@@ -676,9 +676,9 @@ class TestSource:
             "port": "22",
             "credentials": [-5],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_invalid_cred_type(self, django_client, vc_cred):
+    def test_create_invalid_cred_type(self, client_logged_in, vc_cred):
         """A source type and credential type must be the same."""
         data = {
             "name": "source1",
@@ -687,10 +687,10 @@ class TestSource:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     def test_create_with_options_not_allowed_network_type(
-        self, django_client, net_cred
+        self, client_logged_in, net_cred
     ):
         """Test network type doesn't allow ssl options."""
         data = {
@@ -701,9 +701,9 @@ class TestSource:
             "credentials": [net_cred.id],
             "options": {"ssl_cert_verify": False},
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_list(self, django_client, net_cred):
+    def test_list(self, client_logged_in, net_cred):
         """List all Source objects."""
         data = {
             "name": "source",
@@ -713,9 +713,9 @@ class TestSource:
             "credentials": [net_cred.id],
         }
 
-        source_list = self.source_object_factory(data, django_client, range_number=3)
+        source_list = self.source_object_factory(data, client_logged_in, range_number=3)
 
-        response = self.get_source(django_client)
+        response = self.get_source(client_logged_in)
         assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
@@ -735,7 +735,7 @@ class TestSource:
         expected = {"count": 3, "next": None, "previous": None, "results": results}
         assert content == expected
 
-    def test_filter_by_type_list(self, django_client, vc_cred, net_cred):
+    def test_filter_by_type_list(self, client_logged_in, vc_cred, net_cred):
         """List all Source objects filtered by type."""
         net_data = {
             "name": "net_source",
@@ -744,7 +744,7 @@ class TestSource:
             "credentials": [net_cred.id],
             "hosts": ["1.2.3.4"],
         }
-        self.source_object_factory(net_data, django_client, range_number=3)
+        self.source_object_factory(net_data, client_logged_in, range_number=3)
 
         vcenter_data = {
             "name": "vc_source",
@@ -754,10 +754,12 @@ class TestSource:
         }
 
         vcenter_source_list = self.source_object_factory(
-            vcenter_data, django_client, range_number=2
+            vcenter_data, client_logged_in, range_number=2
         )
 
-        response = self.get_source(django_client, {"source_type": DataSources.VCENTER})
+        response = self.get_source(
+            client_logged_in, {"source_type": DataSources.VCENTER}
+        )
         assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
@@ -777,7 +779,7 @@ class TestSource:
         expected = {"count": 2, "next": None, "previous": None, "results": results}
         assert content == expected
 
-    def test_retrieve(self, django_client, net_cred):
+    def test_retrieve(self, client_logged_in, net_cred):
         """Get details on a specific Source by primary key."""
         data = {
             "name": "source1",
@@ -787,10 +789,10 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         url = reverse("v1:source-detail", args=(initial["id"],))
-        response = self.get_source(django_client, url=url)
+        response = self.get_source(client_logged_in, url=url)
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
         assert "credentials" in response_json
@@ -802,13 +804,13 @@ class TestSource:
         assert response_json["hosts"][0] == "1.2.3.4"
         assert response_json["exclude_hosts"][0] == "1.2.3.4"
 
-    def test_retrieve_bad_id(self, django_client):
+    def test_retrieve_bad_id(self, client_logged_in):
         """Get details on a specific Source by bad primary key."""
         url = reverse("v1:source-detail", args=("string",))
-        response = self.get_source(django_client, url=url)
+        response = self.get_source(client_logged_in, url=url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update(self, django_client, net_cred):
+    def test_update(self, client_logged_in, net_cred):
         """Completely update a Source."""
         data = {
             "name": "source2",
@@ -817,7 +819,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source2",
@@ -825,7 +827,7 @@ class TestSource:
             "port": 23,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
         net_cred_response = {"id": net_cred.id, "name": net_cred.name}
@@ -839,7 +841,7 @@ class TestSource:
         for key, value in expected.items():
             assert value == response.json()[key]
 
-    def test_update_collide(self, django_client, net_cred):
+    def test_update_collide(self, client_logged_in, net_cred):
         """Fail update due to name conflict."""
         first_net_source = {
             "name": "net_source",
@@ -848,7 +850,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201(first_net_source, django_client)
+        self.create_expect_201(first_net_source, client_logged_in)
 
         second_net_source = {
             "name": "net_source_2",
@@ -857,7 +859,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(second_net_source, django_client)
+        initial = self.create_expect_201(second_net_source, client_logged_in)
 
         updated_data = {
             "name": "net_source",
@@ -865,10 +867,10 @@ class TestSource:
             "port": 23,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_partial_update_missing_hosts(self, django_client, net_cred):
+    def test_partial_update_missing_hosts(self, client_logged_in, net_cred):
         """Partial update should succeed with missing hosts."""
         data = {
             "name": "source",
@@ -877,17 +879,17 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "credentials": [net_cred.id]}
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
 
         assert response.status_code == status.HTTP_200_OK
 
     def test_partial_update_network_ssl_options_not_allowed(
-        self, django_client, net_cred
+        self, client_logged_in, net_cred
     ):
         """Partial update should succeed with missing hosts."""
         data = {
@@ -897,7 +899,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -906,12 +908,12 @@ class TestSource:
             "options": {"ssl_cert_verify": False},
         }
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_partial_update_no_hosts_retains_initial_host(
-        self, django_client, net_cred
+        self, client_logged_in, net_cred
     ):
         """Partial update should keep initial host if no host provided."""
         data = {
@@ -922,15 +924,15 @@ class TestSource:
             "credentials": [net_cred.id],
         }
 
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "credentials": [net_cred.id]}
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.json()["hosts"] == ["1.2.3.4"]
 
-    def test_partial_update_empty_hosts(self, django_client, net_cred):
+    def test_partial_update_empty_hosts(self, client_logged_in, net_cred):
         """Partial update should succeed with missing hosts."""
         data = {
             "name": "source",
@@ -939,7 +941,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -948,11 +950,11 @@ class TestSource:
             "credentials": [net_cred.id],
         }
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_missing_hosts(self, django_client, net_cred):
+    def test_update_missing_hosts(self, client_logged_in, net_cred):
         """Fail update due to missing host array."""
         data = {
             "name": "source",
@@ -961,13 +963,13 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "credentials": [net_cred.id]}
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_invalid_hosts(self, django_client, net_cred):
+    def test_update_invalid_hosts(self, client_logged_in, net_cred):
         """Fail update due to invalid host."""
         data = {
             "name": "source",
@@ -976,7 +978,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -984,10 +986,10 @@ class TestSource:
             "credentials": [net_cred.id],
             "hosts": ["1**2@33^"],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_empty_hosts(self, django_client, net_cred):
+    def test_update_empty_hosts(self, client_logged_in, net_cred):
         """Fail update due to empty host array."""
         data = {
             "name": "source",
@@ -996,7 +998,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1004,11 +1006,11 @@ class TestSource:
             "port": 22,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["hosts"][0] == messages.SOURCE_HOSTS_CANNOT_BE_EMPTY
 
-    def test_update_missing_credentials(self, django_client, net_cred):
+    def test_update_missing_credentials(self, client_logged_in, net_cred):
         """Fail update due to missing credentials array."""
         data = {
             "name": "source",
@@ -1017,13 +1019,13 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "hosts": ["1.2.3.4"]}
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_empty_credentials(self, django_client, net_cred):
+    def test_update_empty_credentials(self, client_logged_in, net_cred):
         """Fail update due to empty credentials array."""
         data = {
             "name": "source",
@@ -1032,7 +1034,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1040,11 +1042,11 @@ class TestSource:
             "port": 22,
             "credentials": [],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["credentials"][0] == messages.SOURCE_MIN_CREDS
 
-    def test_update_type_passed(self, django_client, net_cred):
+    def test_update_type_passed(self, client_logged_in, net_cred):
         """Fail update due to type passed."""
         data = {
             "name": "source2",
@@ -1053,7 +1055,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source3",
@@ -1062,10 +1064,10 @@ class TestSource:
             "port": 23,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_bad_cred_type(self, django_client, net_cred, vc_cred):
+    def test_update_bad_cred_type(self, client_logged_in, net_cred, vc_cred):
         """Fail update due to bad cred type."""
         data = {
             "name": "source2",
@@ -1074,7 +1076,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source3",
@@ -1083,10 +1085,10 @@ class TestSource:
             "port": 23,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_invalid_exclude_hosts(self, django_client, net_cred):
+    def test_update_invalid_exclude_hosts(self, client_logged_in, net_cred):
         """Fail update due to invalid host."""
         data = {
             "name": "source",
@@ -1095,7 +1097,7 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1104,10 +1106,10 @@ class TestSource:
             "credentials": [net_cred.id],
             "exclude_hosts": ["*invalid!!host&*"],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_partial_update(self, django_client, net_cred):
+    def test_partial_update(self, client_logged_in, net_cred):
         """Partially update a Source."""
         data = {
             "name": "source3",
@@ -1116,17 +1118,17 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source3-new", "hosts": ["1.2.3.5"]}
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["name"] == "source3-new"
         assert response.json()["hosts"] == ["1.2.3.5"]
 
-    def test_delete(self, django_client, net_cred):
+    def test_delete(self, client_logged_in, net_cred):
         """Delete a Source."""
         data = {
             "name": "source3",
@@ -1135,13 +1137,13 @@ class TestSource:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response_source_creation = self.create_expect_201(data, django_client)
+        response_source_creation = self.create_expect_201(data, client_logged_in)
 
         url = reverse("v1:source-detail", args=(response_source_creation["id"],))
-        response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
+        response = client_logged_in.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    def test_delete_with_scans(self, django_client):
+    def test_delete_with_scans(self, client_logged_in):
         """Delete a Source used by a scan."""
         cred = Credential(name="cred2", username="user2", password="pass2")
         cred.save()
@@ -1160,13 +1162,13 @@ class TestSource:
         scan.sources.add(source)
 
         url = reverse("v1:source-detail", args=(source.id,))
-        response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
+        response = client_logged_in.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
         assert response_json["detail"] == messages.SOURCE_DELETE_NOT_VALID_W_SCANS
         assert response_json["scans"][0]["name"] == "test_scan"
 
-    def test_delete_and_list(self, django_client, net_cred):
+    def test_delete_and_list(self, client_logged_in, net_cred):
         """Delete a Source and confirm other Sources remain intact."""
         total_sources = 3
         data = {
@@ -1177,7 +1179,7 @@ class TestSource:
             "credentials": [net_cred.id],
         }
         source_list = self.source_object_factory(
-            data, django_client, range_number=total_sources
+            data, client_logged_in, range_number=total_sources
         )
         cred_for_response = {"id": net_cred.id, "name": net_cred.name}
         results = []
@@ -1194,7 +1196,7 @@ class TestSource:
 
         removed_source = results.pop(random.randrange(0, total_sources))
         url = reverse("v1:source-detail", args=(removed_source["id"],))
-        response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
+        response = client_logged_in.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         expected = {
@@ -1203,12 +1205,12 @@ class TestSource:
             "previous": None,
             "results": results,
         }
-        response = self.get_source(django_client)
+        response = self.get_source(client_logged_in)
         assert response.status_code == status.HTTP_200_OK
         content = response.json()
         assert content == expected
 
-    def test_successful_vcenter_create(self, django_client, vc_cred):
+    def test_successful_vcenter_create(self, client_logged_in, vc_cred):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
@@ -1216,10 +1218,10 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [vc_cred.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
-    def test_create_too_many_creds(self, django_client, vc_cred, net_cred):
+    def test_create_too_many_creds(self, client_logged_in, vc_cred, net_cred):
         """A vcenter source and have one credential."""
         data = {
             "name": "source1",
@@ -1227,18 +1229,18 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [vc_cred.id, net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_req_host(self, django_client, vc_cred):
+    def test_create_req_host(self, client_logged_in, vc_cred):
         """A vcenter source must have a host."""
         data = {
             "name": "source1",
             "source_type": DataSources.VCENTER,
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_hosts(self, django_client, vc_cred):
+    def test_create_empty_hosts(self, client_logged_in, vc_cred):
         """A vcenter source not have empty hosts."""
         data = {
             "name": "source1",
@@ -1246,13 +1248,13 @@ class TestSource:
             "hosts": [],
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     def test_negative_create_non_network_with_hosts(
-        self, django_client, valid_cred, source_type
+        self, client_logged_in, valid_cred, source_type
     ):
         """A vcenter source must not have multiple hosts."""
         valid_cred_obj = valid_cred(source_type)
@@ -1262,13 +1264,13 @@ class TestSource:
             "hosts": ["1.2.3.4", "1.2.3.5"],
             "credentials": [valid_cred_obj.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     def test_negative_create_non_network_with_excluded_hosts(
-        self, django_client, valid_cred, source_type
+        self, client_logged_in, valid_cred, source_type
     ):
         """A vcenter source must not have any excluded hosts."""
         valid_cred_obj = valid_cred(source_type)
@@ -1279,14 +1281,14 @@ class TestSource:
             "exclude_hosts": ["1.2.3.4"],
             "credentials": [valid_cred_obj.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     @pytest.mark.parametrize("hosts_range", ("1.2.3.4/5", "1.2.3.[0:255]"))
     def test_negative_create_non_network_with_host_range(
-        self, django_client, valid_cred, source_type, hosts_range
+        self, client_logged_in, valid_cred, source_type, hosts_range
     ):
         """A vcenter source must not have multiple hosts."""
         valid_cred_obj = valid_cred(source_type)
@@ -1296,9 +1298,9 @@ class TestSource:
             "hosts": [hosts_range],
             "credentials": [valid_cred_obj.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_vc_greenpath(self, django_client, vc_cred):
+    def test_update_vc_greenpath(self, client_logged_in, vc_cred):
         """VC - Success full update."""
         data = {
             "name": "source",
@@ -1307,7 +1309,7 @@ class TestSource:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1315,10 +1317,10 @@ class TestSource:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_vc_more_than_one_host(self, django_client, vc_cred):
+    def test_update_vc_more_than_one_host(self, client_logged_in, vc_cred):
         """VC - Fail more than one host."""
         data = {
             "name": "source",
@@ -1327,7 +1329,7 @@ class TestSource:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1335,10 +1337,10 @@ class TestSource:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_vc_with_exclude_host(self, django_client, vc_cred):
+    def test_update_vc_with_exclude_host(self, client_logged_in, vc_cred):
         """VC - Fail when excluded hosts are provided."""
         data = {
             "name": "source",
@@ -1347,7 +1349,7 @@ class TestSource:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1356,10 +1358,10 @@ class TestSource:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_vc_more_than_one_cred(self, django_client, vc_cred):
+    def test_update_vc_more_than_one_cred(self, client_logged_in, vc_cred):
         """VC - Fail more than one cred."""
         data = {
             "name": "source",
@@ -1368,7 +1370,7 @@ class TestSource:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1376,10 +1378,10 @@ class TestSource:
             "port": 22,
             "credentials": [vc_cred.id, vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_vc_range_hosts(self, django_client, vc_cred):
+    def test_update_vc_range_hosts(self, client_logged_in, vc_cred):
         """Fail update due to empty host array."""
         data = {
             "name": "source",
@@ -1388,7 +1390,7 @@ class TestSource:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1396,20 +1398,20 @@ class TestSource:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_create_req_type(self, django_client, vc_cred):
+    def test_create_req_type(self, client_logged_in, vc_cred):
         """A vcenter source must have an type."""
         data = {
             "name": "source1",
             "hosts": ["1.2.3.4"],
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_successful_sat_create(self, django_client, sat_cred):
+    def test_successful_sat_create(self, client_logged_in, sat_cred):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
@@ -1417,10 +1419,10 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [sat_cred.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
-    def test_successful_sat_create_with_options(self, django_client, sat_cred):
+    def test_successful_sat_create_with_options(self, client_logged_in, sat_cred):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
@@ -1429,10 +1431,10 @@ class TestSource:
             "credentials": [sat_cred.id],
             "options": {"ssl_cert_verify": False},
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
-    def test_sat_too_many_creds(self, django_client, sat_cred, net_cred):
+    def test_sat_too_many_creds(self, client_logged_in, sat_cred, net_cred):
         """A sat source and have one credential."""
         data = {
             "name": "source1",
@@ -1440,18 +1442,18 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [sat_cred.id, net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_sat_req_host(self, django_client, sat_cred):
+    def test_sat_req_host(self, client_logged_in, sat_cred):
         """A satellite source must have a host."""
         data = {
             "name": "source1",
             "source_type": DataSources.SATELLITE,
             "credentials": [sat_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_sat_req_empty_hosts(self, django_client, sat_cred):
+    def test_sat_req_empty_hosts(self, client_logged_in, sat_cred):
         """A satellite source must not have empty hosts."""
         data = {
             "name": "source1",
@@ -1459,9 +1461,9 @@ class TestSource:
             "hosts": [],
             "credentials": [sat_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_sat_greenpath(self, django_client, sat_cred):
+    def test_update_sat_greenpath(self, client_logged_in, sat_cred):
         """Sat - Valid full update."""
         data = {
             "name": "source",
@@ -1470,17 +1472,17 @@ class TestSource:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
         updated_data = {
             "name": "source",
             "hosts": ["1.2.3.4"],
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_sat_with_options(self, django_client, sat_cred):
+    def test_update_sat_with_options(self, client_logged_in, sat_cred):
         """Sat - Valid full update with options."""
         data = {
             "name": "source",
@@ -1489,7 +1491,7 @@ class TestSource:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1498,7 +1500,7 @@ class TestSource:
             "credentials": [sat_cred.id],
             "options": {"ssl_cert_verify": False},
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
         expected = {
             "id": initial["id"],
@@ -1511,7 +1513,7 @@ class TestSource:
         }
         assert response.json() == expected
 
-    def test_update_sat_more_than_one_hosts(self, django_client, sat_cred):
+    def test_update_sat_more_than_one_hosts(self, client_logged_in, sat_cred):
         """Sat- Fail update due to multiple hosts."""
         data = {
             "name": "source",
@@ -1520,7 +1522,7 @@ class TestSource:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1528,10 +1530,10 @@ class TestSource:
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_sat_more_exclude_hosts(self, django_client, sat_cred):
+    def test_update_sat_more_exclude_hosts(self, client_logged_in, sat_cred):
         """Sat- Fail update due to including excluded hosts."""
         data = {
             "name": "source",
@@ -1540,7 +1542,7 @@ class TestSource:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1549,10 +1551,10 @@ class TestSource:
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_sat_more_than_one_cred(self, django_client, sat_cred):
+    def test_update_sat_more_than_one_cred(self, client_logged_in, sat_cred):
         """Sat- Fail update due to multiple hosts."""
         data = {
             "name": "source",
@@ -1561,7 +1563,7 @@ class TestSource:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1569,10 +1571,10 @@ class TestSource:
             "port": 22,
             "credentials": [sat_cred.id, sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_sat_range_hosts(self, django_client, sat_cred):
+    def test_update_sat_range_hosts(self, client_logged_in, sat_cred):
         """Fail update due to invalid host array."""
         data = {
             "name": "source",
@@ -1581,7 +1583,7 @@ class TestSource:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -1589,11 +1591,11 @@ class TestSource:
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_openshift_source_create(self, django_client, openshift_cred):
+    def test_openshift_source_create(self, client_logged_in, openshift_cred):
         """Ensure we can create a new openshift source."""
         data = {
             "name": "openshift_source_1",
@@ -1601,20 +1603,20 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [openshift_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
         assert Source.objects.count() == 1
         assert Source.objects.get().name == "openshift_source_1"
 
-    def test_openshift_missing_host(self, django_client, openshift_cred):
+    def test_openshift_missing_host(self, client_logged_in, openshift_cred):
         """Ensure hosts field is required when creating openshift credential."""
         data = {
             "name": "openshift_source_1",
             "source_type": DataSources.OPENSHIFT,
             "credentials": [openshift_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_openshift_extra_unallowed_fields(self, django_client, openshift_cred):
+    def test_openshift_extra_unallowed_fields(self, client_logged_in, openshift_cred):
         """Ensure unallowed fields are not accepted when creating openshift source."""
         data = {
             "name": "openshift_source_1",
@@ -1623,9 +1625,9 @@ class TestSource:
             "credentials": [openshift_cred.id],
             "options": {"use_paramiko": True},
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_openshift_green_path(self, django_client, openshift_cred):
+    def test_update_openshift_green_path(self, client_logged_in, openshift_cred):
         """Openshift source successful update."""
         data = {
             "name": "openshift_source_1",
@@ -1633,16 +1635,16 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [openshift_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
         updated_data = {
             "name": "openshift_source_1",
             "hosts": ["5.3.2.1"],
             "credentials": [openshift_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_openshift_range_hosts(self, django_client, openshift_cred):
+    def test_update_openshift_range_hosts(self, client_logged_in, openshift_cred):
         """Fail update due to invalid host array."""
         data = {
             "name": "openshift_source_1",
@@ -1650,19 +1652,19 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [openshift_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "openshift_source_1",
             "hosts": ["1.2.3.4/5"],
             "credentials": [openshift_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response = response.json()
         assert response["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_rhacs_source_create(self, django_client, rhacs_cred):
+    def test_rhacs_source_create(self, client_logged_in, rhacs_cred):
         """Ensure we can create a new RHACS source."""
         data = {
             "name": "acs_source_1",
@@ -1670,20 +1672,20 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [rhacs_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
         assert Source.objects.count() == 1
         assert Source.objects.get().name == "acs_source_1"
 
-    def test_rhacs_missing_host(self, django_client, rhacs_cred):
+    def test_rhacs_missing_host(self, client_logged_in, rhacs_cred):
         """Ensure hosts field is required when creating RHACS credential."""
         data = {
             "name": "acs_source_1",
             "source_type": DataSources.RHACS,
             "credentials": [rhacs_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_rhacs_extra_unallowed_fields(self, django_client, rhacs_cred):
+    def test_rhacs_extra_unallowed_fields(self, client_logged_in, rhacs_cred):
         """Ensure unallowed fields are not accepted when creating RHACS source."""
         data = {
             "name": "acs_source_1",
@@ -1692,9 +1694,9 @@ class TestSource:
             "credentials": [rhacs_cred.id],
             "options": {"use_paramiko": True},
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_rhacs_green_path(self, django_client, rhacs_cred):
+    def test_update_rhacs_green_path(self, client_logged_in, rhacs_cred):
         """RHACS source successful update."""
         data = {
             "name": "acs_source_1",
@@ -1702,13 +1704,13 @@ class TestSource:
             "hosts": ["1.2.3.4"],
             "credentials": [rhacs_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
         updated_data = {
             "name": "acs_source_1",
             "hosts": ["5.3.2.1"],
             "credentials": [rhacs_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
 
@@ -1716,73 +1718,73 @@ class TestSource:
 class TestSourceV2:
     """Test the basic V2 Source infrastructure."""
 
-    def create(self, data, django_client):
+    def create(self, data, client_logged_in):
         """Call the create endpoint."""
         url = reverse("v2:source-list")
-        return django_client.post(url, json=data, headers=ACCEPT_JSON_HEADER)
+        return client_logged_in.post(url, data=data, headers=ACCEPT_JSON_HEADER)
 
-    def create_expect_400(self, data, django_client, expected_response=None):
+    def create_expect_400(self, data, client_logged_in, expected_response=None):
         """We will do a lot of create tests that expect HTTP 400s."""
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         if expected_response:
             response_json = response.json()
             assert response_json == expected_response
 
-    def create_expect_201(self, data, django_client):
+    def create_expect_201(self, data, client_logged_in):
         """Create a source, return the response as a dict."""
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     @patch("api.source.view.start_scan", side_effect=dummy_start)
-    def create_with_query(self, query, data, django_client, start_scan):
+    def create_with_query(self, query, data, client_logged_in, start_scan):
         """Create a source with query param, return the response as a dict."""
         url = reverse("v2:source-list")
         url += query
-        return django_client.post(url, json=data, headers=ACCEPT_JSON_HEADER)
+        return client_logged_in.post(url, data=data, headers=ACCEPT_JSON_HEADER)
 
-    def create_expect_201_with_query(self, query, data, django_client):
+    def create_expect_201_with_query(self, query, data, client_logged_in):
         """Create a valid source with a query parameter."""
-        response = self.create_with_query(query, data, django_client)
+        response = self.create_with_query(query, data, client_logged_in)
         assert response.status_code == status.HTTP_201_CREATED
         return response.json()
 
     def create_expect_400_with_query(
-        self, query, data, django_client, expected_response=None
+        self, query, data, client_logged_in, expected_response=None
     ):
         """Create an expect HTTP 400 with a query param."""
-        response = self.create_with_query(query, data, django_client)
+        response = self.create_with_query(query, data, client_logged_in)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         if expected_response:
             response_json = response.json()
             assert response_json == expected_response
 
-    def get_source(self, django_client, params=None, url=None):
+    def get_source(self, client_logged_in, params=None, url=None):
         """Call the retrieve endpoint."""
         if not url:
             url = reverse("v2:source-list")
         if params is not None:
-            return django_client.get(url, params=params)
+            return client_logged_in.get(url, params)
         else:
-            return django_client.get(url)
+            return client_logged_in.get(url)
 
-    def update_source(self, django_client, data, source_id):
+    def update_source(self, client_logged_in, data, source_id):
         """Call the update endpoint."""
         url = reverse("v2:source-detail", args=(source_id,))
-        return django_client.put(url=url, json=data)
+        return client_logged_in.put(url, data=data)
 
-    def partially_update_source(self, django_client, data, source_id):
+    def partially_update_source(self, client_logged_in, data, source_id):
         """Call the partially update endpoint."""
         url = reverse("v2:source-detail", args=(source_id,))
-        return django_client.patch(url=url, json=data)
+        return client_logged_in.patch(url, data=data)
 
-    def source_object_factory(self, data, django_client, range_number):
+    def source_object_factory(self, data, client_logged_in, range_number):
         """Create source objects and return list with name and ids."""
         source_list = []
         for index in range(range_number):
             data["name"] = data["name"] + str(index)
-            response = self.create_expect_201(data, django_client)
+            response = self.create_expect_201(data, client_logged_in)
 
             source_info = {"name": data["name"], "id": response["id"]}
             source_list.append(source_info)
@@ -1864,7 +1866,7 @@ class TestSourceV2:
         }
         assert out == expected
 
-    def test_source_create_with_false_scan(self, django_client, net_cred):
+    def test_source_create_with_false_scan(self, client_logged_in, net_cred):
         """Test creating a source with a valid scan query param of False."""
         query = "?scan=False"
         data = {
@@ -1874,10 +1876,10 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response = self.create_expect_201_with_query(query, data, django_client)
+        response = self.create_expect_201_with_query(query, data, client_logged_in)
         assert "id" in response
 
-    def test_source_create_with_true_scan(self, django_client, net_cred):
+    def test_source_create_with_true_scan(self, client_logged_in, net_cred):
         """Test creating source with valid scan query param of True."""
         query = "?scan=True"
         data = {
@@ -1887,9 +1889,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201_with_query(query, data, django_client)
+        self.create_expect_201_with_query(query, data, client_logged_in)
 
-    def test_source_create_with_invalid_scan(self, django_client, net_cred):
+    def test_source_create_with_invalid_scan(self, client_logged_in, net_cred):
         """Test the source create method with invalid query param."""
         query = "?scan=Foo"
         data = {
@@ -1899,10 +1901,10 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400_with_query(query, data, django_client)
+        self.create_expect_400_with_query(query, data, client_logged_in)
 
     @pytest.mark.parametrize("source_type", (ds for ds in DataSources))
-    def test_successful_create(self, django_client, valid_cred, source_type):
+    def test_successful_create(self, client_logged_in, valid_cred, source_type):
         """A valid create request should succeed."""
         valid_cred_obj = valid_cred(source_type)
         data = {
@@ -1912,7 +1914,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [valid_cred_obj.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
     @pytest.mark.parametrize(
@@ -1927,7 +1929,7 @@ class TestSourceV2:
         ),
     )
     def test_successful_create_no_port(
-        self, django_client, valid_cred, source_type, default_port
+        self, client_logged_in, valid_cred, source_type, default_port
     ):
         """A valid create request should succeed without port."""
         valid_cred_obj = valid_cred(source_type)
@@ -1937,13 +1939,13 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [valid_cred_obj.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
         assert response.get("port") == default_port
 
     @pytest.mark.parametrize("source_type", (ds for ds in DataSources))
     def test_successful_create_custom_port(
-        self, django_client, valid_cred, source_type
+        self, client_logged_in, valid_cred, source_type
     ):
         """A valid create request should succeed."""
         port = random.randint(1, 65535)
@@ -1955,11 +1957,11 @@ class TestSourceV2:
             "port": str(port),
             "credentials": [valid_cred_obj.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
         assert response.get("port") == port
 
-    def test_double_create(self, django_client, net_cred):
+    def test_double_create(self, client_logged_in, net_cred):
         """A duplicate create should fail."""
         data = {
             "name": "source1",
@@ -1968,11 +1970,11 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_multiple_hosts(self, django_client, net_cred):
+    def test_create_multiple_hosts(self, client_logged_in, net_cred):
         """A valid create request with two hosts."""
         data = {
             "name": "source1",
@@ -1981,9 +1983,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
 
-    def test_create_no_name(self, django_client, net_cred):
+    def test_create_no_name(self, client_logged_in, net_cred):
         """A create request must have a name."""
         data = {
             "hosts": "1.2.3.4",
@@ -1991,9 +1993,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_name(self, django_client, net_cred):
+    def test_create_empty_name(self, client_logged_in, net_cred):
         """Empty name is not valid."""
         data = {
             "name": "",
@@ -2002,9 +2004,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_invalid_name(self, django_client, net_cred):
+    def test_create_invalid_name(self, client_logged_in, net_cred):
         """A create request must have a string name."""
         data = {
             "name": 1,
@@ -2013,9 +2015,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_unprintable_name(self, django_client, net_cred):
+    def test_create_unprintable_name(self, client_logged_in, net_cred):
         """The Source name must be printable."""
         data = {
             "name": "\r\n",
@@ -2024,9 +2026,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_no_host(self, django_client, net_cred):
+    def test_create_no_host(self, client_logged_in, net_cred):
         """A Source needs a host."""
         data = {
             "name": "source1",
@@ -2034,9 +2036,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_host(self, django_client, net_cred):
+    def test_create_empty_host(self, client_logged_in, net_cred):
         """An empty array is not a host identifier."""
         data = {
             "name": "source1",
@@ -2045,9 +2047,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_host_empty_string(self, django_client, net_cred):
+    def test_create_host_empty_string(self, client_logged_in, net_cred):
         """An empty string is not a host identifier."""
         data = {
             "name": "source1",
@@ -2056,9 +2058,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_hosts_not_array(self, django_client, net_cred):
+    def test_create_hosts_not_array(self, client_logged_in, net_cred):
         """Test error when hosts is not an array."""
         data = {
             "name": "source1",
@@ -2067,9 +2069,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_hosts_not_array_of_strings(self, django_client, net_cred):
+    def test_create_hosts_not_array_of_strings(self, client_logged_in, net_cred):
         """Test error when hosts is not an array of strings."""
         data = {
             "name": "source1",
@@ -2078,9 +2080,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_long_name(self, django_client, net_cred):
+    def test_create_long_name(self, client_logged_in, net_cred):
         """A long source name."""
         data = {
             "name": "A" * 100,
@@ -2089,9 +2091,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_ip(self, django_client, net_cred):
+    def test_create_empty_ip(self, client_logged_in, net_cred):
         """An empty string passed with valid ips."""
         data = {
             "name": "source1",
@@ -2101,12 +2103,12 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
 
-        resp_json = self.create_expect_201(data, django_client)
+        resp_json = self.create_expect_201(data, client_logged_in)
         resp_hosts = resp_json.get("hosts")
         assert len(resp_hosts) == 1
         assert resp_hosts == ["10.10.181.9"]
 
-    def test_create_valid_hosts(self, django_client, net_cred):
+    def test_create_valid_hosts(self, client_logged_in, net_cred):
         """Test valid host patterns."""
         data = {
             "name": "source1",
@@ -2129,9 +2131,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
 
-    def test_create_valid_exclude_hosts(self, django_client, net_cred):
+    def test_create_valid_exclude_hosts(self, client_logged_in, net_cred):
         """Test valid exclude host patterns."""
         data = {
             "name": "source1",
@@ -2155,9 +2157,9 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
 
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
 
-    def test_create_invalid_hosts(self, django_client, net_cred):
+    def test_create_invalid_hosts(self, client_logged_in, net_cred):
         """Test invalid host patterns."""
         hosts = [
             "192.1..2",
@@ -2183,11 +2185,11 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
 
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == 400
         assert len(response.json()["hosts"]) == len(hosts)
 
-    def test_create_bad_host_pattern(self, django_client, net_cred):
+    def test_create_bad_host_pattern(self, client_logged_in, net_cred):
         """Test a invalid host pattern."""
         hosts = ["10.1.1.1-10.1.1.254"]
 
@@ -2198,12 +2200,12 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response = self.create(data, django_client)
+        response = self.create(data, client_logged_in)
         assert response.status_code == 400
         assert len(response.json()["hosts"]) == len(hosts)
 
     @pytest.mark.parametrize("bad_port", ("string*!", "-1", "False", -1, False))
-    def test_create_bad_port(self, django_client, net_cred, bad_port):
+    def test_create_bad_port(self, client_logged_in, net_cred, bad_port):
         """Some values are not a valid ssh port."""
         data = {
             "name": "source1",
@@ -2212,9 +2214,9 @@ class TestSourceV2:
             "port": bad_port,
             "credentials": [net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_no_credentials(self, django_client):
+    def test_create_no_credentials(self, client_logged_in):
         """A Source needs credentials."""
         data = {
             "name": "source1",
@@ -2222,9 +2224,9 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "port": "22",
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_credentials(self, django_client):
+    def test_create_empty_credentials(self, client_logged_in):
         """The empty string is not a valid credential list."""
         data = {
             "name": "source1",
@@ -2234,9 +2236,9 @@ class TestSourceV2:
             "credentials": [],
         }
 
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_credential_does_not_exist(self, django_client):
+    def test_create_credential_does_not_exist(self, client_logged_in):
         """A random int is not a valid credential id."""
         data = {
             "name": "source1",
@@ -2246,9 +2248,9 @@ class TestSourceV2:
             "credentials": [42],
         }
 
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_credential_not_valid_id(self, django_client):
+    def test_create_credential_not_valid_id(self, client_logged_in):
         """A random int is not a valid credential id."""
         data = {
             "name": "source1",
@@ -2257,9 +2259,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": ["hi"],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_negative_credential_id(self, django_client):
+    def test_create_negative_credential_id(self, client_logged_in):
         """Negative numbers are not a valid id."""
         data = {
             "name": "source1",
@@ -2268,9 +2270,9 @@ class TestSourceV2:
             "port": "22",
             "credentials": [-5],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_invalid_cred_type(self, django_client, vc_cred):
+    def test_create_invalid_cred_type(self, client_logged_in, vc_cred):
         """A source type and credential type must be the same."""
         data = {
             "name": "source1",
@@ -2279,10 +2281,10 @@ class TestSourceV2:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     def test_create_with_options_not_allowed_network_type(
-        self, django_client, net_cred
+        self, client_logged_in, net_cred
     ):
         """Test network type doesn't allow ssl options."""
         data = {
@@ -2293,9 +2295,9 @@ class TestSourceV2:
             "credentials": [net_cred.id],
             "ssl_cert_verify": False,
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_list(self, django_client, net_cred):
+    def test_list(self, client_logged_in, net_cred):
         """List all Source objects."""
         data = {
             "name": "source",
@@ -2305,9 +2307,9 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
 
-        source_list = self.source_object_factory(data, django_client, range_number=3)
+        source_list = self.source_object_factory(data, client_logged_in, range_number=3)
 
-        response = self.get_source(django_client)
+        response = self.get_source(client_logged_in)
         assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
@@ -2332,7 +2334,7 @@ class TestSourceV2:
         expected = {"count": 3, "next": None, "previous": None, "results": results}
         assert content == expected
 
-    def test_filter_by_type_list(self, django_client, vc_cred, net_cred):
+    def test_filter_by_type_list(self, client_logged_in, vc_cred, net_cred):
         """List all Source objects filtered by type."""
         net_data = {
             "name": "net_source",
@@ -2341,7 +2343,7 @@ class TestSourceV2:
             "credentials": [net_cred.id],
             "hosts": ["1.2.3.4"],
         }
-        self.source_object_factory(net_data, django_client, range_number=3)
+        self.source_object_factory(net_data, client_logged_in, range_number=3)
 
         vcenter_data = {
             "name": "vc_source",
@@ -2351,10 +2353,12 @@ class TestSourceV2:
         }
 
         vcenter_source_list = self.source_object_factory(
-            vcenter_data, django_client, range_number=2
+            vcenter_data, client_logged_in, range_number=2
         )
 
-        response = self.get_source(django_client, {"source_type": DataSources.VCENTER})
+        response = self.get_source(
+            client_logged_in, {"source_type": DataSources.VCENTER}
+        )
         assert response.status_code == status.HTTP_200_OK
 
         content = response.json()
@@ -2378,7 +2382,7 @@ class TestSourceV2:
         expected = {"count": 2, "next": None, "previous": None, "results": results}
         assert content == expected
 
-    def test_retrieve(self, django_client, net_cred):
+    def test_retrieve(self, client_logged_in, net_cred):
         """Get details on a specific Source by primary key."""
         data = {
             "name": "source1",
@@ -2388,10 +2392,10 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         url = reverse("v2:source-detail", args=(initial["id"],))
-        response = self.get_source(django_client, url=url)
+        response = self.get_source(client_logged_in, url=url)
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
         assert "credentials" in response_json
@@ -2403,13 +2407,13 @@ class TestSourceV2:
         assert response_json["hosts"][0] == "1.2.3.4"
         assert response_json["exclude_hosts"][0] == "1.2.3.4"
 
-    def test_retrieve_bad_id(self, django_client):
+    def test_retrieve_bad_id(self, client_logged_in):
         """Get details on a specific Source by bad primary key."""
         url = reverse("v2:source-detail", args=("string",))
-        response = self.get_source(django_client, url=url)
+        response = self.get_source(client_logged_in, url=url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update(self, django_client, net_cred):
+    def test_update(self, client_logged_in, net_cred):
         """Completely update a Source."""
         data = {
             "name": "source2",
@@ -2418,7 +2422,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source2",
@@ -2426,7 +2430,7 @@ class TestSourceV2:
             "port": 23,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
         net_cred_response = {"id": net_cred.id, "name": net_cred.name}
@@ -2440,7 +2444,7 @@ class TestSourceV2:
         for key, value in expected.items():
             assert value == response.json()[key]
 
-    def test_update_collide(self, django_client, net_cred):
+    def test_update_collide(self, client_logged_in, net_cred):
         """Fail update due to name conflict."""
         first_net_source = {
             "name": "net_source",
@@ -2449,7 +2453,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        self.create_expect_201(first_net_source, django_client)
+        self.create_expect_201(first_net_source, client_logged_in)
 
         second_net_source = {
             "name": "net_source_2",
@@ -2458,7 +2462,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(second_net_source, django_client)
+        initial = self.create_expect_201(second_net_source, client_logged_in)
 
         updated_data = {
             "name": "net_source",
@@ -2466,10 +2470,10 @@ class TestSourceV2:
             "port": 23,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_partial_update_missing_hosts(self, django_client, net_cred):
+    def test_partial_update_missing_hosts(self, client_logged_in, net_cred):
         """Partial update should succeed with missing hosts."""
         data = {
             "name": "source",
@@ -2478,17 +2482,17 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "credentials": [net_cred.id]}
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
 
         assert response.status_code == status.HTTP_200_OK
 
     def test_partial_update_network_ssl_options_not_allowed(
-        self, django_client, net_cred
+        self, client_logged_in, net_cred
     ):
         """Partial update should succeed with missing hosts."""
         data = {
@@ -2498,7 +2502,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2507,12 +2511,12 @@ class TestSourceV2:
             "ssl_cert_verify": False,
         }
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_partial_update_no_hosts_retains_initial_host(
-        self, django_client, net_cred
+        self, client_logged_in, net_cred
     ):
         """Partial update should keep initial host if no host provided."""
         data = {
@@ -2523,15 +2527,15 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
 
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "credentials": [net_cred.id]}
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.json()["hosts"] == ["1.2.3.4"]
 
-    def test_partial_update_empty_hosts(self, django_client, net_cred):
+    def test_partial_update_empty_hosts(self, client_logged_in, net_cred):
         """Partial update should succeed with missing hosts."""
         data = {
             "name": "source",
@@ -2540,7 +2544,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2549,11 +2553,11 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_missing_hosts(self, django_client, net_cred):
+    def test_update_missing_hosts(self, client_logged_in, net_cred):
         """Fail update due to missing host array."""
         data = {
             "name": "source",
@@ -2562,13 +2566,13 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "credentials": [net_cred.id]}
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_invalid_hosts(self, django_client, net_cred):
+    def test_update_invalid_hosts(self, client_logged_in, net_cred):
         """Fail update due to invalid host."""
         data = {
             "name": "source",
@@ -2577,7 +2581,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2585,10 +2589,10 @@ class TestSourceV2:
             "credentials": [net_cred.id],
             "hosts": ["1**2@33^"],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_empty_hosts(self, django_client, net_cred):
+    def test_update_empty_hosts(self, client_logged_in, net_cred):
         """Fail update due to empty host array."""
         data = {
             "name": "source",
@@ -2597,7 +2601,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2605,11 +2609,11 @@ class TestSourceV2:
             "port": 22,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["hosts"][0] == messages.SOURCE_HOSTS_CANNOT_BE_EMPTY
 
-    def test_update_missing_credentials(self, django_client, net_cred):
+    def test_update_missing_credentials(self, client_logged_in, net_cred):
         """Fail update due to missing credentials array."""
         data = {
             "name": "source",
@@ -2618,13 +2622,13 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source", "port": 22, "hosts": ["1.2.3.4"]}
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_empty_credentials(self, django_client, net_cred):
+    def test_update_empty_credentials(self, client_logged_in, net_cred):
         """Fail update due to empty credentials array."""
         data = {
             "name": "source",
@@ -2633,7 +2637,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2641,11 +2645,11 @@ class TestSourceV2:
             "port": 22,
             "credentials": [],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["credentials"][0] == messages.SOURCE_MIN_CREDS
 
-    def test_update_type_passed(self, django_client, net_cred):
+    def test_update_type_passed(self, client_logged_in, net_cred):
         """Fail update due to type passed."""
         data = {
             "name": "source2",
@@ -2654,7 +2658,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source3",
@@ -2663,10 +2667,10 @@ class TestSourceV2:
             "port": 23,
             "credentials": [net_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_bad_cred_type(self, django_client, net_cred, vc_cred):
+    def test_update_bad_cred_type(self, client_logged_in, net_cred, vc_cred):
         """Fail update due to bad cred type."""
         data = {
             "name": "source2",
@@ -2675,7 +2679,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source3",
@@ -2684,10 +2688,10 @@ class TestSourceV2:
             "port": 23,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_invalid_exclude_hosts(self, django_client, net_cred):
+    def test_update_invalid_exclude_hosts(self, client_logged_in, net_cred):
         """Fail update due to invalid host."""
         data = {
             "name": "source",
@@ -2696,7 +2700,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2705,10 +2709,10 @@ class TestSourceV2:
             "credentials": [net_cred.id],
             "exclude_hosts": ["*invalid!!host&*"],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_partial_update(self, django_client, net_cred):
+    def test_partial_update(self, client_logged_in, net_cred):
         """Partially update a Source."""
         data = {
             "name": "source3",
@@ -2717,17 +2721,17 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {"name": "source3-new", "hosts": ["1.2.3.5"]}
         response = self.partially_update_source(
-            django_client, updated_data, initial["id"]
+            client_logged_in, updated_data, initial["id"]
         )
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["name"] == "source3-new"
         assert response.json()["hosts"] == ["1.2.3.5"]
 
-    def test_delete(self, django_client, net_cred):
+    def test_delete(self, client_logged_in, net_cred):
         """Delete a Source."""
         data = {
             "name": "source3",
@@ -2736,13 +2740,13 @@ class TestSourceV2:
             "port": "22",
             "credentials": [net_cred.id],
         }
-        response_source_creation = self.create_expect_201(data, django_client)
+        response_source_creation = self.create_expect_201(data, client_logged_in)
 
         url = reverse("v2:source-detail", args=(response_source_creation["id"],))
-        response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
+        response = client_logged_in.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    def test_delete_with_scans(self, django_client):
+    def test_delete_with_scans(self, client_logged_in):
         """Delete a Source used by a scan."""
         cred = Credential(name="cred2", username="user2", password="pass2")
         cred.save()
@@ -2761,13 +2765,13 @@ class TestSourceV2:
         scan.sources.add(source)
 
         url = reverse("v2:source-detail", args=(source.id,))
-        response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
+        response = client_logged_in.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_json = response.json()
         assert response_json["detail"] == messages.SOURCE_DELETE_NOT_VALID_W_SCANS
         assert response_json["scans"][0]["name"] == "test_scan"
 
-    def test_delete_and_list(self, django_client, net_cred):
+    def test_delete_and_list(self, client_logged_in, net_cred):
         """Delete a Source and confirm other Sources remain intact."""
         total_sources = 3
         data = {
@@ -2778,7 +2782,7 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
         source_list = self.source_object_factory(
-            data, django_client, range_number=total_sources
+            data, client_logged_in, range_number=total_sources
         )
         cred_for_response = {"id": net_cred.id, "name": net_cred.name}
         results = []
@@ -2800,7 +2804,7 @@ class TestSourceV2:
 
         removed_source = results.pop(random.randrange(0, total_sources))
         url = reverse("v2:source-detail", args=(removed_source["id"],))
-        response = django_client.delete(url, headers=ACCEPT_JSON_HEADER)
+        response = client_logged_in.delete(url, headers=ACCEPT_JSON_HEADER)
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         expected = {
@@ -2809,12 +2813,12 @@ class TestSourceV2:
             "previous": None,
             "results": results,
         }
-        response = self.get_source(django_client)
+        response = self.get_source(client_logged_in)
         assert response.status_code == status.HTTP_200_OK
         content = response.json()
         assert content == expected
 
-    def test_successful_vcenter_create(self, django_client, vc_cred):
+    def test_successful_vcenter_create(self, client_logged_in, vc_cred):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
@@ -2822,10 +2826,10 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [vc_cred.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
-    def test_create_too_many_creds(self, django_client, vc_cred, net_cred):
+    def test_create_too_many_creds(self, client_logged_in, vc_cred, net_cred):
         """A vcenter source and have one credential."""
         data = {
             "name": "source1",
@@ -2833,18 +2837,18 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [vc_cred.id, net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_req_host(self, django_client, vc_cred):
+    def test_create_req_host(self, client_logged_in, vc_cred):
         """A vcenter source must have a host."""
         data = {
             "name": "source1",
             "source_type": DataSources.VCENTER,
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_create_empty_hosts(self, django_client, vc_cred):
+    def test_create_empty_hosts(self, client_logged_in, vc_cred):
         """A vcenter source not have empty hosts."""
         data = {
             "name": "source1",
@@ -2852,13 +2856,13 @@ class TestSourceV2:
             "hosts": [],
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     def test_negative_create_non_network_with_hosts(
-        self, django_client, valid_cred, source_type
+        self, client_logged_in, valid_cred, source_type
     ):
         """A vcenter source must not have multiple hosts."""
         valid_cred_obj = valid_cred(source_type)
@@ -2868,13 +2872,13 @@ class TestSourceV2:
             "hosts": ["1.2.3.4", "1.2.3.5"],
             "credentials": [valid_cred_obj.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     def test_negative_create_non_network_with_excluded_hosts(
-        self, django_client, valid_cred, source_type
+        self, client_logged_in, valid_cred, source_type
     ):
         """A vcenter source must not have any excluded hosts."""
         valid_cred_obj = valid_cred(source_type)
@@ -2885,14 +2889,14 @@ class TestSourceV2:
             "exclude_hosts": ["1.2.3.4"],
             "credentials": [valid_cred_obj.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
     @pytest.mark.parametrize("hosts_range", ("1.2.3.4/5", "1.2.3.[0:255]"))
     def test_negative_create_non_network_with_host_range(
-        self, django_client, valid_cred, source_type, hosts_range
+        self, client_logged_in, valid_cred, source_type, hosts_range
     ):
         """A vcenter source must not have multiple hosts."""
         valid_cred_obj = valid_cred(source_type)
@@ -2902,9 +2906,9 @@ class TestSourceV2:
             "hosts": [hosts_range],
             "credentials": [valid_cred_obj.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_vc_greenpath(self, django_client, vc_cred):
+    def test_update_vc_greenpath(self, client_logged_in, vc_cred):
         """VC - Success full update."""
         data = {
             "name": "source",
@@ -2913,7 +2917,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2921,10 +2925,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_vc_more_than_one_host(self, django_client, vc_cred):
+    def test_update_vc_more_than_one_host(self, client_logged_in, vc_cred):
         """VC - Fail more than one host."""
         data = {
             "name": "source",
@@ -2933,7 +2937,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2941,10 +2945,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_vc_with_exclude_host(self, django_client, vc_cred):
+    def test_update_vc_with_exclude_host(self, client_logged_in, vc_cred):
         """VC - Fail when excluded hosts are provided."""
         data = {
             "name": "source",
@@ -2953,7 +2957,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2962,10 +2966,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_vc_more_than_one_cred(self, django_client, vc_cred):
+    def test_update_vc_more_than_one_cred(self, client_logged_in, vc_cred):
         """VC - Fail more than one cred."""
         data = {
             "name": "source",
@@ -2974,7 +2978,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -2982,10 +2986,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [vc_cred.id, vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_vc_range_hosts(self, django_client, vc_cred):
+    def test_update_vc_range_hosts(self, client_logged_in, vc_cred):
         """Fail update due to empty host array."""
         data = {
             "name": "source",
@@ -2994,7 +2998,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [vc_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -3002,20 +3006,20 @@ class TestSourceV2:
             "port": 22,
             "credentials": [vc_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_create_req_type(self, django_client, vc_cred):
+    def test_create_req_type(self, client_logged_in, vc_cred):
         """A vcenter source must have an type."""
         data = {
             "name": "source1",
             "hosts": ["1.2.3.4"],
             "credentials": [vc_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_successful_sat_create(self, django_client, sat_cred):
+    def test_successful_sat_create(self, client_logged_in, sat_cred):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
@@ -3023,10 +3027,10 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [sat_cred.id],
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
-    def test_successful_sat_create_with_options(self, django_client, sat_cred):
+    def test_successful_sat_create_with_options(self, client_logged_in, sat_cred):
         """A valid create request should succeed."""
         data = {
             "name": "source1",
@@ -3035,10 +3039,10 @@ class TestSourceV2:
             "credentials": [sat_cred.id],
             "options": {"ssl_cert_verify": False},
         }
-        response = self.create_expect_201(data, django_client)
+        response = self.create_expect_201(data, client_logged_in)
         assert "id" in response
 
-    def test_sat_too_many_creds(self, django_client, sat_cred, net_cred):
+    def test_sat_too_many_creds(self, client_logged_in, sat_cred, net_cred):
         """A sat source and have one credential."""
         data = {
             "name": "source1",
@@ -3046,18 +3050,18 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [sat_cred.id, net_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_sat_req_host(self, django_client, sat_cred):
+    def test_sat_req_host(self, client_logged_in, sat_cred):
         """A satellite source must have a host."""
         data = {
             "name": "source1",
             "source_type": DataSources.SATELLITE,
             "credentials": [sat_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_sat_req_empty_hosts(self, django_client, sat_cred):
+    def test_sat_req_empty_hosts(self, client_logged_in, sat_cred):
         """A satellite source must not have empty hosts."""
         data = {
             "name": "source1",
@@ -3065,9 +3069,9 @@ class TestSourceV2:
             "hosts": [],
             "credentials": [sat_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_sat_greenpath(self, django_client, sat_cred):
+    def test_update_sat_greenpath(self, client_logged_in, sat_cred):
         """Sat - Valid full update."""
         data = {
             "name": "source",
@@ -3076,17 +3080,17 @@ class TestSourceV2:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
         updated_data = {
             "name": "source",
             "hosts": ["1.2.3.4"],
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_sat_with_options(self, django_client, sat_cred):
+    def test_update_sat_with_options(self, client_logged_in, sat_cred):
         """Sat - Valid full update with options."""
         data = {
             "name": "source",
@@ -3095,7 +3099,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -3104,7 +3108,7 @@ class TestSourceV2:
             "credentials": [sat_cred.id],
             "ssl_cert_verify": False,
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
         expected = {
             "id": initial["id"],
@@ -3121,7 +3125,7 @@ class TestSourceV2:
         }
         assert response.json() == expected
 
-    def test_update_sat_more_than_one_hosts(self, django_client, sat_cred):
+    def test_update_sat_more_than_one_hosts(self, client_logged_in, sat_cred):
         """Sat- Fail update due to multiple hosts."""
         data = {
             "name": "source",
@@ -3130,7 +3134,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -3138,10 +3142,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_sat_more_exclude_hosts(self, django_client, sat_cred):
+    def test_update_sat_more_exclude_hosts(self, client_logged_in, sat_cred):
         """Sat- Fail update due to including excluded hosts."""
         data = {
             "name": "source",
@@ -3150,7 +3154,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -3159,10 +3163,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_sat_more_than_one_cred(self, django_client, sat_cred):
+    def test_update_sat_more_than_one_cred(self, client_logged_in, sat_cred):
         """Sat- Fail update due to multiple hosts."""
         data = {
             "name": "source",
@@ -3171,7 +3175,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -3179,10 +3183,10 @@ class TestSourceV2:
             "port": 22,
             "credentials": [sat_cred.id, sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_sat_range_hosts(self, django_client, sat_cred):
+    def test_update_sat_range_hosts(self, client_logged_in, sat_cred):
         """Fail update due to invalid host array."""
         data = {
             "name": "source",
@@ -3191,7 +3195,7 @@ class TestSourceV2:
             "port": "22",
             "credentials": [sat_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "source",
@@ -3199,11 +3203,11 @@ class TestSourceV2:
             "port": 22,
             "credentials": [sat_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_openshift_source_create(self, django_client, openshift_cred):
+    def test_openshift_source_create(self, client_logged_in, openshift_cred):
         """Ensure we can create a new openshift source."""
         data = {
             "name": "openshift_source_1",
@@ -3211,20 +3215,20 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [openshift_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
         assert Source.objects.count() == 1
         assert Source.objects.get().name == "openshift_source_1"
 
-    def test_openshift_missing_host(self, django_client, openshift_cred):
+    def test_openshift_missing_host(self, client_logged_in, openshift_cred):
         """Ensure hosts field is required when creating openshift credential."""
         data = {
             "name": "openshift_source_1",
             "source_type": DataSources.OPENSHIFT,
             "credentials": [openshift_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_openshift_extra_unallowed_fields(self, django_client, openshift_cred):
+    def test_openshift_extra_unallowed_fields(self, client_logged_in, openshift_cred):
         """Ensure unallowed fields are not accepted when creating openshift source."""
         data = {
             "name": "openshift_source_1",
@@ -3233,9 +3237,9 @@ class TestSourceV2:
             "credentials": [openshift_cred.id],
             "use_paramiko": True,
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_openshift_green_path(self, django_client, openshift_cred):
+    def test_update_openshift_green_path(self, client_logged_in, openshift_cred):
         """Openshift source successful update."""
         data = {
             "name": "openshift_source_1",
@@ -3243,16 +3247,16 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [openshift_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
         updated_data = {
             "name": "openshift_source_1",
             "hosts": ["5.3.2.1"],
             "credentials": [openshift_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
 
-    def test_update_openshift_range_hosts(self, django_client, openshift_cred):
+    def test_update_openshift_range_hosts(self, client_logged_in, openshift_cred):
         """Fail update due to invalid host array."""
         data = {
             "name": "openshift_source_1",
@@ -3260,19 +3264,19 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [openshift_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
 
         updated_data = {
             "name": "openshift_source_1",
             "hosts": ["1.2.3.4/5"],
             "credentials": [openshift_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response = response.json()
         assert response["hosts"][0] == messages.SOURCE_ONE_HOST
 
-    def test_rhacs_source_create(self, django_client, rhacs_cred):
+    def test_rhacs_source_create(self, client_logged_in, rhacs_cred):
         """Ensure we can create a new RHACS source."""
         data = {
             "name": "acs_source_1",
@@ -3280,20 +3284,20 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [rhacs_cred.id],
         }
-        self.create_expect_201(data, django_client)
+        self.create_expect_201(data, client_logged_in)
         assert Source.objects.count() == 1
         assert Source.objects.get().name == "acs_source_1"
 
-    def test_rhacs_missing_host(self, django_client, rhacs_cred):
+    def test_rhacs_missing_host(self, client_logged_in, rhacs_cred):
         """Ensure hosts field is required when creating RHACS credential."""
         data = {
             "name": "acs_source_1",
             "source_type": DataSources.RHACS,
             "credentials": [rhacs_cred.id],
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_rhacs_extra_unallowed_fields(self, django_client, rhacs_cred):
+    def test_rhacs_extra_unallowed_fields(self, client_logged_in, rhacs_cred):
         """Ensure unallowed fields are not accepted when creating RHACS source."""
         data = {
             "name": "acs_source_1",
@@ -3302,9 +3306,9 @@ class TestSourceV2:
             "credentials": [rhacs_cred.id],
             "use_paramiko": True,
         }
-        self.create_expect_400(data, django_client)
+        self.create_expect_400(data, client_logged_in)
 
-    def test_update_rhacs_green_path(self, django_client, rhacs_cred):
+    def test_update_rhacs_green_path(self, client_logged_in, rhacs_cred):
         """RHACS source successful update."""
         data = {
             "name": "acs_source_1",
@@ -3312,11 +3316,11 @@ class TestSourceV2:
             "hosts": ["1.2.3.4"],
             "credentials": [rhacs_cred.id],
         }
-        initial = self.create_expect_201(data, django_client)
+        initial = self.create_expect_201(data, client_logged_in)
         updated_data = {
             "name": "acs_source_1",
             "hosts": ["5.3.2.1"],
             "credentials": [rhacs_cred.id],
         }
-        response = self.update_source(django_client, updated_data, initial["id"])
+        response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.status_code == status.HTTP_200_OK
