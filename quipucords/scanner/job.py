@@ -9,14 +9,11 @@ from multiprocessing import Process, Value
 import celery
 from celery.result import AsyncResult
 from django.conf import settings
+from django.db.models import Sum
 
 from api.common.common_report import create_report_version
-from api.details_report.util import (
-    build_sources_from_tasks,
-    create_report,
-    validate_details_report_json,
-)
 from api.models import ScanJob, ScanTask
+from api.reports.model import Report
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 from scanner.runner import ScanTaskRunner
@@ -68,30 +65,21 @@ def create_report_for_scan_job(scan_job: ScanJob):
     :returns: tuple[Report,str] with the created Report (if successful)
         and error string (if not successful)
     """
-    inspect_tasks = scan_job.tasks.filter(
-        scan_type=ScanTask.SCAN_TYPE_INSPECT
-    ).order_by("sequence_number")
-    sources = build_sources_from_tasks(inspect_tasks.filter(status=ScanTask.COMPLETED))
+    conn_query = ScanTask.objects.filter(
+        job=scan_job, scan_type=ScanTask.SCAN_TYPE_CONNECT
+    ).aggregate(successful_connections=Sum("systems_scanned"))
 
-    if not sources:
+    if not conn_query["successful_connections"]:
         return None, "No connection results found."
 
-    details_report_json = {
-        "sources": sources,
-        "report_type": "details",
-        "report_version": create_report_version(),
-    }
-    has_errors, validation_result = validate_details_report_json(
-        details_report_json, False
-    )
+    inspect_query = ScanTask.objects.filter(
+        job=scan_job, scan_type=ScanTask.SCAN_TYPE_INSPECT
+    ).aggregate(successful_connections=Sum("systems_scanned"))
 
-    if has_errors:
-        return None, f"Scan produced invalid details report JSON: {validation_result}"
+    if not inspect_query["successful_connections"]:
+        return None, "No facts gathered from scan."
 
-    if report := create_report(create_report_version(), details_report_json):
-        return report, None
-
-    return None, "No facts gathered from scan."
+    return Report.objects.create(report_version=create_report_version()), None
 
 
 def run_task_runner(runner: ScanTaskRunner, *run_args):

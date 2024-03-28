@@ -1,9 +1,14 @@
 """OpenShift inspect task runner."""
 
+from functools import cached_property
+
 from django.conf import settings
 from django.db import transaction
 
+from api.inspectresult.model import InspectGroup
 from api.models import InspectResult, RawFact, ScanTask
+from api.status.misc import get_server_id
+from quipucords.environment import server_version
 from scanner.exceptions import ScanFailureError
 from scanner.openshift import metrics
 from scanner.openshift.api import OpenShiftApi
@@ -57,6 +62,18 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         if self.scan_task.systems_scanned:
             return self.SUCCESS_MESSAGE, ScanTask.COMPLETED
         return self.FAILURE_MESSAGE, ScanTask.FAILED
+
+    @cached_property
+    def _inspect_group(self):
+        inspect_group = InspectGroup.objects.create(
+            source_type=self.scan_task.source.source_type,
+            source_name=self.scan_task.source.name,
+            server_id=get_server_id(),
+            server_version=server_version(),
+            source=self.scan_task.source,
+        )
+        inspect_group.tasks.add(self.scan_task)
+        return inspect_group
 
     def _extra_cluster_facts(
         self, manager_interrupt, ocp_client: OpenShiftApi, cluster
@@ -121,13 +138,11 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def _persist_cluster_facts(self, cluster, other_facts):
         inspection_status = self._infer_inspection_status(cluster)
-        system_result = InspectResult(
+        system_result = InspectResult.objects.create(
             name=cluster.name,
             status=inspection_status,
-            source=self.scan_task.source,
+            inspect_group=self._inspect_group,
         )
-        system_result.save()
-        system_result.tasks.add(self.scan_task)
         raw_fact = self._entity_as_raw_fact(cluster, system_result)
         raw_fact.save()
         other_raw_facts = self._entities_as_raw_facts(system_result, other_facts)
@@ -136,13 +151,11 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def _persist_facts(self, node: OCPNode) -> InspectResult:
         inspection_status = self._infer_inspection_status(node)
-        sys_result = InspectResult(
+        sys_result = InspectResult.objects.create(
             name=node.name,
             status=inspection_status,
-            source=self.scan_task.source,
+            inspect_group=self._inspect_group,
         )
-        sys_result.save()
-        sys_result.tasks.add(self.scan_task)
         raw_fact = self._entity_as_raw_fact(node, sys_result)
         raw_fact.save()
         return sys_result
@@ -159,9 +172,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
     def _entities_as_raw_facts(
         self, inspection_result: InspectResult, entities: dict
     ) -> list[RawFact]:
-        def _pydantic_encoder(value):
-            return value.dict()
-
         raw_fact_list = []
         for collection_name, entity in entities.items():
             raw_fact = RawFact(

@@ -13,7 +13,14 @@ from api.common.common_report import (
     create_report_version,
     sanitize_row,
 )
-from api.models import Report, ScanTask, ServerInformation
+from api.models import (
+    InspectGroup,
+    InspectResult,
+    RawFact,
+    Report,
+    ScanTask,
+    ServerInformation,
+)
 from api.serializers import DetailsReportSerializer
 from constants import DataSources
 
@@ -159,22 +166,52 @@ def _validate_source_json(source_json):
     return False, None
 
 
-def create_report(report_version, json_details_report, raise_exception=False):
+def create_report(
+    *, report_version, json_details_report, scan_job, raise_exception=False
+):
     """Create report.
 
     Fact collection consists of a Report record
     :param report_version: major.minor.patch version of report.
     :param json_details_report: dict representing a details report
+    :param scan_job: ScanJob instance in which results will be attached
     :param raise_exception: raise exception on validation error
     :returns: The newly created Report
     """
     # Create new details report
     serializer = DetailsReportSerializer(data=json_details_report)
     if serializer.is_valid(raise_exception=raise_exception):
+        sources = serializer.validated_data.pop("sources")
         report = serializer.save()
         # removed by serializer since it is read-only.  Set again.
         report.report_version = report_version
         report.save()
+        scan_job.report = report
+        scan_job.save()
+        scan_task = ScanTask.objects.create(
+            job=scan_job,
+            scan_type=ScanTask.SCAN_TYPE_INSPECT,
+            status=ScanTask.COMPLETED,
+            status_message=_(messages.ST_STATUS_MSG_COMPLETED),
+            sequence_number=1,
+        )
+        for source_dict in sources:
+            inspect_group = InspectGroup.objects.create(
+                source_type=source_dict["source_type"],
+                source_name=source_dict["source_name"],
+                server_id=source_dict["server_id"],
+                server_version=source_dict["report_version"],
+            )
+            inspect_group.tasks.add(scan_task)
+            for fact_dict in source_dict["facts"]:
+                inspect_result = InspectResult.objects.create(
+                    inspect_group=inspect_group
+                )
+                raw_facts = [
+                    RawFact(name=k, value=v, inspect_result=inspect_result)
+                    for k, v in fact_dict.items()
+                ]
+                RawFact.objects.bulk_create(raw_facts)
         logger.debug("Fact collection created: %s", report)
         return report
 

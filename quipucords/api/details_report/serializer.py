@@ -13,7 +13,7 @@ class DetailsReportSerializer(NotEmptySerializer):
     report_type = CharField(read_only=True, default=REPORT_TYPE_DETAILS)
     report_version = CharField(max_length=64, read_only=True)
 
-    sources = JSONField(required=True)
+    sources = JSONField()
     report_id = IntegerField(read_only=True, source="id")
     report_platform_id = UUIDField(format="hex_verbose", read_only=True)
     cached_csv = CharField(required=False, read_only=True)

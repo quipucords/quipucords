@@ -13,7 +13,7 @@ from django.utils.translation import gettext as _
 
 from api import messages
 from api.connresult.model import TaskConnectionResult
-from api.inspectresult.model import RawFact
+from api.inspectresult.model import InspectResult, RawFact
 from api.source.model import Source
 
 logger = logging.getLogger(__name__)
@@ -354,7 +354,12 @@ class ScanTask(models.Model):
         if self.scan_type != ScanTask.SCAN_TYPE_INSPECT:
             return []
         fact_list = []
-        for inspect_result in self.inspect_results.prefetch_related("facts").all():
+
+        for inspect_result in (
+            InspectResult.objects.filter(inspect_group__in=self.inspect_groups.all())
+            .prefetch_related("facts")
+            .all()
+        ):
             fact_dict = {
                 raw_fact.name: raw_fact.value for raw_fact in inspect_result.facts.all()
             }
@@ -371,16 +376,21 @@ class ScanTask(models.Model):
         """
         if self.scan_type != ScanTask.SCAN_TYPE_INSPECT:
             return
+        # TODO: should we even be doing this cleanup without logging?
+        # my gut feeling is just mark it as failed (and stop post processing
+        # failed data)
         valid_identity_raw_facts = (
             RawFact.objects.filter(
-                inspect_result__in=self.inspect_results.all(),
+                inspect_result__inspect_group__in=self.inspect_groups.all(),
                 name=identity_key,
             )
             .exclude(value__isnull=True)
             .exclude(value="")
             .exclude(value={})
         )
-        self.inspect_results.exclude(facts__in=valid_identity_raw_facts).delete()
+        InspectResult.objects.filter(
+            inspect_group__in=self.inspect_groups.all()
+        ).exclude(facts__in=valid_identity_raw_facts).delete()
 
     def get_result(self):
         """Access results from ScanTask.
@@ -393,7 +403,9 @@ class ScanTask(models.Model):
             TaskInspectionResult, or Report)
         """
         if self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            return self.inspect_results.all()
+            return InspectResult.objects.filter(
+                inspect_group__in=self.inspect_groups.all()
+            ).all()
         elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
             return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
@@ -401,15 +413,16 @@ class ScanTask(models.Model):
         return None
 
     def log_raw_facts(self, log_level=logging.INFO):
-        """Log raw facts stored on details report."""
-        if not self.job.report:
+        """Log stored raw facts."""
+        raw_facts = self.get_facts()
+        if not raw_facts:
             self.log_message(
-                "Missing details report - Impossible to log raw facts.",
+                "Impossible to log absent raw facts.",
                 log_level=max(logging.ERROR, log_level),
             )
             return
         # Using a pure logger to avoid the extra context information added
         # by log_message method.
         logger.log(log_level, f"{'raw facts':-^50}")
-        logger.log(log_level, self.job.report.sources)
+        logger.log(log_level, raw_facts)
         logger.log(log_level, "-" * 50)

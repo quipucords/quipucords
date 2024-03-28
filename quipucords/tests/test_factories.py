@@ -109,14 +109,8 @@ class TestReportFactory:
     @pytest.mark.parametrize("source_type", DataSources.values)
     def test_source_generation(self, source_type):
         """Test automatic generation of Details facts is not breaking anything."""
-        report = ReportFactory.build(source_types=[source_type], deployment_report=None)
-        # report.id is None since it is not saved to db yet
-        assert report.id is None
-        assert len(report.sources) == 1
-        assert len(report.sources[0]["facts"]) > 1
-        # ensure data can be properly serialized and saved
-        report.save()
-        report.refresh_from_db()
-        assert report.id
+        report = ReportFactory(
+            generate_raw_facts=True, generate_raw_facts__source_types=[source_type]
+        )
         assert len(report.sources) == 1
         assert len(report.sources[0]["facts"]) > 1

@@ -18,6 +18,7 @@ from api.reports.model import Report
 from api.inspectresult.model import (
     RawFact,
     InspectResult,
+    InspectGroup,
 )
 from api.scan.model import Scan
 from api.scanjob.model import ScanJob

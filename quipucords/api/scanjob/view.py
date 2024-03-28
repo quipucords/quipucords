@@ -198,14 +198,18 @@ class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
             scan_job = get_object_or_404(self.queryset, pk=pk)
         except ValueError:
             return Response(status=400)
-        system_result_queryset = InspectResult.objects.filter(tasks__job=scan_job)
+        system_result_queryset = InspectResult.objects.filter(
+            inspect_group__tasks__job=scan_job
+        )
         # create ordered queryset and assign the paginator
         paginator = StandardResultsSetPagination()
         ordered_query_set = system_result_queryset.order_by(ordering_filter)
         if status_filter:
             ordered_query_set = ordered_query_set.filter(status=status_filter)
         if source_id_filter:
-            ordered_query_set = ordered_query_set.filter(source__id=source_id_filter)
+            ordered_query_set = ordered_query_set.filter(
+                inspect_group__source__id=source_id_filter
+            )
 
         page = paginator.paginate_queryset(ordered_query_set, request)
 

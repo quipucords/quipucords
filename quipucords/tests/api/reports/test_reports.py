@@ -42,7 +42,7 @@ from tests.constants import (
     FILENAME_DETAILS_JSON,
     FILENAME_SHA256SUM,
 )
-from tests.factories import DeploymentReportFactory
+from tests.factories import DeploymentReportFactory, ReportFactory
 from tests.report_utils import extract_files_from_tarball
 
 TARBALL_ALWAYS_EXPECTED_FILENAMES = {
@@ -84,7 +84,8 @@ def test_report_without_logs(client_logged_in, caplog):
 @pytest.fixture
 def deployment_with_logs(settings, faker):
     """Return a completed DeploymentReport instance that has associate scan job logs."""
-    deployments_report: DeploymentsReport = DeploymentReportFactory.create()
+    deployments_report: DeploymentsReport = DeploymentReportFactory(report=None)
+    ReportFactory(generate_raw_facts=True, deployment_report=deployments_report)
     scan_job_id = deployments_report.report.scanjob.id
     log_file = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
         scan_job_id=scan_job_id, output_type="test"
