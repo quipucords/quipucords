@@ -1,4 +1,6 @@
 """Test the insights report endpoint (/api/v1/reports/{id}/insights/)."""
+
+import pytest
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -86,14 +88,17 @@ def validate_data(
     assert returned_installed_products == expected_installed_products
 
 
-def test_get_insights_report_as_json(django_client):
+@pytest.mark.django_db
+def test_get_insights_report_as_json(client_logged_in):
     """Retrieve insights report as JSON and verify it contains all data (no slicing)."""
     deployment_report = DeploymentReportFactory(
         status=DeploymentsReport.STATUS_COMPLETE,
     )
     report_id = deployment_report.report.id
-    response = django_client.get(reverse("v1:reports-insights", args=(report_id,)))
-    assert response.ok, f"response was not ok; status {response.status_code}"
+    response = client_logged_in.get(reverse("v1:reports-insights", args=(report_id,)))
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"response was not ok; status {response.status_code}"
 
     # mock slice size so we can expect result to contain all data without slicing
     with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=99999):
@@ -101,7 +106,8 @@ def test_get_insights_report_as_json(django_client):
     validate_data(response_json, deployment_report, expected_number_of_slices=1)
 
 
-def test_get_insights_report_as_json_sliced(django_client):
+@pytest.mark.django_db
+def test_get_insights_report_as_json_sliced(client_logged_in):
     """Retrieve insights report as JSON with sliced data."""
     deployment_report = DeploymentReportFactory(
         number_of_fingerprints=3,
@@ -110,13 +116,18 @@ def test_get_insights_report_as_json_sliced(django_client):
     report_id = deployment_report.report.id
     # mock slice size so we can expect 2 slices on this test
     with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=2):
-        response = django_client.get(reverse("v1:reports-insights", args=(report_id,)))
-    assert response.ok, f"response was not ok; status {response.status_code}"
+        response = client_logged_in.get(
+            reverse("v1:reports-insights", args=(report_id,))
+        )
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"response was not ok; status {response.status_code}"
     response_json = response.json()
     validate_data(response_json, deployment_report)
 
 
-def test_get_insights_report_as_tarball_sliced(django_client):
+@pytest.mark.django_db
+def test_get_insights_report_as_tarball_sliced(client_logged_in):
     """Retrieve insights report as a tarball (.tar.gz) with sliced data."""
     deployments_report = DeploymentReportFactory(
         number_of_fingerprints=11,
@@ -125,11 +136,13 @@ def test_get_insights_report_as_tarball_sliced(django_client):
     report_id = deployments_report.report.id
     # mock slice size so we can expect 2 slices on this test
     with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
-        response = django_client.get(
+        response = client_logged_in.get(
             reverse("v1:reports-insights", args=(report_id,)),
-            params={"format": "tar.gz"},
+            {"format": "tar.gz"},
         )
-    assert response.ok, f"response was not ok; status {response.status_code}"
+    assert (
+        response.status_code == status.HTTP_200_OK
+    ), f"response was not ok; status {response.status_code}"
     # reformat tarball to match json report
     data = extract_files_from_tarball(
         response.content, strip_dirs=False, decode_json=True
@@ -137,7 +150,8 @@ def test_get_insights_report_as_tarball_sliced(django_client):
     validate_data(data, deployments_report)
 
 
-def test_get_insights_report_not_found_because_no_fingerprints(django_client):
+@pytest.mark.django_db
+def test_get_insights_report_not_found_because_no_fingerprints(client_logged_in):
     """Retrieve Insights report, but it does not exist due to lack of fingerprints."""
     deployment_report = DeploymentReportFactory.create(
         number_of_fingerprints=0,
@@ -159,18 +173,20 @@ def test_get_insights_report_not_found_because_no_fingerprints(django_client):
     assert (
         fingerprint_count == 1
     ), f"unexpected fingerprint count {fingerprint_count} != 1"
-    response = django_client.get(reverse("v1:reports-insights", args=(report_id,)))
+    response = client_logged_in.get(reverse("v1:reports-insights", args=(report_id,)))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_insights_report_invalid_id_not_found(django_client):
+@pytest.mark.django_db
+def test_get_insights_report_invalid_id_not_found(client_logged_in):
     """Fail to get an Insights report for an invalid id."""
     url = reverse("v1:reports-list") + "invalid/insights/"
-    response = django_client.get(url)
+    response = client_logged_in.get(url)
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_insights_report_unknown_id_not_found(django_client):
+@pytest.mark.django_db
+def test_get_insights_report_unknown_id_not_found(client_logged_in):
     """Fail to get an Insights for report id that doesn't exist."""
-    response = django_client.get(reverse("v1:reports-insights", args=("999",)))
+    response = client_logged_in.get(reverse("v1:reports-insights", args=("999",)))
     assert response.status_code == status.HTTP_404_NOT_FOUND
