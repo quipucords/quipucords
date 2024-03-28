@@ -1,6 +1,9 @@
 """ScanTask used for network connection discovery."""
+
 import logging
+import shlex
 from multiprocessing import Value
+from subprocess import PIPE, Popen
 
 import ansible_runner
 import pexpect
@@ -8,6 +11,7 @@ from ansible_runner.exceptions import AnsibleRunnerException
 from django.conf import settings
 from django.db import transaction
 from django.forms import model_to_dict
+from more_itertools import batched
 
 import log_messages
 from api.models import (
@@ -29,6 +33,8 @@ from scanner.network.utils import (
 from scanner.runner import ScanTaskRunner
 
 logger = logging.getLogger(__name__)
+
+FPING_BATCH_SIZE = 150
 
 
 # The ConnectTaskRunner creates a new ConnectResultCallback for each
@@ -135,6 +141,25 @@ class ConnectTaskRunner(ScanTaskRunner):
         )
         return scan_message, scan_result
 
+    def _find_alive_hosts(self, all_hosts) -> set[str]:
+        alive_hosts = set()
+        for hosts in batched(all_hosts, FPING_BATCH_SIZE):
+            args = shlex.split("fping --file=- --alive")
+            with Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE) as fping_proc:
+                fping_input = "\n".join(hosts).encode()
+                output, err = fping_proc.communicate(input=fping_input)
+                alive_hosts |= {host for host in output.decode().split("\n") if host}
+        return alive_hosts
+
+    def _discard_unreachable_hosts(self, result_store: ConnectResultStore):
+        all_hosts = set(result_store.remaining_hosts())
+        alive_hosts = self._find_alive_hosts(all_hosts)
+        unreachable_hosts = all_hosts - alive_hosts
+        for host in unreachable_hosts:
+            result_store.record_result(
+                host, self.scan_task.source, None, SystemConnectionResult.UNREACHABLE
+            )
+
     def run_with_result_store(
         self, manager_interrupt: Value, result_store: ConnectResultStore
     ):
@@ -144,6 +169,9 @@ class ConnectTaskRunner(ScanTaskRunner):
         a task of the need to shut down immediately
         :param result_store: ConnectResultStore
         """
+        # start quickly discarding unreachable hosts
+        self._discard_unreachable_hosts(result_store)
+
         serializer = SourceSerializer(self.scan_task.source)
         source = serializer.data
 
