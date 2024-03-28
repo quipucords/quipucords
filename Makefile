@@ -9,6 +9,7 @@ BINDIR  = bin
 PARALLEL_NUM ?= $(shell $(PYTHON) -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
 TEST_TIMEOUT ?= 15
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT) --durations=10
+TEST_ENV = QUIPUCORDS_ENVIRONMENT="test"
 QPC_CELERY_WORKER_MIN_CONCURRENCY ?= 10
 QPC_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 
@@ -96,7 +97,7 @@ else
 endif
 
 test:
-	poetry run pytest $(TEST_OPTS)
+	$(TEST_ENV) poetry run pytest $(TEST_OPTS)
 
 test-case:
 	echo $(pattern)
@@ -111,10 +112,10 @@ test-coverage:
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres COVERAGE_FILE=.coverage.notslow
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QPC_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
 	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m 'slow and (not container)' --cov=quipucords" COVERAGE_FILE=.coverage.notcontainer
-	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.notcontainer
-	poetry run coverage report
+	$(TEST_ENV) poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.notcontainer
+	$(TEST_ENV) poetry run coverage report
 	# We must run `coverage xml` explicitly to make GitHub codecov action happy.
-	poetry run coverage xml
+	$(TEST_ENV) poetry run coverage xml
 
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
