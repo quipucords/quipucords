@@ -1,11 +1,16 @@
 """ScanTask used for vcenter inspection task."""
+
 import logging
 from datetime import datetime
+from functools import cached_property
 
 from django.db import transaction
 from pyVmomi import vim, vmodl
 
+from api.inspectresult.model import ResultSet
 from api.models import InspectResult, RawFact, ScanTask
+from api.status.misc import get_server_id
+from quipucords.environment import server_version
 from scanner.runner import ScanTaskRunner
 from scanner.vcenter.utils import (
     ClusterRawFacts,
@@ -133,6 +138,18 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return facts
 
+    @cached_property
+    def _result_set(self):
+        result_set = ResultSet.objects.create(
+            source_type=self.scan_task.source.source_type,
+            source_name=self.scan_task.source.name,
+            server_id=get_server_id(),
+            server_version=server_version(),
+            source=self.scan_task.source,
+        )
+        result_set.tasks.add(self.scan_task)
+        return result_set
+
     @transaction.atomic
     def parse_vm_props(self, props, host_dict):  # noqa: PLR0912, C901
         """Parse Virtual Machine properties.
@@ -191,13 +208,11 @@ class InspectTaskRunner(ScanTaskRunner):
 
         logger.debug("system %s facts=%s", vm_name, facts)
 
-        sys_result = InspectResult(
+        sys_result = InspectResult.objects.create(
             name=vm_name,
             status=InspectResult.SUCCESS,
-            source=self.scan_task.source,
+            result_set=self._result_set,
         )
-        sys_result.save()
-        sys_result.tasks.add(self.scan_task)
 
         for key, val in facts.items():
             if val is not None:

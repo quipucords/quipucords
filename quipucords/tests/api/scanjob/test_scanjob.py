@@ -12,6 +12,7 @@ from api import messages
 from api.models import (
     InspectResult,
     RawFact,
+    ResultSet,
     Scan,
     ScanJob,
     ScanTask,
@@ -27,6 +28,7 @@ from tests.api.scan.test_scan import (
 from tests.factories import (
     CredentialFactory,
     InspectResultFactory,
+    ResultSetFactory,
     ScanFactory,
     ScanJobFactory,
     ScanTaskFactory,
@@ -759,10 +761,10 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source,
+            result_set=ResultSetFactory(source=source),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_task)
+        inspect_sys_result.result_set.tasks.add(scan_task)
 
         fact = RawFact(
             name="fact_key",
@@ -787,10 +789,12 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source,
+            result_set=ResultSetFactory(
+                source=source,
+            ),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_task)
+        inspect_sys_result.result_set.tasks.add(scan_task)
 
         fact = RawFact(
             name="fact_key",
@@ -815,10 +819,12 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source,
+            result_set=ResultSetFactory(
+                source=source,
+            ),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_task)
+        inspect_sys_result.result_set.tasks.add(scan_task)
 
         fact = RawFact(
             name="fact_key",
@@ -833,9 +839,8 @@ class TestScanJob:
         response = django_client.get(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_inspection_filter_status(self, client, qpc_user):
+    def test_inspection_filter_status(self, client_logged_in):
         """Get ScanJob inspection results with a filtered status."""
-        client.force_login(qpc_user)
         credential = CredentialFactory()
         source = SourceFactory(credentials=[credential])
         scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
@@ -844,10 +849,12 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source,
+            result_set=ResultSetFactory(
+                source=source,
+            ),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_task)
+        inspect_sys_result.result_set.tasks.add(scan_task)
 
         fact = RawFact(
             name="fact_key",
@@ -857,14 +864,13 @@ class TestScanJob:
         fact.save()
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
-        url += "?status=" + SystemConnectionResult.FAILED
-        response = client.get(url)
+        response = client_logged_in.get(url, {"status": SystemConnectionResult.FAILED})
         assert response.status_code == status.HTTP_200_OK
         json_response = response.json()
         expected = {"count": 0, "next": None, "previous": None, "results": []}
         assert json_response == expected
 
-    def test_inspection_paging(self, django_client, live_server):
+    def test_inspection_paging(self, client_logged_in):
         """Test paging of ScanJob inspection results."""
         credential = CredentialFactory()
         source = SourceFactory(credentials=[credential])
@@ -874,10 +880,10 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source,
+            result_set=ResultSetFactory(source=source),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_task)
+        inspect_sys_result.result_set.tasks.add(scan_task)
 
         fact = RawFact(
             name="fact_key",
@@ -889,10 +895,10 @@ class TestScanJob:
         inspect_sys_result2 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
-            source=source,
+            result_set=ResultSetFactory(source=source),
         )
         inspect_sys_result2.save()
-        inspect_sys_result2.tasks.add(scan_task)
+        inspect_sys_result2.result_set.tasks.add(scan_task)
 
         fact2 = RawFact(
             name="fact_key2",
@@ -902,11 +908,10 @@ class TestScanJob:
         fact2.save()
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
-        response = django_client.get(url, params={"page_size": 1})
+        response = client_logged_in.get(url, {"page_size": 1})
         assert response.status_code == status.HTTP_200_OK
         next_url = (
-            f"{live_server.url}"
-            f"{reverse('v1:scanjob-inspection', args=(scan_job.id,))}"
+            f"http://testserver{reverse('v1:scanjob-inspection', args=(scan_job.id,))}"
             "?page=2&page_size=1"
         )
         assert response.json() == {
@@ -939,34 +944,34 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo1",
             status=SystemConnectionResult.SUCCESS,
-            source=source1,
+            result_set=ResultSetFactory(source=source1),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_tasks[2])
+        inspect_sys_result.result_set.tasks.add(scan_tasks[2])
 
         inspect_sys_result2 = InspectResult(
             name="Foo2",
             status=SystemConnectionResult.SUCCESS,
-            source=source1,
+            result_set=ResultSetFactory(source=source1),
         )
         inspect_sys_result2.save()
-        inspect_sys_result2.tasks.add(scan_tasks[2])
+        inspect_sys_result2.result_set.tasks.add(scan_tasks[2])
 
         inspect_sys_result3 = InspectResult(
             name="Foo3",
             status=SystemConnectionResult.FAILED,
-            source=source2,
+            result_set=ResultSetFactory(source=source2),
         )
         inspect_sys_result3.save()
-        inspect_sys_result3.tasks.add(scan_tasks[3])
+        inspect_sys_result3.result_set.tasks.add(scan_tasks[3])
 
         inspect_sys_result4 = InspectResult(
             name="Foo4",
             status=SystemConnectionResult.FAILED,
-            source=source2,
+            result_set=ResultSetFactory(source=source2),
         )
         inspect_sys_result4.save()
-        inspect_sys_result4.tasks.add(scan_tasks[3])
+        inspect_sys_result4.result_set.tasks.add(scan_tasks[3])
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url, params={"ordering": "-name"})
@@ -1017,7 +1022,7 @@ class TestScanJob:
         }
         assert json_response == expected
 
-    def test_inspection_filter_by_source_id(self, django_client):
+    def test_inspection_filter_by_source_id(self, client_logged_in):
         """Tests inspection result filter by source_id."""
         credential = CredentialFactory()
         source1 = SourceFactory(credentials=[credential])
@@ -1030,37 +1035,37 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo1",
             status=SystemConnectionResult.SUCCESS,
-            source=source1,
+            result_set=ResultSetFactory(source=source1),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_tasks[2])
+        inspect_sys_result.result_set.tasks.add(scan_tasks[2])
 
         inspect_sys_result2 = InspectResult(
             name="Foo2",
             status=SystemConnectionResult.SUCCESS,
-            source=source1,
+            result_set=ResultSetFactory(source=source1),
         )
         inspect_sys_result2.save()
-        inspect_sys_result2.tasks.add(scan_tasks[2])
+        inspect_sys_result2.result_set.tasks.add(scan_tasks[2])
 
         inspect_sys_result3 = InspectResult(
             name="Foo3",
             status=SystemConnectionResult.FAILED,
-            source=source2,
+            result_set=ResultSetFactory(source=source2),
         )
         inspect_sys_result3.save()
-        inspect_sys_result3.tasks.add(scan_tasks[3])
+        inspect_sys_result3.result_set.tasks.add(scan_tasks[3])
 
         inspect_sys_result4 = InspectResult(
             name="Foo4",
             status=SystemConnectionResult.FAILED,
-            source=source2,
+            result_set=ResultSetFactory(source=source2),
         )
         inspect_sys_result4.save()
-        inspect_sys_result4.tasks.add(scan_tasks[3])
+        inspect_sys_result4.result_set.tasks.add(scan_tasks[3])
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
-        response = django_client.get(url, params={"source_id": source2.id})
+        response = client_logged_in.get(url, {"source_id": source2.id})
         assert response.status_code == status.HTTP_200_OK
         json_resp = response.json()
         expected = {
@@ -1099,39 +1104,44 @@ class TestScanJob:
         scan_job, scan_tasks = create_scan_job_two_tasks(
             source1, source2, ScanTask.SCAN_TYPE_INSPECT
         )
-
         # Create an inspection system result
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source1,
+            result_set=ResultSetFactory(source=source1),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_tasks[2])
+        inspect_sys_result.result_set.tasks.add(scan_tasks[2])
 
         inspect_sys_result2 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source1,
+            result_set=ResultSetFactory(
+                source=source1,
+            ),
         )
         inspect_sys_result2.save()
-        inspect_sys_result2.tasks.add(scan_tasks[2])
+        inspect_sys_result2.result_set.tasks.add(scan_tasks[2])
 
         inspect_sys_result3 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
-            source=source2,
+            result_set=ResultSetFactory(
+                source=source2,
+            ),
         )
         inspect_sys_result3.save()
-        inspect_sys_result3.tasks.add(scan_tasks[3])
+        inspect_sys_result3.result_set.tasks.add(scan_tasks[3])
 
         inspect_sys_result4 = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
-            source=source2,
+            result_set=ResultSetFactory(
+                source=source2,
+            ),
         )
         inspect_sys_result4.save()
-        inspect_sys_result4.tasks.add(scan_tasks[3])
+        inspect_sys_result4.result_set.tasks.add(scan_tasks[3])
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url)
@@ -1195,10 +1205,12 @@ class TestScanJob:
         inspect_sys_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.FAILED,
-            source=source1,
+            result_set=ResultSetFactory(
+                source=source1,
+            ),
         )
         inspect_sys_result.save()
-        inspect_sys_result.tasks.add(scan_tasks[2])
+        inspect_sys_result.result_set.tasks.add(scan_tasks[2])
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = django_client.get(url)
@@ -1231,10 +1243,12 @@ class TestScanJob:
         inspect_result = InspectResult(
             name="Foo",
             status=SystemConnectionResult.SUCCESS,
-            source=source,
+            result_set=ResultSetFactory(
+                source=source,
+            ),
         )
         inspect_result.save()
-        inspect_result.tasks.add(scan_task)
+        inspect_result.result_set.tasks.add(scan_task)
         source.delete()
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
@@ -1780,10 +1794,9 @@ class TestScanJob:
         )
         # Create an inspection system result
         sys_result = InspectResult.objects.create(
-            name="Foo",
-            status=InspectResult.SUCCESS,
+            name="Foo", status=InspectResult.SUCCESS, result_set=ResultSetFactory()
         )
-        sys_result.tasks.add(scan_task)
+        sys_result.result_set.tasks.add(scan_task)
 
         RawFact.objects.create(
             name="fact_key", value="fact_value", inspect_result=sys_result
@@ -1894,9 +1907,19 @@ class TestScanJobViewSetV2:
             ],
         }
 
-    def test_filter_by_scanid(
-        self, django_client, mocker, django_assert_max_num_queries
+    def test_max_number_of_queries(
+        self, client_logged_in, django_assert_max_num_queries
     ):
+        """Ensure ScanJobView don't explode in a ridiculous number of queries."""
+        ScanJobFactory.create_batch(100)
+        url = reverse("v2:job-list")
+        # make sure all annotations and prefetches are working so this view don't have
+        # N+1 issues
+        with django_assert_max_num_queries(5):
+            response = client_logged_in.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_filter_by_scanid(self, client_logged_in, mocker):
         """Test filtering scanjob list view by scan id."""
         scan = ScanFactory()
         scanjob = scan.most_recent_scanjob
@@ -1906,11 +1929,8 @@ class TestScanJobViewSetV2:
         assert scanjob_scanless.scan_id is None
 
         url = reverse("v2:job-list")
-        # since this listing has more than 1 scanjob, let's make sure all annotations
-        # and prefetches are working so this view don't have N+1 issues
-        with django_assert_max_num_queries(1):
-            response = django_client.get(url)
-        assert response.ok
+        response = client_logged_in.get(url)
+        assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -1923,8 +1943,8 @@ class TestScanJobViewSetV2:
             scanjob.id,
         ]
         # filter by scan_id
-        response2 = django_client.get(url, params={"scan_id": scanjob.scan_id})
-        assert response2.ok
+        response2 = client_logged_in.get(url, {"scan_id": scanjob.scan_id})
+        assert response2.status_code == status.HTTP_200_OK
         assert response2.json() == {
             "count": 1,
             "next": None,
@@ -1934,8 +1954,8 @@ class TestScanJobViewSetV2:
         assert response2.json()["results"][0]["id"] == scanjob.id
         assert response2.json()["results"][0]["scan_id"] == scanjob.scan_id
         # filter scanless jobs
-        response3 = django_client.get(url, params={"scan_id__isnull": True})
-        assert response3.ok
+        response3 = client_logged_in.get(url, {"scan_id__isnull": True})
+        assert response3.status_code == status.HTTP_200_OK
         assert response3.json() == {
             "count": 1,
             "next": None,
@@ -1990,9 +2010,10 @@ class TestScanJobViewSetV2:
 def scanjob_with_inspect_results():
     """ScanJob with 3 InspectResults."""
     inspection_results = InspectResultFactory.create_batch(3)
-    scanjob = ScanJobFactory()
+    result_sets = ResultSet.objects.filter(inspect_results__in=inspection_results)
+    scanjob = ScanJobFactory(report=None)
     task = ScanTaskFactory(job=scanjob)
-    task.inspect_results.add(*inspection_results)
+    task.result_sets.set(result_sets)
     return scanjob
 
 
@@ -2000,9 +2021,9 @@ def scanjob_with_inspect_results():
 def test_delete_inspect_results(scanjob_with_inspect_results):
     """Test ScanJob.delete_inspect_results method."""
     scanjob = scanjob_with_inspect_results
-    assert InspectResult.objects.filter(tasks__job=scanjob).exists()
+    assert InspectResult.objects.filter(result_set__tasks__job=scanjob).exists()
     scanjob.delete_inspect_results()
-    assert not InspectResult.objects.filter(tasks__job=scanjob).exists()
+    assert not InspectResult.objects.filter(result_set__tasks__job=scanjob).exists()
 
 
 @pytest.mark.django_db
@@ -2013,18 +2034,18 @@ def test_delete_inspect_results_bound_to_other_scanjobs(
     inspect_res = InspectResult.objects.first()
     other_scanjob = ScanJobFactory()
     task = ScanTaskFactory(job=other_scanjob)
-    inspect_res.tasks.add(task)
+    inspect_res.result_set.tasks.add(task)
     # save id in a variable so we can check later for existence
     inspect_res_id = inspect_res.id
 
     scanjob = scanjob_with_inspect_results
-    assert InspectResult.objects.filter(tasks__job=scanjob).count() == 3
+    assert InspectResult.objects.filter(result_set__tasks__job=scanjob).count() == 3
     scanjob.delete_inspect_results()
-    assert InspectResult.objects.filter(tasks__job=scanjob).count() == 1
+    assert InspectResult.objects.filter(result_set__tasks__job=scanjob).count() == 1
     assert InspectResult.objects.filter(id=inspect_res_id).exists()
     # get rid of other_scanjob should make delete_inspection_results clear the results
     # (scantask will be deleted in cascade)
     other_scanjob.delete()
     scanjob.delete_inspect_results()
-    assert InspectResult.objects.filter(tasks__job=scanjob).count() == 0
+    assert InspectResult.objects.filter(result_set__tasks__job=scanjob).count() == 0
     assert not InspectResult.objects.filter(id=inspect_res_id).exists()

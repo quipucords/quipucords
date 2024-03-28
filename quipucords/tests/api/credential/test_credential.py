@@ -940,7 +940,7 @@ class TestCredential:
             url, data=data, content_type="application/json"
         )
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_200_OK, response.json()
         response_ssh_keyfile = response.json().get("ssh_keyfile")
         assert response_ssh_keyfile == str(ssh_keyfile2)
         assert response_ssh_keyfile != str(ssh_keyfile1)

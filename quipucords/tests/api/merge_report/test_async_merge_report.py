@@ -40,13 +40,24 @@ class TestAsyncMergeReports:
         """Return a Server Id."""
         return ServerInformation.create_or_retrieve_server_id()
 
+    @pytest.fixture
+    def expected_inspect_task_json(self):
+        """Return expected inspect task json."""
+        return {
+            "scan_type": "inspect",
+            "sequence_number": 1,
+            "status": "completed",
+            "status_message": "Task is complete.",
+            "systems_count": 0,
+            "systems_failed": 0,
+            "systems_scanned": 0,
+            "systems_unreachable": 0,
+        }
+
     def merge_details_from_source_expect_201(self, data, django_client):
         """Create a source, return the response as a dict."""
         response = django_client.post(reverse("v1:reports-merge-jobs"), json=data)
-        if response.status_code != status.HTTP_201_CREATED:
-            print("Failure cause: ")
-            print(response.json())
-        assert response.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
         return response.json()
 
     def merge_details_from_source_expect_400(self, data, django_client):
@@ -62,7 +73,9 @@ class TestAsyncMergeReports:
     # Test Async Report Merge
     ##############################################################
 
-    def test_greenpath_create(self, server_id, network_source, django_client):
+    def test_greenpath_create(
+        self, server_id, network_source, django_client, expected_inspect_task_json
+    ):
         """Create report merge job object via API."""
         request_json = {
             "report_type": "details",
@@ -86,6 +99,7 @@ class TestAsyncMergeReports:
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",
+            "tasks": [expected_inspect_task_json],
         }
         assert "id" in response_json
         job_id = response_json.pop("id")
@@ -96,7 +110,7 @@ class TestAsyncMergeReports:
         assert get_response.status_code == status.HTTP_200_OK
 
     def test_success_create_with_identical_sources(
-        self, server_id, network_source, django_client
+        self, server_id, network_source, django_client, expected_inspect_task_json
     ):
         """Create report merge job with two identical sources."""
         request_json = {
@@ -128,6 +142,7 @@ class TestAsyncMergeReports:
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",
+            "tasks": [expected_inspect_task_json],
         }
         assert "id" in response_json
         job_id = response_json.pop("id")
@@ -498,6 +513,18 @@ class TestAsyncMergeReports:
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",
+            "tasks": [
+                {
+                    "scan_type": "inspect",
+                    "sequence_number": 1,
+                    "status": "completed",
+                    "status_message": "Task is complete.",
+                    "systems_count": 0,
+                    "systems_failed": 0,
+                    "systems_scanned": 0,
+                    "systems_unreachable": 0,
+                }
+            ],
         }
 
         assert json_response == expected

@@ -75,13 +75,13 @@ class TestVCenterInspectTaskRunnerTest:
 
     def test__none(self):
         """Test get result method when no results exist."""
-        results = self.scan_task.inspect_results.first()
+        results = self.scan_task.get_result().first()
         assert results is None
 
     def test_get_result(self):
         """Test get results method when results exist."""
         results = list(self.scan_task.get_result())
-        assert results == list(self.scan_task.inspect_results.all())
+        assert results == list(self.scan_task.get_result().all())
 
     def test_parse_parent_props(self):
         """Test the parse_parent_props_method."""
@@ -208,7 +208,7 @@ class TestVCenterInspectTaskRunnerTest:
             return_value=(mac_addresses, ip_addresses),
         ):
             self.runner.parse_vm_props(props, host_dict)
-            sys_results = self.scan_task.inspect_results.all()
+            sys_results = self.scan_task.get_result().all()
             expected_facts = {
                 "vm.cluster": "cluster1",
                 "vm.cpu_count": 4,

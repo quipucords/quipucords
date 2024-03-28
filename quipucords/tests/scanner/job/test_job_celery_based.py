@@ -8,6 +8,7 @@ which bypasses several important layers of the Celery stack. Please choose
 carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
+
 import json
 from unittest.mock import patch
 
@@ -21,7 +22,7 @@ from api.scantask.model import ScanTask
 from constants import DataSources
 from scanner import job, tasks
 from tests.factories import ScanJobFactory, ScanTaskFactory, SourceFactory
-from tests.utils import raw_facts_generator
+from tests.utils import fake_semver, raw_facts_generator
 
 
 @pytest.fixture
@@ -132,6 +133,7 @@ def fingerprint_only_scanjob(request, faker):
             "source_type": source_type,
             "source_name": faker.slug(),
             "server_id": faker.uuid4(),
+            "report_version": f"{fake_semver()}+{faker.sha1()}",
             "facts": list(raw_facts_generator(source_type, 1)),
         }
     ]
@@ -139,22 +141,22 @@ def fingerprint_only_scanjob(request, faker):
     sources_json_friendly = json.loads(json.dumps(raw_sources, cls=RawFactEncoder))
     # create a "details report" with only the bare minimum information required by
     # a valid Report instance
-    report = create_report(
-        create_report_version(),
-        {"sources": sources_json_friendly},
-        raise_exception=True,
-    )
+
     scan_job = ScanJobFactory(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
         status=ScanTask.PENDING,
-        report=report,
     )
-
     ScanTaskFactory(
         job=scan_job,
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
         status=ScanTask.PENDING,
         source=None,
+    )
+    create_report(
+        report_version=create_report_version(),
+        json_details_report={"sources": sources_json_friendly},
+        raise_exception=True,
+        scan_job=scan_job,
     )
 
     return scan_job
@@ -286,6 +288,7 @@ def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
 @pytest.mark.django_db
+@pytest.mark.dbcompat
 def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     """Test that a fingerprint-only scanjob can be run successfully."""
     assert (

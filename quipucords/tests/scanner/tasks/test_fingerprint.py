@@ -16,8 +16,8 @@ from tests.factories import ReportFactory, ScanJobFactory, ScanTaskFactory
 @pytest.mark.django_db
 def test_fingerprint_happy_path_details_report_already_exists(mocker):
     """Test fingerprint calls fingerprint runner when details report already exists."""
-    report = ReportFactory(scanjob=None)
-    scan_job = ScanJobFactory(status=ScanTask.RUNNING, report=report)
+    scan_job = ScanJobFactory(status=ScanTask.RUNNING)
+    report = ReportFactory(scanjob=scan_job)
     scan_task = ScanTaskFactory(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
         status=ScanTask.PENDING,
@@ -50,11 +50,11 @@ def test_fingerprint_happy_path_details_report_already_exists(mocker):
 @pytest.mark.django_db
 def test_fingerprint_happy_path_creates_details_report(mocker):
     """Test fingerprint creates missing details report and calls fingerprint runner."""
-    scan_job = ScanJobFactory(status=ScanTask.RUNNING, report=None)
+    scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     scan_task = ScanTaskFactory(
         scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, status=ScanTask.PENDING, job=scan_job
     )
-    report = ReportFactory(scanjob=None)
+    report = ReportFactory(scanjob=scan_job)
     mocker.patch(
         "scanner.tasks.create_report_for_scan_job",
         return_value=(report, None),

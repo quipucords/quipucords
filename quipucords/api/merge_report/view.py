@@ -1,4 +1,5 @@
 """View for system reports."""
+
 import logging
 
 from django.shortcuts import get_object_or_404
@@ -49,7 +50,7 @@ def _convert_ids_to_json(report_request_json):
     report_type = None
 
     for report in reports:
-        sources = sources + report.sources
+        sources = sources + list(report.sources)
         if not report_version and report.report_version:
             report_version = report.report_version
             report_type = REPORT_TYPE_DETAILS
@@ -88,14 +89,17 @@ def _create_async_merge_report_job(details_report_data):
 
     details_report_data = _reconcile_source_versions(details_report_data)
 
+    # Create new job to run
+    merge_job = ScanJob.objects.create(
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+    )
     # Create FC model and save data
     report_version = details_report_data.get("report_version", None)
-    details_report = create_report(report_version, details_report_data)
-
-    # Create new job to run
-
-    merge_job = ScanJob.objects.create(
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=details_report
+    create_report(
+        report_version=report_version,
+        json_details_report=details_report_data,
+        raise_exception=True,
+        scan_job=merge_job,
     )
     merge_job.log_current_status()
     job_serializer = ScanJobSerializerV1(merge_job)
