@@ -34,7 +34,6 @@ class TestSourceBulkDelete:
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(Source.objects.filter(id__in=[source1.id, source2.id])) == 0
@@ -47,7 +46,6 @@ class TestSourceBulkDelete:
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(Source.objects.filter(id__in=[source1.id, source2.id])) == 0
@@ -63,7 +61,6 @@ class TestSourceBulkDelete:
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=invalid_delete_params,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -76,7 +73,6 @@ class TestSourceBulkDelete:
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
@@ -95,7 +91,6 @@ class TestSourceBulkDelete:
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
@@ -135,7 +130,6 @@ class TestSourceBulkDelete:
         response = client_logged_in.post(
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
