@@ -97,6 +97,7 @@ class TestAsyncMergeReports:
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",
+            "tasks": [expected_inspect_task_json],
         }
         assert "id" in response_json
         job_id = response_json.pop("id")
@@ -139,6 +140,7 @@ class TestAsyncMergeReports:
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",
+            "tasks": [expected_inspect_task_json],
         }
         assert "id" in response_json
         job_id = response_json.pop("id")
@@ -503,6 +505,18 @@ class TestAsyncMergeReports:
             "scan_type": "fingerprint",
             "status": "created",
             "status_message": "Job is created.",
+            "tasks": [
+                {
+                    "scan_type": "inspect",
+                    "sequence_number": 1,
+                    "status": "completed",
+                    "status_message": "Task is complete.",
+                    "systems_count": 0,
+                    "systems_failed": 0,
+                    "systems_scanned": 0,
+                    "systems_unreachable": 0,
+                }
+            ],
         }
 
         assert json_response == expected

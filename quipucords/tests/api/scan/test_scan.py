@@ -11,7 +11,7 @@ from rest_framework.reverse import reverse
 from api.models import Scan, ScanTask
 from api.scan.serializer import ScanSerializer
 from api.scan.view import expand_scan
-from tests.factories import ScanFactory, SourceFactory
+from tests.factories import ReportFactory, ScanFactory, SourceFactory
 from tests.scanner.test_util import create_scan_job
 
 
@@ -355,6 +355,7 @@ class TestScanUpdate:
     def test_update(self, client_logged_in, faker):
         """Completely update a scan."""
         scan = ScanFactory()
+        ReportFactory(scanjob=scan.most_recent_scanjob)
         url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = client_logged_in.get(url)
         assert original_response.ok
@@ -386,6 +387,7 @@ class TestScanUpdate:
     def test_partial_update_retains(self, client_logged_in):
         """Test partial update retains unprovided info."""
         scan = ScanFactory()
+        ReportFactory(scanjob=scan.most_recent_scanjob)
         url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = client_logged_in.get(url)
         assert original_response.ok
@@ -411,6 +413,7 @@ class TestScanUpdate:
     def test_partial_update_sources(self, client_logged_in):
         """Test partial update on sources."""
         scan = ScanFactory()
+        ReportFactory(scanjob=scan.most_recent_scanjob)
         original_source = scan.sources.first()
         new_source = SourceFactory()
         assert original_source.id != new_source.id
@@ -450,12 +453,7 @@ class TestScanUpdate:
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
-            "jobs": [
-                {
-                    "id": scan.most_recent_scanjob.id,
-                    "report_id": scan.most_recent_scanjob.report_id,
-                }
-            ],
+            "jobs": [{"id": scan.most_recent_scanjob.id}],
             "options": {
                 "disabled_optional_products": {
                     "jboss_brms": False,
@@ -481,12 +479,7 @@ class TestScanUpdate:
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
-            "jobs": [
-                {
-                    "id": scan.most_recent_scanjob.id,
-                    "report_id": scan.most_recent_scanjob.report_id,
-                }
-            ],
+            "jobs": [{"id": scan.most_recent_scanjob.id}],
             "name": new_scan_data.name,
             "scan_type": scan.scan_type,
             "options": {"max_concurrency": 25},

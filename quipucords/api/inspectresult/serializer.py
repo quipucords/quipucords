@@ -1,6 +1,6 @@
 """Module for serializing all model object for database storage."""
 
-from rest_framework.serializers import CharField, ChoiceField, JSONField
+from rest_framework.serializers import CharField, ChoiceField, IntegerField, JSONField
 
 from api.common.serializer import NotEmptySerializer
 from api.models import (
@@ -28,6 +28,7 @@ class SystemInspectionResultSerializer(NotEmptySerializer):
 
     name = CharField(required=True, max_length=1024)
     status = ChoiceField(required=True, choices=InspectResult.CONN_STATUS_CHOICES)
+    source = IntegerField(source="inspect_group.source_id")
 
     class Meta:
         """Metadata for serializer."""

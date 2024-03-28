@@ -1,6 +1,7 @@
 """ScanTask used for network connection discovery."""
 
 import logging
+from functools import cached_property
 from pathlib import Path
 
 import ansible_runner
@@ -10,7 +11,7 @@ from django.db import transaction
 from django.forms import model_to_dict
 
 import log_messages
-from api.inspectresult.model import RawFact
+from api.inspectresult.model import InspectGroup, RawFact
 from api.models import (
     InspectResult,
     Scan,
@@ -18,8 +19,10 @@ from api.models import (
     ScanTask,
     SystemConnectionResult,
 )
+from api.status.misc import get_server_id
 from api.vault import write_to_yaml
 from constants import SCAN_JOB_LOG
+from quipucords.environment import server_version
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerError
 from scanner.network.inspect_callback import AnsibleResults, InspectCallback
@@ -139,12 +142,11 @@ class InspectTaskRunner(ScanTaskRunner):
         unreachable_hosts = connected_hosts - scanned_hosts
 
         for host in unreachable_hosts:
-            sys_result = InspectResult(
+            InspectResult.objects.create(
                 name=host,
                 status=InspectResult.UNREACHABLE,
-                source=self.scan_task.source,
+                inspect_group=self._inspect_group,
             )
-            sys_result.save()
 
     def _inspect_scan(  # noqa: PLR0912, PLR0915, C901
         self, manager_interrupt, connected
@@ -308,13 +310,11 @@ class InspectTaskRunner(ScanTaskRunner):
             f" Status: {ansible_results.status}. Facts {facts}",
             log_level=logging.DEBUG,
         )
-        sys_result = InspectResult(
+        sys_result = InspectResult.objects.create(
             name=ansible_results.host,
             status=ansible_results.status,
-            source=self.scan_task.source,
+            inspect_group=self._inspect_group,
         )
-        sys_result.save()
-        sys_result.tasks.add(self.scan_task)
         raw_facts = []
         for fact_key, fact_value in facts.items():
             raw_facts.append(
@@ -327,6 +327,18 @@ class InspectTaskRunner(ScanTaskRunner):
         RawFact.objects.bulk_create(raw_facts)
         increment_kwargs = self._get_scan_task_increment_kwargs(ansible_results.status)
         self.scan_task.increment_stats(ansible_results.host, **increment_kwargs)
+
+    @cached_property
+    def _inspect_group(self):
+        inspect_group = InspectGroup.objects.create(
+            source_type=self.scan_task.source.source_type,
+            source_name=self.scan_task.source.name,
+            server_id=get_server_id(),
+            server_version=server_version(),
+            source=self.scan_task.source,
+        )
+        inspect_group.tasks.add(self.scan_task)
+        return inspect_group
 
     def _post_process_facts(self, ansible_results):
         logger.debug(
@@ -413,7 +425,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 cred_data = model_to_dict(host_cred)
                 connected.append((result.name, cred_data))
 
-        for result in self.scan_task.inspect_results.all():
+        for result in self.scan_task.get_result():
             if result.status == InspectResult.SUCCESS:
                 completed.append(result.name)
             elif result.status == InspectResult.FAILED:

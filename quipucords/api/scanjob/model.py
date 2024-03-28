@@ -236,7 +236,7 @@ class ScanJob(models.Model):
             self.connection_results = job_conn_result
             self.save()
 
-        if self.tasks:
+        if self.tasks and not self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             # It appears the initialization didn't complete
             # so remove partial results
             self.delete_inspect_results()
@@ -270,8 +270,8 @@ class ScanJob(models.Model):
 
     def delete_inspect_results(self):
         """Delete InspectResults exclusively related to this ScanJob."""
-        InspectResult.objects.filter(tasks__job_id=self.id).exclude(
-            tasks__in=ScanTask.objects.exclude(job_id=self.id)
+        InspectResult.objects.filter(inspect_group__tasks__job_id=self.id).exclude(
+            inspect_group__tasks__in=ScanTask.objects.exclude(job_id=self.id)
         ).delete()
 
     def _create_connection_tasks(self):

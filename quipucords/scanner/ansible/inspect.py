@@ -8,7 +8,9 @@ from django.conf import settings
 from django.db import transaction
 from requests import RequestException
 
-from api.models import InspectResult, RawFact, Scan, ScanTask
+from api.models import InspectGroup, InspectResult, RawFact, Scan, ScanTask
+from api.status.misc import get_server_id
+from quipucords.environment import server_version
 from scanner.ansible.runner import AnsibleTaskRunner
 from scanner.exceptions import ScanFailureError
 
@@ -171,13 +173,19 @@ class InspectTaskRunner(AnsibleTaskRunner):
         :param inspection_status: status of the inspection
         :param facts_dict: dictionary of facts to persist
         """
-        sys_result = InspectResult(
-            name=self.system_name,
-            status=inspection_status,
+        inspect_group = InspectGroup.objects.create(
+            source_type=self.scan_task.source.source_type,
+            source_name=self.scan_task.source.name,
+            server_id=get_server_id(),
+            server_version=server_version(),
             source=self.scan_task.source,
         )
-        sys_result.save()
-        sys_result.tasks.add(self.scan_task)
+        inspect_group.tasks.add(self.scan_task)
+        sys_result = InspectResult.objects.create(
+            name=self.system_name,
+            status=inspection_status,
+            inspect_group=inspect_group,
+        )
         raw_facts = self._facts_dict_as_raw_facts(sys_result, **facts_dict)
         RawFact.objects.bulk_create(raw_facts)
         return sys_result

@@ -86,8 +86,8 @@ class TestScanBulkDelete:
         """Test bulk delete succeeds and deletes related objects."""
         scan1 = ScanFactory()
         scan2_in_use = ScanFactory()
-        scan2report = ReportFactory(scanjob=None)
-        scan2job = ScanJobFactory(scan=scan2_in_use, report=scan2report)
+        scan2job = ScanJobFactory(scan=scan2_in_use)
+        scan2report = ReportFactory(scanjob=scan2job)
         scan2task = ScanTaskFactory(job=scan2job)
         delete_request = {"ids": [scan2_in_use.id, scan1.id]}
         response = client_logged_in.post(

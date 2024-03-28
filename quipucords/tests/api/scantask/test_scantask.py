@@ -11,7 +11,7 @@ from api import messages
 from api.inspectresult.model import InspectResult, RawFact
 from api.models import Credential, Scan, ScanJob, ScanTask, Source
 from api.serializers import ScanTaskSerializer
-from tests.factories import InspectResultFactory, ScanTaskFactory
+from tests.factories import InspectGroupFactory, InspectResultFactory, ScanTaskFactory
 
 
 def dummy_start():
@@ -254,8 +254,9 @@ class ScanTaskTest(TestCase):
 def test_cleanup_facts():
     """Test ScanTask.cleanup_facts method."""
     scan_task = ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT)
-    results = InspectResultFactory.create_batch(5)
-    scan_task.inspect_results.add(*results)
+    inspect_group = InspectGroupFactory()
+    results = InspectResultFactory.create_batch(5, inspect_group=inspect_group)
+    scan_task.inspect_groups.add(inspect_group)
     assert scan_task.get_result().count() == 5
     identity_key = "identity-key"
     # add a raw fact with identity key to "protect" one of the results

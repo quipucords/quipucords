@@ -1,5 +1,10 @@
 """factories to help testing Quipucords."""
 
+# all factory.post_generate methods here will inevitably trigger a false positive for
+# "invalid-first-argument-name-for-method" (N805) check. let's simply disable it
+# completely for this file to avoid repetition.
+# ruff: noqa: N805
+
 import random
 
 import factory
@@ -92,7 +97,7 @@ class DeploymentReportFactory(DjangoModelFactory):
         model = "api.DeploymentsReport"
 
     @factory.post_generation
-    def number_of_fingerprints(obj, create, extracted, **kwargs):  # noqa: N805
+    def number_of_fingerprints(obj, create, extracted, **kwargs):
         """Create fingerprints associated to deployment report instance."""
         if not create and not extracted:
             return
@@ -107,7 +112,7 @@ class DeploymentReportFactory(DjangoModelFactory):
         )
 
     @factory.post_generation
-    def _set_cached_fingerprints(obj, *args, **kwargs):  # noqa: N805
+    def _set_cached_fingerprints(obj, *args, **kwargs):
         """Reproduce the logic responsible for DUPLICATION of fingerprints."""
         # only attempt to generate fingerprints for obj already saved to db
         # and with a "STATUS_COMPLETE"
@@ -124,23 +129,89 @@ class DeploymentReportFactory(DjangoModelFactory):
 class ReportFactory(DjangoModelFactory):
     """Factory for Report."""
 
-    deployment_report = factory.SubFactory(DeploymentReportFactory, report=None)
-    scanjob = factory.RelatedFactory(
-        "tests.factories.ScanJobFactory",
-        factory_related_name="report",
-    )
-    sources = factory.LazyAttribute(generate_details_sources)
-
     class Meta:
         """Factory options."""
 
         model = "api.Report"
 
-    class Params:
-        """Factory parameters."""
+    @factory.post_generation
+    def scanjob(obj: models.Report, create: bool, extracted: models.ScanJob, **kwargs):
+        """Add ScanJob instance to Report."""
+        if not create:
+            return
+        if extracted:
+            extracted.report = obj
+            extracted.save()
+            return
+        ScanJobFactory(report=obj)
 
-        source_types = factory.Faker("random_elements", elements=DataSources.values)
-        facts_per_source = factory.Faker("pyint", min_value=2, max_value=10)
+    @staticmethod
+    def get_or_create_inspect_task(report: models.Report):
+        """Get or create a inspect task."""
+        try:
+            scan_job = report.scanjob
+        except models.Report.scanjob.RelatedObjectDoesNotExist:
+            scan_job = ScanJobFactory(report=None)
+            scan_job.report = report
+            scan_job.save()
+
+        scan_task = (
+            scan_job.tasks.filter(scan_type=models.ScanTask.SCAN_TYPE_INSPECT)
+            .order_by("sequence_number")
+            .first()
+        )
+
+        if not scan_task:
+            scan_task = ScanTaskFactory(
+                job=scan_job, scan_type=models.ScanTask.SCAN_TYPE_INSPECT
+            )
+        return scan_task
+
+    @factory.post_generation
+    def generate_raw_facts(
+        obj: models.Report, create: bool, extracted: list[DataSources], **kwargs
+    ):
+        """Create RawFacts with the "extracted" source types."""
+        if not create or not extracted:
+            return
+        source_types = kwargs.get("source_types") or _faker.random_elements(
+            DataSources.values
+        )
+        fact_number = _faker.pyint(min_value=2, max_value=10)
+
+        scan_task = ReportFactory.get_or_create_inspect_task(obj)
+        for source_type in source_types:
+            inspect_group = InspectGroupFactory(source_type=source_type)
+            inspect_group.tasks.add(scan_task)
+            for fact_dict in raw_facts_generator(source_type, fact_number):
+                inspect_result = InspectResultFactory(inspect_group=inspect_group)
+                raw_facts = [
+                    models.RawFact(name=k, value=v, inspect_result=inspect_result)
+                    for k, v in fact_dict.items()
+                ]
+                models.RawFact.objects.bulk_create(raw_facts)
+
+    @factory.post_generation
+    def sources(obj: models.Report, create: bool, extracted: list[dict], **kwargs):
+        """Import "sources" (same as old details report "source") as RawFacts."""
+        if not create or not extracted:
+            return
+        scan_task = ReportFactory.get_or_create_inspect_task(obj)
+        for source_dict in extracted:
+            inspect_group = InspectGroupFactory(
+                source_type=source_dict["source_type"],
+                source_name=source_dict["source_name"],
+                server_id=source_dict["server_id"],
+                server_version=source_dict["report_version"],
+            )
+            inspect_group.tasks.add(scan_task)
+            for fact_dict in source_dict["facts"]:
+                inspect_result = InspectResultFactory(inspect_group=inspect_group)
+                raw_facts = [
+                    models.RawFact(name=k, value=v, inspect_result=inspect_result)
+                    for k, v in fact_dict.items()
+                ]
+                models.RawFact.objects.bulk_create(raw_facts)
 
 
 class JobConnectionResultFactory(DjangoModelFactory):
@@ -158,13 +229,22 @@ class ScanJobFactory(DjangoModelFactory):
     start_time = factory.Faker("past_datetime")
     end_time = factory.Faker("date_time_between", start_date="-15d")
 
-    report = factory.SubFactory(ReportFactory, scanjob=None)
     connection_results = factory.SubFactory(JobConnectionResultFactory)
 
     class Meta:
         """Factory options."""
 
         model = "api.ScanJob"
+
+    @factory.post_generation
+    def report(obj: models.ScanJob, create: bool, extracted: models.Report, **kwargs):
+        """Add a report to created ScanJob."""
+        if not create:
+            return
+        if extracted:
+            obj.report = extracted
+            obj.save()
+            return
 
 
 class ScanFactory(DjangoModelFactory):
@@ -194,7 +274,7 @@ class ScanFactory(DjangoModelFactory):
         return scan
 
     @factory.post_generation
-    def number_of_sources(obj: models.Scan, create, extracted, **kwargs):  # noqa: N805
+    def number_of_sources(obj: models.Scan, create, extracted, **kwargs):
         """Create n sources associated to Scan."""
         if not create:
             return
@@ -222,6 +302,7 @@ class TaskConnectionResultFactory(DjangoModelFactory):
 class ScanTaskFactory(DjangoModelFactory):
     """Factory for ScanTask."""
 
+    scan_type = models.ScanTask.SCAN_TYPE_INSPECT
     start_time = factory.Faker("past_datetime")
     end_time = factory.Faker("date_time_between", start_date="-15d")
 
@@ -236,6 +317,24 @@ class ScanTaskFactory(DjangoModelFactory):
         """Factory options."""
 
         model = "api.ScanTask"
+
+    @factory.post_generation
+    def with_raw_facts(
+        obj: models.ScanTask, create: bool, extracted: list[dict], **kwargs
+    ):
+        """Import raw facts to this ScanTask instance."""
+        if not create or not extracted:
+            return
+
+        inspect_group = InspectGroupFactory()
+        inspect_group.tasks.add(obj)
+        for fact_dict in extracted:
+            inspect_result = InspectResultFactory(inspect_group=inspect_group)
+            raw_facts = [
+                models.RawFact(name=k, value=v, inspect_result=inspect_result)
+                for k, v in fact_dict.items()
+            ]
+            models.RawFact.objects.bulk_create(raw_facts)
 
 
 class CredentialFactory(DjangoModelFactory):
@@ -281,9 +380,7 @@ class SourceFactory(DjangoModelFactory):
         return source
 
     @factory.post_generation
-    def number_of_credentials(
-        obj: models.Source, create, extracted, **kwargs  # noqa: N805
-    ):
+    def number_of_credentials(obj: models.Source, create, extracted, **kwargs):
         """Create n credentials associated to Source."""
         if not create:
             return
@@ -299,10 +396,25 @@ class SourceFactory(DjangoModelFactory):
             obj.credentials.add(*credentials)
 
 
+class InspectGroupFactory(DjangoModelFactory):
+    """Factory for InspectGroupFactory."""
+
+    source_name = factory.Faker("ipv4")
+    source_type = factory.Faker("random_element", elements=DataSources.values)
+    server_id = factory.Faker("uuid4")
+    server_version = factory.Faker("bothify", text="#.#.##+????????")
+
+    class Meta:
+        """Factory options."""
+
+        model = "api.InspectGroup"
+
+
 class InspectResultFactory(DjangoModelFactory):
     """Factory for InspectResultFactory."""
 
     name = factory.Faker("ipv4")
+    inspect_group = factory.SubFactory(InspectGroupFactory)
 
     class Meta:
         """Factory options."""
