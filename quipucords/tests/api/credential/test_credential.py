@@ -74,7 +74,7 @@ class TestCredential:
     def create(self, data, client_logged_in):
         """Call the create endpoint."""
         url = reverse("v1:credentials-list")
-        return client_logged_in.post(url, data=data, content_type="application/json")
+        return client_logged_in.post(url, data=data)
 
     def create_expect_400(self, data, client_logged_in):
         """We will do a lot of create tests that expect HTTP 400s."""
@@ -208,9 +208,7 @@ class TestCredential:
         }
         if cred_type == DataSources.RHACS:
             data["auth_token"] = "auth token"
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -229,9 +227,7 @@ class TestCredential:
             "cred_type": cred_type,
             "password": "pass1",
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["username"]
 
@@ -247,9 +243,7 @@ class TestCredential:
             "username": "user1",
             "cred_type": DataSources.NETWORK,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
         assert response.json()["non_field_errors"] == [
             messages.HC_PWD_OR_KEYFILE_OR_KEY
@@ -268,9 +262,7 @@ class TestCredential:
             "cred_type": DataSources.NETWORK,
             "ssh_keyfile": "blah",
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_keyfile"]
 
@@ -292,9 +284,7 @@ class TestCredential:
             "ssh_keyfile": str(ssh_keyfile),
             "ssh_key": openssh_key,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["non_field_errors"] == [messages.HC_KEYFILE_OR_KEY]
@@ -313,9 +303,7 @@ class TestCredential:
             "password": "pass1",
             "ssh_key": openssh_key,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["non_field_errors"] == [messages.HC_PWD_NOT_WITH_KEY]
@@ -336,9 +324,7 @@ class TestCredential:
             "password": faker.password(length=12),
             "ssh_passphrase": faker.password(length=16),
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["ssh_passphrase"] == [messages.HC_NO_KEY_W_PASS]
@@ -357,9 +343,7 @@ class TestCredential:
             "password": "pass1",
             "cred_type": DataSources.NETWORK,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -379,9 +363,7 @@ class TestCredential:
             "password": "pass1",
             "cred_type": DataSources.NETWORK,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -401,9 +383,7 @@ class TestCredential:
             "password": "A" * 2000,
             "cred_type": DataSources.NETWORK,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -424,9 +404,7 @@ class TestCredential:
             "become_password": "A" * 2000,
             "cred_type": DataSources.NETWORK,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -446,9 +424,7 @@ class TestCredential:
             "ssh_keyfile": "A" * 2000,
             "cred_type": DataSources.NETWORK,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -508,7 +484,7 @@ class TestCredential:
         data = {"name": "cred2", "username": "user23", "password": "pass2"}
         data[field] = "newvalue"
         url = reverse("v1:credentials-detail", args=(resp["id"],))
-        resp = client_logged_in.put(url, data=data, content_type="application/json")
+        resp = client_logged_in.put(url, data=data)
         assert resp.status_code == status.HTTP_200_OK
 
     def test_hostcred_update_double(self, client_logged_in):
@@ -531,7 +507,7 @@ class TestCredential:
 
         data = {"name": "cred1", "username": "user2", "password": "pass2"}
         url = reverse("v1:credentials-detail", args=(resp2["id"],))
-        resp = client_logged_in.put(url, data=data, content_type="application/json")
+        resp = client_logged_in.put(url, data=data)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_hostcred_retrieve_view(self, client_logged_in):
@@ -616,9 +592,7 @@ class TestCredential:
             "username": "user1",
             "ssh_keyfile": "keyfile",
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -648,9 +622,7 @@ class TestCredential:
         }
         if cred_type == DataSources.RHACS:
             data["auth_token"] = "auth token"
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_201_CREATED
         response_json = response.json()
         assert "become_method" not in response_json
@@ -751,9 +723,7 @@ class TestCredential:
             "password": "pass1",
             "become_method": method,
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_sat_cred_create(self, client_logged_in):
@@ -792,9 +762,7 @@ class TestCredential:
             "username": "user1",
             "ssh_keyfile": "keyfile",
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == expected_error
 
@@ -840,7 +808,6 @@ class TestCredential:
         response = client_logged_in.post(
             url,
             data=data,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()[dict_key] == [message]
@@ -873,7 +840,6 @@ class TestCredential:
                 "password": "supersecretpassword",
                 "ssh_keyfile": None,
             },
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_201_CREATED, response.json()
 
@@ -901,15 +867,12 @@ class TestCredential:
         response = client_logged_in.post(
             reverse("v1:credentials-list"),
             data=credentials,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_201_CREATED
 
         credentials["cred_type"] = new_type
         url = reverse("v1:credentials-detail", args=(response.json()["id"],))
-        resp = client_logged_in.put(
-            url, data=credentials, content_type="application/json"
-        )
+        resp = client_logged_in.put(url, data=credentials)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert resp.json() == {
             "cred_type": ["cred_type is invalid for credential update"]
@@ -926,9 +889,7 @@ class TestCredential:
             "username": "some-user",
             "ssh_keyfile": str(ssh_keyfile1),
         }
-        response = client_logged_in.post(
-            reverse("v1:credentials-list"), data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:credentials-list"), data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         ssh_keyfile2 = tmp_path / faker.file_name(extension="pem")
@@ -936,9 +897,7 @@ class TestCredential:
         cred_id = response.json().get("id")
         url = reverse("v1:credentials-detail", args=(cred_id,))
         data = {"name": credential_name, "ssh_keyfile": str(ssh_keyfile2)}
-        response = client_logged_in.patch(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data=data)
 
         assert response.status_code == status.HTTP_200_OK
         response_ssh_keyfile = response.json().get("ssh_keyfile")
@@ -956,9 +915,7 @@ class TestCredential:
             "username": "some-user",
             "password": "some-password",
         }
-        response = client_logged_in.post(
-            reverse("v1:credentials-list"), data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:credentials-list"), data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         ssh_keyfile = tmp_path / faker.file_name(extension="pem")
@@ -970,9 +927,7 @@ class TestCredential:
             "password": None,
             "ssh_keyfile": str(ssh_keyfile),
         }
-        response = client_logged_in.patch(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data=data)
 
         assert response.status_code == status.HTTP_200_OK
         json_resp = response.json()
@@ -992,9 +947,7 @@ class TestCredential:
             "username": "some-user",
             "ssh_keyfile": str(ssh_keyfile1),
         }
-        response = client_logged_in.post(
-            reverse("v1:credentials-list"), data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:credentials-list"), data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         cred_id = response.json().get("id")
@@ -1004,9 +957,7 @@ class TestCredential:
             "password": "some-password",
             "ssh_keyfile": None,
         }
-        response = client_logged_in.patch(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data=data)
 
         assert response.status_code == status.HTTP_200_OK
         json_resp = response.json()
@@ -1025,9 +976,7 @@ class TestCredential:
             "cred_type": DataSources.NETWORK,
             "ssh_key": openssh_key,
         }
-        response = client_logged_in.post(
-            reverse("v1:credentials-list"), data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:credentials-list"), data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         cred_id = response.json()["id"]
@@ -1035,9 +984,7 @@ class TestCredential:
         updated_data = {
             "ssh_key": updated_openssh_key,
         }
-        response = client_logged_in.patch(
-            url, data=updated_data, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data=updated_data)
         assert response.status_code == status.HTTP_200_OK
 
         cred = Credential.objects.get(id=cred_id)
@@ -1058,17 +1005,13 @@ class TestCredential:
             "username": "user1",
             "password": "pass1",
         }
-        response = client_logged_in.post(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.post(url, data=data)
         assert response.status_code == status.HTTP_201_CREATED
 
         cred_id = response.json().get("id")
         url = reverse("v1:credentials-detail", args=(cred_id,))
         data.update({"ssh_key": openssh_key})
-        response = client_logged_in.patch(
-            url, data=data, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data=data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["non_field_errors"] == [messages.HC_PWD_NOT_WITH_KEY]
@@ -1098,7 +1041,6 @@ class TestCredentialBulkDelete:
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
@@ -1111,7 +1053,6 @@ class TestCredentialBulkDelete:
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
@@ -1127,7 +1068,6 @@ class TestCredentialBulkDelete:
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=invalid_delete_params,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -1140,7 +1080,6 @@ class TestCredentialBulkDelete:
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
@@ -1159,7 +1098,6 @@ class TestCredentialBulkDelete:
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
@@ -1183,7 +1121,6 @@ class TestCredentialBulkDelete:
         response = client_logged_in.post(
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()

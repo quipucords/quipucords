@@ -69,9 +69,7 @@ class TestScanCreate:
             expected_scan_type = scan_type
         else:
             expected_scan_type = ScanTask.SCAN_TYPE_INSPECT
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == {
             "id": mocker.ANY,
@@ -94,9 +92,7 @@ class TestScanCreate:
         # at view level).
         source = SourceFactory()
         payload = {"sources": [source.id]}
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"name": ["This field is required."]}
 
@@ -116,9 +112,7 @@ class TestScanCreate:
         # at view level).
         payload = {"name": faker.bothify("Scan ????-######")}
         payload.update(extra_payload)
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"sources": [expected_error_message]}
 
@@ -134,9 +128,7 @@ class TestScanCreate:
             "sources": [source.id],
             "scan_type": scan_type,
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"scan_type": [mocker.ANY]}
         error_message = response.json()["scan_type"][0]
@@ -158,9 +150,7 @@ class TestScanCreate:
             "sources": [source.id],
             "scan_type": "",
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "scan_type": [
@@ -177,9 +167,7 @@ class TestScanCreate:
             "name": faker.bothify("Scan ????-######"),
             "sources": [faker.slug()],
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Source identifiers must be integer values."]
@@ -194,9 +182,7 @@ class TestScanCreate:
             "name": faker.bothify("Scan ????-######"),
             "sources": [999999],
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "sources": ["Source with id=999999 could not be found in database."]
@@ -214,9 +200,7 @@ class TestScanCreate:
                 }
             },
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_201_CREATED
         DEFAULT_MAX_CONCURRENCY = 25
         assert response.json() == {
@@ -257,9 +241,7 @@ class TestScanCreate:
                 "max_concurrency": -5,
             },
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -277,9 +259,7 @@ class TestScanCreate:
                 "max_concurrency": 10000,
             },
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -301,9 +281,7 @@ class TestScanCreate:
             "sources": [source.id],
             "options": {"disabled_optional_products": "foo"},
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -326,9 +304,7 @@ class TestScanCreate:
             "sources": [source.id],
             "options": {"disabled_optional_products": {"jboss_eap": option_value}},
         }
-        response = client_logged_in.post(
-            reverse("v1:scan-list"), data=payload, content_type="application/json"
-        )
+        response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             "options": {
@@ -390,9 +366,7 @@ class TestScanUpdate:
             "sources": [new_source.id],
             "scan_type": ScanTask.SCAN_TYPE_CONNECT,
         }
-        response = client_logged_in.put(
-            url, data=payload, content_type="application/json"
-        )
+        response = client_logged_in.put(url, data=payload)
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() != original_json
 
@@ -417,9 +391,7 @@ class TestScanUpdate:
         assert original_response.status_code == status.HTTP_200_OK
         original_json = original_response.json()
 
-        response_update = client_logged_in.patch(
-            url, data={"name": "NEW NAME"}, content_type="application/json"
-        )
+        response_update = client_logged_in.patch(url, data={"name": "NEW NAME"})
         assert response_update.status_code == status.HTTP_200_OK
         assert response_update.json() == {
             "id": original_json["id"],
@@ -443,9 +415,7 @@ class TestScanUpdate:
         new_source = SourceFactory()
         assert original_source.id != new_source.id
         url = reverse("v1:scan-detail", args=(scan.id,))
-        response = client_logged_in.patch(
-            url, data={"sources": [new_source.id]}, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data={"sources": [new_source.id]})
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
@@ -475,9 +445,7 @@ class TestScanUpdate:
                 "max_concurrency": max_concurrency,
             },
         }
-        response = client_logged_in.patch(
-            url, data=payload, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data=payload)
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
@@ -508,9 +476,7 @@ class TestScanUpdate:
         new_scan_data = ScanFactory.build()
         url = reverse("v1:scan-detail", args=(scan.id,))
         assert scan.name != new_scan_data.name
-        response = client_logged_in.patch(
-            url, data={"name": new_scan_data.name}, content_type="application/json"
-        )
+        response = client_logged_in.patch(url, data={"name": new_scan_data.name})
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json() == {
             "id": scan.id,
@@ -545,9 +511,7 @@ class TestScanUpdate:
                 }
             }
         }
-        response_patch = client_logged_in.patch(
-            url, data=payload, content_type="application/json"
-        )
+        response_patch = client_logged_in.patch(url, data=payload)
         assert response_patch.status_code == status.HTTP_200_OK, response_patch.json()
 
         updated_response = client_logged_in.get(url)
@@ -568,7 +532,6 @@ class TestScanUpdate:
         response = client_logged_in.patch(
             url,
             data={"scan_type": ScanTask.SCAN_TYPE_CONNECT},
-            content_type="application/json",
         )
         assert response.status_code == status.HTTP_200_OK, response.json()
         assert response.json()["scan_type"] == ScanTask.SCAN_TYPE_CONNECT
