@@ -8,28 +8,28 @@ from rest_framework.reverse import reverse
 pytestmark = pytest.mark.django_db  # all user tests require the database
 
 
-def test_current(qpc_user, django_client):
+def test_current(qpc_user_simple, client_logged_in):
     """Test the current API endpoint."""
     url = reverse("v1:users-current")
-    response = django_client.get(url)
+    response = client_logged_in.get(url)
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"username": qpc_user.username}
+    assert response.json() == {"username": qpc_user_simple.username}
 
 
-def test_logout_sends_clear_header(qpc_user, django_client):
+def test_logout_sends_clear_header(client_logged_in):
     """Test that user logout sends the Clear-Site-Data header."""
     logout_url = reverse("v1:users-logout")
-    response = django_client.put(logout_url)
+    response = client_logged_in.put(logout_url)
     assert response.status_code == status.HTTP_200_OK
     assert "Clear-Site-Data" in response.headers
-    assert response.text == ""
+    assert response.content == b""
 
 
-def test_logout_deletes_token(qpc_user, django_client):
+def test_logout_deletes_token(qpc_user_simple, client_logged_in):
     """Test that user logout deletes its auth tokens."""
-    auth_token, _ = Token.objects.get_or_create(user=qpc_user)
+    auth_token, _ = Token.objects.get_or_create(user=qpc_user_simple)
     assert auth_token is not None
     logout_url = reverse("v1:users-logout")
-    response = django_client.put(logout_url)
+    response = client_logged_in.put(logout_url)
     assert response.status_code == status.HTTP_200_OK
-    assert Token.objects.filter(user=qpc_user).count() == 0
+    assert Token.objects.filter(user=qpc_user_simple).count() == 0

@@ -43,7 +43,7 @@ def test_automatic_retry():
     # lets compare our custom session with requests default
     requests_session = RequestsSession()
     req_response = requests_session.get("http://some.url/")
-    assert not req_response.ok
+    assert req_response.status_code >= 400
     # now our custom session
     session = Session()
     qpc_resp = session.get("http://some.url/")

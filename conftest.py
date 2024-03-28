@@ -7,7 +7,6 @@ the proper patching.
 
 from functools import partial
 from pathlib import Path
-from urllib.parse import urljoin
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -52,46 +51,6 @@ def scan_manager(mocker):
     mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
     with override_settings(QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER=True):
         yield _manager
-
-
-@pytest.fixture
-def qpc_user_pass(faker):
-    """Create password for qpc test user."""
-    return faker.password()
-
-
-@pytest.fixture
-def qpc_user(qpc_user_pass, faker):
-    """Create qpc test user."""
-    user = get_user_model()(username=faker.user_name())
-    user.set_password(qpc_user_pass)
-    user.save()
-    return user
-
-
-@pytest.fixture
-def django_client(live_server, qpc_user, qpc_user_pass):
-    """
-    HTTP client which connects to django live server.
-
-    If you are considering using this fixture, please know that its setup is
-    surprisingly slow. On modern hardware, we have seen it add up to 400ms
-    to each test that uses it. Unless you are sure that you need the full
-    live server or need to assert output using the requests library, please
-    consider using the `client_logged_in` fixture instead.
-    """
-    from compat.requests import Session
-    from tests.utils.http import QPCAuth
-
-    client = Session(
-        base_url=urljoin(live_server.url, "api/v1/"),
-        auth=QPCAuth(
-            base_url=live_server.url,
-            username=qpc_user.username,
-            password=qpc_user_pass,
-        ),
-    )
-    return client
 
 
 @pytest.fixture
