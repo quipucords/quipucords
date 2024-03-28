@@ -26,11 +26,17 @@ jobs:
         with:
           fetch-depth: 0  # fetches all commits/tags
 
+      - name: Install qemu dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
       - name: Build quipucords image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
+          archs: amd64,arm64
           tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }}
           containerfiles: |
             ./Dockerfile
