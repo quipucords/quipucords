@@ -18,6 +18,10 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +31,7 @@ jobs:
           fetch-depth: 0  # fetches all commits/tags
 
       - name: Install qemu dependency
+        if: ${{ matrix.arch=='arm64' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static
@@ -36,7 +41,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          archs: amd64,arm64
+          archs: ${{ matrix.arch }}
           tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }}
           containerfiles: |
             ./Dockerfile
