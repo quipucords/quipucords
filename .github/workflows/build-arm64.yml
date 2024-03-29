@@ -9,7 +9,7 @@ on:
     branches: [main, 'release/*']
 
 env:
-  STABLE_TAG: ${{ github.event_name == 'push' && github.ref_name || format('pr-{0}', github.event.pull_request.number) }}
+  STABLE_TAG: ${{ github.event_name == 'push' && github.ref_name || format('pr-{0}', github.event.pull_request.number) }}-arm64
   # We had a problem with GitHub setting quay expiration label also during
   # merge to main, so we just set meaningless value as a workaround.
   EXPIRATION_LABEL: ${{ github.event_name == 'push' && 'quipucords.source=github' || 'quay.expires-after=5d' }}
@@ -17,7 +17,7 @@ env:
   REGISTRY: ${{ vars.REGISTRY || 'quay.io' }}
 
 jobs:
-  build:
+  build-arm64:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,13 +26,18 @@ jobs:
         with:
           fetch-depth: 0  # fetches all commits/tags
 
+      - name: Install qemu dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
       - name: Build quipucords image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          archs: amd64
-          tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }}
+          archs: arm64
+          tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main-arm64' && 'latest-arm64' || '' }}
           containerfiles: |
             ./Dockerfile
           labels: |
