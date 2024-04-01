@@ -185,7 +185,7 @@ class TestScanJob:
         scanjob = scan.most_recent_scanjob
         url = reverse("v1:scanjob-detail", args=(scanjob.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert "scan" in response.json()
         scan_json = response.json()["scan"]
         assert scan_json == {"id": scan.id, "name": scan.name}
@@ -209,7 +209,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 1,
             "next": None,
@@ -268,7 +268,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"status": SystemConnectionResult.FAILED})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 0,
             "next": None,
@@ -303,7 +303,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -359,7 +359,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"ordering": "-name"})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -437,7 +437,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 4,
             "next": None,
@@ -534,7 +534,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"source_id": source2.id})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -611,7 +611,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"page_size": 2})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         next_url = (
             "http://testserver"
             f"{reverse('v1:scanjob-connection', args=(scan_job.id,))}"
@@ -676,7 +676,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -726,7 +726,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-connection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 1,
             "next": None,
@@ -855,7 +855,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"status": SystemConnectionResult.FAILED})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_response = response.json()
         expected = {"count": 0, "next": None, "previous": None, "results": []}
         assert json_response == expected
@@ -899,7 +899,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"page_size": 1})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         next_url = (
             "http://testserver"
             f"{reverse('v1:scanjob-inspection', args=(scan_job.id,))}"
@@ -966,7 +966,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"ordering": "-name"})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_response = response.json()
         expected = {
             "count": 4,
@@ -1057,7 +1057,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url, {"source_id": source2.id})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_resp = response.json()
         expected = {
             "count": 2,
@@ -1131,7 +1131,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_response = response.json()
         expected = {
             "count": 4,
@@ -1198,7 +1198,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_response = response.json()
         expected = {
             "count": 1,
@@ -1235,7 +1235,7 @@ class TestScanJob:
 
         url = reverse("v1:scanjob-inspection", args=(scan_job.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_response = response.json()
         expected = {
             "count": 1,
@@ -1350,7 +1350,7 @@ class TestScanJob:
         scan_job = ScanJobFactory()
         url = reverse("v1:scanjob-cancel", args=(scan_job.id,))
         response = client_logged_in.put(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_cancel_bad_id(self, client_logged_in):
         """Cancel a scanjob with bad id."""
@@ -1699,7 +1699,7 @@ class TestScanJob:
         ScanJobFactory()
         url = reverse("v1:scan-filtered-jobs", args=(scan.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         results = [
             {
@@ -1726,7 +1726,7 @@ class TestScanJob:
         url = reverse("v1:scan-filtered-jobs", args=(scan.id,))
 
         response = client_logged_in.get(url, {"status": ScanTask.PENDING})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         assert response.json() == {
             "count": 0,
@@ -1736,7 +1736,7 @@ class TestScanJob:
         }
 
         response = client_logged_in.get(url, {"status": ScanTask.CREATED})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         results1 = [
             {
@@ -1834,7 +1834,7 @@ class TestScanJobViewSetV2:
         source = scanjob.sources.first()
         url = reverse("v2:job-detail", args=(scanjob.id,))
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "id": scanjob.id,
             "end_time": scanjob.end_time.isoformat(),
@@ -1862,7 +1862,7 @@ class TestScanJobViewSetV2:
         source = scanjob.sources.first()
         url = reverse("v2:job-list")
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 1,
             "next": None,
@@ -1902,7 +1902,7 @@ class TestScanJobViewSetV2:
         # N+1 issues
         with django_assert_max_num_queries(5):
             response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_filter_by_scanid(self, client_logged_in, mocker):
         """Test filtering scanjob list view by scan id."""
@@ -1915,7 +1915,7 @@ class TestScanJobViewSetV2:
 
         url = reverse("v2:job-list")
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -1929,7 +1929,7 @@ class TestScanJobViewSetV2:
         ]
         # filter by scan_id
         response2 = client_logged_in.get(url, {"scan_id": scanjob.scan_id})
-        assert response2.status_code == status.HTTP_200_OK
+        assert response2.ok
         assert response2.json() == {
             "count": 1,
             "next": None,
@@ -1940,7 +1940,7 @@ class TestScanJobViewSetV2:
         assert response2.json()["results"][0]["scan_id"] == scanjob.scan_id
         # filter scanless jobs
         response3 = client_logged_in.get(url, {"scan_id__isnull": True})
-        assert response3.status_code == status.HTTP_200_OK
+        assert response3.ok
         assert response3.json() == {
             "count": 1,
             "next": None,
@@ -1959,7 +1959,7 @@ class TestScanJobViewSetV2:
         scanjob = ScanJob.objects.get(scan_type=chosen_type)
         url = reverse("v2:job-list")
         response = client_logged_in.get(url, {"scan_type": chosen_type})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 1,
             "next": None,
@@ -1979,7 +1979,7 @@ class TestScanJobViewSetV2:
         scanjob = ScanJob.objects.get(status=chosen_status)
         url = reverse("v2:job-list")
         response = client_logged_in.get(url, {"status": chosen_status})
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == {
             "count": 1,
             "next": None,

@@ -716,7 +716,7 @@ class TestSource:
         source_list = self.source_object_factory(data, client_logged_in, range_number=3)
 
         response = self.get_source(client_logged_in)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         content = response.json()
         cred_for_response = {"id": net_cred.id, "name": net_cred.name}
@@ -760,7 +760,7 @@ class TestSource:
         response = self.get_source(
             client_logged_in, {"source_type": DataSources.VCENTER}
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         content = response.json()
         cred_for_response = {"id": vc_cred.id, "name": vc_cred.name}
@@ -793,7 +793,7 @@ class TestSource:
 
         url = reverse("v1:source-detail", args=(initial["id"],))
         response = self.get_source(client_logged_in, url=url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert "credentials" in response_json
         creds = response_json["credentials"]
@@ -828,7 +828,7 @@ class TestSource:
             "credentials": [net_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         net_cred_response = {"id": net_cred.id, "name": net_cred.name}
         expected = {
@@ -886,7 +886,7 @@ class TestSource:
             client_logged_in, updated_data, initial["id"]
         )
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_partial_update_network_ssl_options_not_allowed(
         self, client_logged_in, net_cred
@@ -1124,7 +1124,7 @@ class TestSource:
         response = self.partially_update_source(
             client_logged_in, updated_data, initial["id"]
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json()["name"] == "source3-new"
         assert response.json()["hosts"] == ["1.2.3.5"]
 
@@ -1206,7 +1206,7 @@ class TestSource:
             "results": results,
         }
         response = self.get_source(client_logged_in)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         content = response.json()
         assert content == expected
 
@@ -1318,7 +1318,7 @@ class TestSource:
             "credentials": [vc_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_update_vc_more_than_one_host(self, client_logged_in, vc_cred):
         """VC - Fail more than one host."""
@@ -1480,7 +1480,7 @@ class TestSource:
             "credentials": [sat_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_update_sat_with_options(self, client_logged_in, sat_cred):
         """Sat - Valid full update with options."""
@@ -1501,7 +1501,7 @@ class TestSource:
             "options": {"ssl_cert_verify": False},
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         expected = {
             "id": initial["id"],
             "name": "source",
@@ -1642,7 +1642,7 @@ class TestSource:
             "credentials": [openshift_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_update_openshift_range_hosts(self, client_logged_in, openshift_cred):
         """Fail update due to invalid host array."""
@@ -1711,7 +1711,7 @@ class TestSource:
             "credentials": [rhacs_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
 
 @pytest.mark.django_db
@@ -2310,7 +2310,7 @@ class TestSourceV2:
         source_list = self.source_object_factory(data, client_logged_in, range_number=3)
 
         response = self.get_source(client_logged_in)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         content = response.json()
         cred_for_response = {"id": net_cred.id, "name": net_cred.name}
@@ -2359,7 +2359,7 @@ class TestSourceV2:
         response = self.get_source(
             client_logged_in, {"source_type": DataSources.VCENTER}
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         content = response.json()
         cred_for_response = {"id": vc_cred.id, "name": vc_cred.name}
@@ -2396,7 +2396,7 @@ class TestSourceV2:
 
         url = reverse("v2:source-detail", args=(initial["id"],))
         response = self.get_source(client_logged_in, url=url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert "credentials" in response_json
         creds = response_json["credentials"]
@@ -2431,7 +2431,7 @@ class TestSourceV2:
             "credentials": [net_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         net_cred_response = {"id": net_cred.id, "name": net_cred.name}
         expected = {
@@ -2489,7 +2489,7 @@ class TestSourceV2:
             client_logged_in, updated_data, initial["id"]
         )
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_partial_update_network_ssl_options_not_allowed(
         self, client_logged_in, net_cred
@@ -2727,7 +2727,7 @@ class TestSourceV2:
         response = self.partially_update_source(
             client_logged_in, updated_data, initial["id"]
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json()["name"] == "source3-new"
         assert response.json()["hosts"] == ["1.2.3.5"]
 
@@ -2814,7 +2814,7 @@ class TestSourceV2:
             "results": results,
         }
         response = self.get_source(client_logged_in)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         content = response.json()
         assert content == expected
 
@@ -2926,7 +2926,7 @@ class TestSourceV2:
             "credentials": [vc_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_update_vc_more_than_one_host(self, client_logged_in, vc_cred):
         """VC - Fail more than one host."""
@@ -3088,7 +3088,7 @@ class TestSourceV2:
             "credentials": [sat_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_update_sat_with_options(self, client_logged_in, sat_cred):
         """Sat - Valid full update with options."""
@@ -3109,7 +3109,7 @@ class TestSourceV2:
             "ssl_cert_verify": False,
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         expected = {
             "id": initial["id"],
             "name": "source",
@@ -3254,7 +3254,7 @@ class TestSourceV2:
             "credentials": [openshift_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_update_openshift_range_hosts(self, client_logged_in, openshift_cred):
         """Fail update due to invalid host array."""
@@ -3323,4 +3323,4 @@ class TestSourceV2:
             "credentials": [rhacs_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok

@@ -63,8 +63,34 @@ def qpc_user_simple(faker):
     return get_user_model().objects.create(username=faker.user_name())
 
 
+class ResponseMixin:
+    """Mixin intended to expand Django's Response with QoL features from requests."""
+
+    @property
+    def ok(self):
+        """Returns True if response is OK."""
+        return 200 <= self.status_code < 300
+
+    @property
+    def text(self):
+        """Returns unicode representation of response.content."""
+        return self.content.decode()
+
+
 class Client(DjangoClient):
     """Django client for tests with some QoL changes."""
+
+    def request(self, **request):
+        """Patched request method for juicy DX/QoL changes."""
+        response = super().request(**request)
+        # we can't simply replace django's HttpResponse because
+        # error responses are specialized classes, with attributes
+        # like .status_code defined as class attributes.
+        class CustomResponse(response.__class__, ResponseMixin):
+            """Add our custom Response methods to django response."""
+
+        response.__class__ = CustomResponse
+        return response
 
     def post(self, *args, **kwargs):
         """POST request."""

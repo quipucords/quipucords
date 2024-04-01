@@ -104,7 +104,7 @@ class TestAsyncMergeReports:
 
         url = reverse("v1:reports-merge-jobs-detail", args=(job_id,))
         get_response = client_logged_in.get(url)
-        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.ok
 
     def test_success_create_with_identical_sources(
         self, server_id, network_source, client_logged_in, expected_inspect_task_json
@@ -146,7 +146,7 @@ class TestAsyncMergeReports:
 
         url = reverse("v1:reports-merge-jobs-detail", args=(job_id,))
         get_response = client_logged_in.get(url)
-        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.ok
 
     def test_404_if_not_fingerprint_job(self, faker, client_logged_in):
         """Test report job status only returns merge jobs."""
@@ -166,7 +166,7 @@ class TestAsyncMergeReports:
         scan_job.save()
         url = reverse("v1:reports-merge-jobs-detail", args=(scan_job.id,))
         get_response = client_logged_in.get(url)
-        assert get_response.status_code == status.HTTP_200_OK
+        assert get_response.ok
 
     def test_create_report_merge_bad_url(self, client_logged_in):
         """Create merge report job bad url."""

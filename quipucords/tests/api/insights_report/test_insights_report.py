@@ -96,9 +96,7 @@ def test_get_insights_report_as_json(client_logged_in):
     )
     report_id = deployment_report.report.id
     response = client_logged_in.get(reverse("v1:reports-insights", args=(report_id,)))
-    assert (
-        response.status_code == status.HTTP_200_OK
-    ), f"response was not ok; status {response.status_code}"
+    assert response.ok, f"response was not ok; status {response.status_code}"
 
     # mock slice size so we can expect result to contain all data without slicing
     with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=99999):
@@ -119,9 +117,7 @@ def test_get_insights_report_as_json_sliced(client_logged_in):
         response = client_logged_in.get(
             reverse("v1:reports-insights", args=(report_id,))
         )
-    assert (
-        response.status_code == status.HTTP_200_OK
-    ), f"response was not ok; status {response.status_code}"
+    assert response.ok, f"response was not ok; status {response.status_code}"
     response_json = response.json()
     validate_data(response_json, deployment_report)
 
@@ -140,9 +136,7 @@ def test_get_insights_report_as_tarball_sliced(client_logged_in):
             reverse("v1:reports-insights", args=(report_id,)),
             {"format": "tar.gz"},
         )
-    assert (
-        response.status_code == status.HTTP_200_OK
-    ), f"response was not ok; status {response.status_code}"
+    assert response.ok, f"response was not ok; status {response.status_code}"
     # reformat tarball to match json report
     data = extract_files_from_tarball(
         response.content, strip_dirs=False, decode_json=True

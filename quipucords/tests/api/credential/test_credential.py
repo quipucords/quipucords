@@ -432,7 +432,7 @@ class TestCredential:
         """Tests the list view set of the Credential API."""
         url = reverse("v1:credentials-list")
         response = client_logged_in.get(url)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
     def test_hostcred_list_filter_view(self, client_logged_in):
         """Tests the list view with filter set of the Credential API."""
@@ -454,14 +454,14 @@ class TestCredential:
 
         url = reverse("v1:credentials-list")
         resp = client_logged_in.get(url)
-        assert resp.status_code == status.HTTP_200_OK
+        assert resp.ok
         json_resp = resp.json()
         assert json_resp.get("results") is not None
         results = json_resp.get("results")
         assert len(results) == 2
 
         resp = client_logged_in.get(url, data={"cred_type": DataSources.VCENTER})
-        assert resp.status_code == status.HTTP_200_OK
+        assert resp.ok
         json_resp = resp.json()
         assert json_resp.get("results") is not None
         results = json_resp.get("results")
@@ -485,7 +485,7 @@ class TestCredential:
         data[field] = "newvalue"
         url = reverse("v1:credentials-detail", args=(resp["id"],))
         resp = client_logged_in.put(url, data=data)
-        assert resp.status_code == status.HTTP_200_OK
+        assert resp.ok
 
     def test_hostcred_update_double(self, client_logged_in):
         """Update to new name that conflicts with other should fail."""
@@ -516,7 +516,7 @@ class TestCredential:
         cred.save()
         url = reverse("v1:credentials-detail", args=(cred.pk,))
         resp = client_logged_in.get(url, headers=ACCEPT_JSON_HEADER)
-        assert resp.status_code == status.HTTP_200_OK
+        assert resp.ok
         json_resp = resp.json()
         assert json_resp.get("name") == "cred2"
         assert json_resp.get("username") == "user2"
@@ -899,7 +899,7 @@ class TestCredential:
         data = {"name": credential_name, "ssh_keyfile": str(ssh_keyfile2)}
         response = client_logged_in.patch(url, data=data)
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_ssh_keyfile = response.json().get("ssh_keyfile")
         assert response_ssh_keyfile == str(ssh_keyfile2)
         assert response_ssh_keyfile != str(ssh_keyfile1)
@@ -929,7 +929,7 @@ class TestCredential:
         }
         response = client_logged_in.patch(url, data=data)
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_resp = response.json()
         assert not json_resp.get("password")
         assert json_resp.get("ssh_keyfile") == str(ssh_keyfile)
@@ -959,7 +959,7 @@ class TestCredential:
         }
         response = client_logged_in.patch(url, data=data)
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         json_resp = response.json()
         assert not json_resp.get("ssh_keyfile")
         assert json_resp.get("password") == ENCRYPTED_DATA_MASK
@@ -985,7 +985,7 @@ class TestCredential:
             "ssh_key": updated_openssh_key,
         }
         response = client_logged_in.patch(url, data=updated_data)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
 
         cred = Credential.objects.get(id=cred_id)
         assert cred.name == cred_name
@@ -1023,7 +1023,7 @@ class TestCredential:
         response = client_logged_in.get(
             reverse("v1:credentials-detail", args=(credential.id,))
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         resp_data = response.json()
         assert "sources" in resp_data
         assert resp_data["sources"] == [{"id": source.id, "name": source.name}]
@@ -1042,7 +1042,7 @@ class TestCredentialBulkDelete:
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
 
     def test_bulk_delete_all_ids(self, client_logged_in):
@@ -1054,7 +1054,7 @@ class TestCredentialBulkDelete:
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
         assert Credential.objects.count() == 0
 
@@ -1081,7 +1081,7 @@ class TestCredentialBulkDelete:
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == set([cred1.id, cred2.id])
         assert response_json["missing"] == [non_existent_id]
@@ -1099,7 +1099,7 @@ class TestCredentialBulkDelete:
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert response_json["deleted"] == [cred.id]
         assert response_json["missing"] == []
@@ -1122,7 +1122,7 @@ class TestCredentialBulkDelete:
             reverse("v1:credentials-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == set([cred1.id, cred2.id])
         assert response_json["missing"] == []
@@ -1300,7 +1300,7 @@ class TestCredentialSerialization:
         response = client_logged_in.get(
             reverse("v1:credentials-detail", args=(credential.id,))
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert response.json() == expected_output
 
     def test_masked_data_serialization_list(self, client_logged_in):
@@ -1314,7 +1314,7 @@ class TestCredentialSerialization:
         # sorting results to match default credentials api sorting
         results = sorted(results, key=lambda x: x["name"])
         response = client_logged_in.get(reverse("v1:credentials-list"))
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         expected_output = {
             "count": len(self.INPUT_OUTPUT_ID),
             "next": None,
