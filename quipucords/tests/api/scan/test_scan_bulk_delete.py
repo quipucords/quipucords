@@ -36,7 +36,7 @@ class TestScanBulkDelete:
             reverse("v1:scans-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert len(Scan.objects.filter(id__in=[scan1.id, scan2.id])) == 0
 
     def test_bulk_delete_all_ids(self, client_logged_in):
@@ -48,7 +48,7 @@ class TestScanBulkDelete:
             reverse("v1:scans-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert len(Scan.objects.filter(id__in=[scan1.id, scan2.id])) == 0
         assert Scan.objects.count() == 0
 
@@ -75,7 +75,7 @@ class TestScanBulkDelete:
             reverse("v1:scans-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == set([scan1.id, scan2.id])
         assert response_json["missing"] == [non_existent_id]
@@ -93,7 +93,7 @@ class TestScanBulkDelete:
             reverse("v1:scans-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == {scan1.id, scan2_in_use.id}
         assert response_json["missing"] == []
@@ -123,7 +123,7 @@ class TestScanBulkDelete:
             reverse("v1:scans-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == {
             scan1.id,

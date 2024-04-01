@@ -96,7 +96,7 @@ class Smoker:
         scan_manager.work()
         response = client_logged_in.get(scan_detail_url)
         attempts = 1
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
 
         completed_status = {ScanTask.COMPLETED, ScanTask.CANCELED, ScanTask.FAILED}
         while (
@@ -106,7 +106,7 @@ class Smoker:
             backoff = 2**attempts
             sleep(backoff)
             response = client_logged_in.get(scan_detail_url)
-            assert response.status_code == status.HTTP_200_OK, response.json()
+            assert response.ok, response.json()
 
         assert scan_status == ScanTask.COMPLETED, response.json()
 
@@ -127,7 +127,7 @@ class Smoker:
         response = client_logged_in.get(
             reverse("v1:reports-details", args=(report_id,))
         )
-        assert response.status_code == status.HTTP_200_OK, response.content.decode()
+        assert response.ok, response.text
         report_details_dict = response.json()
         expected_details_report = {
             "report_id": report_id,
@@ -178,7 +178,7 @@ class Smoker:
         response = client_logged_in.get(
             reverse("v1:reports-deployments", args=(report_id,))
         )
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
 
         report_deployments_dict = response.json()
         assert report_deployments_dict == {
@@ -225,21 +225,17 @@ class Smoker:
         details_response = client_logged_in.get(
             reverse("v1:reports-details", args=(report_id,))
         )
-        assert (
-            details_response.status_code == status.HTTP_200_OK
-        ), details_response.json()
+        assert details_response.ok, details_response.json()
 
         deployments_response = client_logged_in.get(
             reverse("v1:reports-deployments", args=(report_id,))
         )
-        assert (
-            deployments_response.status_code == status.HTTP_200_OK
-        ), deployments_response.json()
+        assert deployments_response.ok, deployments_response.json()
 
         full_report_response = client_logged_in.get(
             reverse("v1:reports-detail", args=(report_id,))
         )
-        assert full_report_response.status_code == status.HTTP_200_OK
+        assert full_report_response.ok
 
         with tarfile.open(fileobj=BytesIO(full_report_response.content)) as tarball:
             tarball_details_dict = load_json_from_tarball(

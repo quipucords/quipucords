@@ -5,7 +5,6 @@ import tarfile
 from io import BytesIO
 
 import pytest
-from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api.models import Report
@@ -38,7 +37,7 @@ class TestDetailsReport:
         response = client_logged_in.get(
             reverse("v1:reports-details", args=(report.id,))
         )
-        assert response.status_code == status.HTTP_200_OK, response.content.decode()
+        assert response.ok, response.text
         assert response.json() == {
             "report_id": report.id,
             "sources": sources,
@@ -53,7 +52,7 @@ class TestDetailsReport:
             reverse("v1:reports-details", args=(report.id,)),
             headers={"Accept": "application/json+gzip"},
         )
-        assert response.status_code == status.HTTP_200_OK, response.content.decode()
+        assert response.ok, response.text
         expected_filename = f"report_id_{report.id}/details.json"
 
         with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
@@ -76,7 +75,7 @@ class TestDetailsReport:
             reverse("v1:reports-details", args=(report.id,)),
             headers={"Accept": "text/csv"},
         )
-        assert response.status_code == status.HTTP_200_OK, response.content.decode()
+        assert response.ok, response.text
         server_id = sources[0]["server_id"]
         source_name = sources[0]["source_name"]
         source_type = sources[0]["source_type"]
@@ -92,6 +91,6 @@ class TestDetailsReport:
             "batata,tomate\r\n"
             "\r\n\r\n"
         )
-        assert response.content.decode() == expected_csv
+        assert response.text == expected_csv
         report.refresh_from_db()
         assert report.cached_csv == expected_csv

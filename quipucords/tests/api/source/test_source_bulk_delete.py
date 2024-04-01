@@ -35,7 +35,7 @@ class TestSourceBulkDelete:
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert len(Source.objects.filter(id__in=[source1.id, source2.id])) == 0
 
     def test_bulk_delete_all_ids(self, client_logged_in):
@@ -47,7 +47,7 @@ class TestSourceBulkDelete:
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         assert len(Source.objects.filter(id__in=[source1.id, source2.id])) == 0
         assert Source.objects.count() == 0
 
@@ -74,7 +74,7 @@ class TestSourceBulkDelete:
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == set([source1.id, source2.id])
         assert response_json["missing"] == [non_existent_id]
@@ -92,7 +92,7 @@ class TestSourceBulkDelete:
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert response_json["deleted"] == [source.id]
         assert response_json["missing"] == []
@@ -131,7 +131,7 @@ class TestSourceBulkDelete:
             reverse("v1:sources-bulk-delete"),
             data=delete_request,
         )
-        assert response.status_code == status.HTTP_200_OK
+        assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == {
             source1.id,

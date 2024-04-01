@@ -324,7 +324,7 @@ class TestScanRetrieve:
         scan = ScanFactory(most_recent_scanjob=None)
         source = scan.sources.first()
         response = client_logged_in.get(reverse("v1:scan-detail", args=(scan.id,)))
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "id": scan.id,
             "name": scan.name,
@@ -357,7 +357,7 @@ class TestScanUpdate:
         scan = ScanFactory()
         url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = client_logged_in.get(url)
-        assert original_response.status_code == status.HTTP_200_OK
+        assert original_response.ok
         original_json = original_response.json()
 
         new_source = SourceFactory()
@@ -367,7 +367,7 @@ class TestScanUpdate:
             "scan_type": ScanTask.SCAN_TYPE_CONNECT,
         }
         response = client_logged_in.put(url, data=payload)
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() != original_json
 
         assert response.json() == {
@@ -388,11 +388,11 @@ class TestScanUpdate:
         scan = ScanFactory()
         url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = client_logged_in.get(url)
-        assert original_response.status_code == status.HTTP_200_OK
+        assert original_response.ok
         original_json = original_response.json()
 
         response_update = client_logged_in.patch(url, data={"name": "NEW NAME"})
-        assert response_update.status_code == status.HTTP_200_OK
+        assert response_update.ok
         assert response_update.json() == {
             "id": original_json["id"],
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -416,7 +416,7 @@ class TestScanUpdate:
         assert original_source.id != new_source.id
         url = reverse("v1:scan-detail", args=(scan.id,))
         response = client_logged_in.patch(url, data={"sources": [new_source.id]})
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -446,7 +446,7 @@ class TestScanUpdate:
             },
         }
         response = client_logged_in.patch(url, data=payload)
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -477,7 +477,7 @@ class TestScanUpdate:
         url = reverse("v1:scan-detail", args=(scan.id,))
         assert scan.name != new_scan_data.name
         response = client_logged_in.patch(url, data={"name": new_scan_data.name})
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "id": scan.id,
             "most_recent_scanjob": scan.most_recent_scanjob.id,
@@ -501,7 +501,7 @@ class TestScanUpdate:
         )
         url = reverse("v1:scan-detail", args=(scan.id,))
         original_response = client_logged_in.get(url)
-        assert original_response.status_code == status.HTTP_200_OK
+        assert original_response.ok
         original_json = original_response.json()
 
         payload = {
@@ -512,12 +512,10 @@ class TestScanUpdate:
             }
         }
         response_patch = client_logged_in.patch(url, data=payload)
-        assert response_patch.status_code == status.HTTP_200_OK, response_patch.json()
+        assert response_patch.ok, response_patch.json()
 
         updated_response = client_logged_in.get(url)
-        assert (
-            updated_response.status_code == status.HTTP_200_OK
-        ), updated_response.json()
+        assert updated_response.ok, updated_response.json()
         assert updated_response.json() != original_json
         expected_result = original_json
         expected_result["options"]["enabled_extended_product_search"][
@@ -533,7 +531,7 @@ class TestScanUpdate:
             url,
             data={"scan_type": ScanTask.SCAN_TYPE_CONNECT},
         )
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json()["scan_type"] == ScanTask.SCAN_TYPE_CONNECT
 
 
@@ -613,7 +611,7 @@ class TestScanList:
     def test_list(self, client_logged_in, expected_scans):
         """List Scan objects."""
         response = client_logged_in.get(reverse("v1:scan-list"))
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "count": 2,
             "next": None,
@@ -626,7 +624,7 @@ class TestScanList:
         response = client_logged_in.get(
             reverse("v1:scan-list"), data={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
         )
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "count": 1,
             "next": None,
@@ -641,7 +639,7 @@ class TestScanList:
             reverse("v1:scan-list"),
             data={"ordering": "most_recent_scanjob__start_time"},
         )
-        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.ok, response.json()
         assert response.json() == {
             "count": 2,
             "next": None,

@@ -87,12 +87,10 @@ def test_get_deployments_report_as_csv(client_logged_in, deployments_report):
         reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "text/csv"},
     )
-    assert (
-        response.status_code == status.HTTP_200_OK
-    ), f"response was not ok; status {response.status_code}"
+    assert response.ok, f"response was not ok; status {response.status_code}"
 
     # Sanity-check the basic structure of the tarball deployments.csv directly.
-    deployments_csv_data = list(csv.reader(response.content.decode().splitlines()))
+    deployments_csv_data = list(csv.reader(response.text.splitlines()))
     # We expect a table header, one line in the first table, two blank lines, a section
     # marker, another table header, one line per system fingerprint in the second table,
     # and another blank line at the end. (1 + 1 + 2 + 1 + 1 + n + 1, or 7 + n)
@@ -139,9 +137,7 @@ def test_get_deployments_report_as_json(client_logged_in, deployments_report):
         reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
         headers={"Accept": "application/json"},
     )
-    assert (
-        response.status_code == status.HTTP_200_OK
-    ), f"response was not ok; status {response.status_code}"
+    assert response.ok, f"response was not ok; status {response.status_code}"
 
     deployments_json = response.json()
     deployments_json_fingerprints = deployments_json.pop("system_fingerprints")
@@ -177,11 +173,11 @@ def test_get_deployment_report_as_tarball(client_logged_in, deployments_report):
         path, headers={"Accept": "application/json+gzip"}
     )
     assert (
-        gzip_response.status_code == status.HTTP_200_OK
+        gzip_response.ok
     ), f"gzip response was not ok; status {gzip_response.status_code}"
     json_response = client_logged_in.get(path, headers={"Accept": "application/json"})
     assert (
-        json_response.status_code == status.HTTP_200_OK
+        json_response.ok
     ), f"json response was not ok; status {json_response.status_code}"
 
     extracted_files = extract_files_from_tarball(
@@ -195,8 +191,8 @@ def test_get_deployment_report_as_tarball(client_logged_in, deployments_report):
 @pytest.mark.django_db
 def test_get_deployment_report_invalid_id_not_found(client_logged_in):
     """Test getting a report for an invalid report ID responds with 404."""
-    url = reverse("v1:reports-list") + "/invalid/deployments/"
-    response = client_logged_in.get(url)
+    url = reverse("v1:reports-list") + "invalid/deployments/"
+    response = client_logged_in.get(url, headers={"accept": "application/json"})
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
