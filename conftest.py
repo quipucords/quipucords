@@ -113,13 +113,7 @@ class Client(DjangoClient):
 
 @pytest.fixture
 def client_logged_in(qpc_user_simple, settings) -> Client:
-    """
-    Create a simpler Django test client with logged-in user.
-
-    For tests that don't actually need a full live server, this is much faster than
-    django_client. Note that the client_logged_in interface (django.test.Client) is
-    different from the django_client interface (requests.Request).
-    """
+    """Create a simpler Django test client with logged-in user."""
     # Why this override_settings? See:
     # https://whitenoise.readthedocs.io/en/stable/django.html#whitenoise-makes-my-tests-run-slow
     settings.WHITENOISE_AUTOREFRESH = True
