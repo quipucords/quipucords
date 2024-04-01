@@ -1,7 +1,7 @@
 """
 pytest config for quipucords.
 
-IMPORTANT: Don't import aplication code on toplevel as this can influence
+IMPORTANT: Don't import application code on toplevel as this can influence
 the proper patching.
 """
 
