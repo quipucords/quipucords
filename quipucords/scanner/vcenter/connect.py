@@ -1,4 +1,5 @@
 """ScanTask used for vcenter connection task."""
+
 import logging
 from socket import gaierror
 

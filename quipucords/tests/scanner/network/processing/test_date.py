@@ -1,6 +1,5 @@
 """Unit tests for initial processing of date facts."""
 
-
 import unittest
 
 from scanner.network.processing import date, process

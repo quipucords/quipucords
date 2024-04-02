@@ -1,6 +1,5 @@
 """Unit tests for initial processing of ifconfig facts."""
 
-
 import unittest
 
 from scanner.network.processing import ifconfig

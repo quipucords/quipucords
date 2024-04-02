@@ -1,6 +1,5 @@
 """Module for serializing all model object for database storage."""
 
-
 from rest_framework.serializers import CharField, ChoiceField
 
 from api.common.serializer import NotEmptySerializer

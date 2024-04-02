@@ -1557,12 +1557,15 @@ def test_process_details_report_exception(fingerprint_task_runner):
     deployments_report = DeploymentsReport(id=1)
     deployments_report.save()
     report = Report(id=1, deployment_report=deployments_report)
-    with patch(
-        "fingerprinter.runner.FingerprintTaskRunner._process_sources",
-        return_value=[fact_collection],
-    ), patch(
-        "fingerprinter.runner.SystemFingerprintSerializer.save",
-        side_effect=DataError,
+    with (
+        patch(
+            "fingerprinter.runner.FingerprintTaskRunner._process_sources",
+            return_value=[fact_collection],
+        ),
+        patch(
+            "fingerprinter.runner.SystemFingerprintSerializer.save",
+            side_effect=DataError,
+        ),
     ):
         status_message, status = fingerprint_task_runner._process_details_report(
             "", report

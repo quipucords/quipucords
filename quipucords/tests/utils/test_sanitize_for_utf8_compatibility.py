@@ -1,4 +1,5 @@
 """Tests for `utils.sanitize_for_utf8_compatibility`."""
+
 import pytest
 
 from utils import sanitize_for_utf8_compatibility

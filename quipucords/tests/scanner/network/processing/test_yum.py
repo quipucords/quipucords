@@ -1,6 +1,5 @@
 """Unit tests for initial processing of yum enabled repos fact."""
 
-
 import unittest
 
 from scanner.network.processing import yum

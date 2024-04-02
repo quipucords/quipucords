@@ -1,4 +1,5 @@
 """Test source serializer."""
+
 import pytest
 
 from api import messages

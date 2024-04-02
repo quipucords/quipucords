@@ -1,4 +1,5 @@
 """Utility functions to help tests for API reports."""
+
 import json
 import tarfile
 from io import BytesIO

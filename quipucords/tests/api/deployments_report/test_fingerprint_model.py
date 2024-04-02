@@ -1,4 +1,5 @@
 """Test the fingerprint model."""
+
 from django.test import TestCase
 
 from api.common.common_report import create_report_version

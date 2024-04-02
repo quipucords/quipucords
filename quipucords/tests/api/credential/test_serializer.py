@@ -1,4 +1,5 @@
 """Test credentials serializer."""
+
 import datetime
 from pathlib import Path
 from unittest import mock

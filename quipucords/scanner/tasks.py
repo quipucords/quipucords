@@ -1,4 +1,5 @@
 """Celery tasks for running scans."""
+
 import logging
 
 import celery

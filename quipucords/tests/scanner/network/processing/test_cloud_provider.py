@@ -1,6 +1,5 @@
 """Unit tests for initial processing of cloud provider facts."""
 
-
 import unittest
 
 from scanner.network.processing import cloud_provider
@@ -104,9 +103,9 @@ class TestProcessCloudProvider(unittest.TestCase):
             cloud_provider.AMAZON,
         )
         dependencies["dmi_bios_version"] = "6.0"
-        dependencies[
-            "dmi_chassis_asset_tag"
-        ] = "Asset Tag: 7783-7084-3265-9085-8269-3286-77"
+        dependencies["dmi_chassis_asset_tag"] = (
+            "Asset Tag: 7783-7084-3265-9085-8269-3286-77"
+        )
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
                 "QPC_FORCE_POST_PROCESS", dependencies
@@ -151,9 +150,9 @@ class TestProcessCloudProvider(unittest.TestCase):
         # deps indicate no cloud provider
         dependencies["dmi_bios_version"] = "6.0"
         dependencies["dmi_chassis_asset_tag"] = "Asset Tag: No Asset Tag"
-        dependencies[
-            "dmi_system_product_name"
-        ] = "Product Name: VMware Virtual Platform"
+        dependencies["dmi_system_product_name"] = (
+            "Product Name: VMware Virtual Platform"
+        )
         dependencies["dmi_system_manufacturer"] = "VMWare, Inc."
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(

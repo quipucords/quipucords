@@ -7,6 +7,7 @@ functionality is very similar.
 
 @TODO abstract bulk delete logic tests and deduplicate their code (DRY!)
 """
+
 import pytest
 from django.urls import reverse
 from rest_framework import status

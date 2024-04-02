@@ -1,4 +1,5 @@
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
+
 import logging
 from pathlib import Path
 from unittest import mock

@@ -1,4 +1,5 @@
 """Describes the views associated with the API models."""
+
 from itertools import groupby
 
 from django.db import transaction

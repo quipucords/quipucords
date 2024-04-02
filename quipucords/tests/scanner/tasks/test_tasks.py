@@ -1,4 +1,5 @@
 """Test the scanner.tasks.finalize_scan function."""
+
 import pytest
 from django.test import override_settings
 

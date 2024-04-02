@@ -1,4 +1,5 @@
 """Misc utils for quipucords."""
+
 import json
 
 

@@ -2,6 +2,7 @@
 
 These models are used in the REST definitions
 """
+
 import ssl
 from functools import cached_property
 

@@ -1,4 +1,5 @@
 """ScanTask used for vcenter inspection task."""
+
 import logging
 from datetime import datetime
 

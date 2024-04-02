@@ -1,4 +1,5 @@
 """Viewset for user function."""
+
 import logging
 
 from django.contrib.auth import logout

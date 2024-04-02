@@ -83,6 +83,7 @@ class Client(DjangoClient):
     def request(self, **request):
         """Patched request method for juicy DX/QoL changes."""
         response = super().request(**request)
+
         # we can't simply replace django's HttpResponse because
         # error responses are specialized classes, with attributes
         # like .status_code defined as class attributes.

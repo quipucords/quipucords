@@ -1,4 +1,5 @@
 """Satellite 6 API handlers."""
+
 from __future__ import annotations
 
 import itertools

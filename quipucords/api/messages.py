@@ -1,4 +1,5 @@
 """API messages for translation."""
+
 # S105 violations here are false positives
 # ruff: noqa: S105
 

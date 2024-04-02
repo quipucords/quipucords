@@ -1,4 +1,5 @@
 """Describes the views associated with the API models."""
+
 from itertools import groupby
 
 from django.db import transaction
@@ -51,9 +52,9 @@ def format_source(json_source):
             json_scan_job["source_systems_count"] = task_for_source.systems_count
             json_scan_job["source_systems_scanned"] = task_for_source.systems_scanned
             json_scan_job["source_systems_failed"] = task_for_source.systems_failed
-            json_scan_job[
-                "source_systems_unreachable"
-            ] = task_for_source.systems_unreachable
+            json_scan_job["source_systems_unreachable"] = (
+                task_for_source.systems_unreachable
+            )
 
         json_source["connection"] = json_scan_job
     return json_source

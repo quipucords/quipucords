@@ -1,4 +1,5 @@
 """Test the satellite factory."""
+
 import pytest
 
 from api.models import Credential, ScanTask, Source

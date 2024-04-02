@@ -8,6 +8,7 @@ which bypasses several important layers of the Celery stack. Please choose
 carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
+
 import json
 from unittest.mock import patch
 

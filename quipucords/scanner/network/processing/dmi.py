@@ -1,4 +1,5 @@
 """Initial processing of the shell output from the dmi role."""
+
 import logging
 
 from scanner.network.processing import process

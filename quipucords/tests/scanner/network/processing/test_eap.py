@@ -1,6 +1,5 @@
 """Unit tests for initial processing."""
 
-
 import unittest
 
 from scanner.network.processing import eap, process

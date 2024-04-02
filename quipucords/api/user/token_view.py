@@ -1,4 +1,5 @@
 """Expiring authorization token."""
+
 import datetime
 
 from django.conf import settings

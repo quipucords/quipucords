@@ -1,4 +1,5 @@
 """ScanTask used for network connection discovery."""
+
 import logging
 import uuid
 from copy import deepcopy
@@ -989,9 +990,11 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("installed_products", "installed_products"),
             # Get IPv4 addresses from ifconfig's fact if present, else from ip's fact.
             (
-                "ifconfig_ip_addresses"
-                if deepget(fact, "ifconfig_ip_addresses") is not None
-                else "ip_address_show_ipv4",
+                (
+                    "ifconfig_ip_addresses"
+                    if deepget(fact, "ifconfig_ip_addresses") is not None
+                    else "ip_address_show_ipv4"
+                ),
                 "ip_addresses",
             ),
             # Set CPU facts

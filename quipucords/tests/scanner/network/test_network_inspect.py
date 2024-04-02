@@ -1,4 +1,5 @@
 """Test the inspect scanner capabilities."""
+
 from multiprocessing import Value
 from pathlib import Path
 from unittest.mock import ANY, Mock, patch
@@ -255,8 +256,9 @@ class TestNetworkInspectScanner:
     def test_inspect_scan_fail_no_facts(self, mock_run):
         """Test running a inspect scan with mocked connection."""
         mock_run.return_value.status = "successful"
-        with requests_mock.Mocker() as mocker, patch.object(
-            InspectTaskRunner, "_persist_ansible_logs"
+        with (
+            requests_mock.Mocker() as mocker,
+            patch.object(InspectTaskRunner, "_persist_ansible_logs"),
         ):
             mocker.post(self.fact_endpoint, status_code=201, json={"id": 1})
             scanner = InspectTaskRunner(self.scan_job, self.scan_task)

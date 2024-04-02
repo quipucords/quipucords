@@ -1,4 +1,5 @@
 """Test OpenShift InspectTaskRunner."""
+
 import os
 from unittest import mock
 
