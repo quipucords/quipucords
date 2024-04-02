@@ -17,6 +17,13 @@ env:
   REGISTRY: ${{ vars.REGISTRY || 'quay.io' }}
 
 jobs:
+  # Warning! Please do not change the name "build-arm64", reconfigure it to
+  # use a matrix, or anything else that would change its name in GitHub runs.
+  # We specifically ignore this job name in discovery-ci "wait" tasks before
+  # test execution because this job is slow and we do not want our integration
+  # tests to wait for it to complete. If you believe you have a good reason
+  # for changing this job name, please consult the dev team first and update
+  # discovery-ci accordingly.
   build-arm64:
     runs-on: ubuntu-latest
 
