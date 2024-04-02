@@ -126,6 +126,15 @@ def client_logged_in(qpc_user_simple, settings) -> Client:
     yield client
 
 
+@pytest.fixture
+def client_logged_out(settings) -> Client:
+    """Create a simpler Django test client without a logged-in user."""
+    settings.WHITENOISE_AUTOREFRESH = True
+    settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]["user"] = "9000/second"
+    client = Client()
+    yield client
+
+
 @pytest.fixture(scope="module")
 def vcr_config(_vcr_uri_map):
     """

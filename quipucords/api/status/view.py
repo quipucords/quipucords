@@ -1,7 +1,13 @@
 """View for server status."""
 import os
 
-from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_protect
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from api import API_VERSION
@@ -16,6 +22,9 @@ from quipucords.environment import (
 
 
 @api_view(["GET"])
+@csrf_protect
+@authentication_classes([])
+@permission_classes((AllowAny,))
 def status(request):
     """Provide the server status information."""
     commit_info = commit()

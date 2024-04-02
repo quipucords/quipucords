@@ -17,3 +17,11 @@ class TestStatus:
         assert response.headers.get("X-Server-Version")
         assert response.headers["X-Server-Version"] == server_version()
         assert response.json()["api_version"] == 1
+
+    def test_status_endpoint_logged_out(self, client_logged_out):
+        """Test the status endpoint without a logged-in user."""
+        url = reverse("v1:server-status")
+        response = client_logged_out.get(url)
+        assert response.headers.get("X-Server-Version")
+        assert response.headers["X-Server-Version"] == server_version()
+        assert response.json()["api_version"] == 1
