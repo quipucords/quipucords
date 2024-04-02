@@ -1,4 +1,5 @@
 """Utilities used for VCenter operations."""
+
 import atexit
 import ssl
 

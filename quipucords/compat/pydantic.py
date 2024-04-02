@@ -1,4 +1,5 @@
 """Quipucords/pydantic compatibility layer."""
+
 # If you ever attempt to run this module on it's own it won't work because it shadows
 # pydantic package (python interpreter will probably complain about circular imports).
 # Running as part of compat package (like from `compat.pydantic import blabla`) will

@@ -1,4 +1,5 @@
 """View for system reports."""
+
 import logging
 
 from django.shortcuts import get_object_or_404

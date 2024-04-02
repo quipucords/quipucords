@@ -1,4 +1,5 @@
 """Test SatelliteInterface._prepare_and_process_hosts when Celery is enabled."""
+
 from unittest.mock import Mock, patch
 
 import pytest

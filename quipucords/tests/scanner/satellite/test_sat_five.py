@@ -1,4 +1,5 @@
 """Test the satellite five interface."""
+
 import xmlrpc.client
 from multiprocessing import Value
 from unittest.mock import ANY, patch

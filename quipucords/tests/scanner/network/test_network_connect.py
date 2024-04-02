@@ -1,6 +1,5 @@
 """Test the discovery scanner capabilities."""
 
-
 from multiprocessing import Value
 from pathlib import Path
 from unittest.mock import Mock, patch

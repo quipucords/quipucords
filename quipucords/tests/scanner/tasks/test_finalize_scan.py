@@ -1,4 +1,5 @@
 """Test the scanner.tasks.finalize_scan function."""
+
 import logging
 
 import pytest

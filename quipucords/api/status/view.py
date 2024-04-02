@@ -1,4 +1,5 @@
 """View for server status."""
+
 import os
 
 from django.http import HttpResponse

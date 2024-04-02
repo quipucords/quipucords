@@ -6,6 +6,7 @@ from the deployments report API are structured correctly. This test does not
 exhaustively test all possible fields since the shape of the outputs can change based
 on the types and contents of the collected facts and system fingerprints.
 """
+
 import csv
 
 import pytest

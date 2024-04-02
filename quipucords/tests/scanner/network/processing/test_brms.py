@@ -1,6 +1,5 @@
 """Unit tests for initial processing."""
 
-
 from scanner.network.processing import brms
 from scanner.network.processing.util_for_test import (
     ansible_item,

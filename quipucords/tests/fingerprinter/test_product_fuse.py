@@ -1,6 +1,5 @@
 """Test the product fuse."""
 
-
 from django.test import TestCase
 
 from api.models import ServerInformation

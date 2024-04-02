@@ -1,4 +1,5 @@
 """Test the scanner.tasks.celery_run_task function."""
+
 import pytest
 from django.test import override_settings
 

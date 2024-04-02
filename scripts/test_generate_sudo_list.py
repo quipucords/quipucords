@@ -1,4 +1,5 @@
 """Tests for generate sudo list script."""
+
 from pathlib import Path
 from unittest import mock
 

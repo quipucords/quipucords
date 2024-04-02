@@ -2,6 +2,7 @@
 
 These models are used in the REST definitions.
 """
+
 import logging
 from collections import namedtuple
 
@@ -120,9 +121,9 @@ class Scan(models.Model):
             for prod in Scan.SUPPORTED_PRODUCTS:
                 flag = extended_search.get(prod, False)
                 enabled_extended_product_search[prod] = convert_to_boolean(flag)
-            enabled_extended_product_search[
-                Scan.EXT_PRODUCT_SEARCH_DIRS
-            ] = extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
+            enabled_extended_product_search[Scan.EXT_PRODUCT_SEARCH_DIRS] = (
+                extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
+            )
             self.enabled_extended_product_search = enabled_extended_product_search
 
     @staticmethod

@@ -318,9 +318,9 @@ class ScanSerializer(NotEmptySerializer):
                     enabled_extended_product_search[prod] = convert_to_boolean(flag)
             search_directories = extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None)
             if search_directories:
-                enabled_extended_product_search[
-                    Scan.EXT_PRODUCT_SEARCH_DIRS
-                ] = search_directories
+                enabled_extended_product_search[Scan.EXT_PRODUCT_SEARCH_DIRS] = (
+                    search_directories
+                )
             instance.enabled_extended_product_search = enabled_extended_product_search
         else:
             # Existing values to update
@@ -329,6 +329,6 @@ class ScanSerializer(NotEmptySerializer):
                 if flag is not None:
                     extended_search_instance[prod] = convert_to_boolean(flag)
             if extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS, None) is not None:
-                extended_search_instance[
-                    Scan.EXT_PRODUCT_SEARCH_DIRS
-                ] = extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS)
+                extended_search_instance[Scan.EXT_PRODUCT_SEARCH_DIRS] = (
+                    extended_search.get(Scan.EXT_PRODUCT_SEARCH_DIRS)
+                )

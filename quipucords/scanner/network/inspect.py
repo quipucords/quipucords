@@ -1,4 +1,5 @@
 """ScanTask used for network connection discovery."""
+
 import logging
 from pathlib import Path
 

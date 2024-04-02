@@ -1,6 +1,5 @@
 """Test the network scanner utility functions."""
 
-
 import unittest
 from unittest import mock
 

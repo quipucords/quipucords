@@ -1,4 +1,5 @@
 """Satellite 5 API handlers."""
+
 import logging
 import xmlrpc.client
 from collections.abc import Iterable

@@ -1,4 +1,5 @@
 """Test RHACS ConnectTaskRunner."""
+
 import logging
 
 import pytest

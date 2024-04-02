@@ -52,9 +52,10 @@ def test_if_value_for_env_default_list_gets_updated(
 
 def test_when_value_cant_be_cast_to_int():
     """Tests if function only updates values if it can be cast to int."""
-    with mock.patch.dict(
-        os.environ, ({"QPC_FEATURE_OVERALL_STATUS": "wrong"})
-    ), pytest.raises(ValueError) as exc:
+    with (
+        mock.patch.dict(os.environ, ({"QPC_FEATURE_OVERALL_STATUS": "wrong"})),
+        pytest.raises(ValueError) as exc,
+    ):
         FeatureFlag.get_feature_flags_from_env()
     assert (
         str(exc.value) == "'wrong' from 'QPC_FEATURE_OVERALL_STATUS'"
@@ -76,8 +77,9 @@ def test_when_int_is_not_valid_value_for_env(
     env_value,
 ):
     """Test when int is not a valid value for env."""
-    with mock.patch.dict(os.environ, ({env_name: env_value})), pytest.raises(
-        ValueError, match="can't be converted to int"
+    with (
+        mock.patch.dict(os.environ, ({env_name: env_value})),
+        pytest.raises(ValueError, match="can't be converted to int"),
     ):
         FeatureFlag.get_feature_flags_from_env()
 

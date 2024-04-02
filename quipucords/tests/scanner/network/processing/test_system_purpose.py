@@ -1,6 +1,5 @@
 """Unit tests for initial processing of system purpose fact."""
 
-
 import unittest
 
 from scanner.network.processing import system_purpose

@@ -1,4 +1,5 @@
 """Test the scanner.tasks.get_task_runner_class function."""
+
 import logging
 
 import pytest

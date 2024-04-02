@@ -18,6 +18,7 @@ Here is an example output (from a RHEL9 VM) that this processor can handle:
     inet6 fe80::4c4:ffaf:f5e8:3e81/64 scope link
        valid_lft forever preferred_lft forever
 """  # noqa: E501
+
 import ipaddress
 import re
 

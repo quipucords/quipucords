@@ -1,4 +1,5 @@
 """Unit tests for process `ip address show` facts."""
+
 from scanner.network.processing import ip
 from scanner.network.processing.util_for_test import ansible_result
 

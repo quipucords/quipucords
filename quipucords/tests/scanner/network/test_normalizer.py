@@ -1,6 +1,5 @@
 """test network scan normalizer."""
 
-
 import pytest
 
 from scanner.network.normalizer import (

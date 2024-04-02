@@ -3,6 +3,7 @@ env module.
 
 Utilities for handling env vars in testing.
 """
+
 import os
 from functools import cached_property
 from urllib.parse import urlparse, urlunparse

@@ -1,6 +1,5 @@
 """Test quipucords api urls."""
 
-
 import pytest
 from rest_framework.reverse import reverse
 

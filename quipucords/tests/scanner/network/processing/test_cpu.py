@@ -1,6 +1,5 @@
 """Unit tests for initial processing of cpu facts."""
 
-
 import unittest
 
 from scanner.network.processing import cpu, process

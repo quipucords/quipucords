@@ -1,4 +1,5 @@
 """Test the vcenter connect capabilities."""
+
 from multiprocessing import Value
 from socket import gaierror
 from unittest.mock import ANY, Mock, patch

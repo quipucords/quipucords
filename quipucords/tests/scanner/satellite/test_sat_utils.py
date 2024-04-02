@@ -1,4 +1,5 @@
 """Test the satellite utils."""
+
 import xmlrpc.client
 from unittest.mock import ANY, patch
 

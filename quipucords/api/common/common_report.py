@@ -1,4 +1,5 @@
 """Util for common report operations."""
+
 import io
 import logging
 import tarfile

@@ -262,9 +262,9 @@ class TestVCenterInspectTaskRunnerTest:
         content.propertyCollector.RetrievePropertiesEx(ANY).token = "1"
         content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects_first_page
         content.propertyCollector.ContinueRetrievePropertiesEx(ANY).token = None
-        content.propertyCollector.ContinueRetrievePropertiesEx(
-            ANY
-        ).objects = objects_second_page
+        content.propertyCollector.ContinueRetrievePropertiesEx(ANY).objects = (
+            objects_second_page
+        )
 
         with (
             patch.object(

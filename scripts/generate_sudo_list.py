@@ -1,4 +1,5 @@
 """Helper script to generate sudo list doc."""
+
 import argparse
 import filecmp
 import sys

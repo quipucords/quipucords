@@ -1,6 +1,5 @@
 """Unit tests for initial processing of virt facts."""
 
-
 import unittest
 
 from scanner.network.processing import process, virt

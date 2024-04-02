@@ -2,6 +2,7 @@
 
 These models are used in the REST definitions
 """
+
 from django.db import models
 from django.utils.translation import gettext as _
 

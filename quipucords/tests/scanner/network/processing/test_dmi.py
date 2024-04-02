@@ -1,6 +1,5 @@
 """Unit tests for initial processing of dmi facts."""
 
-
 import unittest
 
 from scanner.network.processing import dmi

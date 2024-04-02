@@ -1,4 +1,5 @@
 """Factory for Satellite Interface."""
+
 from scanner.satellite.api import SATELLITE_VERSION_5
 from scanner.satellite.five import SatelliteFive
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2

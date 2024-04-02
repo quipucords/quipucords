@@ -1,4 +1,5 @@
 """Infer release version."""
+
 import re
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError, version

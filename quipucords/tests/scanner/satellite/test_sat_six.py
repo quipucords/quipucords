@@ -1,4 +1,5 @@
 """Test the satellite six interface."""
+
 from multiprocessing import Value
 from unittest.mock import ANY, patch
 
@@ -531,15 +532,16 @@ class TestSatelliteSixV1:
             },
         ]
 
-        with patch.object(
-            SatelliteSixV1, "get_orgs", return_value=[org_a_id, org_b_id]
-        ), patch.object(SatelliteSixV1, "prepare_hosts") as mock_prepare_hosts, patch(
-            "scanner.satellite.six.request_host_details", return_value={}
-        ) as mock_request_host_details, patch(
-            "scanner.satellite.utils.validate_task_stats", return_value=True
-        ), patch(
-            "multiprocessing.pool.Pool.starmap"
-        ) as mock_pool_starmap, requests_mock.Mocker() as mocker:
+        with (
+            patch.object(SatelliteSixV1, "get_orgs", return_value=[org_a_id, org_b_id]),
+            patch.object(SatelliteSixV1, "prepare_hosts") as mock_prepare_hosts,
+            patch(
+                "scanner.satellite.six.request_host_details", return_value={}
+            ) as mock_request_host_details,
+            patch("scanner.satellite.utils.validate_task_stats", return_value=True),
+            patch("multiprocessing.pool.Pool.starmap") as mock_pool_starmap,
+            requests_mock.Mocker() as mocker,
+        ):
             mock_prepare_hosts.side_effect = lambda x: list(x)
             mocker.get(url_org_a, status_code=200, json=jsonresults[0])
             mocker.get(url_org_b, status_code=200, json=jsonresults[1])
