@@ -19,6 +19,7 @@ from api.views import (
     details,
     insights,
     jobs,
+    ping,
     reports,
     source_bulk_delete,
     status,
@@ -60,6 +61,7 @@ v1_urls = [
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
     path("token/", QuipucordsExpiringAuthTokenView),
     path("status/", status, name="server-status"),
+    path("ping/", ping, name="server-ping"),
     *ROUTER_V1.urls,
 ]
 

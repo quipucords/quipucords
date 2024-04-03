@@ -1,7 +1,14 @@
 """View for server status."""
 import os
 
-from rest_framework.decorators import api_view
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_protect
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from api import API_VERSION
@@ -33,3 +40,12 @@ def status(request):
             env_dict[key] = value
     server_info["environment_vars"] = env_dict
     return Response(server_info)
+
+
+@api_view(["GET"])
+@csrf_protect
+@authentication_classes([])
+@permission_classes((AllowAny,))
+def ping(_request):
+    """Provide the public ping endpoint."""
+    return HttpResponse("pong", content_type="text/plain")
