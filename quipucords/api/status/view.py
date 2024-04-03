@@ -2,7 +2,6 @@
 import os
 
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_protect
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -43,7 +42,6 @@ def status(request):
 
 
 @api_view(["GET"])
-@csrf_protect
 @authentication_classes([])
 @permission_classes((AllowAny,))
 def ping(_request):
