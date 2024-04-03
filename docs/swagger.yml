@@ -37,6 +37,8 @@ tags:
   description: "API related to the User model"
 - name: "Status"
   description: "API related to the server status"
+- name: "Ping"
+  description: "API related to the server ping"
 
 paths:
   /credentials/:
@@ -1243,6 +1245,19 @@ paths:
           description: "Server status"
           schema:
             $ref: "#/definitions/ServerStatus"
+  /ping/:
+    get:
+      tags:
+        - "Ping"
+      summary: "Provides endpoint for server ping"
+      description: "Server liveness ping."
+      operationId: "serverPing"
+      security: []
+      produces:
+        - text/plain
+      responses:
+        200:
+          description: "Server pong"
 definitions:
   Credential:
     type: "object"
