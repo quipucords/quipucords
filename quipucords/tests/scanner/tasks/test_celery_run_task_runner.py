@@ -43,3 +43,25 @@ def test_celery_run_task_runner(mocker, runner_return_value, expect_success):
     assert success is expect_success
     assert scan_task_id == scan_task.id
     assert task_status == runner_return_value
+
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+@pytest.mark.django_db
+def test_celery_run_task_runner_canceled(mocker):
+    """Test celery_run_task_runner's with scan job canceled."""
+    scan_type = ScanTask.SCAN_TYPE_CONNECT
+    source_type = DataSources.NETWORK
+    scan_task = ScanTaskFactory(source__source_type=source_type, scan_type=scan_type)
+
+    mock_get_task_runner_class = mocker.patch.object(tasks, "get_task_runner_class")
+    mocker.patch.object(tasks, "scan_job_is_canceled", return_value=True)
+
+    success, scan_task_id, task_status = tasks.celery_run_task_runner.delay(
+        scan_task.id, source_type, scan_type
+    ).get()
+
+    mock_get_task_runner_class.assert_called_once_with(source_type, scan_type)
+
+    assert success is False
+    assert scan_task_id == scan_task.id
+    assert task_status == ScanTask.CANCELED

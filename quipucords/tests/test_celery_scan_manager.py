@@ -73,12 +73,10 @@ class TestCeleryScanManager:
         scan_job.tasks = None
         assert celery_manager.kill(scan_job, "cancel") is False
 
-    @patch("scanner.manager.AsyncResult")
-    @patch("scanner.manager.get_scan_job_celery_task_id")
-    def test_celery_manager_interface_kill_success(
-        self, _async_result_mock, _get_celery_task_id_mock, faker
-    ):
+    def test_celery_manager_interface_kill_success(self, faker, mocker):
         """Assert CeleryScanManager handles kill successes."""
+        mocker.patch.object(manager, "AsyncResult")
+        mocker.patch.object(manager, "get_scan_job_celery_task_id")
         celery_manager = manager.CeleryScanManager()
         scan_job_id = faker.pyint()
         scan_job = Mock()
@@ -87,12 +85,10 @@ class TestCeleryScanManager:
         assert celery_manager.kill(scan_job, "cancel") is True
 
     @pytest.mark.django_db
-    @patch("scanner.manager.AsyncResult")
-    @patch("scanner.manager.get_scan_job_celery_task_id")
-    def test_celery_manager_interface_kill_with_tasks_success(
-        self, _async_result_mock, _get_celery_task_id_mock
-    ):
+    def test_celery_manager_interface_kill_with_tasks_success(self, mocker):
         """Assert CeleryScanManager handles kill successes with valid Scan Tasks."""
+        mocker.patch.object(manager, "AsyncResult")
+        mocker.patch.object(manager, "get_scan_job_celery_task_id")
         celery_manager = manager.CeleryScanManager()
         scan_job = ScanJobFactory(status=ScanTask.RUNNING)
         ScanTaskFactory(job=scan_job)

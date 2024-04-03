@@ -304,3 +304,20 @@ def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     deployments_report = fingerprint_only_scanjob.report.deployment_report
     assert deployments_report.id
     assert deployments_report.system_fingerprints.count() == 1
+
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@pytest.mark.django_db
+def test_fingerprint_job_canceled(fingerprint_only_scanjob, mocker):
+    """Test that a fingerprint scan job handles if a scan job is canceled."""
+    assert (
+        not fingerprint_only_scanjob.report.deployment_report
+    ), "scanjob seems to be already completed"
+    job_runner = job.ScanJobRunner(fingerprint_only_scanjob)
+    assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
+    mocker.patch.object(tasks, "scan_job_is_canceled", return_value=True)
+    async_result = job_runner.run()
+    async_result.get()
+
+    fingerprint_only_scanjob.refresh_from_db()
+    assert fingerprint_only_scanjob.status == ScanTask.FAILED
