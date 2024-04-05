@@ -23,6 +23,7 @@ RUN dnf install \
         jq \
         libpq \
         make \
+        nmap-ncat \
         openssh-clients \
         procps-ng \
         python3.11 \

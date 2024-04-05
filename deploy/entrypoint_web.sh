@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+shopt -s inherit_errexit
 
 handle_certificates() {
     # verify if user provided certificates exist or create a self signed certificate.
@@ -41,6 +42,10 @@ else
     handle_certificates
     GUNICORN_CONF="/deploy/gunicorn_conf.py"
 fi
+
+SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")
+"${SCRIPT_DIR}"/check_related_services_liveness.sh
 
 # We only start the server if both the DB
 # migration succeeds and the superuser is created.
