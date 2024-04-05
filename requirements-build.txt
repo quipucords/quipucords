@@ -25,7 +25,7 @@ flit-core==3.9.0
     #   sqlparse
     #   typing-extensions
     #   wheel
-hatchling==1.22.4
+hatchling==1.22.5
     # via
     #   colorama
     #   urllib3
@@ -61,7 +61,7 @@ setuptools-scm==7.1.0
     #   setuptools-rust
 trove-classifiers==2024.3.25
     # via hatchling
-typing-extensions==4.10.0 ; python_version >= "3.11" and python_version < "3.12"
+typing-extensions==4.11.0 ; python_version >= "3.11" and python_version < "3.12"
     # via setuptools-scm
 wheel==0.43.0
     # via
