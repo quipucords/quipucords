@@ -51,9 +51,6 @@ COPY Makefile .
 ARG UI_RELEASE="latest"
 RUN --mount=type=secret,id=gh_api_token make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
-# Create /etc/ssl/qpc
-COPY deploy/ssl /etc/ssl/qpc
-
 # Create /deploy
 COPY deploy  /deploy
 
