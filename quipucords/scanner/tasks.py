@@ -125,7 +125,7 @@ def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
 
     if scan_job_is_canceled(self, scan_job.id):
         logger.info(f"Scan Job {scan_job.id} canceled, skipping fingerprint")
-        scan_job.status_fail("Scan Job was Canceled")
+        scan_job.status_cancel()
         return False, scan_task_id, ScanTask.CANCELED
 
     if not (report := scan_job.report):
