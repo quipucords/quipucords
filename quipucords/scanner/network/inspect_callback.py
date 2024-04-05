@@ -74,7 +74,6 @@ class InspectCallback:
                     host,
                     fact_name,
                 )
-            fact_value = _fact_value
             if fact_name in self._ansible_facts[host]:
                 logger.warning("[host=%s] Overwriting fact %s", host, fact_name)
             logger.debug("[host=%s] Storing fact %s", host, fact_name)

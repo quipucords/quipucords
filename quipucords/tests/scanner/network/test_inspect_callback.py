@@ -16,7 +16,7 @@ from scanner.network.inspect_callback import InspectCallback
 @pytest.fixture
 def event_ok():
     """
-    Return a successful ansible event.
+    Return a successful Ansible event.
 
     This was collected while debugging `InspectCallback.event_callback` during an actual
     network scan.
@@ -64,7 +64,7 @@ def event_ok():
 @pytest.fixture
 def event_failed():
     """
-    Return a ansible event with "failed" status.
+    Return an Ansible event with "failed" status.
 
     This was collected while debugging `InspectCallback.event_callback` during an actual
     network scan.
@@ -118,11 +118,11 @@ def event_failed():
 @pytest.fixture
 def event_unreachable():
     """
-    Return a ansible event with "unreachable" status.
+    Return an Ansible event with "unreachable" status.
 
     This was collected while debugging `InspectCallback.event_callback` during an actual
     network scan. Some longer strings were replaced with <...>. In order to achieve the
-    unreachable status the target VM scanned was terminated mid scan.
+    unreachable status the target VM scanned was terminated mid-scan.
     """
     return {
         "uuid": "26079e2e-6bad-46b5-a64d-feea7e0f6ab5",
@@ -160,6 +160,38 @@ def event_unreachable():
             },
             "uuid": "26079e2e-6bad-46b5-a64d-feea7e0f6ab5",
         },
+    }
+
+
+@pytest.fixture
+def fact_with_bad_bytes():
+    """
+    Return a collected Ansible fact that contains "bad" bytes.
+
+    This represents a fact with not-UTF8-safe bytes like seen in a customer bug report.
+    This was collected while debugging `InspectCallback._process_task_facts` during an
+    actual network scan that triggered this condition.
+    """
+    return {
+        "internal_system_user_count": {
+            "rc": 0,
+            "stdout": (
+                "root:x:0:0:root:/root:/bin/bash\r\n"
+                "ß´˜µ∫∑´®˙∆˚©ƒ∑´®¨˚˙∆ß∂ƒ∫≤“‘æ…≤≤µ˜e\udcc0\udcc0\udcf4\udcff:x:"
+                "69420:69420:i am a potato:/home/potato:/bin/bash\r\n"
+            ),
+            "stdout_lines": [
+                "root:x:0:0:root:/root:/bin/bash",
+                (
+                    "ß´˜µ∫∑´®˙∆˚©ƒ∑´®¨˚˙∆ß∂ƒ∫≤“‘æ…≤≤µ˜e\udcc0\udcc0\udcf4\udcff:x:"
+                    "69420:69420:i am a potato:/home/potato:/bin/bash"
+                ),
+            ],
+            "stderr": "Shared connection to 127.0.0.1 closed.\r\n",
+            "stderr_lines": ["Shared connection to 127.0.0.1 closed."],
+            "changed": True,
+            "failed": False,
+        }
     }
 
 
@@ -262,6 +294,29 @@ class TestInspectCallback:
         results = next(callback.iter_results())
         assert results.facts == facts
         assert results.status == expected_status
+
+    def test_fact_sanitization_bad_byte_strings(
+        self, mocker, caplog, fact_with_bad_bytes
+    ):
+        """Test InspectCallback._process_task_facts with "bad" bytes in strings."""
+        caplog.set_level(logging.WARNING)
+        original_line = fact_with_bad_bytes["internal_system_user_count"][
+            "stdout_lines"
+        ][1]
+        hostname = "buggyhost"
+        callback = InspectCallback(mocker.Mock())
+        callback._process_task_facts(fact_with_bad_bytes, hostname)
+        modified_line = callback._ansible_facts[hostname]["internal_system_user_count"][
+            "stdout_lines"
+        ][1]
+        assert original_line != modified_line, "bad line was not modified"
+        assert "????" not in original_line
+        assert "????" in modified_line
+        assert caplog.record_tuples[0][1] == logging.WARNING
+        assert caplog.record_tuples[0][2] == (
+            f"[host={hostname}] Sanitized value for 'internal_system_user_count' "
+            "changed from its original value."
+        )
 
 
 @pytest.fixture
