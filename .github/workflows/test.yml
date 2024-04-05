@@ -69,8 +69,11 @@ jobs:
           cache: "poetry"
           cache-dependency-path: "poetry.lock"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: poetry install
+
+      - name: Install additional tools
+        run: sudo apt-get install -y shellcheck
 
       - name: Run Test
         run: make ${{ matrix.type }} -k

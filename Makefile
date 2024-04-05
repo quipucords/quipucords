@@ -43,6 +43,7 @@ help:
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
 	@echo "  lint-black                    to run the black format checker"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
+	@echo "  lint-shell                    to run the shellcheck linter"
 	@echo "  lock-requirements             to lock all python dependencies"
 	@echo "  update-requirements           to update all python dependencies"
 	@echo "  check-requirements            to check python dependency files"
@@ -122,7 +123,7 @@ test-integration:
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
-lint: lint-ruff lint-black lint-ansible
+lint: lint-shell lint-ruff lint-black lint-ansible
 
 lint-ruff:
 	poetry run ruff .
@@ -133,6 +134,9 @@ lint-black:
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
 	poetry run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
+
+lint-shell:
+	shellcheck ./deploy/*.sh
 
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
