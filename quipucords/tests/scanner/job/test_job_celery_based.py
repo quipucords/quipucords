@@ -320,4 +320,4 @@ def test_fingerprint_job_canceled(fingerprint_only_scanjob, mocker):
     async_result.get()
 
     fingerprint_only_scanjob.refresh_from_db()
-    assert fingerprint_only_scanjob.status == ScanTask.FAILED
+    assert fingerprint_only_scanjob.status == ScanTask.CANCELED
