@@ -37,6 +37,7 @@ else
     # 1. with this simpler config we delegate to nginx to deal with https shenanigans
     # 2. we can set a higher number of workers, since there's no risk for race conditions
     #    with the celery-based manager
+    handle_certificates
     GUNICORN_CONF="/deploy/gunicorn_conf.py"
 fi
 
