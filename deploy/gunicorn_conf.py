@@ -17,4 +17,8 @@ errorlog = "-"
 loglevel = "info"
 accesslog = "-"
 
+# SSL configuration
+keyfile = "/etc/ssl/qpc/server.key"
+certfile = "/etc/ssl/qpc/server.crt"
+
 start_debugger_if_required()
