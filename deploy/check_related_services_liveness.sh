@@ -33,6 +33,8 @@ function check_db_liveness() {
         local PSQL_PORT
         PSQL_PORT=$(get_django_config "DATABASES['default']['PORT']")
         check_svc_status "${PSQL_HOST}" "${PSQL_PORT}"
+    else
+        echo "Skipping postgres liveness check."
     fi
 }
 
