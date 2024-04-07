@@ -38,4 +38,19 @@ function check_db_liveness() {
     fi
 }
 
+function check_redis_liveness() {
+    local QPC_ENABLE_CELERY_SCAN_MANAGER
+    QPC_ENABLE_CELERY_SCAN_MANAGER=$(get_django_config QPC_ENABLE_CELERY_SCAN_MANAGER)
+    if [[ "${QPC_ENABLE_CELERY_SCAN_MANAGER}" == "True" ]]; then
+        local REDIS_HOST
+        REDIS_HOST=$(get_django_config REDIS_HOST)
+        local REDIS_PORT
+        REDIS_PORT=$(get_django_config REDIS_PORT)
+        check_svc_status "${REDIS_HOST}" "${REDIS_PORT}"
+    else
+        echo "Skipping redis liveness check."
+    fi
+}
+
 check_db_liveness
+check_redis_liveness
