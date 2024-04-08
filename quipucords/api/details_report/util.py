@@ -10,7 +10,6 @@ from api import messages
 from api.common.common_report import (
     REPORT_TYPE_DETAILS,
     CSVHelper,
-    create_report_version,
     sanitize_row,
 )
 from api.models import (
@@ -19,7 +18,6 @@ from api.models import (
     RawFact,
     Report,
     ScanTask,
-    ServerInformation,
 )
 from api.serializers import DetailsReportSerializer
 from constants import DataSources
@@ -39,32 +37,6 @@ SOURCE_NAME_KEY = "source_name"
 FACTS_KEY = "facts"
 
 logger = logging.getLogger(__name__)
-
-
-def build_sources_from_tasks(tasks):
-    """Build sources for a set of tasks.
-
-    :param tasks: ScanTask objects used to build results
-    :returns: dict containing sources structure for facts endpoint
-    """
-    server_id = ServerInformation.create_or_retrieve_server_id()
-    sources = []
-    for inspect_task in tasks:
-        if inspect_task.scan_type != ScanTask.SCAN_TYPE_INSPECT:
-            continue
-        task_facts = inspect_task.get_facts()
-        if task_facts:
-            source = inspect_task.source
-            if source is not None:
-                source_dict = {
-                    SERVER_ID_KEY: server_id,
-                    REPORT_VERSION_KEY: create_report_version(),
-                    SOURCE_NAME_KEY: source.name,
-                    SOURCE_TYPE_KEY: source.source_type,
-                    FACTS_KEY: task_facts,
-                }
-                sources.append(source_dict)
-    return sources
 
 
 def validate_details_report_json(details_report_json, external_json):
