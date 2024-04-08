@@ -43,21 +43,6 @@ def system_fingerprint_source_types():
     return all_types - ignored_types
 
 
-def generate_details_sources(obj):
-    """Return raw facts for details report depending on source_type."""
-    sources_list = []
-    for source_type in obj.source_types:
-        source = {
-            "server_id": _faker.uuid4(),
-            "source_name": _faker.slug(),
-            "source_type": source_type,
-            "report_version": _faker.uuid4(),
-            "facts": list(raw_facts_generator(source_type, obj.facts_per_source)),
-        }
-        sources_list.append(source)
-    return sources_list
-
-
 class SystemFingerprintFactory(DjangoModelFactory):
     """SystemFingerprint factory."""
 
@@ -148,19 +133,12 @@ class ReportFactory(DjangoModelFactory):
     @staticmethod
     def get_or_create_inspect_task(report: models.Report):
         """Get or create a inspect task."""
-        try:
-            scan_job = report.scanjob
-        except models.Report.scanjob.RelatedObjectDoesNotExist:
-            scan_job = ScanJobFactory(report=None)
-            scan_job.report = report
-            scan_job.save()
-
+        scan_job = report.scanjob
         scan_task = (
             scan_job.tasks.filter(scan_type=models.ScanTask.SCAN_TYPE_INSPECT)
             .order_by("sequence_number")
             .first()
         )
-
         if not scan_task:
             scan_task = ScanTaskFactory(
                 job=scan_job, scan_type=models.ScanTask.SCAN_TYPE_INSPECT
@@ -172,46 +150,53 @@ class ReportFactory(DjangoModelFactory):
         obj: models.Report, create: bool, extracted: list[DataSources], **kwargs
     ):
         """Create RawFacts with the "extracted" source types."""
-        if not create or not extracted:
+        if not create or not (extracted or kwargs):
             return
         source_types = kwargs.get("source_types") or _faker.random_elements(
             DataSources.values
         )
-        fact_number = _faker.pyint(min_value=2, max_value=10)
-
+        assert isinstance(source_types, (list, tuple))
+        assert all(el in DataSources.values for el in source_types)
+        fact_number = kwargs.get("qty_per_source")
+        if fact_number is None:
+            fact_number = _faker.pyint(min_value=2, max_value=5)
+        assert isinstance(fact_number, int)
         scan_task = ReportFactory.get_or_create_inspect_task(obj)
         for source_type in source_types:
             inspect_group = InspectGroupFactory(source_type=source_type)
             inspect_group.tasks.add(scan_task)
             for fact_dict in raw_facts_generator(source_type, fact_number):
-                inspect_result = InspectResultFactory(inspect_group=inspect_group)
-                raw_facts = [
-                    models.RawFact(name=k, value=v, inspect_result=inspect_result)
-                    for k, v in fact_dict.items()
-                ]
-                models.RawFact.objects.bulk_create(raw_facts)
+                InspectResultFactory(
+                    inspect_group=inspect_group, with_raw_facts=fact_dict
+                )
 
     @factory.post_generation
     def sources(obj: models.Report, create: bool, extracted: list[dict], **kwargs):
         """Import "sources" (same as old details report "source") as RawFacts."""
         if not create or not extracted:
             return
+        assert isinstance(extracted, (list, tuple))
+        assert all(isinstance(el, dict) for el in extracted)
+        assert all(el.get("facts") for el in extracted)
+        assert all(isinstance(el.get("facts"), (list, tuple)) for el in extracted)
         scan_task = ReportFactory.get_or_create_inspect_task(obj)
         for source_dict in extracted:
-            inspect_group = InspectGroupFactory(
-                source_type=source_dict["source_type"],
-                source_name=source_dict["source_name"],
-                server_id=source_dict["server_id"],
-                server_version=source_dict["report_version"],
-            )
+            fact_list = source_dict["facts"]
+            inspect_group_kwargs = {
+                "source_type": source_dict.get("source_type"),
+                "source_name": source_dict.get("source_name"),
+                "server_id": source_dict.get("server_id"),
+                "server_version": source_dict.get("report_version"),
+            }
+            inspect_group_kwargs = {
+                k: v for k, v in inspect_group_kwargs.items() if v is not None
+            }
+            inspect_group = InspectGroupFactory(**inspect_group_kwargs)
             inspect_group.tasks.add(scan_task)
-            for fact_dict in source_dict["facts"]:
-                inspect_result = InspectResultFactory(inspect_group=inspect_group)
-                raw_facts = [
-                    models.RawFact(name=k, value=v, inspect_result=inspect_result)
-                    for k, v in fact_dict.items()
-                ]
-                models.RawFact.objects.bulk_create(raw_facts)
+            for fact_dict in fact_list:
+                InspectResultFactory(
+                    inspect_group=inspect_group, with_raw_facts=fact_dict
+                )
 
 
 class JobConnectionResultFactory(DjangoModelFactory):
@@ -329,12 +314,7 @@ class ScanTaskFactory(DjangoModelFactory):
         inspect_group = InspectGroupFactory()
         inspect_group.tasks.add(obj)
         for fact_dict in extracted:
-            inspect_result = InspectResultFactory(inspect_group=inspect_group)
-            raw_facts = [
-                models.RawFact(name=k, value=v, inspect_result=inspect_result)
-                for k, v in fact_dict.items()
-            ]
-            models.RawFact.objects.bulk_create(raw_facts)
+            InspectResultFactory(inspect_group=inspect_group, with_raw_facts=fact_dict)
 
 
 class CredentialFactory(DjangoModelFactory):
@@ -420,6 +400,20 @@ class InspectResultFactory(DjangoModelFactory):
         """Factory options."""
 
         model = "api.InspectResult"
+
+    @factory.post_generation
+    def with_raw_facts(
+        obj: models.InspectResult, create: bool, extracted: dict, **kwargs
+    ):
+        """Import raw facts to this InspectResult instance."""
+        if not create or not extracted:
+            return
+
+        raw_facts = [
+            models.RawFact(name=k, value=v, inspect_result=obj)
+            for k, v in extracted.items()
+        ]
+        models.RawFact.objects.bulk_create(raw_facts)
 
 
 def generate_invalid_id(faker: factory.Faker) -> int:

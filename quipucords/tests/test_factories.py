@@ -114,3 +114,21 @@ class TestReportFactory:
         )
         assert len(report.sources) == 1
         assert len(report.sources[0]["facts"]) > 1
+
+    @pytest.mark.dbcompat
+    def test_source_generation_qty_per_source(self, faker):
+        """Test source generation quantity per source."""
+        qty_per_source = faker.pyint(min_value=6, max_value=10)
+        qty_of_sources = len(DataSources.names)
+        report = ReportFactory(
+            generate_raw_facts=True,
+            generate_raw_facts__source_types=DataSources.values,
+            generate_raw_facts__qty_per_source=qty_per_source,
+        )
+        assert len(report.sources) == qty_of_sources
+        # we expect the +1 because of OpenShift type, which has an extra "system"
+        expected_number_of_results = qty_of_sources * qty_per_source + 1
+        assert (
+            sum(len(source["facts"]) for source in report.sources)
+            == expected_number_of_results
+        )
