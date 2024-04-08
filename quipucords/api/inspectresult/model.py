@@ -72,7 +72,7 @@ class InspectGroupQuerySet(models.QuerySet):
         elif connection.vendor == "sqlite":
             raw_sql = RAW_QUERY_SQLITE
             raw_sql_kw = {"output_field": models.JSONField()}
-        else:
+        else:  # pragma: no cover
             raise NotImplementedError(
                 f"with_raw_facts not implemented for {connection.vendor=}"
             )
