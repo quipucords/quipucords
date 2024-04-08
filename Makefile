@@ -126,7 +126,7 @@ swagger-valid:
 lint: lint-shell lint-ruff lint-black lint-ansible
 
 lint-ruff:
-	poetry run ruff .
+	poetry run ruff check .
 
 lint-black:
 	poetry run black . --check --diff
