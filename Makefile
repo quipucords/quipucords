@@ -111,8 +111,8 @@ test-coverage:
 	# combine them to a single .coverage file.
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres COVERAGE_FILE=.coverage.notslow
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QPC_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
-	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m 'slow and (not container)' --cov=quipucords" COVERAGE_FILE=.coverage.notcontainer
-	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.notcontainer
+	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m slow --cov=quipucords" COVERAGE_FILE=.coverage.slow
+	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.slow
 	poetry run coverage report
 	# We must run `coverage xml` explicitly to make GitHub codecov action happy.
 	poetry run coverage xml
