@@ -502,7 +502,7 @@ else:
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         },
         "redis": {
-            "BACKEND": "django_redis.cache.RedisCache",
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
             "LOCATION": REDIS_URL,
             "KEY_PREFIX": "discovery",
             "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
