@@ -16,16 +16,16 @@ from scanner.tasks import (
 class TestCeleryTaskCache:
     """Test the celery tasks cache functions."""
 
-    @patch("scanner.tasks.redis_cache")
-    def test_get_scan_job_celery_task(self, redis_cache_mock, faker):
+    @patch("scanner.tasks.caches")
+    def test_get_scan_job_celery_task(self, caches_mock, faker):
         """Test that getting a cache key accesses the redis cache."""
         scan_job_id = faker.pyint()
         key = scan_job_celery_task_id_key(scan_job_id)
         get_scan_job_celery_task_id(scan_job_id)
-        assert redis_cache_mock.get.called_once_with(key)
+        assert caches_mock["redis"].get.called_once_with(key)
 
-    @patch("scanner.tasks.redis_cache")
-    def test_set_scan_job_celery_task_without_timeout(self, redis_cache_mock, faker):
+    @patch("scanner.tasks.caches")
+    def test_set_scan_job_celery_task_without_timeout(self, caches_mock, faker):
         """Test that setting a cache key uses the default ttl if not specified."""
         default_scan_job_ttl = faker.pyint(10, 60)
         with override_settings(QPC_SCAN_JOB_TTL=default_scan_job_ttl):
@@ -33,12 +33,12 @@ class TestCeleryTaskCache:
             scan_job_id = faker.pyint()
             set_scan_job_celery_task_id(scan_job_id, celery_task_id)
             key = scan_job_celery_task_id_key(celery_task_id)
-            assert redis_cache_mock.set.called_once_with(
+            assert caches_mock["redis"].set.called_once_with(
                 key, celery_task_id, default_scan_job_ttl
             )
 
-    @patch("scanner.tasks.redis_cache")
-    def test_set_scan_job_celery_task_wit_timeout(self, redis_cache_mock, faker):
+    @patch("scanner.tasks.caches")
+    def test_set_scan_job_celery_task_wit_timeout(self, caches_mock, faker):
         """Test that setting a cache key honors the TTL specified."""
         use_scan_job_ttl = faker.pyint(10, 60)
         celery_task_id = faker.uuid4()
@@ -47,7 +47,7 @@ class TestCeleryTaskCache:
             scan_job_id, celery_task_id, key_timeout=use_scan_job_ttl
         )
         key = scan_job_celery_task_id_key(celery_task_id)
-        assert redis_cache_mock.set.called_once_with(
+        assert caches_mock["redis"].set.called_once_with(
             key, celery_task_id, use_scan_job_ttl
         )
 

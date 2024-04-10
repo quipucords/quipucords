@@ -483,30 +483,36 @@ QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
 # the application will continue to work without the Celery scan manager enabled.
 # Once quipucords only supports the Celery Scan Manager and Redis, we can then
 # switch the default to be Redis.
+
+# When enabling the Celery Scan Manager, we want to also enable the Redis
+# Cache back-end. That can be disabled via QUIPUCORDS_ENABLE_REDIS_CACHE
+# for development or testing purposes.
+
+defaultEnableRedisCache = False
+if QPC_ENABLE_CELERY_SCAN_MANAGER:
+    defaultEnableRedisCache = True
+
+QUIPUCORDS_ENABLE_REDIS_CACHE = env.bool(
+    "QUIPUCORDS_ENABLE_REDIS_CACHE", defaultEnableRedisCache
+)
+
 QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
 
-# For test environments, we only want to communicate with the local memory cache.
-QUIPUCORDS_ENVIRONMENT = env("QUIPUCORDS_ENVIRONMENT", default="production")
-if QUIPUCORDS_ENVIRONMENT == "test":
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        },
-        "redis": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        },
-    }
-else:
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        },
-        "redis": {
-            "BACKEND": "django.core.cache.backends.redis.RedisCache",
-            "LOCATION": REDIS_URL,
-            "KEY_PREFIX": "discovery",
-            "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
-        },
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "redis": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+}
+
+if QUIPUCORDS_ENABLE_REDIS_CACHE:
+    CACHES["redis"] = {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "KEY_PREFIX": "discovery",
+        "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
     }
 
 # Let's define various cache TTL's
