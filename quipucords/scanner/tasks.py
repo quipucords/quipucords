@@ -16,7 +16,6 @@ from scanner.runner import ScanTaskRunner
 
 logger = logging.getLogger(__name__)
 celery_inspect = celery_app.control.inspect()
-redis_cache = caches["redis"]
 
 
 def scan_job_celery_task_id_key(scan_job_id: int):
@@ -26,7 +25,7 @@ def scan_job_celery_task_id_key(scan_job_id: int):
 
 def get_scan_job_celery_task_id(scan_job_id: int):
     """Return the celery task id for a given scan job id."""
-    return redis_cache.get(scan_job_celery_task_id_key(scan_job_id))
+    return caches["redis"].get(scan_job_celery_task_id_key(scan_job_id))
 
 
 def set_scan_job_celery_task_id(
@@ -36,7 +35,7 @@ def set_scan_job_celery_task_id(
     if key_timeout is None:
         key_timeout = settings.QPC_SCAN_JOB_TTL
     key = scan_job_celery_task_id_key(scan_job_id)
-    redis_cache.set(key, celery_task_id, key_timeout)
+    caches["redis"].set(key, celery_task_id, key_timeout)
 
 
 def celery_task_is_revoked(task: celery.Task, celery_task_id: str):

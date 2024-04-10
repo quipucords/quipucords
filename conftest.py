@@ -26,6 +26,19 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 
 @pytest.fixture(autouse=True)
+def disable_redis_cache(settings):
+    """Disable the Redis backend cache and use the local memory cache instead."""
+    settings.CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+        "redis": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+    }
+
+
+@pytest.fixture(autouse=True)
 def disable_celery_until_we_are_ready(settings):
     """Disable Celery scan manager in tests until we are ready to switch everything."""
     settings.QPC_ENABLE_CELERY_SCAN_MANAGER = False
