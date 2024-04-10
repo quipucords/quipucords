@@ -488,12 +488,8 @@ QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
 # Cache back-end. That can be disabled via QUIPUCORDS_ENABLE_REDIS_CACHE
 # for development or testing purposes.
 
-defaultEnableRedisCache = False
-if QPC_ENABLE_CELERY_SCAN_MANAGER:
-    defaultEnableRedisCache = True
-
 QUIPUCORDS_ENABLE_REDIS_CACHE = env.bool(
-    "QUIPUCORDS_ENABLE_REDIS_CACHE", defaultEnableRedisCache
+    "QUIPUCORDS_ENABLE_REDIS_CACHE", QPC_ENABLE_CELERY_SCAN_MANAGER
 )
 
 QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
