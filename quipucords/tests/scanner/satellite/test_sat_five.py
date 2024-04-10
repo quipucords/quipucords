@@ -17,7 +17,7 @@ from api.models import (
     TaskConnectionResult,
 )
 from constants import DataSources
-from scanner.satellite.api import SatelliteException
+from scanner.satellite.api import SatelliteError
 from scanner.satellite.five import SatelliteFive, request_host_details
 from tests.scanner.test_util import create_scan_job
 
@@ -87,7 +87,7 @@ class TestSatelliteFive:
         """Test the method host_count with error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.api.host_count()
 
     @pytest.mark.django_db
@@ -115,7 +115,7 @@ class TestSatelliteFive:
         """Test the method hosts with error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.api.hosts()
 
     @pytest.mark.django_db
@@ -309,7 +309,7 @@ class TestSatelliteFive:
         """Test the virtual_guests method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.api.virtual_guests(1)
 
     @pytest.mark.django_db
@@ -330,7 +330,7 @@ class TestSatelliteFive:
         """Test the virtual_hosts method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.api.virtual_hosts()
 
     @pytest.mark.django_db
@@ -357,7 +357,7 @@ class TestSatelliteFive:
         """Test the phyiscal_hosts method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.api.physical_hosts()
 
     @pytest.mark.django_db
@@ -378,7 +378,7 @@ class TestSatelliteFive:
         """Test the hosts_facts method with an error."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
     @pytest.mark.django_db

@@ -3,11 +3,11 @@
 from api.models import ScanTask
 
 
-class ScanException(Exception):
+class ScanError(Exception):
     """Generic scanner exception."""
 
 
-class ScanInterruptException(ScanException):
+class ScanInterruptError(ScanError):
     """
     Generic Interrupt Exception.
 
@@ -17,19 +17,19 @@ class ScanInterruptException(ScanException):
     STATUS = None
 
 
-class ScanCancelException(ScanInterruptException):
+class ScanCancelError(ScanInterruptError):
     """Scan cancel exception."""
 
     STATUS = ScanTask.CANCELED
 
 
-class ScanPauseException(ScanInterruptException):
+class ScanPauseError(ScanInterruptError):
     """Scan pause exception."""
 
     STATUS = ScanTask.PAUSED
 
 
-class ScanFailureError(ScanException):
+class ScanFailureError(ScanError):
     """
     Exception for scan failures.
 

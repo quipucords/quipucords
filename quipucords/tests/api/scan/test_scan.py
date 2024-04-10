@@ -202,7 +202,7 @@ class TestScanCreate:
         }
         response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_201_CREATED
-        DEFAULT_MAX_CONCURRENCY = 25
+        default_max_concurrency = 25
         assert response.json() == {
             "id": mocker.ANY,
             "name": payload["name"],
@@ -216,7 +216,7 @@ class TestScanCreate:
                     "jboss_fuse": False,
                     "jboss_ws": False,
                 },
-                "max_concurrency": DEFAULT_MAX_CONCURRENCY,
+                "max_concurrency": default_max_concurrency,
             },
             "scan_type": ScanTask.SCAN_TYPE_INSPECT,
             "sources": [

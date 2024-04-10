@@ -193,7 +193,7 @@ class NodeResources(OCPBaseEntity):
     _kind = "node-resources"
 
     @validator("cpu", pre=True)
-    def _convert_cpu_value(cls, value):
+    def _convert_cpu_value(cls, value):  # noqa: N805 # false positive
         # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu
         millicore_suffix = re.compile(r"^\d+m$")
         if isinstance(value, str) and millicore_suffix.match(value):
@@ -201,7 +201,7 @@ class NodeResources(OCPBaseEntity):
         return value
 
     @validator("memory_in_bytes", pre=True)
-    def _convert_memory_bytes(cls, value):
+    def _convert_memory_bytes(cls, value):  # noqa: N805 # false positive
         if isinstance(value, str):
             digits, power_name, ends_with_i = cls._parse_resource_string(value)
             if ends_with_i:

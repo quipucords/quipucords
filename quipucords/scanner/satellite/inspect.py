@@ -3,7 +3,7 @@
 from requests import exceptions
 
 from api.models import ScanTask
-from scanner.satellite.api import SatelliteAuthException, SatelliteException
+from scanner.satellite.api import SatelliteAuthError, SatelliteError
 from scanner.satellite.runner import SatelliteTaskRunner
 
 
@@ -15,8 +15,8 @@ class InspectTaskRunner(SatelliteTaskRunner):
     """
 
     EXPECTED_EXCEPTIONS = (
-        SatelliteAuthException,
-        SatelliteException,
+        SatelliteAuthError,
+        SatelliteError,
         exceptions.ConnectionError,
         TimeoutError,
     )

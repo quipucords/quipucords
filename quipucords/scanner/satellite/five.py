@@ -11,7 +11,7 @@ from more_itertools import unique_everseen
 from api.models import InspectResult
 from api.scantask.model import ScanTask
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteException, SatelliteInterface
+from scanner.satellite.api import SatelliteError, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
 
 logger = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ class SatelliteFive(SatelliteInterface):
             systems_count = len(systems)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteError(str(xml_error)) from xml_error
         self.connect_scan_task.update_stats(
             "INITIAL SATELLITE STATS", sys_count=systems_count
         )
@@ -166,7 +166,7 @@ class SatelliteFive(SatelliteInterface):
                     self.record_conn_result(unique_name, credential)
 
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteError(str(xml_error)) from xml_error
 
         return hosts
 
@@ -308,7 +308,7 @@ class SatelliteFive(SatelliteInterface):
             virt_guests = client.system.list_virtual_guests(key, virtual_host_id)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteError(str(xml_error)) from xml_error
 
         for guest in virt_guests:
             virt_id = guest.get(ID)
@@ -340,7 +340,7 @@ class SatelliteFive(SatelliteInterface):
                 virtual_hosts[virt_host_id] = virtual_host
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteError(str(xml_error)) from xml_error
 
         for virt_host in virt_hosts:
             virt_host_id = virt_host.get(ID)
@@ -373,16 +373,14 @@ class SatelliteFive(SatelliteInterface):
                     physical_hosts.append(host_id)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteError(str(xml_error)) from xml_error
 
         return physical_hosts
 
     def hosts_facts(self, manager_interrupt):
         """Obtain the managed hosts detail raw facts."""
         if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "hosts_facts cannot be called for a connection scan"
-            )
+            raise SatelliteError("hosts_facts cannot be called for a connection scan")
         systems_count = len(self.connect_scan_task.connection_result.systems.all())
         self.inspect_scan_task.update_stats(
             "INITIAL SATELLITE STATS", sys_count=systems_count
@@ -394,7 +392,7 @@ class SatelliteFive(SatelliteInterface):
             hosts = client.system.list_user_systems(key)
             client.auth.logout(key)
         except xmlrpc.client.Fault as xml_error:
-            raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteError(str(xml_error)) from xml_error
         virtual_hosts, virtual_guests = self.virtual_hosts()
         physical_hosts = self.physical_hosts()
         hosts = unique_everseen(hosts)

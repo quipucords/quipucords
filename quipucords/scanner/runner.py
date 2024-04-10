@@ -6,10 +6,10 @@ from typing import Tuple
 
 from api.models import ScanJob, ScanTask
 from scanner.exceptions import (
-    ScanCancelException,
+    ScanCancelError,
     ScanFailureError,
-    ScanInterruptException,
-    ScanPauseException,
+    ScanInterruptError,
+    ScanPauseError,
 )
 
 
@@ -76,7 +76,7 @@ class ScanTaskRunner(metaclass=ABCMeta):
             self.check_for_interrupt(manager_interrupt)
             # call the inner task executor (should be implemented in concrete classes)
             return self.execute_task(manager_interrupt)
-        except ScanInterruptException as interrupt_exc:
+        except ScanInterruptError as interrupt_exc:
             return self.handle_interrupt_exception(interrupt_exc, manager_interrupt)
         except ScanFailureError as failure_error:
             return failure_error.message, ScanTask.FAILED
@@ -91,12 +91,12 @@ class ScanTaskRunner(metaclass=ABCMeta):
         if not manager_interrupt:
             return
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-            raise ScanCancelException()
+            raise ScanCancelError()
         if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-            raise ScanPauseException()
+            raise ScanPauseError()
 
     def handle_interrupt_exception(
-        self, interrupt_exception: ScanInterruptException, manager_interrupt: Value
+        self, interrupt_exception: ScanInterruptError, manager_interrupt: Value
     ):
         """Stop scan job when InterruptScanException is raised."""
         manager_interrupt.value = ScanJob.JOB_TERMINATE_ACK

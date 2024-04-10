@@ -10,7 +10,7 @@ from api.models import ScanTask
 from scanner.exceptions import ScanFailureError
 from scanner.runner import ScanTaskRunner
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteAuthException, SatelliteException
+from scanner.satellite.api import SatelliteAuthError, SatelliteError
 from scanner.satellite.factory import create
 
 
@@ -20,8 +20,8 @@ class SatelliteTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
     supports_partial_results = False
 
     EXPECTED_EXCEPTIONS = (
-        SatelliteAuthException,
-        SatelliteException,
+        SatelliteAuthError,
+        SatelliteError,
         exceptions.ConnectionError,
         TimeoutError,
         socket.gaierror,
