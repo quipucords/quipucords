@@ -388,9 +388,17 @@ class ScanTask(models.Model):
             .exclude(value="")
             .exclude(value={})
         )
-        InspectResult.objects.filter(
+        invalid_results = InspectResult.objects.filter(
             inspect_group__in=self.inspect_groups.all()
-        ).exclude(facts__in=valid_identity_raw_facts).delete()
+        ).exclude(facts__in=valid_identity_raw_facts)
+        if not invalid_results.exists():
+            return
+        logger.warning(
+            "[task=%s] %d invalid results found. Deleting...",
+            self.id,
+            invalid_results.count(),
+        )
+        invalid_results.delete()
 
     def get_result(self):
         """Access results from ScanTask.
