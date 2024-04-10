@@ -11,8 +11,8 @@ from constants import DataSources
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
-    SatelliteAuthException,
-    SatelliteException,
+    SatelliteAuthError,
+    SatelliteError,
 )
 from scanner.satellite.connect import ConnectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
@@ -26,7 +26,7 @@ def mock_conn_exception(param1):
 
 def mock_sat_auth_exception(param1):
     """Mock method to throw satellite auth error."""
-    raise SatelliteAuthException()
+    raise SatelliteAuthError()
 
 
 def mock_timeout_error(param1):
@@ -127,7 +127,7 @@ class TestConnectTaskRunner:
         task = ConnectTaskRunner(self.scan_job, self.scan_task)
 
         with patch(
-            "scanner.satellite.runner.utils.status", side_effect=SatelliteException()
+            "scanner.satellite.runner.utils.status", side_effect=SatelliteError()
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)

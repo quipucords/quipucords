@@ -15,7 +15,7 @@ from requests.exceptions import Timeout
 
 from api.models import InspectResult, ScanTask
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteException, SatelliteInterface
+from scanner.satellite.api import SatelliteError, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
 
 logger = logging.getLogger(__name__)
@@ -159,7 +159,7 @@ def request_results(  # noqa: PLR0913
             options=options,
         )
         if response.status_code != requests.codes.ok:
-            raise SatelliteException(
+            raise SatelliteError(
                 f"Invalid response code {response.status_code}" f" for url: {url}"
             )
         response_body = response.json()
@@ -356,7 +356,7 @@ def _request_host_details(  # noqa: PLR0913
         )
 
         if host_fields_response.status_code != requests.codes.ok:
-            raise SatelliteException(
+            raise SatelliteError(
                 f"Invalid response code {host_fields_response.status_code}"
                 f" for url: {host_fields_url}"
             )
@@ -385,14 +385,14 @@ def _request_host_details(  # noqa: PLR0913
                 )
                 scan_task.log_message(message, logging.WARN, logging_options)
         elif host_subscriptions_response.status_code != requests.codes.ok:
-            raise SatelliteException(
+            raise SatelliteError(
                 f"Invalid response code {host_subscriptions_response.status_code}"
                 f" for url: {host_subscriptions_url}"
             )
         system_inspection_result = InspectResult.SUCCESS
         host_fields_json = host_fields_response.json()
         host_subscriptions_json = host_subscriptions_response.json()
-    except SatelliteException as sat_error:
+    except SatelliteError as sat_error:
         error_message = f"Satellite 6 unknown error encountered: {sat_error}\n"
         logger.error(error_message)
         system_inspection_result = InspectResult.FAILED
@@ -483,9 +483,7 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(self.connect_scan_task.connection_result.systems.all())
         if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "hosts_facts cannot be called for a connection scan"
-            )
+            raise SatelliteError("hosts_facts cannot be called for a connection scan")
         self.inspect_scan_task.update_stats(
             "INITIAL SATELLITE STATS", sys_count=systems_count
         )
@@ -549,7 +547,7 @@ class SatelliteSixV1(SatelliteSix):
                 query_params=params,
             )
             if response.status_code != requests.codes.ok:
-                raise SatelliteException(
+                raise SatelliteError(
                     f"Invalid response code {response.status_code} for url: {url}"
                 )
             systems_count += response.json().get("total", 0)
@@ -596,7 +594,7 @@ class SatelliteSixV2(SatelliteSix):
             self.connect_scan_task, url=HOSTS_V2_URL, query_params=params
         )
         if response.status_code != requests.codes.ok:
-            raise SatelliteException(
+            raise SatelliteError(
                 f"Invalid response code {response.status_code} for url: {url}"
             )
         systems_count = response.json().get("total", 0)

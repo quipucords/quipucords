@@ -20,7 +20,7 @@ from api.models import (
 from api.serializers import SourceSerializer
 from constants import SCAN_JOB_LOG
 from scanner.network import InspectTaskRunner
-from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
+from scanner.network.exceptions import NetworkCancelError, NetworkPauseError
 from scanner.network.inspect import construct_inventory
 from scanner.network.inspect_callback import InspectCallback
 from scanner.network.utils import delete_ssh_keyfiles, is_gen_ssh_keyfile
@@ -360,7 +360,7 @@ class TestNetworkInspectScanner:
     def test_cancel_inspect(self):
         """Test cancel of inspect."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with pytest.raises(NetworkCancelException):
+        with pytest.raises(NetworkCancelError):
             scanner.connect_scan_task = self.connect_scan_task
             scanner._inspect_scan(
                 Value("i", ScanJob.JOB_TERMINATE_CANCEL), self.host_list
@@ -369,7 +369,7 @@ class TestNetworkInspectScanner:
     def test_pause_inspect(self):
         """Test pause of inspect."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with pytest.raises(NetworkPauseException):
+        with pytest.raises(NetworkPauseError):
             scanner.connect_scan_task = self.connect_scan_task
             scanner._inspect_scan(
                 Value("i", ScanJob.JOB_TERMINATE_PAUSE), self.host_list

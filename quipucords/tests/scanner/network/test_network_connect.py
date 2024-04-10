@@ -13,7 +13,7 @@ from api.models import Credential, Scan, ScanJob, ScanTask, Source
 from api.serializers import SourceSerializer
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
-from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
+from scanner.network.exceptions import NetworkCancelError, NetworkPauseError
 from scanner.network.utils import (
     _construct_vars,
     delete_ssh_keyfiles,
@@ -597,7 +597,7 @@ class TestNetworkConnectTaskRunner:
         source = serializer.data
         hosts = source["hosts"]
         connection_port = source["port"]
-        with pytest.raises(NetworkCancelException):
+        with pytest.raises(NetworkCancelError):
             _connect(
                 Value("i", ScanJob.JOB_TERMINATE_CANCEL),
                 self.scan_task,
@@ -608,7 +608,7 @@ class TestNetworkConnectTaskRunner:
                 self.concurrency,
             )
         # Test cancel at run() level
-        mock_run.side_effect = NetworkCancelException()
+        mock_run.side_effect = NetworkCancelError()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
         assert scan_result == ScanTask.CANCELED
@@ -621,7 +621,7 @@ class TestNetworkConnectTaskRunner:
         source = serializer.data
         hosts = source["hosts"]
         connection_port = source["port"]
-        with pytest.raises(NetworkPauseException):
+        with pytest.raises(NetworkPauseError):
             _connect(
                 Value("i", ScanJob.JOB_TERMINATE_PAUSE),
                 self.scan_task,
@@ -632,7 +632,7 @@ class TestNetworkConnectTaskRunner:
                 self.concurrency,
             )
         # Test cancel at run() level
-        mock_run.side_effect = NetworkPauseException()
+        mock_run.side_effect = NetworkPauseError()
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
         assert scan_result == ScanTask.PAUSED

@@ -18,7 +18,7 @@ from api.models import (
     SystemConnectionResult,
 )
 from api.scanjob.model import ScanJob
-from scanner.exceptions import ScanCancelException, ScanPauseException
+from scanner.exceptions import ScanCancelError, ScanPauseError
 from scanner.satellite import utils
 
 logger = logging.getLogger(__name__)
@@ -27,19 +27,19 @@ SATELLITE_VERSION_5 = "5"
 SATELLITE_VERSION_6 = "6"
 
 
-class SatelliteAuthException(Exception):
+class SatelliteAuthError(Exception):
     """Exception for Satellite Authentication interaction."""
 
 
-class SatelliteException(Exception):
+class SatelliteError(Exception):
     """Exception for Satellite interaction."""
 
 
-class SatelliteCancelException(ScanCancelException):
+class SatelliteCancelError(ScanCancelError):
     """Exception for Satellite Cancel interrupt."""
 
 
-class SatellitePauseException(ScanPauseException):
+class SatellitePauseError(ScanPauseError):
     """Exception for Satellite Pause interrupt."""
 
 
@@ -113,9 +113,7 @@ class SatelliteInterface(ABC):
 
     def _prepare_host_request_options(self):
         if self.inspect_scan_task is None:
-            raise SatelliteException(
-                "host_details cannot be called for a connection scan"
-            )
+            raise SatelliteError("host_details cannot be called for a connection scan")
         host, port, user, password = utils.get_connect_data(self.inspect_scan_task)
 
         ssl_cert_verify = self.inspect_scan_task.source.ssl_cert_verify
@@ -210,10 +208,10 @@ class SatelliteInterface(ABC):
         with Pool(processes=self.max_concurrency) as pool:
             for chunk in chunked(hosts, self.max_concurrency):
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                    raise SatelliteCancelException()
+                    raise SatelliteCancelError()
 
                 if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                    raise SatellitePauseException()
+                    raise SatellitePauseError()
                 host_params = self.prepare_hosts(chunk)
                 results = pool.starmap(request_host_details, host_params)
                 process_results(results=results)

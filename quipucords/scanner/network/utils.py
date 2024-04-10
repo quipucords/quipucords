@@ -13,7 +13,7 @@ from django.conf import settings
 
 from api.models import ScanJob
 from api.vault import decrypt_data_as_unicode
-from scanner.network.exceptions import NetworkCancelException, NetworkPauseException
+from scanner.network.exceptions import NetworkCancelError, NetworkPauseError
 
 # key is stop_type, value is manager_interrupt.value
 STOP_STATES = {
@@ -27,9 +27,9 @@ def check_manager_interrupt(interrupt: Value):
     if not interrupt:
         return
     if interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-        raise NetworkCancelException()
+        raise NetworkCancelError()
     if interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-        raise NetworkPauseException()
+        raise NetworkPauseError()
 
 
 def _credential_vars(credential):

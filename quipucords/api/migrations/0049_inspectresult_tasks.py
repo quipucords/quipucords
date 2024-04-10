@@ -4,7 +4,7 @@ from django.db import migrations, models
 def bind_inspect_result_to_scantask(apps, schema_editor):
     """Bind InspectResult to ScanTask."""
     InspectResult = apps.get_model("api", "InspectResult")
-    M2MModel = InspectResult.tasks.through
+    M2MModel = InspectResult.tasks.through  # noqa: N806
     m2m_instances = []
     for result in InspectResult.objects.prefetch_related(
         "task_inspection_result__scantask"

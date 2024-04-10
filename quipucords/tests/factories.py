@@ -92,7 +92,7 @@ class DeploymentReportFactory(DjangoModelFactory):
         model = "api.DeploymentsReport"
 
     @factory.post_generation
-    def number_of_fingerprints(obj, create, extracted, **kwargs):
+    def number_of_fingerprints(obj, create, extracted, **kwargs):  # noqa: N805
         """Create fingerprints associated to deployment report instance."""
         if not create and not extracted:
             return
@@ -107,7 +107,7 @@ class DeploymentReportFactory(DjangoModelFactory):
         )
 
     @factory.post_generation
-    def _set_cached_fingerprints(obj, *args, **kwargs):
+    def _set_cached_fingerprints(obj, *args, **kwargs):  # noqa: N805
         """Reproduce the logic responsible for DUPLICATION of fingerprints."""
         # only attempt to generate fingerprints for obj already saved to db
         # and with a "STATUS_COMPLETE"
@@ -194,7 +194,7 @@ class ScanFactory(DjangoModelFactory):
         return scan
 
     @factory.post_generation
-    def number_of_sources(obj: models.Scan, create, extracted, **kwargs):
+    def number_of_sources(obj: models.Scan, create, extracted, **kwargs):  # noqa: N805
         """Create n sources associated to Scan."""
         if not create:
             return
@@ -281,7 +281,9 @@ class SourceFactory(DjangoModelFactory):
         return source
 
     @factory.post_generation
-    def number_of_credentials(obj: models.Source, create, extracted, **kwargs):
+    def number_of_credentials(
+        obj: models.Source, create, extracted, **kwargs  # noqa: N805
+    ):
         """Create n credentials associated to Source."""
         if not create:
             return
