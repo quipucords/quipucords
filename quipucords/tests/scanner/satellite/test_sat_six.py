@@ -18,7 +18,7 @@ from api.models import (
     TaskConnectionResult,
 )
 from constants import DataSources
-from scanner.satellite.api import SatelliteException
+from scanner.satellite.api import SatelliteError
 from scanner.satellite.six import (
     SatelliteSixV1,
     SatelliteSixV2,
@@ -97,7 +97,7 @@ class TestSatelliteSixV1:
             url = construct_url(orgs_url, "1.2.3.4")
             jsonresult = {"results": [{"id": 1}, {"id": 7}, {"id": 8}], "per_page": 100}
             mocker.get(url, status_code=500, json=jsonresult)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.get_orgs()
 
     @pytest.mark.django_db
@@ -135,7 +135,7 @@ class TestSatelliteSixV1:
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.host_count()
 
     @pytest.mark.django_db
@@ -180,7 +180,7 @@ class TestSatelliteSixV1:
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.hosts()
 
     @pytest.mark.django_db
@@ -458,7 +458,7 @@ class TestSatelliteSixV1:
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
             mocker.get(url, status_code=500)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
     @patch(
@@ -631,7 +631,7 @@ class TestSatelliteSixV2:
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.host_count()
 
     @pytest.mark.django_db
@@ -668,7 +668,7 @@ class TestSatelliteSixV2:
                 "total": 3,
             }
             mocker.get(url, status_code=500, json=jsonresult)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.hosts()
 
     @pytest.mark.django_db
@@ -1058,7 +1058,7 @@ class TestSatelliteSixV2:
         with requests_mock.Mocker() as mocker:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4")
             mocker.get(url, status_code=500)
-            with pytest.raises(SatelliteException):
+            with pytest.raises(SatelliteError):
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
     @patch(

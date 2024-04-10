@@ -21,7 +21,7 @@ from api.models import (
 from api.vault import write_to_yaml
 from constants import SCAN_JOB_LOG
 from scanner.exceptions import ScanFailureError
-from scanner.network.exceptions import ScannerException
+from scanner.network.exceptions import ScannerError
 from scanner.network.inspect_callback import AnsibleResults, InspectCallback
 from scanner.network.processing.process import NO_DATA, process
 from scanner.network.utils import (
@@ -82,7 +82,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
             if num_total == 0:
                 msg = "Inventory provided no reachable hosts."
-                raise ScannerException(msg)
+                raise ScannerError(msg)
 
             self.scan_task.update_stats(
                 "INITIAL NETWORK INSPECT STATS",
@@ -111,7 +111,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 )
                 raise ScanFailureError(msg)
 
-        except (AnsibleRunnerException, AssertionError, ScannerException) as error:
+        except (AnsibleRunnerException, AssertionError, ScannerError) as error:
             error_message = f"Scan task encountered error: {error}"
             raise ScanFailureError(error_message)
 

@@ -1,17 +1,17 @@
 """Exceptions used by network scan."""
 
-from scanner.exceptions import ScanCancelException, ScanPauseException
+from scanner.exceptions import ScanCancelError, ScanPauseError
 
 
-class NetworkCancelException(ScanCancelException):
+class NetworkCancelError(ScanCancelError):
     """Exception for Network Cancel interrupt."""
 
 
-class NetworkPauseException(ScanPauseException):
+class NetworkPauseError(ScanPauseError):
     """Exception for Network Pause interrupt."""
 
 
-class ScannerException(Exception):
+class ScannerError(Exception):
     """Exception for issues detected during scans."""
 
     def __init__(self, message=""):

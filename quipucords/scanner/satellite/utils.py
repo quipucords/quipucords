@@ -12,8 +12,8 @@ from api.vault import decrypt_data_as_unicode
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
-    SatelliteAuthException,
-    SatelliteException,
+    SatelliteAuthError,
+    SatelliteError,
 )
 
 logger = logging.getLogger(__name__)
@@ -143,7 +143,7 @@ def status(scan_task):
     """
     try:
         return _status6(scan_task)
-    except SatelliteException as error:
+    except SatelliteError as error:
         message = (
             "Satellite 6 status check failed with error:"
             f' "{error}". Attempting Satellite 5.'
@@ -151,7 +151,7 @@ def status(scan_task):
         scan_task.log_message(message)
     try:
         return _status5(scan_task)
-    except SatelliteException as error:
+    except SatelliteError as error:
         message = f'Satellite 5 status check failed with error: "{error}".'
         scan_task.log_message(message, log_level=logging.ERROR)
     except xmlrpc.client.ProtocolError:
@@ -174,12 +174,12 @@ def _status5(scan_task):
     except xmlrpc.client.Fault as xml_error:
         invalid_auth = "Either the password or username is incorrect."
         if invalid_auth in str(xml_error):
-            raise SatelliteAuthException(str(xml_error)) from xml_error
-        raise SatelliteException(str(xml_error)) from xml_error
+            raise SatelliteAuthError(str(xml_error)) from xml_error
+        raise SatelliteError(str(xml_error)) from xml_error
     except xmlrpc.client.ProtocolError as protocol_error:
         if protocol_error.errcode == codes.HTTP_404_NOT_FOUND:
             raise protocol_error
-        raise SatelliteException(str(protocol_error)) from protocol_error
+        raise SatelliteError(str(protocol_error)) from protocol_error
 
     api_version = SATELLITE_VERSION_5
     status_code = codes.HTTP_200_OK
@@ -202,14 +202,14 @@ def _status6(scan_task):
         api_version = status_data.get("api_version")
     elif status_code == codes.HTTP_401_UNAUTHORIZED:
         err_msg = "Unable to authenticate against " + url
-        raise SatelliteAuthException(err_msg)
+        raise SatelliteAuthError(err_msg)
     else:
         err_msg = (
             "Failure while attempting Satellite 6"
             f" status check at {url} for task {scan_task.id}"
             f" with status code {status_code}."
         )
-        raise SatelliteException(err_msg)
+        raise SatelliteError(err_msg)
     return (status_code, api_version, SATELLITE_VERSION_6)
 
 
@@ -246,7 +246,7 @@ def validate_task_stats(task):
         task.log_message(error, log_level=logging.ERROR)
         new_failed = missing_sys + systems_failed
         task.update_stats("Missed failed systems", sys_failed=new_failed)
-        raise SatelliteException("hosts_facts could not scan all systems")
+        raise SatelliteError("hosts_facts could not scan all systems")
 
 
 def raw_facts_template():

@@ -11,8 +11,8 @@ from constants import DataSources
 from scanner.satellite.api import (
     SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
-    SatelliteAuthException,
-    SatelliteException,
+    SatelliteAuthError,
+    SatelliteError,
 )
 from scanner.satellite.utils import (
     _status5,
@@ -127,7 +127,7 @@ class TestSatelliteUtils:
         """Test a successful status request to Satellite 5 server."""
         client = mock_serverproxy.return_value
         client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             _status5(self.scan_task)
             mock_serverproxy.auth.login.assert_called_once_with(ANY, ANY)
 
@@ -158,7 +158,7 @@ class TestSatelliteUtils:
             url = construct_url(status_url, "1.2.3.4")
             jsonresult = {"api_version": 2}
             mocker.get(url, status_code=401, json=jsonresult)
-            with pytest.raises(SatelliteAuthException):
+            with pytest.raises(SatelliteAuthError):
                 status(self.scan_task)
                 mock_serverproxy.auth.login.assert_called_once_with(ANY, ANY)
 
@@ -187,6 +187,6 @@ class TestSatelliteUtils:
     @pytest.mark.django_db
     def test_validate_task_stats_error(self):
         """Test validate task stats errors."""
-        with pytest.raises(SatelliteException):
+        with pytest.raises(SatelliteError):
             self.scan_task.increment_stats("TEST", increment_sys_count=True)
             validate_task_stats(self.scan_task)
