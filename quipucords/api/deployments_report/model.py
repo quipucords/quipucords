@@ -49,8 +49,6 @@ class SystemFingerprint(models.Model):
     VIRTUALIZED = "virtualized"
     HYPERVISOR = "hypervisor"
 
-    SOURCE_TYPE = (("network", "Ansible"), ("vcenter", "VCenter"), (UNKNOWN, "Unknown"))
-
     INFRASTRUCTURE_TYPE = (
         (BARE_METAL, "Bare Metal"),
         (VIRTUALIZED, "Virtualized"),
@@ -171,10 +169,6 @@ class SystemFingerprint(models.Model):
             ]
         )
         return {field.name for field in cls._meta.get_fields()} - non_fact_fields
-
-    def source_types(self):
-        """Retrieve source_types."""
-        return {s.get("source_type") for s in self.sources}
 
 
 class Product(models.Model):
