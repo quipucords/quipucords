@@ -26,7 +26,6 @@ default_kwargs = {"required": False}
 class FactsSerializer(Serializer):
     """Serializer for HBI facts."""
 
-    source_types = fields.ListField()
     last_discovered = fields.DateTimeField()
     qpc_server_version = fields.CharField(default=server_version)
     qpc_server_id = fields.CharField(default=get_server_id)
