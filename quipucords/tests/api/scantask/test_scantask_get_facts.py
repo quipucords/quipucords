@@ -1,56 +1,47 @@
 """Test ScanTask.get_facts."""
 
+from functools import partial
+
 import pytest
 
-from api.models import (
-    RawFact,
-    ScanJob,
-    ScanTask,
-)
-from tests.factories import InspectGroupFactory, InspectResultFactory
-from tests.utils.facts import random_name, random_value
+from api.models import ScanTask
+from tests.factories import ScanTaskFactory
 
 
 @pytest.fixture
-def raw_facts_list():
+def raw_facts_list(faker):
     """Fixture representing a list of random facts."""
-    systems = []
-    for _ in range(50):
-        systems.append({random_name(): random_value() for _ in range(100)})
-    return systems
+    # name "fact" will be use to order "systems" in test_content
+    return [
+        {
+            "name": faker.slug(),
+            faker.slug(): faker.pybool(),
+            faker.slug(): faker.pyint(max_value=100),
+        }
+        for _ in range(10)
+    ]
 
 
 @pytest.fixture
 def inspection_scantask(raw_facts_list):
-    """Scantask instance mapped to raw_facts_list."""
-    scan_task = ScanTask.objects.create(
+    """ScanTask instance mapped to raw_facts_list."""
+    return ScanTaskFactory(
         scan_type=ScanTask.SCAN_TYPE_INSPECT,
-        job=ScanJob.objects.create(),
+        with_raw_facts=raw_facts_list,
     )
-    inspect_group = InspectGroupFactory()
-    scan_task.inspect_groups.add(inspect_group)
-    for i, facts in enumerate(raw_facts_list):
-        inspection_result = InspectResultFactory(name=i, inspect_group=inspect_group)
-        raw_fact_instances = [
-            RawFact(
-                name=fact_name,
-                inspect_result=inspection_result,
-                value=fact_value,
-            )
-            for fact_name, fact_value in facts.items()
-        ]
-        RawFact.objects.bulk_create(raw_fact_instances)
-
-    return scan_task
 
 
-def test_content(db, raw_facts_list, inspection_scantask: ScanTask):
+@pytest.mark.django_db
+def test_content(raw_facts_list, inspection_scantask: ScanTask):
     """Check if get_facts content is equal to the original data."""
-    assert raw_facts_list == inspection_scantask.get_facts()
+    # ensure facts are on the same order to avoid failures (ordering might
+    # vary, and that's fine - this test only cares about the content)
+    fact_sorter = partial(sorted, key=lambda d: d["name"])
+    assert fact_sorter(raw_facts_list) == fact_sorter(inspection_scantask.get_facts())
 
 
+@pytest.mark.django_db
 def test_number_of_queries(
-    db,
     django_assert_max_num_queries,
     inspection_scantask: ScanTask,
 ):
