@@ -13,20 +13,17 @@ from api.source.model import Source
 from constants import DataSources
 
 RAW_QUERY_POSTGRES = """
-with raw_agg as (
-    select
-        ir.id,
+with raw_agg(ir_id, inspect_group_id, raw_facts) as (
+	select
+		ir.id,
         ir.inspect_group_id,
-        (
-        select
-            json_object_agg(raw.name, raw.value) as raw_facts
-        from
-            api_rawfact raw
-        where
-            raw.inspect_result_id = ir.id
-    )
-from
-	api_inspectresult as ir
+        json_object_agg(raw.name, raw.value) as raw_facts
+	from
+		api_inspectresult ir
+	inner join
+		api_rawfact raw on ir.id = raw.inspect_result_id
+    group by
+        ir.id
 )
 select
 	json_agg(raw_agg.raw_facts) as raw_fact_list
