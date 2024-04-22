@@ -4,9 +4,10 @@ import logging
 
 import pytest
 
-from api.models import Report, ScanJob, ScanTask
+from api.models import InspectGroup, InspectResult, Report, ScanJob, ScanTask
 from constants import DataSources
 from fingerprinter.runner import FingerprintTaskRunner
+from tests.factories import InspectResultFactory, ReportFactory, ScanTaskFactory
 
 logger = logging.getLogger(__file__)
 
@@ -138,7 +139,7 @@ def expected_messages():
     ]
 
 
-def test_process_sources(
+def test_merge_fingerprints(
     task_runner: FingerprintTaskRunner, expected_messages, report, caplog
 ):
     """Test FingerprintTaskRunner._process_sources counting mechanism."""
@@ -162,3 +163,25 @@ def test_process_facts_for_datasource(
     # if the appropriate method is implemented, our error shall be raised.
     with pytest.raises(RuntimeError, match="STOP!!!"):
         task_runner.process_facts_for_datasource(data_source, {}, {})
+
+
+@pytest.mark.django_db
+def test_process_sources():
+    """Test FingerprintTaskRunner._process_sources against a report with raw data."""
+    report = ReportFactory(generate_raw_facts=True)
+    # add a fact-less InspectResult to reproduce issues with failed systems
+    inspect_group = InspectGroup.objects.first()
+    InspectResultFactory(inspect_group=inspect_group, status=InspectResult.UNREACHABLE)
+    task = ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, job=report.scanjob)
+    fingerprint_runner = FingerprintTaskRunner(report.scanjob, task)
+    fingerprints = fingerprint_runner._process_sources(report)
+    number_of_systems = InspectResult.objects.filter(
+        inspect_group__tasks__job=report.scanjob
+    ).count()
+    number_of_ocp_clusters = InspectGroup.objects.filter(
+        tasks__job=report.scanjob,
+        source_type=DataSources.OPENSHIFT.value,
+    ).count()
+    # ignore ocp clusters (as they are not part of deployments) and the failed system
+    expected_number_of_fingerprints = number_of_systems - number_of_ocp_clusters - 1
+    assert len(fingerprints) == expected_number_of_fingerprints
