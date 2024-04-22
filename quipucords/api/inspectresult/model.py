@@ -14,47 +14,47 @@ from constants import DataSources
 
 RAW_QUERY_POSTGRES = """
 with raw_agg(ir_id, inspect_group_id, raw_facts) as (
-	select
-		ir.id,
+    select
+        ir.id,
         ir.inspect_group_id,
         json_object_agg(raw.name, raw.value) as raw_facts
-	from
-		api_inspectresult ir
-	inner join
-		api_rawfact raw on ir.id = raw.inspect_result_id
+    from
+        api_inspectresult ir
+    inner join
+        api_rawfact raw on ir.id = raw.inspect_result_id
     group by
         ir.id
 )
 select
-	json_agg(raw_agg.raw_facts) as raw_fact_list
+    json_agg(raw_agg.raw_facts) as raw_fact_list
 from raw_agg
 where
     raw_agg.inspect_group_id=api_inspectgroup.id
 group by
-	raw_agg.inspect_group_id
+    raw_agg.inspect_group_id
 """
 
 
 RAW_QUERY_SQLITE = """
 with raw_agg(ir_id, inspect_group_id, raw_facts) as (
-	select
-		ir.id,
+    select
+        ir.id,
         ir.inspect_group_id,
         json_group_object(raw.name, json(raw.value)) as raw_facts
-	from
-		api_inspectresult ir
-	inner join
-		api_rawfact raw on ir.id = raw.inspect_result_id
+    from
+        api_inspectresult ir
+    inner join
+        api_rawfact raw on ir.id = raw.inspect_result_id
     group by
         ir.id
 )
 select
-	json_group_array(json(raw_agg.raw_facts)) as raw_fact_list
+    json_group_array(json(raw_agg.raw_facts)) as raw_fact_list
 from raw_agg
 where
     raw_agg.inspect_group_id=api_inspectgroup.id
 group by
-	raw_agg.inspect_group_id
+    raw_agg.inspect_group_id
 """
 
 
