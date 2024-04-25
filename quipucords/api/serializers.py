@@ -1,6 +1,6 @@
 """API serializers for import organization."""
 
-# flake8: noqa
+# ruff: noqa: F401
 
 from api.connresult.serializer import (
     JobConnectionResultSerializer,
@@ -16,8 +16,14 @@ from api.inspectresult.serializer import (
     RawFactSerializer,
     SystemInspectionResultSerializer,
 )
+from api.reports.serializer import ReportUploadSerializer
 from api.scan.serializer import ScanSerializer
-from api.scanjob.serializer import ScanJobSerializerV1, SourceField
+from api.scanjob.serializer import (
+    ScanJobSerializerV1,
+    ScanJobSerializerV2,
+    SimpleScanJobSerializer,
+    SourceField,
+)
 from api.scantask.serializer import ScanTaskSerializer
 from api.source.serializer import (
     CredentialsField,

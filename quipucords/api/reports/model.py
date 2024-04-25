@@ -5,6 +5,7 @@ from functools import cached_property
 
 from django.db import models
 
+from api.common.common_report import create_report_version
 from api.common.models import BaseModel
 from api.inspectresult.model import InspectGroup
 
@@ -12,7 +13,9 @@ from api.inspectresult.model import InspectGroup
 class Report(BaseModel):
     """A reported set of facts."""
 
-    report_version = models.CharField(max_length=64, null=False)
+    report_version = models.CharField(
+        max_length=64, null=False, default=create_report_version
+    )
     # report_platform_id is a unique identifier required by yupana/insights
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
     # ---------------------------- legacy fields ----------------------------

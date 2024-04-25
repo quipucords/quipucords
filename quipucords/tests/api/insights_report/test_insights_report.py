@@ -172,14 +172,6 @@ def test_get_insights_report_not_found_because_no_fingerprints(client_logged_in)
 
 
 @pytest.mark.django_db
-def test_get_insights_report_invalid_id_not_found(client_logged_in):
-    """Fail to get an Insights report for an invalid id."""
-    url = reverse("v1:reports-list") + "invalid/insights/"
-    response = client_logged_in.get(url)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
 def test_get_insights_report_unknown_id_not_found(client_logged_in):
     """Fail to get an Insights for report id that doesn't exist."""
     response = client_logged_in.get(reverse("v1:reports-insights", args=("999",)))

@@ -13,7 +13,7 @@ from django.utils.translation import gettext as _
 from api import messages
 from api.common.models import BaseModel
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
-from api.inspectresult.model import InspectResult
+from api.inspectresult.model import InspectGroup, InspectResult, RawFact
 from api.reports.model import Report
 from api.scan.model import Scan
 from api.scanjob.queryset import ScanJobQuerySet
@@ -246,14 +246,10 @@ class ScanJob(BaseModel):
             if self.report and self.report.deployment_report:
                 self.report.deployment_report.system_fingerprints.all().delete()
 
-        # Create tasks
-        conn_tasks = self._create_connection_tasks()
-        inspect_tasks = self._create_inspection_tasks(conn_tasks)
-        self._create_fingerprint_task(conn_tasks, inspect_tasks)
+        # create tasks
+        self._create_pending_tasks()
 
-        if self.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT and (
-            conn_tasks or inspect_tasks
-        ):
+        if self.scan_type != ScanTask.SCAN_TYPE_FINGERPRINT:
             # this job runs an actual scan
             if self.scan:
                 self.scan.most_recent_scanjob = self
@@ -267,6 +263,11 @@ class ScanJob(BaseModel):
         self.status_message = _(messages.SJ_STATUS_MSG_PENDING)
         self.save()
         self.log_current_status()
+
+    def _create_pending_tasks(self):
+        conn_tasks = self._create_connection_tasks()
+        inspect_tasks = self._create_inspection_tasks(conn_tasks)
+        self._create_fingerprint_task(conn_tasks, inspect_tasks)
 
     def delete_inspect_results(self):
         """Delete InspectResults exclusively related to this ScanJob."""
@@ -514,3 +515,37 @@ class ScanJob(BaseModel):
             )
             return True
         return False
+
+    def ingest_sources(self, source_list, task_sequence_number=1):
+        """Create raw facts associated to this job."""
+        inspect_task = ScanTask.objects.create(
+            job=self,
+            scan_type=ScanTask.SCAN_TYPE_INSPECT,
+            status=ScanTask.COMPLETED,
+            sequence_number=task_sequence_number,
+        )
+        inspect_group_list = []
+        inspect_result_list = []
+        raw_fact_list = []
+        for source_dict in source_list:
+            inspect_group = InspectGroup(
+                source_type=source_dict["source_type"],
+                source_name=source_dict["source_name"],
+                server_id=source_dict["server_id"],
+                server_version=source_dict["report_version"],
+            )
+            inspect_group_list.append(inspect_group)
+            for fact_dict in source_dict["facts"]:
+                # InspectResult is lacking 'name' and 'status'. While
+                # 'details report' isn't modified (or replaced), there's
+                # nothing we can do.
+                inspect_result = InspectResult(inspect_group=inspect_group)
+                inspect_result_list.append(inspect_result)
+                raw_fact_list.extend(
+                    RawFact(name=k, value=v, inspect_result=inspect_result)
+                    for k, v in fact_dict.items()
+                )
+        InspectGroup.objects.bulk_create(inspect_group_list)
+        InspectResult.objects.bulk_create(inspect_result_list)
+        RawFact.objects.bulk_create(raw_fact_list)
+        inspect_task.inspect_groups.set(inspect_group_list)

@@ -10,6 +10,7 @@ from api import messages
 from api.common.common_report import create_report_version
 from api.models import Credential, ScanTask, ServerInformation, Source
 from constants import DataSources
+from tests.factories import ReportFactory
 from tests.scanner.test_util import create_scan_job
 
 
@@ -464,7 +465,6 @@ class TestAsyncMergeReports:
         self, server_id, network_source, client_logged_in
     ):
         """Test report merge by id jobs success."""
-        url = reverse("v1:reports-list")
         sources1 = [
             {
                 "server_id": server_id,
@@ -474,6 +474,7 @@ class TestAsyncMergeReports:
                 "facts": [{"key1": "value1"}],
             }
         ]
+        report1 = ReportFactory(sources=sources1)
         sources2 = [
             {
                 "server_id": "abc",
@@ -483,21 +484,8 @@ class TestAsyncMergeReports:
                 "facts": [{"key2": "value2"}],
             }
         ]
-        request_json = {"report_type": "details", "sources": sources1}
-        response = client_logged_in.post(url, data=request_json)
-        assert response.status_code == status.HTTP_201_CREATED, response.json()
-        response_json = response.json()
-        assert response_json["sources"] == sources1
-        report1_id = response_json["report_id"]
-
-        request_json = {"report_type": "details", "sources": sources2}
-        response = client_logged_in.post(url, data=request_json)
-        assert response.status_code == status.HTTP_201_CREATED, response.json()
-        response_json = response.json()
-        assert response_json["sources"] == sources2
-        report2_id = response_json["report_id"]
-
-        data = {"reports": [report1_id, report2_id]}
+        report2 = ReportFactory(sources=sources2)
+        data = {"reports": [report1.id, report2.id]}
         json_response = self.merge_details_by_ids_expect_201(data, client_logged_in)
         expected = {
             "id": mock.ANY,
