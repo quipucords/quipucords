@@ -8,11 +8,13 @@ from scanner.openshift.entities import OCPCluster, OCPNode
 _faker = Faker()
 
 
-def raw_facts_generator(source_type, n):
+def raw_facts_generator(source_type, n, as_native_types=True):
     """Generate 'n' raw facts for a given source type."""
     if source_type == DataSources.OPENSHIFT:
         # ocp gets a special treatment due to its asymmetric raw facts (cluster vs node)
-        yield from _openshift_raw_facts_generator(n)
+        # and the choice of how to represent them as "native" python types (dict/list)
+        # or their original representation as pydantic models
+        yield from _openshift_raw_facts_generator(n, as_native_types=as_native_types)
     else:
         func_map = {
             DataSources.NETWORK: _network_raw_facts,
@@ -176,7 +178,7 @@ def _ansible_raw_facts():
     }
 
 
-def _openshift_raw_facts_generator(number_of_facts):
+def _openshift_raw_facts_generator(number_of_facts, as_native_types=True):
     """Generate openshift raw facts."""
     # TODO: consider adopting a solution like polyfactory to generate factories for
     # pydantic models
@@ -185,7 +187,7 @@ def _openshift_raw_facts_generator(number_of_facts):
         version=fake_semver(),
     )
     yield {
-        "cluster": cluster,
+        "cluster": cluster.dict() if as_native_types else cluster,
         "operators": [],
         "rhacm_metrics": [],
     }
@@ -213,7 +215,7 @@ def _openshift_raw_facts_generator(number_of_facts):
             creation_timestamp=_faker.date_time(),
             cluster_uuid=cluster.uuid,
         )
-        yield {"node": node}
+        yield {"node": node.dict() if as_native_types else node}
 
 
 def _rhacs_raw_facts():
