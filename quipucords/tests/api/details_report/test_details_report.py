@@ -40,6 +40,7 @@ class TestDetailsReport:
         assert response.ok, response.text
         assert response.json() == {
             "report_id": report.id,
+            "report_version": report.report_version,
             "sources": sources,
             "report_type": "details",
             "report_platform_id": str(report.report_platform_id),
@@ -62,6 +63,7 @@ class TestDetailsReport:
 
         assert response_json == {
             "report_id": report.id,
+            "report_version": report.report_version,
             "sources": sources,
             "report_type": "details",
             "report_platform_id": str(report.report_platform_id),

@@ -114,6 +114,8 @@ class DeploymentReportFactory(DjangoModelFactory):
 class ReportFactory(DjangoModelFactory):
     """Factory for Report."""
 
+    report_version = factory.Faker("bothify", text="%.#.##+?#?#?#?#?#?#?#?#")
+
     class Meta:
         """Factory options."""
 
