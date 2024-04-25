@@ -199,22 +199,11 @@ class ReportFactory(DjangoModelFactory):
                 )
 
 
-class JobConnectionResultFactory(DjangoModelFactory):
-    """Factory for JobConnectionResult model."""
-
-    class Meta:
-        """Factory options."""
-
-        model = models.JobConnectionResult
-
-
 class ScanJobFactory(DjangoModelFactory):
     """Factory for ScanJob."""
 
     start_time = factory.Faker("past_datetime")
     end_time = factory.Faker("date_time_between", start_date="-15d")
-
-    connection_results = factory.SubFactory(JobConnectionResultFactory)
 
     class Meta:
         """Factory options."""
@@ -230,6 +219,18 @@ class ScanJobFactory(DjangoModelFactory):
             obj.report = extracted
             obj.save()
             return
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        """Override DjangoModelFactory internal create method."""
+        scan_job: models.ScanJob = super()._create(*args, **kwargs)
+        if (
+            scan_job.scan_type != models.ScanTask.SCAN_TYPE_FINGERPRINT
+            and not scan_job.connection_results
+        ):
+            scan_job.connection_results = models.JobConnectionResult.objects.create()
+            scan_job.save()
+        return scan_job
 
 
 class ScanFactory(DjangoModelFactory):
@@ -273,17 +274,6 @@ class ScanFactory(DjangoModelFactory):
             obj.sources.add(*sources)
 
 
-class TaskConnectionResultFactory(DjangoModelFactory):
-    """Factory for TaskConnectionResult model."""
-
-    job_connection_result_id = factory.SelfAttribute("..job.connection_results_id")
-
-    class Meta:
-        """Factory options."""
-
-        model = models.TaskConnectionResult
-
-
 class ScanTaskFactory(DjangoModelFactory):
     """Factory for ScanTask."""
 
@@ -294,14 +284,25 @@ class ScanTaskFactory(DjangoModelFactory):
     source = factory.SubFactory("tests.factories.SourceFactory")
     job = factory.SubFactory("tests.factories.ScanJobFactory")
 
-    connection_result = factory.SubFactory(
-        TaskConnectionResultFactory,
-    )
-
     class Meta:
         """Factory options."""
 
         model = "api.ScanTask"
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        """Override DjangoModelFactory internal create method."""
+        scan_task: models.ScanTask = super()._create(*args, **kwargs)
+        if (
+            scan_task.scan_type == models.ScanTask.SCAN_TYPE_CONNECT
+            and scan_task.job.connection_results
+            and not scan_task.connection_result
+        ):
+            scan_task.connection_result = models.TaskConnectionResult.objects.create(
+                job_connection_result=scan_task.job.connection_results
+            )
+            scan_task.save()
+        return scan_task
 
     @factory.post_generation
     def with_raw_facts(
