@@ -1,6 +1,11 @@
 """Serializer for system facts models."""
 
-from rest_framework.serializers import CharField, IntegerField, JSONField, UUIDField
+from rest_framework.serializers import (
+    CharField,
+    IntegerField,
+    JSONField,
+    UUIDField,
+)
 
 from api.common.common_report import REPORT_TYPE_DETAILS
 from api.common.serializer import NotEmptySerializer

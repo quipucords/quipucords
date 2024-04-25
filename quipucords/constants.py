@@ -16,3 +16,5 @@ class DataSources(TextChoices):
 
 ENCRYPTED_DATA_MASK = "********"
 SCAN_JOB_LOG = "scan-job-{scan_job_id}-{output_type}.txt"
+# minimum accepted version for imported reports
+MINIMUM_REPORT_VERSION = (1, 0, 0)

@@ -8,7 +8,6 @@ import pytest
 import requests_mock
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
-from rest_framework.reverse import reverse
 
 from api.models import (
     Credential,
@@ -86,7 +85,7 @@ class TestNetworkInspectScanner:
 
         self.scan_task.update_stats("TEST NETWORK INSPECT.", sys_failed=0)
 
-        self.fact_endpoint = "http://testserver" + reverse("v1:reports-list")
+        self.fact_endpoint = "http://testserver/whatever"
 
         self.scan_job.save()
         self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL, ScanJob.JOB_TERMINATE_PAUSE]

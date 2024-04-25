@@ -35,7 +35,8 @@ from api.details_report.serializer import DetailsReportSerializer
 from api.details_report.util import create_details_csv
 from api.inspectresult.model import InspectGroup
 from api.reports.model import Report
-from constants import SCAN_JOB_LOG
+from api.scantask.model import ScanTask
+from constants import SCAN_JOB_LOG, DataSources
 from tests.constants import (
     FILENAME_DEPLOYMENTS_CSV,
     FILENAME_DEPLOYMENTS_JSON,
@@ -45,6 +46,7 @@ from tests.constants import (
 )
 from tests.factories import DeploymentReportFactory, ReportFactory
 from tests.report_utils import extract_files_from_tarball
+from tests.utils import raw_facts_generator
 
 TARBALL_ALWAYS_EXPECTED_FILENAMES = {
     FILENAME_SHA256SUM,
@@ -335,3 +337,68 @@ def test_sources_query_is_isolated():
             "facts": [facts2],
         }
     ]
+
+
+@pytest.fixture
+def upload_report_payload(faker):
+    """Fixture representing a valid payload for uploading a report."""
+    source_type = faker.random_element(DataSources.values)
+    return {
+        "report_type": "details",
+        "report_platform_id": faker.uuid4(),
+        "sources": [
+            {
+                "server_id": faker.uuid4(),
+                "source_name": faker.slug(),
+                "source_type": source_type,
+                "report_version": faker.bothify("%.#.##+?#?#?#?#?#?#?#"),
+                "facts": list(raw_facts_generator(source_type, 1)),
+            }
+        ],
+    }
+
+
+@pytest.mark.django_db(transaction=True)
+def test_upload_report(upload_report_payload, client_logged_in, mocker, scan_manager):
+    """Test 'greenpath' for uploading a report."""
+    response = client_logged_in.post(
+        reverse("v1:reports-upload"), upload_report_payload
+    )
+    assert response.ok
+    assert response.json() == {
+        "job_id": mocker.ANY,
+        "report_id": mocker.ANY,
+        "scan_id": None,
+        "scan_type": "fingerprint",
+        "status": "pending",
+        "status_message": "Job is pending.",
+    }
+    report = Report.objects.get(id=response.json()["report_id"])
+    assert response.json()["job_id"] == report.scanjob.id
+    assert report.deployment_report is None
+    # start the scan manager
+    scan_manager.work()
+    # after the manager completed, check job-detail endpoint shows it is complete.
+    # (note: a v2 endpoint is required because v1 job viewset don't support all
+    # job types (🤷))
+    scan_job_response = client_logged_in.get(
+        reverse("v2:job-detail", args=(report.scanjob.id,))
+    )
+    assert scan_job_response.json() == {
+        "id": report.scanjob.id,
+        "report_id": report.id,
+        "scan_id": None,
+        "scan_type": "fingerprint",
+        "sources": [],
+        "start_time": mocker.ANY,
+        "end_time": mocker.ANY,
+        "status": ScanTask.COMPLETED,
+        "status_message": "Job is complete.",
+        "systems_count": 0,
+        "systems_failed": 0,
+        "systems_scanned": 0,
+        "systems_unreachable": 0,
+    }
+    # finally, check report is now bound to a deployment_report
+    report.refresh_from_db()
+    assert report.deployment_report_id
