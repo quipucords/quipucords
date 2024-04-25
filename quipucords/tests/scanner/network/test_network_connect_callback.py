@@ -6,6 +6,7 @@ from unittest.mock import Mock
 import pytest
 
 from api.models import Source
+from api.scantask.model import ScanTask
 from constants import DataSources
 from scanner.network.connect import ConnectResultStore
 from scanner.network.connect_callback import ConnectResultCallback
@@ -40,7 +41,9 @@ class TestConnectResultCallback:
 
     def test_task_on_ok(self, source: Source):
         """Test the callback on ok."""
-        results_store = ConnectResultStore(ScanTaskFactory(source=source))
+        results_store = ConnectResultStore(
+            ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        )
         callback = ConnectResultCallback(
             results_store, source.single_credential, source, Mock()
         )
@@ -76,7 +79,9 @@ class TestConnectResultCallback:
 
     def test_task_on_unreachable(self, source: Source):
         """Test the callback on unreachable."""
-        results_store = ConnectResultStore(ScanTaskFactory(source=source))
+        results_store = ConnectResultStore(
+            ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
+        )
         callback = ConnectResultCallback(
             results_store, source.single_credential, source, Mock()
         )
