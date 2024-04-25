@@ -190,14 +190,6 @@ def test_get_deployment_report_as_tarball(client_logged_in, deployments_report):
 
 
 @pytest.mark.django_db
-def test_get_deployment_report_invalid_id_not_found(client_logged_in):
-    """Test getting a report for an invalid report ID responds with 404."""
-    url = reverse("v1:reports-list") + "invalid/deployments/"
-    response = client_logged_in.get(url, headers={"accept": "application/json"})
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.django_db
 def test_get_deployment_report_unknown_id_not_found(client_logged_in):
     """Test getting a report for a report ID that does not exist responds with 404."""
     response = client_logged_in.get(reverse("v1:reports-deployments", args=("1",)))

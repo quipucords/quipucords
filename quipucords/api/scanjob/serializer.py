@@ -198,3 +198,22 @@ class ScanJobSerializerV2(ModelSerializer):
             "systems_failed",
             "systems_unreachable",
         ]
+
+
+class SimpleScanJobSerializer(ModelSerializer):
+    """Simple ScanJob serializer."""
+
+    job_id = IntegerField(source="id")
+
+    class Meta:
+        """Metadata for serializer."""
+
+        model = ScanJob
+        fields = [
+            "job_id",
+            "report_id",
+            "scan_id",
+            "scan_type",
+            "status",
+            "status_message",
+        ]
