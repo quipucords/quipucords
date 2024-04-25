@@ -3,7 +3,6 @@
 import logging
 
 import django.dispatch
-from django.utils.translation import gettext as _
 
 from api import messages
 from scanner import manager
@@ -24,20 +23,21 @@ def handle_scan(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("START"))
+    instance.log_message(messages.SIGNAL_STATE_CHANGE % "START")
     scanner = ScanJobRunner(instance)
+    logger.info("Starting scan with MANAGER=%s", manager.SCAN_MANAGER)
     instance.queue()
     if not manager.SCAN_MANAGER.is_alive():
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
-            _(messages.SIGNAL_SCAN_MANAGER_CRASH),
+            messages.SIGNAL_SCAN_MANAGER_CRASH,
         )
         manager.reinitialize()
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
-            _(messages.SIGNAL_SCAN_MANAGER_RESTART),
+            messages.SIGNAL_SCAN_MANAGER_RESTART,
         )
         manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up
@@ -67,7 +67,7 @@ def scan_pause(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("PAUSE"))
+    instance.log_message(messages.SIGNAL_STATE_CHANGE % "PAUSE")
     scan_action(sender, instance, PAUSE, **kwargs)
 
 
@@ -79,7 +79,7 @@ def scan_cancel(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("CANCEL"))
+    instance.log_message(messages.SIGNAL_STATE_CHANGE % "CANCEL")
     scan_action(sender, instance, CANCEL, **kwargs)
 
 
@@ -91,7 +91,7 @@ def scan_restart(sender, instance, **kwargs):
     :param kwargs: Other args
     :returns: None
     """
-    instance.log_message(_(messages.SIGNAL_STATE_CHANGE) % ("RESTART"))
+    instance.log_message(messages.SIGNAL_STATE_CHANGE % "RESTART")
     scanner = ScanJobRunner(instance)
 
     if not manager.SCAN_MANAGER:
@@ -101,13 +101,13 @@ def scan_restart(sender, instance, **kwargs):
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
-            _(messages.SIGNAL_SCAN_MANAGER_CRASH),
+            messages.SIGNAL_SCAN_MANAGER_CRASH,
         )
         manager.reinitialize()
         logger.error(
             "%s: %s",
             manager.SCAN_MANAGER_LOG_PREFIX,
-            _(messages.SIGNAL_SCAN_MANAGER_RESTART),
+            messages.SIGNAL_SCAN_MANAGER_RESTART,
         )
         manager.SCAN_MANAGER.start()
         # Don't add the scan as it will be picked up

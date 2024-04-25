@@ -1,26 +1,13 @@
 """Dummy scan manager module - a replacement on [Scan]Manager for tests."""
 
+import logging
+
 from scanner.job import ScanJobRunner
 
-
-class SingletonMeta(type):
-    """
-    Metaclass designed to force classes to behave as singletons.
-
-    Shamelesly copied from https://refactoring.guru/design-patterns/singleton
-    """
-
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        """Return class instance."""
-        if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-        return cls._instances[cls]
+logger = logging.getLogger(__name__)
 
 
-class DummyScanManager(metaclass=SingletonMeta):
+class DummyScanManager:
     """ScanManager for testing purposes."""
 
     def __init__(self):
@@ -38,7 +25,10 @@ class DummyScanManager(metaclass=SingletonMeta):
     def work(self):
         """Execute scan queue synchronously."""
         while self._queue:
+            logger.info("=" * 50)
+            logger.info("CURRENT QUEUE %s", self._queue)
             job_runner: ScanJobRunner = self._queue.pop()
+            logger.info("STARTING JOB %s", job_runner.scan_job)
             job_runner.start()
 
     def kill(self, job, command):
