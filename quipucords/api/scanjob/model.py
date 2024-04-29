@@ -549,3 +549,16 @@ class ScanJob(BaseModel):
         InspectResult.objects.bulk_create(inspect_result_list)
         RawFact.objects.bulk_create(raw_fact_list)
         inspect_task.inspect_groups.set(inspect_group_list)
+
+    def copy_raw_facts_from_reports(self, report_id_list, task_sequence_number=1):
+        """Create raw facts associated to this job."""
+        inspect_task = ScanTask.objects.create(
+            job=self,
+            scan_type=ScanTask.SCAN_TYPE_INSPECT,
+            status=ScanTask.COMPLETED,
+            sequence_number=task_sequence_number,
+        )
+        inspect_groups = InspectGroup.objects.filter(
+            tasks__job__report_id__in=report_id_list
+        ).all()
+        inspect_task.inspect_groups.set(inspect_groups)

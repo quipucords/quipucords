@@ -52,12 +52,7 @@ v1_urls = [
     ),
     path("reports/<int:report_id>/insights/", insights, name="reports-insights"),
     path("reports/<int:report_id>/", reports, name="reports-detail"),
-    path("reports/merge/jobs/", async_merge_reports, name="reports-merge-jobs"),
-    path(
-        "reports/merge/jobs/<int:scan_job_id>/",
-        async_merge_reports,
-        name="reports-merge-jobs-detail",
-    ),
+    path("reports/merge/", async_merge_reports, name="reports-merge"),
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
     path("token/", QuipucordsExpiringAuthTokenView),
     path("status/", status, name="server-status"),
