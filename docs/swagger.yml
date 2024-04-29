@@ -872,33 +872,6 @@ paths:
           description: "Not authorized"
         404:
           description: "Scan job inspection results not found"
-  /jobs/{scan_job_id}/pause/:
-    put:
-      tags:
-        - "Scan Job"
-      summary: "Pauses an existing scan job"
-      description: "Pauses a scan if it is currently running, fails otherwise"
-      operationId: "pauseScan"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "scan_job_id"
-        in: "path"
-        description: "ID of scan job to pause"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "Scan job paused"
-          schema:
-            $ref: "#/definitions/ScanJobOut"
-        400:
-          description: "Scan job not running"
-        401:
-          description: "Not authorized"
-        404:
-          description: "Scan job not found"
   /jobs/{scan_job_id}/cancel/:
     put:
       tags:
@@ -922,33 +895,6 @@ paths:
             $ref: "#/definitions/ScanJobOut"
         400:
           description: "Scan job has already finished"
-        401:
-          description: "Not authorized"
-        404:
-          description: "Scan job not found"
-  /jobs/{scan_job_id}/restart/:
-    put:
-      tags:
-        - "Scan Job"
-      summary: "Restarts an existing scan job"
-      description: "Restarts a scan if it has been paused, fails otherwise"
-      operationId: "restartScan"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "scan_job_id"
-        in: "path"
-        description: "ID of scan job to restart"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "Scan job restarted"
-          schema:
-            $ref: "#/definitions/ScanJobOut"
-        400:
-          description: "Scan job was not in paused state"
         401:
           description: "Not authorized"
         404:

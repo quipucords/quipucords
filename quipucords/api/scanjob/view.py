@@ -23,7 +23,7 @@ from api.serializers import (
     SystemConnectionResultSerializer,
     SystemInspectionResultSerializer,
 )
-from api.signal.scanjob_signal import cancel_scan, pause_scan, restart_scan
+from api.signal.scanjob_signal import cancel_scan
 
 logger = logging.getLogger(__name__)
 
@@ -221,29 +221,6 @@ class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         return Response(status=404)
 
     @action(detail=True, methods=["put"])
-    def pause(self, request, pk=None):
-        """Pause the running scan."""
-        if not pk or (pk and not is_int(pk)):
-            error = {"id": [_(messages.COMMON_ID_INV)]}
-            raise ValidationError(error)
-        scan = get_object_or_404(self.queryset, pk=pk)
-
-        if scan.status == ScanTask.RUNNING:
-            # Kill job before changing job state
-            pause_scan.send(sender=self.__class__, instance=scan)
-            scan.status_pause()
-            serializer = ScanJobSerializerV1(scan)
-            json_scan = serializer.data
-            json_scan = expand_scanjob(json_scan)
-            return Response(json_scan, status=200)
-        elif scan.status == ScanTask.PAUSED:
-            err_msg = _(messages.ALREADY_PAUSED)
-            return JsonResponse({"non_field_errors": [err_msg]}, status=400)
-
-        err_msg = _(messages.NO_PAUSE)
-        return JsonResponse({"non_field_errors": [err_msg]}, status=400)
-
-    @action(detail=True, methods=["put"])
     def cancel(self, request, pk=None):
         """Cancel the running scan."""
         if not pk or (pk and not is_int(pk)):
@@ -261,29 +238,6 @@ class ScanJobViewSetV1(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         json_scan = serializer.data
         json_scan = expand_scanjob(json_scan)
         return Response(json_scan, status=200)
-
-    @action(detail=True, methods=["put"])
-    def restart(self, request, pk=None):
-        """Restart a paused scan."""
-        if not pk or (pk and not is_int(pk)):
-            error = {"id": [_(messages.COMMON_ID_INV)]}
-            raise ValidationError(error)
-        scan = get_object_or_404(self.queryset, pk=pk)
-
-        if scan.status == ScanTask.PAUSED:
-            # Update job state before starting job
-            scan.status_restart()
-            restart_scan.send(sender=self.__class__, instance=scan)
-            serializer = ScanJobSerializerV1(scan)
-            json_scan = serializer.data
-            json_scan = expand_scanjob(json_scan)
-            return Response(json_scan, status=200)
-        elif scan.status == ScanTask.RUNNING:
-            err_msg = _(messages.ALREADY_RUNNING)
-            return JsonResponse({"non_field_errors": [err_msg]}, status=400)
-
-        err_msg = _(messages.NO_RESTART)
-        return JsonResponse({"non_field_errors": [err_msg]}, status=400)
 
 
 class ScanJobViewSetV2(viewsets.ReadOnlyModelViewSet):

@@ -1348,20 +1348,6 @@ class TestScanJob:
         response = client_logged_in.delete(url)
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
-    def test_pause_bad_state(self, client_logged_in):
-        """Pause a scanjob."""
-        scan_job = ScanJobFactory()
-
-        url = reverse("v1:scanjob-pause", args=(scan_job.id,))
-        response = client_logged_in.put(url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_pause_bad_id(self, client_logged_in):
-        """Pause a scanjob with bad id."""
-        url = reverse("v1:scanjob-pause", args=("string",))
-        response = client_logged_in.put(url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
     def test_cancel(self, client_logged_in):
         """Cancel a scanjob."""
         scan_job = ScanJobFactory()
@@ -1372,20 +1358,6 @@ class TestScanJob:
     def test_cancel_bad_id(self, client_logged_in):
         """Cancel a scanjob with bad id."""
         url = reverse("v1:scanjob-cancel", args=("string",))
-        response = client_logged_in.put(url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_restart_bad_state(self, client_logged_in):
-        """Restart a scanjob."""
-        scan_job = ScanJobFactory()
-
-        url = reverse("v1:scanjob-restart", args=(scan_job.id,))
-        response = client_logged_in.put(url)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    def test_restart_bad_id(self, client_logged_in):
-        """Restart a scanjob with bad id."""
-        url = reverse("v1:scanjob-restart", args=("string",))
         response = client_logged_in.put(url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
