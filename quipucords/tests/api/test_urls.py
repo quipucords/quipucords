@@ -32,9 +32,7 @@ from rest_framework.reverse import reverse
         ("v1:scanjob-detail", {"pk": 1}, "/api/v1/jobs/1/"),
         ("v1:scanjob-connection", {"pk": 1}, "/api/v1/jobs/1/connection/"),
         ("v1:scanjob-inspection", {"pk": 1}, "/api/v1/jobs/1/inspection/"),
-        ("v1:scanjob-pause", {"pk": 1}, "/api/v1/jobs/1/pause/"),
         ("v1:scanjob-cancel", {"pk": 1}, "/api/v1/jobs/1/cancel/"),
-        ("v1:scanjob-restart", {"pk": 1}, "/api/v1/jobs/1/restart/"),
         # why users (plural)? other named views use singular...
         ("v1:users-current", {}, "/api/v1/users/current/"),
         ("v1:users-logout", {}, "/api/v1/users/logout/"),
