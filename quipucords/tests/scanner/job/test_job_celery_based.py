@@ -9,16 +9,12 @@ carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
 
-import json
 from unittest.mock import patch
 
 import pytest
 from django.test import override_settings
 
-from api.common.common_report import create_report_version
-from api.common.util import RawFactEncoder
-from api.details_report.util import create_report
-from api.scantask.model import ScanTask
+from api.models import Report, ScanJob, ScanTask
 from constants import DataSources
 from scanner import job, tasks
 from tests.factories import ScanJobFactory, ScanTaskFactory, SourceFactory
@@ -137,27 +133,11 @@ def fingerprint_only_scanjob(request, faker):
             "facts": list(raw_facts_generator(source_type, 1)),
         }
     ]
-    # force all objects to be friendly to JSON (de)serialization
-    sources_json_friendly = json.loads(json.dumps(raw_sources, cls=RawFactEncoder))
-    # create a "details report" with only the bare minimum information required by
-    # a valid Report instance
-
-    scan_job = ScanJobFactory(
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-        status=ScanTask.PENDING,
+    scan_job: ScanJob = ScanJobFactory(
+        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT, report=Report.objects.create()
     )
-    ScanTaskFactory(
-        job=scan_job,
-        scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-        status=ScanTask.PENDING,
-        source=None,
-    )
-    create_report(
-        report_version=create_report_version(),
-        json_details_report={"sources": sources_json_friendly},
-        raise_exception=True,
-        scan_job=scan_job,
-    )
+    scan_job.ingest_sources(raw_sources)
+    scan_job.queue()
 
     return scan_job
 
