@@ -164,10 +164,8 @@ class InspectCallback:
             return False
         for stop_type, stop_value in STOP_STATES.items():
             if self.interrupt.value == stop_value:
-                (
-                    logger.info(
-                        log_messages.NETWORK_CALLBACK_ACK_STOP, "INSPECT", stop_type
-                    ),
+                logger.info(
+                    log_messages.NETWORK_CALLBACK_ACK_STOP, "INSPECT", stop_type
                 )
                 self.stopped = True
                 return True
