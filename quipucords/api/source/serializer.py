@@ -456,7 +456,6 @@ class SourceSerializerBase(ModelSerializer):
 
             val = int(octet_strings[i])
             if val < 0 or val > 255:  # noqa: PLR2004
-
                 err_msg = _(
                     messages.NET_CIDR_RANGE % {"ip_range": ip_range, "octet": val}
                 )

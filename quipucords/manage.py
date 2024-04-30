@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Django server management module."""
+
 import multiprocessing
 import os
 import sys

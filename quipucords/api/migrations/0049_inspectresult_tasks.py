@@ -15,7 +15,6 @@ def bind_inspect_result_to_scantask(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0048_rename_system_inspection_result_rawfact_inspect_result"),
     ]

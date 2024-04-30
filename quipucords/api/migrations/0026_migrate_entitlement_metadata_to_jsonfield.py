@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0025_migrate_product_version_metadata_to_jsonfield"),
     ]

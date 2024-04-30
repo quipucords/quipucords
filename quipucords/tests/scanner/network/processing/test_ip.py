@@ -106,9 +106,7 @@ def test_one_invalid_among_several_normal_ipv4_addresses(faker):
     ]
     all_addresses = (
         # Put the bad address in the middle of the good addresses.
-        good_ipv4_addresses[:1]
-        + [invalid_ipv4_address]
-        + good_ipv4_addresses[1:]
+        good_ipv4_addresses[:1] + [invalid_ipv4_address] + good_ipv4_addresses[1:]
     )
     ip_command_output = IP_LOOPBACK_OUTPUT_TEMPLATE
     for offset, ipv4_address in enumerate(all_addresses):
@@ -178,9 +176,7 @@ def test_one_invalid_among_normal_mac_addresses(faker):
     ]
     all_addresses = (
         # Put the bad address in the middle of the good addresses.
-        good_mac_addresses[:1]
-        + [invalid_mac_address]
-        + good_mac_addresses[1:]
+        good_mac_addresses[:1] + [invalid_mac_address] + good_mac_addresses[1:]
     )
     ip_command_output = IP_LOOPBACK_OUTPUT_TEMPLATE
     for offset, mac_address in enumerate(all_addresses):

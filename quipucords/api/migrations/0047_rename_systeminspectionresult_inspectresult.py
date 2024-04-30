@@ -36,7 +36,6 @@ def reverse_rename_id_seq(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0046_merge_scan_options_with_scan"),
     ]
