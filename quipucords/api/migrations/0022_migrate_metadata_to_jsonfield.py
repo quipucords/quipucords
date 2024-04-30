@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0021_migrate_hosts_and_exclude_hosts_jsonfield"),
     ]

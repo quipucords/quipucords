@@ -267,7 +267,6 @@ class ReportEntity:
         try:
             return self._deployment_report.last_discovered
         except AttributeError:
-
             return self._deployment_report.report.scanjob.end_time
 
     @classmethod

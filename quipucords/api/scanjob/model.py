@@ -159,7 +159,6 @@ class ScanJob(models.Model):
             self.report.refresh_from_db()
 
             if self.report.deployment_report:
-
                 system_fingerprint_count = (
                     self.report.deployment_report.system_fingerprints.count()
                 )

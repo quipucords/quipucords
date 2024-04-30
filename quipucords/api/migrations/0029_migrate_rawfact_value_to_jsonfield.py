@@ -6,7 +6,6 @@ from api.common.util import RawFactEncoder
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0028_alter_source_credentials"),
     ]

@@ -262,9 +262,9 @@ class TestVCenterInspectTaskRunnerTest:
         content.propertyCollector.RetrievePropertiesEx(ANY).token = "1"
         content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects_first_page
         content.propertyCollector.ContinueRetrievePropertiesEx(ANY).token = None
-        content.propertyCollector.ContinueRetrievePropertiesEx(ANY).objects = (
-            objects_second_page
-        )
+        content.propertyCollector.ContinueRetrievePropertiesEx(
+            ANY
+        ).objects = objects_second_page
 
         with (
             patch.object(
@@ -278,7 +278,6 @@ class TestVCenterInspectTaskRunnerTest:
             ) as mock_parse_host_props,
             patch.object(InspectTaskRunner, "parse_vm_props") as mock_parse_vm_props,
         ):
-
             self.runner.retrieve_properties(content)
             mock_parse_parent_props.assert_called_with(ANY, ANY)
             mock_parse_cluster_props.assert_called_with(ANY, ANY)

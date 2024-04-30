@@ -82,7 +82,6 @@ class DetailsReportsViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         runner.run()
 
         if scan_job.status != ScanTask.COMPLETED:
-
             error_json = {"error": scan_job.tasks.first().status_message}
             return Response(error_json, status=status.HTTP_400_BAD_REQUEST)
 

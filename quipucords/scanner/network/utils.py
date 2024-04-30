@@ -142,7 +142,6 @@ def expand_hostpattern(hostpattern):
     # specification?
 
     try:
-
         (pattern, port) = parse_address(hostpattern, allow_ranges=True)
     except:  # noqa
         # not a recognizable host pattern

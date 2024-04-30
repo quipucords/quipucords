@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0040_alter_credential_cred_type_alter_source_source_type"),
     ]

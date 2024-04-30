@@ -6,7 +6,6 @@ import api.inspectresult.model
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0034_remove_deploymentsreport_cached_masked_csv_and_more"),
     ]

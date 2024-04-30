@@ -7,7 +7,6 @@
 # Why make this choice then? well, naming things is hard. Calling this module
 # "compat.pydantic" makes sense and makes it easy to find.
 
-
 from pydantic import BaseModel as _BaseModel
 
 
@@ -46,7 +45,6 @@ def raises(error: Exception):
     """
 
     def wrap(model_class: type):
-
         if not hasattr(model_class, "__raise__"):
             raise TypeError("Class decorated with `raises` must implement `__raise__`")
 

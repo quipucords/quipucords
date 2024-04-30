@@ -64,7 +64,6 @@ def drop_all_scan_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0050_remove_taskinspectionresult_job_inspection_result"),
     ]

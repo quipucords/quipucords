@@ -228,7 +228,6 @@ class SatelliteInterface(ABC):
                 process_results(results=results)
 
     def _prepare_host_logging_options(self):
-
         return {
             "job_id": self.scan_job.id,
             "task_sequence_number": self.inspect_scan_task.sequence_number,

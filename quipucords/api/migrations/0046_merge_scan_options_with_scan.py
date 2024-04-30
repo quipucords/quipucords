@@ -58,7 +58,6 @@ def merge_scan_options(apps, _schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0045_merge_source_options_with_source"),
     ]

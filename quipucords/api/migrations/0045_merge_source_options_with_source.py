@@ -17,7 +17,6 @@ def merge_source_options(apps, _schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0044_credential_created_at_credential_updated_at"),
     ]

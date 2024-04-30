@@ -15,7 +15,6 @@ def update_timestamps(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("api", "0043_alter_credential_cred_type_alter_source_source_type"),
     ]
