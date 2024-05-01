@@ -1,6 +1,5 @@
-"""API models for import organization."""
-
-# flake8: noqa
+"""quipucords models."""
+# ruff: noqa: F401
 
 from api.connresult.model import (
     JobConnectionResult,
@@ -14,12 +13,8 @@ from api.deployments_report.model import (
     Product,
     SystemFingerprint,
 )
+from api.inspectresult.model import InspectGroup, InspectResult, RawFact
 from api.reports.model import Report
-from api.inspectresult.model import (
-    RawFact,
-    InspectResult,
-    InspectGroup,
-)
 from api.scan.model import Scan
 from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask

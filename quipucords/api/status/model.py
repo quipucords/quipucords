@@ -5,10 +5,12 @@ import uuid
 
 from django.db import models, transaction
 
+from api.common.models import BaseModel
+
 logger = logging.getLogger(__name__)
 
 
-class ServerInformation(models.Model):
+class ServerInformation(BaseModel):
     """A server's information."""
 
     global_identifier = models.CharField(max_length=36, null=False)

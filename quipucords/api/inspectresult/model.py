@@ -8,6 +8,7 @@ from django.db.models.expressions import RawSQL
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.models import BaseModel
 from api.common.util import RawFactEncoder
 from api.source.model import Source
 from constants import DataSources
@@ -80,7 +81,7 @@ class InspectGroupQuerySet(models.QuerySet):
         )
 
 
-class InspectGroup(models.Model):
+class InspectGroup(BaseModel):
     """
     Model representing a collection of results and their common metadata.
 
@@ -108,7 +109,7 @@ class InspectGroup(models.Model):
     objects = InspectGroupQuerySet.as_manager()
 
 
-class InspectResult(models.Model):
+class InspectResult(BaseModel):
     """A model for captured system data."""
 
     SUCCESS = "success"
@@ -135,7 +136,7 @@ class InspectResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_SYS_INSPECT_RESULTS_MSG)
 
 
-class RawFact(models.Model):
+class RawFact(BaseModel):
     """A model of a raw fact."""
 
     name = models.CharField(max_length=1024)

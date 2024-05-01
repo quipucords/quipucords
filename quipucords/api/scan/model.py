@@ -10,6 +10,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.models import BaseModel
 from api.common.util import (
     convert_to_boolean,
     convert_to_int,
@@ -23,7 +24,7 @@ PROD_DEF = namedtuple(
 )
 
 
-class Scan(models.Model):
+class Scan(BaseModel):
     """Configuration for the scan jobs that will run."""
 
     SCAN_TYPE_CHOICES = (

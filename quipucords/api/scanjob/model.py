@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.models import BaseModel
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
 from api.inspectresult.model import InspectResult
 from api.reports.model import Report
@@ -22,7 +23,7 @@ from api.source.model import Source
 logger = logging.getLogger(__name__)
 
 
-class ScanJob(models.Model):
+class ScanJob(BaseModel):
     """The scan job captures all sources and scan tasks for a scan."""
 
     JOB_RUN = 0

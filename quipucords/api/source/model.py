@@ -8,11 +8,12 @@ from functools import cached_property
 
 from django.db import models
 
+from api.common.models import BaseModel
 from api.credential.model import Credential
 from constants import DataSources
 
 
-class Source(models.Model):
+class Source(BaseModel):
     """A source connects a list of credentials and a list of hosts."""
 
     SSL_PROTOCOL_SSLv23 = "SSLv23"

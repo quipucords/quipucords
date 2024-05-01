@@ -85,7 +85,10 @@ class SourceSerializerBase(ModelSerializer):
         """Metadata for the serializer."""
 
         model = Source
-        fields = "__all__"
+        exclude = (
+            "created_at",
+            "updated_at",
+        )  # TODO Include these datetime fields in a future API version.
 
     @classmethod
     def validate_opts(cls, options, source_type):
