@@ -5,6 +5,7 @@ import uuid
 from django.db import models
 
 from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DEPLOYMENT
+from api.common.models import BaseModel
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -13,7 +14,7 @@ from fingerprinter.constants import (
 )
 
 
-class DeploymentsReport(models.Model):
+class DeploymentsReport(BaseModel):
     """Represents deployment report."""
 
     report_type = models.CharField(
@@ -38,7 +39,7 @@ class DeploymentsReport(models.Model):
     cached_csv = models.TextField(null=True)
 
 
-class SystemFingerprint(models.Model):
+class SystemFingerprint(BaseModel):
     """Represents system fingerprint."""
 
     # Important: If you add a DATE field, add it to list
@@ -158,20 +159,20 @@ class SystemFingerprint(models.Model):
     @classmethod
     def get_valid_fact_names(cls):
         """All expected fact names."""
-        non_fact_fields = set(
-            [
-                "id",
-                "deployment_report",
-                META_DATA_KEY,
-                SOURCES_KEY,
-                ENTITLEMENTS_KEY,
-                PRODUCTS_KEY,
-            ]
-        )
+        non_fact_fields = {
+            "id",
+            "deployment_report",
+            "created_at",
+            "updated_at",
+            META_DATA_KEY,
+            SOURCES_KEY,
+            ENTITLEMENTS_KEY,
+            PRODUCTS_KEY,
+        }
         return {field.name for field in cls._meta.get_fields()} - non_fact_fields
 
 
-class Product(models.Model):
+class Product(BaseModel):
     """Represents a product."""
 
     PRESENT = "present"
@@ -195,7 +196,7 @@ class Product(models.Model):
     metadata = models.JSONField(unique=False, null=False, default=dict)
 
 
-class Entitlement(models.Model):
+class Entitlement(BaseModel):
     """Represents a Entitlement."""
 
     fingerprint = models.ForeignKey(

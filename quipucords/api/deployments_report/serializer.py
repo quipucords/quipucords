@@ -126,7 +126,10 @@ class SystemFingerprintSerializer(ModelSerializer):
         """Meta class for SystemFingerprintSerializer."""
 
         model = SystemFingerprint
-        fields = "__all__"
+        exclude = (
+            "created_at",
+            "updated_at",
+        )  # TODO Include these datetime fields in a future API version.
 
     def create(self, validated_data):
         """Create a system fingerprint."""

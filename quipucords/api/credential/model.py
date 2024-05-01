@@ -7,11 +7,12 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.models import BaseModel
 from api.vault import encrypt_data_as_unicode
 from constants import DataSources
 
 
-class Credential(models.Model):
+class Credential(BaseModel):
     """The credential for connecting to systems."""
 
     BECOME_USER_DEFAULT = "root"
@@ -52,8 +53,6 @@ class Credential(models.Model):
     )
     become_user = models.CharField(max_length=64, null=True, blank=True)
     become_password = models.CharField(max_length=1024, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     ENCRYPTED_FIELDS = [
         "password",

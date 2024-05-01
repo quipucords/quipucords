@@ -5,10 +5,11 @@ from functools import cached_property
 
 from django.db import models
 
+from api.common.models import BaseModel
 from api.inspectresult.model import InspectGroup
 
 
-class Report(models.Model):
+class Report(BaseModel):
     """A reported set of facts."""
 
     report_version = models.CharField(max_length=64, null=False)

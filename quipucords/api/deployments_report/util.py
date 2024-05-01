@@ -84,7 +84,8 @@ def create_deployments_csv(deployments_report_dict):  # noqa: PLR0912, PLR0915, 
 
     valid_fact_attributes = {
         field.name for field in SystemFingerprint._meta.get_fields()
-    }
+    } - {"created_at", "updated_at"}
+    # TODO Include these datetime fields in a future version.
 
     # Add fields to just one fingerprint
     system = systems_list[0]

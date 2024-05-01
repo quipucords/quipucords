@@ -12,6 +12,7 @@ from django.db.models import F
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.models import BaseModel
 from api.connresult.model import TaskConnectionResult
 from api.inspectresult.model import InspectResult, RawFact
 from api.source.model import Source
@@ -19,7 +20,7 @@ from api.source.model import Source
 logger = logging.getLogger(__name__)
 
 
-class ScanTask(models.Model):
+class ScanTask(BaseModel):
     """The scan task captures a single source for a scan."""
 
     SCAN_TYPE_CONNECT = "connect"

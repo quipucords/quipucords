@@ -22,4 +22,9 @@ class DetailsReportSerializer(NotEmptySerializer):
         """Meta class for DetailsReportSerializer."""
 
         model = Report
-        exclude = ("id", "deployment_report")
+        exclude = (
+            "id",
+            "deployment_report",
+            "created_at",
+            "updated_at",
+        )  # TODO Include these datetime fields in a future API version.

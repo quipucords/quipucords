@@ -7,11 +7,12 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from api import messages
+from api.common.models import BaseModel
 from api.credential.model import Credential
 from api.source.model import Source
 
 
-class JobConnectionResult(models.Model):
+class JobConnectionResult(BaseModel):
     """The results of a connection scan."""
 
     class Meta:
@@ -20,7 +21,7 @@ class JobConnectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_JOB_CONN_RESULTS_MSG)
 
 
-class TaskConnectionResult(models.Model):
+class TaskConnectionResult(BaseModel):
     """The captured connection results from a scan."""
 
     job_connection_result = models.ForeignKey(
@@ -33,7 +34,7 @@ class TaskConnectionResult(models.Model):
         verbose_name_plural = _(messages.PLURAL_TASK_CONN_RESULTS_MSG)
 
 
-class SystemConnectionResult(models.Model):
+class SystemConnectionResult(BaseModel):
     """A key value pair of captured data."""
 
     SUCCESS = "success"
