@@ -5,7 +5,6 @@ from pathlib import Path
 from unittest.mock import ANY, Mock, patch
 
 import pytest
-import requests_mock
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
 
@@ -82,11 +81,7 @@ class TestNetworkInspectScanner:
             "TEST_VC.", sys_count=2, sys_failed=1, sys_scanned=1
         )
         self.connect_scan_task.status_complete()
-
         self.scan_task.update_stats("TEST NETWORK INSPECT.", sys_failed=0)
-
-        self.fact_endpoint = "http://testserver/whatever"
-
         self.scan_job.save()
         self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL, ScanJob.JOB_TERMINATE_PAUSE]
         self.interrupt = Mock(value=ScanJob.JOB_RUN)
@@ -255,11 +250,7 @@ class TestNetworkInspectScanner:
     def test_inspect_scan_fail_no_facts(self, mock_run):
         """Test running a inspect scan with mocked connection."""
         mock_run.return_value.status = "successful"
-        with (
-            requests_mock.Mocker() as mocker,
-            patch.object(InspectTaskRunner, "_persist_ansible_logs"),
-        ):
-            mocker.post(self.fact_endpoint, status_code=201, json={"id": 1})
+        with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
             scanner = InspectTaskRunner(self.scan_job, self.scan_task)
             scanner.connect_scan_task = self.connect_scan_task
             scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
