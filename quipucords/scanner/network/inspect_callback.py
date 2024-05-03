@@ -59,7 +59,7 @@ class InspectCallback:
         host = event_data.get("host", UNKNOWN_HOST)
         task = event_data.get("task")
         role = event_data.get("role")
-        logger.info("[host=%s] processing role='%s' task='%s'", host, role, task)
+        logger.debug("[host=%s] processing role='%s' task='%s'", host, role, task)
         self._process_task_facts(ansible_facts, host)
 
     def _process_task_facts(self, ansible_facts, host):
@@ -87,12 +87,18 @@ class InspectCallback:
         task = event_data.get("task")
         role = event_data.get("role")
         if result.get("rc") == TIMEOUT_RC:
-            logger.error("[host=%s] Task '%s' timed out", host, task)
+            logger.error("[host=%s role='%s' task='%s'] timed out", host, role, task)
 
         # Only log an error when ignore errors is false
         if event_data.get("ignore_errors", False):
             err_reason = result.get("msg", event_data)
-            logger.warning("[host=%s] failed - reason: %s", host, err_reason)
+            logger.warning(
+                "[host=%s role='%s' task='%s'] failed - reason: %s",
+                host,
+                role,
+                task,
+                err_reason,
+            )
 
         task_facts = result.get("ansible_facts")
         if task_facts:
@@ -100,7 +106,7 @@ class InspectCallback:
             # but do we really want to collect facts for a failed event?
             # TODO: keep an eye on logs from test lab and field for the following
             logger.warning(
-                "[host=%s] role='%s' task='%s' FAILED and contains ansible_facts",
+                "[host=%s role='%s' task='%s'] FAILED and contains ansible_facts",
                 host,
                 role,
                 task,
