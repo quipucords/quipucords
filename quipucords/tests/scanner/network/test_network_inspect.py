@@ -1,5 +1,6 @@
 """Test the inspect scanner capabilities."""
 
+import logging
 from multiprocessing import Value
 from pathlib import Path
 from unittest.mock import ANY, Mock, patch
@@ -8,6 +9,7 @@ import pytest
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
 
+from api.inspectresult.model import RawFact
 from api.models import (
     Credential,
     ScanJob,
@@ -228,14 +230,19 @@ class TestNetworkInspectScanner:
         assert inventory_dict[1] == expected
 
     @patch("ansible_runner.run")
-    def test_inspect_scan_failure(self, mock_run):
+    def test_inspect_scan_failure(self, mock_run, caplog):
         """Test scan flow with mocked manager and failure."""
         mock_run.side_effect = AnsibleRunnerException()
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scanner.connect_scan_task = self.connect_scan_task
-        with pytest.raises(AnsibleRunnerException):
-            scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
-            mock_run.assert_called()
+        caplog.set_level(logging.ERROR)
+        _, scan_result = scanner._inspect_scan(
+            Value("i", ScanJob.JOB_RUN), self.host_list
+        )
+        # an error should not prevent scan completion
+        assert scan_result == "completed"
+        # no raw fact produced, given the errors
+        assert RawFact.objects.count() == 0
 
     @patch("scanner.network.inspect.InspectTaskRunner._inspect_scan")
     def test_inspect_scan_error(self, mock_scan):
