@@ -3,6 +3,7 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
+from api.aggregate_report.view import aggregate_report
 from api.reports.view import upload_raw_facts
 from api.scan.view import scan_bulk_delete
 from api.views import (
@@ -46,6 +47,9 @@ v1_urls = [
     path("sources/bulk_delete/", source_bulk_delete, name="sources-bulk-delete"),
     path("scans/bulk_delete/", scan_bulk_delete, name="scans-bulk-delete"),
     path("reports/", upload_raw_facts, name="reports-upload"),
+    path(
+        "reports/<int:report_id>/aggregate/", aggregate_report, name="reports-aggregate"
+    ),
     path("reports/<int:report_id>/details/", details, name="reports-details"),
     path(
         "reports/<int:report_id>/deployments/", deployments, name="reports-deployments"

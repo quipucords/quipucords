@@ -2,6 +2,7 @@
 
 # ruff: noqa: F401
 
+from api.aggregate_report.view import aggregate_report
 from api.credential.view import CredentialViewSet, credential_bulk_delete
 from api.deployments_report.view import deployments
 from api.details_report.view import details
