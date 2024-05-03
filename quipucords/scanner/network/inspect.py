@@ -248,10 +248,9 @@ class InspectTaskRunner(ScanTaskRunner):
                     cmdline=all_commands,
                     verbosity=verbosity_lvl,
                 )
-            except Exception as error:
+            except Exception:
                 logger.exception("Uncaught exception during Ansible Runner execution")
-                delete_ssh_keyfiles(inventory)
-                raise AnsibleRunnerException(str(error)) from error
+                continue
 
             log_message = (
                 "INSPECT PROCESSING GROUP ANSIBLE RUNNER COMPLETED"
