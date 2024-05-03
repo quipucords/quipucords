@@ -226,7 +226,13 @@ class TestInspectCallback:
     @pytest.mark.parametrize(
         "ignore_errors,expected_messages",
         (
-            (True, ["[host=127.0.0.1] failed - reason: non-zero return code"]),
+            (
+                True,
+                [
+                    "[host=127.0.0.1 role='check_dependencies' task='gather "
+                    "internal_have_java_cmd'] failed - reason: non-zero return code"
+                ],
+            ),
             (False, []),
         ),
     )
@@ -258,8 +264,8 @@ class TestInspectCallback:
         callback.event_callback(event_failed)
         assert callback._ansible_facts["127.0.0.1"] == {"watermelon": "melancia"}
         assert caplog.messages == [
-            "[host=127.0.0.1] failed - reason: non-zero return code",
-            "[host=127.0.0.1] role='check_dependencies' task='gather internal_have_java_cmd' FAILED and contains ansible_facts",  # noqa: E501
+            "[host=127.0.0.1 role='check_dependencies' task='gather internal_have_java_cmd'] failed - reason: non-zero return code",  # noqa: E501
+            "[host=127.0.0.1 role='check_dependencies' task='gather internal_have_java_cmd'] FAILED and contains ansible_facts",  # noqa: E501
         ]
 
     def test_task_on_unreachable(self, event_unreachable, mocker):

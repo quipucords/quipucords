@@ -257,7 +257,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 f" group {group_name}: {runner_obj.status=}"
                 f" {runner_obj.rc=} {runner_obj.stats=}"
             )
-            self.scan_task.log_message(log_message, log_level=logging.DEBUG)
+            self.scan_task.log_message(log_message, log_level=logging.INFO)
 
             # Let's delete any private ssh key files that we generated
             delete_ssh_keyfiles(inventory)
