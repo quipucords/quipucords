@@ -1,7 +1,9 @@
 """Utility functions for system fingerprinting."""
 
+import logging
 from collections import OrderedDict
 
+logger = logging.getLogger(__name__)
 NAME = "name"
 
 
@@ -16,7 +18,12 @@ def product_entitlement_found(entitlements, product_name):
         return False
     for entitlement in entitlements:
         name = entitlement.get(NAME, "")
-        if product_name in name:
+        if name is None:
+            logger.warning(
+                "Unexpected None %(name)s found in entitlement (%(entitlement)s)",
+                {"name": NAME, "entitlement": entitlement},
+            )
+        elif product_name in name:
             return True
     return False
 
