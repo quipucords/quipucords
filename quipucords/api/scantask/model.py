@@ -156,18 +156,25 @@ class ScanTask(BaseModel):
     # All scan task types
     def _log_scan_message(self, message, log_level=logging.INFO, static_options=None):
         """Log a message for this task."""
+        if not self.source:
+            logger.warning("Missing source for job ID %s", self.job_id)
+            source_type = None
+            source_name = None
+        else:
+            source_type = self.source.source_type
+            source_name = self.source.name
         if static_options is not None:
             actual_message = (
                 f"Job {self.job_id:d},"
                 f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
-                f" ({self.scan_type}, {self.source.source_type}, {self.source.name}) - "
+                f" ({self.scan_type}, {source_type}, {source_name}) - "
             )
         else:
             elapsed_time = self._compute_elapsed_time()
             actual_message = (
                 f"Job {self.job_id:d},"
                 f" Task {self.sequence_number:d} of {self.scan_job_task_count:d}"
-                f" ({self.scan_type}, {self.source.source_type}, {self.source.name},"
+                f" ({self.scan_type}, {source_type}, {source_name},"
                 f" elapsed_time: {elapsed_time:.0f}s) - "
             )
         actual_message += message.strip()
