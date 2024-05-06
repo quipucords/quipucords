@@ -1,6 +1,7 @@
 """Test the ScanTask model and serializer."""
 
-from datetime import datetime
+from collections.abc import Callable
+from functools import partial
 from unittest.mock import patch
 
 import pytest
@@ -47,202 +48,195 @@ def scan_job(scan: Scan) -> ScanJob:
 
 
 @pytest.mark.django_db
-class TestScanTask:
-    """Test the basic ScanJob infrastructure."""
+def test_successful_create(scan_job, source):
+    """Create a scan task and serialize it."""
+    task = ScanTask.objects.create(
+        job=scan_job,
+        source=source,
+        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        status=ScanTask.PENDING,
+    )
+    serializer = ScanTaskSerializer(task)
+    json_task = serializer.data
+    expected = {
+        "sequence_number": 0,
+        "source": source.id,
+        "scan_type": ScanTask.SCAN_TYPE_CONNECT,
+        "status": "pending",
+        "status_message": messages.ST_STATUS_MSG_PENDING,
+        "systems_count": 0,
+        "systems_scanned": 0,
+        "systems_failed": 0,
+        "systems_unreachable": 0,
+    }
+    assert expected == json_task
 
-    def test_successful_create(self, scan_job, source):
-        """Create a scan task and serialize it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        serializer = ScanTaskSerializer(task)
-        json_task = serializer.data
-        expected = {
-            "sequence_number": 0,
-            "source": source.id,
-            "scan_type": ScanTask.SCAN_TYPE_CONNECT,
-            "status": "pending",
-            "status_message": messages.ST_STATUS_MSG_PENDING,
-            "systems_count": 0,
-            "systems_scanned": 0,
-            "systems_failed": 0,
-            "systems_unreachable": 0,
-        }
-        assert expected == json_task
 
-    def test_successful_start(self, scan_job, source):
-        """Create a scan task and start it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        start_time = datetime.utcnow()
-        task.status_start()
-        assert messages.ST_STATUS_MSG_RUNNING == task.status_message
-        assert task.status == ScanTask.RUNNING
-        assert start_time.replace(microsecond=0) == task.start_time.replace(
-            microsecond=0
-        )
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "model_action,expected_status,expected_message,check_start_time,check_end_time",
+    [
+        [
+            ScanTask.status_start,
+            ScanTask.RUNNING,
+            messages.ST_STATUS_MSG_RUNNING,
+            True,
+            False,
+        ],
+        [
+            ScanTask.status_restart,
+            ScanTask.PENDING,
+            messages.ST_STATUS_MSG_RESTARTED,
+            False,
+            False,
+        ],
+        [
+            ScanTask.status_pause,
+            ScanTask.PAUSED,
+            messages.ST_STATUS_MSG_PAUSED,
+            False,
+            False,
+        ],
+        [
+            ScanTask.status_cancel,
+            ScanTask.CANCELED,
+            messages.ST_STATUS_MSG_CANCELED,
+            False,
+            True,
+        ],
+        [
+            partial(ScanTask.status_complete, message="this was a triumph"),
+            ScanTask.COMPLETED,
+            "this was a triumph",
+            False,
+            True,
+        ],
+        [
+            partial(ScanTask.status_fail, message="i'm making a note here"),
+            ScanTask.FAILED,
+            "i'm making a note here",
+            False,
+            True,
+        ],
+    ],
+)
+def test_scan_task_model_status_action(  # noqa: PLR0913
+    model_action: Callable[[ScanTask], [None]],
+    expected_status: str,
+    expected_message: str,
+    check_start_time: bool,
+    check_end_time: bool,
+    scan_job: ScanJob,
+    source: Source,
+):
+    """Test status-related model actions on a new ScanTask instance."""
+    task = ScanTask.objects.create(
+        job=scan_job,
+        source=source,
+        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        status=ScanTask.PENDING,
+    )
+    model_action(task)
+    assert expected_status == task.status
+    assert expected_message == task.status_message
+    if check_start_time:
+        assert task.start_time is not None
+    if check_end_time:
+        assert task.end_time is not None
 
-    def test_successful_restart(self, scan_job, source):
-        """Create a scan task and restart it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        task.status_restart()
-        assert messages.ST_STATUS_MSG_RESTARTED == task.status_message
-        assert task.status == ScanTask.PENDING
 
-    def test_successful_pause(self, scan_job, source):
-        """Create a scan task and status_pause it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        task.status_pause()
-        assert messages.ST_STATUS_MSG_PAUSED == task.status_message
-        assert task.status == ScanTask.PAUSED
+@pytest.mark.django_db
+def test_scantask_increment(scan_job, source):
+    """Test scan task increment feature."""
+    task = ScanTask.objects.create(
+        job=scan_job,
+        source=source,
+        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        status=ScanTask.PENDING,
+    )
+    task.increment_stats(
+        "foo",
+        increment_sys_count=True,
+        increment_sys_scanned=True,
+        increment_sys_failed=True,
+        increment_sys_unreachable=True,
+    )
+    assert 1 == task.systems_count
+    assert 1 == task.systems_scanned
+    assert 1 == task.systems_failed
+    assert 1 == task.systems_unreachable
+    task.increment_stats(
+        "foo",
+        increment_sys_count=True,
+        increment_sys_scanned=True,
+        increment_sys_failed=True,
+        increment_sys_unreachable=True,
+    )
+    assert 2 == task.systems_count
+    assert 2 == task.systems_scanned
+    assert 2 == task.systems_failed
+    assert 2 == task.systems_unreachable
 
-    def test_successful_cancel(self, scan_job, source):
-        """Create a scan task and cancel it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        end_time = datetime.utcnow()
-        task.status_cancel()
-        assert messages.ST_STATUS_MSG_CANCELED == task.status_message
-        assert task.status == ScanTask.CANCELED
-        assert end_time.replace(microsecond=0) == task.end_time.replace(microsecond=0)
 
-    def test_successful_complete(self, scan_job, source):
-        """Create a scan task and complete it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        end_time = datetime.utcnow()
-        task.status_complete("great")
-        assert "great" == task.status_message
-        assert task.status == ScanTask.COMPLETED
-        assert end_time.replace(microsecond=0) == task.end_time.replace(microsecond=0)
+@pytest.mark.django_db
+def test_scantask_increment_stats_multiple_in_parallel(scan_job, source):
+    """Test scan task increment two instances in parallel.
 
-    def test_scantask_fail(self, scan_job, source):
-        """Create a scan task and fail it."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        msg = "Test Fail."
-        end_time = datetime.utcnow()
-        task.status_fail(msg)
-        assert msg == task.status_message
-        assert task.status == ScanTask.FAILED
-        assert end_time.replace(microsecond=0) == task.end_time.replace(microsecond=0)
+    This is a special case test to help ensure that increment_stats is thread-safe.
+    We patch `refresh_from_db` with a mock object here because we don't want the
+    underlying functionality to rely on `refresh_from_db` completing immediately
+    before the update/save.
+    """
+    task_instance_a = ScanTask.objects.create(
+        job=scan_job,
+        source=source,
+        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        status=ScanTask.PENDING,
+    )
+    task_instance_b = ScanTask.objects.get(id=task_instance_a.id)
 
-    def test_scantask_increment(self, scan_job, source):
-        """Test scan task increment feature."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        task.increment_stats(
-            "foo",
-            increment_sys_count=True,
-            increment_sys_scanned=True,
-            increment_sys_failed=True,
-            increment_sys_unreachable=True,
-        )
-        assert 1 == task.systems_count
-        assert 1 == task.systems_scanned
-        assert 1 == task.systems_failed
-        assert 1 == task.systems_unreachable
-        task.increment_stats(
-            "foo",
-            increment_sys_count=True,
-            increment_sys_scanned=True,
-            increment_sys_failed=True,
-            increment_sys_unreachable=True,
-        )
-        assert 2 == task.systems_count
-        assert 2 == task.systems_scanned
-        assert 2 == task.systems_failed
-        assert 2 == task.systems_unreachable
+    assert 0 == task_instance_a.systems_count
+    assert 0 == task_instance_b.systems_count
 
-    def test_scantask_increment_stats_multiple_in_parallel(self, scan_job, source):
-        """Test scan task increment two instances in parallel.
+    with (
+        patch.object(task_instance_a, "refresh_from_db"),
+        patch.object(task_instance_b, "refresh_from_db"),
+    ):
+        task_instance_a.increment_stats("foo", increment_sys_count=True)
+        task_instance_b.increment_stats("foo", increment_sys_count=True)
 
-        This is a special case test to help ensure that increment_stats is thread-safe.
-        We patch `refresh_from_db` with a mock object here because we don't want the
-        underlying functionality to rely on `refresh_from_db` completing immediately
-        before the update/save.
-        """
-        task_instance_a = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        task_instance_b = ScanTask.objects.get(id=task_instance_a.id)
+    task_instance_a.refresh_from_db()
+    task_instance_b.refresh_from_db()
 
-        assert 0 == task_instance_a.systems_count
-        assert 0 == task_instance_b.systems_count
+    assert 2 == task_instance_a.systems_count
+    assert 2 == task_instance_b.systems_count
 
-        with (
-            patch.object(task_instance_a, "refresh_from_db"),
-            patch.object(task_instance_b, "refresh_from_db"),
-        ):
-            task_instance_a.increment_stats("foo", increment_sys_count=True)
-            task_instance_b.increment_stats("foo", increment_sys_count=True)
 
-        task_instance_a.refresh_from_db()
-        task_instance_b.refresh_from_db()
-
-        assert 2 == task_instance_a.systems_count
-        assert 2 == task_instance_b.systems_count
-
-    def test_scantask_reset_stats(self, scan_job, source):
-        """Test scan task reset stat feature."""
-        task = ScanTask.objects.create(
-            job=scan_job,
-            source=source,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-        )
-        task.increment_stats(
-            "foo",
-            increment_sys_count=True,
-            increment_sys_scanned=True,
-            increment_sys_failed=True,
-            increment_sys_unreachable=True,
-        )
-        assert 1 == task.systems_count
-        assert 1 == task.systems_scanned
-        assert 1 == task.systems_failed
-        assert 1 == task.systems_unreachable
-        task.reset_stats()
-        assert 0 == task.systems_count
-        assert 0 == task.systems_scanned
-        assert 0 == task.systems_failed
-        assert 0 == task.systems_unreachable
+@pytest.mark.django_db
+def test_scantask_reset_stats(scan_job, source):
+    """Test scan task reset stat feature."""
+    task = ScanTask.objects.create(
+        job=scan_job,
+        source=source,
+        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        status=ScanTask.PENDING,
+    )
+    task.increment_stats(
+        "foo",
+        increment_sys_count=True,
+        increment_sys_scanned=True,
+        increment_sys_failed=True,
+        increment_sys_unreachable=True,
+    )
+    assert 1 == task.systems_count
+    assert 1 == task.systems_scanned
+    assert 1 == task.systems_failed
+    assert 1 == task.systems_unreachable
+    task.reset_stats()
+    assert 0 == task.systems_count
+    assert 0 == task.systems_scanned
+    assert 0 == task.systems_failed
+    assert 0 == task.systems_unreachable
 
 
 @pytest.mark.django_db
