@@ -1,5 +1,6 @@
 """Test the ScanTask model and serializer."""
 
+import logging
 from collections.abc import Callable
 from functools import partial
 from unittest.mock import patch
@@ -261,3 +262,26 @@ def test_cleanup_facts():
     scan_task.cleanup_facts(identity_key)
     assert scan_task.get_result().count() == 1
     assert InspectResult.objects.filter(id=protected_result_id).exists()
+
+
+@pytest.mark.django_db
+def test_log_scan_message_normal(scan_job, source, caplog, faker):
+    """Test _log_scan_message for a populated instance."""
+    task = ScanTask.objects.create(job=scan_job, source=source)
+    caplog.set_level(logging.INFO, logger="api.scantask.model")
+    message = faker.sentence()
+    task._log_scan_message(message)
+    assert len(caplog.messages) == 1
+    assert message in caplog.messages[0]
+
+
+@pytest.mark.django_db
+def test_log_scan_message_problematic(scan_job, caplog, faker):
+    """Test _log_scan_message for an instance with no sources."""
+    task = ScanTask.objects.create(job=scan_job)  # no sources!
+    caplog.set_level(logging.INFO, logger="api.scantask.model")
+    message = faker.sentence()
+    task._log_scan_message(message)
+    assert len(caplog.messages) == 2
+    assert "Missing source" in caplog.messages[0]
+    assert message in caplog.messages[1]
