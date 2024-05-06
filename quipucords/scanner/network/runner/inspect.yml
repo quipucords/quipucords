@@ -16,7 +16,6 @@
     - file_contents
     - jboss_eap
     - jboss_eap5
-    - jboss_brms
     - jboss_fuse
     - jboss_ws
     - jboss_fuse_on_karaf

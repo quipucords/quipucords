@@ -1306,7 +1306,6 @@ class TestScanJob:
                 "disabled_optional_products": {
                     "jboss_eap": True,
                     "jboss_fuse": True,
-                    "jboss_brms": True,
                     "jboss_ws": True,
                 }
             },
@@ -1441,11 +1440,9 @@ class TestScanJob:
         expected_vars = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": True,
             "jboss_ws": True,
             "jboss_eap_ext": False,
             "jboss_fuse_ext": False,
-            "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
@@ -1475,11 +1472,9 @@ class TestScanJob:
         expected_vars = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": True,
             "jboss_ws": True,
             "jboss_eap_ext": False,
             "jboss_fuse_ext": False,
-            "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
@@ -1508,11 +1503,9 @@ class TestScanJob:
         expected_vars = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": True,
             "jboss_ws": True,
             "jboss_eap_ext": False,
             "jboss_fuse_ext": False,
-            "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
@@ -1553,7 +1546,6 @@ class TestScanJob:
         extended = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": True,
             "jboss_ws": True,
             Scan.EXT_PRODUCT_SEARCH_DIRS: ["a", "b"],
         }
@@ -1569,11 +1561,9 @@ class TestScanJob:
         expected_vars = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": True,
             "jboss_ws": True,
             "jboss_eap_ext": True,
             "jboss_fuse_ext": True,
-            "jboss_brms_ext": True,
             "jboss_ws_ext": True,
             "search_directories": "a b",
         }
@@ -1595,7 +1585,6 @@ class TestScanJob:
         disabled = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": False,
             "jboss_ws": False,
         }
         scan_options = {
@@ -1612,11 +1601,9 @@ class TestScanJob:
         expected_vars = {
             "jboss_eap": True,
             "jboss_fuse": False,
-            "jboss_brms": True,
             "jboss_ws": True,
             "jboss_eap_ext": False,
             "jboss_fuse_ext": False,
-            "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars
@@ -1640,7 +1627,6 @@ class TestScanJob:
         disabled = {
             "jboss_eap": True,
             "jboss_fuse": True,
-            "jboss_brms": True,
             "jboss_ws": True,
         }
         scan_options = {
@@ -1656,11 +1642,9 @@ class TestScanJob:
         expected_vars = {
             "jboss_eap": False,
             "jboss_fuse": False,
-            "jboss_brms": False,
             "jboss_ws": False,
             "jboss_eap_ext": False,
             "jboss_fuse_ext": False,
-            "jboss_brms_ext": False,
             "jboss_ws_ext": False,
         }
         assert extra_vars == expected_vars

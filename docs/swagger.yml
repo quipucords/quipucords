@@ -1700,10 +1700,6 @@ definitions:
         type: "boolean"
         description: "The setting for JBoss Fuse"
         default: false
-      jboss_brms:
-        type: "boolean"
-        description: "The setting for JBoss BRMS"
-        default: false
       jboss_ws:
         type: "boolean"
         description: "The setting for JBoss Web Server"
@@ -1716,10 +1712,6 @@ definitions:
         description: "The setting for JBoss EAP"
         default: false
       jboss_fuse:
-        type: "boolean"
-        description: "The setting for JBoss BRMS"
-        default: false
-      jboss_brms:
         type: "boolean"
         description: "The setting for JBoss Fuse"
         default: false

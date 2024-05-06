@@ -29,7 +29,6 @@ from fingerprinter.constants import (
     PRODUCTS_KEY,
     SOURCES_KEY,
 )
-from fingerprinter.jboss_brms import detect_jboss_brms
 from fingerprinter.jboss_eap import detect_jboss_eap
 from fingerprinter.jboss_fuse import detect_jboss_fuse
 from fingerprinter.jboss_web_server import detect_jboss_ws
@@ -922,9 +921,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
         """
         eap = detect_jboss_eap(source, raw_fact)
         fuse = detect_jboss_fuse(source, raw_fact)
-        brms = detect_jboss_brms(source, raw_fact)
         jws = detect_jboss_ws(source, raw_fact)
-        fingerprint["products"] = [eap, fuse, brms, jws]
+        fingerprint["products"] = [eap, fuse, jws]
 
     def _add_entitlements_to_fingerprint(
         self, source, raw_fact_key, raw_fact, fingerprint
