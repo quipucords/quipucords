@@ -115,7 +115,7 @@ SJ_STATUS_MSG_COMPLETED = "Job is complete."
 
 SJ_EXTRA_VARS_DICT = "Extra vars must be a dictionary."
 SJ_EXTRA_VARS_BOOL = "Extra vars values must be type boolean."
-SJ_EXTRA_VARS_KEY = "Extra vars keys must be jboss_eap, jboss_fuse, or jboss_brms."
+SJ_EXTRA_VARS_KEY = "Extra vars keys must be jboss_eap or jboss_fuse."
 
 SJ_MERGE_JOB_REQUIRED = "This field is required"
 SJ_MERGE_JOB_NOT_LIST = "This field must be a list of job ids."

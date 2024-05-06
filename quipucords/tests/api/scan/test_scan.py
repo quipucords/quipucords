@@ -211,7 +211,6 @@ class TestScanCreate:
             # TODO: change this behavior in v2 api
             "options": {
                 "disabled_optional_products": {
-                    "jboss_brms": False,
                     "jboss_eap": True,
                     "jboss_fuse": False,
                     "jboss_ws": False,
@@ -456,7 +455,6 @@ class TestScanUpdate:
             "jobs": [{"id": scan.most_recent_scanjob.id}],
             "options": {
                 "disabled_optional_products": {
-                    "jboss_brms": False,
                     "jboss_eap": False,
                     "jboss_fuse": False,
                     "jboss_ws": True,

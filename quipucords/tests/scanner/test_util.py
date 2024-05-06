@@ -93,12 +93,12 @@ def scan_options_products(expected_vars_dict):
     """
     disabled_optional_products = {
         key: not expected_vars_dict[key]
-        for key in ("jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws")
+        for key in ("jboss_eap", "jboss_fuse", "jboss_ws")
     }
 
     enabled_extended_product_search = {
         key: expected_vars_dict[f"{key}_ext"]
-        for key in ("jboss_eap", "jboss_fuse", "jboss_brms", "jboss_ws")
+        for key in ("jboss_eap", "jboss_fuse", "jboss_ws")
     }
 
     return disabled_optional_products, enabled_extended_product_search

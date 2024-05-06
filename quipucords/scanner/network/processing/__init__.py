@@ -1,7 +1,6 @@
 """Initial processing for facts coming from Ansible."""
 
 from . import (
-    brms,
     cloud_provider,
     cpu,
     date,

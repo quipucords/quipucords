@@ -35,13 +35,11 @@ class Scan(BaseModel):
     JBOSS_EAP = "jboss_eap"
     JBOSS_FUSE = "jboss_fuse"
     JBOSS_WS = "jboss_ws"
-    JBOSS_BRMS = "jboss_brms"
 
     PRODUCTS = {
         JBOSS_EAP: PROD_DEF(JBOSS_EAP, True, f"{JBOSS_EAP}_ext", False, True),
         JBOSS_FUSE: PROD_DEF(JBOSS_FUSE, True, f"{JBOSS_FUSE}_ext", False, True),
         JBOSS_WS: PROD_DEF(JBOSS_WS, True, f"{JBOSS_WS}_ext", False, True),
-        JBOSS_BRMS: PROD_DEF(JBOSS_BRMS, True, f"{JBOSS_BRMS}_ext", False, True),
     }
 
     SUPPORTED_PRODUCTS = PRODUCTS.keys()
@@ -163,9 +161,6 @@ class Scan(BaseModel):
         if enable_products is not None:
             extra_vars[self.JBOSS_EAP] = (
                 enable_products.get(
-                    self.JBOSS_BRMS, Scan.PRODUCTS[self.JBOSS_BRMS].enabled
-                )
-                or enable_products.get(
                     self.JBOSS_FUSE, Scan.PRODUCTS[self.JBOSS_FUSE].enabled
                 )
                 or enable_products.get(
@@ -178,14 +173,11 @@ class Scan(BaseModel):
             extra_vars[self.JBOSS_FUSE] = enable_products.get(
                 self.JBOSS_FUSE, Scan.PRODUCTS[self.JBOSS_FUSE].enabled
             )
-            extra_vars[self.JBOSS_BRMS] = enable_products.get(
-                self.JBOSS_BRMS, Scan.PRODUCTS[self.JBOSS_BRMS].enabled
-            )
             extra_vars[self.JBOSS_WS] = enable_products.get(
                 self.JBOSS_WS, Scan.PRODUCTS[self.JBOSS_WS].enabled
             )
 
-        # Scan for EAP if fuse or brms are in scan
+        # Scan for EAP if fuse is in scan
         extended_search = self.enabled_extended_product_search
         if extended_search is not None:
             for prod in Scan.SUPPORTED_PRODUCTS:

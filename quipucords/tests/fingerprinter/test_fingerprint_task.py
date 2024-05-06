@@ -110,7 +110,6 @@ EXPECTED_FINGERPRINT_MAP_VCENTER = {
 PRODUCTS = [
     {"name": "JBoss EAP", "presence": "absent"},
     {"name": "JBoss Fuse", "presence": "absent"},
-    {"name": "JBoss BRMS", "presence": "absent"},
     {"name": "JBoss Web Server", "presence": "absent", "version": []},
 ]
 
