@@ -4,6 +4,9 @@
   # update roles structure when we transition off ansible 2.3
   # https://docs.ansible.com/ansible/latest/user_guide/playbooks_reuse_roles.html
   roles:
+    # IMPORTANT NOTE:
+    # The order of these roles is specific and deliberate.
+    # Do not sort or reorder these without specific reasons.
     - user_data
     - check_dependencies
     - connection
@@ -14,11 +17,6 @@
     - cloud_provider
     - etc_release
     - file_contents
-    - jboss_eap
-    - jboss_eap5
-    - jboss_fuse
-    - jboss_ws
-    - jboss_fuse_on_karaf
     - ifconfig
     - ip
     - installed_products
@@ -30,4 +28,9 @@
     - system_purpose
     - redhat_release
     - memory
+    - jboss_eap
+    - jboss_eap5
+    - jboss_fuse
+    - jboss_ws
+    - jboss_fuse_on_karaf
     - host_done
