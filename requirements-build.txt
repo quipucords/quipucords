@@ -19,6 +19,7 @@ flit-core==3.9.0
     #   django-filter
     #   docutils
     #   idna
+    #   jinja2
     #   more-itertools
     #   packaging
     #   pathspec
