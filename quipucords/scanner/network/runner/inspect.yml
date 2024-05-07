@@ -7,7 +7,6 @@
     # IMPORTANT NOTE:
     # The order of these roles is specific and deliberate.
     # Do not sort or reorder these without specific reasons.
-    - user_data
     - check_dependencies
     - connection
     - virt
@@ -16,11 +15,9 @@
     - dmi
     - cloud_provider
     - etc_release
-    - file_contents
     - ifconfig
     - ip
     - installed_products
-    - redhat_packages
     - subman
     - uname
     - virt_what
@@ -28,6 +25,9 @@
     - system_purpose
     - redhat_release
     - memory
+    - user_data
+    - redhat_packages
+    - file_contents
     - jboss_eap
     - jboss_eap5
     - jboss_brms
