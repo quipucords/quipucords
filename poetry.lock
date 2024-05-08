@@ -2599,16 +2599,15 @@ files = [
 
 [[package]]
 name = "pyvmomi"
-version = "7.0.3"
+version = "8.0.2.0.1"
 description = "VMware vSphere Python SDK"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=2.7.9, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "pyvmomi-7.0.3.tar.gz", hash = "sha256:2ab52d940061d25307e4e4867ffea6e8ed597e7263025b0abaacc5b1d652da31"},
+    {file = "pyvmomi-8.0.2.0.1.tar.gz", hash = "sha256:791c4d93252e3c0896fecae8d785f8342b123672e7cae9c5548a639b9bf668ad"},
 ]
 
 [package.dependencies]
-requests = ">=2.3.0"
 six = ">=1.7.3"
 
 [package.extras]
@@ -3664,4 +3663,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.11"
-content-hash = "619474d7401a95a18d22b1c9df992edca413f8740df61853f9d13d78a1f687b7"
+content-hash = "f5553cbaa1f4f0beefc188dcd2c515c025bd74502bcfc7879ad61563bf2410da"

@@ -3,7 +3,7 @@
 import atexit
 import ssl
 
-from pyVim.connect import Disconnect, SmartConnect, SmartConnectNoSSL
+from pyVim.connect import Disconnect, SmartConnect
 from pyVmomi import vmodl
 
 from api.vault import decrypt_data_as_unicode
@@ -15,10 +15,6 @@ def vcenter_connect(scan_task):
     :param scan_task: The scan task
     :returns: VCenter connection object.
     """
-    vcenter = None
-    disable_ssl = None
-    ssl_cert_verify = None
-    ssl_protocol = None
     source = scan_task.source
     credential = source.credentials.all().first()
     user = credential.username
@@ -26,30 +22,23 @@ def vcenter_connect(scan_task):
     password = decrypt_data_as_unicode(credential.password)
     port = scan_task.source.port
 
-    if source.disable_ssl is True:
-        disable_ssl = True
-
-    if source.ssl_cert_verify is not None:
-        ssl_cert_verify = source.ssl_cert_verify
-
+    disable_ssl = source.disable_ssl
+    ssl_cert_verify = source.ssl_cert_verify
     ssl_protocol = source.get_ssl_protocol()
 
+    smart_connect_kwargs = {"host": host, "user": user, "pwd": password, "port": port}
+
     if disable_ssl:
-        vcenter = SmartConnectNoSSL(host=host, user=user, pwd=password, port=port)
-    elif ssl_protocol is None and ssl_cert_verify is None:
-        vcenter = SmartConnect(host=host, user=user, pwd=password, port=port)
-    else:
-        ssl_context = None
-        if ssl_protocol is None:
-            ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
-        else:
-            ssl_context = ssl.SSLContext(protocol=ssl_protocol)
+        smart_connect_kwargs["disableSslCertValidation"] = True
+    elif not (ssl_protocol is None and ssl_cert_verify is None):
+        ssl_context = ssl.SSLContext(
+            protocol=ssl_protocol if ssl_protocol else ssl.PROTOCOL_SSLv23
+        )
         if ssl_cert_verify is False:
             ssl_context.verify_mode = ssl.CERT_NONE
-        vcenter = SmartConnect(
-            host=host, user=user, pwd=password, port=port, sslContext=ssl_context
-        )
+        smart_connect_kwargs["sslContext"] = ssl_context
 
+    vcenter = SmartConnect(**smart_connect_kwargs)
     atexit.register(Disconnect, vcenter)
 
     return vcenter
