@@ -211,9 +211,10 @@ class InspectTaskRunner(ScanTaskRunner):
             call = InspectCallback(manager_interrupt)
 
             # Build Ansible Runner Parameters
+            job_timeout = int(settings.NETWORK_INSPECT_JOB_TIMEOUT) * len(group_names)
             runner_settings = {
-                "idle_timeout": int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
-                "job_timeout": int(settings.NETWORK_INSPECT_JOB_TIMEOUT),
+                "idle_timeout": job_timeout,
+                "job_timeout": job_timeout,
                 "pexpect_timeout": 5,
             }
             playbook_path = str(
