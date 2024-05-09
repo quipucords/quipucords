@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        python-version: ["3.11", "3.12"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository code
@@ -22,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
         with:
-          python-version-file: pyproject.toml
+          python-version: ${{ matrix.python-version }}
           cache: "poetry"
           cache-dependency-path: "poetry.lock"
 
@@ -40,6 +41,7 @@ jobs:
             test-coverage,
             test-sudo-list,
           ]
+        python-version: ["3.11", "3.12"]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -65,7 +67,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
         with:
-          python-version-file: pyproject.toml
+          python-version: ${{ matrix.python-version }}
           cache: "poetry"
           cache-dependency-path: "poetry.lock"
 
