@@ -6,13 +6,13 @@
 #
 calver==2022.6.26
     # via trove-classifiers
-cffi==1.16.0 ; python_version >= "3.11" and python_version < "3.12"
+cffi==1.16.0 ; python_version >= "3.11" and python_version < "3.13"
     # via
     #   cryptography
     #   pynacl
 cython==0.29.37
     # via pyyaml
-docutils==0.21.2 ; python_version >= "3.11" and python_version < "3.12"
+docutils==0.21.2 ; python_version >= "3.11" and python_version < "3.13"
     # via python-daemon
 flit-core==3.9.0
     # via
@@ -31,7 +31,7 @@ hatchling==1.24.2
     #   colorama
     #   sqlparse
     #   urllib3
-packaging==24.0 ; python_version >= "3.11" and python_version < "3.12"
+packaging==24.0 ; python_version >= "3.11" and python_version < "3.13"
     # via
     #   hatchling
     #   setuptools-scm
@@ -47,7 +47,7 @@ poetry-core==1.9.0
     # via
     #   click-didyoumean
     #   rsa
-pycparser==2.22 ; python_version >= "3.11" and python_version < "3.12"
+pycparser==2.22 ; python_version >= "3.11" and python_version < "3.13"
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
@@ -63,7 +63,7 @@ setuptools-scm==7.1.0
     #   setuptools-rust
 trove-classifiers==2024.5.17
     # via hatchling
-typing-extensions==4.11.0 ; python_version >= "3.11" and python_version < "3.12"
+typing-extensions==4.11.0 ; python_version >= "3.11" and python_version < "3.13"
     # via setuptools-scm
 wheel==0.43.0
     # via
@@ -81,7 +81,7 @@ wheel==0.43.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==70.0.0 ; python_version >= "3.11" and python_version < "3.12"
+setuptools==70.0.0 ; python_version >= "3.11" and python_version < "3.13"
     # via
     #   ansible
     #   ansible-core
