@@ -16,7 +16,11 @@ from api.serializers import SystemFingerprintSerializer
 from api.status import get_server_id
 from constants import DataSources
 from tests.utils import fake_rhel, raw_facts_generator
-from tests.utils.raw_facts_generator import fake_installed_products
+from tests.utils.raw_facts_generator import (
+    DEFAULT_RHEL_OS_NAME,
+    fake_installed_products,
+    fake_major_minor_ver,
+)
 
 _faker = Faker()
 
@@ -48,7 +52,10 @@ class SystemFingerprintFactory(DjangoModelFactory):
 
     name = factory.Faker("hostname")
     bios_uuid = factory.Faker("uuid4")
+    os_name = DEFAULT_RHEL_OS_NAME
+    os_version = factory.LazyFunction(fake_major_minor_ver)
     os_release = factory.LazyFunction(fake_rhel)
+    is_redhat = True
     ip_addresses = factory.LazyAttribute(lambda o: o.ip_addresses_list)
     architecture = factory.Iterator(["x86_64", "ARM"])
     sources = factory.LazyAttribute(format_sources)

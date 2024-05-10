@@ -7,6 +7,8 @@ from scanner.openshift.entities import OCPCluster, OCPNode
 
 _faker = Faker()
 
+DEFAULT_RHEL_OS_NAME = "Red Hat Enterprise Linux"
+
 
 def raw_facts_generator(source_type, n, as_native_types=True):
     """Generate 'n' raw facts for a given source type."""
@@ -28,10 +30,14 @@ def raw_facts_generator(source_type, n, as_native_types=True):
             yield raw_fact_func()
 
 
-def fake_rhel():
+def fake_rhel(name: str | None = None, version: str | None = None) -> str:
     """Return a string representing a fake etc_release for RHEL."""
     codename = _faker.slug().capitalize()
-    return f"Red Hat Enterprise Linux release {fake_major_minor_ver()} ({codename})"
+    return (
+        f"{name if name else DEFAULT_RHEL_OS_NAME} "
+        f"release {version if version else fake_major_minor_ver()} "
+        f"({codename})"
+    )
 
 
 def fake_installed_products() -> list[dict]:
