@@ -188,7 +188,9 @@ class YupanaMetadataSerializer(Serializer):
 
     report_id = fields.UUIDField(source="report_uuid")
     host_inventory_api_version = fields.CharField(default="1.0")
-    source = fields.CharField(default="qpc")
+    # RHINENG-2639: to help yuptoo to make the distinction between Satellite and
+    # Discovery, set 'source' to 'discovery'
+    source = fields.CharField(default="discovery")
     source_metadata = YupanaSourceSerializer(source="*")
     report_slices = fields.DictField(source="slices", child=ReportSliceSerializer())
 
