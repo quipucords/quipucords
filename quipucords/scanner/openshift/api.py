@@ -362,6 +362,10 @@ class OpenShiftApi:
         return self._route_api.get(**kwargs).items
 
     def _init_ocp_nodes(self, node) -> OCPNode:
+        # following upstream docs[1], if unschedulable is None, it is considered
+        # false.
+        # [1]: https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/node-v1/#NodeSpec
+        unschedulable = node.spec["unschedulable"] or False
         return OCPNode(
             name=node.metadata.name,
             creation_timestamp=node.metadata.creationTimestamp,
@@ -382,6 +386,7 @@ class OpenShiftApi:
             machine_id=node.status["nodeInfo"]["machineID"],
             operating_system=node.status["nodeInfo"]["operatingSystem"],
             taints=node.spec["taints"],
+            unschedulable=unschedulable,
         )
 
     def _init_cluster(self, cluster) -> OCPCluster:

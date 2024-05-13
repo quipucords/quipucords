@@ -1,6 +1,7 @@
 """Abstraction for retrieving data from OpenShift/Kubernetes API."""
 
 import logging
+import random
 from pathlib import Path
 from unittest import mock
 from uuid import UUID
@@ -8,6 +9,7 @@ from uuid import UUID
 import httpretty
 import pytest
 from kubernetes.dynamic.exceptions import ResourceNotFoundError
+from kubernetes.dynamic.resource import ResourceInstance
 
 from scanner.openshift.api import OpenShiftApi, optional_openshift_resource
 from scanner.openshift.entities import (
@@ -537,3 +539,30 @@ def test_metrics_query(
     for query_item in query_response:
         assert "instance" in query_item
         assert "metric" not in query_item
+
+
+@pytest.mark.vcr(VCRCassettes.OCP_DISCOVERER_CACHE, VCRCassettes.OCP_NODE)
+@pytest.mark.parametrize(
+    "expected_value,unschedulable",
+    (
+        (False, None),
+        (False, False),
+        (True, True),
+    ),
+)
+def test_unschedulable_logic(
+    ocp_client: OpenShiftApi, mocker, expected_value, unschedulable
+):
+    """Test if OCPNode.unschedulable is correctly inferred from OCP API."""
+    # monkeypatch a real representation of Node in order to test this logic.
+    # This can't be done (or at least I couldn't figure out a way) to mock
+    # it directly - ResourceInstance and ResourceField objects are not friendly
+    # to mock, nor accepts direct assignment.
+    raw_node = random.choice(ocp_client._list_nodes())
+    raw_node_dict = raw_node.to_dict()
+    raw_node_dict["spec"]["unschedulable"] = unschedulable
+    mocked_node = ResourceInstance(mocker.Mock(), raw_node_dict)
+
+    node = ocp_client._init_ocp_nodes(mocked_node)
+    assert isinstance(node, OCPNode)
+    assert node.unschedulable == expected_value
