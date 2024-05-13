@@ -95,6 +95,7 @@ class OCPNode(OCPBaseEntity):
     operating_system: str = None
     taints: List[dict] = None
     errors: Dict[str, OCPError] = Field(default_factory=dict)
+    unschedulable: bool = None
     _kind = "node"
 
 
