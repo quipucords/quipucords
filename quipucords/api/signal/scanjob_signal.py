@@ -27,6 +27,10 @@ def handle_scan(sender, instance, **kwargs):
     scanner = ScanJobRunner(instance)
     logger.info("Starting scan with MANAGER=%s", manager.SCAN_MANAGER)
     instance.queue()
+
+    if not manager.SCAN_MANAGER:
+        manager.reinitialize()
+
     if not manager.SCAN_MANAGER.is_alive():
         logger.error(
             "%s: %s",
