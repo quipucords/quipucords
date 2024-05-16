@@ -29,7 +29,6 @@ class CeleryScanManager:
     def __init__(self):
         """Log a warning about this scan manager being incomplete."""
         logger.info("%s: Celery Scan manager instance created.", self.log_prefix)
-        logger.warning("%s is not yet fully functional.", __class__.__name__)
 
     def is_alive(self):
         """Return true to make the common manager interface happy."""
