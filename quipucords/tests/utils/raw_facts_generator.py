@@ -88,6 +88,25 @@ def _network_raw_facts():
         "uname_processor": _faker.random_element(["x86_64", "ARM"]),
         "virt_type": _faker.random_element(["vmware", "xen", "kvm", None]),
     }
+
+    # Some facts that help populate fingerprints for later reporting.
+    # Many of these may be None because they may randomly be missing in real scans.
+    facts.update(
+        {
+            "date_anaconda_log": str(_faker.date()) if _faker.pybool() else None,
+            "date_filesystem_create": str(_faker.date()) if _faker.pybool() else None,
+            "date_machine_id": str(_faker.date()) if _faker.pybool() else None,
+            "date_yum_history": str(_faker.date()) if _faker.pybool() else None,
+            "etc_release_name": DEFAULT_RHEL_OS_NAME if _faker.pybool() else None,
+            "etc_release_version": fake_major_minor_ver() if _faker.pybool() else None,
+            "redhat_packages_gpg_is_redhat": _faker.pybool(),
+            "system_purpose_json": {_faker.slug(): _faker.slug()}
+            if _faker.pybool()
+            else None,
+            "uname_hostname": _faker.uuid4() if _faker.pybool() else None,
+        }
+    )
+
     # some facts that depend on others for consistency. not 100% accurate but good
     # enough for testing
     facts["virt_virt"] = "virt-guest" if facts["virt_type"] else "virt-host"

@@ -35,7 +35,7 @@ def expected_normalized_facts(raw_facts):
         "os_release": raw_facts["etc_release_release"],
         "arch": raw_facts["uname_processor"],
         "cloud_provider": raw_facts["cloud_provider"],
-        "system_purpose": None,
+        "system_purpose": raw_facts["system_purpose_json"],
         "infrastructure_type": "virtualized",
         "infrastructure_vendor": "some-vendor",
         "network_interfaces": [
