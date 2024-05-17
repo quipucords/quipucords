@@ -1,5 +1,7 @@
 """Utility functions to generate raw facts."""
 
+import zoneinfo
+
 from faker import Faker
 
 from constants import DataSources
@@ -218,7 +220,9 @@ def _openshift_raw_facts_generator(number_of_facts, as_native_types=True):
             architecture="amd64",
             kernel_version=f"{fake_semver()}-{fake_semver()}.el{_faker.random_digit()}.x86_64",
             operating_system="linux",
-            creation_timestamp=_faker.date_time(),
+            creation_timestamp=_faker.date_time(
+                tzinfo=zoneinfo.ZoneInfo("UTC")
+            ).replace(microsecond=0),
             cluster_uuid=cluster.uuid,
         )
         yield {"node": node.dict() if as_native_types else node}
