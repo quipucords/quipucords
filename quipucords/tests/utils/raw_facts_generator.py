@@ -11,6 +11,12 @@ _faker = Faker()
 
 DEFAULT_RHEL_OS_NAME = "Red Hat Enterprise Linux"
 
+# Small list of cluster names to be used in all vcenter fact generation so that in a
+# large (>10) list of facts at least some VMs will appear to belong to the same host.
+VCENTER_RANDOM_CLUSTER_NAMES = [
+    _faker.hostname() for _ in range(_faker.pyint(min_value=5, max_value=10))
+]
+
 
 def raw_facts_generator(source_type, n, as_native_types=True):
     """Generate 'n' raw facts for a given source type."""
@@ -118,7 +124,7 @@ def _network_raw_facts():
 
 def _vcenter_raw_facts():
     return {
-        "vm.cluster": None,
+        "vm.cluster": _faker.random_element(VCENTER_RANDOM_CLUSTER_NAMES),
         "vm.cpu_count": _faker.pyint(min_value=1, max_value=9),
         "vm.datacenter": None,
         "vm.dns_name": None,
@@ -132,7 +138,9 @@ def _vcenter_raw_facts():
         "vm.mac_addresses": [_faker.mac_address()],
         "vm.memory_size": None,
         "vm.name": _faker.slug(),
-        "vm.os": None,
+        "vm.os": _faker.random_element(["red hat enterprise linux", "rhel"])
+        if _faker.pybool()
+        else None,
         "vm.state": None,
         "vm.is_template": _faker.pybool(),
         "vm.uuid": _faker.uuid4(),
