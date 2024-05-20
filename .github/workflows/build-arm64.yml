@@ -33,6 +33,11 @@ jobs:
         with:
           fetch-depth: 0  # fetches all commits/tags
 
+      - name: Define Release Tag
+        id: define-release-tag
+        shell: bash
+        run: echo "RELEASE_TAG=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*}-arm64 || echo)" >> "$GITHUB_ENV"
+
       - name: Install qemu dependency
         run: |
           sudo apt-get update
@@ -44,7 +49,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_NAME }}
           archs: arm64
-          tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main-arm64' && 'latest-arm64' || '' }}
+          tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main-arm64' && 'latest-arm64' || '' }} ${{ contains( env.RELEASE_TAG , '.' ) && env.RELEASE_TAG || '' }}
           containerfiles: |
             ./Dockerfile
           labels: |
