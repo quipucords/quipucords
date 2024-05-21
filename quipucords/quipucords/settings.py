@@ -477,6 +477,12 @@ QPC_ENABLE_CELERY_SCAN_MANAGER = env.bool("QPC_ENABLE_CELERY_SCAN_MANAGER", Fals
 MAX_TIMEOUT_ORDERLY_SHUTDOWN = env.int("MAX_TIMEOUT_ORDERLY_SHUTDOWN", 30)
 QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
 
+QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS = (
+    False
+    if PRODUCTION
+    else env.bool("QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS", default=False)
+)
+
 # Defining both local memory and Redis as Django back-end caches.
 #
 # For now, we're keeping the default as local memory cache, this way
