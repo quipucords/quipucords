@@ -134,8 +134,11 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
             # here even if the "is_redhat" attribute was not set on the fingerprint.
             continue
 
-        if not fingerprint.cpu_core_count and not has_vcenter_source:
-            # Do not penalize vCenter sources because they do not collect core counts.
+        if not fingerprint.cpu_core_count and (
+            has_network_source or has_satellite_source
+        ):
+            # Only network and satellite sources set this fact,
+            # and we don't want to penalize others for not having it.
             aggregated.missing_cpu_core_count += 1
 
         if not fingerprint.cpu_socket_count:
