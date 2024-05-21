@@ -116,6 +116,29 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     expected_aggregate.missing_system_creation_date += 1
     expected_aggregate.os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.2"] = 1
 
+    # RHEL with several important facts not set ("missing")
+    SystemFingerprintFactory(
+        name=None,  # missing_name++
+        os_version=None,
+        infrastructure_type=SystemFingerprint.UNKNOWN,  # instances_unknown++
+        deployment_report=deployments_report,
+        cpu_count=None,  # cpu_count is only relevant for openshift sources
+        cpu_core_count=None,  # missing_cpu_core_count++
+        cpu_socket_count=None,  # missing_cpu_socket_count++
+        system_purpose=None,  # missing_system_purpose++
+        redhat_certs=None,  # missing_pem_files++
+        sources=[source_network],
+        system_creation_date=None,  # missing_system_creation_date++
+    )
+    expected_aggregate.instances_unknown += 1
+    expected_aggregate.missing_cpu_core_count += 1
+    expected_aggregate.missing_cpu_socket_count += 1
+    expected_aggregate.missing_name += 1
+    expected_aggregate.missing_pem_files += 1
+    expected_aggregate.missing_system_creation_date += 1
+    expected_aggregate.missing_system_purpose += 1
+    expected_aggregate.os_by_name_and_version[DEFAULT_RHEL_OS_NAME][UNKNOWN] = 1
+
     # largely unknown system found via ansible
     SystemFingerprintFactory(
         os_version=None,
@@ -124,14 +147,13 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         infrastructure_type=SystemFingerprint.UNKNOWN,  # instances_unknown++
         deployment_report=deployments_report,
         cpu_count=None,  # cpu_count is only relevant for openshift sources
-        cpu_core_count=None,  # missing_cpu_core_count++
+        cpu_core_count=None,  # ansible has no effect on missing_cpu_core_count
         cpu_socket_count=None,  # missing_cpu_socket_count++
         sources=[source_ansible],
         system_creation_date=None,  # missing_system_creation_date++
     )
     expected_aggregate.instances_unknown += 1
     expected_aggregate.missing_name += 1
-    expected_aggregate.missing_cpu_core_count += 1
     expected_aggregate.missing_cpu_socket_count += 1
     expected_aggregate.missing_system_creation_date += 1
     expected_aggregate.os_by_name_and_version[UNKNOWN] = {UNKNOWN: 1}
