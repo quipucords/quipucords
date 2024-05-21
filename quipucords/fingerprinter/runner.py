@@ -5,6 +5,7 @@ import uuid
 from copy import deepcopy
 from datetime import datetime
 
+from django.conf import settings
 from django.db import DataError
 from rest_framework.serializers import DateField
 
@@ -138,7 +139,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
             raise error
 
-    def _process_details_report(self, manager_interrupt, report):  # noqa: PLR0915
+    def _process_details_report(self, manager_interrupt, report):  # noqa: PLR0915, C901, PLR0912
         """Process the details report.
 
         :param manager_interrupt: Signal to indicate job is canceled
@@ -161,6 +162,16 @@ class FingerprintTaskRunner(ScanTaskRunner):
         deployment_report = report.deployment_report
         date_field = DateField()
         final_fingerprint_list = []
+
+        if settings.QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS:
+            logger.warning(
+                "Bypassing cached_fingerprints build and assignment! "
+                "This option is intended only for development purposes and "
+                "WILL cause unexpected results when viewing "
+                "Report %s or DeploymentsReport %s",
+                report.id,
+                deployment_report.id,
+            )
 
         valid_fact_attributes = {
             field.name for field in SystemFingerprint._meta.get_fields()
@@ -189,6 +200,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             if serializer.is_valid():
                 try:
                     fingerprint = serializer.save()
+
+                    if settings.QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS:
+                        continue
 
                     # Add auto-generated fields for the insights report
                     fingerprint_dict["id"] = fingerprint.id
@@ -227,7 +241,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
         # Mark completed because engine has processed raw facts
         status = ScanTask.COMPLETED
         status_message = "success"
-        if final_fingerprint_list:
+        if (
+            final_fingerprint_list
+            or settings.QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS
+        ):
             deployment_report.status = DeploymentsReport.STATUS_COMPLETE
         else:
             status_message = (

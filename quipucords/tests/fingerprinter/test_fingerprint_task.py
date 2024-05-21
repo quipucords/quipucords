@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import pytest
 from django.db import DataError
+from django.test import override_settings
 
 from api.deployments_report.model import SystemFingerprint
 from api.models import DeploymentsReport, Report, ServerInformation, Source
@@ -1504,6 +1505,7 @@ def test_multi_format_dateparse(fingerprint_task_runner):
 
 
 @pytest.mark.django_db
+@override_settings(QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS=False)
 def test_process_details_report_failed(fingerprint_task_runner):
     """Test processing a details report no valid fps."""
     fact_collection = {}
@@ -1518,9 +1520,11 @@ def test_process_details_report_failed(fingerprint_task_runner):
         )
         assert "failed" in status_message.lower()
         assert status == "failed"
+    assert len(deployments_report.cached_fingerprints) == 0
 
 
 @pytest.mark.django_db
+@override_settings(QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS=False)
 def test_process_details_report_success(fingerprint_task_runner):
     """Test processing a details report success."""
     fact_collection = {
@@ -1543,9 +1547,11 @@ def test_process_details_report_success(fingerprint_task_runner):
         )
     assert "success" in status_message.lower()
     assert status == "completed"
+    assert len(deployments_report.cached_fingerprints) == 1
 
 
 @pytest.mark.django_db
+@override_settings(QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS=False)
 def test_process_details_report_exception(fingerprint_task_runner):
     """Test processing a details report with an exception."""
     fact_collection = {
@@ -1571,6 +1577,34 @@ def test_process_details_report_exception(fingerprint_task_runner):
         )
         assert "failed" in status_message.lower()
         assert status == "failed"
+    assert len(deployments_report.cached_fingerprints) == 0
+
+
+@pytest.mark.django_db
+@override_settings(QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS=True)
+def test_process_details_report_bypass(fingerprint_task_runner, faker):
+    """Test processing a details report with the "bypass" setting."""
+    fact_collection = {
+        "name": "dhcp181-3.gsslab.rdu2.redhat.com",
+        "metadata": {},
+        "etc_machine_id": "3f01b55457674041b75e41829bcee1dc",
+        "insights_client_id": "3f01b55457674041b75e41829bcee1dc",
+        "ip_addresses": ["1.2.3.4"],
+        "sources": [],
+    }
+    deployments_report = DeploymentsReport(id=1)
+    deployments_report.save()
+    report = Report(id=1, deployment_report=deployments_report)
+    with patch(
+        "fingerprinter.runner.FingerprintTaskRunner._process_sources",
+        return_value=[fact_collection],
+    ):
+        status_message, status = fingerprint_task_runner._process_details_report(
+            "", report
+        )
+    assert "success" in status_message.lower()
+    assert status == "completed"
+    assert len(deployments_report.cached_fingerprints) == 0
 
 
 @pytest.mark.parametrize(
