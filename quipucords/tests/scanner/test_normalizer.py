@@ -2,10 +2,13 @@
 
 import json
 import logging
+import sys
 
 import pytest
 
 from scanner.normalizer import BaseNormalizer, FactMapper, NormalizedResult
+
+is_python_3_12_or_above = sys.version_info >= (3, 12, 0)
 
 
 def test_normalizer_creation():
@@ -27,13 +30,15 @@ def test_normalizer_creation():
 
 def test_wrong_dependency_order():
     """Ensure that creating Normalizers with dependencies unordered will fail ASAP."""
-    with pytest.raises(RuntimeError) as exc_info:
+    expected_exception_type = ValueError if is_python_3_12_or_above else RuntimeError
+
+    with pytest.raises(expected_exception_type) as exc_info:
 
         class N(BaseNormalizer):
             fact1 = FactMapper("raw1", str, dependencies=["fact2"])
             fact2 = FactMapper("raw2", str)
 
-    exc_cause = exc_info.value.__cause__
+    exc_cause = exc_info.value if is_python_3_12_or_above else exc_info.value.__cause__
     assert isinstance(exc_cause, ValueError)
     assert str(exc_cause) == "'fact2' can't be found on normalizer 'N'"
 
@@ -243,11 +248,16 @@ class TestMultipleNormalizers:
         class N1(BaseNormalizer):
             fact1 = FactMapper("raw1", str)
 
-        with pytest.raises(RuntimeError) as exc_info:
+        expected_exception_type = (
+            ValueError if is_python_3_12_or_above else RuntimeError
+        )
+        with pytest.raises(expected_exception_type) as exc_info:
 
             class N2(BaseNormalizer):
                 fact2 = FactMapper("raw2", str, dependencies=["fact1"])
 
-        exc_cause = exc_info.value.__cause__
+        exc_cause = (
+            exc_info.value if is_python_3_12_or_above else exc_info.value.__cause__
+        )
         assert isinstance(exc_cause, ValueError)
         assert str(exc_cause) == "'fact1' can't be found on normalizer 'N2'"
