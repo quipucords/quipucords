@@ -142,9 +142,15 @@ class ScanTask(BaseModel):
 
     # All task types
     def log_message(
-        self, message, log_level=logging.INFO, static_options=None, exception=None
+        self, message: str, log_level=logging.INFO, static_options=None, exception=None
     ):
-        """Log a message for this task."""
+        """
+        Log a message for this task.
+
+        TODO Rewrite this function to take a list of arguments instead of a string.
+        Or kill this function and just use standard logger functionality.
+        Variables in the message should be interpreted by standard logger functionality.
+        """
         if exception:
             logger.exception("Got an exception.")
 
@@ -154,8 +160,16 @@ class ScanTask(BaseModel):
             self._log_scan_message(message, log_level, static_options)
 
     # All scan task types
-    def _log_scan_message(self, message, log_level=logging.INFO, static_options=None):
-        """Log a message for this task."""
+    def _log_scan_message(
+        self, message: str, log_level=logging.INFO, static_options=None
+    ):
+        """
+        Log a message for this task.
+
+        TODO Rewrite this function to take a list of arguments instead of a string.
+        Or kill this function and just use standard logger functionality.
+        Variables in the message should be interpreted by standard logger functionality.
+        """
         if not self.source:
             logger.warning("Missing source for job ID %s", self.job_id)
             source_type = None
@@ -181,8 +195,14 @@ class ScanTask(BaseModel):
         logger.log(log_level, actual_message)
 
     # Fingerprint task type
-    def _log_fingerprint_message(self, message, log_level=logging.INFO):
-        """Log a message for this task."""
+    def _log_fingerprint_message(self, message: str, log_level=logging.INFO):
+        """
+        Log a message for this task.
+
+        TODO Rewrite this function to take a list of arguments instead of a string.
+        Or kill this function and just use standard logger functionality.
+        Variables in the message should be interpreted by standard logger functionality.
+        """
         elapsed_time = self._compute_elapsed_time()
         details_report_id = None
         if self.job.report:
