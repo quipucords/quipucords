@@ -22,7 +22,7 @@ class TestCeleryTaskCache:
         scan_job_id = faker.pyint()
         key = scan_job_celery_task_id_key(scan_job_id)
         get_scan_job_celery_task_id(scan_job_id)
-        assert caches_mock["redis"].get.called_once_with(key)
+        caches_mock["redis"].get.assert_called_once_with(key)
 
     @patch("scanner.tasks.caches")
     def test_set_scan_job_celery_task_without_timeout(self, caches_mock, faker):
@@ -32,8 +32,8 @@ class TestCeleryTaskCache:
             celery_task_id = faker.uuid4()
             scan_job_id = faker.pyint()
             set_scan_job_celery_task_id(scan_job_id, celery_task_id)
-            key = scan_job_celery_task_id_key(celery_task_id)
-            assert caches_mock["redis"].set.called_once_with(
+            key = scan_job_celery_task_id_key(scan_job_id)
+            caches_mock["redis"].set.assert_called_once_with(
                 key, celery_task_id, default_scan_job_ttl
             )
 
@@ -46,8 +46,8 @@ class TestCeleryTaskCache:
         set_scan_job_celery_task_id(
             scan_job_id, celery_task_id, key_timeout=use_scan_job_ttl
         )
-        key = scan_job_celery_task_id_key(celery_task_id)
-        assert caches_mock["redis"].set.called_once_with(
+        key = scan_job_celery_task_id_key(scan_job_id)
+        caches_mock["redis"].set.assert_called_once_with(
             key, celery_task_id, use_scan_job_ttl
         )
 
