@@ -219,24 +219,25 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     number_invalid += 1
                     self.scan_task.log_message(
                         "The fingerprint could not be saved. "
-                        f"Fingerprint: {str(error).strip()}. Error: {fingerprint_dict}",
+                        f"Fingerprint: {str(error).strip()}.",
                         log_level=logging.ERROR,
                         exception=error,
                     )
+                    logger.error(fingerprint_dict)
             else:
                 number_invalid += 1
                 self.scan_task.log_message(
-                    f"Invalid fingerprint: {fingerprint_dict}",
-                    log_level=logging.ERROR,
+                    "Invalid fingerprint.", log_level=logging.ERROR
                 )
+                logger.error(fingerprint_dict)
                 self.scan_task.log_message(
                     f"Fingerprint errors: {serializer.errors}",
                     log_level=logging.ERROR,
                 )
             self.scan_task.log_message(
-                f"Fingerprints (report id={report.id}): {fingerprint_dict}",
-                log_level=logging.DEBUG,
+                f"Fingerprints (report id={report.id})", log_level=logging.DEBUG
             )
+            logger.debug(fingerprint_dict)
 
         # Mark completed because engine has processed raw facts
         status = ScanTask.COMPLETED
