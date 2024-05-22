@@ -107,8 +107,14 @@ class ScanJob(BaseModel):
 
         self.log_message(message, log_level=log_level)
 
-    def log_message(self, message, log_level=logging.INFO):
-        """Log a message for this job."""
+    def log_message(self, message: str, log_level=logging.INFO):
+        """
+        Log a message for this job.
+
+        TODO Rewrite this function to take a list of arguments instead of a string.
+        Or kill this function and just use standard logger functionality.
+        Variables in the message should be interpreted by standard logger functionality.
+        """
         elapsed_time = self._compute_elapsed_time()
         actual_message = (
             f"Job {self.id:d}"
