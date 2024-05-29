@@ -1,10 +1,16 @@
 """Test the aggregate report model generation."""
 
+from dataclasses import asdict
 from datetime import date
 
 import pytest
 
-from api.aggregate_report.model import UNKNOWN, AggregateReport, build_aggregate_report
+from api.aggregate_report.model import (
+    UNKNOWN,
+    AggregateReport,
+    build_aggregate_report,
+    get_aggregate_report_by_report_id,
+)
 from api.deployments_report.model import DeploymentsReport, Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
 from api.reports.model import Report
@@ -321,3 +327,19 @@ def test_build_aggregate_report_system_fingerprint(
     aggregated: AggregateReport = build_aggregate_report(report.id)
     assert aggregated is not None
     assert aggregated == expected_aggregate_report
+
+
+@pytest.mark.django_db
+def test_get_aggregate_report_by_report_id(
+    report_and_expected_aggregate: tuple[Report, AggregateReport],
+):
+    """Test that if the Report exists, a proper report is generated."""
+    report, expected_aggregate_report = report_and_expected_aggregate
+    aggregate = get_aggregate_report_by_report_id(report.id)
+    assert aggregate == asdict(expected_aggregate_report)
+
+
+@pytest.mark.django_db
+def test_get_aggregate_report_by_report_id_not_found():
+    """Test that if the Report does not exist, None report is generated."""
+    assert get_aggregate_report_by_report_id(-1) is None
