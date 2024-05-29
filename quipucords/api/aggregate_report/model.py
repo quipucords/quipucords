@@ -87,14 +87,17 @@ class AggregateReport:
     openshift_node_instances: int = 0
 
 
-def get_aggregate_report_by_report_id(report_id: int) -> dict:
+def get_aggregate_report_by_report_id(report_id: int) -> dict | None:
     """
     Get the aggregate report data for the given report ID.
 
     TODO Turn this into a database lookup after we start storing AggregateReport.
     """
-    report = Report.objects.get(pk=report_id)
-    return asdict(build_aggregate_report(report.id))
+    try:
+        report = Report.objects.get(pk=report_id)
+        return asdict(build_aggregate_report(report.id))
+    except Report.DoesNotExist:
+        return None
 
 
 def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
