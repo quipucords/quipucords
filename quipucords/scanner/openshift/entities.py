@@ -107,7 +107,7 @@ class OCPWorkload(OCPBaseEntity):
     Deployments, StatefulSets, Jobs, custom resources that manage pods, etc...
 
     More info here: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.26/#-strong-workloads-apis-strong-
-    """  # noqa: 501
+    """
 
     name: str
     namespace: str = None
