@@ -72,6 +72,7 @@ class AggregateReport:
     missing_system_creation_date: int = 0
     missing_system_purpose: int = 0
     openshift_cores: int = 0
+    openshift_operators_by_name: dict = field(default_factory=dict)
     openshift_operators_by_kind: dict = field(default_factory=dict)
     os_by_name_and_version: dict = field(default_factory=dict)
     socket_pairs: int = 0
@@ -257,6 +258,7 @@ def _aggregate_from_raw_facts(
     """
     ansible_hosts_in_database = []
     ansible_hosts_in_jobs = []
+    openshift_operators_by_name = defaultdict(int)
     openshift_operators_by_kind = defaultdict(int)
 
     for source_type, raw_facts in grouped_facts:
@@ -285,6 +287,7 @@ def _aggregate_from_raw_facts(
                     aggregated.openshift_node_instances += 1
                 for operator in raw_fact.get("operators", []):
                     openshift_operators_by_kind[operator.get("kind", UNKNOWN)] += 1
+                    openshift_operators_by_name[operator.get("name", UNKNOWN)] += 1
 
     ansible_hosts_in_database = set(ansible_hosts_in_database)
     ansible_hosts_in_jobs = set(ansible_hosts_in_jobs)
@@ -295,6 +298,7 @@ def _aggregate_from_raw_facts(
     aggregated.ansible_hosts_in_jobs = len(ansible_hosts_in_jobs)
 
     aggregated.openshift_operators_by_kind.update(openshift_operators_by_kind)
+    aggregated.openshift_operators_by_name.update(openshift_operators_by_name)
 
 
 def build_aggregate_report(report_id: int) -> AggregateReport:

@@ -284,11 +284,11 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         with_raw_facts={
             "cluster": {"kind": "cluster"},  # openshift_cluster_instances++
             "operators": [
-                {"kind": "type1"},
+                {"kind": "type1", "name": "name1"},
                 {"kind": "type2"},
-                {"kind": "type1"},
+                {"kind": "type1", "name": "name2"},
                 {},
-                {"kind": "type2"},
+                {"kind": "type2", "name": "name2"},
                 {"kind": "type2"},
             ],  # openshift_operators_by_kind[...]++
         },
@@ -299,6 +299,9 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     expected_aggregate.openshift_operators_by_kind["unknown"] = 1
     expected_aggregate.openshift_operators_by_kind["type1"] = 2
     expected_aggregate.openshift_operators_by_kind["type2"] = 3
+    expected_aggregate.openshift_operators_by_name["unknown"] = 3
+    expected_aggregate.openshift_operators_by_name["name1"] = 1
+    expected_aggregate.openshift_operators_by_name["name2"] = 2
 
     InspectResultFactory(
         inspect_group=inspect_group,
