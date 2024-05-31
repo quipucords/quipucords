@@ -197,6 +197,7 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         sources=[source_network],
         system_creation_date=date(1970, 1, 1),
     )
+    expected_aggregate.instances_not_redhat += 1
     expected_aggregate.os_by_name_and_version["LCARS"] = {"NCC-1701-D": 1}
 
     # os_name, os_version, and name are frequently blank in real vcenter scans.
