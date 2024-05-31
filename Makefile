@@ -148,7 +148,7 @@ celery-worker:
 	$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QPC_CELERY_WORKER_MAX_CONCURRENCY},${QPC_CELERY_WORKER_MIN_CONCURRENCY}
 
 server-set-superuser:
-	cat ./deploy/setup_user.py | $(PYTHON) quipucords/manage.py shell --settings quipucords.settings -v 3
+	$(PYTHON) quipucords/manage.py create_or_update_user --settings quipucords.settings -v 3
 
 server-init: server-migrate server-set-superuser
 
