@@ -56,6 +56,7 @@ class AggregateReport:
     inspect_result_status_unknown: int = 0
     inspect_result_status_unreachable: int = 0
     instances_hypervisor: int = 0
+    instances_not_redhat: int = 0
     instances_physical: int = 0
     instances_unknown: int = 0
     instances_virtual: int = 0
@@ -136,6 +137,7 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
             # to count them if we positively identified Red Hat during fingerprinting.
             # We treat everything found by OpenShift or Satellite to be "is_redhat=True"
             # here even if the "is_redhat" attribute was not set on the fingerprint.
+            aggregated.instances_not_redhat += 1
             continue
 
         if not fingerprint.cpu_core_count and (
