@@ -3,11 +3,17 @@
 import re
 
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.test import override_settings
 
-from quipucords import settings
-from quipucords.user import make_random_password, validate_password
+from quipucords.user import (
+    InvalidPasswordError,
+    create_or_update_user,
+    make_random_password,
+    validate_password,
+)
 
 User = get_user_model()
 
@@ -54,3 +60,82 @@ class TestUserPasswordValidators:
             ValidationError, match="The password is too similar to the username"
         ):
             validate_password("test", user=test_user)
+
+
+@pytest.mark.django_db
+class TestCreateOrUpdateUser:
+    """Test create_or_update_user with various inputs."""
+
+    def test_new_user_no_password(self, client, faker):
+        """Test create_or_update_user with a new username and no password."""
+        username = faker.name()
+        email = faker.email()
+        password = None
+        created, updated, generated_password = create_or_update_user(
+            username, email, password
+        )
+        assert created
+        assert not updated
+        assert generated_password
+        assert User.objects.filter(username=username).exists()
+        with override_settings(AXES_ENABLED=False):
+            assert client.login(username=username, password=generated_password)
+
+    def test_new_user_good_password(self, client, faker):
+        """Test create_or_update_user with a new username and a good password."""
+        username = faker.name()
+        email = faker.email()
+        password = f"{faker.password(length=settings.QPC_MINIMUM_PASSWORD_LENGTH)}"
+        created, updated, generated_password = create_or_update_user(
+            username, email, password
+        )
+        assert created
+        assert not updated
+        assert not generated_password
+        assert User.objects.filter(username=username).exists()
+        with override_settings(AXES_ENABLED=False):
+            assert client.login(username=username, password=password)
+
+    def test_new_user_bad_password(self, faker):
+        """Test create_or_update_user with a new username and a bad password."""
+        username = faker.name()
+        email = faker.email()
+        password = "1"
+        with pytest.raises(InvalidPasswordError):
+            create_or_update_user(username, email, password)
+        assert not User.objects.filter(username=username).exists()
+
+    def test_update_user_no_password(self, qpc_user_simple: User):
+        """Test create_or_update_user with an existing username and no password."""
+        old_password_hash = qpc_user_simple.password
+        password = None
+        created, updated, generated_password = create_or_update_user(
+            qpc_user_simple.username, None, password
+        )
+        assert not created
+        assert not updated
+        assert not generated_password
+        qpc_user_simple.refresh_from_db()
+        assert old_password_hash == qpc_user_simple.password
+
+    def test_update_user_good_password(self, client, faker, qpc_user_simple: User):
+        """Test create_or_update_user with an existing username and a good password."""
+        username = qpc_user_simple.username
+        password = f"{faker.password(length=settings.QPC_MINIMUM_PASSWORD_LENGTH)}"
+        created, updated, generated_password = create_or_update_user(
+            username, None, password
+        )
+        assert not created
+        assert updated
+        assert not generated_password
+        with override_settings(AXES_ENABLED=False):
+            assert client.login(username=username, password=password)
+
+    def test_update_user_bad_password(self, qpc_user_simple: User):
+        """Test create_or_update_user with an existing username and a bad password."""
+        old_password_hash = qpc_user_simple.password
+        password = "1"
+        with pytest.raises(InvalidPasswordError):
+            create_or_update_user(qpc_user_simple.username, None, password)
+        qpc_user_simple.refresh_from_db()
+        assert old_password_hash == qpc_user_simple.password
