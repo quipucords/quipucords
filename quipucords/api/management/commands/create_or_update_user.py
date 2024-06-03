@@ -5,9 +5,9 @@ from os import environ
 from textwrap import dedent
 
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
-from quipucords.user import InvalidPasswordError, create_or_update_user
+from quipucords.user import create_or_update_user
 
 User = get_user_model()
 
@@ -43,17 +43,17 @@ class Command(BaseCommand):
         email = environ.get("QPC_SERVER_USER_EMAIL", DEFAULT_EMAIL)
         password = environ.get("QPC_SERVER_PASSWORD")
 
-        try:
-            created, updated, generated_password = create_or_update_user(
-                username, email, password
-            )
-        except InvalidPasswordError as error:
-            error_message = "Invalid server password specified."
-            for error_detail in error:
-                error_message += f"\n- {error_detail}"
-            raise CommandError(error_message)
+        created, updated, generated_password = create_or_update_user(
+            username, email, password
+        )
 
         if created or updated:
+            if password and generated_password and password != generated_password:
+                message = (
+                    "QPC_SERVER_PASSWORD value failed password requirements. "
+                    "Using a randomly generated password instead."
+                )
+                self.stdout.write(self.style.WARNING(message))
             verb = "Created" if created else "Updated"
             password_description = (
                 f"random password: {generated_password}"

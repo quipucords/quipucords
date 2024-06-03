@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 
 from quipucords.user import (
-    InvalidPasswordError,
     create_or_update_user,
     make_random_password,
     validate_password,
@@ -96,14 +95,27 @@ class TestCreateOrUpdateUser:
         with override_settings(AXES_ENABLED=False):
             assert client.login(username=username, password=password)
 
-    def test_new_user_bad_password(self, faker):
-        """Test create_or_update_user with a new username and a bad password."""
+    def test_new_user_bad_password(self, client, faker):
+        """
+        Test create_or_update_user with a new username and a bad password.
+
+        Note that the requested bad password is *not* used. Instead, we detect that the
+        requested password is not valid, and we generate a new one to set instead.
+        """
         username = faker.name()
         email = faker.email()
         password = "1"
-        with pytest.raises(InvalidPasswordError):
-            create_or_update_user(username, email, password)
-        assert not User.objects.filter(username=username).exists()
+        created, updated, generated_password = create_or_update_user(
+            username, email, password
+        )
+        assert created
+        assert not updated
+        assert generated_password
+        assert generated_password != password
+        assert User.objects.filter(username=username).exists()
+        with override_settings(AXES_ENABLED=False):
+            assert not client.login(username=username, password=password)
+            assert client.login(username=username, password=generated_password)
 
     def test_update_user_no_password(self, qpc_user_simple: User):
         """Test create_or_update_user with an existing username and no password."""
@@ -131,11 +143,23 @@ class TestCreateOrUpdateUser:
         with override_settings(AXES_ENABLED=False):
             assert client.login(username=username, password=password)
 
-    def test_update_user_bad_password(self, qpc_user_simple: User):
-        """Test create_or_update_user with an existing username and a bad password."""
-        old_password_hash = qpc_user_simple.password
+    def test_update_user_bad_password(self, client, qpc_user_simple: User):
+        """
+        Test create_or_update_user with an existing username and a bad password.
+
+        Note that the requested bad password is *not* used. Instead, we detect that the
+        requested password is not valid, and we generate a new one to set instead.
+        """
+        username = qpc_user_simple.username
         password = "1"
-        with pytest.raises(InvalidPasswordError):
-            create_or_update_user(qpc_user_simple.username, None, password)
-        qpc_user_simple.refresh_from_db()
-        assert old_password_hash == qpc_user_simple.password
+        created, updated, generated_password = create_or_update_user(
+            username, None, password
+        )
+        assert not created
+        assert updated
+        assert generated_password
+        assert generated_password != password
+        assert User.objects.filter(username=username).exists()
+        with override_settings(AXES_ENABLED=False):
+            assert not client.login(username=username, password=password)
+            assert client.login(username=username, password=generated_password)
