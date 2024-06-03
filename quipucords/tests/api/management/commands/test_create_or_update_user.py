@@ -7,9 +7,13 @@ from unittest import mock
 
 import pytest
 from django.conf import settings
-from django.core.management import CommandError, call_command
+from django.core.management import call_command
 
 from quipucords.user import User
+
+password_failed_requirements_message = (
+    "QPC_SERVER_PASSWORD value failed password requirements"
+)
 
 
 @contextmanager
@@ -33,6 +37,7 @@ def test_create_or_update_user_create_with_no_password(faker):
     with patch_environ(username):
         call_command("create_or_update_user", stdout=out)
     assert expected_message in out.getvalue()
+    assert password_failed_requirements_message not in out.getvalue()
 
 
 @pytest.mark.django_db
@@ -48,17 +53,20 @@ def test_create_or_update_user_create_with_valid_password(faker):
         call_command("create_or_update_user", stdout=out)
     assert expected_message in out.getvalue()
     assert password not in out.getvalue()
+    assert password_failed_requirements_message not in out.getvalue()
 
 
 @pytest.mark.django_db
 def test_create_or_update_user_fail_create_with_bad_password(faker):
-    """Test failure to create a user with a bad password."""
+    """Test creating a user with a bad password (generating a better random one)."""
+    out = StringIO()
     username = faker.user_name()
     password = "1"
-    with patch_environ(username, password), pytest.raises(CommandError) as error:
-        call_command("create_or_update_user")
-    expected_message = "Invalid server password specified"
-    assert expected_message in str(error)
+    with patch_environ(username, password):
+        call_command("create_or_update_user", stdout=out)
+    expected_message = f"Created user '{username}' with random password:"
+    assert expected_message in out.getvalue()
+    assert password_failed_requirements_message in out.getvalue()
 
 
 @pytest.mark.django_db
@@ -70,6 +78,7 @@ def test_create_or_update_user_update_with_no_password(qpc_user_simple: User):
     with patch_environ(username):
         call_command("create_or_update_user", stdout=out)
     assert expected_message in out.getvalue()
+    assert password_failed_requirements_message not in out.getvalue()
 
 
 @pytest.mark.django_db
@@ -85,14 +94,17 @@ def test_create_or_update_user_update_with_valid_password(qpc_user_simple: User,
         call_command("create_or_update_user", stdout=out)
     assert expected_message in out.getvalue()
     assert password not in out.getvalue()
+    assert password_failed_requirements_message not in out.getvalue()
 
 
 @pytest.mark.django_db
-def test_create_or_update_user_fail_update_with_bad_password(qpc_user_simple: User):
-    """Test failure to update a user with a bad password."""
+def test_create_or_update_user_update_with_bad_password(qpc_user_simple: User):
+    """Test updating a user with a bad password (generating a better random one)."""
+    out = StringIO()
     username = qpc_user_simple.username
     password = "1"
-    with patch_environ(username, password), pytest.raises(CommandError) as error:
-        call_command("create_or_update_user")
-    expected_message = "Invalid server password specified"
-    assert expected_message in str(error)
+    with patch_environ(username, password):
+        call_command("create_or_update_user", stdout=out)
+    expected_message = f"Updated user '{username}' with random password:"
+    assert expected_message in out.getvalue()
+    assert password_failed_requirements_message in out.getvalue()

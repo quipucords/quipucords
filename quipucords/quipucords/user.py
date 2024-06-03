@@ -54,13 +54,17 @@ def create_or_update_user(
     - "updated" bool True if an existing User was updated, False otherwise.
     - "password" str contains the new password only if a new random password was set.
     """
+    generate_password = False
     if password:
-        validate_password(password)
+        try:
+            validate_password(password)
+        except InvalidPasswordError:
+            generate_password = True
     user, created = User.objects.get_or_create(
         username=username, defaults={"email": email}
     )
     updated = not created and password is not None
-    generate_password = created and password is None
+    generate_password = generate_password or (created and password is None)
     if generate_password:
         password = make_random_password()
     if created or updated:
