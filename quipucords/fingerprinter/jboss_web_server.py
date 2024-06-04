@@ -102,7 +102,7 @@ def detect_jboss_ws(source, facts):
     if has_eula_file:
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
         raw_facts[JWS_HAS_EULA_TXT_FILE] = has_eula_file
-    # Versions 3.0.0 and over explicitely mention 'JWS' in version string
+    # Versions 3.0.0 and over explicitly mention 'JWS' in version string
     if version:
         raw_facts[JWS_VERSION] = facts.get(JWS_VERSION)
         for ver in version:
@@ -116,7 +116,7 @@ def detect_jboss_ws(source, facts):
     if installed_with_rpm:
         product_dict[PRESENCE_KEY] = Product.PRESENT
         raw_facts[JWS_INSTALLED_WITH_RPM] = installed_with_rpm
-    # If jws was installed (not as zip) it will have a certifcate
+    # If jws was installed (not as zip) it will have a certificate
     # https://mojo.redhat.com/docs/DOC-103535
     # The cert may only be installed when a product is installed with RPM,
     # which we already check for. This step may be unnecessary.
