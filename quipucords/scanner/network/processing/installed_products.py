@@ -23,7 +23,7 @@ class ProcessInstalledProducts(process.Processor):
         for product in installed_products_cmd_output.split(grep_separator):
             product_dict = {}
             for line in product.splitlines():
-                if not line.strip():
+                if not (line.strip() and ":" in line):
                     continue
                 key, value = line.strip().split(":", 1)
                 if key in ["Name", "ID"]:
