@@ -14,8 +14,8 @@ from api.aggregate_report.model import (
 from api.deployments_report.model import DeploymentsReport, Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
 from api.reports.model import Report
-from api.scan.model import Scan
 from constants import DataSources
+from fingerprinter import jboss_eap, jboss_web_server
 from tests.factories import (
     DeploymentReportFactory,
     InspectGroupFactory,
@@ -69,7 +69,7 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         system_creation_date=date(2024, 3, 31),
     )
     Product.objects.create(
-        name=Scan.JBOSS_EAP, presence=Product.PRESENT, fingerprint=fingerprint
+        name=jboss_eap.PRODUCT, presence=Product.PRESENT, fingerprint=fingerprint
     )  # jboss_eap_instances++, jboss_eap_cores_virtual += 2
     expected_aggregate.instances_virtual += 1
     expected_aggregate.socket_pairs += 1
@@ -91,7 +91,7 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         system_creation_date=date(2024, 4, 2),
     )
     Product.objects.create(
-        name=Scan.JBOSS_WS, presence=Product.PRESENT, fingerprint=fingerprint
+        name=jboss_web_server.PRODUCT, presence=Product.PRESENT, fingerprint=fingerprint
     )  # jboss_ws_instances++, jboss_ws_cores_physical += 8
     expected_aggregate.instances_physical += 1
     expected_aggregate.missing_system_purpose += 1
