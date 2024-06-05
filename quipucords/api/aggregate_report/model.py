@@ -30,8 +30,8 @@ from math import ceil
 from api.deployments_report.model import Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
 from api.reports.model import Report
-from api.scan.model import Scan
 from constants import DataSources
+from fingerprinter import jboss_eap, jboss_web_server
 from utils.datetime import average_date
 
 logger = logging.getLogger(__name__)
@@ -168,8 +168,8 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
             product.name: bool(product.presence == Product.PRESENT)
             for product in fingerprint.products.all()
         }
-        jboss_eap_present = product_presences.get(Scan.JBOSS_EAP, False)
-        jboss_ws_present = product_presences.get(Scan.JBOSS_WS, False)
+        jboss_eap_present = product_presences.get(jboss_eap.PRODUCT, False)
+        jboss_ws_present = product_presences.get(jboss_web_server.PRODUCT, False)
         jboss_eap_cpu_core_count = cpu_core_count if jboss_eap_present else 0
         jboss_ws_cpu_core_count = cpu_core_count if jboss_ws_present else 0
 
