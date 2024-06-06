@@ -68,10 +68,10 @@ class ProcessCloudProvider(process.Processor):
     @staticmethod
     def process(output, dependencies):
         """Pass the output back through."""
-        dmi_bios_version = dependencies.get("dmi_bios_version", "")
-        dmi_chassis_asset_tag = dependencies.get("dmi_chassis_asset_tag", "")
-        dmi_system_manufacturer = dependencies.get("dmi_system_manufacturer", "")
-        dmi_system_product_name = dependencies.get("dmi_system_product_name", "")
+        dmi_bios_version = dependencies.get("dmi_bios_version", "") or ""
+        dmi_chassis_asset_tag = dependencies.get("dmi_chassis_asset_tag", "") or ""
+        dmi_system_manufacturer = dependencies.get("dmi_system_manufacturer", "") or ""
+        dmi_system_product_name = dependencies.get("dmi_system_product_name", "") or ""
         if "amazon" in dmi_bios_version.lower():
             return AMAZON
         if "google" in dmi_bios_version.lower():
