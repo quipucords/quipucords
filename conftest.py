@@ -51,6 +51,8 @@ def default_data_dir(settings, tmp_path: Path) -> Path:
     settings.DEFAULT_DATA_DIR = data_dir
     settings.LOG_DIRECTORY = data_dir / "logs"
     settings.LOG_DIRECTORY.mkdir(parents=True)
+    settings.QUIPUCORDS_CACHED_REPORTS_DATA_DIR = data_dir / "cached_reports"
+    settings.QUIPUCORDS_CACHED_REPORTS_DATA_DIR.mkdir(parents=True)
     return data_dir
 
 

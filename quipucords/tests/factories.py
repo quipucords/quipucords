@@ -109,6 +109,11 @@ class DeploymentReportFactory(DjangoModelFactory):
         """Reproduce the logic responsible for DUPLICATION of fingerprints."""
         # only attempt to generate fingerprints for obj already saved to db
         # and with a "STATUS_COMPLETE"
+        if kwargs.get("skip", False):
+            # Note: We have to use `kwargs` and not a real keyword argument due to
+            # factoryboy internal workings. Using a real keyword argument here would
+            # raise a `TypeError` ("got multiple values for argument 'skip'").
+            return
         if obj.id and obj.status == models.DeploymentsReport.STATUS_COMPLETE:
             # TODO get RID of this OUTRAGEOUS logic.
             serializer = SystemFingerprintSerializer(

@@ -520,3 +520,9 @@ if QUIPUCORDS_ENABLE_REDIS_CACHE:
 
 # Let's define various cache TTL's
 QPC_SCAN_JOB_TTL = env.int("QPC_SCAN_JOB_TTL", default=24 * 3600)
+
+QUIPUCORDS_CACHED_REPORTS_DATA_DIR = Path(
+    env.str(
+        "QUIPUCORDS_CACHED_REPORTS_DATA_DIR", str(DEFAULT_DATA_DIR / "cached_reports")
+    )
+)
