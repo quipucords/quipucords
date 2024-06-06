@@ -1,7 +1,12 @@
 """Models system fingerprints."""
 
+import json
+import logging
+import time
 import uuid
+from pathlib import Path
 
+from django.conf import settings
 from django.db import models
 
 from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DEPLOYMENT
@@ -12,6 +17,16 @@ from fingerprinter.constants import (
     PRODUCTS_KEY,
     SOURCES_KEY,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def cached_files_path() -> Path:
+    """Get the directory path for the cached report files."""
+    return settings.QUIPUCORDS_CACHED_REPORTS_DATA_DIR
+
+
+CACHED_FILE_NAME_FORMAT = "deployments-report-{id}-{unixtime}.{extension}"
 
 
 class DeploymentsReport(BaseModel):
@@ -35,8 +50,91 @@ class DeploymentsReport(BaseModel):
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
-    cached_fingerprints = models.JSONField(null=True)
-    cached_csv = models.TextField(null=True)
+
+    cached_fingerprints_file_path = models.FilePathField(
+        null=True, blank=True, path=cached_files_path, max_length=255
+    )
+    cached_csv_file_path = models.FilePathField(
+        null=True, blank=True, path=cached_files_path, max_length=255
+    )
+
+    @property
+    def cached_fingerprints(self) -> dict | None:
+        """Return cached fingerprints data if it exists."""
+        if not self.cached_fingerprints_file_path:
+            return None
+        file_path = Path(self.cached_fingerprints_file_path).absolute()
+        if file_path.parent != cached_files_path():
+            # Check to protect against potentially malicious filesystem access.
+            logger.error(
+                "Unsupported parent path for DeploymentsReport %s file: %s",
+                self.id,
+                file_path,
+            )
+            return None
+        try:
+            with file_path.open("r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            logger.warning(
+                "Cached fingerprints file for DeploymentsReport %s not found at %s",
+                self.id,
+                file_path,
+            )
+            return None
+
+    @cached_fingerprints.setter
+    def cached_fingerprints(self, data):
+        """Save cached fingerprints data."""
+        file_path = cached_files_path() / CACHED_FILE_NAME_FORMAT.format(
+            id=self.id, unixtime=time.time(), extension="json"
+        )
+        if file_path.exists():
+            logger.warning("Overwriting existing file at %s", file_path)
+        with file_path.open("w") as f:
+            json.dump(data, f)
+        self.cached_fingerprints_file_path = file_path
+
+    @property
+    def cached_csv(self):
+        """Return cached csv data if it exists."""
+        if not self.cached_csv_file_path:
+            return None
+        file_path = Path(self.cached_csv_file_path).absolute()
+        if file_path.parent != cached_files_path():
+            # Check to protect against potentially malicious filesystem access.
+            logger.error(
+                "Unsupported parent path for DeploymentsReport %s file: %s",
+                self.id,
+                file_path,
+            )
+            return None
+        try:
+            with file_path.open("r", newline="") as f:
+                # I hate `newline=''` but we need this for compatibility
+                # because we write \r\n into the CSV file, but by default,
+                # python wants to strip the extra `\r` from `\r\n`.
+                # See also: https://docs.python.org/3.12/library/functions.html#open
+                return f.read()
+        except FileNotFoundError:
+            logger.warning(
+                "Cached CSV file for DeploymentsReport %s not found at %s",
+                self.id,
+                self.cached_csv_file_path,
+            )
+            return None
+
+    @cached_csv.setter
+    def cached_csv(self, data):
+        """Save cached csv data."""
+        file_path = cached_files_path() / CACHED_FILE_NAME_FORMAT.format(
+            id=self.id, unixtime=time.time(), extension="csv"
+        )
+        if file_path.exists():
+            logger.warning("Overwriting existing file at %s", file_path)
+        with file_path.open("w") as f:
+            f.write(data)
+        self.cached_csv_file_path = file_path
 
 
 class SystemFingerprint(BaseModel):

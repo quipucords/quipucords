@@ -8,13 +8,21 @@ on the types and contents of the collected facts and system fingerprints.
 """
 
 import csv
+import logging
 
 import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api.common.common_report import REPORT_TYPE_DEPLOYMENT
-from api.deployments_report.model import DeploymentsReport, SystemFingerprint
+from api.deployments_report.model import (
+    DeploymentsReport,
+    SystemFingerprint,
+    cached_files_path,
+)
+from api.deployments_report.model import (
+    time as time_module,
+)
 from api.deployments_report.util import sanitize_row
 from constants import DataSources
 from tests.factories import DeploymentReportFactory
@@ -206,3 +214,136 @@ def test_get_deployments_report_not_complete_424_failed(client_logged_in):
         reverse("v1:reports-deployments", args=(deployments_report.report.id,))
     )
     assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_csv_not_set():
+    """Test getting cached_csv when cached_csv_file_path is not set."""
+    deployments_report = DeploymentReportFactory(cached_csv_file_path=None)
+    assert deployments_report.cached_csv is None
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_fingerprints_not_set():
+    """Test getting cached_fingerprints when its path is not set."""
+    # `_set_cached_fingerprints__skip=True` is REQUIRED here because
+    # DeploymentReportFactory._set_cached_fingerprints's default behavior causes it to
+    # try to set cached_fingerprints before we are ready to set it for this test.
+    deployments_report = DeploymentReportFactory(_set_cached_fingerprints__skip=True)
+    assert deployments_report.cached_fingerprints is None
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_csv_unsupported_path(faker, caplog):
+    """Test getting cached_csv when its path has unexpected parent."""
+    unexpected_path = f"/{faker.slug()}/{faker.slug()}.csv"
+    deployments_report = DeploymentReportFactory(cached_csv_file_path=unexpected_path)
+    expected_error = (
+        f"Unsupported parent path for DeploymentsReport {deployments_report.id}"
+    )
+    caplog.set_level(logging.ERROR)
+    assert deployments_report.cached_csv is None
+    assert expected_error in caplog.messages[-1]
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_fingerprints_unsupported_path(faker, caplog):
+    """Test getting cached_fingerprints when its path has unexpected parent."""
+    unexpected_path = f"/{faker.slug()}/{faker.slug()}.json"
+    # `_set_cached_fingerprints__skip=True` is REQUIRED here because
+    # DeploymentReportFactory._set_cached_fingerprints's default behavior causes it to
+    # try to set cached_fingerprints before we are ready to set it for this test.
+    deployments_report = DeploymentReportFactory(
+        cached_fingerprints_file_path=unexpected_path,
+        _set_cached_fingerprints__skip=True,
+    )
+    expected_error = (
+        f"Unsupported parent path for DeploymentsReport {deployments_report.id}"
+    )
+    caplog.set_level(logging.ERROR)
+    assert deployments_report.cached_fingerprints is None
+    assert expected_error in caplog.messages[-1]
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_csv_not_found(faker, caplog):
+    """Test getting cached_csv when its path does not find a file."""
+    not_found_path = f"{cached_files_path()}/{faker.slug()}.csv"
+    deployments_report = DeploymentReportFactory(cached_csv_file_path=not_found_path)
+    expected_warning = (
+        f"Cached CSV file for DeploymentsReport {deployments_report.id} not found"
+    )
+    caplog.set_level(logging.WARNING)
+    assert deployments_report.cached_csv is None
+    assert expected_warning in caplog.messages[-1]
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_fingerprints_not_found(faker, caplog):
+    """Test getting cached_fingerprints when its path does not find a file."""
+    not_found_path = f"{cached_files_path()}/{faker.slug()}.json"
+    # `_set_cached_fingerprints__skip=True` is REQUIRED here because
+    # DeploymentReportFactory._set_cached_fingerprints's default behavior causes it to
+    # try to set cached_fingerprints before we are ready to set it for this test.
+    deployments_report = DeploymentReportFactory(
+        cached_fingerprints_file_path=not_found_path,
+        _set_cached_fingerprints__skip=True,
+    )
+    expected_warning = (
+        f"Cached fingerprints file for DeploymentsReport {deployments_report.id} "
+        "not found"
+    )
+    caplog.set_level(logging.WARNING)
+    assert deployments_report.cached_fingerprints is None
+    assert expected_warning in caplog.messages[-1]
+
+
+@pytest.mark.django_db
+def test_set_deployments_report_set_cached_csv_file_already_exists(
+    mocker, caplog, faker
+):
+    """Test setting cached_csv when file already exists at the path."""
+    expected_warning = "Overwriting existing file at"
+    caplog.set_level(logging.WARNING)
+    original_csv_content = (
+        f"{faker.slug()},{faker.slug()}\r\n\r\n{faker.slug()},{faker.slug()}\r\n"
+    )
+    updated_csv_content = (
+        f"{faker.slug()},{faker.slug()}\r\n\r\n{faker.slug()},{faker.slug()}\r\n"
+    )
+
+    mock_time = mocker.patch.object(time_module, "time")
+    mock_time.return_value = faker.pyint()
+    deployments_report = DeploymentReportFactory(cached_csv_file_path=None)
+    deployments_report.cached_csv = original_csv_content
+    assert deployments_report.cached_csv == original_csv_content
+    assert not caplog.messages
+
+    deployments_report.cached_csv = updated_csv_content
+    assert deployments_report.cached_csv == updated_csv_content
+    assert expected_warning in caplog.messages[-1]
+
+
+@pytest.mark.django_db
+def test_set_deployments_report_set_cached_fingerprints_file_already_exists(
+    mocker, caplog, faker
+):
+    """Test setting cached_fingerprints when file already exists at the path."""
+    expected_warning = "Overwriting existing file at"
+    caplog.set_level(logging.WARNING)
+    original_dict_content = {faker.slug(): faker.slug()}
+    updated_dict_content = {faker.slug(): faker.slug()}
+
+    mock_time = mocker.patch.object(time_module, "time")
+    mock_time.return_value = faker.pyint()
+    # `_set_cached_fingerprints__skip=True` is REQUIRED here because
+    # DeploymentReportFactory._set_cached_fingerprints's default behavior causes it to
+    # try to set cached_fingerprints before we are ready to set it for this test.
+    deployments_report = DeploymentReportFactory(_set_cached_fingerprints__skip=True)
+    deployments_report.cached_fingerprints = original_dict_content
+    assert deployments_report.cached_fingerprints == original_dict_content
+    assert expected_warning not in caplog.messages
+
+    deployments_report.cached_fingerprints = updated_dict_content
+    assert deployments_report.cached_fingerprints == updated_dict_content
+    assert expected_warning in caplog.messages[-1]
