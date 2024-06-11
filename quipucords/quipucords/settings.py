@@ -263,6 +263,7 @@ elif QPC_DBMS == "postgres":
             "PORT": QPC_DBMS_PORT,
         }
     }
+QUIPUCORDS_BULK_CREATE_BATCH_SIZE = env.int("QUIPUCORDS_BULK_CREATE_BATCH_SIZE", 100)
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
