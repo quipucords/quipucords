@@ -324,7 +324,9 @@ class InspectTaskRunner(ScanTaskRunner):
                     inspect_result=sys_result,
                 )
             )
-        RawFact.objects.bulk_create(raw_facts)
+        RawFact.objects.bulk_create(
+            raw_facts, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
         increment_kwargs = self._get_scan_task_increment_kwargs(ansible_results.status)
         self.scan_task.increment_stats(ansible_results.host, **increment_kwargs)
 

@@ -114,7 +114,9 @@ class InspectTaskRunner(RHACSTaskRunner):
             inspect_group=inspect_group,
         )
         raw_facts = self._facts_dict_as_raw_facts(sys_result, **facts_dict)
-        RawFact.objects.bulk_create(raw_facts)
+        RawFact.objects.bulk_create(
+            raw_facts, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
         return sys_result
 
     def _facts_dict_as_raw_facts(

@@ -5,6 +5,7 @@ from datetime import datetime
 from itertools import chain
 
 import pytest
+from django.conf import settings
 
 from api.common.entities import HostEntity, ReportEntity, ReportSlice
 from api.deployments_report.model import DeploymentsReport
@@ -35,7 +36,9 @@ def fingerprint_with_products():
         Product(name="JBoss Fuse", presence=Product.ABSENT, fingerprint=sys_fp),
         Product(name="UNKOWN PRODUCT", presence=Product.PRESENT, fingerprint=sys_fp),
     ]
-    Product.objects.bulk_create(products)
+    Product.objects.bulk_create(
+        products, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+    )
     return sys_fp
 
 

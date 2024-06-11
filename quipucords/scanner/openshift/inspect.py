@@ -146,7 +146,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         raw_fact = self._entity_as_raw_fact(cluster, system_result)
         raw_fact.save()
         other_raw_facts = self._entities_as_raw_facts(system_result, other_facts)
-        RawFact.objects.bulk_create(other_raw_facts)
+        RawFact.objects.bulk_create(
+            other_raw_facts, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
         return system_result
 
     def _persist_facts(self, node: OCPNode) -> InspectResult:

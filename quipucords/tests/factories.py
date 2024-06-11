@@ -8,6 +8,7 @@
 import random
 
 import factory
+from django.conf import settings
 from factory.django import DjangoModelFactory
 from faker import Faker
 
@@ -423,7 +424,9 @@ class InspectResultFactory(DjangoModelFactory):
             models.RawFact(name=k, value=v, inspect_result=obj)
             for k, v in extracted.items()
         ]
-        models.RawFact.objects.bulk_create(raw_facts)
+        models.RawFact.objects.bulk_create(
+            raw_facts, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
 
 
 def generate_invalid_id(faker: factory.Faker) -> int:

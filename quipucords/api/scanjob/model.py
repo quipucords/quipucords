@@ -6,6 +6,7 @@ These models are used in the REST definitions.
 import logging
 from datetime import datetime
 
+from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils.translation import gettext as _
@@ -551,9 +552,15 @@ class ScanJob(BaseModel):
                     RawFact(name=k, value=v, inspect_result=inspect_result)
                     for k, v in fact_dict.items()
                 )
-        InspectGroup.objects.bulk_create(inspect_group_list)
-        InspectResult.objects.bulk_create(inspect_result_list)
-        RawFact.objects.bulk_create(raw_fact_list)
+        InspectGroup.objects.bulk_create(
+            inspect_group_list, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
+        InspectResult.objects.bulk_create(
+            inspect_result_list, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
+        RawFact.objects.bulk_create(
+            raw_fact_list, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
+        )
         inspect_task.inspect_groups.set(inspect_group_list)
 
     def copy_raw_facts_from_reports(self, report_id_list, task_sequence_number=1):
