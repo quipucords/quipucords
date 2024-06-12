@@ -1,0 +1,16 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "rhel8.localdomain",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "93139b7873cc71c4a7f94c4365439422",
+        "boot_id": "42fd710c04f52f4f7b28d89b26a9d7d1",
+        "virtualization": "kvm",
+        "operating_system": "\u001b]8;;https://www.redhat.com/\u0007Red Hat Enterprise Linux 8.9 (Ootpa)\u001b]8;;\u0007",
+        "cpe_os_name": "cpe:/o:redhat:enterprise_linux:8::baseos",
+        "kernel": "Linux 4.18.0-513.24.1.el8_9.x86_64",
+        "architecture": "x86-64"
+    }
+}

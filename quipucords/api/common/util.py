@@ -1,5 +1,6 @@
 """Util for common operations."""
 
+import dataclasses
 import logging
 from datetime import datetime
 from json import JSONEncoder
@@ -210,6 +211,8 @@ class RawFactEncoder(JSONEncoder):
             return o.isoformat()
         if isinstance(o, set):
             return sorted(o)
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
         return super().default(o)
 
 

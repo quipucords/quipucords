@@ -1,0 +1,14 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "ip-172-26-141-83.ec2.internal",
+        "icon_name": "computer",
+        "machine_id": "19c8d28971d37edecd5c78e56c28f137",
+        "boot_id": "efb3a2652924a3b51f05c7eca19a9d2f",
+        "operating_system": "Red Hat Enterprise Linux 8.4 (Ootpa)",
+        "cpe_os_name": "cpe:/o:redhat:enterprise_linux:8.4:GA",
+        "kernel": "Linux 4.18.0-305.88.1.el8_4.aarch64",
+        "architecture": "arm64"
+    }
+}

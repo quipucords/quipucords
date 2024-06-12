@@ -1,0 +1,17 @@
+     Static hostname: fedora40
+           Icon name: computer-vm
+             Chassis: vm 🖴
+          Machine ID: d3001a3b61df76db811fdd1741b90f58
+             Boot ID: e34ebdee671d768ac3d1cf3f4ab566dd
+      Virtualization: qemu
+    Operating System: Fedora Linux 40 (Server Edition)
+         CPE OS Name: cpe:/o:fedoraproject:fedora:40
+      OS Support End: Tue 2025-05-13
+OS Support Remaining: 10month 2w 2d
+              Kernel: Linux 6.9.4-200.fc40.x86_64
+        Architecture: x86-64
+     Hardware Vendor: QEMU
+      Hardware Model: Standard PC _Q35 + ICH9, 2009_
+    Firmware Version: 0.0.0
+       Firmware Date: Fri 2015-02-06
+        Firmware Age: 9y 4month 2w 4d

@@ -1,0 +1,16 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "centos8s.localdomain",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "b9258cdefc4b8a9d734413decb851880",
+        "boot_id": "bbcfeb76e9a4185d1f7739f40e645c3f",
+        "virtualization": "kvm",
+        "operating_system": "\u001b]8;;https://centos.org/\u0007CentOS Stream 8\u001b]8;;\u0007",
+        "cpe_os_name": "cpe:/o:centos:centos:8",
+        "kernel": "Linux 4.18.0-448.el8.x86_64",
+        "architecture": "x86-64"
+    }
+}

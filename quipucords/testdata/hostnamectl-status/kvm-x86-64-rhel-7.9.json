@@ -1,0 +1,16 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "rhel7.localdomain",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "663438e3ef64471398dd8af0a945da24",
+        "boot_id": "84e5594a465149def10830d25a992d1f",
+        "virtualization": "kvm",
+        "operating_system": "Red Hat Enterprise Linux Server 7.9 (Maipo)",
+        "cpe_os_name": "cpe:/o:redhat:enterprise_linux:7.9:GA:server",
+        "kernel": "Linux 3.10.0-1160.el7.x86_64",
+        "architecture": "x86-64"
+    }
+}

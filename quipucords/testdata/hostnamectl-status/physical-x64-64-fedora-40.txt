@@ -1,0 +1,16 @@
+     Static hostname: username-thinkpadt14gen3.remote.local
+           Icon name: computer-laptop
+             Chassis: laptop 💻
+          Machine ID: 38b0031a48923caa79849681ff91c76e
+             Boot ID: ebf40e6b1c06428e33b4dd80a908c1e6
+    Operating System: Fedora Linux 40 (Workstation Edition)
+         CPE OS Name: cpe:/o:fedoraproject:fedora:40
+      OS Support End: Tue 2025-05-13
+OS Support Remaining: 10month 2w 2d
+              Kernel: Linux 6.9.5-200.fc40.x86_64
+        Architecture: x86-64
+     Hardware Vendor: Lenovo
+      Hardware Model: ThinkPad T14 Gen 3
+    Firmware Version: N3MET19W (1.18 )
+       Firmware Date: Wed 2024-03-20
+        Firmware Age: 3month 6d

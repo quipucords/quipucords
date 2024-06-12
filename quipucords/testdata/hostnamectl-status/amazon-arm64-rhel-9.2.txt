@@ -1,0 +1,13 @@
+ Static hostname: ip-172-29-253-80.ec2.internal
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: ae9fb5f90b6f9b5afbf6efa97cb9887c
+         Boot ID: f759dface3ca240219462d51b388f039
+  Virtualization: amazon
+Operating System: Red Hat Enterprise Linux 9.2 (Plow)
+     CPE OS Name: cpe:/o:redhat:enterprise_linux:9::baseos
+          Kernel: Linux 5.14.0-284.11.1.el9_2.aarch64
+    Architecture: arm64
+ Hardware Vendor: Amazon EC2
+  Hardware Model: t4g.micro
+Firmware Version: 1.0

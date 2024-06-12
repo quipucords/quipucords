@@ -1,0 +1,19 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "ip-172-17-158-15.ec2.internal",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "f6624c515115bbe072d3303e562e74e6",
+        "boot_id": "603d5e46246151e3ad15aa4b26d95660",
+        "virtualization": "amazon",
+        "operating_system": "Amazon Linux 2023.4.20240611",
+        "cpe_os_name": "cpe:2.3:o:amazon:amazon_linux:2023",
+        "kernel": "Linux 6.1.92-99.174.amzn2023.aarch64",
+        "architecture": "arm64",
+        "hardware_vendor": "Amazon EC2",
+        "hardware_model": "t4g.nano",
+        "firmware_version": "1.0"
+    }
+}

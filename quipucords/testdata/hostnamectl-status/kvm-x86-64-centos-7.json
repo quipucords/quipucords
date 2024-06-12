@@ -1,0 +1,16 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "example.com",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "4a9675338a7100d965096c7ec58a4e27",
+        "boot_id": "85628d25858078551da097e97f92e937",
+        "virtualization": "kvm",
+        "operating_system": "CentOS Linux 7 (Core)",
+        "cpe_os_name": "cpe:/o:centos:centos:7",
+        "kernel": "Linux 5.13.4-x86_64-linode146",
+        "architecture": "x86-64"
+    }
+}

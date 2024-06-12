@@ -1,0 +1,10 @@
+   Static hostname: rhel7.localdomain
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: 663438e3ef64471398dd8af0a945da24
+           Boot ID: 84e5594a465149def10830d25a992d1f
+    Virtualization: kvm
+  Operating System: Red Hat Enterprise Linux Server 7.9 (Maipo)
+       CPE OS Name: cpe:/o:redhat:enterprise_linux:7.9:GA:server
+            Kernel: Linux 3.10.0-1160.el7.x86_64
+      Architecture: x86-64

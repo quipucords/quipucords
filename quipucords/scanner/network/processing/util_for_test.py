@@ -12,8 +12,8 @@ def ansible_results(results):
         "results": [
             {
                 "item": result.get("item", ""),
-                "stdout": result["stdout"],
-                "stdout_lines": result["stdout"].splitlines(),
+                "stdout": result.get("stdout", ""),
+                "stdout_lines": result.get("stdout", "").splitlines(),
                 "rc": result.get("rc", 0),
             }
             for result in results

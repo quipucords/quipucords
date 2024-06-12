@@ -1,0 +1,18 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "rhel9.localdomain",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "934a73edeed28861195f1a7261fc2435",
+        "boot_id": "07c14fd4366961c34665fc3e01594f9d",
+        "virtualization": "kvm",
+        "operating_system": "\u001b]8;;https://www.redhat.com/\u0007Red Hat Enterprise Linux 9.1 (Plow)\u001b]8;;\u0007",
+        "cpe_os_name": "cpe:/o:redhat:enterprise_linux:9::baseos",
+        "kernel": "Linux 5.14.0-162.6.1.el9_1.x86_64",
+        "architecture": "x86-64",
+        "hardware_vendor": "QEMU",
+        "hardware_model": "Standard PC _i440FX + PIIX, 1996_"
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "raspbian",
+        "icon_name": "computer",
+        "machine_id": "74dd1f051c23559cb3f9476b457c39a2",
+        "boot_id": "c83cda410da763b6d375b9a88bd7a55a",
+        "operating_system": "Raspbian GNU/Linux 10 (buster)",
+        "kernel": "Linux 5.10.103-v7l+",
+        "architecture": "arm"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "ip-172-29-253-80.ec2.internal",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "ae9fb5f90b6f9b5afbf6efa97cb9887c",
+        "boot_id": "f759dface3ca240219462d51b388f039",
+        "virtualization": "amazon",
+        "operating_system": "Red Hat Enterprise Linux 9.2 (Plow)",
+        "cpe_os_name": "cpe:/o:redhat:enterprise_linux:9::baseos",
+        "kernel": "Linux 5.14.0-284.11.1.el9_2.aarch64",
+        "architecture": "arm64",
+        "hardware_vendor": "Amazon EC2",
+        "hardware_model": "t4g.micro",
+        "firmware_version": "1.0"
+    }
+}

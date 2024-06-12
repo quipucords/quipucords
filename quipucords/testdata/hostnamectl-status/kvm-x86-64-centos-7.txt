@@ -1,0 +1,10 @@
+   Static hostname: example.com
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: 4a9675338a7100d965096c7ec58a4e27
+           Boot ID: 85628d25858078551da097e97f92e937
+    Virtualization: kvm
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+            Kernel: Linux 5.13.4-x86_64-linode146
+      Architecture: x86-64

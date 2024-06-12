@@ -1,0 +1,8 @@
+   Static hostname: ip-10-5-70-26.ec2.internal
+         Icon name: computer
+        Machine ID: 33a34669595a39502879bd642becc753
+           Boot ID: 93c29817176c05d0c31cb828802a9b79
+  Operating System: Red Hat Enterprise Linux Server 7.6 (Maipo)
+       CPE OS Name: cpe:/o:redhat:enterprise_linux:7.6:GA:server
+            Kernel: Linux 4.14.0-115.2.2.el7a.aarch64
+      Architecture: arm64

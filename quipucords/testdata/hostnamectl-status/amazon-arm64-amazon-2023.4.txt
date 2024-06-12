@@ -1,0 +1,13 @@
+ Static hostname: ip-172-17-158-15.ec2.internal
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: f6624c515115bbe072d3303e562e74e6
+         Boot ID: 603d5e46246151e3ad15aa4b26d95660
+  Virtualization: amazon
+Operating System: Amazon Linux 2023.4.20240611
+     CPE OS Name: cpe:2.3:o:amazon:amazon_linux:2023
+          Kernel: Linux 6.1.92-99.174.amzn2023.aarch64
+    Architecture: arm64
+ Hardware Vendor: Amazon EC2
+  Hardware Model: t4g.nano
+Firmware Version: 1.0

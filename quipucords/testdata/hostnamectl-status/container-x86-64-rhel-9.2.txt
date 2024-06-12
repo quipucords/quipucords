@@ -1,0 +1,11 @@
+ Static hostname: 8d9a5314ce26
+       Icon name: computer-container
+         Chassis: container ☐
+      Machine ID: b401e6c0fff01cba0949da4de2c2aa59
+         Boot ID: 772e9730b238d823f1ee20f8a43d3181
+  Virtualization: container-other
+Operating System: ]8;;https://www.redhat.com/Red Hat Enterprise Linux 9.2 (Plow)]8;;
+     CPE OS Name: cpe:/o:redhat:enterprise_linux:9::baseos
+          Kernel: Linux 6.8.9-100.fc38.x86_64
+    Architecture: x86-64
+Firmware Version: N2VET42W (1.27 )

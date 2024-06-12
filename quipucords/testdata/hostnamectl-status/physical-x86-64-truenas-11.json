@@ -1,0 +1,15 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "truenas",
+        "icon_name": "computer-desktop",
+        "chassis": "desktop",
+        "machine_id": "a5980ba0cb2ac6ebf16efa9e5caa6db2",
+        "boot_id": "44c536d5c4dd78db9d52ea5ae4562c2c",
+        "operating_system": "Debian GNU/Linux 11 (bullseye)",
+        "kernel": "Linux 5.15.131+truenas",
+        "architecture": "x86-64",
+        "firmware_version": "F5"
+    }
+}

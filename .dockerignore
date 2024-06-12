@@ -25,6 +25,7 @@ quipucords/client
 quipucords/db.sqlite3
 quipucords/quipucords/templates
 quipucords/staticfiles
+quipucords/testdata
 quipucords/tests
 var
 venv

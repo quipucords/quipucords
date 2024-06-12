@@ -1,0 +1,10 @@
+   Static hostname: centos8s.localdomain
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: b9258cdefc4b8a9d734413decb851880
+           Boot ID: bbcfeb76e9a4185d1f7739f40e645c3f
+    Virtualization: kvm
+  Operating System: ]8;;https://centos.org/CentOS Stream 8]8;;
+       CPE OS Name: cpe:/o:centos:centos:8
+            Kernel: Linux 4.18.0-448.el8.x86_64
+      Architecture: x86-64

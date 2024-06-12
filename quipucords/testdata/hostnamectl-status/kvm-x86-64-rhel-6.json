@@ -1,0 +1,5 @@
+{
+    "return_code": 127,
+    "error_msg": "unexpected return code (127) for 'hostnamectl status'. Full output from command:\nbash: hostnamectl: command not found\n",
+    "value": null
+}
