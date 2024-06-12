@@ -1,0 +1,16 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "pop-os",
+        "icon_name": "computer-desktop",
+        "chassis": "desktop",
+        "machine_id": "daec1fb1dd47b7a309cb5b59a5091589",
+        "boot_id": "f84719ae8ac59e781cc54b3bf671a7a5",
+        "operating_system": "Pop!_OS 22.04 LTS",
+        "kernel": "Linux 6.8.0-76060800daily20240311-generic",
+        "architecture": "x86-64",
+        "hardware_vendor": "Acidanthera",
+        "hardware_model": "iMac20,1"
+    }
+}

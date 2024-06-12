@@ -1,0 +1,7 @@
+   Static hostname: raspbian
+         Icon name: computer
+        Machine ID: 74dd1f051c23559cb3f9476b457c39a2
+           Boot ID: c83cda410da763b6d375b9a88bd7a55a
+  Operating System: Raspbian GNU/Linux 10 (buster)
+            Kernel: Linux 5.10.103-v7l+
+      Architecture: arm

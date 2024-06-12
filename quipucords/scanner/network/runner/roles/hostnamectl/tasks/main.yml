@@ -1,0 +1,15 @@
+---
+# tasks file for hostnamectl
+
+- name: internal_host_started_processing_role
+  set_fact:
+    internal_host_started_processing_role: "hostnamectl"
+
+- name: gather hostnamectl-status
+  raw: export LANG=C LC_ALL=C TERM=dumb; hostnamectl status
+  register: internal_hostnamectl_status
+  ignore_errors: yes
+
+- name: set hostnamectl fact
+  set_fact:
+    hostnamectl: "{{ internal_hostnamectl_status }}"

@@ -1,0 +1,9 @@
+ Static hostname: truenas
+       Icon name: computer-desktop
+         Chassis: desktop 🖥️
+      Machine ID: a5980ba0cb2ac6ebf16efa9e5caa6db2
+         Boot ID: 44c536d5c4dd78db9d52ea5ae4562c2c
+Operating System: Debian GNU/Linux 11 (bullseye)
+          Kernel: Linux 5.15.131+truenas
+    Architecture: x86-64
+Firmware Version: F5

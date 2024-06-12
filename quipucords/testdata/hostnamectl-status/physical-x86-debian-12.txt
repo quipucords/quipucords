@@ -1,0 +1,11 @@
+ Static hostname: mini-hp.local
+       Icon name: computer-laptop
+         Chassis: laptop 💻
+      Machine ID: c4f55b9ed1a570f9d647d6461249a2cb
+         Boot ID: d1e09ba67288db54deeab72188a4df6f
+Operating System: Debian GNU/Linux 12 (bookworm)
+          Kernel: Linux 6.1.0-21-686-pae
+    Architecture: x86
+ Hardware Vendor: Hewlett-Packard
+  Hardware Model: HP Mini 210-1000
+Firmware Version: F.12

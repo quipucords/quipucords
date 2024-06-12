@@ -2,7 +2,9 @@
 
 import abc
 import traceback
+from dataclasses import dataclass
 from logging import DEBUG, ERROR
+from typing import Any
 
 # ### Conventions ####
 #
@@ -27,6 +29,17 @@ STDOUT = "stdout"
 QPC_FORCE_POST_PROCESS = "QPC_FORCE_POST_PROCESS"
 
 SUDO_ERROR = "sudo: a password is required"
+
+
+@dataclass
+class ProcessedResult:
+    """Processed result including relevant metadata."""
+
+    # return_code == 0 = success
+    return_code: int
+    error_msg: str = None
+    # the actual fact value
+    value: Any = None
 
 
 def is_sudo_error_value(value):

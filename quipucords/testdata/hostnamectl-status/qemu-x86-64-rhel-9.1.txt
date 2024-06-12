@@ -1,0 +1,12 @@
+ Static hostname: rhel9.localdomain
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: 934a73edeed28861195f1a7261fc2435
+         Boot ID: 07c14fd4366961c34665fc3e01594f9d
+  Virtualization: kvm
+Operating System: ]8;;https://www.redhat.com/Red Hat Enterprise Linux 9.1 (Plow)]8;;
+     CPE OS Name: cpe:/o:redhat:enterprise_linux:9::baseos
+          Kernel: Linux 5.14.0-162.6.1.el9_1.x86_64
+    Architecture: x86-64
+ Hardware Vendor: QEMU
+  Hardware Model: Standard PC _i440FX + PIIX, 1996_

@@ -1,0 +1,10 @@
+   Static hostname: rhel8.localdomain
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: 93139b7873cc71c4a7f94c4365439422
+           Boot ID: 42fd710c04f52f4f7b28d89b26a9d7d1
+    Virtualization: kvm
+  Operating System: ]8;;https://www.redhat.com/Red Hat Enterprise Linux 8.9 (Ootpa)]8;;
+       CPE OS Name: cpe:/o:redhat:enterprise_linux:8::baseos
+            Kernel: Linux 4.18.0-513.24.1.el8_9.x86_64
+      Architecture: x86-64

@@ -1,0 +1,23 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "fedora40",
+        "icon_name": "computer-vm",
+        "chassis": "vm",
+        "machine_id": "d3001a3b61df76db811fdd1741b90f58",
+        "boot_id": "e34ebdee671d768ac3d1cf3f4ab566dd",
+        "virtualization": "qemu",
+        "operating_system": "Fedora Linux 40 (Server Edition)",
+        "cpe_os_name": "cpe:/o:fedoraproject:fedora:40",
+        "os_support_end": "Tue 2025-05-13",
+        "os_support_remaining": "10month 2w 2d",
+        "kernel": "Linux 6.9.4-200.fc40.x86_64",
+        "architecture": "x86-64",
+        "hardware_vendor": "QEMU",
+        "hardware_model": "Standard PC _Q35 + ICH9, 2009_",
+        "firmware_version": "0.0.0",
+        "firmware_date": "Fri 2015-02-06",
+        "firmware_age": "9y 4month 2w 4d"
+    }
+}

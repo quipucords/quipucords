@@ -321,6 +321,9 @@ STATIC_URL = "/client/"
 
 STATICFILES_DIRS = [BASE_DIR / "client"]
 
+if not PRODUCTION:
+    TESTDATA_DIR = BASE_DIR / "testdata"
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"

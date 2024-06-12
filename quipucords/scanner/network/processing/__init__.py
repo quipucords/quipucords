@@ -8,6 +8,7 @@ from . import (
     eap,
     eap5,
     fuse,
+    hostnamectl,
     ifconfig,
     installed_products,
     ip,

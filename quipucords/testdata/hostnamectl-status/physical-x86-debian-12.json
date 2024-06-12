@@ -1,0 +1,17 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "mini-hp.local",
+        "icon_name": "computer-laptop",
+        "chassis": "laptop",
+        "machine_id": "c4f55b9ed1a570f9d647d6461249a2cb",
+        "boot_id": "d1e09ba67288db54deeab72188a4df6f",
+        "operating_system": "Debian GNU/Linux 12 (bookworm)",
+        "kernel": "Linux 6.1.0-21-686-pae",
+        "architecture": "x86",
+        "hardware_vendor": "Hewlett-Packard",
+        "hardware_model": "HP Mini 210-1000",
+        "firmware_version": "F.12"
+    }
+}

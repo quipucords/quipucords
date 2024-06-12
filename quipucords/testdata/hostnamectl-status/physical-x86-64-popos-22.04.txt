@@ -1,0 +1,10 @@
+ Static hostname: pop-os
+       Icon name: computer-desktop
+         Chassis: desktop
+      Machine ID: daec1fb1dd47b7a309cb5b59a5091589
+         Boot ID: f84719ae8ac59e781cc54b3bf671a7a5
+Operating System: Pop!_OS 22.04 LTS
+          Kernel: Linux 6.8.0-76060800daily20240311-generic
+    Architecture: x86-64
+ Hardware Vendor: Acidanthera
+  Hardware Model: iMac20,1

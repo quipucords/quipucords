@@ -1,0 +1,17 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "8d9a5314ce26",
+        "icon_name": "computer-container",
+        "chassis": "container",
+        "machine_id": "b401e6c0fff01cba0949da4de2c2aa59",
+        "boot_id": "772e9730b238d823f1ee20f8a43d3181",
+        "virtualization": "container-other",
+        "operating_system": "\u001b]8;;https://www.redhat.com/\u0007Red Hat Enterprise Linux 9.2 (Plow)\u001b]8;;\u0007",
+        "cpe_os_name": "cpe:/o:redhat:enterprise_linux:9::baseos",
+        "kernel": "Linux 6.8.9-100.fc38.x86_64",
+        "architecture": "x86-64",
+        "firmware_version": "N2VET42W (1.27 )"
+    }
+}

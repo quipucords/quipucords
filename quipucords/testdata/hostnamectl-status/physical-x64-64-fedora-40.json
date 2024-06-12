@@ -1,0 +1,22 @@
+{
+    "return_code": 0,
+    "error_msg": null,
+    "value": {
+        "static_hostname": "username-thinkpadt14gen3.remote.local",
+        "icon_name": "computer-laptop",
+        "chassis": "laptop",
+        "machine_id": "38b0031a48923caa79849681ff91c76e",
+        "boot_id": "ebf40e6b1c06428e33b4dd80a908c1e6",
+        "operating_system": "Fedora Linux 40 (Workstation Edition)",
+        "cpe_os_name": "cpe:/o:fedoraproject:fedora:40",
+        "os_support_end": "Tue 2025-05-13",
+        "os_support_remaining": "10month 2w 2d",
+        "kernel": "Linux 6.9.5-200.fc40.x86_64",
+        "architecture": "x86-64",
+        "hardware_vendor": "Lenovo",
+        "hardware_model": "ThinkPad T14 Gen 3",
+        "firmware_version": "N3MET19W (1.18 )",
+        "firmware_date": "Wed 2024-03-20",
+        "firmware_age": "3month 6d"
+    }
+}

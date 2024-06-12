@@ -28,6 +28,7 @@
     - user_data
     - redhat_packages
     - file_contents
+    - hostnamectl
     - jboss_eap
     - jboss_eap5
     - jboss_fuse
