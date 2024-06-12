@@ -15,7 +15,6 @@ requires = ["poetry-core"]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-ansible = ">=9,<10"
 django = "^4.2.7"
 django-filter = ">=22.1"
 djangorestframework = "^3.14"
@@ -36,6 +35,7 @@ celery = {extras = ["redis"], version = "^5.3.0"}
 more-itertools = "^9.1.0"
 django-cors-headers = "^4.3.1"
 django-axes = "^6.3.0"
+ansible-core = "^2.17.0"
 
 [tool.poetry.group.dev.dependencies]
 pip = "23.3.1"  # see https://github.com/quipucords/quipucords/pull/2559

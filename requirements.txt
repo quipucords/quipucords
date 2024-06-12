@@ -1,7 +1,6 @@
 amqp==5.2.0 ; python_version >= "3.11" and python_version < "3.13"
-ansible-core==2.16.7 ; python_version >= "3.11" and python_version < "3.13"
+ansible-core==2.17.0 ; python_version >= "3.11" and python_version < "3.13"
 ansible-runner==2.4.0 ; python_version >= "3.11" and python_version < "3.13"
-ansible==9.6.0 ; python_version >= "3.11" and python_version < "3.13"
 asgiref==3.8.1 ; python_version >= "3.11" and python_version < "3.13"
 async-timeout==4.0.3 ; python_version >= "3.11" and python_full_version < "3.11.3"
 bcrypt==4.1.3 ; python_version >= "3.11" and python_version < "3.13"
