@@ -4,9 +4,8 @@ import pytest
 
 from api.models import Credential, ScanTask, Source
 from constants import DataSources
-from scanner.satellite.api import SATELLITE_VERSION_5, SATELLITE_VERSION_6
+from scanner.satellite.api import SATELLITE_VERSION_6
 from scanner.satellite.factory import create
-from scanner.satellite.five import SatelliteFive
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
 from tests.scanner.test_util import create_scan_job
 
@@ -43,14 +42,6 @@ class TestSatelliteFactory:
         api_version = 1
         api = create(satellite_version, api_version, self.scan_job, self.scan_task)
         assert api is None
-
-    @pytest.mark.django_db
-    def test_create_sat5(self):
-        """Test the method to create a Sat 5 interface."""
-        satellite_version = SATELLITE_VERSION_5
-        api_version = 1
-        api = create(satellite_version, api_version, self.scan_job, self.scan_task)
-        assert api.__class__ == SatelliteFive
 
     @pytest.mark.django_db
     def test_create_sat6_v1(self):

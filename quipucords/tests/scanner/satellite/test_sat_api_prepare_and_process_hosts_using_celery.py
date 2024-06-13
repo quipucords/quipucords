@@ -80,7 +80,7 @@ def test__prepare_and_process_hosts_using_celery(
     """Test SatelliteInterface._prepare_and_process_hosts Celery task interaction.
 
     This test uses the SatelliteSixV2 implementation of SatelliteInterface, but the same
-    logic should apply for SatelliteSixV1 and SatelliteFive because the code relevant to
+    logic should also apply to SatelliteSixV1 because the code relevant to
     this test's behavior lives in the parent SatelliteInterface class.
 
     We use the celery_worker fixture here to embed a live worker because we are

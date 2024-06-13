@@ -1,6 +1,5 @@
 """Test the satellite utils."""
 
-import xmlrpc.client
 from unittest.mock import ANY, patch
 
 import pytest
@@ -9,28 +8,20 @@ import requests_mock
 from api.models import Credential, ScanTask, Source
 from constants import DataSources
 from scanner.satellite.api import (
-    SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
     SatelliteAuthError,
     SatelliteError,
 )
 from scanner.satellite.utils import (
-    _status5,
     construct_url,
     data_map,
     execute_request,
     get_connect_data,
     get_credential,
-    get_sat5_client,
     status,
     validate_task_stats,
 )
 from tests.scanner.test_util import create_scan_job
-
-
-def mock_xml_fault(param1, param2):
-    """Mock method to throw connection error."""
-    raise xmlrpc.client.Fault(faultCode=500, faultString="fault")
 
 
 class TestSatelliteUtils:
@@ -101,42 +92,17 @@ class TestSatelliteUtils:
         return_value=(200, SATELLITE_VERSION_6, SATELLITE_VERSION_6),
     )
     @pytest.mark.django_db
-    def test_status_sat6(self, mock_status5):
+    def test_status_sat6(self, mock_status6):
         """Test a patched status request to Satellite 6 server."""
         status_code, api_version, satellite_version = status(self.scan_task)
         assert status_code == 200
         assert api_version == SATELLITE_VERSION_6
         assert satellite_version == SATELLITE_VERSION_6
-        mock_status5.assert_called_once_with(ANY)
+        mock_status6.assert_called_once_with(ANY)
 
     @pytest.mark.django_db
-    @patch("xmlrpc.client.ServerProxy")
-    def test_status5(self, mock_serverproxy):
-        """Test a successful status request to Satellite 5 server."""
-        client = mock_serverproxy.return_value
-        client.auth.login.return_value = "key"
-        client.auth.logout.return_value = "key"
-        status_code, api_version, satellite_version = _status5(self.scan_task)
-        assert status_code == 200
-        assert api_version == SATELLITE_VERSION_5
-        assert satellite_version == SATELLITE_VERSION_5
-
-    @pytest.mark.django_db
-    @patch("xmlrpc.client.ServerProxy")
-    def test_status5_xmlfault(self, mock_serverproxy):
-        """Test a successful status request to Satellite 5 server."""
-        client = mock_serverproxy.return_value
-        client.auth.login.side_effect = mock_xml_fault
-        with pytest.raises(SatelliteError):
-            _status5(self.scan_task)
-            mock_serverproxy.auth.login.assert_called_once_with(ANY, ANY)
-
-    @pytest.mark.django_db
-    @patch("xmlrpc.client.ServerProxy")
-    def test_status(self, mock_serverproxy):
+    def test_status(self):
         """Test a successful status request to Satellite server."""
-        client = mock_serverproxy.return_value
-        client.auth.login.side_effect = mock_xml_fault
         with requests_mock.Mocker() as mocker:
             status_url = "https://{sat_host}:{port}/api/status"
             url = construct_url(status_url, "1.2.3.4")
@@ -148,11 +114,8 @@ class TestSatelliteUtils:
             assert satellite_version == SATELLITE_VERSION_6
 
     @pytest.mark.django_db
-    @patch("xmlrpc.client.ServerProxy")
-    def test_status_error(self, mock_serverproxy):
+    def test_status_error(self):
         """Test a error status request to Satellite server."""
-        client = mock_serverproxy.return_value
-        client.auth.login.side_effect = mock_xml_fault
         with requests_mock.Mocker() as mocker:
             status_url = "https://{sat_host}:{port}/api/status"
             url = construct_url(status_url, "1.2.3.4")
@@ -160,7 +123,6 @@ class TestSatelliteUtils:
             mocker.get(url, status_code=401, json=jsonresult)
             with pytest.raises(SatelliteAuthError):
                 status(self.scan_task)
-                mock_serverproxy.auth.login.assert_called_once_with(ANY, ANY)
 
     @pytest.mark.django_db
     def test_data_map(self):
@@ -170,14 +132,6 @@ class TestSatelliteUtils:
         expected = {"id": "100", "color": "blue"}
         mapped = data_map(map_dict, data)
         assert mapped == expected
-
-    @pytest.mark.django_db
-    def test_get_sat5_client(self):
-        """Test the sat5 client helper."""
-        client, user, password = get_sat5_client(self.scan_task)
-        assert client is not None
-        assert user == "username"
-        assert password == "password"
 
     @pytest.mark.django_db
     def test_validate_task_stats(self):

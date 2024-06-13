@@ -1,8 +1,6 @@
 """Utilities used for Satellite operations."""
 
 import logging
-import ssl
-import xmlrpc.client
 
 import requests
 from django.conf import settings
@@ -10,7 +8,6 @@ from rest_framework import status as codes
 
 from api.vault import decrypt_data_as_unicode
 from scanner.satellite.api import (
-    SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
     SatelliteAuthError,
     SatelliteError,
@@ -43,42 +40,6 @@ def get_connect_data(scan_task):
     host = scan_task.source.get_hosts()[0]
     port = scan_task.source.port
     return (host, port, user, password)
-
-
-def get_sat5_client(scan_task, options=None):
-    """Create xmlrpc client and credential for Satellite 5.
-
-    :param scan_task: The scan tasks
-    :param options: A dictionary containing the values for ssl_cert_verify,
-        host, port, user, and password.
-    :returns: A tuple of (client, user, password)
-    """
-    if options:
-        ssl_verify = options.get("ssl_cert_verify")
-        host = options.get("host")
-        port = options.get("port")
-        user = options.get("user")
-        password = options.get("password")
-    else:
-        ssl_verify = scan_task.source.ssl_cert_verify
-        if ssl_verify is None:
-            ssl_verify = True
-        host, port, user, password = get_connect_data(scan_task)
-
-    ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_SSLv23)
-    if ssl_verify is False:
-        ssl_context.verify_mode = ssl.CERT_NONE
-
-    rpc_url_template = "https://{sat_host}:{port}/rpc/api"
-    rpc_url = construct_url(rpc_url_template, sat_host=host, port=port)
-    client = xmlrpc.client.ServerProxy(
-        uri=rpc_url,
-        context=ssl_context,
-        use_builtin_types=True,
-        allow_none=True,
-        use_datetime=True,
-    )
-    return (client, user, password)
 
 
 def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
@@ -149,41 +110,7 @@ def status(scan_task):
             f' "{error}". Attempting Satellite 5.'
         )
         scan_task.log_message(message)
-    try:
-        return _status5(scan_task)
-    except SatelliteError as error:
-        message = f'Satellite 5 status check failed with error: "{error}".'
-        scan_task.log_message(message, log_level=logging.ERROR)
-    except xmlrpc.client.ProtocolError:
-        message = "Satellite 5 status check endpoint not found. "
-        scan_task.log_message(message)
-
     return None, None, None
-
-
-def _status5(scan_task):
-    """Check Satellite status to get api_version and connectivity.
-
-    :param scan_task: The scan task
-    :returns: tuple (status_code, api_version or None)
-    """
-    client, user, password = get_sat5_client(scan_task)
-    try:
-        key = client.auth.login(user, password)
-        client.auth.logout(key)
-    except xmlrpc.client.Fault as xml_error:
-        invalid_auth = "Either the password or username is incorrect."
-        if invalid_auth in str(xml_error):
-            raise SatelliteAuthError(str(xml_error)) from xml_error
-        raise SatelliteError(str(xml_error)) from xml_error
-    except xmlrpc.client.ProtocolError as protocol_error:
-        if protocol_error.errcode == codes.HTTP_404_NOT_FOUND:
-            raise protocol_error
-        raise SatelliteError(str(protocol_error)) from protocol_error
-
-    api_version = SATELLITE_VERSION_5
-    status_code = codes.HTTP_200_OK
-    return (status_code, api_version, SATELLITE_VERSION_5)
 
 
 def _status6(scan_task):

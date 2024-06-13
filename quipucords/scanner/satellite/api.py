@@ -27,7 +27,6 @@ from scanner.satellite import utils
 
 logger = logging.getLogger(__name__)
 
-SATELLITE_VERSION_5 = "5"
 SATELLITE_VERSION_6 = "6"
 
 
