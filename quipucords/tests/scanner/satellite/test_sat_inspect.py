@@ -9,7 +9,6 @@ from requests import exceptions
 from api.models import Credential, ScanJob, ScanTask, Source
 from constants import DataSources
 from scanner.satellite.api import (
-    SATELLITE_VERSION_5,
     SATELLITE_VERSION_6,
     SatelliteAuthError,
     SatelliteError,
@@ -85,19 +84,6 @@ class TestInspectTaskRunner:
         task = InspectTaskRunner(scan_job, inspect_task)
         with patch(
             "scanner.satellite.runner.utils.status", return_value=(None, None, None)
-        ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
-            mock_sat_status.assert_called_once_with(ANY)
-            assert status[1] == ScanTask.FAILED
-
-    @pytest.mark.django_db
-    def test_run_sat5_bad_status(self):
-        """Test the running inspect task for Satellite 5."""
-        scan_job, inspect_task = self.create_scan_job()
-        task = InspectTaskRunner(scan_job, inspect_task)
-        with patch(
-            "scanner.satellite.runner.utils.status",
-            return_value=(401, None, SATELLITE_VERSION_5),
         ) as mock_sat_status:
             status = task.run(Value("i", ScanJob.JOB_RUN))
             mock_sat_status.assert_called_once_with(ANY)
