@@ -144,7 +144,7 @@
   # Ver 5.x.x has a jws5-tomcat.service unit installed.
   # Only provides major version (5).
 - name: find JWS version through systemctl
-  raw: export LANG=C LC_ALL=C; systemctl status 'jws*-tomcat.service' 2>/dev/null | grep "Apache Tomcat Web" | grep -o 'jws[0-9]\+'
+  raw: export LANG=C LC_ALL=C TERM=dumb; systemctl status 'jws*-tomcat.service' 2>/dev/null | grep "Apache Tomcat Web" | grep -o 'jws[0-9]\+'
   register: internal_jws_version_5_systemctl
   ignore_errors: yes
   when: 'internal_have_systemctl and jboss_ws'
