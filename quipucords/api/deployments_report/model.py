@@ -66,22 +66,23 @@ class DeploymentsReport(BaseModel):
         file_path = Path(self.cached_fingerprints_file_path).absolute()
         if file_path.parent != cached_files_path():
             # Check to protect against potentially malicious filesystem access.
-            logger.error(
-                "Unsupported parent path for DeploymentsReport %s file: %s",
-                self.id,
-                file_path,
+            message = (
+                "Unsupported parent path for DeploymentsReport "
+                f"{self.id} cached_fingerprints file: {file_path}"
             )
-            return None
+            logger.error(message)
+            raise PermissionError(message)
         try:
             with file_path.open("r") as f:
                 return json.load(f)
-        except FileNotFoundError:
-            logger.warning(
-                "Cached fingerprints file for DeploymentsReport %s not found at %s",
+        except FileNotFoundError as e:
+            logger.exception(e)
+            logger.error(
+                "Cached fingerprints file for DeploymentsReport %s not found at '%s'",
                 self.id,
                 file_path,
             )
-            return None
+            raise
 
     @cached_fingerprints.setter
     def cached_fingerprints(self, data):
@@ -103,12 +104,12 @@ class DeploymentsReport(BaseModel):
         file_path = Path(self.cached_csv_file_path).absolute()
         if file_path.parent != cached_files_path():
             # Check to protect against potentially malicious filesystem access.
-            logger.error(
-                "Unsupported parent path for DeploymentsReport %s file: %s",
-                self.id,
-                file_path,
+            message = (
+                "Unsupported parent path for DeploymentsReport "
+                f"{self.id} cached_csv file: {file_path}"
             )
-            return None
+            logger.error(message)
+            raise PermissionError(message)
         try:
             with file_path.open("r", newline="") as f:
                 # I hate `newline=''` but we need this for compatibility
@@ -116,13 +117,14 @@ class DeploymentsReport(BaseModel):
                 # python wants to strip the extra `\r` from `\r\n`.
                 # See also: https://docs.python.org/3.12/library/functions.html#open
                 return f.read()
-        except FileNotFoundError:
-            logger.warning(
-                "Cached CSV file for DeploymentsReport %s not found at %s",
+        except FileNotFoundError as e:
+            logger.exception(e)
+            logger.error(
+                "Cached CSV file for DeploymentsReport %s not found at '%s'",
                 self.id,
                 self.cached_csv_file_path,
             )
-            return None
+            raise
 
     @cached_csv.setter
     def cached_csv(self, data):

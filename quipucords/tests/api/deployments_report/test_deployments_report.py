@@ -242,7 +242,8 @@ def test_get_deployments_report_cached_csv_unsupported_path(faker, caplog):
         f"Unsupported parent path for DeploymentsReport {deployments_report.id}"
     )
     caplog.set_level(logging.ERROR)
-    assert deployments_report.cached_csv is None
+    with pytest.raises(PermissionError):
+        unexpected_data = deployments_report.cached_csv  # noqa: F841
     assert expected_error in caplog.messages[-1]
 
 
@@ -261,7 +262,8 @@ def test_get_deployments_report_cached_fingerprints_unsupported_path(faker, capl
         f"Unsupported parent path for DeploymentsReport {deployments_report.id}"
     )
     caplog.set_level(logging.ERROR)
-    assert deployments_report.cached_fingerprints is None
+    with pytest.raises(PermissionError):
+        unexpected_data = deployments_report.cached_fingerprints  # noqa: F841
     assert expected_error in caplog.messages[-1]
 
 
@@ -270,12 +272,14 @@ def test_get_deployments_report_cached_csv_not_found(faker, caplog):
     """Test getting cached_csv when its path does not find a file."""
     not_found_path = f"{cached_files_path()}/{faker.slug()}.csv"
     deployments_report = DeploymentReportFactory(cached_csv_file_path=not_found_path)
-    expected_warning = (
-        f"Cached CSV file for DeploymentsReport {deployments_report.id} not found"
+    expected_error = (
+        f"Cached CSV file for DeploymentsReport {deployments_report.id} "
+        f"not found at '{not_found_path}'"
     )
-    caplog.set_level(logging.WARNING)
-    assert deployments_report.cached_csv is None
-    assert expected_warning in caplog.messages[-1]
+    caplog.set_level(logging.ERROR)
+    with pytest.raises(FileNotFoundError):
+        unexpected_data = deployments_report.cached_csv  # noqa: F841
+    assert expected_error in caplog.messages[-1]
 
 
 @pytest.mark.django_db
@@ -289,13 +293,14 @@ def test_get_deployments_report_cached_fingerprints_not_found(faker, caplog):
         cached_fingerprints_file_path=not_found_path,
         _set_cached_fingerprints__skip=True,
     )
-    expected_warning = (
+    expected_error = (
         f"Cached fingerprints file for DeploymentsReport {deployments_report.id} "
-        "not found"
+        f"not found at '{not_found_path}'"
     )
-    caplog.set_level(logging.WARNING)
-    assert deployments_report.cached_fingerprints is None
-    assert expected_warning in caplog.messages[-1]
+    caplog.set_level(logging.ERROR)
+    with pytest.raises(FileNotFoundError):
+        unexpected_data = deployments_report.cached_fingerprints  # noqa: F841
+    assert expected_error in caplog.messages[-1]
 
 
 @pytest.mark.django_db
