@@ -17,6 +17,7 @@ services:
       REDIS_HOST: qpc-redis
       REDIS_PASSWORD: qpc
       QPC_ENABLE_CELERY_SCAN_MANAGER: 1
+      QUIPUCORDS_DATA_DIR: /var
     ports:
       - "9999:8000"
     volumes:
@@ -24,6 +25,7 @@ services:
       - .:/app:z
       - ./deploy:/deploy:ro
       - ./var/sshkeys/:/sshkeys:ro
+      - ./var:/var:z
     depends_on:
       - qpc-db
       - qpc-redis
@@ -74,6 +76,7 @@ services:
       - .:/app:ro
       - ./deploy:/deploy:ro
       - ./var/sshkeys/:/sshkeys:ro
+      - ./var:/var:z
     environment:
       ANSIBLE_LOG_LEVEL: 3
       NETWORK_CONNECT_JOB_TIMEOUT: 6
@@ -90,6 +93,7 @@ services:
       REDIS_HOST: qpc-redis
       REDIS_PASSWORD: qpc
       QPC_ENABLE_CELERY_SCAN_MANAGER: 1
+      QUIPUCORDS_DATA_DIR: /var
 
   scan-target:
     build:

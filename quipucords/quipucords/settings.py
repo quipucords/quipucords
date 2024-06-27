@@ -28,7 +28,7 @@ env = environ.Env()
 # BASE_DIR is ./quipucords/quipucords
 BASE_DIR = Path(__file__).absolute().parent.parent
 # DEFAULT_DATA_DIR is ./var, which is on .gitignore
-DEFAULT_DATA_DIR = BASE_DIR.parent / "var"
+DEFAULT_DATA_DIR = Path(env.str("QUIPUCORDS_DATA_DIR", BASE_DIR.parent / "var"))
 
 PRODUCTION = env.bool("PRODUCTION", False)
 
