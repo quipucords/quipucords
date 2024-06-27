@@ -3,7 +3,7 @@
 import unittest
 
 from scanner.network.processing import eap, process
-from scanner.network.processing.util_for_test import (
+from tests.scanner.network.processing.util_for_test import (
     ansible_item,
     ansible_result,
     ansible_results,

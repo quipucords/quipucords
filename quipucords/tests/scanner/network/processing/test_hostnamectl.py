@@ -8,7 +8,7 @@ from django.conf import settings
 
 from scanner.network.processing import hostnamectl
 from scanner.network.processing.process import ProcessedResult
-from scanner.network.processing.util_for_test import ansible_result
+from tests.scanner.network.processing.util_for_test import ansible_result
 
 hostnamectl_files_dir = settings.TESTDATA_DIR / "hostnamectl-status"
 

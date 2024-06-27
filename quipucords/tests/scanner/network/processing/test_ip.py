@@ -1,7 +1,7 @@
 """Unit tests for process `ip address show` facts."""
 
 from scanner.network.processing import ip
-from scanner.network.processing.util_for_test import ansible_result
+from tests.scanner.network.processing.util_for_test import ansible_result
 
 IP_LOOPBACK_OUTPUT_TEMPLATE = """\
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000

@@ -3,7 +3,10 @@
 import unittest
 
 from scanner.network.processing import karaf, process
-from scanner.network.processing.util_for_test import ansible_result, ansible_results
+from tests.scanner.network.processing.util_for_test import (
+    ansible_result,
+    ansible_results,
+)
 
 
 class TestProcessKarafRunningProcesses(unittest.TestCase):

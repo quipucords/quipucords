@@ -3,7 +3,7 @@
 import unittest
 
 from scanner.network.processing import cloud_provider
-from scanner.network.processing.util_for_test import ansible_result
+from tests.scanner.network.processing.util_for_test import ansible_result
 
 
 class TestProcessDmiChassisAssetTag(unittest.TestCase):
