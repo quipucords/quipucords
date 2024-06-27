@@ -3,7 +3,7 @@
 import unittest
 
 from scanner.network.processing import fuse
-from scanner.network.processing.util_for_test import ansible_result
+from tests.scanner.network.processing.util_for_test import ansible_result
 
 
 class TestProcessFindJbossActiveMQJar(unittest.TestCase):

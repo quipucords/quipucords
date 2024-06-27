@@ -4,7 +4,10 @@ from django.test import TestCase
 
 from api.models import Credential, Scan, ScanJob, ScanTask, Source
 from scanner.network.processing import process
-from scanner.network.processing.util_for_test import ansible_result, ansible_results
+from tests.scanner.network.processing.util_for_test import (
+    ansible_result,
+    ansible_results,
+)
 
 HOST = "host"
 

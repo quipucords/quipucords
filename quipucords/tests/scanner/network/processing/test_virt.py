@@ -3,7 +3,7 @@
 import unittest
 
 from scanner.network.processing import process, virt
-from scanner.network.processing.util_for_test import ansible_result
+from tests.scanner.network.processing.util_for_test import ansible_result
 
 
 class TestProcessVirtXenPrivcmdFound(unittest.TestCase):
