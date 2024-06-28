@@ -9,6 +9,7 @@ on the types and contents of the collected facts and system fingerprints.
 
 import csv
 import logging
+from pathlib import Path
 
 import pytest
 from rest_framework import status
@@ -352,3 +353,57 @@ def test_set_deployments_report_set_cached_fingerprints_file_already_exists(
     deployments_report.cached_fingerprints = updated_dict_content
     assert deployments_report.cached_fingerprints == updated_dict_content
     assert expected_warning in caplog.messages[-1]
+
+
+@pytest.fixture
+def deployments_report_with_cached_files(faker):
+    """Return a new DeploymentsReport with cached files."""
+    deployments_report: DeploymentsReport = DeploymentReportFactory()
+    # DeploymentsReport from the factory has cached_fingerprints but not cached_csv,
+    # and we don't want to add that functionality to the factory because we would
+    # rather just entirely drop the CSV data. (Well, a boy can dream...)
+    deployments_report.cached_csv = f"{faker.slug()},{faker.slug()}"
+    deployments_report.save()
+    deployments_report.refresh_from_db()
+    return deployments_report
+
+
+@pytest.mark.django_db
+def test_delete_deployments_report_also_deletes_cached_files(
+    deployments_report_with_cached_files,
+):
+    """Test DeploymentsReport.delete() also deletes its cached files."""
+    cached_fingerprints_file_path = Path(
+        deployments_report_with_cached_files.cached_fingerprints_file_path
+    )
+    cached_csv_file_path = Path(
+        deployments_report_with_cached_files.cached_csv_file_path
+    )
+    assert cached_fingerprints_file_path.exists()
+    assert cached_csv_file_path.exists()
+    deployments_report_with_cached_files.delete()
+    assert not cached_fingerprints_file_path.exists()
+    assert not cached_csv_file_path.exists()
+
+
+@pytest.mark.django_db
+def test_delete_deployments_report_ignores_missing_files(
+    deployments_report_with_cached_files,
+):
+    """Test DeploymentsReport.delete() succeeds even if its cached files are missing."""
+    cached_fingerprints_file_path = Path(
+        deployments_report_with_cached_files.cached_fingerprints_file_path
+    )
+    cached_csv_file_path = Path(
+        deployments_report_with_cached_files.cached_csv_file_path
+    )
+    assert cached_fingerprints_file_path.exists()
+    assert cached_csv_file_path.exists()
+
+    # Delete the files independently before deleting the DeploymentsReport
+    # to ensure it gracefully ignores missing files upon deletion.
+    cached_fingerprints_file_path.unlink()
+    cached_csv_file_path.unlink()
+
+    deployments_report_with_cached_files.delete()
+    # Nothing left to assert; just be happy it raised no exceptions!
