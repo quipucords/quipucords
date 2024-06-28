@@ -17,6 +17,21 @@ VCENTER_RANDOM_CLUSTER_NAMES = [
     _faker.hostname() for _ in range(_faker.pyint(min_value=5, max_value=10))
 ]
 
+# These options were documented in https://issues.redhat.com/browse/DISCOVERY-428
+# as found from the latest `hostnamectl` man page.
+HOSTNAMECTL_CHASSIS_TYPES = [
+    "desktop",
+    "laptop",
+    "convertible",
+    "server",
+    "tablet",
+    "handset",
+    "watch",
+    "embedded",
+    "vm",
+    "container",
+]
+
 
 def raw_facts_generator(source_type, n, as_native_types=True):
     """Generate 'n' raw facts for a given source type."""
@@ -84,6 +99,7 @@ def _network_raw_facts():
         "dmi_system_uuid": _faker.uuid4(),
         "etc_machine_id": _faker.uuid4(),
         "etc_release_release": fake_rhel(),
+        "hostnamectl": fake_hostnamectl(),
         "ifconfig_ip_addresses": [_faker.ipv4()],
         "ifconfig_mac_addresses": [_faker.mac_address()],
         "insights_client_id": _faker.uuid4(),
@@ -120,6 +136,20 @@ def _network_raw_facts():
     # use integer division as a float will be invalid in fingerprint validation
     facts["cpu_core_per_socket"] = facts["cpu_core_count"] // facts["cpu_socket_count"]
     return facts
+
+
+def fake_hostnamectl() -> dict:
+    """Return an object representing a minimal hostnamectl fact."""
+    return {
+        "value": {
+            # Many other interesting values are typically returned by hostnamectl,
+            # such as "architecture", "virtualization", and "operating_system",
+            # but at the time of this writing, we only care about "chassis".
+            "chassis": _faker.random_element(HOSTNAMECTL_CHASSIS_TYPES),
+        },
+        "error_msg": None,
+        "return_code": 0,
+    }
 
 
 def _vcenter_raw_facts():

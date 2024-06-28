@@ -82,9 +82,11 @@ NAME_RELATED_FACTS = ["name", "vm_dns_name", "virtual_host_name"]
 COMBINED_KEY = "combined_fingerprints"
 
 
-def fingerprint_network_infrastructure_type(fact):
+def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
     """Determine if running on VM or bare metal."""
     virt_what_type = fact.get("virt_what_type")
+    hostnamectl_chassis = deepget(fact, "hostnamectl__value__chassis")
+
     if virt_what_type == "bare metal":
         raw_fact_key = "virt_what_type"
         fact_value = SystemFingerprint.BARE_METAL
@@ -96,6 +98,14 @@ def fingerprint_network_infrastructure_type(fact):
         # So, we assume it's virtualized. See also: DISCOVERY-243.
         raw_fact_key = "subman_virt_is_guest"
         fact_value = SystemFingerprint.VIRTUALIZED
+    elif hostnamectl_chassis in ["vm", "container"]:
+        # If we could not find relevant details from virt_what, we fall back to
+        # checking hostnamtctl output. See also: DISCOVERY-428.
+        raw_fact_key = "hostnamectl"
+        fact_value = SystemFingerprint.VIRTUALIZED
+    elif hostnamectl_chassis:
+        raw_fact_key = "hostnamectl"
+        fact_value = SystemFingerprint.BARE_METAL
     elif virt_what_type:
         # virt_what_type is not "bare metal" or None, but we have no other details.
         raw_fact_key = "virt_what_type"
