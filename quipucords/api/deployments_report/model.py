@@ -8,6 +8,8 @@ from pathlib import Path
 
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DEPLOYMENT
 from api.common.models import BaseModel
@@ -137,6 +139,16 @@ class DeploymentsReport(BaseModel):
         with file_path.open("w") as f:
             f.write(data)
         self.cached_csv_file_path = file_path
+
+
+@receiver(post_delete, sender=DeploymentsReport)
+def deployments_report_post_delete_callback(*args, **kwargs):
+    """Delete the cached files upon deleting a deployments report."""
+    instance: DeploymentsReport = kwargs["instance"]
+    if instance.cached_csv_file_path:
+        Path(instance.cached_csv_file_path).unlink(missing_ok=True)
+    if instance.cached_fingerprints_file_path:
+        Path(instance.cached_fingerprints_file_path).unlink(missing_ok=True)
 
 
 class SystemFingerprint(BaseModel):
