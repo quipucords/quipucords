@@ -32,6 +32,11 @@ HOSTNAMECTL_CHASSIS_TYPES = [
     "container",
 ]
 
+# These are only some of the possible virt-what outputs.
+# Found by just looking at virt-what script's echo commands.
+# See: less $(command -v virt-what)
+VIRT_WHAT_TYPES = ["bare metal", "kvm", "qemu", "podman", "redhat", "xen", "hyperv"]
+
 
 def raw_facts_generator(source_type, n, as_native_types=True):
     """Generate 'n' raw facts for a given source type."""
@@ -109,6 +114,7 @@ def _network_raw_facts():
         "system_purpose_json": None,
         "uname_processor": _faker.random_element(["x86_64", "ARM"]),
         "virt_type": _faker.random_element(["vmware", "xen", "kvm", None]),
+        "virt_what": fake_virt_what(),
     }
 
     # Some facts that help populate fingerprints for later reporting.
@@ -129,13 +135,22 @@ def _network_raw_facts():
         }
     )
 
-    # some facts that depend on others for consistency. not 100% accurate but good
-    # enough for testing
-    facts["virt_virt"] = "virt-guest" if facts["virt_type"] else "virt-host"
-    facts["virt_what_type"] = facts["virt_type"]
     # use integer division as a float will be invalid in fingerprint validation
     facts["cpu_core_per_socket"] = facts["cpu_core_count"] // facts["cpu_socket_count"]
     return facts
+
+
+def fake_virt_what() -> dict:
+    """Return an object representing a minimal virt_what fact."""
+    values = [
+        _faker.random_element(VIRT_WHAT_TYPES)
+        for _ in range(_faker.pyint(min_value=0, max_value=2))
+    ]
+    return {
+        "value": values,
+        "error_msg": None,
+        "return_code": 0 if _faker.pybool() else 1,
+    }
 
 
 def fake_hostnamectl() -> dict:

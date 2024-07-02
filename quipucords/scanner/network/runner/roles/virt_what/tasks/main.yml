@@ -4,33 +4,13 @@
   set_fact:
     internal_host_started_processing_role: "virt_what"
 
-- name: set virt-what.type fact if virt-what not found
-  set_fact:
-    virt_what_type: ""
-  ignore_errors: yes
-  when: 'not internal_have_virt_what'
-
 - name: execute virt-what
-  raw: export LANG=C LC_ALL=C; virt-what;echo $?
+  raw: export LANG=C LC_ALL=C; virt-what
   register: internal_virt_what_output
   ignore_errors: yes
   become: yes
   when: 'user_has_sudo and internal_have_virt_what'
 
-- name: extract virt-what error code
+- name: set virt-what fact
   set_fact:
-    internal_virt_what_error: '{{ internal_virt_what_output["stdout_lines"][-1] | int }}'
-  ignore_errors: yes
-  when: 'user_has_sudo and internal_have_virt_what and "stdout_lines" in internal_virt_what_output'
-
-- name: set virt-what.type fact to bare metal if virt-what errored
-  set_fact:
-    virt_what_type: "bare metal"
-  ignore_errors: yes
-  when: 'user_has_sudo and internal_have_virt_what and (not internal_virt_what_error|int  == 0)'
-
-- name: set virt-what.type fact if virt-what ran successfully
-  set_fact:
-    virt_what_type: '{{ ";".join(internal_virt_what_output["stdout_lines"][:-1]) }}'
-  ignore_errors: yes
-  when: 'user_has_sudo and internal_have_virt_what and (internal_virt_what_error|int == 0) and "stdout_lines" in internal_virt_what_output'
+    virt_what: "{{ internal_virt_what_output }}"

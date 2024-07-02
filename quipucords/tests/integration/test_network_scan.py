@@ -188,7 +188,6 @@ def expected_network_scan_facts():
             "internal_sys_manufacturer",
             "internal_system_user_count",
             "internal_user_login_history",
-            "internal_virt_what_error",
             "internal_xen_guest",
             "internal_xen_privcmd_found",
         }

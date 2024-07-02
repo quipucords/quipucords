@@ -84,14 +84,15 @@ COMBINED_KEY = "combined_fingerprints"
 
 def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
     """Determine if running on VM or bare metal."""
-    virt_what_type = fact.get("virt_what_type")
-    hostnamectl_chassis = deepget(fact, "hostnamectl__value__chassis")
+    virt_what: list[str] | None = deepget(fact, "virt_what__value")
+    hostnamectl_chassis: str | None = deepget(fact, "hostnamectl__value__chassis")
 
-    if virt_what_type == "bare metal":
-        raw_fact_key = "virt_what_type"
+    if virt_what and "bare metal" in virt_what:
+        raw_fact_key = "virt_what"
         fact_value = SystemFingerprint.BARE_METAL
-    elif fact.get("virt_type"):
-        raw_fact_key = "virt_type"
+    elif virt_what:
+        # We assume *anything* other than "bare metal" means virtualized.
+        raw_fact_key = "virt_what"
         fact_value = SystemFingerprint.VIRTUALIZED
     elif fact.get("subman_virt_is_guest", False):
         # We don't know virt_type, but subscription-manager says it's a guest.
@@ -106,12 +107,8 @@ def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
     elif hostnamectl_chassis:
         raw_fact_key = "hostnamectl"
         fact_value = SystemFingerprint.BARE_METAL
-    elif virt_what_type:
-        # virt_what_type is not "bare metal" or None, but we have no other details.
-        raw_fact_key = "virt_what_type"
-        fact_value = SystemFingerprint.UNKNOWN
     else:
-        raw_fact_key = "virt_what_type/virt_type"
+        raw_fact_key = "virt_what"
         fact_value = SystemFingerprint.UNKNOWN
     return raw_fact_key, fact_value
 

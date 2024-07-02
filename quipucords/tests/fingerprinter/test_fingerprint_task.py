@@ -42,7 +42,7 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "date_machine_id": "date_machine_id",
     "date_yum_history": "date_yum_history",
     "etc_machine_id": "etc_machine_id",
-    "infrastructure_type": "virt_what_type/virt_type",
+    "infrastructure_type": "virt_what",
     "insights_client_id": "insights_client_id",
     "installed_products": "installed_products",
     "ip_addresses": "ifconfig_ip_addresses",
@@ -430,8 +430,11 @@ def _validate_network_result(fingerprint, fact):
     assert fact.get("date_filesystem_create") == fingerprint.get(
         "date_filesystem_create"
     )
-    assert "virtualized" == fingerprint.get("infrastructure_type")
-
+    assert fingerprint.get("infrastructure_type") in [
+        SystemFingerprint.BARE_METAL,
+        SystemFingerprint.VIRTUALIZED,
+        SystemFingerprint.UNKNOWN,
+    ]  # We don't know exactly which because of generated fact randomness.
     assert fact.get("virt_type") == fingerprint.get("virtualized_type")
     assert fact.get("uname_processor") == fingerprint.get("architecture")
     assert fact.get("redhat_packages_certs") == fingerprint.get("redhat_certs")
@@ -596,32 +599,65 @@ def test_process_network_source(
 @pytest.mark.parametrize(
     "facts, expected_raw_fact_key, expected_infrastructure_type",
     (
-        (
-            {"virt_what_type": "bare metal"},
-            "virt_what_type",
+        (  # virt_what "bare metal" trumps anything else
+            {
+                "virt_what": {"value": ["bare metal"]},  # physical
+                "subman_virt_is_guest": True,  # virtual
+                "hostnamectl": {"value": {"chassis": "vm"}},  # virtual
+            },
+            "virt_what",
             SystemFingerprint.BARE_METAL,
         ),
-        (
-            {"virt_type": "unspecified-magic"},
-            "virt_type",
+        (  # non-empty virt_what still trumps anything else
+            {
+                "virt_what": {"value": ["potato"]},  # "virtual" I guess
+                "subman_virt_is_guest": False,  # unknown
+                "hostnamectl": {"value": {"chassis": "desktop"}},  # physical
+            },
+            "virt_what",
             SystemFingerprint.VIRTUALIZED,
         ),
-        (
-            {"subman_virt_is_guest": True},
+        (  # prefer subman_virt_is_guest True over hostnamectl
+            {
+                "virt_what": None,  # unknown
+                "subman_virt_is_guest": True,  # virtual
+                "hostnamectl": {"value": {"chassis": "desktop"}},  # physical
+            },
             "subman_virt_is_guest",
             SystemFingerprint.VIRTUALIZED,
         ),
-        (
-            {"virt_what_type": "unspecified-magic"},
-            "virt_what_type",
+        (  # subman_virt_is_guest not-True is ignored, leaving hostnamectl
+            {
+                "subman_virt_is_guest": False,  # unknown
+                "hostnamectl": {"value": {"chassis": "vm"}},  # virtual
+            },
+            "hostnamectl",
+            SystemFingerprint.VIRTUALIZED,
+        ),
+        (  # mystery hostnamectl values are treated as physical
+            {
+                "hostnamectl": {"value": {"chassis": "potato"}},  # physical
+            },
+            "hostnamectl",
+            SystemFingerprint.BARE_METAL,
+        ),
+        (  # if all are missing or empty, infra is truly unknown
+            {
+                "virt_what": None,
+                "subman_virt_is_guest": None,
+                "hostnamectl": None,
+            },
+            "virt_what",
             SystemFingerprint.UNKNOWN,
         ),
-        (
-            {"virt_what_type": None},
-            "virt_what_type/virt_type",
+        (  # alternate inputs for unknown
+            {
+                "virt_what": {"value": []},
+                "hostnamectl": {"value": {"foo": "bar"}},  # ignore non-chassis values
+            },
+            "virt_what",
             SystemFingerprint.UNKNOWN,
         ),
-        ({}, "virt_what_type/virt_type", SystemFingerprint.UNKNOWN),
     ),
 )
 @pytest.mark.django_db
@@ -637,6 +673,8 @@ def test_process_network_source_infrastructure_type(
 
     This test is intended to test exhaustively many inputs that can lead to the various
     infrastructure_type fingerprint values that could indicate a virtualized guest.
+    This test effectively covers runner.fingerprint_network_infrastructure_type which
+    is invoked by _process_network_fact.
     """
     source = {
         "server_id": server_id,
