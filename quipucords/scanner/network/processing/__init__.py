@@ -19,5 +19,6 @@ from . import (
     system_purpose,
     user_data,
     virt,
+    virt_what,
     yum,
 )
