@@ -1,6 +1,7 @@
 """Describes the views associated with the API models."""
 
 import logging
+import warnings
 
 from django.db import transaction
 from django.db.models import Q
@@ -67,8 +68,9 @@ def jobs(request, scan_id=None):
     """Get the jobs of a scan."""
     # TODO: remove this view and adjust ScanJobViewSet to add any missing functionality
     # in v2 api
-    DeprecationWarning(
-        "api/v1/scans/<scan-id>/jobs/ will be replaced by api/v2/jobs/ views."
+    warnings.warn(
+        "api/v1/scans/<scan-id>/jobs/ will be replaced by api/v2/jobs/ views.",
+        DeprecationWarning,
     )
     if scan_id is not None:
         if not is_int(scan_id):
