@@ -83,7 +83,14 @@ COMBINED_KEY = "combined_fingerprints"
 
 
 def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
-    """Determine if running on VM or bare metal."""
+    """
+    Determine if running on VM or bare metal.
+
+    IMPORTANT DEVELOPER NOTE: This function's implementation is also largely duplicated
+    by infrastructure_type_normalizer which is intended to cover a *future* code path.
+
+    TODO FIXME: Remove duplicate code when we switch to the new normalizers.
+    """
     virt_what: list[str] | None = deepget(fact, "virt_what__value")
     hostnamectl_chassis: str | None = deepget(fact, "hostnamectl__value__chassis")
 

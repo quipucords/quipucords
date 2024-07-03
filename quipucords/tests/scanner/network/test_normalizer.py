@@ -2,12 +2,14 @@
 
 import pytest
 
+from api.deployments_report.model import SystemFingerprint
 from scanner.network.normalizer import (
     Normalizer,
     infrastructure_type_normalizer,
     ip_address_normalizer,
 )
 from tests.utils import raw_facts_generator
+from tests.utils.raw_facts_generator import fake_virt_what
 
 
 @pytest.fixture
@@ -16,6 +18,7 @@ def raw_facts():
     raw_facts_list = list(raw_facts_generator("network", 1))
     facts = raw_facts_list[0]
     facts["virt_type"] = "some-vendor"
+    facts["virt_what"] = fake_virt_what(["potato-computer"], 0)
     return facts
 
 
@@ -58,56 +61,78 @@ def test_normalizer(mocker, raw_facts, expected_normalized_facts):
 
 @pytest.mark.parametrize(
     "facts, expected_value, expected_raw_fact_keys",
-    [
-        (
+    (
+        (  # virt_what "bare metal" trumps anything else
             {
-                "virt_what_type": "bare metal",
-                "virt_type": "foo",
-                "subman_virt_is_guest": True,
+                "virt_what": {"value": ["bare metal"]},  # physical
+                "subman_virt_is_guest": True,  # virtual
+                "hostnamectl": {"value": {"chassis": "vm"}},  # virtual
             },
-            "physical",
-            ["virt_what_type"],
+            SystemFingerprint.BARE_METAL,
+            ["virt_what"],
         ),
-        (
-            {"virt_what_type": "bare metal"},
-            "physical",
-            ["virt_what_type"],
-        ),
-        (
-            {"virt_what_type": "something else"},
-            None,
-            None,
-        ),
-        (
+        (  # non-empty virt_what still trumps anything else
             {
-                "virt_type": "foo",
-                "subman_virt_is_guest": True,
+                "virt_what": {"value": ["potato"]},  # "virtual" I guess
+                "subman_virt_is_guest": False,  # unknown
+                "hostnamectl": {"value": {"chassis": "desktop"}},  # physical
             },
-            "virtualized",
-            ["virt_type"],
+            SystemFingerprint.VIRTUALIZED,
+            ["virt_what"],
         ),
-        (
-            {"virt_type": "foo"},
-            "virtualized",
-            ["virt_type"],
-        ),
-        (
+        (  # prefer subman_virt_is_guest True over hostnamectl
             {
-                "virt_type": "",
-                "subman_virt_is_guest": True,
+                "virt_what": None,  # unknown
+                "subman_virt_is_guest": True,  # virtual
+                "hostnamectl": {"value": {"chassis": "desktop"}},  # physical
             },
-            "virtualized",
+            SystemFingerprint.VIRTUALIZED,
             ["subman_virt_is_guest"],
         ),
-        (
-            {},
-            None,
-            None,
+        (  # subman_virt_is_guest not-True is ignored, leaving hostnamectl
+            {
+                "subman_virt_is_guest": False,  # unknown
+                "hostnamectl": {"value": {"chassis": "vm"}},  # virtual
+            },
+            SystemFingerprint.VIRTUALIZED,
+            ["hostnamectl"],
         ),
-    ],
+        (  # mystery hostnamectl values are treated as physical
+            {
+                "hostnamectl": {"value": {"chassis": "potato"}},  # physical
+            },
+            SystemFingerprint.BARE_METAL,
+            ["hostnamectl"],
+        ),
+        (  # if all are missing or empty, infra is truly unknown
+            {
+                "virt_what": None,
+                "subman_virt_is_guest": None,
+                "hostnamectl": None,
+            },
+            SystemFingerprint.UNKNOWN,
+            ["virt_what"],
+        ),
+        (  # alternate inputs for unknown
+            {
+                "virt_what": {"value": []},
+                "hostnamectl": {"value": {"foo": "bar"}},
+                # ignore non-chassis values
+            },
+            SystemFingerprint.UNKNOWN,
+            ["virt_what"],
+        ),
+    ),
 )
 def test_infrastructure_type_normalizer(facts, expected_value, expected_raw_fact_keys):
-    """Test infrastructure_type_normalizer."""
+    """
+    Test infrastructure_type_normalizer.
+
+    IMPORTANT DEVELOPER NOTE: This test's implementation largely duplicates the code
+    originally written in test_process_network_source_infrastructure_type.
+
+    TODO FIXME: Remove duplicate code when we switch to the new normalizers.
+    """
     norm_result = infrastructure_type_normalizer(**facts)
     assert norm_result.value == expected_value
     assert norm_result.raw_fact_keys == expected_raw_fact_keys

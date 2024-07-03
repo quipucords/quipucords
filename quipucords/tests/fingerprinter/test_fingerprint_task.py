@@ -675,6 +675,11 @@ def test_process_network_source_infrastructure_type(
     infrastructure_type fingerprint values that could indicate a virtualized guest.
     This test effectively covers runner.fingerprint_network_infrastructure_type which
     is invoked by _process_network_fact.
+
+    IMPORTANT DEVELOPER NOTE: This test's implementation is also largely duplicated by
+    test_infrastructure_type_normalizer which is intended to cover a *future* code path.
+
+    TODO FIXME: Remove duplicate code when we switch to the new normalizers.
     """
     source = {
         "server_id": server_id,
