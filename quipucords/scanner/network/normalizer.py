@@ -2,24 +2,53 @@
 
 import ipaddress
 
+from api.deployments_report.model import SystemFingerprint
 from constants import DataSources
 from fingerprinter import formatters
 from scanner.normalizer import BaseNormalizer, FactMapper, NormalizedResult, str_or_none
+from utils import deepget
 
 
 def infrastructure_type_normalizer(
-    *, virt_what_type=None, virt_type=None, subman_virt_is_guest=None
+    *, virt_what=None, hostnamectl=None, subman_virt_is_guest=None
 ):
-    """Normalize infrastructure type."""
-    if virt_what_type == "bare metal":
-        return NormalizedResult("physical", raw_fact_keys=["virt_what_type"])
-    elif virt_type:
-        return NormalizedResult("virtualized", raw_fact_keys=["virt_type"])
+    """
+    Normalize infrastructure type.
+
+    IMPORTANT DEVELOPER NOTE: This function's implementation largely duplicates the code
+    originally written in fingerprinter.runner.fingerprint_network_infrastructure_type,
+    but this code has never been tested in a true end-to-end integration test, and at
+    the time of this writing, we don't really know if this works as advertised.
+
+    TODO FIXME: Verify that this actually works when we switch to the new normalizers.
+    """
+    virt_what: list[str] | None = deepget(virt_what, "value")
+    hostnamectl_chassis: str | None = deepget(hostnamectl, "value__chassis")
+
+    if virt_what and "bare metal" in virt_what:
+        raw_fact_key = "virt_what"
+        fact_value = SystemFingerprint.BARE_METAL
+    elif virt_what:
+        # We assume *anything* other than "bare metal" means virtualized.
+        raw_fact_key = "virt_what"
+        fact_value = SystemFingerprint.VIRTUALIZED
     elif subman_virt_is_guest:
         # We don't know virt_type, but subscription-manager says it's a guest.
         # So, we assume it's virtualized. See also: DISCOVERY-243.
-        return NormalizedResult("virtualized", raw_fact_keys=["subman_virt_is_guest"])
-    return NormalizedResult(None, raw_fact_keys=None)
+        raw_fact_key = "subman_virt_is_guest"
+        fact_value = SystemFingerprint.VIRTUALIZED
+    elif hostnamectl_chassis in ["vm", "container"]:
+        # If we could not find relevant details from virt_what, we fall back to
+        # checking hostnamtctl output. See also: DISCOVERY-428.
+        raw_fact_key = "hostnamectl"
+        fact_value = SystemFingerprint.VIRTUALIZED
+    elif hostnamectl_chassis:
+        raw_fact_key = "hostnamectl"
+        fact_value = SystemFingerprint.BARE_METAL
+    else:
+        raw_fact_key = "virt_what"
+        fact_value = SystemFingerprint.UNKNOWN
+    return NormalizedResult(fact_value, raw_fact_keys=[raw_fact_key])
 
 
 def ip_address_normalizer(ifconfig_ip_addresses: list[str]):
@@ -63,7 +92,7 @@ class Normalizer(BaseNormalizer):
     cores_per_socket = FactMapper("cpu_core_per_socket", int)
     system_memory_bytes = FactMapper("system_memory_bytes", int)
     infrastructure_type = FactMapper(
-        ["virt_what_type", "virt_type", "subman_virt_is_guest"],
+        ["virt_what", "subman_virt_is_guest", "hostnamectl"],
         infrastructure_type_normalizer,
     )
     infrastructure_vendor = FactMapper("virt_type", str_or_none)

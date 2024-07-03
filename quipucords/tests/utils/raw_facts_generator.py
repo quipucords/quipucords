@@ -140,27 +140,32 @@ def _network_raw_facts():
     return facts
 
 
-def fake_virt_what() -> dict:
+def fake_virt_what(values=None, return_code=None) -> dict:
     """Return an object representing a minimal virt_what fact."""
-    values = [
-        _faker.random_element(VIRT_WHAT_TYPES)
-        for _ in range(_faker.pyint(min_value=0, max_value=2))
-    ]
+    if values is None:
+        values = [
+            _faker.random_element(VIRT_WHAT_TYPES)
+            for _ in range(_faker.pyint(min_value=0, max_value=2))
+        ]
+    if return_code is None:
+        return_code = 0 if _faker.pybool() else 1
     return {
         "value": values,
         "error_msg": None,
-        "return_code": 0 if _faker.pybool() else 1,
+        "return_code": return_code,
     }
 
 
-def fake_hostnamectl() -> dict:
+def fake_hostnamectl(chassis=None) -> dict:
     """Return an object representing a minimal hostnamectl fact."""
+    if not chassis:
+        chassis = _faker.random_element(HOSTNAMECTL_CHASSIS_TYPES)
     return {
         "value": {
             # Many other interesting values are typically returned by hostnamectl,
             # such as "architecture", "virtualization", and "operating_system",
             # but at the time of this writing, we only care about "chassis".
-            "chassis": _faker.random_element(HOSTNAMECTL_CHASSIS_TYPES),
+            "chassis": chassis,
         },
         "error_msg": None,
         "return_code": 0,
