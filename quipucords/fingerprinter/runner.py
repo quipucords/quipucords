@@ -94,11 +94,8 @@ def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
     virt_what: list[str] | None = deepget(fact, "virt_what__value")
     hostnamectl_chassis: str | None = deepget(fact, "hostnamectl__value__chassis")
 
-    if virt_what and "bare metal" in virt_what:
-        raw_fact_key = "virt_what"
-        fact_value = SystemFingerprint.BARE_METAL
-    elif virt_what:
-        # We assume *anything* other than "bare metal" means virtualized.
+    if virt_what:
+        # We assume *anything* in virt-what's stdout means virtualized.
         raw_fact_key = "virt_what"
         fact_value = SystemFingerprint.VIRTUALIZED
     elif fact.get("subman_virt_is_guest", False):

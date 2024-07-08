@@ -62,16 +62,7 @@ def test_normalizer(mocker, raw_facts, expected_normalized_facts):
 @pytest.mark.parametrize(
     "facts, expected_value, expected_raw_fact_keys",
     (
-        (  # virt_what "bare metal" trumps anything else
-            {
-                "virt_what": {"value": ["bare metal"]},  # physical
-                "subman_virt_is_guest": True,  # virtual
-                "hostnamectl": {"value": {"chassis": "vm"}},  # virtual
-            },
-            SystemFingerprint.BARE_METAL,
-            ["virt_what"],
-        ),
-        (  # non-empty virt_what still trumps anything else
+        (  # non-empty virt_what trumps anything else
             {
                 "virt_what": {"value": ["potato"]},  # "virtual" I guess
                 "subman_virt_is_guest": False,  # unknown

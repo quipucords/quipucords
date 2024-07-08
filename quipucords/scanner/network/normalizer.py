@@ -25,11 +25,8 @@ def infrastructure_type_normalizer(
     virt_what: list[str] | None = deepget(virt_what, "value")
     hostnamectl_chassis: str | None = deepget(hostnamectl, "value__chassis")
 
-    if virt_what and "bare metal" in virt_what:
-        raw_fact_key = "virt_what"
-        fact_value = SystemFingerprint.BARE_METAL
-    elif virt_what:
-        # We assume *anything* other than "bare metal" means virtualized.
+    if virt_what:
+        # We assume *anything* in virt-what's stdout means virtualized.
         raw_fact_key = "virt_what"
         fact_value = SystemFingerprint.VIRTUALIZED
     elif subman_virt_is_guest:
