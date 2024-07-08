@@ -599,16 +599,7 @@ def test_process_network_source(
 @pytest.mark.parametrize(
     "facts, expected_raw_fact_key, expected_infrastructure_type",
     (
-        (  # virt_what "bare metal" trumps anything else
-            {
-                "virt_what": {"value": ["bare metal"]},  # physical
-                "subman_virt_is_guest": True,  # virtual
-                "hostnamectl": {"value": {"chassis": "vm"}},  # virtual
-            },
-            "virt_what",
-            SystemFingerprint.BARE_METAL,
-        ),
-        (  # non-empty virt_what still trumps anything else
+        (  # non-empty virt_what trumps anything else
             {
                 "virt_what": {"value": ["potato"]},  # "virtual" I guess
                 "subman_virt_is_guest": False,  # unknown

@@ -35,7 +35,7 @@ HOSTNAMECTL_CHASSIS_TYPES = [
 # These are only some of the possible virt-what outputs.
 # Found by just looking at virt-what script's echo commands.
 # See: less $(command -v virt-what)
-VIRT_WHAT_TYPES = ["bare metal", "kvm", "qemu", "podman", "redhat", "xen", "hyperv"]
+VIRT_WHAT_TYPES = ["kvm", "qemu", "podman", "redhat", "xen", "hyperv"]
 
 
 def raw_facts_generator(source_type, n, as_native_types=True):
