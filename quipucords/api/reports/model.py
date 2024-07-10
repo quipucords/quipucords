@@ -28,7 +28,11 @@ class Report(BaseModel):
 
     @cached_property
     def sources(self):
-        """Drop in replacement for the now defunct "sources" JSONField."""
+        """
+        Drop in replacement for the now defunct "sources" JSONField.
+
+        Returns a InspectGroupQuerySet.
+        """
         return (
             InspectGroup.objects.with_raw_facts()
             .filter(tasks__job__report_id=self.id)
