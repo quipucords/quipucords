@@ -304,7 +304,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         return status_message, status
 
     @staticmethod
-    def _format_count_message(fingerprint_map, total_only=False):
+    def _format_count_message(fingerprint_map: dict, total_only=False) -> str:
         if not total_only:
             message = ", ".join(
                 f"{source_type}={len(fingerprints)}"
@@ -319,7 +319,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
     def _log_message_with_count(
         self,
         message,
-        fingerprints_per_type,
+        fingerprints_per_type: dict,
         log_level=logging.INFO,
         total_only=False,
     ):
@@ -333,10 +333,10 @@ class FingerprintTaskRunner(ScanTaskRunner):
             log_level=log_level,
         )
 
-    def _process_sources(self, report):
+    def _process_sources(self, report) -> list:
         """Process facts and convert to fingerprints.
 
-        :param details_report: Report containing raw facts
+        :param report: Report containing raw facts
         :returns: list of fingerprints for all systems (all scans)
         """
         # fingerprints per source type
