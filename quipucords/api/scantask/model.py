@@ -4,7 +4,7 @@ These models are used in the REST definitions.
 """
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from functools import cached_property
 
 from django.db import models, transaction
@@ -221,7 +221,7 @@ class ScanTask(BaseModel):
         if self.start_time is None:
             elapsed_time = 0
         else:
-            elapsed_time = (datetime.utcnow() - self.start_time).total_seconds()
+            elapsed_time = (datetime.now(UTC) - self.start_time).total_seconds()
         return elapsed_time
 
     # All task types
@@ -314,7 +314,7 @@ class ScanTask(BaseModel):
     # All task types
     def status_start(self):
         """Change status to RUNNING."""
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(UTC)
         self.status = ScanTask.RUNNING
         self.status_message = _(messages.ST_STATUS_MSG_RUNNING)
         self.save()
@@ -340,7 +340,7 @@ class ScanTask(BaseModel):
     # All task types
     def status_cancel(self):
         """Change status to CANCELED."""
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         self.status = ScanTask.CANCELED
         self.status_message = _(messages.ST_STATUS_MSG_CANCELED)
         self.save()
@@ -351,7 +351,7 @@ class ScanTask(BaseModel):
     def status_complete(self, message=None):
         """Change status to COMPLETED."""
         self.refresh_from_db()
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         self.status = ScanTask.COMPLETED
         if message:
             self.status_message = message
@@ -369,7 +369,7 @@ class ScanTask(BaseModel):
 
         :param message: The error message associated with failure
         """
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         self.status = ScanTask.FAILED
         self.status_message = message
         self.log_message(self.status_message, log_level=logging.ERROR)

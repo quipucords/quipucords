@@ -5,6 +5,7 @@
 # completely for this file to avoid repetition.
 # ruff: noqa: N805
 
+import datetime
 import random
 
 import factory
@@ -217,8 +218,10 @@ class ReportFactory(DjangoModelFactory):
 class ScanJobFactory(DjangoModelFactory):
     """Factory for ScanJob."""
 
-    start_time = factory.Faker("past_datetime")
-    end_time = factory.Faker("date_time_between", start_date="-15d")
+    start_time = factory.Faker("past_datetime", tzinfo=datetime.timezone.utc)
+    end_time = factory.Faker(
+        "date_time_between", start_date="-15d", tzinfo=datetime.timezone.utc
+    )
 
     class Meta:
         """Factory options."""
@@ -293,8 +296,10 @@ class ScanTaskFactory(DjangoModelFactory):
     """Factory for ScanTask."""
 
     scan_type = models.ScanTask.SCAN_TYPE_INSPECT
-    start_time = factory.Faker("past_datetime")
-    end_time = factory.Faker("date_time_between", start_date="-15d")
+    start_time = factory.Faker("past_datetime", tzinfo=datetime.timezone.utc)
+    end_time = factory.Faker(
+        "date_time_between", start_date="-15d", tzinfo=datetime.timezone.utc
+    )
 
     source = factory.SubFactory("tests.factories.SourceFactory")
     job = factory.SubFactory("tests.factories.ScanJobFactory")

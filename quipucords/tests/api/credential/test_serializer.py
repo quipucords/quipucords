@@ -542,7 +542,7 @@ class TestBaseCredentialSerializer:
             if isinstance(value, str) and Credential.is_encrypted(value):
                 return ENCRYPTED_DATA_MASK
             elif isinstance(value, datetime.datetime):
-                return value.strftime("%Y-%m-%dT%H:%M:%S.%f")
+                return value.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             return value
 
         credentials = CredentialFactory.create_batch(10)

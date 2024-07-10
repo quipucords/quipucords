@@ -1,7 +1,7 @@
 """ScanTask used for vcenter inspection task."""
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from functools import cached_property
 
 from django.db import transaction
@@ -157,7 +157,7 @@ class InspectTaskRunner(ScanTaskRunner):
         :param props: Array of Dynamic Properties
         :param host_dict: Dictionary of host properties
         """
-        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
         facts = raw_facts_template()
         for prop in props:

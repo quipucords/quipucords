@@ -2,7 +2,7 @@
 
 import random
 import re
-from datetime import timedelta
+from datetime import UTC, timedelta
 
 import pytest
 from rest_framework import status
@@ -564,7 +564,7 @@ class TestScanList:
     @pytest.fixture
     def expected_scans(self, faker, mocker):
         """Return a 'json' with 2 Scan objects."""
-        start_time1 = faker.date_time()
+        start_time1 = faker.date_time(tzinfo=UTC)
         scan1 = ScanFactory(
             name="SCAN1",
             scan_type=ScanTask.SCAN_TYPE_CONNECT,

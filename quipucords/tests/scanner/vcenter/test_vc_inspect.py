@@ -1,6 +1,6 @@
 """Test the vcenter inspect capabilities."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
@@ -161,7 +161,7 @@ class TestVCenterInspectTaskRunnerTest:
     @patch("scanner.vcenter.inspect.datetime")
     def test_parse_vm_props(self, mock_dt):
         """Test the parse_vm_props method."""
-        mock_dt.utcnow.return_value = datetime(2000, 1, 1, 4, 20)
+        mock_dt.now.return_value = datetime(2000, 1, 1, 4, 20, tzinfo=UTC)
 
         ip_addresses, mac_addresses = ["1.2.3.4"], ["00:50:56:9e:09:8c"]
 
