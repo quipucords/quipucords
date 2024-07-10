@@ -276,9 +276,17 @@ class ScanJob(BaseModel):
         inspect_tasks = self._create_inspection_tasks(conn_tasks)
         self._create_fingerprint_task(conn_tasks, inspect_tasks)
 
-    def delete_inspect_results(self):
-        """Delete InspectResults exclusively related to this ScanJob."""
-        InspectResult.objects.filter(inspect_group__tasks__job_id=self.id).exclude(
+    def delete_inspect_results(self, scan_task_id=None):
+        """
+        Delete InspectResults exclusively related to this ScanJob.
+
+        Optionally filter to delete only the InspectResults related to
+        the given ScanTask ID.
+        """
+        filters = Q(inspect_group__tasks__job_id=self.id)
+        if scan_task_id:
+            filters = filters & Q(inspect_group__tasks__in=[scan_task_id])
+        InspectResult.objects.filter(filters).exclude(
             inspect_group__tasks__in=ScanTask.objects.exclude(job_id=self.id)
         ).delete()
 

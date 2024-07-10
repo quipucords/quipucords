@@ -39,7 +39,9 @@ class ScanTaskRunner(metaclass=ABCMeta):
             if self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
                 self.scan_task.connection_result.systems.all().delete()
             elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-                self.scan_task.job.delete_inspect_results()
+                self.scan_task.job.delete_inspect_results(
+                    scan_task_id=self.scan_task.id
+                )
             elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
                 report = self.scan_job.report
                 if report:
