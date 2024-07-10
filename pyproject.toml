@@ -16,7 +16,7 @@ requires = ["poetry-core"]
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
 ansible = ">=10,<11"
-django = "^4.2.7"
+django = "^4.2.14"
 django-filter = ">=22.1"
 djangorestframework = "^3.14"
 jmespath = "^1.0.1"
