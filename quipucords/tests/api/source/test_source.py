@@ -1,7 +1,7 @@
 """Test the API application."""
 
 import random
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 import pytest
@@ -223,7 +223,7 @@ class TestSource:
 
     def test_format_source(self):
         """Test the format source method."""
-        start = datetime.now()
+        start = datetime.now(UTC)
         source = Source(
             name="source1",
             hosts=["1.2.3.4"],
@@ -231,7 +231,7 @@ class TestSource:
             port=22,
         )
         source.save()
-        end = datetime.now()
+        end = datetime.now(UTC)
         scan_job, scan_task = create_scan_job(source)
         scan_task.update_stats(
             "", sys_count=10, sys_scanned=9, sys_failed=1, sys_unreachable=0
@@ -1817,7 +1817,7 @@ class TestSourceV2:
 
     def test_format_source(self):
         """Test the format source method."""
-        start = datetime.now()
+        start = datetime.now(UTC)
         source = Source(
             name="source1",
             hosts=["1.2.3.4"],
@@ -1825,7 +1825,7 @@ class TestSourceV2:
             port=22,
         )
         source.save()
-        end = datetime.now()
+        end = datetime.now(UTC)
         scan_job, scan_task = create_scan_job(source)
         scan_task.update_stats(
             "", sys_count=10, sys_scanned=9, sys_failed=1, sys_unreachable=0

@@ -20,7 +20,7 @@ class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
         if not token.user.is_active:
             raise exceptions.AuthenticationFailed("User inactive or deleted")
 
-        utc_now = datetime.datetime.utcnow()
+        utc_now = datetime.datetime.now(datetime.UTC)
 
         hours = settings.QPC_TOKEN_EXPIRE_HOURS
         if token.created < utc_now - datetime.timedelta(hours=hours):

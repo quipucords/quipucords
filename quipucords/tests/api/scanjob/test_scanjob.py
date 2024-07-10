@@ -1811,7 +1811,7 @@ class TestScanJobViewSetV2:
         assert response.ok
         assert response.json() == {
             "id": scanjob.id,
-            "end_time": scanjob.end_time.isoformat(),
+            "end_time": scanjob.end_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "report_id": scanjob.report_id,
             "scan_id": scanjob.scan.id,
             "scan_type": scanjob.scan_type,
@@ -1822,7 +1822,7 @@ class TestScanJobViewSetV2:
                     "source_type": source.source_type,
                 }
             ],
-            "start_time": scanjob.start_time.isoformat(),
+            "start_time": scanjob.start_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "status": scanjob.status,
             "status_message": scanjob.status_message,
             "systems_count": 10,
@@ -1844,7 +1844,7 @@ class TestScanJobViewSetV2:
             "results": [
                 {
                     "id": scanjob.id,
-                    "end_time": scanjob.end_time.isoformat(),
+                    "end_time": scanjob.end_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     "report_id": scanjob.report_id,
                     "scan_id": scanjob.scan.id,
                     "scan_type": scanjob.scan_type,
@@ -1855,7 +1855,7 @@ class TestScanJobViewSetV2:
                             "source_type": source.source_type,
                         }
                     ],
-                    "start_time": scanjob.start_time.isoformat(),
+                    "start_time": scanjob.start_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                     "status": scanjob.status,
                     "status_message": scanjob.status_message,
                     "systems_count": 10,

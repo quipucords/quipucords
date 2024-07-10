@@ -21,7 +21,7 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
         user = serializer.validated_data["user"]
         auth_token, created = Token.objects.get_or_create(user=user)
 
-        utc_now = datetime.datetime.utcnow()
+        utc_now = datetime.datetime.now(datetime.UTC)
         valid_token_window = utc_now - datetime.timedelta(
             hours=settings.QPC_TOKEN_EXPIRE_HOURS
         )
@@ -29,7 +29,7 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
             # refresh the token
             auth_token.delete()
             auth_token = Token.objects.create(user=user)
-            auth_token.created = datetime.datetime.utcnow()
+            auth_token.created = datetime.datetime.now(datetime.UTC)
             auth_token.save()
 
         return Response({"token": auth_token.key})

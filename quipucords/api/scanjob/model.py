@@ -4,7 +4,7 @@ These models are used in the REST definitions.
 """
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from django.conf import settings
 from django.db import models, transaction
@@ -222,7 +222,7 @@ class ScanJob(BaseModel):
         if self.start_time is None:
             elapsed_time = 0
         else:
-            elapsed_time = (datetime.utcnow() - self.start_time).total_seconds()
+            elapsed_time = (datetime.now(UTC) - self.start_time).total_seconds()
         return elapsed_time
 
     @transaction.atomic
@@ -376,7 +376,7 @@ class ScanJob(BaseModel):
 
         :returns: bool True if successfully updated, else False
         """
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(UTC)
         target_status = ScanTask.RUNNING
         has_error = self.validate_status_change(target_status, [ScanTask.PENDING])
         if has_error:
@@ -446,7 +446,7 @@ class ScanJob(BaseModel):
 
         :returns: bool True if successfully updated, else False
         """
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         target_status = ScanTask.CANCELED
         has_error = self.validate_status_change(
             target_status,
@@ -476,7 +476,7 @@ class ScanJob(BaseModel):
 
         :returns: bool True if successfully updated, else False
         """
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         target_status = ScanTask.COMPLETED
         has_error = self.validate_status_change(target_status, [ScanTask.RUNNING])
         if has_error:
@@ -495,7 +495,7 @@ class ScanJob(BaseModel):
         :param message: The error message associated with failure
         :returns: bool True if successfully updated, else False
         """
-        self.end_time = datetime.utcnow()
+        self.end_time = datetime.now(UTC)
         target_status = ScanTask.FAILED
         has_error = self.validate_status_change(target_status, [ScanTask.RUNNING])
         if has_error:

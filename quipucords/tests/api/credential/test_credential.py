@@ -1309,8 +1309,12 @@ class TestCredentialSerialization:
         results = []
         for input_data, output, _id in self.INPUT_OUTPUT_ID:
             credential = CredentialFactory(**input_data)
-            output["created_at"] = credential.created_at.isoformat()
-            output["updated_at"] = credential.updated_at.isoformat()
+            output["created_at"] = credential.created_at.strftime(
+                "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+            output["updated_at"] = credential.updated_at.strftime(
+                "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
             results.append(output)
         # sorting results to match default credentials api sorting
         results = sorted(results, key=lambda x: x["name"])
