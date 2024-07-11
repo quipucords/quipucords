@@ -19,8 +19,6 @@ logger = getLogger(__name__)
 class ConnectTaskRunner(RHACSTaskRunner):
     """Connection phase task runner for RHACS scanner."""
 
-    supports_partial_results = False
-
     def execute_task(self, manager_interrupt):
         """
         Execute the task and save the results.

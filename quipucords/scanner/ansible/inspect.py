@@ -20,8 +20,6 @@ logger = getLogger(__name__)
 class InspectTaskRunner(AnsibleTaskRunner):
     """Inspection phase task runner for ansible scanner."""
 
-    supports_partial_results = False
-
     HOST_FIELDS = [
         "name",
         "id",

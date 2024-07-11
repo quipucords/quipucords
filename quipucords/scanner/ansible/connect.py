@@ -16,8 +16,6 @@ logger = getLogger(__name__)
 class ConnectTaskRunner(AnsibleTaskRunner):
     """Connection phase task runner for ansible scanner."""
 
-    supports_partial_results = False
-
     def execute_task(self, manager_interrupt):
         """
         Execute the task and save the results.

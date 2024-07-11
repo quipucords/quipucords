@@ -49,8 +49,6 @@ class InspectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    supports_partial_results = True
-
     def __init__(self, scan_job, scan_task):
         """Set context for task execution.
 

@@ -21,8 +21,6 @@ logger = getLogger(__name__)
 class InspectTaskRunner(RHACSTaskRunner):
     """Inspection phase task runner for RHACS scanner."""
 
-    supports_partial_results = False
-
     REQUEST_KWARGS = {
         "raise_for_status": True,
         "timeout": settings.QPC_INSPECT_TASK_TIMEOUT,
