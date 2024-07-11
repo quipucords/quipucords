@@ -17,8 +17,6 @@ from scanner.satellite.factory import create
 class SatelliteTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
     """Genetic Satellite ScanTaskRunner."""
 
-    supports_partial_results = False
-
     EXPECTED_EXCEPTIONS = (
         SatelliteAuthError,
         SatelliteError,

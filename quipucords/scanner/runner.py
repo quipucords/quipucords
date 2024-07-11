@@ -16,12 +16,6 @@ from scanner.exceptions import (
 class ScanTaskRunner(metaclass=ABCMeta):
     """ScanTaskRunner is a logical breakdown of work."""
 
-    @classmethod
-    @property
-    @abstractmethod
-    def supports_partial_results(cls) -> bool:
-        """Indicate if task supports partial results."""
-
     def __init__(self, scan_job: ScanJob, scan_task: ScanTask):
         """Set context for task execution.
 
@@ -30,36 +24,6 @@ class ScanTaskRunner(metaclass=ABCMeta):
         """
         self.scan_job = scan_job
         self.scan_task = scan_task
-        self.cleanup_unsupported_partial_results()
-
-    def cleanup_unsupported_partial_results(self):
-        """Clean partial results if they are unsupported."""
-        if not self.supports_partial_results:
-            self.scan_task.reset_stats()
-            if self.scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-                self.scan_task.connection_result.systems.all().delete()
-            elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-                self.scan_task.job.delete_inspect_results(
-                    scan_task_id=self.scan_task.id
-                )
-            elif self.scan_task.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
-                report = self.scan_job.report
-                if report:
-                    # remove results from previous interrupted scan
-                    deployment_report = report.deployment_report
-
-                    if deployment_report:
-                        # remove partial results
-                        self.scan_task.log_message(
-                            "REMOVING PARTIAL RESULTS - deleting"
-                            f" {deployment_report.system_fingerprints.count():d}"
-                            " fingerprints from previous scan"
-                        )
-                        deployment_report.system_fingerprints.all().delete()
-                        deployment_report.save()
-                        report.deployment_report = None
-                        report.save()
-                        deployment_report.delete()
 
     def run(self, manager_interrupt: Value = None):
         """Block that will be executed.
