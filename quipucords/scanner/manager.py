@@ -42,7 +42,6 @@ class CeleryScanManager:
         :returns: True if killed, False otherwise.
         """
         scan_job_id = job.id
-        job.status = ScanJob.JOB_TERMINATE_CANCEL
         job.status_cancel()
         if job.tasks is not None:
             for scan_task in job.tasks.all():
