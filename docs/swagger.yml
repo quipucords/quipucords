@@ -2614,13 +2614,6 @@ definitions:
           format: "int64"
           description: "Number of users derived from /etc/passwd file"
           example: 4
-        user_login_history:
-          type: "array"
-          items:
-            type: "string"
-            description: "User login entries found from the last command"
-          example: ["user_login1","user_login2"]
-          description: "User login history found from running the last command"
   SystemInspectResultOut:
     type: "object"
     required:

@@ -130,7 +130,6 @@ def expected_network_scan_facts():
         "uname_hostname",
         "uname_processor",
         "user_has_sudo",
-        "user_login_history",
         "virt_num_guests",
         "virt_num_running_guests",
         "virt_type",
@@ -167,7 +166,6 @@ def expected_network_scan_facts():
             "internal_release_file",
             "internal_sys_manufacturer",
             "internal_system_user_count",
-            "internal_user_login_history",
             "internal_xen_guest",
             "internal_xen_privcmd_found",
         }
@@ -209,7 +207,6 @@ def fingerprint_fact_map():
         "system_service_level_agreement": "system_purpose_json__service_level_agreement",  # noqa:E501
         "system_usage_type": "system_purpose_json__usage",
         "system_user_count": "system_user_count",
-        "user_login_history": "user_login_history",
         "virtualized_type": "virt_type",
     }
 

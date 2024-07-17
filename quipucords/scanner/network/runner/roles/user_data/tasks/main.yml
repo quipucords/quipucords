@@ -4,23 +4,6 @@
   set_fact:
     internal_host_started_processing_role: "user_data"
 
-# Facts to gather last 25 logins
-- name: gather user_login_history data fact
-  raw: export LANG=C LC_ALL=C; last -25
-  register: internal_user_login_history_cmd
-  ignore_errors: yes
-  become: yes
-
-- name: set internal_user_login_history_cmd fact
-  set_fact:
-    internal_user_login_history: "{{ internal_user_login_history_cmd }}"
-  ignore_errors: yes
-
-- name: initialize user_login_history
-  set_fact:
-    user_login_history: "QPC_FORCE_POST_PROCESS"
-  ignore_errors: yes
-
 # Facts to determine number of users
 - name: gather etc/passwd data fact
   raw: export LANG=C LC_ALL=C; cat /etc/passwd
