@@ -40,22 +40,6 @@ class TestProcessHasJBossEula(unittest.TestCase):
         )
 
 
-class TestProcessTomcatPartOfRedhatProduct(unittest.TestCase):
-    """Test ProcessTomcatPartOfRedhatProduct."""
-
-    def test_true(self):
-        """Return True if tomcat was installed as part of a redhat product."""
-        self.assertEqual(
-            jws.ProcessTomcatPartOfRedhatProduct.process(ansible_result("True")), True
-        )
-
-    def test_false(self):
-        """Return False if tomcat is not part of a redhat product."""
-        self.assertEqual(
-            jws.ProcessTomcatPartOfRedhatProduct.process(ansible_result("False")), False
-        )
-
-
 class TestProcessJWSHasCert(unittest.TestCase):
     """Test ProcessJWSHasCert."""
 

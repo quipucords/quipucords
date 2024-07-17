@@ -124,7 +124,6 @@ def _network_raw_facts():
             "date_anaconda_log": str(_faker.date()) if _faker.pybool() else None,
             "date_filesystem_create": str(_faker.date()) if _faker.pybool() else None,
             "date_machine_id": str(_faker.date()) if _faker.pybool() else None,
-            "date_yum_history": str(_faker.date()) if _faker.pybool() else None,
             "etc_release_name": DEFAULT_RHEL_OS_NAME if _faker.pybool() else None,
             "etc_release_version": fake_major_minor_ver() if _faker.pybool() else None,
             "redhat_packages_gpg_is_redhat": _faker.pybool(),

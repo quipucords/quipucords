@@ -24,26 +24,6 @@
     cpu_model_name: "{{internal_cpu_model_name}}"
   ignore_errors: yes
 
-- name: gather internal_cpu_bogomips fact
-  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^bogomips\s*.' | sed -n -e 's/^.*bogomips\s*.\s*//p'
-  register: internal_cpu_bogomips
-  ignore_errors: yes
-
-- name: set cpu_bogomips fact
-  set_fact:
-    cpu_bogomips: "{{internal_cpu_bogomips}}"
-  ignore_errors: yes
-
-- name: gather internal_cpu_cpu_family fact
-  raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^cpu family\s*.' | sed -n -e 's/^.*cpu family\s*.\s*//p'
-  register: internal_cpu_cpu_family
-  ignore_errors: yes
-
-- name: gather cpu_cpu_family fact
-  set_fact:
-    cpu_cpu_family: "{{internal_cpu_cpu_family}}"
-  ignore_errors: yes
-
 - name: gather internal_cpu_model_ver fact
   raw: export LANG=C LC_ALL=C; cat /proc/cpuinfo 2>/dev/null | grep '^model\s*:' | sed -n -e 's/^.*model\s*:\s*//p'
   register: internal_cpu_model_ver

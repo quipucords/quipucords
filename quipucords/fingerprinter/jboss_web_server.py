@@ -12,7 +12,6 @@ SUBMAN_CONSUMED = "subman_consumed"
 
 JWS_INSTALLED_WITH_RPM = "jws_installed_with_rpm"
 JWS_HAS_EULA_TXT_FILE = "jws_has_eula_txt_file"
-TOMCAT_PART_OF_REDHAT_PRODUCT = "tomcat_is_part_of_redhat_product"
 JWS_VERSION = "jws_version"
 JWS_HAS_CERT = "jws_has_cert"
 
@@ -85,7 +84,6 @@ def detect_jboss_ws(source, facts):
     installed_with_rpm = facts.get(JWS_INSTALLED_WITH_RPM)
     has_eula_file = facts.get(JWS_HAS_EULA_TXT_FILE)
     jws_has_cert = facts.get(JWS_HAS_CERT)
-    tomcat_part_of_redhat = facts.get(TOMCAT_PART_OF_REDHAT_PRODUCT)
     version = get_version(facts.get(JWS_VERSION))
     product_dict[VERSION_KEY] = version
     raw_facts = {}
@@ -95,10 +93,7 @@ def detect_jboss_ws(source, facts):
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
         raw_facts[SUBMAN_CONSUMED] = subman_consumed
     # If JWS not installed with rpm, detect potential presence by the presence
-    # of a JBossEULA file or tomcat server in JWS_HOME directory
-    if tomcat_part_of_redhat:
-        product_dict[PRESENCE_KEY] = Product.POTENTIAL
-        raw_facts[TOMCAT_PART_OF_REDHAT_PRODUCT] = tomcat_part_of_redhat
+    # of a JBossEULA file in JWS_HOME directory
     if has_eula_file:
         product_dict[PRESENCE_KEY] = Product.POTENTIAL
         raw_facts[JWS_HAS_EULA_TXT_FILE] = has_eula_file

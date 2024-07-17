@@ -4,24 +4,9 @@
   set_fact:
     internal_host_started_processing_role: "date"
 
-- name: gather internal_date_date fact
-  raw: export LANG=C LC_ALL=C; date
-  register: internal_date_date
-  ignore_errors: yes
-
-- name: set date_date fact
-  set_fact:
-    date_date: "{{internal_date_date}}"
-  ignore_errors: yes
-
 - name: gather uptime fact
   raw: export LANG=C LC_ALL=C; uptime=$(cat /proc/uptime); array=( $uptime); seconds=" +seconds"; formatted_uptime="${array[0]}$seconds"; TZ=utc date --date -"$formatted_uptime" +"%Y-%m-%d %T"
   register: internal_uptime_utc_cmd
-  ignore_errors: yes
-
-- name: extract result value for uptime
-  set_fact:
-    last_booted_at: "{{ internal_uptime_utc_cmd | json_query('stdout_lines[-1]') | trim }}"
   ignore_errors: yes
 
 - name: gather date.anaconda_log fact
@@ -65,16 +50,4 @@
 - name: set date_filesystem_create fact
   set_fact:
     date_filesystem_create: "{{internal_date_filesystem_create}}"
-  ignore_errors: yes
-
-- name: gather internal_date_yum_history fact
-  raw: export LANG=C LC_ALL=C; yum history 2>/dev/null  | tail -n 2 | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
-  register: internal_date_yum_history
-  become: yes
-  ignore_errors: yes
-  when: 'user_has_sudo and internal_have_yum'
-
-- name: set date_yum_history fact
-  set_fact:
-    date_yum_history: "{{internal_date_yum_history}}"
   ignore_errors: yes
