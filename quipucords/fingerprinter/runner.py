@@ -66,7 +66,6 @@ FINGERPRINT_GLOBAL_ID_KEY = "FINGERPRINT_GLOBAL_ID"
 # (date_key, date_pattern)
 RAW_DATE_KEYS = dict(
     [
-        ("date_yum_history", ["%Y-%m-%d"]),
         ("date_filesystem_create", ["%Y-%m-%d"]),
         ("date_anaconda_log", ["%Y-%m-%d"]),
         ("registration_time", ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S %z"]),
@@ -1061,7 +1060,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("date_machine_id", "date_machine_id"),
             ("date_anaconda_log", "date_anaconda_log"),
             ("date_filesystem_create", "date_filesystem_create"),
-            ("date_yum_history", "date_yum_history"),
             ("insights_client_id", "insights_client_id"),
             # public cloud fact
             ("cloud_provider", "cloud_provider"),

@@ -67,27 +67,6 @@
   ignore_errors: yes
   when: '"stdout_lines" not in internal_dmi_system_manufacturer_cmd'
 
-- name: gather dmi.processor-family fact
-  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s processor-family 2>/dev/null
-  register: internal_dmi_processor_family_cmd
-  ignore_errors: yes
-  become: yes
-  when: 'user_has_sudo and internal_have_dmidecode'
-
-- name: extract result value for dmi.processor-family
-  set_fact:
-    dmi_processor_family: "{{ internal_dmi_processor_family_cmd['stdout_lines'][-1] | trim if internal_have_dmidecode else '' }}"
-  ignore_errors: yes
-  when:
-    - '"stdout_lines" in internal_dmi_processor_family_cmd'
-    - 'internal_dmi_processor_family_cmd["stdout_lines"] | length > 0'
-
-- name: handle failure value for dmi.processor-family
-  set_fact:
-    dmi_processor_family: ""
-  ignore_errors: yes
-  when: '"stdout_lines" not in internal_dmi_processor_family_cmd'
-
 - name: gather dmi.system-uuid fact
   raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s system-uuid 2>/dev/null
   register: internal_dmi_system_uuid_cmd

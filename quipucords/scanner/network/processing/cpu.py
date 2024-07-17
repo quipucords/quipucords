@@ -22,17 +22,6 @@ class ProcessCpuModelVer(process.Processor):
         return get_line(output["stdout_lines"])
 
 
-class ProcessCpuCpuFamily(process.Processor):
-    """Process the cpu family."""
-
-    KEY = "cpu_cpu_family"
-
-    @staticmethod
-    def process(output, dependencies=None):
-        """Pass the output back through."""
-        return get_line(output["stdout_lines"])
-
-
 class ProcessCpuVendorId(process.Processor):
     """Process the vendor id of the cpu."""
 
@@ -48,17 +37,6 @@ class ProcessCpuModelName(process.Processor):
     """Process the model name of the cpu."""
 
     KEY = "cpu_model_name"
-
-    @staticmethod
-    def process(output, dependencies=None):
-        """Pass the output back through."""
-        return get_line(output["stdout_lines"])
-
-
-class ProcessCpuBogomips(process.Processor):
-    """Process the bogomips of the cpu."""
-
-    KEY = "cpu_bogomips"
 
     @staticmethod
     def process(output, dependencies=None):

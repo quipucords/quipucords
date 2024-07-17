@@ -40,7 +40,6 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "date_anaconda_log": "date_anaconda_log",
     "date_filesystem_create": "date_filesystem_create",
     "date_machine_id": "date_machine_id",
-    "date_yum_history": "date_yum_history",
     "etc_machine_id": "etc_machine_id",
     "infrastructure_type": "virt_what",
     "insights_client_id": "insights_client_id",
@@ -173,7 +172,6 @@ def _create_network_details_report_json(  # noqa: PLR0913, PLR0912, PLR0915, C90
     connection_port=22,
     cpu_socket_count=2,
     cpu_core_count=2,
-    date_yum_history="2017-07-18",
     date_filesystem_create="2017-06-17",
     date_anaconda_log="2017-05-17",
     date_machine_id="2017-04-17",
@@ -236,8 +234,6 @@ def _create_network_details_report_json(  # noqa: PLR0913, PLR0912, PLR0915, C90
         fact["cpu_core_count"] = cpu_core_count
     if date_anaconda_log:
         fact["date_anaconda_log"] = date_anaconda_log
-    if date_yum_history:
-        fact["date_yum_history"] = date_yum_history
     if date_filesystem_create:
         fact["date_filesystem_create"] = date_filesystem_create
     if date_machine_id:
@@ -425,7 +421,6 @@ def _validate_network_result(fingerprint, fact):
     assert fact.get("cpu_core_count") == fingerprint.get("cpu_core_count")
 
     assert fact.get("date_anaconda_log") == fingerprint.get("date_anaconda_log")
-    assert fact.get("date_yum_history") == fingerprint.get("date_yum_history")
     assert fact.get("date_machine_id") == fingerprint.get("date_machine_id")
     assert fact.get("date_filesystem_create") == fingerprint.get(
         "date_filesystem_create"
@@ -1495,7 +1490,6 @@ def test_compute_system_creation_time(server_id, fingerprint_task_runner):
     )
     assert len(result_fingerprints) == 1
     rfp = result_fingerprints[0]
-    rfp["date_yum_history"] = "2018-1-7"
     rfp["date_filesystem_create"] = None
     rfp["date_anaconda_log"] = "201837"
     rfp["registration_time"] = "2018-4-7 12:45:02"

@@ -4,16 +4,6 @@
   set_fact:
     internal_host_started_processing_role: "uname"
 
-- name: gather internal_uname_os fact
-  raw: export LANG=C LC_ALL=C; uname -s
-  register: internal_uname_os
-  ignore_errors: yes
-
-- name: add uname.os to dictionary
-  set_fact:
-    uname_os: "{{ internal_uname_os | json_query('stdout_lines[-1]') | default('') }}"
-  ignore_errors: yes
-
 - name: gather internal_uname_hostname fact
   raw: export LANG=C LC_ALL=C; uname -n
   register: internal_uname_hostname
@@ -34,16 +24,6 @@
     uname_processor: "{{ internal_uname_processor | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
-- name: gather internal_uname_kernel fact
-  raw: export LANG=C LC_ALL=C; uname -r
-  register: internal_uname_kernel
-  ignore_errors: yes
-
-- name: add uname.kernel to dictionary
-  set_fact:
-    uname_kernel: "{{ internal_uname_kernel | json_query('stdout_lines[-1]') | default('') }}"
-  ignore_errors: yes
-
 - name: gather internal_uname_all fact
   raw: export LANG=C LC_ALL=C; uname -a
   register: internal_uname_all
@@ -52,14 +32,4 @@
 - name: add uname.all to dictionary
   set_fact:
     uname_all: "{{ internal_uname_all | json_query('stdout_lines[-1]') | default('') }}"
-  ignore_errors: yes
-
-- name: gather internal_uname_hardware_platform fact
-  raw: export LANG=C LC_ALL=C; uname -i
-  register: internal_uname_hardware_platform
-  ignore_errors: yes
-
-- name: add uname.hardware_platform to dictionary
-  set_fact:
-    uname_hardware_platform: "{{ internal_uname_hardware_platform | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes

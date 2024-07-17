@@ -79,30 +79,22 @@ class ProductJWSTest(TestCase):
             "presence": "potential",
             "version": [],
             "metadata": {
-                "raw_fact_key": "tomcat_is_part_of_redhat_product",
                 "source_name": "source1",
                 "source_type": "network",
                 "server_id": self.server_id,
             },
         }
-
-        # Test where tomcat is part of red hat product
         source = {
             "server_id": self.server_id,
             "source_name": "source1",
             "source_type": "network",
         }
         facts = {
-            "jws_has_eula_txt_file": False,
+            "jws_has_eula_txt_file": True,
             "jws_installed_with_rpm": False,
-            "tomcat_is_part_of_redhat_product": True,
         }
-        product = detect_jboss_ws(source, facts)
-        self.assertEqual(product, expected)
 
         # Test where JWS_HOME contains jboss eula file
-        facts["tomcat_is_part_of_redhat_product"] = False
-        facts["jws_has_eula_txt_file"] = True
         product = detect_jboss_ws(source, facts)
         expected["metadata"]["raw_fact_key"] = "jws_has_eula_txt_file"
         self.assertEqual(product, expected)
@@ -136,7 +128,6 @@ class ProductJWSTest(TestCase):
         facts = {
             "jboss_has_eula_txt_file": False,
             "jws_installed_with_rpm": False,
-            "tomcat_is_part_of_redhat_product": False,
         }
         expected = {
             "name": "JBoss Web Server",

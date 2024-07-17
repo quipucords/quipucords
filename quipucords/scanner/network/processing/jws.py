@@ -28,18 +28,6 @@ class ProcessHasJBossEULA(process.Processor):
         return bool(stdout_lines and stdout_lines[-1] == "true")
 
 
-class ProcessTomcatPartOfRedhatProduct(process.Processor):
-    """Process output of search for redhat string in tomcat files."""
-
-    KEY = "tomcat_is_part_of_redhat_product"
-
-    @staticmethod
-    def process(output, dependencies=None):
-        """Return either True or False."""
-        stdout_lines = output.get("stdout_lines", [])
-        return bool(stdout_lines and stdout_lines[-1] == "True")
-
-
 class ProcessJWSHasCert(process.Processor):
     """Process output of 'ls /etc/pki/product/185.pem 2>/dev/null'."""
 

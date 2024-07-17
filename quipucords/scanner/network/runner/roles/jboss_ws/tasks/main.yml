@@ -76,18 +76,6 @@
       }}"
   ignore_errors: yes
 
-  # If tomcat was installed with a Redhat product, a 'redhat' string can be found in certain files
-- name: determine if tomcat is installed from upstream or as part of redhat product
-  raw: export LANG=C LC_ALL=C; \[ $(grep -iR redhat "{{ jws_home }}"/tomcat[0-99] 2>/dev/null| wc -l) != 0 \] && echo False || echo True
-  register: internal_tomcat_is_part_of_redhat_product
-  ignore_errors: yes
-  when: 'jws_home is defined and jboss_ws'
-
-- name: set tomcat_is_part_of_redhat_product fact
-  set_fact:
-    tomcat_is_part_of_redhat_product: "{{internal_tomcat_is_part_of_redhat_product}}"
-  ignore_errors: yes
-
 - name: see if JBossEULA.txt exists
   raw: export LANG=C LC_ALL=C; if [ -f "{{ jws_home }}"/JBossEULA.txt ]; then FOUND="true"; else FOUND="false"; fi; echo ${FOUND}
   register: internal_jws_has_eula_txt_file
