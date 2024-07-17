@@ -26,25 +26,3 @@ class ProcessSystemUserCount(process.Processor):
             unique_users = set(users)
             return len(unique_users)
         return ""
-
-
-class ProcessUserLoginHistory(process.Processor):
-    """Process the user_login_history fact."""
-
-    KEY = "user_login_history"
-
-    DEPS = ["internal_user_login_history"]
-    REQUIRE_DEPS = False
-
-    @staticmethod
-    def process(output, dependencies):
-        """Pass the output back through."""
-        user_login_history = dependencies.get("internal_user_login_history")
-        if user_login_history and user_login_history.get("rc") == 0:
-            result = [
-                line
-                for line in user_login_history.get("stdout_lines")
-                if line != ""  # noqa: PLC1901
-            ]
-            return result
-        return ""

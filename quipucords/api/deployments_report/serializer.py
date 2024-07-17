@@ -95,7 +95,6 @@ class SystemFingerprintSerializer(ModelSerializer):
 
     virtualized_type = CharField(max_length=64, **default_args)
     system_user_count = IntegerField(min_value=0, **default_args)
-    user_login_history = JSONField(**default_args)
 
     # VCenter scan facts
     vm_state = CharField(max_length=24, **default_args)

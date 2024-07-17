@@ -1065,7 +1065,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("cloud_provider", "cloud_provider"),
             # user data facts
             ("system_user_count", "system_user_count"),
-            ("user_login_history", "user_login_history"),
             # System purpose facts
             ("system_purpose_json", "system_purpose"),
             ("system_purpose_json__role", "system_role"),

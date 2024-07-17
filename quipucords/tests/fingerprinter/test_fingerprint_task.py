@@ -62,7 +62,6 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "system_service_level_agreement": "system_purpose_json__service_level_agreement",
     "system_usage_type": "system_purpose_json__usage",
     "system_user_count": "system_user_count",
-    "user_login_history": "user_login_history",
     "virtualized_type": "virt_type",
 }
 EXPECTED_FINGERPRINT_MAP_SATELLITE = {
