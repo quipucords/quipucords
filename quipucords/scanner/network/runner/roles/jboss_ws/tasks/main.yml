@@ -16,6 +16,7 @@
 - name: search for folder above tomcat home with locate
   raw: export LANG=C LC_ALL=C; locate tomcat?/bin/startup.sh | awk -F 'tomcat' '{print $1}' | head -1
   register: internal_jws_find_home_from_tomcat_file
+  become: yes
   ignore_errors: yes
   when: 'user_has_sudo and internal_have_locate and jboss_ws'
 

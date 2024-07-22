@@ -103,8 +103,10 @@
 
 - name: gather internal_have_locate_cmd
   raw: export LANG=C LC_ALL=C; command -v locate
+  become: yes
   register: internal_have_locate_cmd
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: test locate command
   raw: export LANG=C LC_ALL=C; locate echo
@@ -114,14 +116,8 @@
 
 - name: set internal_have_locate
   set_fact:
-    internal_have_locate: false
+    internal_have_locate: "{{ internal_have_locate_cmd.get('rc') == 0 and internal_test_locate.get('rc') == 0 }}"
   ignore_errors: yes
-
-- name: set internal_have_locate
-  set_fact:
-    internal_have_locate: true
-  ignore_errors: yes
-  when: (internal_have_locate_cmd.get('rc') == 0 and internal_test_locate.get('rc') == 0)
 
 - name: gather internal_have_systemctl_cmd
   raw: export LANG=C LC_ALL=C; whereis systemctl
