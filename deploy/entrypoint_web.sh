@@ -3,6 +3,8 @@
 set -e
 shopt -s inherit_errexit
 
+export QUIPUCORDS_HTTPS_ON="${QUIPUCORDS_HTTPS_ON:-1}"
+
 handle_certificates() {
     # verify if user provided certificates exist or create a self signed certificate.
     CERTS_PATH="/etc/ssl/qpc"
@@ -39,7 +41,9 @@ else
     # 1. with this simpler config we delegate to nginx to deal with https shenanigans
     # 2. we can set a higher number of workers, since there's no risk for race conditions
     #    with the celery-based manager
-    handle_certificates
+    if [[ "${QUIPUCORDS_HTTPS_ON}" == "1" ]]; then
+        handle_certificates
+    fi
     GUNICORN_CONF="/deploy/gunicorn_conf.py"
 fi
 
