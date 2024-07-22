@@ -27,14 +27,14 @@
     internal_have_dmidecode: "{{ internal_have_dmidecode_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_tune2fs_cmd
+- name: gather internal_have_tune2fs_user_cmd
   raw: export LANG=C LC_ALL=C; command -v tune2fs
-  register: internal_have_tune2fs_cmd
+  register: internal_have_tune2fs_user_cmd
   ignore_errors: yes
 
-- name: set internal_have_tune2fs
+- name: set internal_have_tune2fs_user
   set_fact:
-    internal_have_tune2fs: "{{ internal_have_tune2fs_cmd.get('rc') == 0 }}"
+    internal_have_tune2fs_user: "{{ internal_have_tune2fs_user_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_yum_cmd

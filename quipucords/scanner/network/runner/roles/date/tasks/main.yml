@@ -45,7 +45,7 @@
   raw: export LANG=C LC_ALL=C; fs_date=$(tune2fs -l $(mount | egrep '/ type' | grep -o '/dev.* on' | sed -e 's/\on//g') 2>/dev/null | grep 'Filesystem created' | sed 's/Filesystem created:\s*//g'); if [[ $fs_date ]]; then date +'%F' -d "$fs_date"; else echo "" ; fi
   register: internal_date_filesystem_create
   ignore_errors: yes
-  when: 'internal_have_tune2fs'
+  when: 'internal_have_tune2fs_user'
 
 - name: set date_filesystem_create fact
   set_fact:
