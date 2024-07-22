@@ -137,21 +137,17 @@
   ignore_errors: yes
   when: (internal_whereis_systemctl_cmd.get('rc') == 0 and internal_whereis_systemctl_cmd.get('stdout_lines')[-1] != 'systemctl:')
 
-- name: gather internal_whereis_chkconfig_cmd
-  raw: export LANG=C LC_ALL=C; whereis chkconfig
-  register: internal_whereis_chkconfig_cmd
+- name: gather internal_have_chkconfig_cmd
+  raw: export LANG=C LC_ALL=C; command -v chkconfig
+  register: internal_have_chkconfig_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_chkconfig
   set_fact:
-    internal_have_chkconfig: false
+    internal_have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
   ignore_errors: yes
-
-- name: set internal_have_chkconfig
-  set_fact:
-    internal_have_chkconfig: true
-  ignore_errors: yes
-  when: (internal_whereis_chkconfig_cmd.get('rc') == 0 and internal_whereis_chkconfig_cmd.get('stdout_lines')[-1] != 'chkconfig:')
 
 - name: gather internal_whereis_ifconfig_cmd
   raw: export LANG=C LC_ALL=C; whereis ifconfig

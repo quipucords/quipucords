@@ -244,7 +244,7 @@
   ignore_errors: yes
 
 - name: look for jboss in chkconfig
-  raw: export LANG=C LC_ALL=C; /sbin/chkconfig --list
+  raw: export LANG=C LC_ALL=C; chkconfig --list
   register: internal_jboss_eap_chkconfig
   ignore_errors: yes
   become: yes
