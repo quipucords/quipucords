@@ -50,7 +50,9 @@
 - name: gather internal_have_java_cmd
   raw: export LANG=C LC_ALL=C; command -v java
   register: internal_have_java_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_java
   set_fact:
