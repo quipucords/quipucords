@@ -190,7 +190,9 @@
 - name: gather internal_have_unzip_cmd
   raw: export LANG=C LC_ALL=C; command -v unzip
   register: internal_have_unzip_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_unzip
   set_fact:
