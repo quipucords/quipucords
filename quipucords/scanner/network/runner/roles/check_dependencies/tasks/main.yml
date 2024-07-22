@@ -93,8 +93,10 @@
 
 - name: gather internal_have_virt_what_cmd
   raw: export LANG=C LC_ALL=C; command -v virt-what
+  become: yes
   register: internal_have_virt_what_cmd
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_virt_what
   set_fact:
