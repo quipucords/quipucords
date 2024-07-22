@@ -155,7 +155,7 @@ def expected_network_scan_facts():
             "internal_have_java",
             "internal_have_locate",
             "internal_have_rct",
-            "internal_have_rpm",
+            "internal_have_rpm_user",
             "internal_have_subscription_manager",
             "internal_have_systemctl",
             "internal_have_tune2fs_user",
