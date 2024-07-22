@@ -171,21 +171,27 @@
     internal_have_ifconfig_user: "{{ internal_have_ifconfig_user_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_whereis_ip_cmd
-  raw: export LANG=C LC_ALL=C; command -v /sbin/ip
-  register:  internal_whereis_ip_cmd
+- name: gather internal_have_ip_cmd
+  raw: export LANG=C LC_ALL=C; command -v ip
+  register: internal_have_ip_cmd
+  become: yes
   ignore_errors: yes
-
-- name: set internal_have_ip default
-  set_fact:
-    internal_have_ip: false
-  ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_ip
   set_fact:
-    internal_have_ip: true
+    internal_have_ip: "{{ internal_have_ip_cmd.get('rc') == 0 }}"
   ignore_errors: yes
-  when: "internal_whereis_ip_cmd.get('rc') == 0"
+
+- name: gather internal_have_ip_user_cmd
+  raw: export LANG=C LC_ALL=C; command -v ip
+  register: internal_have_ip_user_cmd
+  ignore_errors: yes
+
+- name: set internal_have_ip_user
+  set_fact:
+    internal_have_ip_user: "{{ internal_have_ip_user_cmd.get('rc') == 0 }}"
+  ignore_errors: yes
 
 - name: gather internal_have_unzip_cmd
   raw: export LANG=C LC_ALL=C; command -v unzip

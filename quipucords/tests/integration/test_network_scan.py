@@ -151,6 +151,7 @@ def expected_network_scan_facts():
             "internal_have_ifconfig",
             "internal_have_ifconfig_user",
             "internal_have_ip",
+            "internal_have_ip_user",
             "internal_have_java",
             "internal_have_locate",
             "internal_have_rct",
