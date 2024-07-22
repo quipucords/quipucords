@@ -8,7 +8,7 @@
   raw: export LANG=C LC_ALL=C; find /etc/pki/product*/ -name '*pem' -exec rct cat-cert --no-content '{}' \; | grep -C2 -E '^\s+ID:'
   register: internal_installed_products
   ignore_errors: yes
-  when: 'internal_have_rct'
+  when: 'internal_have_rct_user'
 
 - name: set installed_products fact
   set_fact:
