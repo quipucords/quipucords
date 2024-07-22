@@ -35,7 +35,7 @@
   ignore_errors: yes
 
 - name: set system manufacturer
-  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+  raw: export LANG=C LC_ALL=C; dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
   register: internal_sys_manufacturer_cmd
   become: yes
   ignore_errors: yes

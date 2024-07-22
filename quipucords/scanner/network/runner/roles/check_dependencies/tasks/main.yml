@@ -16,7 +16,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_dmidecode_cmd
-  raw: export LANG=C LC_ALL=C; command -v /usr/sbin/dmidecode
+  raw: export LANG=C LC_ALL=C; command -v dmidecode
   register: internal_have_dmidecode_cmd
   become: yes
   ignore_errors: yes
