@@ -135,8 +135,9 @@
 - name: find JWS version through systemctl
   raw: export LANG=C LC_ALL=C TERM=dumb; systemctl status 'jws*-tomcat.service' 2>/dev/null | grep "Apache Tomcat Web" | grep -o 'jws[0-9]\+'
   register: internal_jws_version_5_systemctl
+  become: yes
   ignore_errors: yes
-  when: 'internal_have_systemctl and jboss_ws'
+  when: 'user_has_sudo and internal_have_systemctl and jboss_ws'
 
   # Additional methods of finding different versions can be appended to
   # jws_version. A map of the raw stdout value to the correctly formatted

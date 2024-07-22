@@ -120,20 +120,16 @@
   ignore_errors: yes
 
 - name: gather internal_have_systemctl_cmd
-  raw: export LANG=C LC_ALL=C; whereis systemctl
-  register: internal_whereis_systemctl_cmd
+  raw: export LANG=C LC_ALL=C; command -v systemctl
+  register: internal_have_systemctl_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_systemctl
   set_fact:
-    internal_have_systemctl: false
+    internal_have_systemctl: "{{ internal_have_systemctl_cmd.get('rc') == 0 }}"
   ignore_errors: yes
-
-- name: set internal_have_systemctl
-  set_fact:
-    internal_have_systemctl: true
-  ignore_errors: yes
-  when: (internal_whereis_systemctl_cmd.get('rc') == 0 and internal_whereis_systemctl_cmd.get('stdout_lines')[-1] != 'systemctl:')
 
 - name: gather internal_have_chkconfig_cmd
   raw: export LANG=C LC_ALL=C; command -v chkconfig
