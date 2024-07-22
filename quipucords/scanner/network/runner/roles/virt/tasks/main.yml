@@ -70,7 +70,7 @@
   raw: export LANG=C LC_ALL=C; virsh -c qemu:///system --readonly list --all | wc -l
   register: internal_virt_num_guests
   ignore_errors: yes
-  when: 'internal_have_virsh'
+  when: 'internal_have_virsh_user'
 
 - name: set virt_num_guests fact
   set_fact:
@@ -79,16 +79,16 @@
 
 - name: extract output virt.num_guests fact
   set_fact:
-    virt_num_guests: "{{ virt_num_guests['stdout_lines'][-1] if internal_have_virsh else None }}"
+    virt_num_guests: "{{ virt_num_guests['stdout_lines'][-1] if internal_have_virsh_user else None }}"
   ignore_errors: yes
 
 - name: gather virt.num_running_guests fact
   raw: export LANG=C LC_ALL=C; virsh -c qemu:///system --readonly list --uuid | wc -l
   register: internal_virt_num_running_guests
   ignore_errors: yes
-  when: 'internal_have_virsh'
+  when: 'internal_have_virsh_user'
 
 - name: extract output virt.num_running_guests fact
   set_fact:
-    virt_num_running_guests: "{{ internal_virt_num_running_guests['stdout_lines'][-1] if internal_have_virsh else None }}"
+    virt_num_running_guests: "{{ internal_virt_num_running_guests['stdout_lines'][-1] if internal_have_virsh_user else None }}"
   ignore_errors: yes
