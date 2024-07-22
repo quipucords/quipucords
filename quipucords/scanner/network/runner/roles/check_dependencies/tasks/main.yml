@@ -39,8 +39,10 @@
 
 - name: gather internal_have_yum_cmd
   raw: export LANG=C LC_ALL=C; command -v yum
+  become: yes
   register: internal_have_yum_cmd
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_yum
   set_fact:
