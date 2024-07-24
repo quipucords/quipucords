@@ -1,19 +1,9 @@
-export LANG=C LC_ALL=C TERM=dumb; /usr/bin/systemctl list-unit-files --no-pager
+export LANG=C LC_ALL=C TERM=dumb; systemctl list-unit-files --no-pager
+export LANG=C LC_ALL=C TERM=dumb; systemctl status 'jws*-tomcat.service' 2>/dev/null | grep "Apache Tomcat Web" | grep -o 'jws[0-9]\+'
 export LANG=C LC_ALL=C;
 subscription-manager identity 2>/dev/null |
 grep 'system identity:' |
 sed 's/system identity:\s*//'
-export LANG=C LC_ALL=C; /sbin/chkconfig --list
-export LANG=C LC_ALL=C; /sbin/ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
-export LANG=C LC_ALL=C; /sbin/ip address show
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s bios-vendor 2>/dev/null
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s bios-version 2>/dev/null
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode -s system-uuid 2>/dev/null
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode -t 4 | egrep 'Designation|Status'
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode -t chassis 2>/dev/null | grep "Asset Tag"
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode -t system 2>/dev/null | grep "Product Name"
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode 2>/dev/null | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
-export LANG=C LC_ALL=C; /usr/sbin/dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
 export LANG=C LC_ALL=C; FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*activemq-\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
 export LANG=C LC_ALL=C; FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*camel-core\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
 export LANG=C LC_ALL=C; FOUND=""; for jar in `find {{search_directories}} -type f -xdev -name \*cxf-rt\*redhat\*.jar 2>/dev/null | grep fuse | sed -n 's/.*\(redhat-[0-9]\{6\}\).*/\1/p' | sort -u`; do if [ ! -z "${jar}" ]; then if [ ! -z "$FOUND" ]; then FOUND="$FOUND; $jar"; else FOUND=${jar}; fi; fi; done; echo ${FOUND}
@@ -23,13 +13,33 @@ export LANG=C LC_ALL=C; cat '{{ item }}/README.txt' 2>/dev/null
 export LANG=C LC_ALL=C; cat '{{ item }}/modules/layers.conf' 2>/dev/null
 export LANG=C LC_ALL=C; cat '{{ item }}/version.txt' 2>/dev/null
 export LANG=C LC_ALL=C; cat /etc/passwd
-export LANG=C LC_ALL=C; command -v /usr/sbin/dmidecode
+export LANG=C LC_ALL=C; chkconfig --list
+export LANG=C LC_ALL=C; command -v chkconfig
+export LANG=C LC_ALL=C; command -v dmidecode
+export LANG=C LC_ALL=C; command -v ifconfig
+export LANG=C LC_ALL=C; command -v ip
+export LANG=C LC_ALL=C; command -v java
+export LANG=C LC_ALL=C; command -v locate
 export LANG=C LC_ALL=C; command -v subscription-manager
+export LANG=C LC_ALL=C; command -v systemctl
+export LANG=C LC_ALL=C; command -v unzip
+export LANG=C LC_ALL=C; command -v virt-what
+export LANG=C LC_ALL=C; command -v yum
+export LANG=C LC_ALL=C; dmidecode -s bios-vendor 2>/dev/null
+export LANG=C LC_ALL=C; dmidecode -s bios-version 2>/dev/null
+export LANG=C LC_ALL=C; dmidecode -s system-uuid 2>/dev/null
+export LANG=C LC_ALL=C; dmidecode -t 4 | egrep 'Designation|Status'
+export LANG=C LC_ALL=C; dmidecode -t chassis 2>/dev/null | grep "Asset Tag"
+export LANG=C LC_ALL=C; dmidecode -t system 2>/dev/null | grep "Product Name"
+export LANG=C LC_ALL=C; dmidecode 2>/dev/null | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
+export LANG=C LC_ALL=C; dmidecode | grep -A4 'System Information' | grep 'Manufacturer' | sed -n -e 's/^.*Manufacturer:\s//p'
 export LANG=C LC_ALL=C; echo "user has sudo" 2>/dev/null
 export LANG=C LC_ALL=C; find {{search_directories}} -xdev -type f -name jboss-modules.jar 2> /dev/null | xargs -n 1 --no-run-if-empty dirname | sort -u
 export LANG=C LC_ALL=C; find {{search_directories}} -xdev -type f -name karaf.jar 2> /dev/null | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize | sort -u
 export LANG=C LC_ALL=C; for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
-export LANG=C LC_ALL=C; if [ -f /sbin/ifconfig ] ; then /sbin/ifconfig -a; else hostname -I 2>/dev/null; fi
+export LANG=C LC_ALL=C; if command -v ifconfig >/dev/null ; then ifconfig -a; else hostname -I 2>/dev/null; fi
+export LANG=C LC_ALL=C; ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
+export LANG=C LC_ALL=C; ip address show
 export LANG=C LC_ALL=C; java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
 export LANG=C LC_ALL=C; java -jar '{{ item }}/jboss-as/bin/run.jar' --version
 export LANG=C LC_ALL=C; locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
@@ -38,6 +48,7 @@ export LANG=C LC_ALL=C; locate camel-core | grep fuse | sed -n 's/.*\(redhat-[0-
 export LANG=C LC_ALL=C; locate cxf-rt | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
 export LANG=C LC_ALL=C; locate jboss-modules.jar | xargs -n 1 --no-run-if-empty dirname
 export LANG=C LC_ALL=C; locate karaf.jar | sed -n -e 's/\(.*\)lib\/karaf\.jar$/\1/p' | xargs -n 1 --no-run-if-empty readlink --canonicalize
+export LANG=C LC_ALL=C; locate tomcat?/bin/startup.sh | awk -F 'tomcat' '{print $1}' | head -1
 export LANG=C LC_ALL=C; ls --full-time /root/anaconda-ks.cfg 2>/dev/null | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}'
 export LANG=C LC_ALL=C; ls -1 "{{ item }}" 2>/dev/null
 export LANG=C LC_ALL=C; ls -1 "{{ item }}"/bin 2>/dev/null
