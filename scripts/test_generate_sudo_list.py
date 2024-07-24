@@ -156,7 +156,10 @@ def test_compare_lists_equal_files(tmp_path, capsys):
 def test_compare_lists_diff_files(tmp_path, capsys):
     """Verify expected output for different sudo command lists."""
     file_path = tmp_path / "sudo_list.txt"
-    with mock.patch("scripts.generate_sudo_list.filecmp.cmp", return_value=False):
+    with (
+        mock.patch("scripts.generate_sudo_list.filecmp.cmp", return_value=False),
+        pytest.raises(SystemExit),
+    ):
         compare_sudo_cmds_lists(file_path)
     expected_stderr = "Error: The sudo command list document has been modified.\n"
     out, err = capsys.readouterr()
@@ -168,8 +171,11 @@ def test_compare_lists_diff_files(tmp_path, capsys):
 def test_compare_lists_nonexistent_file(tmp_path, capsys):
     """Verify expected output for nonexistent sudo command file path."""
     file_path = tmp_path / "sudo_list.txt"
-    with mock.patch(
-        "scripts.generate_sudo_list.filecmp.cmp", side_effect=FileNotFoundError()
+    with (
+        mock.patch(
+            "scripts.generate_sudo_list.filecmp.cmp", side_effect=FileNotFoundError()
+        ),
+        pytest.raises(SystemExit),
     ):
         compare_sudo_cmds_lists(file_path)
     expected_stderr = f"Error: {file_path} has not been found.\n"

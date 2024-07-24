@@ -44,6 +44,7 @@ def create_document_file(file_path):
 def compare_sudo_cmds_lists(file_path):
     """Compare the most updated sudo list with an existing one."""
     generated_doc = generate_sudo_cmds_document()
+    found_errors = False
 
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_file.write(generated_doc.encode())
@@ -52,10 +53,14 @@ def compare_sudo_cmds_lists(file_path):
                 sys.stderr.write(
                     "Error: The sudo command list document has been modified.\n"
                 )
+                found_errors = True
         except FileNotFoundError:
             sys.stderr.write(f"Error: {file_path} has not been found.\n")
+            found_errors = True
         finally:
             Path(temp_file.name).unlink()
+    if found_errors:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
