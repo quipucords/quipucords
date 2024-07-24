@@ -110,7 +110,7 @@
 # KARAF_HOME (or even whether it's Fuse-on-Karaf or Fuse-on-EAP).
 
 - name: look for fuse systemd service
-  raw: export LANG=C LC_ALL=C TERM=dumb; /usr/bin/systemctl list-unit-files --no-pager
+  raw: export LANG=C LC_ALL=C TERM=dumb; systemctl list-unit-files --no-pager
   register: internal_jboss_fuse_systemctl_unit_files
   ignore_errors: yes
   become: yes
@@ -122,7 +122,7 @@
   ignore_errors: yes
 
 - name: look for fuse in chkconfig
-  raw: export LANG=C LC_ALL=C; /sbin/chkconfig --list
+  raw: export LANG=C LC_ALL=C; chkconfig --list
   register: internal_jboss_fuse_chkconfig
   ignore_errors: yes
   become: yes

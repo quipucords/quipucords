@@ -38,7 +38,7 @@ def event_ok():
             "play": "group_0",
             "play_uuid": "6c946626-0f07-0f23-a006-000000000002",
             "play_pattern": " group_0 ",
-            "task": "set internal_have_rpm",
+            "task": "set internal_have_rpm_user",
             "task_uuid": "6c946626-0f07-0f23-a006-000000000038",
             "task_action": "set_fact",
             "resolved_action": "ansible.builtin.set_fact",
@@ -48,7 +48,7 @@ def event_ok():
             "host": "127.0.0.1",
             "remote_addr": "127.0.0.1",
             "res": {
-                "ansible_facts": {"internal_have_rpm": True},
+                "ansible_facts": {"internal_have_rpm_user": True},
                 "_ansible_no_log": None,
                 "changed": False,
             },
@@ -221,7 +221,7 @@ class TestInspectCallback:
         callback.event_callback(event_ok)
         patched_task_on_ok.assert_called_once_with(event_ok)
         # this host and facts are hardcoded on event_ok fixture
-        assert callback._ansible_facts["127.0.0.1"] == {"internal_have_rpm": True}
+        assert callback._ansible_facts["127.0.0.1"] == {"internal_have_rpm_user": True}
 
     @pytest.mark.parametrize(
         "ignore_errors,expected_messages",

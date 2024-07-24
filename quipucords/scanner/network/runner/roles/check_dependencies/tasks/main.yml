@@ -16,7 +16,7 @@
   ignore_errors: yes
 
 - name: gather internal_have_dmidecode_cmd
-  raw: export LANG=C LC_ALL=C; command -v /usr/sbin/dmidecode
+  raw: export LANG=C LC_ALL=C; command -v dmidecode
   register: internal_have_dmidecode_cmd
   become: yes
   ignore_errors: yes
@@ -27,20 +27,22 @@
     internal_have_dmidecode: "{{ internal_have_dmidecode_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_tune2fs_cmd
+- name: gather internal_have_tune2fs_user_cmd
   raw: export LANG=C LC_ALL=C; command -v tune2fs
-  register: internal_have_tune2fs_cmd
+  register: internal_have_tune2fs_user_cmd
   ignore_errors: yes
 
-- name: set internal_have_tune2fs
+- name: set internal_have_tune2fs_user
   set_fact:
-    internal_have_tune2fs: "{{ internal_have_tune2fs_cmd.get('rc') == 0 }}"
+    internal_have_tune2fs_user: "{{ internal_have_tune2fs_user_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_yum_cmd
   raw: export LANG=C LC_ALL=C; command -v yum
+  become: yes
   register: internal_have_yum_cmd
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_yum
   set_fact:
@@ -50,21 +52,23 @@
 - name: gather internal_have_java_cmd
   raw: export LANG=C LC_ALL=C; command -v java
   register: internal_have_java_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_java
   set_fact:
     internal_have_java: "{{ internal_have_java_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_rpm_cmd
+- name: gather internal_have_rpm_user_cmd
   raw: export LANG=C LC_ALL=C; command -v rpm
-  register: internal_have_rpm_cmd
+  register: internal_have_rpm_user_cmd
   ignore_errors: yes
 
-- name: set internal_have_rpm
+- name: set internal_have_rpm_user
   set_fact:
-    internal_have_rpm: "{{ internal_have_rpm_cmd.get('rc') == 0 }}"
+    internal_have_rpm_user: "{{ internal_have_rpm_user_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_subscription_manager_cmd
@@ -79,20 +83,22 @@
     internal_have_subscription_manager: "{{ internal_have_subscription_manager_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_virsh_cmd
+- name: gather internal_have_virsh_user_cmd
   raw: export LANG=C LC_ALL=C; command -v virsh
-  register: internal_have_virsh_cmd
+  register: internal_have_virsh_user_cmd
   ignore_errors: yes
 
-- name: set internal_have_virsh
+- name: set internal_have_virsh_user
   set_fact:
-    internal_have_virsh: "{{ internal_have_virsh_cmd.get('rc') == 0 }}"
+    internal_have_virsh_user: "{{ internal_have_virsh_user_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
 - name: gather internal_have_virt_what_cmd
   raw: export LANG=C LC_ALL=C; command -v virt-what
+  become: yes
   register: internal_have_virt_what_cmd
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_virt_what
   set_fact:
@@ -101,8 +107,10 @@
 
 - name: gather internal_have_locate_cmd
   raw: export LANG=C LC_ALL=C; command -v locate
+  become: yes
   register: internal_have_locate_cmd
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: test locate command
   raw: export LANG=C LC_ALL=C; locate echo
@@ -112,94 +120,94 @@
 
 - name: set internal_have_locate
   set_fact:
-    internal_have_locate: false
+    internal_have_locate: "{{ internal_have_locate_cmd.get('rc') == 0 and internal_test_locate.get('rc') == 0 }}"
   ignore_errors: yes
-
-- name: set internal_have_locate
-  set_fact:
-    internal_have_locate: true
-  ignore_errors: yes
-  when: (internal_have_locate_cmd.get('rc') == 0 and internal_test_locate.get('rc') == 0)
 
 - name: gather internal_have_systemctl_cmd
-  raw: export LANG=C LC_ALL=C; whereis systemctl
-  register: internal_whereis_systemctl_cmd
+  raw: export LANG=C LC_ALL=C; command -v systemctl
+  register: internal_have_systemctl_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_systemctl
   set_fact:
-    internal_have_systemctl: false
+    internal_have_systemctl: "{{ internal_have_systemctl_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: set internal_have_systemctl
-  set_fact:
-    internal_have_systemctl: true
+- name: gather internal_have_chkconfig_cmd
+  raw: export LANG=C LC_ALL=C; command -v chkconfig
+  register: internal_have_chkconfig_cmd
+  become: yes
   ignore_errors: yes
-  when: (internal_whereis_systemctl_cmd.get('rc') == 0 and internal_whereis_systemctl_cmd.get('stdout_lines')[-1] != 'systemctl:')
-
-- name: gather internal_whereis_chkconfig_cmd
-  raw: export LANG=C LC_ALL=C; whereis chkconfig
-  register: internal_whereis_chkconfig_cmd
-  ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_chkconfig
   set_fact:
-    internal_have_chkconfig: false
+    internal_have_chkconfig: "{{ internal_have_chkconfig_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: set internal_have_chkconfig
-  set_fact:
-    internal_have_chkconfig: true
+- name: gather internal_have_ifconfig_cmd
+  raw: export LANG=C LC_ALL=C; command -v ifconfig
+  register:  internal_have_ifconfig_cmd
+  become: yes
   ignore_errors: yes
-  when: (internal_whereis_chkconfig_cmd.get('rc') == 0 and internal_whereis_chkconfig_cmd.get('stdout_lines')[-1] != 'chkconfig:')
-
-- name: gather internal_whereis_ifconfig_cmd
-  raw: export LANG=C LC_ALL=C; whereis ifconfig
-  register:  internal_whereis_ifconfig_cmd
-  ignore_errors: yes
-
-- name: set internal_have_ifconfig default
-  set_fact:
-    internal_have_ifconfig: false
-  ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_ifconfig
   set_fact:
-    internal_have_ifconfig: true
-  ignore_errors: yes
-  when: "internal_whereis_ifconfig_cmd.get('rc') == 0 and internal_whereis_ifconfig_cmd.get('stdout_lines')[-1] != 'ifconfig:'"
-
-- name: gather internal_whereis_ip_cmd
-  raw: export LANG=C LC_ALL=C; command -v /sbin/ip
-  register:  internal_whereis_ip_cmd
+    internal_have_ifconfig: "{{ internal_have_ifconfig_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: set internal_have_ip default
+- name: gather internal_have_ifconfig_user_cmd
+  raw: export LANG=C LC_ALL=C; command -v ifconfig
+  register:  internal_have_ifconfig_user_cmd
+  ignore_errors: yes
+
+- name: set internal_have_ifconfig_user
   set_fact:
-    internal_have_ip: false
+    internal_have_ifconfig_user: "{{ internal_have_ifconfig_user_cmd.get('rc') == 0 }}"
   ignore_errors: yes
+
+- name: gather internal_have_ip_cmd
+  raw: export LANG=C LC_ALL=C; command -v ip
+  register: internal_have_ip_cmd
+  become: yes
+  ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_ip
   set_fact:
-    internal_have_ip: true
+    internal_have_ip: "{{ internal_have_ip_cmd.get('rc') == 0 }}"
   ignore_errors: yes
-  when: "internal_whereis_ip_cmd.get('rc') == 0"
+
+- name: gather internal_have_ip_user_cmd
+  raw: export LANG=C LC_ALL=C; command -v ip
+  register: internal_have_ip_user_cmd
+  ignore_errors: yes
+
+- name: set internal_have_ip_user
+  set_fact:
+    internal_have_ip_user: "{{ internal_have_ip_user_cmd.get('rc') == 0 }}"
+  ignore_errors: yes
 
 - name: gather internal_have_unzip_cmd
   raw: export LANG=C LC_ALL=C; command -v unzip
   register: internal_have_unzip_cmd
+  become: yes
   ignore_errors: yes
+  when: 'user_has_sudo'
 
 - name: set internal_have_unzip
   set_fact:
     internal_have_unzip: "{{ internal_have_unzip_cmd.get('rc') == 0 }}"
   ignore_errors: yes
 
-- name: gather internal_have_rct_cmd
+- name: gather internal_have_rct_user_cmd
   raw: export LANG=C LC_ALL=C; command -v rct
-  register: internal_have_rct_cmd
+  register: internal_have_rct_user_cmd
   ignore_errors: yes
 
-- name: set internal_have_rct
+- name: set internal_have_rct_user
   set_fact:
-    internal_have_rct: "{{ internal_have_rct_cmd.get('rc') == 0 }}"
+    internal_have_rct_user: "{{ internal_have_rct_user_cmd.get('rc') == 0 }}"

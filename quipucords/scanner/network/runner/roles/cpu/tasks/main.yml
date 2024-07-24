@@ -70,7 +70,7 @@
   ignore_errors: yes
 
 - name: gather cpu.socket_count fact
-  raw: export LANG=C LC_ALL=C; /usr/sbin/dmidecode -t 4 | egrep 'Designation|Status'
+  raw: export LANG=C LC_ALL=C; dmidecode -t 4 | egrep 'Designation|Status'
   register: internal_cpu_socket_count_dmi_cmd
   become: yes
   ignore_errors: yes
