@@ -31,6 +31,8 @@ hatchling==1.25.0
     #   colorama
     #   sqlparse
     #   urllib3
+maturin==1.7.0
+    # via cryptography
 packaging==24.1 ; python_version >= "3.11" and python_version < "3.13"
     # via
     #   hatchling
@@ -52,7 +54,7 @@ semantic-version==2.10.0
 setuptools-rust==1.9.0
     # via
     #   bcrypt
-    #   cryptography
+    #   maturin
 setuptools-scm==7.1.0
     # via
     #   ansible-runner
@@ -70,8 +72,8 @@ wheel==0.43.0
     #   bcrypt
     #   cachetools
     #   click-repl
-    #   cryptography
     #   django-axes
+    #   maturin
     #   pynacl
     #   python-dateutil
     #   python-string-utils
@@ -96,6 +98,7 @@ setuptools==69.0.2 ; python_version >= "3.11" and python_version < "3.13"
     #   django-axes
     #   django-cors-headers
     #   gunicorn
+    #   maturin
     #   pathspec
     #   pluggy
     #   pyasn1
