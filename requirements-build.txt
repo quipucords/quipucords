@@ -75,6 +75,7 @@ wheel==0.43.0
     #   django-axes
     #   maturin
     #   pynacl
+    #   python-daemon
     #   python-dateutil
     #   python-string-utils
     #   pyyaml

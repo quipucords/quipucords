@@ -37,6 +37,15 @@ more-itertools = "^9.1.0"
 django-cors-headers = "^4.3.1"
 django-axes = "^6.3.0"
 
+# Temporary hack to handle: https://pagure.io/python-daemon/issue/92
+# quipucords does not directly use python-daemon, but our requirement
+# ansible-runner does, and ansible-runner simply declares '*' version.
+# Pinning python-daemon<3.0.0 works around this downstream build error:
+#   ModuleNotFoundError: No module named 'setuptools.extern'
+# This has been fixed in python-daemon source but not yet released.
+# We should remove this pinned version as soon as >3.0.1 is available.
+python-daemon = "<3.0.0"
+
 [tool.poetry.group.dev.dependencies]
 pip = "23.3.1"  # see https://github.com/quipucords/quipucords/pull/2559
 pytest = "^7.2.1"
