@@ -160,7 +160,7 @@ server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
-	$(PYTHON) quipucords/manage.py runserver --nostatic
+	DJANGO_DEBUG=1 $(PYTHON) quipucords/manage.py runserver --nostatic
 
 $(QUIPUCORDS_UI_PATH):
 	@echo "Couldn't find quipucords-ui repo (${QUIPUCORDS_UI_PATH})"

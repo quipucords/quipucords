@@ -109,14 +109,7 @@ if PRODUCTION:
 
 SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
 
-# SECURITY WARNING: Running with DEBUG=True is a *BAD IDEA*, but this is unfortunately
-# necessary because in some cases we still need to serve static files through Django.
-# Please consider this note from the official Django docs:
-# > This view will only work if DEBUG is True.
-# > That’s because this view is grossly inefficient and probably insecure. This is only
-# > intended for local development, and should never be used in production.
-# TODO FIXME Remove this dangerous default.
-DEBUG = env.bool("DJANGO_DEBUG", True)
+DEBUG = env.bool("DJANGO_DEBUG", False)
 
 if env.bool("QPC_URLLIB3_DISABLE_WARNINGS", False):
     # Optionally disable noisy urllib3 warnings.
