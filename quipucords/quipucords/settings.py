@@ -31,6 +31,7 @@ BASE_DIR = Path(__file__).absolute().parent.parent
 DEFAULT_DATA_DIR = Path(env.str("QUIPUCORDS_DATA_DIR", BASE_DIR.parent / "var"))
 
 PRODUCTION = env.bool("PRODUCTION", False)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # This suppresses warnings for models where an explicit primary key is not defined.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
