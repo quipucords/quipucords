@@ -109,7 +109,7 @@ if PRODUCTION:
 
 SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
 
-DEBUG = env.bool("DJANGO_DEBUG", False)
+DEBUG = False if PRODUCTION else env.bool("DJANGO_DEBUG", False)
 
 if env.bool("QPC_URLLIB3_DISABLE_WARNINGS", False):
     # Optionally disable noisy urllib3 warnings.
