@@ -263,8 +263,13 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
             result_store, credential, scan_task.source, manager_interrupt
         )
 
-        # Create parameters for ansible runner
-        runner_settings = {"job_timeout": int(settings.NETWORK_CONNECT_JOB_TIMEOUT)}
+        # Create parameters for ansible runner. For more info, see:
+        # https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
+        job_timeout = int(settings.NETWORK_CONNECT_JOB_TIMEOUT) * len(group_names)
+        runner_settings = {
+            "idle_timeout": job_timeout,  # Ansible default = 600 sec
+            "job_timeout": job_timeout,  # Ansible default = 3600 sec
+        }
         extra_vars_dict = {
             "variable_host": group_name,
             "ansible_ssh_timeout": settings.QPC_SSH_CONNECT_TIMEOUT,
