@@ -265,7 +265,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
 
         # Create parameters for ansible runner. For more info, see:
         # https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
-        job_timeout = int(settings.NETWORK_CONNECT_JOB_TIMEOUT) * len(group_names)
+        job_timeout = int(settings.NETWORK_CONNECT_JOB_TIMEOUT) * len(group_ips)
         runner_settings = {
             "idle_timeout": job_timeout,  # Ansible default = 600 sec
             "job_timeout": job_timeout,  # Ansible default = 3600 sec
