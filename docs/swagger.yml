@@ -562,6 +562,31 @@ paths:
             $ref: "#/definitions/ScanPagination"
         401:
           description: "Not authorized"
+  /scans/bulk_delete/:
+    post:
+      tags:
+        - "Scan"
+      summary: "Bulk delete scans"
+      description: "Bulk delete scans by ids"
+      operationId: "bulkDeleteScans"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "List of Scans IDs to delete or the string 'all'"
+        required: true
+        schema:
+          $ref: "#/definitions/BulkDeleteParameters"
+      responses:
+        200:
+          description: "Scans deleted"
+        400:
+          description: "Invalid input"
+        401:
+          description: "Not authorized"
   /scans/{scan_id}/:
     get:
       tags:
