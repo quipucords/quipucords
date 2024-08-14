@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.12"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository code
@@ -41,7 +41,7 @@ jobs:
             test-coverage,
             test-sudo-list,
           ]
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.12"]
     runs-on: ubuntu-latest
     services:
       postgres:
