@@ -265,6 +265,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 self._persist_results(result)
             # save stdout and stderr from ansible
             self._persist_ansible_logs(runner_obj)
+            self._persist_skipped_tasks(call)
 
             final_status = runner_obj.status
             if final_status == "canceled":
@@ -407,6 +408,17 @@ class InspectTaskRunner(ScanTaskRunner):
                 if log_contents and not log_contents.endswith("\n"):
                     log_contents += "\n"
                 file_obj.write(log_contents)
+
+    def _persist_skipped_tasks(self, call: InspectCallback):
+        """Persist a list of tasks that were skipped."""
+        if not settings.QPC_FEATURE_FLAGS.is_feature_active("REPORT_SKIPPED_TASKS"):
+            return
+
+        output_path = (
+            Path(settings.DEFAULT_DATA_DIR) / f"skipped-tasks-{self.scan_job.id}.txt"
+        )
+        skipped_everywhere = set.intersection(*call._skipped_facts.values())
+        output_path.write_text("\n".join(sorted(skipped_everywhere)))
 
     def _obtain_discovery_data(self):
         """Obtain discover scan data.  Either via new scan or paused scan.
