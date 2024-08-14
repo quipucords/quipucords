@@ -7,6 +7,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Generator
 
+from django.conf import settings
+
 import log_messages
 from api.inspectresult.model import InspectResult
 from scanner.network.utils import STOP_STATES
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 HOST_DONE = "host_done"
 TIMEOUT_RC = 124  # 'timeout's return code when it times out.
 UNKNOWN_HOST = "unknown_host"
+UNKNOWN_TASK_PATH = "unknown_task_path"
 
 
 @dataclass
@@ -34,6 +37,10 @@ class InspectCallback:
     def __init__(self, manager_interrupt):
         self._ansible_facts = defaultdict(dict)
         self._unreachable_hosts = set()
+        self._collect_skipped_tasks_enabled = (
+            settings.QPC_FEATURE_FLAGS.is_feature_active("REPORT_SKIPPED_TASKS")
+        )
+        self._skipped_facts = defaultdict(set)
         self.stopped = False
         self.interrupt = manager_interrupt
 
@@ -122,6 +129,25 @@ class InspectCallback:
         logger.error("[host=%s] UNREACHABLE - %s", host, error_msg)
         self._unreachable_hosts.add(host)
 
+    def task_on_skipped(self, event_dict):
+        """Handle skipped events.
+
+        This is only run when REPORT_SKIPPED_TASKS feature flag is active.
+        event_callback checks for the flag, so we don't need to do it here.
+        """
+        event_data = event_dict.get("event_data", {})
+        host = event_data.get("host", UNKNOWN_HOST)
+        task_path = event_data.get("task_path", UNKNOWN_TASK_PATH)
+        result = event_data.get("res", {})
+        loop_var_name = result.get("ansible_loop_var", "")
+        item_id = result.get(loop_var_name, "")
+        task_id = task_path
+        if item_id:
+            task_id = f"{task_path}[{item_id}]"
+
+        logger.debug("[host=%s] skipped task %s, item='%s'", host, task_path, item_id)
+        self._skipped_facts[host].add(task_id)
+
     def event_callback(self, event_dict=None):
         """
         Handle ansible events.
@@ -136,11 +162,12 @@ class InspectCallback:
         okay = ["runner_on_ok", "runner_item_on_ok"]
         failed = ["runner_on_failed", "runner_item_on_failed"]
         unreachable = ["runner_on_unreachable"]
-        runner_ignore = [
-            "runner_on_skipped",
-            "runner_item_on_skipped",
-            "runner_on_start",
-        ]
+        skipped = ["runner_on_skipped", "runner_item_on_skipped"]
+        runner_ignore = ["runner_on_start"]
+        if not self._collect_skipped_tasks_enabled:
+            runner_ignore.extend(skipped)
+            skipped = []
+
         try:
             event = event_dict["event"]
         except KeyError:
@@ -153,6 +180,7 @@ class InspectCallback:
                 event_dict,
             )
             return
+
         if event in runner_ignore:
             return
         elif event in okay:
@@ -161,6 +189,8 @@ class InspectCallback:
             self.task_on_failed(event_dict)
         elif event in unreachable:
             self.task_on_unreachable(event_dict)
+        elif event in skipped:
+            self.task_on_skipped(event_dict)
 
     def cancel_callback(self):
         """Control the cancel callback for ansible runner."""
