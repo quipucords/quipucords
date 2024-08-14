@@ -53,7 +53,7 @@ To work with the quipucords code, begin by cloning the repository:
 git clone git@github.com:quipucords/quipucords.git
 ```
 
-quipucords currently supports Python 3.11. Use your system package manager to ensure the correct version is available for your local environment.
+quipucords currently supports Python 3.12. Use your system package manager to ensure the correct version is available for your local environment.
 
 ## Initial setup
 

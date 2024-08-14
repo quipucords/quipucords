@@ -17,7 +17,7 @@ ENV QUIPUCORDS_LOG_LEVEL=INFO
 ENV QPC_LOG_DIRECTORY=/var/log
 
 COPY scripts/dnf /usr/local/bin/dnf
-ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.11-devel"
+ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.12-devel"
 RUN dnf install \
         git \
         glibc-langpack-en \
@@ -27,15 +27,15 @@ RUN dnf install \
         nmap-ncat \
         openssh-clients \
         procps-ng \
-        python3.11 \
-        python3.11-pip \
+        python3.12 \
+        python3.12-pip \
         sshpass \
         tar \
         which \
         ${BUILD_PACKAGES} \
         -y &&\
     dnf clean all &&\
-    python3.11 -m venv /opt/venv
+    python3.12 -m venv /opt/venv
 
 # set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
 RUN update-crypto-policies --set LEGACY
