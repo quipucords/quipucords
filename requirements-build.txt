@@ -6,13 +6,13 @@
 #
 calver==2022.6.26
     # via trove-classifiers
-cffi==1.17.0 ; python_version >= "3.11" and python_version < "3.13"
+cffi==1.17.0 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   cryptography
     #   pynacl
 cython==3.0.11
     # via pyyaml
-docutils==0.21.2 ; python_version >= "3.11" and python_version < "3.13"
+docutils==0.21.2 ; python_version >= "3.12" and python_version < "4.0"
     # via python-daemon
 flit-core==3.9.0
     # via
@@ -33,7 +33,7 @@ hatchling==1.25.0
     #   urllib3
 maturin==1.7.0
     # via cryptography
-packaging==24.1 ; python_version >= "3.11" and python_version < "3.13"
+packaging==24.1 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   hatchling
     #   setuptools-scm
@@ -47,7 +47,7 @@ poetry-core==1.9.0
     # via
     #   click-didyoumean
     #   rsa
-pycparser==2.22 ; python_version >= "3.11" and python_version < "3.13"
+pycparser==2.22 ; python_version >= "3.12" and python_version < "4.0"
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
@@ -57,20 +57,19 @@ setuptools-rust==1.10.1
     #   maturin
 setuptools-scm==8.0.4
     # via ansible-runner
-setuptools-scm==7.1.0
-    # via python-dateutil
 setuptools-scm==8.1.0
     # via
     #   django-axes
-    #   pluggy
     #   setuptools-rust
+    #   setuptools-scm
+setuptools-scm==7.1.0
+    # via python-dateutil
 trove-classifiers==2024.7.2
     # via hatchling
-typing-extensions==4.12.2 ; python_version >= "3.11" and python_version < "3.13"
+typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
     # via setuptools-scm
 wheel==0.44.0
     # via
-    #   async-timeout
     #   bcrypt
     #   cachetools
     #   click-repl
@@ -85,30 +84,29 @@ wheel==0.44.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==72.2.0 ; python_version >= "3.11" and python_version < "3.13"
-    # via
-    #   ansible
-    #   ansible-core
-    #   async-timeout
-    #   bcrypt
-    #   cachetools
-    #   calver
-    #   cffi
-    #   click-repl
-    #   django
-    #   django-axes
-    #   django-cors-headers
-    #   gunicorn
-    #   pathspec
-    #   pyasn1
-    #   pyasn1-modules
-    #   python-daemon
-    #   pyyaml
-    #   resolvelib
-    #   setuptools-scm
-    #   tzdata
-    #   whitenoise
-setuptools==69.0.2 ; python_version >= "3.11" and python_version < "3.13"
+setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible-runner
     #   setuptools-scm
+setuptools==72.2.0 ; python_version >= "3.12" and python_version < "4.0"
+    # via
+    #   ansible
+    #   ansible-core
+    #   cachetools
+    #   cffi
+    #   click-repl
+    #   cryptography
+    #   django
+    #   django-cors-headers
+    #   gunicorn
+    #   pyasn1
+    #   pyasn1-modules
+    #   python-daemon
+    #   python-dateutil
+    #   pyyaml
+    #   resolvelib
+    #   setuptools-rust
+    #   setuptools-scm
+    #   trove-classifiers
+    #   tzdata
+    #   whitenoise
