@@ -67,7 +67,9 @@ ipython = "^8.10.0"
 django-extensions = "^3.2.1"
 notebook = "^6.5.3"
 ruff = "^0"
-celery = {extras = ["pytest"], version = "^5.3.0"}
+# FixMe: we had to hold back celery version because 5.4.0 introduced
+# some regressions in our unit tests
+celery = {extras = ["pytest"], version = ">=5.3,<5.4"}
 debugpy = "^1.8.5"
 
 [tool.pytest.ini_options]

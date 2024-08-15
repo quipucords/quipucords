@@ -34,9 +34,7 @@ hatchling==1.25.0
 maturin==1.7.0
     # via cryptography
 packaging==24.1 ; python_version >= "3.12" and python_version < "4.0"
-    # via
-    #   hatchling
-    #   setuptools-scm
+    # via setuptools-scm
 pathspec==0.12.1
     # via hatchling
 pbr==6.0.0
@@ -55,13 +53,13 @@ setuptools-rust==1.10.1
     # via
     #   bcrypt
     #   maturin
-setuptools-scm==8.0.4
-    # via ansible-runner
 setuptools-scm==8.1.0
     # via
     #   django-axes
     #   setuptools-rust
     #   setuptools-scm
+setuptools-scm==8.0.4
+    # via ansible-runner
 setuptools-scm==7.1.0
     # via python-dateutil
 trove-classifiers==2024.7.2
@@ -84,10 +82,6 @@ wheel==0.44.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
-    # via
-    #   ansible-runner
-    #   setuptools-scm
 setuptools==72.2.0 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
@@ -95,10 +89,12 @@ setuptools==72.2.0 ; python_version >= "3.12" and python_version < "4.0"
     #   cachetools
     #   cffi
     #   click-repl
-    #   cryptography
     #   django
     #   django-cors-headers
     #   gunicorn
+    #   maturin
+    #   pathspec
+    #   pluggy
     #   pyasn1
     #   pyasn1-modules
     #   python-daemon
@@ -110,3 +106,7 @@ setuptools==72.2.0 ; python_version >= "3.12" and python_version < "4.0"
     #   trove-classifiers
     #   tzdata
     #   whitenoise
+setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
+    # via
+    #   ansible-runner
+    #   setuptools-scm
