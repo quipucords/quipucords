@@ -72,7 +72,7 @@ def inspect_scan_job():
     return connect_task.job
 
 
-@override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test__prepare_and_process_hosts_using_celery(
     mock_prepare_hosts, mock__request_host_details, celery_worker, inspect_scan_job

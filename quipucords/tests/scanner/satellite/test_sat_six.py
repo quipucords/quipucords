@@ -5,6 +5,7 @@ from unittest.mock import ANY, patch
 
 import pytest
 import requests_mock
+from django.test import override_settings
 from faker import Faker
 
 from api.models import (
@@ -31,6 +32,20 @@ from scanner.satellite.utils import construct_url
 from tests.scanner.test_util import create_scan_job
 
 fake = Faker()
+
+
+@pytest.fixture(scope="module")
+def scan_manager():
+    """
+    Override conftest.scan_manager pytest fixture to do nothing in this test module.
+
+    This is necessary because conftest.scan_manager is set to autouse=True, which means
+    it patches *all* tests, but we specifically *do not want* its patches applied here.
+    Instead, we want the real Celery scan manager to run synchronously and execute all
+    of its tasks.
+    """
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        yield
 
 
 class TestSatelliteSixV1:
@@ -69,7 +84,19 @@ class TestSatelliteSixV1:
 
         conn_result = self.api.connect_scan_task.connection_result
         sys_result = SystemConnectionResult(
-            name="sys1_1",
+            name="sys1",
+            status=InspectResult.SUCCESS,
+            task_connection_result=conn_result,
+        )
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name="sys2",
+            status=InspectResult.SUCCESS,
+            task_connection_result=conn_result,
+        )
+        sys_result.save()
+        sys_result = SystemConnectionResult(
+            name="sys3",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
@@ -461,56 +488,65 @@ class TestSatelliteSixV1:
             with pytest.raises(SatelliteError):
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
-    @patch(
-        "multiprocessing.pool.Pool.starmap",
-        return_value=[
-            {
-                "unique_name": "sys_1",
-                "system_inspection_result": "failed",
-                "host_fields_response": {},
-                "host_subscriptions_response": {},
-            }
-        ],
-    )
     @pytest.mark.django_db
-    def test_hosts_facts(self, mock_pool):
+    def test_hosts_facts(self):
         """Test the method hosts."""
         hosts_url = (
             "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
         )
-        with patch.object(SatelliteSixV1, "get_orgs", return_value=[1]):
-            with patch("scanner.satellite.six.request_host_details", return_value={}):
-                with requests_mock.Mocker() as mocker:
-                    url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
-                    jsonresult = {
-                        "results": [
-                            {"uuid": "1", "name": "sys1"},
-                            {"uuid": "2", "name": "sys2"},
-                            {"uuid": "3", "name": "sys3"},
-                        ],
-                        "per_page": 100,
-                        "total": 3,
-                    }
-                    mocker.get(url, status_code=200, json=jsonresult)
-                    self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
-                    assert self.scan_task.get_result().count() == 1
+        hosts_url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
+        hosts_jsonresult = {
+            "results": [
+                {"uuid": "1", "name": "sys1"},
+                {"uuid": "2", "name": "sys2"},
+                {"uuid": "3", "name": "sys3"},
+            ],
+            "per_page": 100,
+            "total": 3,
+        }
+        _request_host_details = [
+            {
+                "unique_name": "sys_1",
+                "system_inspection_result": InspectResult.SUCCESS,
+                "host_fields_response": {},
+                "host_subscriptions_response": {},
+            },
+            {
+                "unique_name": "sys_2",
+                "system_inspection_result": InspectResult.SUCCESS,
+                "host_fields_response": {},
+                "host_subscriptions_response": {},
+            },
+            {
+                "unique_name": "sys_3",
+                "system_inspection_result": InspectResult.SUCCESS,
+                "host_fields_response": {},
+                "host_subscriptions_response": {},
+            },
+        ]
+        with (
+            patch.object(SatelliteSixV1, "get_orgs", return_value=[1]),
+            patch(
+                "scanner.satellite.six._request_host_details",
+                side_effect=_request_host_details,
+            ),
+            requests_mock.Mocker() as mocker,
+        ):
+            mocker.get(hosts_url, status_code=200, json=hosts_jsonresult)
+            self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
+            assert self.scan_task.get_result().count() == 3
 
     @pytest.mark.django_db
     def test_hosts_facts_multiple_orgs_duplicate_hosts(self):
         """
-        Assert hosts_facts correctly de-dupes hosts across multiple orgs.
+        Assert _requests_hosts_unique correctly de-dupes hosts across multiple orgs.
 
         This test assumes that the satellite system could have two orgs and that those
         orgs may contain overlapping hosts.
         """
-        hosts_url = (
-            "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
-        )
         org_a_id = fake.pyint()
         org_b_id = fake.pyint()
 
-        url_org_a = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=org_a_id)
-        url_org_b = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=org_b_id)
         unique_hosts = [
             {"uuid": fake.uuid4(), "name": "sys1"},
             {"uuid": fake.uuid4(), "name": "sys2"},
@@ -519,46 +555,17 @@ class TestSatelliteSixV1:
         ]
         org_a_hosts = unique_hosts[:3]
         org_b_hosts = unique_hosts[1:]  # should overlap with org_a_hosts
-        jsonresults = [
-            {
-                "results": org_a_hosts,
-                "per_page": 100,
-                "total": len(org_a_hosts),
-            },
-            {
-                "results": org_b_hosts,
-                "per_page": 100,
-                "total": len(org_b_hosts),
-            },
-        ]
+        request_results = [org_a_hosts, org_b_hosts]
 
         with (
             patch.object(SatelliteSixV1, "get_orgs", return_value=[org_a_id, org_b_id]),
-            patch.object(SatelliteSixV1, "prepare_hosts") as mock_prepare_hosts,
-            patch(
-                "scanner.satellite.six.request_host_details", return_value={}
-            ) as mock_request_host_details,
-            patch("scanner.satellite.utils.validate_task_stats", return_value=True),
-            patch("multiprocessing.pool.Pool.starmap") as mock_pool_starmap,
-            requests_mock.Mocker() as mocker,
+            patch("scanner.satellite.six.request_results", side_effect=request_results),
         ):
-            mock_prepare_hosts.side_effect = lambda x: list(x)
-            mocker.get(url_org_a, status_code=200, json=jsonresults[0])
-            mocker.get(url_org_b, status_code=200, json=jsonresults[1])
-
-            self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
-
-            # This assertion warrants some explanation...
-            # For this test, we want to see if prepare_hosts was given a list of de-
-            # duped hosts, but it's difficult to assert equality with the generator that
-            # would normally be passed into it. So, we patch prepare_hosts's behavior to
-            # simply return its input cast to a list, which should match our expected
-            # list. Since the output of prepare_hosts goes immediately into
-            # Pool.starmap, we check that Pool.starmap is called with what we expect is
-            # the unique list.
-            mock_pool_starmap.assert_called_with(
-                mock_request_host_details, unique_hosts
+            calculated_hosts = sorted(
+                list(self.api._requests_hosts_unique()), key=lambda x: x["uuid"]
             )
+            expected_hosts = sorted(unique_hosts, key=lambda x: x["uuid"])
+            assert expected_hosts == calculated_hosts
 
 
 class TestSatelliteSixV2:
@@ -1061,19 +1068,8 @@ class TestSatelliteSixV2:
             with pytest.raises(SatelliteError):
                 self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
 
-    @patch(
-        "multiprocessing.pool.Pool.starmap",
-        return_value=[
-            {
-                "unique_name": "sys_1",
-                "system_inspection_result": "success",
-                "host_fields_response": {},
-                "host_subscriptions_response": {},
-            }
-        ],
-    )
     @pytest.mark.django_db
-    def test_hosts_facts(self, mock_pool):
+    def test_hosts_facts(self):
         """Test the hosts_facts method."""
         scan_options = {"max_concurrency": 10}
         scan_job, scan_task = create_scan_job(
@@ -1099,7 +1095,23 @@ class TestSatelliteSixV2:
         sys_result.save()
         api.connect_scan_task.save()
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
-        with requests_mock.Mocker() as mocker:
+
+        _request_host_details = [
+            {
+                "unique_name": "sys_1",
+                "system_inspection_result": InspectResult.SUCCESS,
+                "host_fields_response": {},
+                "host_subscriptions_response": {},
+            },
+        ]
+
+        with (
+            patch(
+                "scanner.satellite.six._request_host_details",
+                side_effect=_request_host_details,
+            ),
+            requests_mock.Mocker() as mocker,
+        ):
             url = construct_url(url=hosts_url, sat_host="1.2.3.4")
             jsonresult = {
                 "total": 1,

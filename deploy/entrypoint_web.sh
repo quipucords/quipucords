@@ -27,25 +27,13 @@ handle_certificates() {
     fi
 }
 
-if [[ "${QPC_ENABLE_CELERY_SCAN_MANAGER:-0}" == "0" ]]; then
-    # ssh-agent is required for thread-based scan manager
-    # shellcheck disable=SC2312
-    eval "$(ssh-agent -s)"
+if [[ "${QUIPUCORDS_HTTPS_ON}" == "1" ]]; then
     # handling certificates is only required for our legacy gunicorn configuration.
     # in the future discovery won't require any of this and a nginx proxy will
     # handle this (DISCOVERY-522)
     handle_certificates
-    GUNICORN_CONF="/deploy/legacy_gunicorn_conf.py"
-else
-    # our gunicorn config is a relic from the past - gunicorn standards are good enough
-    # 1. with this simpler config we delegate to nginx to deal with https shenanigans
-    # 2. we can set a higher number of workers, since there's no risk for race conditions
-    #    with the celery-based manager
-    if [[ "${QUIPUCORDS_HTTPS_ON}" == "1" ]]; then
-        handle_certificates
-    fi
-    GUNICORN_CONF="/deploy/gunicorn_conf.py"
 fi
+GUNICORN_CONF="/deploy/gunicorn_conf.py"
 
 SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
 SCRIPT_DIR=$(dirname "${SCRIPT_PATH}")

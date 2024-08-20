@@ -21,6 +21,20 @@ from tests.factories import ScanJobFactory, ScanTaskFactory, SourceFactory
 from tests.utils import fake_semver, raw_facts_generator
 
 
+@pytest.fixture(scope="module")
+def scan_manager():
+    """
+    Override conftest.scan_manager pytest fixture to do nothing in this test module.
+
+    This is necessary because conftest.scan_manager is set to autouse=True, which means
+    it patches *all* tests, but we specifically *do not want* its patches applied here.
+    Instead, we want the real Celery scan manager to run synchronously and execute all
+    of its tasks.
+    """
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        yield
+
+
 @pytest.fixture
 def connect_scan_job():
     """Prepare a "connect" type ScanJob."""
@@ -178,15 +192,6 @@ def mock__finalize_scan():
         yield mock_task
 
 
-@override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=False)
-@pytest.mark.django_db
-def test_not_celery_runner_if_not_enabled(connect_scan_job):
-    """Test that the correct CeleryBasedScanJobRunner class is chosen."""
-    job_runner = job.ScanJobRunner(connect_scan_job)
-    assert not isinstance(job_runner, job.CeleryBasedScanJobRunner)
-
-
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
 @pytest.mark.django_db
 def test_celery_based_job_runner(connect_scan_job):
     """Test that the correct not-CeleryBasedScanJobRunner class is chosen."""
@@ -194,7 +199,7 @@ def test_celery_based_job_runner(connect_scan_job):
     assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
 
 
-@override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test_run_celery_based_job_runner_only_connect(
     mock__celery_run_task_runner,
@@ -222,7 +227,7 @@ def test_run_celery_based_job_runner_only_connect(
     mock__finalize_scan.assert_called_once()
 
 
-@override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test_run_celery_based_job_runner_inspect_one_job_one_source(
     mock__celery_run_task_runner,
@@ -244,7 +249,7 @@ def test_run_celery_based_job_runner_inspect_one_job_one_source(
     mock__finalize_scan.assert_called_once()
 
 
-@override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
     mock__celery_run_task_runner,
@@ -266,7 +271,6 @@ def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
     mock__finalize_scan.assert_called_once()
 
 
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
 @pytest.mark.django_db
 @pytest.mark.dbcompat
 def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
@@ -288,7 +292,7 @@ def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     assert deployments_report.system_fingerprints.count() == 1
 
 
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True, QPC_ENABLE_CELERY_SCAN_MANAGER=True)
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db
 def test_fingerprint_job_canceled(fingerprint_only_scanjob, mocker):
     """Test that a fingerprint scan job handles if a scan job is canceled."""

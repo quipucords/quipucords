@@ -4,12 +4,10 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from functools import cached_property
-from multiprocessing import Pool, Value
+from multiprocessing import Value
 
 import celery
-from django.conf import settings
 from django.db import transaction
-from more_itertools import chunked
 
 from api.inspectresult.model import InspectGroup
 from api.models import (
@@ -19,7 +17,6 @@ from api.models import (
     ScanTask,
     SystemConnectionResult,
 )
-from api.scanjob.model import ScanJob
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
 from scanner.exceptions import ScanCancelError, ScanPauseError
@@ -146,14 +143,9 @@ class SatelliteInterface(ABC):
         process_results: Callable,
         manager_interrupt: Value = None,
     ):
-        if settings.QPC_ENABLE_CELERY_SCAN_MANAGER:
-            self._prepare_and_process_hosts_using_celery(
-                hosts, request_host_details, process_results
-            )
-        else:
-            self._prepare_and_process_hosts_using_multiprocessing(
-                hosts, request_host_details, process_results, manager_interrupt
-            )
+        self._prepare_and_process_hosts_using_celery(
+            hosts, request_host_details, process_results
+        )
 
     def _prepare_and_process_hosts_using_celery(
         self,
@@ -200,31 +192,6 @@ class SatelliteInterface(ABC):
             .get(disable_sync_subtasks=False)
         )
         process_results(results=results)
-
-    def _prepare_and_process_hosts_using_multiprocessing(
-        self,
-        hosts: Iterable[dict],
-        request_host_details: Callable,
-        process_results: Callable,
-        manager_interrupt: Value,
-    ):
-        """Prepare and process hosts using multiprocessing.Pool.
-
-        :param hosts: iterable of host dicts
-        :param request_host_details: API version-specific function to get host details
-        :param process_results: API version-specific function to process results
-        :param manager_interrupt: shared multiprocessing value with possible interrupt
-        """
-        with Pool(processes=self.max_concurrency) as pool:
-            for chunk in chunked(hosts, self.max_concurrency):
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-                    raise SatelliteCancelError()
-
-                if manager_interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-                    raise SatellitePauseError()
-                host_params = self.prepare_hosts(chunk)
-                results = pool.starmap(request_host_details, host_params)
-                process_results(results=results)
 
     def _prepare_host_logging_options(self):
         return {

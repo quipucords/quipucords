@@ -12,7 +12,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core import management
 from django.test import Client as DjangoClient
-from django.test import override_settings
 
 
 @pytest.fixture(scope="session")
@@ -26,6 +25,18 @@ def django_db_setup(django_db_setup, django_db_blocker):
 
 
 @pytest.fixture(autouse=True)
+def skip_celery_task_is_revoked(mocker):
+    """
+    Bypass celery_task_is_revoked when running tests.
+
+    celery_task_is_revoked will never work in isolated unit test runs because it
+    requires Celery to have a real running broker/result backend (e.g. Redis).
+    """
+    with mocker.patch("scanner.tasks.celery_task_is_revoked", return_value=False):
+        yield
+
+
+@pytest.fixture(autouse=True)
 def disable_redis_cache(settings):
     """Disable the Redis backend cache and use the local memory cache instead."""
     settings.CACHES = {
@@ -36,12 +47,6 @@ def disable_redis_cache(settings):
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         },
     }
-
-
-@pytest.fixture(autouse=True)
-def disable_celery_until_we_are_ready(settings):
-    """Disable Celery scan manager in tests until we are ready to switch everything."""
-    settings.QPC_ENABLE_CELERY_SCAN_MANAGER = False
 
 
 @pytest.fixture(autouse=True)
@@ -62,10 +67,9 @@ def scan_manager(mocker):
     from tests.dummy_scan_manager import DummyScanManager
 
     _manager = DummyScanManager()
-    mocker.patch("scanner.manager.Manager", DummyScanManager)
+    mocker.patch("scanner.manager.CeleryScanManager", DummyScanManager)
     mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    with override_settings(QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER=True):
-        yield _manager
+    yield _manager
 
 
 @pytest.fixture

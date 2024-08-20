@@ -464,55 +464,42 @@ if not AXES_ENABLED or not AXES_LOCK_OUT_AT_FAILURE:
 # Load Feature Flags
 QPC_FEATURE_FLAGS = FeatureFlag()
 
-# Enable or disable various behaviors
-QPC_DISABLE_THREADED_SCAN_MANAGER = env.bool("QPC_DISABLE_THREADED_SCAN_MANAGER", False)
-QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER = env.bool(
-    "QPC_DISABLE_MULTIPROCESSING_SCAN_JOB_RUNNER", False
-)
-QPC_ENABLE_CELERY_SCAN_MANAGER = env.bool("QPC_ENABLE_CELERY_SCAN_MANAGER", False)
-
-# Old hidden/buried configurations that should be removed or renamed
-MAX_TIMEOUT_ORDERLY_SHUTDOWN = env.int("MAX_TIMEOUT_ORDERLY_SHUTDOWN", 30)
-QUIPUCORDS_MANAGER_HEARTBEAT = env.int("QUIPUCORDS_MANAGER_HEARTBEAT", 60 * 15)
-
 QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS = (
     False
     if PRODUCTION
     else env.bool("QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS", default=False)
 )
 
-# Defining both local memory and Redis as Django back-end caches.
-#
-# For now, we're keeping the default as local memory cache, this way
-# the application will continue to work without the Celery scan manager enabled.
-# Once quipucords only supports the Celery Scan Manager and Redis, we can then
-# switch the default to be Redis.
-
-# When enabling the Celery Scan Manager, we want to also enable the Redis
-# Cache back-end. That can be disabled via QUIPUCORDS_ENABLE_REDIS_CACHE
-# for development or testing purposes.
-
-QUIPUCORDS_ENABLE_REDIS_CACHE = env.bool(
-    "QUIPUCORDS_ENABLE_REDIS_CACHE", QPC_ENABLE_CELERY_SCAN_MANAGER
-)
+# The Redis cache backend can be disabled via QUIPUCORDS_ENABLE_REDIS_CACHE
+# for development or testing purposes. Overriding to disable the Redis cache
+# will switch to Django's built-in local memory cache.
+QUIPUCORDS_ENABLE_REDIS_CACHE = env.bool("QUIPUCORDS_ENABLE_REDIS_CACHE", default=True)
 
 QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-    "redis": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-}
-
 if QUIPUCORDS_ENABLE_REDIS_CACHE:
-    CACHES["redis"] = {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "KEY_PREFIX": "discovery",
-        "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+            "KEY_PREFIX": "discovery",
+            "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+        },
+        "redis": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+            "KEY_PREFIX": "discovery",
+            "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+        },
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
+        "redis": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        },
     }
 
 # Let's define various cache TTL's
