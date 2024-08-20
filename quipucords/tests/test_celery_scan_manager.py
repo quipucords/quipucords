@@ -3,7 +3,6 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from django.test import override_settings
 
 from api.models import ScanTask
 from scanner import manager
@@ -20,22 +19,14 @@ def scan_manager():
     """
 
 
-# @pytest.mark.django_db
 class TestCeleryScanManager:
     """Test the CeleryScanManager class."""
 
     def test_default_scan_manager_setting(self):
-        """Assert the default manager class has not changed."""
-        with override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=False):
-            manager.reinitialize()
-            assert isinstance(manager.SCAN_MANAGER, manager.Manager)
-            assert manager.SCAN_MANAGER.__class__.__name__ == "Manager"
-
-    def test_celery_scan_manager_setting(self):
-        """Assert the manager class changes to Celery."""
-        with override_settings(QPC_ENABLE_CELERY_SCAN_MANAGER=True):
-            manager.reinitialize()
-            assert manager.SCAN_MANAGER.__class__.__name__ == "CeleryScanManager"
+        """Assert the default manager class is CeleryScanManager."""
+        manager.reinitialize()
+        assert isinstance(manager.SCAN_MANAGER, manager.CeleryScanManager)
+        assert manager.SCAN_MANAGER.__class__.__name__ == "CeleryScanManager"
 
     def test_celery_manager_interface_isalive(self):
         """Assert CeleryScanManager implements Manager isalive."""

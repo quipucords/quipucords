@@ -29,7 +29,7 @@ class DummyScanManager:
             logger.info("CURRENT QUEUE %s", self._queue)
             job_runner: ScanJobRunner = self._queue.pop()
             logger.info("STARTING JOB %s", job_runner.scan_job)
-            job_runner.start()
+            job_runner.run()
 
     def kill(self, job, command):
         """Mimic ScanManager kill method signature."""

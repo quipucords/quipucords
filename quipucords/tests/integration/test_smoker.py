@@ -84,7 +84,11 @@ class Smoker:
         return scan_id
 
     @pytest.fixture
-    def scan_response(self, client_logged_in, scan_id, scan_manager):
+    def scan_response(
+        self,
+        client_logged_in,
+        scan_id,
+    ):
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = client_logged_in.post(
             reverse("v1:scan-filtered-jobs", args=(scan_id,))
@@ -93,7 +97,7 @@ class Smoker:
         assert (
             create_scan_job_response.status_code == status.HTTP_201_CREATED
         ), create_scan_job_response.json()
-        scan_manager.work()
+        # scan_manager.work()
         response = client_logged_in.get(scan_detail_url)
         attempts = 1
         assert response.ok, response.json()

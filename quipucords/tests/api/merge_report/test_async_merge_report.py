@@ -4,12 +4,27 @@ from functools import partial
 from unittest import mock
 
 import pytest
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
 from api.models import Report, ScanTask
 from tests.factories import ReportFactory
+
+
+@pytest.fixture(scope="module")
+def scan_manager():
+    """
+    Override conftest.scan_manager pytest fixture to do nothing in this test module.
+
+    This is necessary because conftest.scan_manager is set to autouse=True, which means
+    it patches *all* tests, but we specifically *do not want* its patches applied here.
+    Instead, we want the real Celery scan manager to run synchronously and execute all
+    of its tasks.
+    """
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        yield
 
 
 @pytest.mark.django_db
@@ -91,8 +106,8 @@ class TestAsyncMergeReports:
             "report_id": mock.ANY,
             "scan_id": None,
             "scan_type": "fingerprint",
-            "status": "pending",
-            "status_message": "Job is pending.",
+            "status": "running",
+            "status_message": "Job is running.",
         }
         assert json_response == expected
         report = Report.objects.get(id=json_response["report_id"])
@@ -101,9 +116,7 @@ class TestAsyncMergeReports:
         assert source_sorter(report.sources) == source_sorter(
             list(report1.sources) + list(report2.sources)
         )
-        assert report.deployment_report is None
-        # start the scan manager to process the raw facts
-        scan_manager.work()
+
         # check the job endpoint shows the scan was completed
         scan_job_response = client_logged_in.get(
             reverse("v2:job-detail", args=(report.scanjob.id,))

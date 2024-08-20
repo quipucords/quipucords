@@ -3,8 +3,23 @@
 import re
 
 import pytest
+from django.test import override_settings
 
 from tests.integration.test_smoker import Smoker
+
+
+@pytest.fixture(scope="module")
+def scan_manager():
+    """
+    Override conftest.scan_manager pytest fixture to do nothing in this test module.
+
+    This is necessary because conftest.scan_manager is set to autouse=True, which means
+    it patches *all* tests, but we specifically *do not want* its patches applied here.
+    Instead, we want the real Celery scan manager to run synchronously and execute all
+    of its tasks.
+    """
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        yield
 
 
 @pytest.fixture
