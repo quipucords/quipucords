@@ -4,27 +4,12 @@ from functools import partial
 from unittest import mock
 
 import pytest
-from django.test import override_settings
 from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
 from api.models import Report, ScanTask
 from tests.factories import ReportFactory
-
-
-@pytest.fixture(scope="module")
-def scan_manager():
-    """
-    Override conftest.scan_manager pytest fixture to do nothing in this test module.
-
-    This is necessary because conftest.scan_manager is set to autouse=True, which means
-    it patches *all* tests, but we specifically *do not want* its patches applied here.
-    Instead, we want the real Celery scan manager to run synchronously and execute all
-    of its tasks.
-    """
-    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
-        yield
 
 
 @pytest.mark.django_db

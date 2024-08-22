@@ -12,6 +12,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core import management
 from django.test import Client as DjangoClient
+from django.test import override_settings
 
 
 @pytest.fixture(scope="session")
@@ -62,14 +63,15 @@ def default_data_dir(settings, tmp_path: Path) -> Path:
 
 
 @pytest.fixture(autouse=True)
-def scan_manager(mocker):
-    """return a DummyScanManager instance."""
-    from tests.dummy_scan_manager import DummyScanManager
+def scan_manager():
+    """return a CeleryScanManager instance configured for synchronous processing."""
+    from scanner import manager
 
-    _manager = DummyScanManager()
-    mocker.patch("scanner.manager.CeleryScanManager", DummyScanManager)
-    mocker.patch("scanner.manager.SCAN_MANAGER", _manager)
-    yield _manager
+    old_scan_manager = manager.SCAN_MANAGER
+    manager.reinitialize()
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        yield manager.SCAN_MANAGER
+    manager.SCAN_MANAGER = old_scan_manager
 
 
 @pytest.fixture
