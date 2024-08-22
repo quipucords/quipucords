@@ -1,4 +1,10 @@
-"""Queue Manager module."""
+"""
+Scan manager module.
+
+SCAN_MANAGER acts as a global singleton, but this is just a vestigial artifact
+of an older design that required a singleton. SCAN_MANAGER and the general concept
+of the "scan manager" may be removed in an upcoming iteration of this code.
+"""
 
 from __future__ import annotations
 
@@ -19,8 +25,8 @@ class CeleryScanManager:
     log_prefix = "CELERY SCAN MANAGER"
 
     def __init__(self):
-        """Log a warning about this scan manager being incomplete."""
-        logger.info("%s: Celery Scan manager instance created.", self.log_prefix)
+        """Log a when a new instance is initialized."""
+        logger.debug("%s: Celery Scan manager instance created.", self.log_prefix)
 
     def is_alive(self):
         """Return true to make the common manager interface happy."""
