@@ -28,11 +28,7 @@ class CeleryScanManager:
         """Log a when a new instance is initialized."""
         logger.debug("%s: Celery Scan manager instance created.", self.log_prefix)
 
-    def is_alive(self):
-        """Return true to make the common manager interface happy."""
-        return True
-
-    def kill(self, job: ScanJob, command: str):
+    def kill(self, job: ScanJob):
         """Kill a ScanJob Celery task.
 
         :param job: The ScanJob to kill.
@@ -60,10 +56,6 @@ class CeleryScanManager:
         )
         celery_task = AsyncResult(str(celery_task_id))
         celery_task.revoke()
-        return True
-
-    def start(self):
-        """Return true to make the common manager interface happy."""
         return True
 
     def put(self, scan_job_runner: CeleryBasedScanJobRunner):
