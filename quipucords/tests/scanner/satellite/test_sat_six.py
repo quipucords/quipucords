@@ -5,7 +5,6 @@ from unittest.mock import ANY, patch
 
 import pytest
 import requests_mock
-from django.test import override_settings
 from faker import Faker
 
 from api.models import (
@@ -32,20 +31,6 @@ from scanner.satellite.utils import construct_url
 from tests.scanner.test_util import create_scan_job
 
 fake = Faker()
-
-
-@pytest.fixture(scope="module")
-def scan_manager():
-    """
-    Override conftest.scan_manager pytest fixture to do nothing in this test module.
-
-    This is necessary because conftest.scan_manager is set to autouse=True, which means
-    it patches *all* tests, but we specifically *do not want* its patches applied here.
-    Instead, we want the real Celery scan manager to run synchronously and execute all
-    of its tasks.
-    """
-    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
-        yield
 
 
 class TestSatelliteSixV1:

@@ -24,7 +24,6 @@ import tarfile
 from io import BytesIO
 
 import pytest
-from django.test import override_settings
 from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
 
@@ -56,20 +55,6 @@ TARBALL_ALWAYS_EXPECTED_FILENAMES = {
     FILENAME_DETAILS_CSV,
     FILENAME_DETAILS_JSON,
 }
-
-
-@pytest.fixture(scope="module")
-def scan_manager():
-    """
-    Override conftest.scan_manager pytest fixture to do nothing in this test module.
-
-    This is necessary because conftest.scan_manager is set to autouse=True, which means
-    it patches *all* tests, but we specifically *do not want* its patches applied here.
-    Instead, we want the real Celery scan manager to run synchronously and execute all
-    of its tasks.
-    """
-    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
-        yield
 
 
 def get_serialized_report_data(report: Report) -> dict:
