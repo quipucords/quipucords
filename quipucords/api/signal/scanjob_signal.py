@@ -31,23 +31,7 @@ def handle_scan(sender, instance, **kwargs):
     if not manager.SCAN_MANAGER:
         manager.reinitialize()
 
-    if not manager.SCAN_MANAGER.is_alive():
-        logger.error(
-            "%s: %s",
-            manager.SCAN_MANAGER.log_prefix,
-            messages.SIGNAL_SCAN_MANAGER_CRASH,
-        )
-        manager.reinitialize()
-        logger.error(
-            "%s: %s",
-            manager.SCAN_MANAGER.log_prefix,
-            messages.SIGNAL_SCAN_MANAGER_RESTART,
-        )
-        manager.SCAN_MANAGER.start()
-        # Don't add the scan as it will be picked up
-        # by the manager startup, looking for pending/running scans.
-    else:
-        manager.SCAN_MANAGER.put(scanner)
+    manager.SCAN_MANAGER.put(scanner)
 
 
 def scan_action(sender, instance, action, **kwargs):
@@ -60,7 +44,7 @@ def scan_action(sender, instance, action, **kwargs):
     :returns: None
     """
     if action in [PAUSE, CANCEL]:
-        manager.SCAN_MANAGER.kill(instance, action)
+        manager.SCAN_MANAGER.kill(instance)
 
 
 def scan_pause(sender, instance, **kwargs):
@@ -101,23 +85,7 @@ def scan_restart(sender, instance, **kwargs):
     if not manager.SCAN_MANAGER:
         manager.reinitialize()
 
-    if not manager.SCAN_MANAGER.is_alive():
-        logger.error(
-            "%s: %s",
-            manager.SCAN_MANAGER.log_prefix,
-            messages.SIGNAL_SCAN_MANAGER_CRASH,
-        )
-        manager.reinitialize()
-        logger.error(
-            "%s: %s",
-            manager.SCAN_MANAGER.log_prefix,
-            messages.SIGNAL_SCAN_MANAGER_RESTART,
-        )
-        manager.SCAN_MANAGER.start()
-        # Don't add the scan as it will be picked up
-        # by the manager startup, looking for pending/running scans.
-    else:
-        manager.SCAN_MANAGER.put(scanner)
+    manager.SCAN_MANAGER.put(scanner)
 
 
 start_scan = django.dispatch.Signal()

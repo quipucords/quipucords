@@ -23,4 +23,3 @@ from scanner import manager  # noqa: E402
 
 if not manager.SCAN_MANAGER:
     manager.reinitialize()
-manager.SCAN_MANAGER.start()
