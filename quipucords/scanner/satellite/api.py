@@ -4,7 +4,6 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from functools import cached_property
-from multiprocessing import Value
 
 import celery
 from django.db import transaction
@@ -19,7 +18,6 @@ from api.models import (
 )
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
-from scanner.exceptions import ScanCancelError, ScanPauseError
 from scanner.satellite import utils
 
 logger = logging.getLogger(__name__)
@@ -33,14 +31,6 @@ class SatelliteAuthError(Exception):
 
 class SatelliteError(Exception):
     """Exception for Satellite interaction."""
-
-
-class SatelliteCancelError(ScanCancelError):
-    """Exception for Satellite Cancel interrupt."""
-
-
-class SatellitePauseError(ScanPauseError):
-    """Exception for Satellite Pause interrupt."""
 
 
 class SatelliteInterface(ABC):
@@ -141,7 +131,6 @@ class SatelliteInterface(ABC):
         hosts: Iterable[dict],
         request_host_details: Callable,
         process_results: Callable,
-        manager_interrupt: Value = None,
     ):
         self._prepare_and_process_hosts_using_celery(
             hosts, request_host_details, process_results
@@ -215,5 +204,5 @@ class SatelliteInterface(ABC):
         """Obtain the managed hosts."""
 
     @abstractmethod
-    def hosts_facts(self, manager_interrupt):
+    def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""

@@ -205,7 +205,7 @@ class TestInspectCallback:
         # https://github.com/pytest-dev/pytest/issues/7162
         # https://github.com/pytest-dev/pytest/issues/3697
         patched_logger = mocker.patch("scanner.network.inspect_callback.logger")
-        callback = InspectCallback(manager_interrupt=mocker.Mock())
+        callback = InspectCallback()
         event_data = {"some_data": "some_value"}
         assert callback.event_callback(event_data) is None
         patched_logger.debug.assert_called_with(
@@ -214,7 +214,7 @@ class TestInspectCallback:
 
     def test_task_on_ok(self, event_ok, mocker):
         """Test InspectCallback.event_callback in a successful event."""
-        callback = InspectCallback(mocker.Mock())
+        callback = InspectCallback()
         patched_task_on_ok = mocker.patch.object(
             InspectCallback, "task_on_ok", wraps=callback.task_on_ok
         )
@@ -241,7 +241,7 @@ class TestInspectCallback:
     ):
         """Test InspectCallback.event_callback in a failed event."""
         caplog.set_level(logging.WARNING)
-        callback = InspectCallback(mocker.Mock())
+        callback = InspectCallback()
         patched_task_on_failed = mocker.patch.object(
             InspectCallback, "task_on_failed", wraps=callback.task_on_failed
         )
@@ -256,10 +256,10 @@ class TestInspectCallback:
         # hardcoded host+error message on event_failed fixture
         assert caplog.messages == expected_messages
 
-    def test_task_on_failed_with_ansible_facts(self, event_failed, caplog, mocker):
+    def test_task_on_failed_with_ansible_facts(self, event_failed, caplog):
         """Test InspectCallback.event_callback in a failed event."""
         caplog.set_level(logging.WARNING)
-        callback = InspectCallback(mocker.Mock())
+        callback = InspectCallback()
         event_failed["event_data"]["res"]["ansible_facts"] = {"watermelon": "melancia"}
         callback.event_callback(event_failed)
         assert callback._ansible_facts["127.0.0.1"] == {"watermelon": "melancia"}
@@ -270,7 +270,7 @@ class TestInspectCallback:
 
     def test_task_on_unreachable(self, event_unreachable, mocker):
         """Test InspectCallback.event_callback in a unreachable event."""
-        callback = InspectCallback(mocker.Mock())
+        callback = InspectCallback()
         patched_task_on_unreachable = mocker.patch.object(
             InspectCallback, "task_on_unreachable", wraps=callback.task_on_unreachable
         )
@@ -291,9 +291,9 @@ class TestInspectCallback:
             ({"host_done": False}, False, InspectResult.FAILED),
         ),
     )
-    def test_results(self, mocker, facts, is_unreachable, expected_status):
+    def test_results(self, facts, is_unreachable, expected_status):
         """Test InspectCallback.iter_results."""
-        callback = InspectCallback(mocker.Mock())
+        callback = InspectCallback()
         callback._ansible_facts = {"host": facts}
         if is_unreachable:
             callback._unreachable_hosts.add("host")
@@ -301,16 +301,14 @@ class TestInspectCallback:
         assert results.facts == facts
         assert results.status == expected_status
 
-    def test_fact_sanitization_bad_byte_strings(
-        self, mocker, caplog, fact_with_bad_bytes
-    ):
+    def test_fact_sanitization_bad_byte_strings(self, caplog, fact_with_bad_bytes):
         """Test InspectCallback._process_task_facts with "bad" bytes in strings."""
         caplog.set_level(logging.WARNING)
         original_line = fact_with_bad_bytes["internal_system_user_count"][
             "stdout_lines"
         ][1]
         hostname = "buggyhost"
-        callback = InspectCallback(mocker.Mock())
+        callback = InspectCallback()
         callback._process_task_facts(fact_with_bad_bytes, hostname)
         modified_line = callback._ansible_facts[hostname]["internal_system_user_count"][
             "stdout_lines"
@@ -339,10 +337,10 @@ def local_inventory(tmp_path):
 
 @pytest.mark.slow
 @pytest.mark.integration
-def test_inspect_callback_with_inspect_playbook(mocker, settings, local_inventory):
+def test_inspect_callback_with_inspect_playbook(settings, local_inventory):
     """Smoketest InspectCallback integration with ansible_runner."""
     playbook_path = str(settings.BASE_DIR / "scanner/network/runner/inspect.yml")
-    callback = InspectCallback(mocker.Mock())
+    callback = InspectCallback()
 
     runner_obj = ansible_runner.run(
         inventory=local_inventory,

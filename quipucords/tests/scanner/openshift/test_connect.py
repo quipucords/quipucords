@@ -26,7 +26,7 @@ def test_connect_with_success(mocker, scan_task: ScanTask):
     """Test connecting to OpenShift host with success."""
     mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == ConnectTaskRunner.SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
     assert scan_task.systems_count == 1
@@ -50,7 +50,7 @@ def test_connect_with_error(
     error = OCPError(status=err_status, reason="fail", message="fail")
     mocker.patch.object(OpenShiftApi, "can_connect", side_effect=error)
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == ConnectTaskRunner.FAILURE_MESSAGE
     assert status == ScanTask.FAILED
     assert scan_task.systems_count == 1

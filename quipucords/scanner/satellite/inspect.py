@@ -21,7 +21,7 @@ class InspectTaskRunner(SatelliteTaskRunner):
         TimeoutError,
     )
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Scan satellite manager and obtain host facts."""
         conn_task = self.scan_task.prerequisites.first()
         if conn_task.status != ScanTask.COMPLETED:
@@ -29,8 +29,8 @@ class InspectTaskRunner(SatelliteTaskRunner):
                 f"Prerequisites scan task {conn_task.sequence_number} failed."
             )
             return error_message, ScanTask.FAILED
-        return super().execute_task(manager_interrupt)
+        return super().execute_task()
 
-    def handle_api_calls(self, api, manager_interrupt):
+    def handle_api_calls(self, api):
         """Handle api calls for inspection phase."""
-        api.hosts_facts(manager_interrupt)
+        api.hosts_facts()

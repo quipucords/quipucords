@@ -136,7 +136,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         except Exception:  # noqa: BLE001
             return []
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Execute fingerprint task."""
         deployment_report = DeploymentsReport(report_version=create_report_version())
         deployment_report.save()
@@ -145,11 +145,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         self.scan_job.report.save()
 
         try:
-            message, status = self._process_details_report(
-                manager_interrupt, self.scan_job.report
-            )
-
-            self.check_for_interrupt(manager_interrupt)
+            message, status = self._process_details_report(self.scan_job.report)
 
             if status == ScanTask.COMPLETED:
                 deployment_report.status = DeploymentsReport.STATUS_COMPLETE
@@ -171,10 +167,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
             raise error
 
-    def _process_details_report(self, manager_interrupt, report):  # noqa: PLR0915, C901, PLR0912
+    def _process_details_report(self, report):  # noqa: PLR0915, C901, PLR0912
         """Process the details report.
 
-        :param manager_interrupt: Signal to indicate job is canceled
         :param report: Report that was saved
         :param scan_task: Task that is running this merge
         :returns: Status message and status
@@ -225,8 +220,6 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 f"(name={name}, os_release={os_release})"
             )
 
-            if status_count % 100 == 0:
-                self.check_for_interrupt(manager_interrupt)
             fingerprint_dict["deployment_report"] = deployment_report.id
             serializer = SystemFingerprintSerializer(data=fingerprint_dict)
             if serializer.is_valid():

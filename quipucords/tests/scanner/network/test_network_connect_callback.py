@@ -10,7 +10,6 @@ from api.scantask.model import ScanTask
 from constants import DataSources
 from scanner.network.connect import ConnectResultStore
 from scanner.network.connect_callback import ConnectResultCallback
-from scanner.network.utils import STOP_STATES
 from tests.factories import ScanTaskFactory, SourceFactory
 
 
@@ -45,7 +44,7 @@ class TestConnectResultCallback:
             ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
         )
         callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
+            results_store, source.single_credential, source
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_ok"))
@@ -63,7 +62,7 @@ class TestConnectResultCallback:
         """Test the callback on failed."""
         results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
+            results_store, source.single_credential, source
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_failed"))
@@ -83,7 +82,7 @@ class TestConnectResultCallback:
             ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
         )
         callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
+            results_store, source.single_credential, source
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_unreachable"))
@@ -102,7 +101,7 @@ class TestConnectResultCallback:
         """Test exception for each task."""
         results_store = None
         callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
+            results_store, source.single_credential, source
         )
         events = []
         events.append(build_event(host="1.2.3.4", event="runner_on_ok"))
@@ -119,7 +118,7 @@ class TestConnectResultCallback:
         """Test unknown event response."""
         results_store = ConnectResultStore(ScanTaskFactory(source=source))
         callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
+            results_store, source.single_credential, source
         )
         event = build_event(host="1.2.3.4", event="runner_on_unknown_event")
         callback.event_callback(event)
@@ -128,34 +127,15 @@ class TestConnectResultCallback:
         """Test unknown event response."""
         results_store = ConnectResultStore(ScanTaskFactory())
         callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
+            results_store, source.single_credential, source
         )
         event = build_event(host=None, event="runner_on_ok")
         callback.event_callback(event)
 
-    def test_cancel_event(self, source: Source):
-        """Test cancel event response."""
-        # Test continue state
-        results_store = ConnectResultStore(ScanTaskFactory(source=source))
-        callback = ConnectResultCallback(
-            results_store, source.single_credential, source, Mock()
-        )
-        result = callback.cancel_callback()
-        assert not result
-        # Test cancel state
-        for stop_value in STOP_STATES.values():
-            interrupt = Mock(value=stop_value)
-            callback = ConnectResultCallback(
-                results_store, source.single_credential, source, interrupt
-            )
-            assert callback.interrupt.value == stop_value
-            result = callback.cancel_callback()
-            assert result is True
-
     def test_unexpected_event(self):
         """Test how event_callback handles an unexpected event."""
         results_store = Mock()
-        callback = ConnectResultCallback(results_store, Mock(), Mock(), Mock())
+        callback = ConnectResultCallback(results_store, Mock(), Mock())
         event_data = {"some_data": "some_value"}
         assert callback.event_callback(event_data) is None
         expected_error = (

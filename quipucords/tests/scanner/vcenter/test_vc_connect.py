@@ -1,13 +1,12 @@
 """Test the vcenter connect capabilities."""
 
-from multiprocessing import Value
 from socket import gaierror
 from unittest.mock import ANY, Mock, patch
 
 import pytest
 from pyVmomi import vim
 
-from api.models import Credential, ScanJob, ScanTask, Source
+from api.models import Credential, ScanTask, Source
 from scanner.vcenter.connect import ConnectTaskRunner, get_vm_names
 from tests.scanner.test_util import create_scan_job
 
@@ -112,7 +111,7 @@ class TestVCenterConnectTaskRunnerTest:
         with patch.object(
             ConnectTaskRunner, "connect", side_effect=invalid_login
         ) as mock_connect:
-            status = self.runner.run(Value("i", ScanJob.JOB_RUN))
+            status = self.runner.run()
             assert ScanTask.FAILED == status[1]
             mock_connect.assert_called_once_with()
 
@@ -121,7 +120,7 @@ class TestVCenterConnectTaskRunnerTest:
         with patch.object(
             ConnectTaskRunner, "connect", side_effect=unreachable_host
         ) as mock_connect:
-            status = self.runner.run(Value("i", ScanJob.JOB_RUN))
+            status = self.runner.run()
             assert ScanTask.FAILED == status[1]
             mock_connect.assert_called_once_with()
 
@@ -130,16 +129,6 @@ class TestVCenterConnectTaskRunnerTest:
         with patch.object(
             ConnectTaskRunner, "connect", return_value=["vm1", "vm2"]
         ) as mock_connect:
-            status = self.runner.run(Value("i", ScanJob.JOB_RUN))
+            status = self.runner.run()
             assert ScanTask.COMPLETED == status[1]
             mock_connect.assert_called_once_with()
-
-    def test_cancel(self):
-        """Test the run method with cancel."""
-        status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        assert ScanTask.CANCELED == status[1]
-
-    def test_pause(self):
-        """Test the run method with pause."""
-        status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        assert ScanTask.PAUSED == status[1]

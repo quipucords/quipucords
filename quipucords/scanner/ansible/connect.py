@@ -16,15 +16,13 @@ logger = getLogger(__name__)
 class ConnectTaskRunner(AnsibleTaskRunner):
     """Connection phase task runner for ansible scanner."""
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """
         Execute the task and save the results.
 
-        :param manager_interrupt: interrupt that can pause/cancel the scan
         :returns: tuple of human readable message and ScanTask.STATUS_CHOICE
         """
         self._init_stats()
-        conn_result = SystemConnectionResult.FAILED
         try:
             self.client.get(
                 "/api/v2/me/",

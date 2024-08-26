@@ -1,13 +1,12 @@
 """Test the vcenter inspect capabilities."""
 
 from datetime import UTC, datetime
-from multiprocessing import Value
 from unittest.mock import ANY, Mock, patch
 
 import pytest
 from pyVmomi import vim
 
-from api.models import Credential, ScanJob, ScanTask, Source
+from api.models import Credential, ScanTask, Source
 from scanner.vcenter.inspect import InspectTaskRunner, get_nics
 from tests.scanner.test_util import create_scan_job
 
@@ -302,7 +301,7 @@ class TestVCenterInspectTaskRunnerTest:
         with patch.object(
             InspectTaskRunner, "inspect", side_effect=invalid_login
         ) as mock_connect:
-            status = self.runner.run(Value("i", ScanJob.JOB_RUN))
+            status = self.runner.run()
             assert ScanTask.FAILED == status[1]
             mock_connect.assert_called_once_with()
 
@@ -310,22 +309,12 @@ class TestVCenterInspectTaskRunnerTest:
         """Test the run method."""
         self.connect_scan_task.status = ScanTask.FAILED
         self.connect_scan_task.save()
-        status = self.runner.run(Value("i", ScanJob.JOB_RUN))
+        status = self.runner.run()
         assert ScanTask.FAILED == status[1]
 
     def test_run(self):
         """Test the run method."""
         with patch.object(InspectTaskRunner, "inspect") as mock_connect:
-            status = self.runner.run(Value("i", ScanJob.JOB_RUN))
+            status = self.runner.run()
             assert ScanTask.COMPLETED == status[1]
             mock_connect.assert_called_once_with()
-
-    def test_cancel(self):
-        """Test the cancel method."""
-        status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        assert ScanTask.CANCELED == status[1]
-
-    def test_pause(self):
-        """Test the pause method."""
-        status = self.runner.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        assert ScanTask.PAUSED == status[1]

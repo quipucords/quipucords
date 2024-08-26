@@ -88,7 +88,7 @@ class ConnectTaskRunner(ScanTaskRunner):
 
         self.scan_task.connection_result.save()
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Scan vcenter and attempt connections."""
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()

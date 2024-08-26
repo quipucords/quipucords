@@ -3,7 +3,6 @@
 import re
 import tempfile
 from functools import cache
-from multiprocessing import Value
 from pathlib import Path
 
 import yaml
@@ -11,25 +10,7 @@ from ansible.parsing.utils.addresses import parse_address
 from ansible.plugins.inventory import detect_range, expand_hostname_range
 from django.conf import settings
 
-from api.models import ScanJob
 from api.vault import decrypt_data_as_unicode
-from scanner.network.exceptions import NetworkCancelError, NetworkPauseError
-
-# key is stop_type, value is manager_interrupt.value
-STOP_STATES = {
-    "cancel": ScanJob.JOB_TERMINATE_CANCEL,
-    "pause": ScanJob.JOB_TERMINATE_PAUSE,
-}
-
-
-def check_manager_interrupt(interrupt: Value):
-    """Check if cancel & pause exception should be raised."""
-    if not interrupt:
-        return
-    if interrupt.value == ScanJob.JOB_TERMINATE_CANCEL:
-        raise NetworkCancelError()
-    if interrupt.value == ScanJob.JOB_TERMINATE_PAUSE:
-        raise NetworkPauseError()
 
 
 def _credential_vars(credential):

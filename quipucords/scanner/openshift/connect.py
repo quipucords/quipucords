@@ -16,7 +16,7 @@ class ConnectTaskRunner(OpenShiftTaskRunner):
     SUCCESS_MESSAGE = "Connected to OpenShift host."
     FAILURE_MESSAGE = "Unable to connect to OpenShift host."
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Scan OpenShift for system connection data."""
         self._init_stats()
         ocp_client = self.get_ocp_client(self.scan_task)

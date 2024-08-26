@@ -43,18 +43,18 @@ class SatelliteTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
             return api
         raise ScanFailureError(self._format_error_message())
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Scan Satellite for system connection data."""
         try:
             api = self._initialize_api_object()
-            self.handle_api_calls(api, manager_interrupt)
+            self.handle_api_calls(api)
         except self.EXPECTED_EXCEPTIONS as error:
             return self._handle_error(error)
 
         return None, ScanTask.COMPLETED
 
     @abstractmethod
-    def handle_api_calls(self, api, manager_interrupt):
+    def handle_api_calls(self, api):
         """Handle specific api calls for either connect or inspect phases."""
 
     def _format_error_message(self, message=None):

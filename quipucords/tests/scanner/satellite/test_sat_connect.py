@@ -1,12 +1,11 @@
 """Test the satellite connect task."""
 
-from multiprocessing import Value
 from unittest.mock import ANY, patch
 
 import pytest
 from requests import exceptions
 
-from api.models import Credential, ScanJob, ScanTask, Source
+from api.models import Credential, ScanTask, Source
 from constants import DataSources
 from scanner.satellite.api import (
     SATELLITE_VERSION_6,
@@ -66,7 +65,7 @@ class TestConnectTaskRunner:
         with patch(
             "scanner.satellite.runner.utils.status", return_value=(None, None, None)
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -79,7 +78,7 @@ class TestConnectTaskRunner:
             "scanner.satellite.runner.utils.status",
             return_value=(401, None, SATELLITE_VERSION_6),
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -92,7 +91,7 @@ class TestConnectTaskRunner:
             "scanner.satellite.runner.utils.status",
             return_value=(200, 3, SATELLITE_VERSION_6),
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -104,7 +103,7 @@ class TestConnectTaskRunner:
         with patch(
             "scanner.satellite.runner.utils.status", side_effect=mock_conn_exception
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -116,7 +115,7 @@ class TestConnectTaskRunner:
         with patch(
             "scanner.satellite.runner.utils.status", side_effect=SatelliteError()
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -129,7 +128,7 @@ class TestConnectTaskRunner:
             "scanner.satellite.runner.utils.status",
             side_effect=mock_sat_auth_exception,
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -141,7 +140,7 @@ class TestConnectTaskRunner:
         with patch(
             "scanner.satellite.runner.utils.status", side_effect=mock_timeout_error
         ) as mock_sat_status:
-            status = task.run(Value("i", ScanJob.JOB_RUN))
+            status = task.run()
             mock_sat_status.assert_called_once_with(ANY)
             assert status[1] == ScanTask.FAILED
 
@@ -160,24 +159,8 @@ class TestConnectTaskRunner:
                 with patch.object(
                     SatelliteSixV2, "hosts", return_value=["sys1"]
                 ) as mock_hosts:
-                    status = task.run(Value("i", ScanJob.JOB_RUN))
+                    status = task.run()
                     mock_sat_status.assert_called_once_with(ANY)
                     mock_host_count.assert_called_once_with()
                     mock_hosts.assert_called_once_with()
                     assert status[1] == ScanTask.COMPLETED
-
-    @pytest.mark.django_db
-    def test_run_sat6_v2_cancel(self):
-        """Test the running connect task (cancel)."""
-        task = ConnectTaskRunner(self.scan_job, self.scan_task)
-
-        status = task.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        assert status[1] == ScanTask.CANCELED
-
-    @pytest.mark.django_db
-    def test_run_sat6_v2_pause(self):
-        """Test the running connect task (pause)."""
-        task = ConnectTaskRunner(self.scan_job, self.scan_task)
-
-        status = task.run(Value("i", ScanJob.JOB_TERMINATE_PAUSE))
-        assert status[1] == ScanTask.PAUSED
