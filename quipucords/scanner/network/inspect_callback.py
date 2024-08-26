@@ -11,7 +11,6 @@ from django.conf import settings
 
 import log_messages
 from api.inspectresult.model import InspectResult
-from scanner.network.utils import STOP_STATES
 from utils.misc import sanitize_for_utf8_compatibility
 
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ class AnsibleResults:
 class InspectCallback:
     """Callback helper to plug ansible callbacks for network scan inspection phase."""
 
-    def __init__(self, manager_interrupt):
+    def __init__(self):
         self._ansible_facts = defaultdict(dict)
         self._unreachable_hosts = set()
         self._collect_skipped_tasks_enabled = (
@@ -42,7 +41,6 @@ class InspectCallback:
         )
         self._skipped_facts = defaultdict(set)
         self.stopped = False
-        self.interrupt = manager_interrupt
 
     def iter_results(self) -> Generator[AnsibleResults]:
         """Yield host completion state and ansible facts."""
@@ -196,13 +194,4 @@ class InspectCallback:
         """Control the cancel callback for ansible runner."""
         if self.stopped:
             return True
-        if not self.interrupt:
-            return False
-        for stop_type, stop_value in STOP_STATES.items():
-            if self.interrupt.value == stop_value:
-                logger.info(
-                    log_messages.NETWORK_CALLBACK_ACK_STOP, "INSPECT", stop_type
-                )
-                self.stopped = True
-                return True
         return False

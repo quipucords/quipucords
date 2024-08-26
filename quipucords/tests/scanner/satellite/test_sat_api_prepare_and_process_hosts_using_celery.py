@@ -102,7 +102,7 @@ def test__prepare_and_process_hosts_using_celery(
 
     mock_process_results = Mock()
     satellite._prepare_and_process_hosts(
-        hosts, six.request_host_details, mock_process_results, None
+        hosts, six.request_host_details, mock_process_results
     )
 
     mock_prepare_hosts.assert_called_once()

@@ -188,7 +188,7 @@ def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     with pytest.raises(ScanFailureError, match="Prerequisite scan have failed."):
-        runner.execute_task(mocker.Mock())
+        runner.execute_task()
 
 
 @pytest.mark.django_db
@@ -210,7 +210,7 @@ def test_inspect_with_success(  # noqa: PLR0913
     mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value=[])
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == InspectTaskRunner.SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
     assert scan_task.systems_count == 2
@@ -250,7 +250,7 @@ def test_inspect_with_success_cluster_metrics(  # noqa: PLR0913
     # be called multiple times, even though currently in practice we only call it once.
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == InspectTaskRunner.SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
     assert scan_task.systems_count == 2
@@ -286,7 +286,7 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
     )
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == InspectTaskRunner.PARTIAL_SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
     assert scan_task.systems_count == 3
@@ -314,7 +314,7 @@ def test_inspect_with_failure(  # noqa: PLR0913
     mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value=[])
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == InspectTaskRunner.FAILURE_MESSAGE
     assert status == ScanTask.FAILED
     assert scan_task.systems_count == 2
@@ -353,7 +353,7 @@ def test_inspect_errors_on_extra_cluster_facts(  # noqa: PLR0913
         side_effect=teapot_exc,
     )
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    message, status = runner.execute_task(mocker.Mock())
+    message, status = runner.execute_task()
     assert message == InspectTaskRunner.PARTIAL_SUCCESS_MESSAGE
     assert status == ScanTask.COMPLETED
     assert scan_task.systems_count == 2
@@ -399,7 +399,7 @@ def test_inspect_with_enabled_workloads(  # noqa: PLR0913
     mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value=[])
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    runner.execute_task(mocker.Mock())
+    runner.execute_task()
 
     raw_facts = scan_task.get_facts()
     cluster = raw_facts[-1]
@@ -423,7 +423,7 @@ def test_inspect_with_disabled_workloads(  # noqa: PLR0913
     )
 
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    runner.execute_task(mocker.Mock())
+    runner.execute_task()
 
     mock_retrieve_workloads.assert_not_called()
     raw_facts = scan_task.get_facts()

@@ -1,6 +1,5 @@
 """Test the satellite six interface."""
 
-from multiprocessing import Value
 from unittest.mock import ANY, patch
 
 import pytest
@@ -11,7 +10,6 @@ from api.models import (
     Credential,
     InspectResult,
     JobConnectionResult,
-    ScanJob,
     ScanTask,
     Source,
     SystemConnectionResult,
@@ -471,7 +469,7 @@ class TestSatelliteSixV1:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4", org_id=1)
             mocker.get(url, status_code=500)
             with pytest.raises(SatelliteError):
-                self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
+                self.api.hosts_facts()
 
     @pytest.mark.django_db
     def test_hosts_facts(self):
@@ -518,7 +516,7 @@ class TestSatelliteSixV1:
             requests_mock.Mocker() as mocker,
         ):
             mocker.get(hosts_url, status_code=200, json=hosts_jsonresult)
-            self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
+            self.api.hosts_facts()
             assert self.scan_task.get_result().count() == 3
 
     @pytest.mark.django_db
@@ -1051,7 +1049,7 @@ class TestSatelliteSixV2:
             url = construct_url(url=hosts_url, sat_host="1.2.3.4")
             mocker.get(url, status_code=500)
             with pytest.raises(SatelliteError):
-                self.api.hosts_facts(Value("i", ScanJob.JOB_RUN))
+                self.api.hosts_facts()
 
     @pytest.mark.django_db
     def test_hosts_facts(self):
@@ -1106,5 +1104,5 @@ class TestSatelliteSixV2:
                 "results": [{"id": 10, "name": "sys10"}],
             }
             mocker.get(url, status_code=200, json=jsonresult)
-            api.hosts_facts(Value("i", ScanJob.JOB_RUN))
+            api.hosts_facts()
             assert scan_task.get_result().count() == 1

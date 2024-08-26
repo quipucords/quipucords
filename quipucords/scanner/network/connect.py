@@ -1,7 +1,6 @@
 """ScanTask used for network connection discovery."""
 
 import logging
-from multiprocessing import Value
 
 import ansible_runner
 import pexpect
@@ -14,7 +13,6 @@ import log_messages
 from api.models import (
     Credential,
     Scan,
-    ScanJob,
     ScanTask,
     SystemConnectionResult,
 )
@@ -22,7 +20,6 @@ from api.serializers import SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
-    check_manager_interrupt,
     construct_inventory,
     delete_ssh_keyfiles,
     expand_hostpattern,
@@ -122,25 +119,15 @@ class ConnectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def execute_task(self, manager_interrupt: Value):
-        """Scan network range and attempt connections.
-
-        :param manager_interrupt: Synchronized Value which can inform
-        a task of the need to shut down immediately
-        """
+    def execute_task(self):
+        """Scan network range and attempt connections."""
         result_store = ConnectResultStore(self.scan_task)
-        scan_message, scan_result = self.run_with_result_store(
-            manager_interrupt, result_store
-        )
+        scan_message, scan_result = self.run_with_result_store(result_store)
         return scan_message, scan_result
 
-    def run_with_result_store(
-        self, manager_interrupt: Value, result_store: ConnectResultStore
-    ):
+    def run_with_result_store(self, result_store: ConnectResultStore):
         """Run with a given ConnectResultStore.
 
-        :param manager_interrupt: Synchronized Value which can inform
-        a task of the need to shut down immediately
         :param result_store: ConnectResultStore
         """
         serializer = SourceSerializer(self.scan_task.source)
@@ -161,7 +148,6 @@ class ConnectTaskRunner(ScanTaskRunner):
         remaining_hosts = result_store.remaining_hosts()
 
         for cred_id in credentials:
-            check_manager_interrupt(manager_interrupt)
             credential = Credential.objects.get(pk=cred_id)
             if not remaining_hosts:
                 message = f"Skipping credential {credential.name}. No remaining hosts."
@@ -173,7 +159,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
             try:
                 scan_message, scan_result = _connect(
-                    manager_interrupt,
                     self.scan_task,
                     remaining_hosts,
                     result_store,
@@ -207,7 +192,6 @@ class ConnectTaskRunner(ScanTaskRunner):
 
 
 def _connect(  # noqa: PLR0913, PLR0912, PLR0915
-    manager_interrupt: Value,
     scan_task: ScanTask,
     hosts,
     result_store: ConnectResultStore,
@@ -219,7 +203,6 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
 ):
     """Attempt to connect to hosts using the given credential.
 
-    :param manager_interrupt: Signal used to communicate termination of scan
     :param scan_task: The scan task for this connection job
     :param hosts: The collection of hosts to test connections
     :param result_store: The result store to accept the results.
@@ -248,7 +231,6 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
     )
     scan_task.log_message(log_message)
     for idx, group_name in enumerate(group_names):
-        check_manager_interrupt(manager_interrupt)
         group_ips = (
             inventory.get("all").get("children").get(group_name).get("hosts").keys()
         )
@@ -259,9 +241,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
             f"About to connect to hosts [{group_ip_string}]"
         )
         scan_task.log_message(log_message)
-        call = ConnectResultCallback(
-            result_store, credential, scan_task.source, manager_interrupt
-        )
+        call = ConnectResultCallback(result_store, credential, scan_task.source)
 
         # Create parameters for ansible runner. For more info, see:
         # https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
@@ -311,17 +291,11 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
 
         final_status = runner_obj.status
         if final_status == "canceled":
-            if (
-                manager_interrupt
-                and manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL
-            ):
-                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                    "CONNECT",
-                    "canceled",
-                )
-                return msg, scan_task.CANCELED
-            msg = log_messages.NETWORK_PLAYBOOK_STOPPED % ("CONNECT", "paused")
-            return msg, scan_task.PAUSED
+            msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                "CONNECT",
+                "canceled",
+            )
+            return msg, scan_task.CANCELED
         if final_status not in ["successful", "unreachable", "failed", "canceled"]:
             if final_status == "timeout":
                 error = log_messages.NETWORK_TIMEOUT_ERR

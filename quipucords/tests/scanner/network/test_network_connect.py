@@ -1,6 +1,5 @@
 """Test the discovery scanner capabilities."""
 
-from multiprocessing import Value
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -9,11 +8,10 @@ from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
 
 from api.connresult.model import SystemConnectionResult
-from api.models import Credential, Scan, ScanJob, ScanTask, Source
+from api.models import Credential, Scan, ScanTask, Source
 from api.serializers import SourceSerializer
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
-from scanner.network.exceptions import NetworkCancelError, NetworkPauseError
 from scanner.network.utils import (
     _construct_vars,
     delete_ssh_keyfiles,
@@ -284,7 +282,6 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                Value("i", ScanJob.JOB_RUN),
                 self.scan_task,
                 hosts,
                 Mock(),
@@ -306,7 +303,6 @@ class TestNetworkConnectTaskRunner:
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
         _connect(
-            Value("i", ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(),
@@ -327,7 +323,6 @@ class TestNetworkConnectTaskRunner:
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
         _connect(
-            Value("i", ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(),
@@ -348,7 +343,6 @@ class TestNetworkConnectTaskRunner:
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
         _connect(
-            Value("i", ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(),
@@ -365,9 +359,7 @@ class TestNetworkConnectTaskRunner:
         mock_run.return_value.status = "successful"
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(["1.2.3.4"])
-        _, result = scanner.run_with_result_store(
-            Value("i", ScanJob.JOB_RUN), result_store
-        )
+        _, result = scanner.run_with_result_store(result_store)
         assert result == ScanTask.COMPLETED
 
     # Similar tests as above modified for source2 (Does not have exclude hosts)
@@ -454,7 +446,6 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                Value("i", ScanJob.JOB_RUN),
                 self.scan_task,
                 hosts,
                 Mock(),
@@ -474,7 +465,6 @@ class TestNetworkConnectTaskRunner:
         hosts = source["hosts"]
         connection_port = source["port"]
         _connect(
-            Value("i", ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(),
@@ -494,7 +484,6 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                Value("i", ScanJob.JOB_RUN),
                 self.scan_task,
                 hosts,
                 Mock(),
@@ -510,9 +499,7 @@ class TestNetworkConnectTaskRunner:
         mock_run.return_value.status = "successful"
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
         result_store = MockResultStore(["1.2.3.4"])
-        _, result = scanner.run_with_result_store(
-            Value("i", ScanJob.JOB_RUN), result_store
-        )
+        _, result = scanner.run_with_result_store(result_store)
         assert result == ScanTask.COMPLETED
 
     @patch("ansible_runner.run")
@@ -524,7 +511,6 @@ class TestNetworkConnectTaskRunner:
         hosts = source["hosts"]
         connection_port = source["port"]
         _connect(
-            Value("i", ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(),
@@ -544,7 +530,6 @@ class TestNetworkConnectTaskRunner:
         hosts = source["hosts"]
         connection_port = source["port"]
         _connect(
-            Value("i", ScanJob.JOB_RUN),
             self.scan_task,
             hosts,
             Mock(),
@@ -568,7 +553,6 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                Value("i", ScanJob.JOB_RUN),
                 self.scan_task,
                 hosts,
                 Mock(),
@@ -584,64 +568,8 @@ class TestNetworkConnectTaskRunner:
         mock_run.return_value.status = "unknown"
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore(["1.2.3.4"])
-        conn_dict = scanner.run_with_result_store(
-            Value("i", ScanJob.JOB_RUN), result_store
-        )
+        conn_dict = scanner.run_with_result_store(result_store)
         assert conn_dict[1] == ScanTask.FAILED
-
-    @patch("scanner.network.connect.ConnectTaskRunner.run_with_result_store")
-    def test_cancel_connect(self, mock_run):
-        """Test cancel of connect."""
-        # Test cancel at _connect level
-        serializer = SourceSerializer(self.source3)
-        source = serializer.data
-        hosts = source["hosts"]
-        connection_port = source["port"]
-        with pytest.raises(NetworkCancelError):
-            _connect(
-                Value("i", ScanJob.JOB_TERMINATE_CANCEL),
-                self.scan_task,
-                hosts,
-                Mock(),
-                self.cred,
-                connection_port,
-                self.concurrency,
-            )
-        # Test cancel at run() level
-        mock_run.side_effect = NetworkCancelError()
-        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
-        _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
-        assert scan_result == ScanTask.CANCELED
-
-    @patch("scanner.network.connect.ConnectTaskRunner.run_with_result_store")
-    def test_pause_connect(self, mock_run):
-        """Test pause of connect."""
-        # Test cancel at _connect level
-        serializer = SourceSerializer(self.source3)
-        source = serializer.data
-        hosts = source["hosts"]
-        connection_port = source["port"]
-        with pytest.raises(NetworkPauseError):
-            _connect(
-                Value("i", ScanJob.JOB_TERMINATE_PAUSE),
-                self.scan_task,
-                hosts,
-                Mock(),
-                self.cred,
-                connection_port,
-                self.concurrency,
-            )
-        # Test cancel at run() level
-        mock_run.side_effect = NetworkPauseError()
-        scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
-        _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
-        assert scan_result == ScanTask.PAUSED
-
-    def test_run_manager_interupt(self):
-        """Test manager interupt for run method."""
-        scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
-        conn_dict = scanner.run(Value("i", ScanJob.JOB_TERMINATE_CANCEL))
-        assert conn_dict[1] == ScanTask.CANCELED
 
     @patch("scanner.network.connect.ConnectTaskRunner.run_with_result_store")
     def test_run_success_return_connect(self, mock_run):
@@ -649,7 +577,7 @@ class TestNetworkConnectTaskRunner:
         # Test cancel at run() level
         mock_run.side_effect = [[None, ScanTask.COMPLETED]]
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
-        _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
+        _, scan_result = scanner.run()
         assert scan_result == ScanTask.COMPLETED
 
     @patch("scanner.network.connect._connect")
@@ -658,7 +586,7 @@ class TestNetworkConnectTaskRunner:
         # Test cancel at run() level
         mock_run.side_effect = AnsibleRunnerException("fail")
         scanner = ConnectTaskRunner(self.scan_job3, self.scan_task3)
-        _, scan_result = scanner.run(Value("i", ScanJob.JOB_RUN))
+        _, scan_result = scanner.run()
         assert scan_result == ScanTask.FAILED
 
     @patch("ansible_runner.run")
@@ -667,7 +595,5 @@ class TestNetworkConnectTaskRunner:
         mock_run.return_value.status = "successful"
         scanner = ConnectTaskRunner(self.scan_job, self.scan_task)
         result_store = MockResultStore([])
-        _, result = scanner.run_with_result_store(
-            Value("i", ScanJob.JOB_RUN), result_store
-        )
+        _, result = scanner.run_with_result_store(result_store)
         assert result == ScanTask.COMPLETED

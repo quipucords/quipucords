@@ -1,9 +1,8 @@
 """Test the inspect scanner capabilities."""
 
 import logging
-from multiprocessing import Value
 from pathlib import Path
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -20,7 +19,6 @@ from api.models import (
 from api.serializers import SourceSerializer
 from constants import SCAN_JOB_LOG
 from scanner.network import InspectTaskRunner
-from scanner.network.exceptions import NetworkCancelError, NetworkPauseError
 from scanner.network.inspect import construct_inventory
 from scanner.network.inspect_callback import InspectCallback
 from scanner.network.utils import delete_ssh_keyfiles, is_gen_ssh_keyfile
@@ -86,7 +84,6 @@ class TestNetworkInspectScanner:
         self.scan_task.update_stats("TEST NETWORK INSPECT.", sys_failed=0)
         self.scan_job.save()
         self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL, ScanJob.JOB_TERMINATE_PAUSE]
-        self.interrupt = Mock(value=ScanJob.JOB_RUN)
 
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
@@ -236,9 +233,7 @@ class TestNetworkInspectScanner:
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         scanner.connect_scan_task = self.connect_scan_task
         caplog.set_level(logging.ERROR)
-        _, scan_result = scanner._inspect_scan(
-            Value("i", ScanJob.JOB_RUN), self.host_list
-        )
+        _, scan_result = scanner._inspect_scan(self.host_list)
         # an error should not prevent scan completion
         assert scan_result == "completed"
         # no raw fact produced, given the errors
@@ -249,8 +244,8 @@ class TestNetworkInspectScanner:
         """Test scan flow with mocked manager and failure."""
         mock_scan.side_effect = AnsibleRunnerException()
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
-        mock_scan.assert_called_with(ANY, self.host_list)
+        scan_task_status = scanner.run()
+        mock_scan.assert_called_with(self.host_list)
         assert scan_task_status[1] == ScanTask.FAILED
 
     @patch("ansible_runner.run")
@@ -260,7 +255,7 @@ class TestNetworkInspectScanner:
         with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
             scanner = InspectTaskRunner(self.scan_job, self.scan_task)
             scanner.connect_scan_task = self.connect_scan_task
-            scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
+            scan_task_status = scanner.run()
             mock_run.assert_called()
             assert scan_task_status[1] == ScanTask.FAILED
 
@@ -270,11 +265,7 @@ class TestNetworkInspectScanner:
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         path = Path(__file__).absolute().parent / "test_util/crash.py"
 
-        _, result = scanner._inspect_scan(
-            Value("i", ScanJob.JOB_RUN),
-            self.host_list,
-            base_ssh_executable=path,
-        )
+        _, result = scanner._inspect_scan(self.host_list, base_ssh_executable=path)
         assert result == ScanTask.COMPLETED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
@@ -284,10 +275,7 @@ class TestNetworkInspectScanner:
         path = Path(__file__).absolute().parent / "test_util/hang.py"
 
         scanner._inspect_scan(
-            Value("i", ScanJob.JOB_RUN),
-            self.host_list,
-            base_ssh_executable=path,
-            ssh_timeout="0.1s",
+            self.host_list, base_ssh_executable=path, ssh_timeout="0.1s"
         )
 
     @patch("ansible_runner.run")
@@ -312,12 +300,12 @@ class TestNetworkInspectScanner:
 
         scanner.connect_scan_task = self.connect_scan_task
         with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
-            scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
+            scanner._inspect_scan(self.host_list)
         mock_run.assert_called()
 
     def test_populate_callback(self):
         """Test the population of the callback object for inspect scan."""
-        callback = InspectCallback(manager_interrupt=self.interrupt)
+        callback = InspectCallback()
         # cleaned unused variable from event_dict
         event_dict = {
             "runner_ident": "f2100bac-7d64-43d2-8e6a-022c6f5104ac",
@@ -339,38 +327,13 @@ class TestNetworkInspectScanner:
         }
         callback.task_on_unreachable(event_dict)
 
-    def test_run_manager_interupt(self):
-        """Test manager interupt for inspect run method."""
-        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        terminate = Value("i", ScanJob.JOB_TERMINATE_CANCEL)
-        scan_task_status = scanner.run(terminate)
-        assert scan_task_status[1] == ScanTask.CANCELED
-
     @patch("scanner.network.inspect.InspectTaskRunner._obtain_discovery_data")
     def test_no_reachable_host(self, discovery):
         """Test no reachable host."""
         discovery.return_value = [], [], [], []
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        scan_task_status = scanner.run(Value("i", ScanJob.JOB_RUN))
+        scan_task_status = scanner.run()
         assert scan_task_status[1] == ScanTask.FAILED
-
-    def test_cancel_inspect(self):
-        """Test cancel of inspect."""
-        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with pytest.raises(NetworkCancelError):
-            scanner.connect_scan_task = self.connect_scan_task
-            scanner._inspect_scan(
-                Value("i", ScanJob.JOB_TERMINATE_CANCEL), self.host_list
-            )
-
-    def test_pause_inspect(self):
-        """Test pause of inspect."""
-        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with pytest.raises(NetworkPauseError):
-            scanner.connect_scan_task = self.connect_scan_task
-            scanner._inspect_scan(
-                Value("i", ScanJob.JOB_TERMINATE_PAUSE), self.host_list
-            )
 
     @patch("ansible_runner.run")
     @patch("scanner.network.inspect.settings.ANSIBLE_LOG_LEVEL", "1")
@@ -379,7 +342,7 @@ class TestNetworkInspectScanner:
         mock_run.return_value.status = "successful"
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
         with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
-            scanner._inspect_scan(Value("i", ScanJob.JOB_RUN), self.host_list)
+            scanner._inspect_scan(self.host_list)
         mock_run.assert_called()
         calls = mock_run.mock_calls
         # Check to see if the parameter was passed into the runner.run()
@@ -430,7 +393,7 @@ class TestAnsibleLogCollector:
         assert not stderr_log.exists()
         # finally, call the method that will "execute" the inspection scan
         # and persist logs
-        inspect_runner._inspect_scan(Mock(), Mock())
+        inspect_runner._inspect_scan(Mock())
         assert stdout_log.exists()
         assert stderr_log.exists()
         # rationale: since we have 2 inspection groups, content from ansible runner

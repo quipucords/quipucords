@@ -25,7 +25,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
     )
     FAILURE_MESSAGE = "Unable to inspect OpenShift host."
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Scan satellite manager and obtain host facts."""
         self._check_prerequisites()
         ocp_client = self.get_ocp_client(self.scan_task)
@@ -40,15 +40,11 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         # cluster is considered a "system", hence the +1
         self._init_stats(len(nodes_list) + 1)
         for node in nodes_list:
-            # check if scanjob is paused or cancelled
-            self.check_for_interrupt(manager_interrupt)
             node.cluster_uuid = cluster.uuid
             self._save_node(node)
 
         self.log("Retrieving extra cluster facts.")
-        extra_cluster_facts = self._extra_cluster_facts(
-            manager_interrupt, ocp_client, cluster
-        )
+        extra_cluster_facts = self._extra_cluster_facts(ocp_client, cluster)
         self._save_cluster(cluster, extra_cluster_facts)
 
         self.log(f"Collected facts for {self.scan_task.systems_scanned} systems.")
@@ -75,9 +71,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         inspect_group.tasks.add(self.scan_task)
         return inspect_group
 
-    def _extra_cluster_facts(
-        self, manager_interrupt, ocp_client: OpenShiftApi, cluster
-    ):
+    def _extra_cluster_facts(self, ocp_client: OpenShiftApi, cluster):
         """Retrieve extra cluster facts."""
         collect_ocp_workloads_enabled = settings.QPC_FEATURE_FLAGS.is_feature_active(
             "OCP_WORKLOADS"
@@ -89,7 +83,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         )
         extra_facts = {}
         for fact_name, api_method in fact2method:
-            self.check_for_interrupt(manager_interrupt)
             try:
                 if fact_name == "workloads" and not collect_ocp_workloads_enabled:
                     continue

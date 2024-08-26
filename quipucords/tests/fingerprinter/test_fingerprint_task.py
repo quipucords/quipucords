@@ -1542,9 +1542,7 @@ def test_process_details_report_failed(fingerprint_task_runner):
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=fact_collection,
     ):
-        status_message, status = fingerprint_task_runner._process_details_report(
-            "", report
-        )
+        status_message, status = fingerprint_task_runner._process_details_report(report)
         assert "failed" in status_message.lower()
         assert status == "failed"
     assert len(deployments_report.cached_fingerprints) == 0
@@ -1569,9 +1567,7 @@ def test_process_details_report_success(fingerprint_task_runner):
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=[fact_collection],
     ):
-        status_message, status = fingerprint_task_runner._process_details_report(
-            "", report
-        )
+        status_message, status = fingerprint_task_runner._process_details_report(report)
     assert "success" in status_message.lower()
     assert status == "completed"
     assert len(deployments_report.cached_fingerprints) == 1
@@ -1599,9 +1595,7 @@ def test_process_details_report_exception(fingerprint_task_runner):
             side_effect=DataError,
         ),
     ):
-        status_message, status = fingerprint_task_runner._process_details_report(
-            "", report
-        )
+        status_message, status = fingerprint_task_runner._process_details_report(report)
         assert "failed" in status_message.lower()
         assert status == "failed"
     assert len(deployments_report.cached_fingerprints) == 0
@@ -1626,9 +1620,7 @@ def test_process_details_report_bypass(fingerprint_task_runner, faker):
         "fingerprinter.runner.FingerprintTaskRunner._process_sources",
         return_value=[fact_collection],
     ):
-        status_message, status = fingerprint_task_runner._process_details_report(
-            "", report
-        )
+        status_message, status = fingerprint_task_runner._process_details_report(report)
     assert "success" in status_message.lower()
     assert status == "completed"
     assert len(deployments_report.cached_fingerprints) == 0

@@ -15,7 +15,6 @@ from api.inspectresult.model import InspectGroup, RawFact
 from api.models import (
     InspectResult,
     Scan,
-    ScanJob,
     ScanTask,
     SystemConnectionResult,
 )
@@ -28,7 +27,6 @@ from scanner.network.exceptions import ScannerError
 from scanner.network.inspect_callback import AnsibleResults, InspectCallback
 from scanner.network.processing.process import NO_DATA, process
 from scanner.network.utils import (
-    check_manager_interrupt,
     construct_inventory,
     delete_ssh_keyfiles,
     raw_facts_template,
@@ -59,7 +57,7 @@ class InspectTaskRunner(ScanTaskRunner):
         super().__init__(scan_job, scan_task)
         self.connect_scan_task = None
 
-    def execute_task(self, manager_interrupt):
+    def execute_task(self):
         """Scan target systems to collect facts.
 
         Attempts connections to a source using a list of credentials
@@ -99,7 +97,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 for unprocessed in connected
                 if unprocessed[0] not in processed_hosts
             ]
-            scan_message, scan_result = self._inspect_scan(manager_interrupt, remaining)
+            scan_message, scan_result = self._inspect_scan(remaining)
 
             self.scan_task.cleanup_facts(NETWORK_SCAN_IDENTITY_KEY)
             temp_facts = self.scan_task.get_facts()
@@ -147,12 +145,10 @@ class InspectTaskRunner(ScanTaskRunner):
             )
 
     def _inspect_scan(  # noqa: PLR0912, PLR0915, C901
-        self, manager_interrupt, connected
+        self, connected
     ):
         """Execute the host scan with the initialized source.
 
-        :param manager_interrupt: Signal used to communicate termination
-            of scan
         :param connected: list of (host, credential) pairs to inspect
         :param base_ssh_executable: ssh executable, or None for
             'ssh'. Will be wrapped with a timeout before being passed
@@ -200,13 +196,12 @@ class InspectTaskRunner(ScanTaskRunner):
 
         # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
-            check_manager_interrupt(manager_interrupt)
             log_message = (
                 "START INSPECT PROCESSING GROUP"
                 f" {(idx + 1):d} of {len(group_names):d}"
             )
             self.scan_task.log_message(log_message)
-            call = InspectCallback(manager_interrupt)
+            call = InspectCallback()
 
             # Build Ansible Runner Parameters
             job_timeout = int(settings.NETWORK_INSPECT_JOB_TIMEOUT) * len(group_names)
@@ -269,21 +264,11 @@ class InspectTaskRunner(ScanTaskRunner):
 
             final_status = runner_obj.status
             if final_status == "canceled":
-                if (
-                    manager_interrupt
-                    and manager_interrupt.value == ScanJob.JOB_TERMINATE_CANCEL
-                ):
-                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                        "INSPECT",
-                        "canceled",
-                    )
-                else:
-                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                        "INSPECT",
-                        "paused",
-                    )
+                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                    "INSPECT",
+                    "canceled",
+                )
                 self.scan_task.log_message(msg)
-                check_manager_interrupt(manager_interrupt)
             if final_status not in ["successful", "unreachable", "failed"]:
                 if final_status == "timeout":
                     error_msg = log_messages.NETWORK_TIMEOUT_ERR

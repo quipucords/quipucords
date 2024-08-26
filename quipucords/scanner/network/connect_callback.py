@@ -5,7 +5,6 @@ import traceback
 
 import log_messages
 from api.connresult.model import SystemConnectionResult
-from scanner.network.utils import STOP_STATES
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +20,11 @@ class ConnectResultCallback:
     scan, as we scan it.
     """
 
-    def __init__(self, result_store, credential, source, manager_interrupt):
+    def __init__(self, result_store, credential, source):
         """Create result callback."""
         self.result_store = result_store
         self.credential = credential
         self.source = source
-        self.interrupt = manager_interrupt
         self.stopped = False
 
     def task_on_ok(self, event_data, host, task_result):
@@ -153,14 +151,4 @@ class ConnectResultCallback:
         """Control the cancel callback for runner."""
         if self.stopped:
             return True
-        if not self.interrupt:
-            return False
-        for stop_type, stop_value in STOP_STATES.items():
-            if self.interrupt.value == stop_value:
-                self.result_store.scan_task.log_message(
-                    log_messages.NETWORK_CALLBACK_ACK_STOP % ("CONNECT", stop_type),
-                    log_level=logging.INFO,
-                )
-                self.stopped = True
-                return True
         return False

@@ -36,7 +36,7 @@ def test_connect_successfully(mock_client, scan_task: ScanTask):
     """Test connecting to RHACS host with success."""
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     mock_client.return_value.get.return_value.status_code = 200
-    message, status = runner.execute_task(mock_client)
+    message, status = runner.execute_task()
     assert message == runner.success_message
     assert status == ScanTask.COMPLETED
     assert scan_task.systems_count == 1
@@ -60,7 +60,7 @@ def test_connect_with_error(
     caplog.set_level(logging.ERROR)
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     mock_client.return_value.get.return_value.status_code = err_status
-    message, status = runner.execute_task(mock_client)
+    message, status = runner.execute_task()
     assert message == runner.failure_message
     assert status == ScanTask.FAILED
     assert scan_task.systems_count == 1
@@ -113,7 +113,7 @@ def test_handling_connection_errors(  # noqa: PLR0913
     caplog.set_level(logging.ERROR)
     runner = ConnectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     mock_client.return_value.get.side_effect = exception
-    message, status = runner.execute_task(mock_client)
+    message, status = runner.execute_task()
     assert message == runner.failure_message
     assert status == ScanTask.FAILED
     assert scan_task.systems_count == 1

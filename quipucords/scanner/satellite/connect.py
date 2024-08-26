@@ -10,7 +10,7 @@ class ConnectTaskRunner(SatelliteTaskRunner):
     and gathers the set of available systems.
     """
 
-    def handle_api_calls(self, api, manager_interrupt):
+    def handle_api_calls(self, api):
         """Handle api calls for connetion phase."""
         api.host_count()
         api.hosts()

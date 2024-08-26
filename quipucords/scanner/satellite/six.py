@@ -479,7 +479,7 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     def _requests_hosts_unique(self):
         """Get an iterable of all unique hosts."""
 
-    def hosts_facts(self, manager_interrupt):
+    def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(self.connect_scan_task.connection_result.systems.all())
         if self.inspect_scan_task is None:
@@ -494,9 +494,7 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
             process_results, self=self, api_version=self.SATELLITE_API_VERSION
         )
 
-        self._prepare_and_process_hosts(
-            hosts, request_host_details, _process_results, manager_interrupt
-        )
+        self._prepare_and_process_hosts(hosts, request_host_details, _process_results)
 
         utils.validate_task_stats(self.inspect_scan_task)
 
