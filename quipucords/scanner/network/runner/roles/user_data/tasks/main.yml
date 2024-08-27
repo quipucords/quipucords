@@ -18,5 +18,5 @@
 
 - name: initialize system_user_count info
   set_fact:
-    system_user_count: "QPC_FORCE_POST_PROCESS"
+    system_user_count: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes

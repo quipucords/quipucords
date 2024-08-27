@@ -18,7 +18,7 @@ class TestProcessSystemUserCount(unittest.TestCase):
         }
         self.assertEqual(
             user_data.ProcessSystemUserCount.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             1,
         )
@@ -29,14 +29,14 @@ class TestProcessSystemUserCount(unittest.TestCase):
         )
         self.assertEqual(
             user_data.ProcessSystemUserCount.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             1,
         )
         dependencies["internal_system_user_count"] = ansible_result("Failed", 1)
         self.assertEqual(
             user_data.ProcessSystemUserCount.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
@@ -46,7 +46,7 @@ class TestProcessSystemUserCount(unittest.TestCase):
         dependencies = {}
         self.assertEqual(
             user_data.ProcessSystemUserCount.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )

@@ -165,7 +165,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_VMWARE,
         )
@@ -182,7 +182,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_VIRTUALBOX,
         )
@@ -199,7 +199,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_VIRTUALPC,
         )
@@ -216,7 +216,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_KVM,
         )
@@ -232,7 +232,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             None,
         )
@@ -249,7 +249,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_KVM,
         )
@@ -266,7 +266,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_KVM,
         )
@@ -283,7 +283,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_XEN,
         )
@@ -300,7 +300,7 @@ class TestProcessVirtType(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtType.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             virt.VIRT_TYPE_XEN,
         )
@@ -321,7 +321,7 @@ class TestProcessVirtVirt(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtVirt.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             "virt-guest",
         )
@@ -334,7 +334,7 @@ class TestProcessVirtVirt(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtVirt.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             "virt-host",
         )
@@ -347,7 +347,7 @@ class TestProcessVirtVirt(unittest.TestCase):
         }
         self.assertEqual(
             virt.ProcessVirtVirt.process(
-                ansible_result(process.QPC_FORCE_POST_PROCESS), dependencies
+                ansible_result(process.QUIPUCORDS_FORCE_POST_PROCESS), dependencies
             ),
             None,
         )

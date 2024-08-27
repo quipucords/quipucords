@@ -19,7 +19,7 @@
 
 - name: initialize dmi_chassis_asset_tag
   set_fact:
-    dmi_chassis_asset_tag: "QPC_FORCE_POST_PROCESS"
+    dmi_chassis_asset_tag: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 # ## Alibaba cloud facts
@@ -37,11 +37,11 @@
 
 - name: initialize dmi_system_product_name
   set_fact:
-    dmi_system_product_name: "QPC_FORCE_POST_PROCESS"
+    dmi_system_product_name: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 # set the public cloud fact to post process
 - name: initialize cloud_provider fact
   set_fact:
-    cloud_provider: "QPC_FORCE_POST_PROCESS"
+    cloud_provider: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes

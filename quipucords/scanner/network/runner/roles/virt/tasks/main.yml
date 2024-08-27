@@ -58,12 +58,12 @@
 
 - name: initialize virt.type
   set_fact:
-    virt_type: "QPC_FORCE_POST_PROCESS"
+    virt_type: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 - name: initialize virt.virt
   set_fact:
-    virt_virt: "QPC_FORCE_POST_PROCESS"
+    virt_virt: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 - name: gather internal_virt_num_guests fact

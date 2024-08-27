@@ -26,7 +26,7 @@ RETURN_CODE_ANY = "RETURN_CODE_ANY"
 SKIPPED = "skipped"
 STDOUT = "stdout"
 
-QPC_FORCE_POST_PROCESS = "QPC_FORCE_POST_PROCESS"
+QUIPUCORDS_FORCE_POST_PROCESS = "QUIPUCORDS_FORCE_POST_PROCESS"
 
 SUDO_ERROR = "sudo: a password is required"
 
@@ -124,7 +124,7 @@ def process(  # noqa: PLR0911, PLR0912, C901
 
     # Don't touch things that are not standard Ansible results,
     # because we don't know what format they will have.
-    if fact_value != QPC_FORCE_POST_PROCESS:
+    if fact_value != QUIPUCORDS_FORCE_POST_PROCESS:
         if not is_ansible_task_result(fact_value):
             log_message = (
                 f"FAILED POST PROCESSING {host}."
