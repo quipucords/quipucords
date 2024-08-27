@@ -80,12 +80,12 @@ jobs:
       - name: Run Test
         run: make ${{ matrix.type }} -k
         env:
-          QPC_DBMS: postgres
-          QPC_DBMS_DATABASE: postgres
-          QPC_DBMS_PORT: 5432
-          QPC_DBMS_USER: postgres
-          QPC_DBMS_PASSWORD: postgres
-          QPC_DBMS_HOST: localhost
+          QUIPUCORDS_DBMS: postgres
+          QUIPUCORDS_DBMS_DATABASE: postgres
+          QUIPUCORDS_DBMS_PORT: 5432
+          QUIPUCORDS_DBMS_USER: postgres
+          QUIPUCORDS_DBMS_PASSWORD: postgres
+          QUIPUCORDS_DBMS_HOST: localhost
 
       - name: Report coverage
         if: ${{ success() && contains(matrix.type, 'test-coverage') }}

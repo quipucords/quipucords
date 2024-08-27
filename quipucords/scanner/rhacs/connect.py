@@ -30,7 +30,7 @@ class ConnectTaskRunner(RHACSTaskRunner):
         try:
             response = self.client.get(
                 "/v1/auth/status",
-                timeout=settings.QPC_CONNECT_TASK_TIMEOUT,
+                timeout=settings.QUIPUCORDS_CONNECT_TASK_TIMEOUT,
                 raise_for_status=True,
             )
             if response.status_code == status.HTTP_200_OK:

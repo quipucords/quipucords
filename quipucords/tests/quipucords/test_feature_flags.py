@@ -11,8 +11,8 @@ from quipucords.featureflag import FeatureFlag
 @pytest.mark.parametrize(
     "env_name,env_value,feature_name,feature_value",
     (
-        ("QPC_FEATURE_TEST", "0", "TEST", False),
-        ("QPC_FEATURE_TEST", "1", "TEST", True),
+        ("QUIPUCORDS_FEATURE_TEST", "0", "TEST", False),
+        ("QUIPUCORDS_FEATURE_TEST", "1", "TEST", True),
     ),
 )
 def test_get_feature_flags_from_env(env_name, env_value, feature_name, feature_value):
@@ -25,7 +25,7 @@ def test_get_feature_flags_from_env(env_name, env_value, feature_name, feature_v
 
 def test_if_returns_default_value_if_another_env_set():
     """Tests if function also returns variables in default dict."""
-    with mock.patch.dict(os.environ, ({"QPC_FEATURE_TEST": "0"})):
+    with mock.patch.dict(os.environ, ({"QUIPUCORDS_FEATURE_TEST": "0"})):
         dict_with_test_flags = FeatureFlag.get_feature_flags_from_env()
         assert "OCP_WORKLOADS" in dict_with_test_flags
         assert "TEST" in dict_with_test_flags
@@ -36,8 +36,8 @@ def test_if_returns_default_value_if_another_env_set():
 @pytest.mark.parametrize(
     "env_name,env_value,feature_name,feature_value",
     (
-        ("QPC_FEATURE_OCP_WORKLOADS", "1", "OCP_WORKLOADS", True),
-        ("QPC_FEATURE_TEST", "0", "TEST", False),
+        ("QUIPUCORDS_FEATURE_OCP_WORKLOADS", "1", "OCP_WORKLOADS", True),
+        ("QUIPUCORDS_FEATURE_TEST", "0", "TEST", False),
     ),
 )
 def test_if_value_for_env_default_list_gets_updated(
@@ -53,12 +53,12 @@ def test_if_value_for_env_default_list_gets_updated(
 def test_when_value_cant_be_cast_to_int():
     """Tests if function only updates values if it can be cast to int."""
     with (
-        mock.patch.dict(os.environ, ({"QPC_FEATURE_OVERALL_STATUS": "wrong"})),
+        mock.patch.dict(os.environ, ({"QUIPUCORDS_FEATURE_OVERALL_STATUS": "wrong"})),
         pytest.raises(ValueError) as exc,
     ):
         FeatureFlag.get_feature_flags_from_env()
     assert (
-        str(exc.value) == "'wrong' from 'QPC_FEATURE_OVERALL_STATUS'"
+        str(exc.value) == "'wrong' from 'QUIPUCORDS_FEATURE_OVERALL_STATUS'"
         " can't be converted to int, verify your"
         " environment variables."
     )
@@ -67,9 +67,9 @@ def test_when_value_cant_be_cast_to_int():
 @pytest.mark.parametrize(
     "env_name,env_value",
     (
-        ("QPC_FEATURE_TEST", "10"),
-        ("QPC_FEATURE_TEST1", "3"),
-        ("QPC_FEATURE_TEST2", "2000"),
+        ("QUIPUCORDS_FEATURE_TEST", "10"),
+        ("QUIPUCORDS_FEATURE_TEST1", "3"),
+        ("QUIPUCORDS_FEATURE_TEST2", "2000"),
     ),
 )
 def test_when_int_is_not_valid_value_for_env(
@@ -87,15 +87,15 @@ def test_when_int_is_not_valid_value_for_env(
 @pytest.mark.parametrize(
     "env_name,env_value,feature_name",
     (
-        ("TEST_QPC_FEATURE_", "1", "TEST"),
-        ("TEST_QPC_FEATURE_", "1", "TEST_"),
-        ("QPC_TEST1_FEATURE_", "0", "TEST1"),
-        ("QPC_TEST1_FEATURE_", "0", "_TEST1"),
-        ("QPC_TEST1_FEATURE_", "0", "TEST1_"),
+        ("TEST_QUIPUCORDS_FEATURE_", "1", "TEST"),
+        ("TEST_QUIPUCORDS_FEATURE_", "1", "TEST_"),
+        ("QUIPUCORDS_TEST1_FEATURE_", "0", "TEST1"),
+        ("QUIPUCORDS_TEST1_FEATURE_", "0", "_TEST1"),
+        ("QUIPUCORDS_TEST1_FEATURE_", "0", "TEST1_"),
     ),
 )
 def test_function_only_adds_names_follow_standard(env_name, env_value, feature_name):
-    """Tests if function only adds variables that start with QPC_FEATURE_."""
+    """Tests if function only adds variables that start with QUIPUCORDS_FEATURE_."""
     with mock.patch.dict(os.environ, ({env_name: env_value})):
         dict_with_test_flags = FeatureFlag.get_feature_flags_from_env()
         assert feature_name not in dict_with_test_flags
@@ -104,10 +104,10 @@ def test_function_only_adds_names_follow_standard(env_name, env_value, feature_n
 @pytest.mark.parametrize(
     "env_name,env_value,feature_name,feature_value",
     (
-        ("qpc_feature_test", "1", "TEST", True),
-        ("qpc_feature_TEST1", "0", "TEST1", False),
-        ("QPC_feature_TEST2", "0", "TEST2", False),
-        ("qpc_FEATURE_test3", "1", "TEST3", True),
+        ("quipucords_feature_test", "1", "TEST", True),
+        ("quipucords_feature_TEST1", "0", "TEST1", False),
+        ("QUIPUCORDS_feature_TEST2", "0", "TEST2", False),
+        ("quipucords_FEATURE_test3", "1", "TEST3", True),
     ),
 )
 def test_if_function_is_not_case_sensitive(
@@ -123,7 +123,7 @@ def test_if_function_is_not_case_sensitive(
 @pytest.fixture
 def setup_feature_flag_instance_for_tests():
     """Set up instance of FeatureFlag class for tests."""
-    with mock.patch.dict(os.environ, {"QPC_FEATURE_TEST": "1"}):
+    with mock.patch.dict(os.environ, {"QUIPUCORDS_FEATURE_TEST": "1"}):
         feature_flag_instance = FeatureFlag()
         return feature_flag_instance
 

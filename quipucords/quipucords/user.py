@@ -14,7 +14,9 @@ class InvalidPasswordError(ValidationError):
 
 def make_random_password():
     """Create a random password for a User."""
-    return User.objects.make_random_password(settings.QPC_MINIMUM_PASSWORD_LENGTH)
+    return User.objects.make_random_password(
+        settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH
+    )
 
 
 def validate_password(password: str, user: User | None = None):

@@ -28,7 +28,7 @@ class TestCeleryTaskCache:
     def test_set_scan_job_celery_task_without_timeout(self, caches_mock, faker):
         """Test that setting a cache key uses the default ttl if not specified."""
         default_scan_job_ttl = faker.pyint(10, 60)
-        with override_settings(QPC_SCAN_JOB_TTL=default_scan_job_ttl):
+        with override_settings(QUIPUCORDS_SCAN_JOB_TTL=default_scan_job_ttl):
             celery_task_id = faker.uuid4()
             scan_job_id = faker.pyint()
             set_scan_job_celery_task_id(scan_job_id, celery_task_id)

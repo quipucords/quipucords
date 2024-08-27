@@ -22,7 +22,9 @@ class TestUserRandomPasswords:
 
     def test_make_random_password_size(self):
         """Test user random password is minimum size."""
-        assert len(make_random_password()) == settings.QPC_MINIMUM_PASSWORD_LENGTH
+        assert (
+            len(make_random_password()) == settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH
+        )
 
     def test_make_random_password_includes_allowed_characters(self):
         """Test user random password includes only allowed characters."""
@@ -84,7 +86,9 @@ class TestCreateOrUpdateUser:
         """Test create_or_update_user with a new username and a good password."""
         username = faker.name()
         email = faker.email()
-        password = f"{faker.password(length=settings.QPC_MINIMUM_PASSWORD_LENGTH)}"
+        password = (
+            f"{faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)}"
+        )
         created, updated, generated_password = create_or_update_user(
             username, email, password
         )
@@ -133,7 +137,9 @@ class TestCreateOrUpdateUser:
     def test_update_user_good_password(self, client, faker, qpc_user_simple: User):
         """Test create_or_update_user with an existing username and a good password."""
         username = qpc_user_simple.username
-        password = f"{faker.password(length=settings.QPC_MINIMUM_PASSWORD_LENGTH)}"
+        password = (
+            f"{faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)}"
+        )
         created, updated, generated_password = create_or_update_user(
             username, None, password
         )

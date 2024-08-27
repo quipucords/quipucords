@@ -26,7 +26,7 @@ class ConnectTaskRunner(AnsibleTaskRunner):
         try:
             self.client.get(
                 "/api/v2/me/",
-                timeout=settings.QPC_CONNECT_TASK_TIMEOUT,
+                timeout=settings.QUIPUCORDS_CONNECT_TASK_TIMEOUT,
                 raise_for_status=True,
             )
             conn_result = SystemConnectionResult.SUCCESS

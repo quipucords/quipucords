@@ -37,7 +37,7 @@ class InspectCallback:
         self._ansible_facts = defaultdict(dict)
         self._unreachable_hosts = set()
         self._collect_skipped_tasks_enabled = (
-            settings.QPC_FEATURE_FLAGS.is_feature_active("REPORT_SKIPPED_TASKS")
+            settings.QUIPUCORDS_FEATURE_FLAGS.is_feature_active("REPORT_SKIPPED_TASKS")
         )
         self._skipped_facts = defaultdict(set)
         self.stopped = False

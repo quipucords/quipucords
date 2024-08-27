@@ -22,7 +22,7 @@ class QuipucordsExpiringTokenAuthentication(TokenAuthentication):
 
         utc_now = datetime.datetime.now(datetime.UTC)
 
-        hours = settings.QPC_TOKEN_EXPIRE_HOURS
+        hours = settings.QUIPUCORDS_TOKEN_EXPIRE_HOURS
         if token.created < utc_now - datetime.timedelta(hours=hours):
             raise exceptions.AuthenticationFailed("Token has expired")
 

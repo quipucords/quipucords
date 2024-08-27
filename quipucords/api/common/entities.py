@@ -243,7 +243,7 @@ class ReportEntity:
     _deployment_report: DeploymentsReport
     hosts: List[HostEntity] = field(repr=False, default_factory=list)
     slice_size_limit: int = field(
-        default_factory=lambda: settings.QPC_INSIGHTS_REPORT_SLICE_SIZE
+        default_factory=lambda: settings.QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE
     )
 
     @property

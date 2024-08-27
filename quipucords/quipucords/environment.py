@@ -89,7 +89,7 @@ def log_all_environment_variables():
     Note: This is potentially a catastrophically bad idea and risks leaking sensitive
     values that don't contain "password" in their names. Use with extreme caution.
     """
-    if not settings.QPC_LOG_ALL_ENV_VARS_AT_STARTUP:
+    if not settings.QUIPUCORDS_LOG_ALL_ENV_VARS_AT_STARTUP:
         return
     env_list = []
     for key, value in os.environ.items():
@@ -107,19 +107,19 @@ def log_database_configuration():
     """Log settings related to the database configuration."""
     settings_to_log = {
         "postgres": [
-            "QPC_DBMS",
-            "QPC_DBMS_HOST",
-            "QPC_DBMS_PORT",
-            "QPC_DBMS_DATABASE",
-            "QPC_DBMS_USER",
+            "QUIPUCORDS_DBMS",
+            "QUIPUCORDS_DBMS_HOST",
+            "QUIPUCORDS_DBMS_PORT",
+            "QUIPUCORDS_DBMS_DATABASE",
+            "QUIPUCORDS_DBMS_USER",
         ],
         "sqlite": [
-            "QPC_DBMS",
+            "QUIPUCORDS_DBMS",
             "DB_PATH",
         ],
     }
 
-    for setting_name in settings_to_log[settings.QPC_DBMS]:
+    for setting_name in settings_to_log[settings.QUIPUCORDS_DBMS]:
         logger.info("%s set to %s", setting_name, repr(getattr(settings, setting_name)))
 
 

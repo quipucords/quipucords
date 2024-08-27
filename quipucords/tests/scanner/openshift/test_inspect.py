@@ -173,10 +173,10 @@ def cluster_err(error):
 
 @pytest.fixture
 def workloads_enabled(settings):
-    """Set QPC_FEATURE_FLAGS with enabled workloads."""
-    with mock.patch.dict(os.environ, {"QPC_FEATURE_OCP_WORKLOADS": "1"}):
+    """Set QUIPUCORDS_FEATURE_FLAGS with enabled workloads."""
+    with mock.patch.dict(os.environ, {"QUIPUCORDS_FEATURE_OCP_WORKLOADS": "1"}):
         feature_flag = FeatureFlag()
-    settings.QPC_FEATURE_FLAGS = feature_flag
+    settings.QUIPUCORDS_FEATURE_FLAGS = feature_flag
 
 
 @pytest.mark.django_db

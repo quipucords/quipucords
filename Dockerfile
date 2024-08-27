@@ -14,7 +14,7 @@ ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_DATA_DIR=/var/data
 ENV QUIPUCORDS_LOG_LEVEL=INFO
-ENV QPC_LOG_DIRECTORY=/var/log
+ENV QUIPUCORDS_LOG_DIRECTORY=/var/log
 
 COPY scripts/dnf /usr/local/bin/dnf
 ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.12-devel"

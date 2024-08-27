@@ -88,18 +88,22 @@ def app_secret_key_and_path():
     return django_secret_key, django_secret_path
 
 
-QPC_SSH_CONNECT_TIMEOUT = env.int("QPC_SSH_CONNECT_TIMEOUT", 10)
-QPC_SSH_INSPECT_TIMEOUT = env.int("QPC_SSH_INSPECT_TIMEOUT", 120)
+QUIPUCORDS_SSH_CONNECT_TIMEOUT = env.int("QUIPUCORDS_SSH_CONNECT_TIMEOUT", 10)
+QUIPUCORDS_SSH_INSPECT_TIMEOUT = env.int("QUIPUCORDS_SSH_INSPECT_TIMEOUT", 120)
 
 # Note: NETWORK_*_JOB_TIMEOUT are **per host**. They may not need to be huge.
-NETWORK_INSPECT_JOB_TIMEOUT = env.int("NETWORK_INSPECT_JOB_TIMEOUT", 10800)  # 3 hours
-NETWORK_CONNECT_JOB_TIMEOUT = env.int("NETWORK_CONNECT_JOB_TIMEOUT", 10)  # 10 sec
+QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT = env.int(
+    "QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT", 10800
+)  # 3 hours
+QUIPUCORDS_NETWORK_CONNECT_JOB_TIMEOUT = env.int(
+    "QUIPUCORDS_NETWORK_CONNECT_JOB_TIMEOUT", 10
+)  # 10 sec
 
-QPC_CONNECT_TASK_TIMEOUT = env.int("QPC_CONNECT_TASK_TIMEOUT", 30)
-QPC_INSPECT_TASK_TIMEOUT = env.int("QPC_INSPECT_TASK_TIMEOUT", 600)
+QUIPUCORDS_CONNECT_TASK_TIMEOUT = env.int("QUIPUCORDS_CONNECT_TASK_TIMEOUT", 30)
+QUIPUCORDS_INSPECT_TASK_TIMEOUT = env.int("QUIPUCORDS_INSPECT_TASK_TIMEOUT", 600)
 
-QPC_HTTP_RETRY_MAX_NUMBER = env.int("QPC_HTTP_RETRY_MAX_NUMBER", 5)
-QPC_HTTP_RETRY_BACKOFF = env.float("QPC_HTTP_RETRY_BACKOFF", 0.1)
+QUIPUCORDS_HTTP_RETRY_MAX_NUMBER = env.int("QUIPUCORDS_HTTP_RETRY_MAX_NUMBER", 5)
+QUIPUCORDS_HTTP_RETRY_BACKOFF = env.float("QUIPUCORDS_HTTP_RETRY_BACKOFF", 0.1)
 
 ANSIBLE_LOG_LEVEL = env.int("ANSIBLE_LOG_LEVEL", 3)
 
@@ -112,7 +116,7 @@ SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
 
 DEBUG = False if PRODUCTION else env.bool("DJANGO_DEBUG", False)
 
-if env.bool("QPC_URLLIB3_DISABLE_WARNINGS", False):
+if env.bool("QUIPUCORDS_URLLIB3_DISABLE_WARNINGS", False):
     # Optionally disable noisy urllib3 warnings.
     # Some scan target systems may have invalid or self-signed certs that the user does
     # not intend to fix, and they may optionally configure its source not to verify the
@@ -144,7 +148,7 @@ INSTALLED_APPS = [
     "api",
 ]
 
-if env.bool("QPC_ENABLE_DJANGO_EXTENSIONS", False):
+if env.bool("QUIPUCORDS_ENABLE_DJANGO_EXTENSIONS", False):
     INSTALLED_APPS.append("django_extensions")
 
 if not PRODUCTION:
@@ -224,13 +228,13 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # Database Management System could be 'sqlite' or 'postgresql'
-QPC_DBMS = env.str("QPC_DBMS", "postgres").lower()
+QUIPUCORDS_DBMS = env.str("QUIPUCORDS_DBMS", "postgres").lower()
 allowed_db_engines = ["sqlite", "postgres"]
-if QPC_DBMS not in allowed_db_engines:
-    raise ImproperlyConfigured(f"QPC_DBMS must be one of {allowed_db_engines}")
+if QUIPUCORDS_DBMS not in allowed_db_engines:
+    raise ImproperlyConfigured(f"QUIPUCORDS_DBMS must be one of {allowed_db_engines}")
 
-if QPC_DBMS == "sqlite":
-    # If user enters an invalid QPC_DBMS, use default postgresql
+if QUIPUCORDS_DBMS == "sqlite":
+    # If user enters an invalid QUIPUCORDS_DBMS, use default postgresql
     DEV_DB = DEFAULT_DATA_DIR / "db.sqlite3"
     PROD_DB = Path(env.str("DJANGO_DB_PATH", str(DEFAULT_DATA_DIR))) / "db.sqlite3"
     DB_PATH = PROD_DB if PRODUCTION else DEV_DB
@@ -241,21 +245,21 @@ if QPC_DBMS == "sqlite":
             "TEST": {"NAME": ":memory:"},
         }
     }
-elif QPC_DBMS == "postgres":
+elif QUIPUCORDS_DBMS == "postgres":
     # The following variables are only relevant when using a postgres database:
-    QPC_DBMS_DATABASE = env.str("QPC_DBMS_DATABASE", "qpc")
-    QPC_DBMS_USER = env.str("QPC_DBMS_USER", "qpc")
-    QPC_DBMS_PASSWORD = env.str("QPC_DBMS_PASSWORD", "qpc")
-    QPC_DBMS_HOST = env.str("QPC_DBMS_HOST", "localhost")
-    QPC_DBMS_PORT = env.int("QPC_DBMS_PORT", 5432)
+    QUIPUCORDS_DBMS_DATABASE = env.str("QUIPUCORDS_DBMS_DATABASE", "qpc")
+    QUIPUCORDS_DBMS_USER = env.str("QUIPUCORDS_DBMS_USER", "qpc")
+    QUIPUCORDS_DBMS_PASSWORD = env.str("QUIPUCORDS_DBMS_PASSWORD", "qpc")
+    QUIPUCORDS_DBMS_HOST = env.str("QUIPUCORDS_DBMS_HOST", "localhost")
+    QUIPUCORDS_DBMS_PORT = env.int("QUIPUCORDS_DBMS_PORT", 5432)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": QPC_DBMS_DATABASE,
-            "USER": QPC_DBMS_USER,
-            "PASSWORD": QPC_DBMS_PASSWORD,
-            "HOST": QPC_DBMS_HOST,
-            "PORT": QPC_DBMS_PORT,
+            "NAME": QUIPUCORDS_DBMS_DATABASE,
+            "USER": QUIPUCORDS_DBMS_USER,
+            "PASSWORD": QUIPUCORDS_DBMS_PASSWORD,
+            "HOST": QUIPUCORDS_DBMS_HOST,
+            "PORT": QUIPUCORDS_DBMS_PORT,
         }
     }
 QUIPUCORDS_BULK_CREATE_BATCH_SIZE = env.int("QUIPUCORDS_BULK_CREATE_BATCH_SIZE", 100)
@@ -265,7 +269,7 @@ QUIPUCORDS_BULK_CREATE_BATCH_SIZE = env.int("QUIPUCORDS_BULK_CREATE_BATCH_SIZE",
 VALIDATOR_MODULE = "django.contrib.auth.password_validation"
 # Note: User.objects.make_random_password minimum length is 10 vs the default
 #       for the MinimumLengthValidator is 8. let's declare it here for consistency.
-QPC_MINIMUM_PASSWORD_LENGTH = 10
+QUIPUCORDS_MINIMUM_PASSWORD_LENGTH = 10
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": f"{VALIDATOR_MODULE}.UserAttributeSimilarityValidator",
@@ -273,7 +277,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": f"{VALIDATOR_MODULE}.MinimumLengthValidator",
         "OPTIONS": {
-            "min_length": QPC_MINIMUM_PASSWORD_LENGTH,
+            "min_length": QUIPUCORDS_MINIMUM_PASSWORD_LENGTH,
         },
     },
     {
@@ -334,7 +338,9 @@ QUIPUCORDS_LOGGING_VERBOSE_FORMAT = env.str(
     "[%(levelname)s %(asctime)s pid=%(process)d tid=%(thread)d "
     "%(relative_pathname)s:%(funcName)s:%(lineno)d] %(message)s",
 )
-LOG_DIRECTORY = Path(env.str("QPC_LOG_DIRECTORY", str(DEFAULT_DATA_DIR / "logs")))
+LOG_DIRECTORY = Path(
+    env.str("QUIPUCORDS_LOG_DIRECTORY", str(DEFAULT_DATA_DIR / "logs"))
+)
 LOGGING_FILE = Path(env.str("DJANGO_LOG_FILE", str(LOG_DIRECTORY / "app.log")))
 
 LOGGING = {
@@ -418,12 +424,18 @@ os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
 # Reverse default behavior for better readability in log files
 os.environ.setdefault("ANSIBLE_NOCOLOR", "True")
 
-QPC_EXCLUDE_INTERNAL_FACTS = env.bool("QPC_EXCLUDE_INTERNAL_FACTS", False)
-QPC_TOKEN_EXPIRE_HOURS = env.int("QPC_TOKEN_EXPIRE_HOURS", 24)
-QPC_INSIGHTS_REPORT_SLICE_SIZE = env.int("QPC_INSIGHTS_REPORT_SLICE_SIZE", 10000)
-QPC_INSIGHTS_DATA_COLLECTOR_LABEL = env.str("QPC_INSIGHTS_DATA_COLLECTOR_LABEL", "qpc")
+QUIPUCORDS_EXCLUDE_INTERNAL_FACTS = env.bool("QUIPUCORDS_EXCLUDE_INTERNAL_FACTS", False)
+QUIPUCORDS_TOKEN_EXPIRE_HOURS = env.int("QUIPUCORDS_TOKEN_EXPIRE_HOURS", 24)
+QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE = env.int(
+    "QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE", 10000
+)
+QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL = env.str(
+    "QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL", "qpc"
+)
 
-QPC_LOG_ALL_ENV_VARS_AT_STARTUP = env.bool("QPC_LOG_ALL_ENV_VARS_AT_STARTUP", True)
+QUIPUCORDS_LOG_ALL_ENV_VARS_AT_STARTUP = env.bool(
+    "QUIPUCORDS_LOG_ALL_ENV_VARS_AT_STARTUP", True
+)
 
 # Redis configuration
 
@@ -462,7 +474,7 @@ if not AXES_ENABLED or not AXES_LOCK_OUT_AT_FAILURE:
     )
 
 # Load Feature Flags
-QPC_FEATURE_FLAGS = FeatureFlag()
+QUIPUCORDS_FEATURE_FLAGS = FeatureFlag()
 
 QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS = (
     False
@@ -475,7 +487,7 @@ QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS = (
 # will switch to Django's built-in local memory cache.
 QUIPUCORDS_ENABLE_REDIS_CACHE = env.bool("QUIPUCORDS_ENABLE_REDIS_CACHE", default=True)
 
-QPC_CACHE_TTL_DEFAULT = env.int("QPC_CACHE_TTL_DEFAULT", default=600)
+QUIPUCORDS_CACHE_TTL_DEFAULT = env.int("QUIPUCORDS_CACHE_TTL_DEFAULT", default=600)
 
 if QUIPUCORDS_ENABLE_REDIS_CACHE:
     CACHES = {
@@ -483,13 +495,13 @@ if QUIPUCORDS_ENABLE_REDIS_CACHE:
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
             "LOCATION": REDIS_URL,
             "KEY_PREFIX": "discovery",
-            "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+            "TIMEOUT": QUIPUCORDS_CACHE_TTL_DEFAULT,
         },
         "redis": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
             "LOCATION": REDIS_URL,
             "KEY_PREFIX": "discovery",
-            "TIMEOUT": QPC_CACHE_TTL_DEFAULT,
+            "TIMEOUT": QUIPUCORDS_CACHE_TTL_DEFAULT,
         },
     }
 else:
@@ -503,7 +515,7 @@ else:
     }
 
 # Let's define various cache TTL's
-QPC_SCAN_JOB_TTL = env.int("QPC_SCAN_JOB_TTL", default=24 * 3600)
+QUIPUCORDS_SCAN_JOB_TTL = env.int("QUIPUCORDS_SCAN_JOB_TTL", default=24 * 3600)
 
 QUIPUCORDS_CACHED_REPORTS_DATA_DIR = Path(
     env.str(

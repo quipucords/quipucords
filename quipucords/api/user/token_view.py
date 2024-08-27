@@ -23,7 +23,7 @@ class QuipucordsExpiringAuthToken(ObtainAuthToken):
 
         utc_now = datetime.datetime.now(datetime.UTC)
         valid_token_window = utc_now - datetime.timedelta(
-            hours=settings.QPC_TOKEN_EXPIRE_HOURS
+            hours=settings.QUIPUCORDS_TOKEN_EXPIRE_HOURS
         )
         if not created and auth_token.created < valid_token_window:
             # refresh the token

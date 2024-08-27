@@ -12,7 +12,7 @@ from django.core.management import call_command
 from quipucords.user import User
 
 password_failed_requirements_message = (
-    "QPC_SERVER_PASSWORD value failed password requirements"
+    "QUIPUCORDS_SERVER_PASSWORD value failed password requirements"
 )
 
 
@@ -21,9 +21,9 @@ def patch_environ(username=None, password=None):
     """Patch os.environ values used by these tests."""
     new_environ = dict()
     if username:
-        new_environ["QPC_SERVER_USERNAME"] = username
+        new_environ["QUIPUCORDS_SERVER_USERNAME"] = username
     if password:
-        new_environ["QPC_SERVER_PASSWORD"] = password
+        new_environ["QUIPUCORDS_SERVER_PASSWORD"] = password
     with mock.patch.dict(os.environ, new_environ, clear=True):
         yield
 
@@ -45,9 +45,9 @@ def test_create_or_update_user_create_with_valid_password(faker):
     """Test creation of a user with a valid password."""
     out = StringIO()
     username = faker.user_name()
-    password = faker.password(length=settings.QPC_MINIMUM_PASSWORD_LENGTH)
+    password = faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)
     expected_message = (
-        f"Created user '{username}' with password from QPC_SERVER_PASSWORD"
+        f"Created user '{username}' with password from QUIPUCORDS_SERVER_PASSWORD"
     )
     with patch_environ(username, password):
         call_command("create_or_update_user", stdout=out)
@@ -86,9 +86,9 @@ def test_create_or_update_user_update_with_valid_password(qpc_user_simple: User,
     """Test updating a user with a valid password."""
     out = StringIO()
     username = qpc_user_simple.username
-    password = faker.password(length=settings.QPC_MINIMUM_PASSWORD_LENGTH)
+    password = faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)
     expected_message = (
-        f"Updated user '{username}' with password from QPC_SERVER_PASSWORD"
+        f"Updated user '{username}' with password from QUIPUCORDS_SERVER_PASSWORD"
     )
     with patch_environ(username, password):
         call_command("create_or_update_user", stdout=out)

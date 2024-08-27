@@ -35,7 +35,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
         self.log("Retrieving node facts.")
         nodes_list = ocp_client.retrieve_nodes(
-            timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT,
+            timeout_seconds=settings.QUIPUCORDS_INSPECT_TASK_TIMEOUT,
         )
         # cluster is considered a "system", hence the +1
         self._init_stats(len(nodes_list) + 1)
@@ -73,8 +73,8 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def _extra_cluster_facts(self, ocp_client: OpenShiftApi, cluster):
         """Retrieve extra cluster facts."""
-        collect_ocp_workloads_enabled = settings.QPC_FEATURE_FLAGS.is_feature_active(
-            "OCP_WORKLOADS"
+        collect_ocp_workloads_enabled = (
+            settings.QUIPUCORDS_FEATURE_FLAGS.is_feature_active("OCP_WORKLOADS")
         )
         fact2method = (
             ("workloads", ocp_client.retrieve_workloads),
@@ -87,7 +87,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
                 if fact_name == "workloads" and not collect_ocp_workloads_enabled:
                     continue
                 extra_facts[fact_name] = api_method(
-                    timeout_seconds=settings.QPC_INSPECT_TASK_TIMEOUT
+                    timeout_seconds=settings.QUIPUCORDS_INSPECT_TASK_TIMEOUT
                 )
             except OCPError as err:
                 cluster.errors[fact_name] = err

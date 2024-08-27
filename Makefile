@@ -9,8 +9,8 @@ BINDIR  = bin
 PARALLEL_NUM ?= $(shell $(PYTHON) -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
 TEST_TIMEOUT ?= 15
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT) --durations=10
-QPC_CELERY_WORKER_MIN_CONCURRENCY ?= 10
-QPC_CELERY_WORKER_MAX_CONCURRENCY ?= 10
+QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY ?= 10
+QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_UI_PATH ?= ../quipucords-ui
@@ -108,8 +108,8 @@ test-coverage:
 	# overwrote the .coverage file, resulting in apparent missing test coverage.
 	# Our workaround is to explicitly write to separate files and then explicitly
 	# combine them to a single .coverage file.
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QPC_DBMS=postgres COVERAGE_FILE=.coverage.notslow
-	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QPC_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QUIPUCORDS_DBMS=postgres COVERAGE_FILE=.coverage.notslow
+	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QUIPUCORDS_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
 	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m slow --cov=quipucords" COVERAGE_FILE=.coverage.slow
 	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.slow
 	poetry run coverage report
@@ -145,7 +145,7 @@ server-randomize-sequences:
 	$(PYTHON) quipucords/manage.py randomize_db_sequences --settings quipucords.settings
 
 celery-worker:
-	$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QPC_CELERY_WORKER_MAX_CONCURRENCY},${QPC_CELERY_WORKER_MIN_CONCURRENCY}
+	$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY},${QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY}
 
 server-set-superuser:
 	$(PYTHON) quipucords/manage.py create_or_update_user --settings quipucords.settings -v 3
@@ -189,13 +189,13 @@ fetch-ui: clean-ui
 	mv dist/client quipucords/. &&\
 	rm -rf ui-dist* dist
 
-qpc_on_ui_dir = ${QUIPUCORDS_UI_PATH}/.qpc/quipucords
-$(qpc_on_ui_dir): $(QUIPUCORDS_UI_PATH)
+quipucords_on_ui_dir = ${QUIPUCORDS_UI_PATH}/.qpc/quipucords
+$(quipucords_on_ui_dir): $(QUIPUCORDS_UI_PATH)
 	@echo "Creating quipucords symlink on UI repo"
-	mkdir -p $(QUIPUCORDS_UI_PATH)/.qpc
-	ln -sf $(TOPDIR) $(QUIPUCORDS_UI_PATH)/.qpc/quipucords
+	mkdir -p $(QUIPUCORDS_UI_PATH)/.quipucords
+	ln -sf $(TOPDIR) $(QUIPUCORDS_UI_PATH)/.quipucords/quipucords
 
-serve-swagger: $(qpc_on_ui_dir)
+serve-swagger: $(quipucords_on_ui_dir)
 	cd $(QUIPUCORDS_UI_PATH);yarn;node ./scripts/swagger.js
 
 build-container:
