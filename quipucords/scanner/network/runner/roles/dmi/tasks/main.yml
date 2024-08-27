@@ -81,5 +81,5 @@
 
 - name: initialize dmi_system_uuid
   set_fact:
-    dmi_system_uuid: "QPC_FORCE_POST_PROCESS"
+    dmi_system_uuid: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes

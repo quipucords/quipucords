@@ -93,10 +93,10 @@
 
 - name: initialize cpu.socket_count fact
   set_fact:
-    cpu_socket_count: "QPC_FORCE_POST_PROCESS"
+    cpu_socket_count: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes
 
 - name: initialize cpu.core_count fact
   set_fact:
-    cpu_core_count: "QPC_FORCE_POST_PROCESS"
+    cpu_core_count: "QUIPUCORDS_FORCE_POST_PROCESS"
   ignore_errors: yes

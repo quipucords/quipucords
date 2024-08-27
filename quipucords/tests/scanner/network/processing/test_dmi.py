@@ -20,18 +20,25 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
         # stdout_lines looks like ['a', 'b', 'c']
         dependencies = {"internal_dmi_system_uuid": ansible_result("a\nb\nc")}
         self.assertEqual(
-            dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies),
+            dmi.ProcessDmiSystemUuid.process(
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+            ),
             "c",
         )
         # stdout_lines looks like ['', 'b']
         dependencies["internal_dmi_system_uuid"] = ansible_result("\nb\n")
         self.assertEqual(
-            dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies),
+            dmi.ProcessDmiSystemUuid.process(
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+            ),
             "b",
         )
         dependencies["internal_dmi_system_uuid"] = ansible_result("Failed", 1)
         self.assertEqual(
-            dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies), ""
+            dmi.ProcessDmiSystemUuid.process(
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+            ),
+            "",
         )
 
     def test_invalid_uuid_case(self):
@@ -39,18 +46,26 @@ class TestProcessDmiSystemUuidr(unittest.TestCase):
         # stdout_lines looks like ['a', 'b', 'ccccccccccccccccccccccccccccccccccccc']
         dependencies = {"internal_dmi_system_uuid": ansible_result(f"a\nb\n{'c' * 37}")}
         self.assertEqual(
-            dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies),
+            dmi.ProcessDmiSystemUuid.process(
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+            ),
             "b",
         )
         # stdout_lines looks like ['', 'b', '']
         dependencies["internal_dmi_system_uuid"] = ansible_result(f"\n{'b' * 37}\n")
         self.assertEqual(
-            dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies), ""
+            dmi.ProcessDmiSystemUuid.process(
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+            ),
+            "",
         )
 
     def test_not_found(self):
         """Did not find dmi system uuid."""
         dependencies = {}
         self.assertEqual(
-            dmi.ProcessDmiSystemUuid.process("QPC_FORCE_POST_PROCESS", dependencies), ""
+            dmi.ProcessDmiSystemUuid.process(
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+            ),
+            "",
         )

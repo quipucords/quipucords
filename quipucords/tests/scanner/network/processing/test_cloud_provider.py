@@ -14,7 +14,7 @@ class TestProcessDmiChassisAssetTag(unittest.TestCase):
         dependencies = {"internal_dmi_chassis_asset_tag": ansible_result("a\nb\nc")}
         self.assertEqual(
             cloud_provider.ProcessDmiChassisAssetTag.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "a",
         )
@@ -22,14 +22,14 @@ class TestProcessDmiChassisAssetTag(unittest.TestCase):
         dependencies["internal_dmi_chassis_asset_tag"] = ansible_result("\nb\n")
         self.assertEqual(
             cloud_provider.ProcessDmiChassisAssetTag.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "b",
         )
         dependencies["internal_dmi_chassis_asset_tag"] = ansible_result("Failed", 1)
         self.assertEqual(
             cloud_provider.ProcessDmiChassisAssetTag.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
@@ -39,7 +39,7 @@ class TestProcessDmiChassisAssetTag(unittest.TestCase):
         dependencies = {}
         self.assertEqual(
             cloud_provider.ProcessDmiChassisAssetTag.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
@@ -59,7 +59,7 @@ class TestProcessDmiSystemProductName(unittest.TestCase):
         dependencies = {"internal_dmi_system_product_name": ansible_result("a\nb\nc")}
         self.assertEqual(
             cloud_provider.ProcessDmiSystemProductName.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "c",
         )
@@ -67,14 +67,14 @@ class TestProcessDmiSystemProductName(unittest.TestCase):
         dependencies["internal_dmi_system_product_name"] = ansible_result("\nb\n")
         self.assertEqual(
             cloud_provider.ProcessDmiSystemProductName.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "b",
         )
         dependencies["internal_dmi_system_product_name"] = ansible_result("Failed", 1)
         self.assertEqual(
             cloud_provider.ProcessDmiSystemProductName.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
@@ -84,7 +84,7 @@ class TestProcessDmiSystemProductName(unittest.TestCase):
         dependencies = {}
         self.assertEqual(
             cloud_provider.ProcessDmiSystemProductName.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
@@ -98,7 +98,7 @@ class TestProcessCloudProvider(unittest.TestCase):
         dependencies = {"dmi_bios_version": "3.4.3.amazon"}
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             cloud_provider.AMAZON,
         )
@@ -108,14 +108,14 @@ class TestProcessCloudProvider(unittest.TestCase):
         )
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             cloud_provider.AZURE,
         )
         dependencies["dmi_bios_version"] = "Google, 1.2.6"
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             cloud_provider.GCP,
         )
@@ -124,7 +124,7 @@ class TestProcessCloudProvider(unittest.TestCase):
         dependencies["dmi_chassis_asset_tag"] = "Asset Tag: No Asset Tag"
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             cloud_provider.ALIBABA,
         )
@@ -132,7 +132,7 @@ class TestProcessCloudProvider(unittest.TestCase):
         dependencies["dmi_system_product_name"] = "	Alibaba Cloud ECS"
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             cloud_provider.ALIBABA,
         )
@@ -143,7 +143,7 @@ class TestProcessCloudProvider(unittest.TestCase):
         dependencies = {}
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
@@ -156,7 +156,7 @@ class TestProcessCloudProvider(unittest.TestCase):
         dependencies["dmi_system_manufacturer"] = "VMWare, Inc."
         self.assertEqual(
             cloud_provider.ProcessCloudProvider.process(
-                "QPC_FORCE_POST_PROCESS", dependencies
+                "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
             ),
             "",
         )
