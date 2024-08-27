@@ -176,7 +176,7 @@ class InspectTaskRunner(ScanTaskRunner):
         if extra_vars.get(Scan.EXT_PRODUCT_SEARCH_DIRS) is None:
             extra_vars[Scan.EXT_PRODUCT_SEARCH_DIRS] = " ".join(DEFAULT_SCAN_DIRS)
 
-        extra_vars["ansible_ssh_timeout"] = settings.QPC_SSH_INSPECT_TIMEOUT
+        extra_vars["ansible_ssh_timeout"] = settings.QUIPUCORDS_SSH_INSPECT_TIMEOUT
 
         group_names, inventory = construct_inventory(
             hosts=connected,
@@ -204,7 +204,9 @@ class InspectTaskRunner(ScanTaskRunner):
             call = InspectCallback()
 
             # Build Ansible Runner Parameters
-            job_timeout = int(settings.NETWORK_INSPECT_JOB_TIMEOUT) * len(group_names)
+            job_timeout = int(settings.QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT) * len(
+                group_names
+            )
             runner_settings = {
                 "idle_timeout": job_timeout,
                 "job_timeout": job_timeout,
@@ -353,7 +355,7 @@ class InspectTaskRunner(ScanTaskRunner):
                 processed_fact = None
             facts[fact_key] = processed_fact
 
-        if settings.QPC_EXCLUDE_INTERNAL_FACTS:
+        if settings.QUIPUCORDS_EXCLUDE_INTERNAL_FACTS:
             # remove internal facts before saving result
             facts = {
                 fact_key: fact_value
@@ -396,7 +398,9 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _persist_skipped_tasks(self, call: InspectCallback):
         """Persist a list of tasks that were skipped."""
-        if not settings.QPC_FEATURE_FLAGS.is_feature_active("REPORT_SKIPPED_TASKS"):
+        if not settings.QUIPUCORDS_FEATURE_FLAGS.is_feature_active(
+            "REPORT_SKIPPED_TASKS"
+        ):
             return
 
         output_path = (

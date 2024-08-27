@@ -37,8 +37,8 @@ class FeatureFlag:
         """Filter feature flags from environment variables."""
         feature_flags = DEFAULT_FEATURE_FLAGS_VALUES.copy()
         for key, value in os.environ.items():
-            if key.upper().startswith("QPC_FEATURE_"):
-                feature_name = key.upper().replace("QPC_FEATURE_", "")
+            if key.upper().startswith("QUIPUCORDS_FEATURE_"):
+                feature_name = key.upper().replace("QUIPUCORDS_FEATURE_", "")
                 feature_value = value.strip()
                 if feature_value in VALID_VALUES_FOR_ENV_VARIABLES:
                     feature_flags[feature_name] = bool(int(feature_value))

@@ -33,7 +33,7 @@ def set_scan_job_celery_task_id(
 ):
     """Set the celery task id for the scan job id."""
     if key_timeout is None:
-        key_timeout = settings.QPC_SCAN_JOB_TTL
+        key_timeout = settings.QUIPUCORDS_SCAN_JOB_TTL
     key = scan_job_celery_task_id_key(scan_job_id)
     caches["redis"].set(key, celery_task_id, key_timeout)
 

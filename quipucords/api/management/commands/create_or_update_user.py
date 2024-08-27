@@ -21,9 +21,9 @@ class Command(BaseCommand):
 
     Creates or updates the user based on the following environment variables:
 
-    * QPC_SERVER_USERNAME (default: "{DEFAULT_USERNAME}")
-    * QPC_SERVER_EMAIL (default: "{DEFAULT_EMAIL}")
-    * QPC_SERVER_PASSWORD
+    * QUIPUCORDS_SERVER_USERNAME (default: "{DEFAULT_USERNAME}")
+    * QUIPUCORDS_SERVER_EMAIL (default: "{DEFAULT_EMAIL}")
+    * QUIPUCORDS_SERVER_PASSWORD
     """
 
     help = dedent(
@@ -39,9 +39,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Execute the logic for this command."""
-        username = environ.get("QPC_SERVER_USERNAME", DEFAULT_USERNAME)
-        email = environ.get("QPC_SERVER_USER_EMAIL", DEFAULT_EMAIL)
-        password = environ.get("QPC_SERVER_PASSWORD")
+        username = environ.get("QUIPUCORDS_SERVER_USERNAME", DEFAULT_USERNAME)
+        email = environ.get("QUIPUCORDS_SERVER_USER_EMAIL", DEFAULT_EMAIL)
+        password = environ.get("QUIPUCORDS_SERVER_PASSWORD")
 
         created, updated, generated_password = create_or_update_user(
             username, email, password
@@ -50,7 +50,7 @@ class Command(BaseCommand):
         if created or updated:
             if password and generated_password and password != generated_password:
                 message = (
-                    "QPC_SERVER_PASSWORD value failed password requirements. "
+                    "QUIPUCORDS_SERVER_PASSWORD value failed password requirements. "
                     "Using a randomly generated password instead."
                 )
                 self.stdout.write(self.style.WARNING(message))
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             password_description = (
                 f"random password: {generated_password}"
                 if generated_password
-                else "password from QPC_SERVER_PASSWORD"
+                else "password from QUIPUCORDS_SERVER_PASSWORD"
             )
             message = f"{verb} user '{username}' with {password_description}"
             self.stdout.write(self.style.SUCCESS(message))

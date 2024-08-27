@@ -30,7 +30,7 @@ def worker_init_hook(**kwargs):
     start_debugger_if_required()
 
 
-if env.bool("QPC_DISABLE_CELERY_LOGGING_HIJACK", True):
+if env.bool("QUIPUCORDS_DISABLE_CELERY_LOGGING_HIJACK", True):
 
     @signals.setup_logging.connect
     def on_celery_setup_logging(**kwargs):

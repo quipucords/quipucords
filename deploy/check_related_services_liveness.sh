@@ -25,9 +25,9 @@ function get_django_config() {
 }
 
 function check_db_liveness() {
-    local QPC_DBMS
-    QPC_DBMS=$(get_django_config QPC_DBMS)
-    if [[ "${QPC_DBMS}" == "postgres" ]]; then
+    local QUIPUCORDS_DBMS
+    QUIPUCORDS_DBMS=$(get_django_config QUIPUCORDS_DBMS)
+    if [[ "${QUIPUCORDS_DBMS}" == "postgres" ]]; then
         local PSQL_HOST
         PSQL_HOST=$(get_django_config "DATABASES['default']['HOST']")
         local PSQL_PORT

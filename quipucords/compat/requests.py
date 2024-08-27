@@ -45,9 +45,9 @@ class Session(requests.Session):
         self.base_url = base_url
         self.auth = auth
         if max_retries is None:
-            max_retries = settings.QPC_HTTP_RETRY_MAX_NUMBER
+            max_retries = settings.QUIPUCORDS_HTTP_RETRY_MAX_NUMBER
         if max_retries > 0:
-            backoff_factor = backoff_factor or settings.QPC_HTTP_RETRY_BACKOFF
+            backoff_factor = backoff_factor or settings.QUIPUCORDS_HTTP_RETRY_BACKOFF
             retry_on_status_code_list = (
                 retry_on_status_code_list or self.DEFAULT_STATUS_CODE_LIST_FOR_RETRY
             )

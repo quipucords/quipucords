@@ -137,7 +137,7 @@ def expected_network_scan_facts():
         "virt_what_type",
         "yum_enabled_repolist",
     }
-    if not settings.QPC_EXCLUDE_INTERNAL_FACTS:
+    if not settings.QUIPUCORDS_EXCLUDE_INTERNAL_FACTS:
         expected_fact_names |= {
             "internal_cpu_model_name_kvm",
             "internal_cpu_socket_count_cpuinfo",

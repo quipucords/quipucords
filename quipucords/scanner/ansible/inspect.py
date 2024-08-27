@@ -34,7 +34,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
     ]
     REQUEST_KWARGS = {
         "raise_for_status": True,
-        "timeout": settings.QPC_INSPECT_TASK_TIMEOUT,
+        "timeout": settings.QUIPUCORDS_INSPECT_TASK_TIMEOUT,
     }
 
     def execute_task(self):

@@ -83,8 +83,8 @@ def execute_request(  # noqa: PLR0913
         host, port, user, password = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
 
-    connect_timeout = settings.QPC_SSH_CONNECT_TIMEOUT
-    inspect_timeout = settings.QPC_SSH_INSPECT_TIMEOUT
+    connect_timeout = settings.QUIPUCORDS_SSH_CONNECT_TIMEOUT
+    inspect_timeout = settings.QUIPUCORDS_SSH_INSPECT_TIMEOUT
 
     response = requests.get(
         url,

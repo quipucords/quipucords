@@ -99,7 +99,7 @@ def test_get_insights_report_as_json(client_logged_in):
     assert response.ok, f"response was not ok; status {response.status_code}"
 
     # mock slice size so we can expect result to contain all data without slicing
-    with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=99999):
+    with override_settings(QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE=99999):
         response_json = response.json()
     validate_data(response_json, deployment_report, expected_number_of_slices=1)
 
@@ -113,7 +113,7 @@ def test_get_insights_report_as_json_sliced(client_logged_in):
     )
     report_id = deployment_report.report.id
     # mock slice size so we can expect 2 slices on this test
-    with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=2):
+    with override_settings(QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE=2):
         response = client_logged_in.get(
             reverse("v1:reports-insights", args=(report_id,))
         )
@@ -131,7 +131,7 @@ def test_get_insights_report_as_tarball_sliced(client_logged_in):
     )
     report_id = deployments_report.report.id
     # mock slice size so we can expect 2 slices on this test
-    with override_settings(QPC_INSIGHTS_REPORT_SLICE_SIZE=10):
+    with override_settings(QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE=10):
         response = client_logged_in.get(
             reverse("v1:reports-insights", args=(report_id,)),
             {"format": "tar.gz"},

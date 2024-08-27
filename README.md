@@ -38,7 +38,7 @@ it is having `podman`, `docker` or any alternative to those.
 ## Quick installation
 
 ```
-podman run -d --name quipucords -e "QPC_DBMS=sqlite" -p 9443:443 -i quay.io/quipucords/quipucords:latest
+podman run -d --name quipucords -e "QUIPUCORDS_DBMS=sqlite" -p 9443:443 -i quay.io/quipucords/quipucords:latest
 ```
 Then open a browser and head to https://localhost:9443
 
@@ -76,24 +76,24 @@ make setup-postgres
 ### Option 2) User provided PostgreSQL instance
 These are the environment variables required to configure quipucords to use a custom postgresql instance.
 ```
-QPC_DBMS=postgres
-QPC_DBMS_DATABASE=<name of the database>
-QPC_DBMS_HOST=<hostname or ip address of the database>
-QPC_DBMS_PASSWORD=<db password>
-QPC_DBMS_PORT=<db port>
-QPC_DBMS_USER=<db user>
+QUIPUCORDS_DBMS=postgres
+QUIPUCORDS_DBMS_DATABASE=<name of the database>
+QUIPUCORDS_DBMS_HOST=<hostname or ip address of the database>
+QUIPUCORDS_DBMS_PASSWORD=<db password>
+QUIPUCORDS_DBMS_PORT=<db port>
+QUIPUCORDS_DBMS_USER=<db user>
 ```
 
 ### Option 3) SQLite
 To use sqlite just set the following environment variable
 ```
-QPC_DBMS=sqlite
+QUIPUCORDS_DBMS=sqlite
 ```
 
 ## Initializing the Server
 
 ```
-make server-init QPC_SERVER_PASSWORD="SuperAdmin1"
+make server-init QUIPUCORDS_SERVER_PASSWORD="SuperAdmin1"
 ```
 
 Both of the above commands create a superuser with name `admin` and password of `SuperAdmin1`.
@@ -136,7 +136,7 @@ If you intend to run on Mac OS, there are several more steps that are required.
 ## Updating the superuser's password
 
 ```
-make server-set-superuser QPC_SERVER_PASSWORD="SuperAdmin2"
+make server-set-superuser QUIPUCORDS_SERVER_PASSWORD="SuperAdmin2"
 ```
 
 The above command updates the `admin` superuser password to `SuperAdmin2`.

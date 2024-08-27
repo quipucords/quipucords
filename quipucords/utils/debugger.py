@@ -8,12 +8,12 @@ logger = getLogger(__name__)
 
 env = environ.Env()
 
-DEBUGPY = env.bool("QPC_DEBUGPY", False)
-DEBUGPY_PORT = env.int("QPC_DEBUGPY_PORT", 5678)
+DEBUGPY = env.bool("QUIPUCORDS_DEBUGPY", False)
+DEBUGPY_PORT = env.int("QUIPUCORDS_DEBUGPY_PORT", 5678)
 
 
 def start_debugger_if_required():
-    """Start a debugger session if QPC_DEBUGPY envvar is set."""
+    """Start a debugger session if QUIPUCORDS_DEBUGPY envvar is set."""
     if DEBUGPY:
         try:
             import debugpy

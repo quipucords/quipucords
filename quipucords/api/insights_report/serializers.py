@@ -119,7 +119,7 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
 
     def get_tags(self, host: HostEntity):
         """Format tags to appear as inventory labels."""
-        data_collector = settings.QPC_INSIGHTS_DATA_COLLECTOR_LABEL
+        data_collector = settings.QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL
 
         tags = {
             "data-collector": data_collector,

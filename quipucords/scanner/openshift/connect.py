@@ -23,7 +23,7 @@ class ConnectTaskRunner(OpenShiftTaskRunner):
         try:
             ocp_client.can_connect(
                 raise_exception=True,
-                timeout_seconds=settings.QPC_CONNECT_TASK_TIMEOUT,
+                timeout_seconds=settings.QUIPUCORDS_CONNECT_TASK_TIMEOUT,
             )
             conn_result = SystemConnectionResult.SUCCESS
         except OCPError as error:

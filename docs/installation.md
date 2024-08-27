@@ -49,7 +49,7 @@ This method builds and runs quipucords container image from your local source al
    ```
 5. Run a PostgreSQL database container. (optional, but recommended)
 
-   If you are comfortable running PostgreSQL elsewhere on your own, you may skip this step, but you will need to specify your own `QPC_DBMS_*` values later when you run the quipucords container. Alternatively, you can run quipucords with no PostgreSQL database, instead using a local Sqlite file. However, we generally do not recommend using Sqlite as your database.
+   If you are comfortable running PostgreSQL elsewhere on your own, you may skip this step, but you will need to specify your own `QUIPUCORDS_DBMS_*` values later when you run the quipucords container. Alternatively, you can run quipucords with no PostgreSQL database, instead using a local Sqlite file. However, we generally do not recommend using Sqlite as your database.
 
    If you wish to run PostgreSQL in its own container, run the following command:
    ```
@@ -85,26 +85,26 @@ This method builds and runs quipucords container image from your local source al
       -e NETWORK_CONNECT_JOB_TIMEOUT=600 \
       -e NETWORK_INSPECT_JOB_TIMEOUT=10800 \
       -e PRODUCTION=True \
-      -e QPC_DBMS_HOST=qpc-psql \
-      -e QPC_DBMS_PASSWORD=qpc \
-      -e QPC_DBMS_USER=qpc \
-      -e QPC_SERVER_TIMEOUT=5 \
-      -e QPC_SERVER_USERNAME=admin \
-      -e QPC_SERVER_PASSWORD=pleasechangethispassword \
-      -e QPC_SERVER_USER_EMAIL=admin@example.com \
+      -e QUIPUCORDS_DBMS_HOST=qpc-psql \
+      -e QUIPUCORDS_DBMS_PASSWORD=qpc \
+      -e QUIPUCORDS_DBMS_USER=qpc \
+      -e QUIPUCORDS_SERVER_TIMEOUT=5 \
+      -e QUIPUCORDS_SERVER_USERNAME=admin \
+      -e QUIPUCORDS_SERVER_PASSWORD=pleasechangethispassword \
+      -e QUIPUCORDS_SERVER_USER_EMAIL=admin@example.com \
       -v "${HOME}"/.local/share/discovery/data/:/var/data:z \
       -v "${HOME}"/.local/share/discovery/log/:/var/log:z \
       -v "${HOME}"/.local/share/discovery/sshkeys/:/sshkeys:z \
       -d quipucords
    ```
 
-   If you decided to use the local Sqlite file instead of PostgreSQL, omit the `QPC_DBMS_*` values and instead specify `-e QPC_DBMS=sqlite`.
+   If you decided to use the local Sqlite file instead of PostgreSQL, omit the `QUIPUCORDS_DBMS_*` values and instead specify `-e QUIPUCORDS_DBMS=sqlite`.
 
-   You should now be able to access the quipucords server from your host at `https://0.0.0.0:9443` using the values for `QPC_SERVER_USERNAME` and `QPC_SERVER_PASSWORD` as your login and password in both the CLI and the web UI.
+   You should now be able to access the quipucords server from your host at `https://0.0.0.0:9443` using the values for `QUIPUCORDS_SERVER_USERNAME` and `QUIPUCORDS_SERVER_PASSWORD` as your login and password in both the CLI and the web UI.
 
-   You may adjust the `QPC_*` values as you like. Note that you must stop and remove the existing `qpc-server` container before changing those values.
+   You may adjust the `QUIPUCORDS_*` values as you like. Note that you must stop and remove the existing `qpc-server` container before changing those values.
 
-   For debugging purposes, may may want to map the `/app` to your local clone of quipucords. To do this, you may want to add an argument like `-v "${HOME}"/projects/quipucords/:/app`. By mapping this directory, you can rapidly change server code without having to rebuild the container.
+   For debugging purposes, you may want to map the `/app` to your local clone of quipucords. To do this, you may want to add an argument like `-v "${HOME}"/projects/quipucords/:/app`. By mapping this directory, you can rapidly change server code without having to rebuild the container.
 
 ##  Option 2: Install and run containers with podman compose
 
