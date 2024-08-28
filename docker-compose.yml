@@ -18,7 +18,6 @@ services:
       REDIS_PASSWORD: qpc
       QPC_ENABLE_CELERY_SCAN_MANAGER: 1
       QUIPUCORDS_DATA_DIR: /var
-      QUIPUCORDS_HTTPS_ON: 0
     ports:
       - "9999:8000"
     volumes:
