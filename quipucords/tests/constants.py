@@ -9,6 +9,7 @@ from tests.env import BaseURI, EnvVar, as_bool
 PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent.parent
 
 CLEANUP_DOCKER_LAYERS = False
+FILENAME_AGGREGATE_JSON = "aggregate.json"
 FILENAME_DEPLOYMENTS_CSV = "deployments.csv"
 FILENAME_DEPLOYMENTS_JSON = "deployments.json"
 FILENAME_DETAILS_CSV = "details.csv"

@@ -28,10 +28,15 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         if not bool(reports_dict):
             return None
         report_id = reports_dict.get("report_id")
+
         # Collect Json Data
+        aggregate_json = reports_dict.get("aggregate_json")
         details_json = reports_dict.get("details_json")
         deployments_json = reports_dict.get("deployments_json")
-        if any(value is None for value in [report_id, details_json, deployments_json]):
+        if any(
+            value is None
+            for value in [report_id, aggregate_json, details_json, deployments_json]
+        ):
             return None
 
         # Collect CSV Data
@@ -41,6 +46,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
             return None
 
         # create the file names
+        aggregate_json_name = create_filename("aggregate", "json", report_id)
         details_json_name = create_filename("details", "json", report_id)
         deployments_json_name = create_filename("deployments", "json", report_id)
         details_csv_name = create_filename("details", "csv", report_id)
@@ -49,6 +55,7 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
 
         # map the file names to the file data
         files_data = {
+            aggregate_json_name: encode_content(aggregate_json, "json"),
             details_json_name: encode_content(details_json, "json"),
             deployments_json_name: encode_content(deployments_json, "json"),
             details_csv_name: encode_content(details_csv, "csv"),

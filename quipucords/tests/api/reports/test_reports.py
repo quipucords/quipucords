@@ -38,6 +38,7 @@ from api.reports.model import Report
 from api.scantask.model import ScanTask
 from constants import SCAN_JOB_LOG, DataSources
 from tests.constants import (
+    FILENAME_AGGREGATE_JSON,
     FILENAME_DEPLOYMENTS_CSV,
     FILENAME_DEPLOYMENTS_JSON,
     FILENAME_DETAILS_CSV,
@@ -49,6 +50,7 @@ from tests.report_utils import extract_files_from_tarball
 from tests.utils import raw_facts_generator
 
 TARBALL_ALWAYS_EXPECTED_FILENAMES = {
+    FILENAME_AGGREGATE_JSON,
     FILENAME_SHA256SUM,
     FILENAME_DEPLOYMENTS_CSV,
     FILENAME_DEPLOYMENTS_JSON,
