@@ -1,6 +1,5 @@
 """Test the aggregate report model generation."""
 
-from dataclasses import asdict
 from datetime import date
 
 import pytest
@@ -10,6 +9,7 @@ from api.aggregate_report.model import (
     AggregateReport,
     build_aggregate_report,
     get_aggregate_report_by_report_id,
+    reformat_aggregate_report_to_dict,
 )
 from api.deployments_report.model import DeploymentsReport, Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
@@ -340,7 +340,7 @@ def test_get_aggregate_report_by_report_id(
     """Test that if the Report exists, a proper report is generated."""
     report, expected_aggregate_report = report_and_expected_aggregate
     aggregate = get_aggregate_report_by_report_id(report.id)
-    assert aggregate == asdict(expected_aggregate_report)
+    assert aggregate == reformat_aggregate_report_to_dict(expected_aggregate_report)
 
 
 @pytest.mark.django_db

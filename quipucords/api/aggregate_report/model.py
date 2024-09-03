@@ -89,6 +89,20 @@ class AggregateReport:
     openshift_node_instances: int = 0
 
 
+def reformat_aggregate_report_to_dict(aggregated: AggregateReport) -> dict:
+    """Reformat an AggregateReport into a slightly more readable dict."""
+    results, diagnostics = {}, {}
+    for key, value in asdict(aggregated).items():
+        if key.startswith("missing_") or key.startswith("inspect_result_status_"):
+            diagnostics[key] = value
+        else:
+            results[key] = value
+    return {
+        "results": results,
+        "diagnostics": diagnostics,
+    }
+
+
 def get_aggregate_report_by_report_id(report_id: int) -> dict | None:
     """
     Get the aggregate report data for the given report ID.
@@ -97,7 +111,8 @@ def get_aggregate_report_by_report_id(report_id: int) -> dict | None:
     """
     try:
         report = Report.objects.get(pk=report_id)
-        return asdict(build_aggregate_report(report.id))
+        aggregated = build_aggregate_report(report.id)
+        return reformat_aggregate_report_to_dict(aggregated)
     except Report.DoesNotExist:
         return None
 
