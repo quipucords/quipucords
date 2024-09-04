@@ -16,9 +16,9 @@ requires = ["poetry-core"]
 [tool.poetry.dependencies]
 python = "^3.12"
 ansible = ">=10,<11"  # important note: ansible>=10 (ansible-core>=2.17) dropped support for python 2.7 on remote hosts
-django = "^4.2.14"
-django-filter = ">=22.1"
-djangorestframework = "^3.14"
+django = "^5.1.1"
+django-filter = ">=24.3"
+djangorestframework = "^3.15"
 jmespath = "^1.0.1"
 paramiko = "^3.0.0"
 pexpect = "^4.8.0"
@@ -31,11 +31,11 @@ ansible-runner = "^2.4.0"
 gunicorn = "^22.0.0"
 openshift = ">=0.13"
 pydantic = "^1.10.4"
-django-environ = "^0.10.0"
+django-environ = "^0.11.2"
 celery = {extras = ["redis"], version = "^5.3.0"}
 more-itertools = "^9.1.0"
-django-cors-headers = "^4.3.1"
-django-axes = "^6.3.0"
+django-cors-headers = "^4.4.0"
+django-axes = "^6.5.1"
 
 # Temporary hack to handle: https://pagure.io/python-daemon/issue/92
 # quipucords does not directly use python-daemon, but our requirement
