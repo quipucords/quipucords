@@ -55,15 +55,15 @@ setuptools-rust==1.10.1
     # via
     #   bcrypt
     #   maturin
-setuptools-scm==8.0.4
-    # via ansible-runner
 setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.1.0
     # via
     #   django-axes
-    #   pluggy
     #   setuptools-rust
+    #   setuptools-scm
+setuptools-scm==8.0.4
+    # via ansible-runner
 trove-classifiers==2024.7.2
     # via hatchling
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
@@ -89,6 +89,8 @@ setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
     #   ansible-runner
     #   setuptools-scm
 setuptools==73.0.1 ; python_version >= "3.12" and python_version < "4.0"
+    # via cryptography
+setuptools==74.1.1 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
     #   ansible-core
@@ -96,15 +98,18 @@ setuptools==73.0.1 ; python_version >= "3.12" and python_version < "4.0"
     #   cffi
     #   click-repl
     #   django
+    #   django-axes
     #   django-cors-headers
     #   gunicorn
+    #   maturin
+    #   pathspec
+    #   pluggy
     #   pyasn1
     #   pyasn1-modules
-    #   pynacl
     #   python-daemon
     #   pyyaml
     #   resolvelib
+    #   setuptools-rust
     #   setuptools-scm
-    #   trove-classifiers
     #   tzdata
     #   whitenoise
