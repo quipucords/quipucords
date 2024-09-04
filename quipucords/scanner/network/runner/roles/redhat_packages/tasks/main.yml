@@ -80,7 +80,7 @@
   ignore_errors: yes
 
 - name: gather enabled repositories
-  raw: export LANG=C LC_ALL=C; yum repolist enabled 2> /dev/null
+  raw: export LANG=C LC_ALL=C; yum -C repolist enabled 2> /dev/null
   register: internal_yum_enabled_repolist
   become: yes
   ignore_errors: yes

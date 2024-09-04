@@ -74,4 +74,4 @@ export LANG=C LC_ALL=C; test -e "{{ item }}"
 export LANG=C LC_ALL=C; unzip -p "{{ item }}"/jboss-modules.jar META-INF/MANIFEST.MF 2>/dev/null
 export LANG=C LC_ALL=C; unzip -p '{{ item }}/jboss-as/bin/run.jar' META-INF/MANIFEST.MF
 export LANG=C LC_ALL=C; virt-what
-export LANG=C LC_ALL=C; yum repolist enabled 2> /dev/null
+export LANG=C LC_ALL=C; yum -C repolist enabled 2> /dev/null
