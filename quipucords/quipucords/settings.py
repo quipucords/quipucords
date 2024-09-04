@@ -267,8 +267,6 @@ QUIPUCORDS_BULK_CREATE_BATCH_SIZE = env.int("QUIPUCORDS_BULK_CREATE_BATCH_SIZE",
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 VALIDATOR_MODULE = "django.contrib.auth.password_validation"
-# Note: User.objects.make_random_password minimum length is 10 vs the default
-#       for the MinimumLengthValidator is 8. let's declare it here for consistency.
 QUIPUCORDS_MINIMUM_PASSWORD_LENGTH = 10
 AUTH_PASSWORD_VALIDATORS = [
     {
