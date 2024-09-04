@@ -1,5 +1,7 @@
 """Utilities for User management."""
 
+import secrets
+
 from django.conf import settings
 from django.contrib.auth import get_user_model, password_validation
 from django.core.exceptions import ValidationError
@@ -14,9 +16,8 @@ class InvalidPasswordError(ValidationError):
 
 def make_random_password():
     """Create a random password for a User."""
-    return User.objects.make_random_password(
-        settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH
-    )
+    length = settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH
+    return secrets.token_hex(length)[:length]
 
 
 def validate_password(password: str, user: User | None = None):
