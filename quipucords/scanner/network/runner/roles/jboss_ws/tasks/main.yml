@@ -57,7 +57,7 @@
 
 # ------------------------------ DETECT JWS/EWS -------------------------------
 - name: check jws presence with yum
-  raw: "export LANG=C LC_ALL=C; yum grouplist {{item}} 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'"
+  raw: "export LANG=C LC_ALL=C; yum -C grouplist {{item}} 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'"
   register: internal_jws_installed_with_rpm
   with_items:
     - jws3

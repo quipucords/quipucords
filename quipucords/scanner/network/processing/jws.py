@@ -4,7 +4,7 @@ from scanner.network.processing import process
 
 
 class ProcessJWSInstalledWithRpm(process.Processor):
-    """Process the results of 'yum grouplist jws3 jws3plus jws5...'."""
+    """Process the results of 'yum -C grouplist jws3 jws3plus jws5...'."""
 
     KEY = "jws_installed_with_rpm"
     RETURN_CODE_ANY = True
