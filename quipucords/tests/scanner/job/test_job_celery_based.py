@@ -185,7 +185,6 @@ def test_celery_based_job_runner(connect_scan_job):
     assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
 
 
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test_run_celery_based_job_runner_only_connect(
     mock__celery_run_task_runner,
@@ -213,7 +212,6 @@ def test_run_celery_based_job_runner_only_connect(
     mock__finalize_scan.assert_called_once()
 
 
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test_run_celery_based_job_runner_inspect_one_job_one_source(
     mock__celery_run_task_runner,
@@ -235,7 +233,6 @@ def test_run_celery_based_job_runner_inspect_one_job_one_source(
     mock__finalize_scan.assert_called_once()
 
 
-@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
     mock__celery_run_task_runner,
@@ -266,8 +263,9 @@ def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     ), "scanjob seems to be already completed"
     job_runner = job.ScanJobRunner(fingerprint_only_scanjob)
     assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
-    async_result = job_runner.run()
-    async_result.get()
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        async_result = job_runner.run()
+        async_result.get()
 
     fingerprint_only_scanjob.refresh_from_db()
     assert fingerprint_only_scanjob.status == ScanTask.COMPLETED

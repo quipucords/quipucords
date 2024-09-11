@@ -23,7 +23,7 @@ from tests.factories import (
 )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestSourceBulkDelete:
     """Tests the Source bulk_delete function."""
 
@@ -103,7 +103,7 @@ class TestSourceBulkDelete:
         assert not Source.objects.filter(pk=source.id).exists()
         assert Source.objects.filter(pk=source_in_use.id).exists()
 
-    def test_bulk_delete_all(self, client_logged_in):
+    def test_bulk_delete_all(self, client_logged_in, celery_worker):
         """Test bulk delete succeeds with magic "all" token."""
         source1 = SourceFactory()
         source1_in_use = SourceFactory()

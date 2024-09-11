@@ -36,9 +36,12 @@ class Smoker:
     - expected_middleware_names
 
     See integration tests that depend on Smoker for usage.
+
+    NOTE: Due to the use of celery_worker fixture, django db must have transaction\
+        support enabled.
     """
 
-    MAX_RETRIES = 10
+    MAX_RETRIES = 5
     SOURCE_NAME = "testing source"
     SOURCE_TYPE = "TBD"
 
@@ -84,11 +87,7 @@ class Smoker:
         return scan_id
 
     @pytest.fixture
-    def scan_response(
-        self,
-        client_logged_in,
-        scan_id,
-    ):
+    def scan_response(self, client_logged_in, scan_id, celery_worker):
         """Start a scan job and poll its results endpoint until completion."""
         create_scan_job_response = client_logged_in.post(
             reverse("v1:scan-filtered-jobs", args=(scan_id,))
@@ -97,11 +96,10 @@ class Smoker:
         assert (
             create_scan_job_response.status_code == status.HTTP_201_CREATED
         ), create_scan_job_response.json()
-        # scan_manager.work()
         response = client_logged_in.get(scan_detail_url)
-        attempts = 1
         assert response.ok, response.json()
 
+        attempts = 1
         completed_status = {ScanTask.COMPLETED, ScanTask.CANCELED, ScanTask.FAILED}
         while (
             scan_status := response.json()["most_recent"]["status"]
@@ -112,6 +110,7 @@ class Smoker:
             response = client_logged_in.get(scan_detail_url)
             assert response.ok, response.json()
 
+        scan_status = response.json()["most_recent"]["status"]
         assert scan_status == ScanTask.COMPLETED, response.json()
 
         return response

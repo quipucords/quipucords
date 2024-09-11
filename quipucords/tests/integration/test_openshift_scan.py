@@ -169,11 +169,10 @@ def patched_openshift_client(  # noqa: PLR0913
 
 
 @pytest.mark.integration
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestOpenShiftScan(Smoker):
     """Smoke test OpenShift scan."""
 
-    MAX_RETRIES = 10
     SOURCE_NAME = "testing source"
     SOURCE_TYPE = DataSources.OPENSHIFT
 

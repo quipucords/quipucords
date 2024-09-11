@@ -12,13 +12,6 @@ from tests.factories import ScanJobFactory, ScanTaskFactory
 class TestCeleryScanManager:
     """Test the CeleryScanManager class."""
 
-    def test_default_scan_manager_setting(self):
-        """Assert the default manager class is CeleryScanManager."""
-        manager.reinitialize()
-        assert isinstance(manager.SCAN_MANAGER, manager.CeleryScanManager)
-        assert manager.SCAN_MANAGER.__class__.__name__ == "CeleryScanManager"
-
-    @patch("scanner.manager.isinstance", return_value=True)
     @patch("scanner.manager.set_scan_job_celery_task_id")
     def test_celery_manager_interface_put(self, set_celery_task_id_mock, faker, mocker):
         """Assert CeleryScanManager implements put."""

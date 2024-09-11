@@ -5,8 +5,8 @@ import logging
 import django.dispatch
 
 from api import messages
-from scanner import manager
 from scanner.job import ScanJobRunner
+from scanner.manager import CeleryScanManager
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +24,9 @@ def handle_scan(sender, instance, **kwargs):
     :returns: None
     """
     instance.log_message(messages.SIGNAL_STATE_CHANGE % "START")
-    scanner = ScanJobRunner(instance)
-    logger.info("Starting scan with MANAGER=%s", manager.SCAN_MANAGER)
+    runner = ScanJobRunner(instance)
     instance.queue()
-
-    if not manager.SCAN_MANAGER:
-        manager.reinitialize()
-
-    manager.SCAN_MANAGER.put(scanner)
+    CeleryScanManager.put(runner)
 
 
 def scan_action(sender, instance, action, **kwargs):
@@ -44,7 +39,7 @@ def scan_action(sender, instance, action, **kwargs):
     :returns: None
     """
     if action in [PAUSE, CANCEL]:
-        manager.SCAN_MANAGER.kill(instance)
+        CeleryScanManager.kill(instance)
 
 
 def scan_pause(sender, instance, **kwargs):
@@ -80,12 +75,8 @@ def scan_restart(sender, instance, **kwargs):
     :returns: None
     """
     instance.log_message(messages.SIGNAL_STATE_CHANGE % "RESTART")
-    scanner = ScanJobRunner(instance)
-
-    if not manager.SCAN_MANAGER:
-        manager.reinitialize()
-
-    manager.SCAN_MANAGER.put(scanner)
+    runner = ScanJobRunner(instance)
+    CeleryScanManager.put(runner)
 
 
 start_scan = django.dispatch.Signal()

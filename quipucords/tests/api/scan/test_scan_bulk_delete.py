@@ -24,11 +24,11 @@ from tests.factories import (
 )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestScanBulkDelete:
     """Tests the Scan bulk_delete function."""
 
-    def test_bulk_delete_specific_ids(self, client_logged_in):
+    def test_bulk_delete_specific_ids(self, client_logged_in, celery_worker):
         """Test that bulk delete deletes all requested scans."""
         scan1 = ScanFactory()
         scan2 = ScanFactory()
@@ -82,7 +82,7 @@ class TestScanBulkDelete:
         assert response_json["missing"] == [non_existent_id]
         assert not Scan.objects.filter(pk__in=[scan1.id, scan2.id]).exists()
 
-    def test_bulk_delete_ignores_errors(self, client_logged_in):
+    def test_bulk_delete_ignores_errors(self, client_logged_in, celery_worker):
         """Test bulk delete succeeds and deletes related objects."""
         scan1 = ScanFactory()
         scan2_in_use = ScanFactory()

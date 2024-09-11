@@ -76,12 +76,11 @@ def expected_fingerprints():
 
 
 @pytest.mark.integration
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("mocked_requests")
 class TestRHACSScan(Smoker):
     """Smoke test RHACS scanner."""
 
-    MAX_RETRIES = 10
     SOURCE_NAME = "testing source"
     SOURCE_TYPE = "rhacs"
 
