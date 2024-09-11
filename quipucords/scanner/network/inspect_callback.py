@@ -80,7 +80,7 @@ class InspectCallback:
                     fact_name,
                 )
             if fact_name in self._ansible_facts[host]:
-                logger.warning("[host=%s] Overwriting fact %s", host, fact_name)
+                logger.debug("[host=%s] Overwriting fact %s", host, fact_name)
             logger.debug("[host=%s] Storing fact %s", host, fact_name)
             self._ansible_facts[host][fact_name] = fact_value
 
@@ -94,23 +94,28 @@ class InspectCallback:
         if result.get("rc") == TIMEOUT_RC:
             logger.error("[host=%s role='%s' task='%s'] timed out", host, role, task)
 
-        # Only log an error when ignore errors is false
-        if event_data.get("ignore_errors", False):
-            err_reason = result.get("msg", event_data)
-            logger.warning(
-                "[host=%s role='%s' task='%s'] failed - reason: %s",
-                host,
-                role,
-                task,
-                err_reason,
-            )
+        err_reason = result.get("msg") or "N/A"
+        stderr = result.get("stderr") or "N/A"
+        stdout = result.get("stdout") or "N/A"
+        rc = result.get("rc") or "N/A"
+        logger.error(
+            "[host=%s role='%s' task='%s'] failed | reason: %s | rc: %s | stderr: %s | "
+            "stdout: %s",
+            host,
+            role,
+            task,
+            str(err_reason).strip(),
+            str(rc).strip(),
+            str(stderr).strip(),
+            str(stdout).strip(),
+        )
 
         task_facts = result.get("ansible_facts")
         if task_facts:
             # only keeping process task facts here because legacy callback had it
             # but do we really want to collect facts for a failed event?
             # TODO: keep an eye on logs from test lab and field for the following
-            logger.warning(
+            logger.error(
                 "[host=%s role='%s' task='%s'] FAILED and contains ansible_facts",
                 host,
                 role,
@@ -161,16 +166,14 @@ class InspectCallback:
         failed = ["runner_on_failed", "runner_item_on_failed"]
         unreachable = ["runner_on_unreachable"]
         skipped = ["runner_on_skipped", "runner_item_on_skipped"]
-        runner_ignore = ["runner_on_start"]
         if not self._collect_skipped_tasks_enabled:
-            runner_ignore.extend(skipped)
             skipped = []
 
         try:
             event = event_dict["event"]
         except KeyError:
-            # since the upgrade to ansible-core 8, weird events without "event" pop up
-            # given how frequent and innocuous they are, log them only at debug level
+            # Since we upgraded to ansible 8, weird events without "event" key pop up.
+            # Given how frequent and innocuous they are, log them only at debug level.
             logger.debug(
                 log_messages.TASK_UNEXPECTED_FAILURE,
                 "event_callback",
@@ -179,9 +182,7 @@ class InspectCallback:
             )
             return
 
-        if event in runner_ignore:
-            return
-        elif event in okay:
+        if event in okay:
             self.task_on_ok(event_dict)
         elif event in failed:
             self.task_on_failed(event_dict)
