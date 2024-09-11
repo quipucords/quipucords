@@ -223,31 +223,23 @@ class TestInspectCallback:
         # this host and facts are hardcoded on event_ok fixture
         assert callback._ansible_facts["127.0.0.1"] == {"internal_have_rpm_user": True}
 
-    @pytest.mark.parametrize(
-        "ignore_errors,expected_messages",
-        (
-            (
-                True,
-                [
-                    "[host=127.0.0.1 role='check_dependencies' task='gather "
-                    "internal_have_java_cmd'] failed - reason: non-zero return code"
-                ],
-            ),
-            (False, []),
-        ),
-    )
+    @pytest.mark.parametrize("ignore_errors", (True, False))
     def test_task_on_failed(  # noqa: PLR0913
-        self, event_failed, mocker, caplog, ignore_errors, expected_messages
+        self, event_failed, mocker, caplog, ignore_errors
     ):
         """Test InspectCallback.event_callback in a failed event."""
-        caplog.set_level(logging.WARNING)
+        expected_messages = [
+            "[host=127.0.0.1 role='check_dependencies' task='gather "
+            "internal_have_java_cmd'] failed | reason: non-zero return code | rc: 1 | "
+            "stderr: Shared connection to 127.0.0.1 closed. | stdout: N/A"
+        ]
+        caplog.set_level(logging.ERROR)
         callback = InspectCallback()
         patched_task_on_failed = mocker.patch.object(
             InspectCallback, "task_on_failed", wraps=callback.task_on_failed
         )
         # the fixture has this hardcoded to True. let's exercise togling it
         # (even though this seems unnecessary since our roles abuse ignore_errors)
-        event_failed["event_data"]["ignore_errors"] = ignore_errors
         callback.event_callback(event_failed)
         patched_task_on_failed.assert_called_once_with(event_failed)
         # event_failed fixture don't have ansible facts - in fact, none of the
@@ -264,7 +256,7 @@ class TestInspectCallback:
         callback.event_callback(event_failed)
         assert callback._ansible_facts["127.0.0.1"] == {"watermelon": "melancia"}
         assert caplog.messages == [
-            "[host=127.0.0.1 role='check_dependencies' task='gather internal_have_java_cmd'] failed - reason: non-zero return code",  # noqa: E501
+            "[host=127.0.0.1 role='check_dependencies' task='gather internal_have_java_cmd'] failed | reason: non-zero return code | rc: 1 | stderr: Shared connection to 127.0.0.1 closed. | stdout: N/A",  # noqa: E501
             "[host=127.0.0.1 role='check_dependencies' task='gather internal_have_java_cmd'] FAILED and contains ansible_facts",  # noqa: E501
         ]
 
