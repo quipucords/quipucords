@@ -4,6 +4,7 @@ from unittest.mock import ANY, patch
 
 import pytest
 import requests_mock
+from django.test import override_settings
 from faker import Faker
 
 from api.models import (
@@ -514,6 +515,7 @@ class TestSatelliteSixV1:
                 side_effect=_request_host_details,
             ),
             requests_mock.Mocker() as mocker,
+            override_settings(CELERY_TASK_ALWAYS_EAGER=True),
         ):
             mocker.get(hosts_url, status_code=200, json=hosts_jsonresult)
             self.api.hosts_facts()
@@ -1094,6 +1096,7 @@ class TestSatelliteSixV2:
                 side_effect=_request_host_details,
             ),
             requests_mock.Mocker() as mocker,
+            override_settings(CELERY_TASK_ALWAYS_EAGER=True),
         ):
             url = construct_url(url=hosts_url, sat_host="1.2.3.4")
             jsonresult = {

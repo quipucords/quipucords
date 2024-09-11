@@ -4,6 +4,7 @@ from functools import partial
 from unittest import mock
 
 import pytest
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.reverse import reverse
 
@@ -80,12 +81,13 @@ class TestAsyncMergeReports:
         json_response = self.merge_details_by_ids_expect_400(data, client_logged_in)
         assert json_response == {"reports": [messages.REPORT_MERGE_NOT_FOUND % "5, 6"]}
 
-    def test_by_id_merge_jobs_success(self, client_logged_in, scan_manager, mocker):
+    def test_by_id_merge_jobs_success(self, client_logged_in, mocker):
         """Test report merge by id jobs success."""
         report1 = ReportFactory(generate_raw_facts=True)
         report2 = ReportFactory(generate_raw_facts=True)
         data = {"reports": [report1.id, report2.id]}
-        json_response = self.merge_details_by_ids_expect_201(data, client_logged_in)
+        with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+            json_response = self.merge_details_by_ids_expect_201(data, client_logged_in)
         expected = {
             "job_id": mock.ANY,
             "report_id": mock.ANY,
@@ -101,11 +103,9 @@ class TestAsyncMergeReports:
         assert source_sorter(report.sources) == source_sorter(
             list(report1.sources) + list(report2.sources)
         )
+        scan_job_detail_url = reverse("v2:job-detail", args=(report.scanjob.id,))
+        scan_job_response = client_logged_in.get(scan_job_detail_url)
 
-        # check the job endpoint shows the scan was completed
-        scan_job_response = client_logged_in.get(
-            reverse("v2:job-detail", args=(report.scanjob.id,))
-        )
         assert scan_job_response.json() == {
             "id": report.scanjob.id,
             "report_id": report.id,

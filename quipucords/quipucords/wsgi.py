@@ -18,8 +18,3 @@ application = get_wsgi_application()
 from . import environment  # noqa: E402
 
 environment.startup()
-
-from scanner import manager  # noqa: E402
-
-if not manager.SCAN_MANAGER:
-    manager.reinitialize()

@@ -12,7 +12,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core import management
 from django.test import Client as DjangoClient
-from django.test import override_settings
 
 
 @pytest.fixture(scope="session")
@@ -60,18 +59,6 @@ def default_data_dir(settings, tmp_path: Path) -> Path:
     settings.QUIPUCORDS_CACHED_REPORTS_DATA_DIR = data_dir / "cached_reports"
     settings.QUIPUCORDS_CACHED_REPORTS_DATA_DIR.mkdir(parents=True)
     return data_dir
-
-
-@pytest.fixture(autouse=True)
-def scan_manager():
-    """return a CeleryScanManager instance configured for synchronous processing."""
-    from scanner import manager
-
-    old_scan_manager = manager.SCAN_MANAGER
-    manager.reinitialize()
-    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
-        yield manager.SCAN_MANAGER
-    manager.SCAN_MANAGER = old_scan_manager
 
 
 @pytest.fixture

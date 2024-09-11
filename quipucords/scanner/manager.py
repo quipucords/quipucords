@@ -24,11 +24,8 @@ class CeleryScanManager:
 
     log_prefix = "CELERY SCAN MANAGER"
 
-    def __init__(self):
-        """Log a when a new instance is initialized."""
-        logger.debug("%s: Celery Scan manager instance created.", self.log_prefix)
-
-    def kill(self, job: ScanJob):
+    @classmethod
+    def kill(cls, job: ScanJob):
         """Kill a ScanJob Celery task.
 
         :param job: The ScanJob to kill.
@@ -45,39 +42,26 @@ class CeleryScanManager:
         celery_task_id = get_scan_job_celery_task_id(scan_job_id)
         if celery_task_id is None:
             logger.warning(
-                f"{self.log_prefix}: Could not kill the scan job {scan_job_id},"
+                f"{cls.log_prefix}: Could not kill the scan job {scan_job_id},"
                 " no related Celery Task found"
             )
             return False
 
         logger.info(
-            f"{self.log_prefix}: Canceling the Celery Task {celery_task_id}"
+            f"{cls.log_prefix}: Canceling the Celery Task {celery_task_id}"
             f" for scan job {scan_job_id}"
         )
         celery_task = AsyncResult(str(celery_task_id))
         celery_task.revoke()
         return True
 
-    def put(self, scan_job_runner: CeleryBasedScanJobRunner):
+    @classmethod
+    def put(cls, scan_job_runner: CeleryBasedScanJobRunner):
         """Process the given CeleryBasedScanJobRunner's job and tasks."""
-        if not isinstance(scan_job_runner, CeleryBasedScanJobRunner):
-            raise ValueError(
-                "CeleryScanManager only accepts CeleryBasedScanJobRunner runners."
-            )
         celery_task_id = scan_job_runner.run()
         scan_job_id = scan_job_runner.scan_job.id
         set_scan_job_celery_task_id(scan_job_id, str(celery_task_id))
         logger.info(
-            f"{self.log_prefix}: Started the Celery Task {celery_task_id}"
+            f"{cls.log_prefix}: Started the Celery Task {celery_task_id}"
             f" for scan job {scan_job_id}"
         )
-
-
-def reinitialize():
-    """Reinitialize the SCAN_MANAGER module variable."""
-    manager_class = CeleryScanManager
-    global SCAN_MANAGER  # noqa: PLW0603
-    SCAN_MANAGER = manager_class()
-
-
-SCAN_MANAGER = None

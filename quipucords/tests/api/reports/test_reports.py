@@ -24,6 +24,7 @@ import tarfile
 from io import BytesIO
 
 import pytest
+from django.test import override_settings
 from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
 
@@ -361,11 +362,12 @@ def upload_report_payload(faker):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_upload_report(upload_report_payload, client_logged_in, mocker, scan_manager):
+def test_upload_report(upload_report_payload, client_logged_in, mocker):
     """Test 'greenpath' for uploading a report."""
-    response = client_logged_in.post(
-        reverse("v1:reports-upload"), upload_report_payload
-    )
+    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
+        response = client_logged_in.post(
+            reverse("v1:reports-upload"), upload_report_payload
+        )
     assert response.ok
     assert response.json() == {
         "job_id": mocker.ANY,
