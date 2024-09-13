@@ -5,6 +5,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from django.utils.translation import gettext as _
+from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ValidationError, empty
 
 from api import messages
@@ -42,6 +43,19 @@ class CredentialSerializer(NotEmptySerializer):
     """Base Serializer for the Credential model."""
 
     sources = RelatedSourceSerializer(many=True, read_only=True)
+    auth_type = SerializerMethodField()
+
+    def get_auth_type(self, credential: Credential) -> str:
+        """Determine a credential's authentication type."""
+        if credential.auth_token:
+            return "auth_token"
+        elif credential.password:
+            return "password"
+        elif credential.ssh_key:
+            return "ssh_key"
+        elif credential.ssh_keyfile:
+            return "ssh_keyfile"
+        return "unknown"
 
     class Meta:
         """Metadata for the serializer."""
@@ -132,7 +146,7 @@ class AuthTokenSerializer(CredentialSerializer):
         """Serializer configuration."""
 
         model = Credential
-        fields = ["id", "name", "cred_type", "auth_token", "sources"]
+        fields = ["auth_type", "id", "name", "cred_type", "auth_token", "sources"]
         extra_kwargs = {
             "auth_token": {"required": True, **ENCRYPTED_FIELD_KWARGS},
         }
@@ -146,6 +160,7 @@ class UsernamePasswordSerializer(CredentialSerializer):
 
         model = Credential
         fields = [
+            "auth_type",
             "cred_type",
             "id",
             "name",
@@ -167,6 +182,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
 
         model = Credential
         fields = [
+            "auth_type",
             "id",
             "name",
             "become_method",
@@ -256,6 +272,7 @@ class AuthTokenOrUserPassSerializer(CredentialSerializer):
 
         model = Credential
         fields = [
+            "auth_type",
             "cred_type",
             "id",
             "name",
@@ -322,4 +339,5 @@ class AuthTokenOrUserPassSerializer(CredentialSerializer):
         # model instance
         if self.instance and self.partial:
             for field in self.Meta.fields:
-                attrs.setdefault(field, getattr(self.instance, field))
+                if not self.fields[field].read_only:
+                    attrs.setdefault(field, getattr(self.instance, field))

@@ -552,8 +552,10 @@ class TestBaseCredentialSerializer:
         for cred_data in serializer.data:
             assert "created_at" in cred_data
             assert "updated_at" in cred_data
+            assert "auth_type" in cred_data
             assert cred_data["created_at"] is not None
             assert cred_data["updated_at"] is not None
+            assert cred_data["auth_type"] is not None
 
         expected_data = []
         # prep a list of credentials dict as the serializer would return
@@ -565,6 +567,8 @@ class TestBaseCredentialSerializer:
             }
             cred_dict["created_at"] = _value_formatter(cred.created_at)
             cred_dict["updated_at"] = _value_formatter(cred.updated_at)
+            # auth_type is a read-only serializer field, not on the model
+            cred_dict["auth_type"] = CredentialSerializer().get_auth_type(cred)
             expected_data.append(cred_dict)
         assert serializer.data == expected_data
 
