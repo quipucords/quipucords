@@ -1151,6 +1151,7 @@ class TestCredentialSerialization:
                 "ssh_passphrase": "non-sense",
             },
             {
+                "auth_type": "password",
                 "id": mock.ANY,
                 "name": "network",
                 "cred_type": DataSources.NETWORK.value,
@@ -1169,6 +1170,7 @@ class TestCredentialSerialization:
                 "ssh_key": "some private SSH Key",
             },
             {
+                "auth_type": "ssh_key",
                 "id": mock.ANY,
                 "name": "network-ssh-key",
                 "cred_type": DataSources.NETWORK.value,
@@ -1186,6 +1188,7 @@ class TestCredentialSerialization:
                 "ssh_passphrase": "some private SSH Key passphrase",
             },
             {
+                "auth_type": "ssh_key",
                 "id": mock.ANY,
                 "name": "network-ssh-key-passphrase",
                 "cred_type": DataSources.NETWORK.value,
@@ -1203,6 +1206,7 @@ class TestCredentialSerialization:
                 "password": "some-password",
             },
             {
+                "auth_type": "password",
                 "id": mock.ANY,
                 "name": "satellite",
                 "cred_type": DataSources.SATELLITE.value,
@@ -1219,6 +1223,7 @@ class TestCredentialSerialization:
                 "password": "some-password",
             },
             {
+                "auth_type": "password",
                 "id": mock.ANY,
                 "name": "vcenter",
                 "cred_type": DataSources.VCENTER.value,
@@ -1234,6 +1239,7 @@ class TestCredentialSerialization:
                 "auth_token": "token",
             },
             {
+                "auth_type": "auth_token",
                 "id": mock.ANY,
                 "name": "ocp",
                 "cred_type": DataSources.OPENSHIFT.value,
@@ -1249,6 +1255,7 @@ class TestCredentialSerialization:
                 "password": "some-password",
             },
             {
+                "auth_type": "password",
                 "id": mock.ANY,
                 "name": "ocp-user-pass",
                 "cred_type": DataSources.OPENSHIFT.value,
@@ -1265,6 +1272,7 @@ class TestCredentialSerialization:
                 "password": "some-password",
             },
             {
+                "auth_type": "password",
                 "id": mock.ANY,
                 "name": "ansible",
                 "cred_type": DataSources.ANSIBLE.value,
@@ -1280,6 +1288,7 @@ class TestCredentialSerialization:
                 "auth_token": "token",
             },
             {
+                "auth_type": "auth_token",
                 "id": mock.ANY,
                 "name": "acs",
                 "cred_type": DataSources.RHACS.value,
