@@ -17,7 +17,7 @@ from api import messages
 from api.common.util import ALL_IDS_MAGIC_STRING, is_int, set_of_ids_or_all_str
 from api.filters import ListFilter
 from api.models import Credential, Source
-from api.serializers import CredentialSerializer
+from api.serializers import CredentialSerializerV1
 
 
 @api_view(["post"])
@@ -114,7 +114,7 @@ class CredentialViewSet(ModelViewSet):
     """A view set for the Credential model."""
 
     queryset = Credential.objects.all()
-    serializer_class = CredentialSerializer
+    serializer_class = CredentialSerializerV1
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = CredentialFilter
     ordering_fields = ("name", "cred_type")
