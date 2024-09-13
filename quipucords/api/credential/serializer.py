@@ -22,9 +22,9 @@ def expand_filepath(filepath):
     return filepath
 
 
-ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
-NO_TRIM_ENCRYPTED_FIELD_KWARGS = {
-    **ENCRYPTED_FIELD_KWARGS,
+ENCRYPTED_FIELD_KWARGS_V1 = {"style": {"input_type": "password"}}
+NO_TRIM_ENCRYPTED_FIELD_KWARGS_V1 = {
+    **ENCRYPTED_FIELD_KWARGS_V1,
     **{"trim_whitespace": False},
 }
 
@@ -39,7 +39,7 @@ class RelatedSourceSerializer(NotEmptySerializer):
         fields = ["id", "name"]
 
 
-class CredentialSerializer(NotEmptySerializer):
+class CredentialSerializerV1(NotEmptySerializer):
     """Base Serializer for the Credential model."""
 
     sources = RelatedSourceSerializer(many=True, read_only=True)
@@ -63,11 +63,11 @@ class CredentialSerializer(NotEmptySerializer):
         model = Credential
         fields = "__all__"
         extra_kwargs = {
-            "password": ENCRYPTED_FIELD_KWARGS,
-            "auth_token": ENCRYPTED_FIELD_KWARGS,
-            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
-            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
-            "become_password": ENCRYPTED_FIELD_KWARGS,
+            "password": ENCRYPTED_FIELD_KWARGS_V1,
+            "auth_token": ENCRYPTED_FIELD_KWARGS_V1,
+            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS_V1,
+            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS_V1,
+            "become_password": ENCRYPTED_FIELD_KWARGS_V1,
         }
 
     # Instead of following DRF BaseSerializer.__new__ signature (cls, *args, **kwargs),
@@ -81,7 +81,7 @@ class CredentialSerializer(NotEmptySerializer):
 
     def __new__(cls, instance=None, data=empty, **kwargs):
         """Overloaded __new__ to return the appropriate serializer."""
-        if cls != CredentialSerializer:
+        if cls != CredentialSerializerV1:
             # shortcut for subclasses - if we already know the subclass, no need to
             # go through the subclassing logic below.
             return super().__new__(cls, instance=instance, data=data, **kwargs)
@@ -93,14 +93,14 @@ class CredentialSerializer(NotEmptySerializer):
     def _get_serializer_class(cls, cred_type):
         """Return the appropriate serializer based on 'cred_type'."""
         serializer_per_datasource = defaultdict(
-            lambda: CredentialSerializer,
+            lambda: CredentialSerializerV1,
             {
-                DataSources.NETWORK: NetworkCredentialSerializer,
-                DataSources.OPENSHIFT: AuthTokenOrUserPassSerializer,
-                DataSources.VCENTER: UsernamePasswordSerializer,
-                DataSources.SATELLITE: UsernamePasswordSerializer,
-                DataSources.ANSIBLE: UsernamePasswordSerializer,
-                DataSources.RHACS: AuthTokenSerializer,
+                DataSources.NETWORK: NetworkCredentialSerializerV1,
+                DataSources.OPENSHIFT: AuthTokenOrUserPassSerializerV1,
+                DataSources.VCENTER: UsernamePasswordSerializerV1,
+                DataSources.SATELLITE: UsernamePasswordSerializerV1,
+                DataSources.ANSIBLE: UsernamePasswordSerializerV1,
+                DataSources.RHACS: AuthTokenSerializerV1,
             },
         )
 
@@ -139,7 +139,7 @@ class CredentialSerializer(NotEmptySerializer):
         return _data
 
 
-class AuthTokenSerializer(CredentialSerializer):
+class AuthTokenSerializerV1(CredentialSerializerV1):
     """Serializer for credentials that require only auth_token."""
 
     class Meta:
@@ -148,11 +148,11 @@ class AuthTokenSerializer(CredentialSerializer):
         model = Credential
         fields = ["auth_type", "id", "name", "cred_type", "auth_token", "sources"]
         extra_kwargs = {
-            "auth_token": {"required": True, **ENCRYPTED_FIELD_KWARGS},
+            "auth_token": {"required": True, **ENCRYPTED_FIELD_KWARGS_V1},
         }
 
 
-class UsernamePasswordSerializer(CredentialSerializer):
+class UsernamePasswordSerializerV1(CredentialSerializerV1):
     """Serializer for credentials that require username and password."""
 
     class Meta:
@@ -169,12 +169,12 @@ class UsernamePasswordSerializer(CredentialSerializer):
             "sources",
         ]
         extra_kwargs = {
-            "password": {"required": True, **ENCRYPTED_FIELD_KWARGS},
+            "password": {"required": True, **ENCRYPTED_FIELD_KWARGS_V1},
             "username": {"required": True},
         }
 
 
-class NetworkCredentialSerializer(CredentialSerializer):
+class NetworkCredentialSerializerV1(CredentialSerializerV1):
     """Serializer class for network scan credentials."""
 
     class Meta:
@@ -198,11 +198,11 @@ class NetworkCredentialSerializer(CredentialSerializer):
         ]
         extra_kwargs = {
             "become_method": {"default": Credential.BECOME_SUDO},
-            "become_password": ENCRYPTED_FIELD_KWARGS,
+            "become_password": ENCRYPTED_FIELD_KWARGS_V1,
             "become_user": {"default": Credential.BECOME_USER_DEFAULT},
-            "password": ENCRYPTED_FIELD_KWARGS,
-            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
-            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
+            "password": ENCRYPTED_FIELD_KWARGS_V1,
+            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS_V1,
+            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS_V1,
             "username": {"required": True},
         }
 
@@ -264,7 +264,7 @@ class NetworkCredentialSerializer(CredentialSerializer):
             data["ssh_key"] = None
 
 
-class AuthTokenOrUserPassSerializer(CredentialSerializer):
+class AuthTokenOrUserPassSerializerV1(CredentialSerializerV1):
     """Serialize credentials that require username+password or auth token."""
 
     class Meta:
@@ -282,8 +282,8 @@ class AuthTokenOrUserPassSerializer(CredentialSerializer):
             "sources",
         ]
         extra_kwargs = {
-            "password": {**ENCRYPTED_FIELD_KWARGS},
-            "auth_token": {**ENCRYPTED_FIELD_KWARGS},
+            "password": {**ENCRYPTED_FIELD_KWARGS_V1},
+            "auth_token": {**ENCRYPTED_FIELD_KWARGS_V1},
         }
 
     def validate(self, attrs: dict):
@@ -299,10 +299,10 @@ class AuthTokenOrUserPassSerializer(CredentialSerializer):
         # defer the rest of the validation to specialized serializers
         if has_auth_token:
             none_fields = {"username": None, "password": None}
-            validator_class = AuthTokenSerializer
+            validator_class = AuthTokenSerializerV1
         else:
             none_fields = {"auth_token": None}
-            validator_class = UsernamePasswordSerializer
+            validator_class = UsernamePasswordSerializerV1
         self._setup_default_data(attrs)
         # force values to some fields to None to ensure non-sense combinations (like
         # auth_token + username) can't happen

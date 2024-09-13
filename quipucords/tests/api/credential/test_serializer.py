@@ -10,11 +10,11 @@ from rest_framework.serializers import ListSerializer
 
 from api import messages
 from api.credential.serializer import (
-    AuthTokenOrUserPassSerializer,
-    AuthTokenSerializer,
-    CredentialSerializer,
-    NetworkCredentialSerializer,
-    UsernamePasswordSerializer,
+    AuthTokenOrUserPassSerializerV1,
+    AuthTokenSerializerV1,
+    CredentialSerializerV1,
+    NetworkCredentialSerializerV1,
+    UsernamePasswordSerializerV1,
 )
 from api.models import Credential
 from api.vault import decrypt_data_as_unicode
@@ -50,7 +50,7 @@ def test_unknown_cred_type():
         "cred_type": "test_cred_type",
         "auth_token": "test_auth_token",
     }
-    serializer = CredentialSerializer(data=data)
+    serializer = CredentialSerializerV1(data=data)
     assert not serializer.is_valid(), serializer.errors
     assert serializer.errors["cred_type"]
 
@@ -67,7 +67,7 @@ def test_openshift_cred_correct_fields():
     # expected validated contains username/password to enforce only auth_token is set
     # on updates
     expected_validated_data.update(username=None, password=None)
-    serializer = CredentialSerializer(data=data)
+    serializer = CredentialSerializerV1(data=data)
     assert serializer.is_valid(), serializer.errors
     assert serializer.validated_data == expected_validated_data
 
@@ -80,7 +80,7 @@ def test_openshift_cred_empty_auth_token():
         "cred_type": DataSources.OPENSHIFT,
         "auth_token": "",
     }
-    serializer = CredentialSerializer(data=data)
+    serializer = CredentialSerializerV1(data=data)
     assert not serializer.is_valid(), serializer.errors
     assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
     # The above assertion is technically correct but maybe misleading. We allow the
@@ -96,7 +96,7 @@ def test_openshift_cred_absent_auth_token():
         "name": "cred1",
         "cred_type": DataSources.OPENSHIFT,
     }
-    serializer = CredentialSerializer(data=data)
+    serializer = CredentialSerializerV1(data=data)
     assert not serializer.is_valid(), serializer.errors
     assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
 
@@ -108,7 +108,7 @@ def test_openshift_cred_update(ocp_credential):
         "name": "cred2",
         "auth_token": "test_auth_token",
     }
-    serializer = CredentialSerializer(data=updated_data, instance=ocp_credential)
+    serializer = CredentialSerializerV1(data=updated_data, instance=ocp_credential)
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     assert ocp_credential.name == "cred2"
@@ -122,7 +122,7 @@ def test_openshift_cred_update_no_token(ocp_credential):
     updated_data = {
         "name": "cred2",
     }
-    serializer = CredentialSerializer(
+    serializer = CredentialSerializerV1(
         data=updated_data, instance=ocp_credential, partial=True
     )
     assert serializer.is_valid(), serializer.errors
@@ -140,7 +140,7 @@ def test_openshift_update_cred_partial(ocp_credential):
     updated_data = {
         "auth_token": "updated_test_auth_token",
     }
-    serializer = CredentialSerializer(
+    serializer = CredentialSerializerV1(
         data=updated_data, partial=True, instance=ocp_credential
     )
     assert serializer.is_valid(), serializer.errors
@@ -154,7 +154,7 @@ def test_create_cred_with_non_unique_name():
     CredentialFactory(
         cred_type=DataSources.OPENSHIFT, name="non-unique", auth_token="token"
     )
-    serializer = CredentialSerializer(
+    serializer = CredentialSerializerV1(
         data={
             "name": "non-unique",
             "cred_type": DataSources.OPENSHIFT,
@@ -169,7 +169,7 @@ def test_create_cred_with_non_unique_name():
 def test_change_cred_type():
     """Test if an attempt to change credential type will cause an error."""
     credential = CredentialFactory(cred_type=DataSources.NETWORK, name="whatever")
-    serializer = CredentialSerializer(
+    serializer = CredentialSerializerV1(
         data={
             "cred_type": DataSources.OPENSHIFT,
         },
@@ -184,7 +184,7 @@ def test_change_cred_type():
 def test_change_with_same_cred_type():
     """Test if "changing" a credential with the same cred_type won't raise an error."""
     credential = CredentialFactory(cred_type=DataSources.OPENSHIFT, name="whatever")
-    serializer = CredentialSerializer(
+    serializer = CredentialSerializerV1(
         data={"cred_type": DataSources.OPENSHIFT},
         instance=credential,
         partial=True,
@@ -313,7 +313,7 @@ def ssh_key_expected_output(fake_ssh_key):
 )
 def test_credential_creation(input_data, expected_output):
     """Test credential creation through serializer."""
-    serializer = CredentialSerializer(data=input_data)
+    serializer = CredentialSerializerV1(data=input_data)
     assert serializer.is_valid(), serializer.errors
     credential = serializer.save()
     cred_as_dict = convert_credential_to_dict(credential)
@@ -322,7 +322,7 @@ def test_credential_creation(input_data, expected_output):
 
 def test_always_required_fields():
     """Regardless of credential type, name and cred_type fields are always required."""
-    serializer = CredentialSerializer(data={})
+    serializer = CredentialSerializerV1(data={})
     assert not serializer.is_valid()
     assert {"name", "cred_type"}.issubset(serializer.errors)
 
@@ -332,7 +332,7 @@ def test_always_required_fields():
 @pytest.mark.parametrize("extra_fields", ({"username": "user"}, {"password": "pass"}))
 def test_auth_credentials(data_source, extra_fields):
     """Test auth based credentials."""
-    serializer = CredentialSerializer(
+    serializer = CredentialSerializerV1(
         data={"name": "test-data", "cred_type": data_source, **extra_fields}
     )
     assert not serializer.is_valid()
@@ -362,7 +362,7 @@ class TestNetworkCredential:
 
     def test_both_password_and_ssh_key(self, fake_ssh_key):
         """Test validation of a payload including password and ssh_key."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data={
                 "name": "network-credential",
                 "cred_type": DataSources.NETWORK,
@@ -378,7 +378,7 @@ class TestNetworkCredential:
 
     def test_neither_password_or_ssh_key(self):
         """Test validation of a payload without password and ssh_key."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data={
                 "name": "network-credential",
                 "cred_type": DataSources.NETWORK,
@@ -392,7 +392,7 @@ class TestNetworkCredential:
 
     def test_replace_password(self, credential_with_ssh_key):
         """Test replacing password with ssh_keyfile."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data={
                 "password": "super-duper-secret",
             },
@@ -411,7 +411,7 @@ class TestNetworkCredential:
 
     def test_replace_ssh_keyfile(self, credential_with_password, fake_ssh_key):
         """Test replacing ssh_keyfile with password."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data={
                 "ssh_keyfile": fake_ssh_key,
             },
@@ -440,7 +440,7 @@ class TestNetworkCredential:
         self, payload_with_passphrase_without_ssh_key
     ):
         """Test using ssh_passphrase without a ssh key."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data=payload_with_passphrase_without_ssh_key,
         )
         assert not serializer.is_valid()
@@ -460,7 +460,7 @@ class TestNetworkCredential:
         credential_with_password,
     ):
         """Test updating a credential with ssh_passphrase and w/o ssh key."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data=payload_with_passphrase_without_ssh_key,
             instance=credential_with_password,
             **kwargs,
@@ -474,7 +474,7 @@ class TestNetworkCredential:
         credential_with_ssh_key: Credential,
     ):
         """Test partial update of ssh_passphrase with saved ssh_key."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data=payload_with_passphrase_without_ssh_key,
             instance=credential_with_ssh_key,
             partial=True,
@@ -488,12 +488,12 @@ class TestNetworkCredential:
 @pytest.mark.parametrize(
     "cred_type, expected_class",
     (
-        (DataSources.NETWORK, NetworkCredentialSerializer),
-        (DataSources.OPENSHIFT, AuthTokenOrUserPassSerializer),
-        (DataSources.SATELLITE, UsernamePasswordSerializer),
-        (DataSources.VCENTER, UsernamePasswordSerializer),
-        (DataSources.ANSIBLE, UsernamePasswordSerializer),
-        (DataSources.RHACS, AuthTokenSerializer),
+        (DataSources.NETWORK, NetworkCredentialSerializerV1),
+        (DataSources.OPENSHIFT, AuthTokenOrUserPassSerializerV1),
+        (DataSources.SATELLITE, UsernamePasswordSerializerV1),
+        (DataSources.VCENTER, UsernamePasswordSerializerV1),
+        (DataSources.ANSIBLE, UsernamePasswordSerializerV1),
+        (DataSources.RHACS, AuthTokenSerializerV1),
     ),
 )
 class TestSerializerPolymorphism:
@@ -501,13 +501,13 @@ class TestSerializerPolymorphism:
 
     def test_with_data(self, cred_type, expected_class):
         """Test polymorphism passing data."""
-        serializer = CredentialSerializer(data={"cred_type": cred_type})
+        serializer = CredentialSerializerV1(data={"cred_type": cred_type})
         assert isinstance(serializer, expected_class)
 
     @pytest.mark.django_db
     def test_with_instance(self, cred_type, expected_class):
         """Test polymorphism passing instance."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             CredentialFactory(name="cred", cred_type=cred_type)
         )
         assert isinstance(serializer, expected_class)
@@ -519,18 +519,18 @@ class TestBaseCredentialSerializer:
     @pytest.mark.parametrize("kwargs", ({}, {"instance": None}, {"data": {}}))
     def test_read_only_polymorphism(self, kwargs):
         """Test read_only polymorphism."""
-        serializer = CredentialSerializer(**kwargs)
+        serializer = CredentialSerializerV1(**kwargs)
         # isinstance wouldn't be good for testing since the other classes
         # are subclasses of this one
-        assert serializer.__class__ == CredentialSerializer
+        assert serializer.__class__ == CredentialSerializerV1
 
     @pytest.mark.django_db
     def test_with_multiple_instances(self):
         """Test init CredentialSerializer with many instances and many=False."""
         credentials = CredentialFactory.create_batch(10)
-        serializer = CredentialSerializer(instance=credentials)
+        serializer = CredentialSerializerV1(instance=credentials)
         # this might seem a fluke, but it's DRF design
-        assert serializer.__class__ == CredentialSerializer
+        assert serializer.__class__ == CredentialSerializerV1
         # attempting to serialize this data would fail horribly due to lack of
         # many=True.
 
@@ -546,9 +546,9 @@ class TestBaseCredentialSerializer:
             return value
 
         credentials = CredentialFactory.create_batch(10)
-        serializer = CredentialSerializer(instance=credentials, many=True)
+        serializer = CredentialSerializerV1(instance=credentials, many=True)
         assert isinstance(serializer, ListSerializer)
-        assert serializer.child.__class__ == CredentialSerializer
+        assert serializer.child.__class__ == CredentialSerializerV1
         for cred_data in serializer.data:
             assert "created_at" in cred_data
             assert "updated_at" in cred_data
@@ -568,7 +568,7 @@ class TestBaseCredentialSerializer:
             cred_dict["created_at"] = _value_formatter(cred.created_at)
             cred_dict["updated_at"] = _value_formatter(cred.updated_at)
             # auth_type is a read-only serializer field, not on the model
-            cred_dict["auth_type"] = CredentialSerializer().get_auth_type(cred)
+            cred_dict["auth_type"] = CredentialSerializerV1().get_auth_type(cred)
             expected_data.append(cred_dict)
         assert serializer.data == expected_data
 
@@ -583,7 +583,7 @@ class TestOCPSerializer:
             cred_type=DataSources.OPENSHIFT,
             auth_token="<TOKEN>",
         )
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             instance=credential,
             data={"username": "<USER>", "password": "<PASS>"},
             partial=True,
@@ -603,7 +603,7 @@ class TestOCPSerializer:
             username=faker.user_name(),
             password=faker.password(),
         )
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             instance=credential,
             data={"auth_token": "<TOKEN>"},
             partial=True,
@@ -618,7 +618,7 @@ class TestOCPSerializer:
     @pytest.mark.django_db
     def test_no_auth(self, faker):
         """Test error when no auth is provided."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data={"cred_type": DataSources.OPENSHIFT, "name": faker.slug()}
         )
         assert not serializer.is_valid()
@@ -627,7 +627,7 @@ class TestOCPSerializer:
     @pytest.mark.django_db
     def test_all_auth(self, faker):
         """Test error when both auth methods are provided."""
-        serializer = CredentialSerializer(
+        serializer = CredentialSerializerV1(
             data={
                 "cred_type": DataSources.OPENSHIFT,
                 "name": faker.slug(),
