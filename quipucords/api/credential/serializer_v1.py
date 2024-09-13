@@ -10,33 +10,15 @@ from rest_framework.serializers import ValidationError, empty
 
 from api import messages
 from api.common.serializer import NotEmptySerializer
-from api.models import Credential, Source
+from api.credential.serializer import RelatedSourceSerializer
+from api.models import Credential
 from constants import ENCRYPTED_DATA_MASK, DataSources
-
-
-def expand_filepath(filepath):
-    """Expand the ssh_keyfile filepath if necessary."""
-    if filepath is not None:
-        expanded = Path(os.path.expandvars(filepath)).expanduser().absolute()
-        return str(expanded)
-    return filepath
-
 
 ENCRYPTED_FIELD_KWARGS_V1 = {"style": {"input_type": "password"}}
 NO_TRIM_ENCRYPTED_FIELD_KWARGS_V1 = {
     **ENCRYPTED_FIELD_KWARGS_V1,
     **{"trim_whitespace": False},
 }
-
-
-class RelatedSourceSerializer(NotEmptySerializer):
-    """Serializer for Source objects related to Credential."""
-
-    class Meta:
-        """Metadata for the serializer."""
-
-        model = Source
-        fields = ["id", "name"]
 
 
 class CredentialSerializerV1(NotEmptySerializer):
@@ -341,3 +323,11 @@ class AuthTokenOrUserPassSerializerV1(CredentialSerializerV1):
             for field in self.Meta.fields:
                 if not self.fields[field].read_only:
                     attrs.setdefault(field, getattr(self.instance, field))
+
+
+def expand_filepath(filepath):
+    """Expand the ssh_keyfile filepath if necessary."""
+    if filepath is not None:
+        expanded = Path(os.path.expandvars(filepath)).expanduser().absolute()
+        return str(expanded)
+    return filepath

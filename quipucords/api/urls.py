@@ -4,10 +4,12 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from api.aggregate_report.view import aggregate_report
+from api.credential.view import credential_bulk_delete
 from api.reports.view import upload_raw_facts
 from api.scan.view import scan_bulk_delete
 from api.views import (
     CredentialViewSetV1,
+    CredentialViewSetV2,
     QuipucordsExpiringAuthTokenView,
     ScanJobViewSetV1,
     ScanJobViewSetV2,
@@ -15,7 +17,6 @@ from api.views import (
     SourceViewSet,
     UserViewSet,
     async_merge_reports,
-    credential_bulk_delete,
     deployments,
     details,
     insights,
@@ -34,6 +35,7 @@ ROUTER_V1.register(r"jobs", ScanJobViewSetV1, basename="scanjob")
 ROUTER_V1.register(r"users", UserViewSet, basename="users")
 
 ROUTER_V2 = SimpleRouter()
+ROUTER_V2.register(r"credentials", CredentialViewSetV2, basename="credentials")
 ROUTER_V2.register(r"sources", SourceViewSet, basename="source")
 ROUTER_V2.register(r"jobs", ScanJobViewSetV2, basename="job")
 
