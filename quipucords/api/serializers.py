@@ -7,6 +7,7 @@ from api.connresult.serializer import (
     SystemConnectionResultSerializer,
     TaskConnectionResultSerializer,
 )
+from api.credential.serializer import CredentialSerializerV2
 from api.credential.serializer_v1 import CredentialSerializerV1
 from api.deployments_report.serializer import (
     SystemFingerprintSerializer,
