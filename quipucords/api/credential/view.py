@@ -110,7 +110,7 @@ class CredentialFilter(FilterSet):
         fields = ["name", "cred_type", "search_by_name"]
 
 
-class CredentialViewSet(ModelViewSet):
+class CredentialViewSetV1(ModelViewSet):
     """A view set for the Credential model."""
 
     queryset = Credential.objects.all()

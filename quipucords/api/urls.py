@@ -7,7 +7,7 @@ from api.aggregate_report.view import aggregate_report
 from api.reports.view import upload_raw_facts
 from api.scan.view import scan_bulk_delete
 from api.views import (
-    CredentialViewSet,
+    CredentialViewSetV1,
     QuipucordsExpiringAuthTokenView,
     ScanJobViewSetV1,
     ScanJobViewSetV2,
@@ -27,7 +27,7 @@ from api.views import (
 )
 
 ROUTER_V1 = SimpleRouter()
-ROUTER_V1.register(r"credentials", CredentialViewSet, basename="credentials")
+ROUTER_V1.register(r"credentials", CredentialViewSetV1, basename="credentials")
 ROUTER_V1.register(r"sources", SourceViewSet, basename="source")
 ROUTER_V1.register(r"scans", ScanViewSet, basename="scan")
 ROUTER_V1.register(r"jobs", ScanJobViewSetV1, basename="scanjob")
