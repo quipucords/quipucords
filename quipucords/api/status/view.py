@@ -1,7 +1,5 @@
 """View for server status."""
 
-import os
-
 from django.http import HttpResponse
 from rest_framework.decorators import (
     api_view,
@@ -15,7 +13,6 @@ from api import API_VERSION
 from api.status.model import ServerInformation
 from quipucords.environment import (
     commit,
-    modules,
     platform_info,
     python_version,
     server_version,
@@ -32,13 +29,7 @@ def status(request):
     server_info["server_address"] = request.META.get("HTTP_HOST", "localhost")
     server_info["platform"] = platform_info()
     server_info["python"] = python_version()
-    server_info["modules"] = modules()
     server_info["server_id"] = ServerInformation.create_or_retrieve_server_id()
-    env_dict = {}
-    for key, value in os.environ.items():
-        if "password" not in key.lower():
-            env_dict[key] = value
-    server_info["environment_vars"] = env_dict
     return Response(server_info)
 
 
