@@ -63,13 +63,13 @@ poetry install
 ```
 
 Quipucords environment variables for configuration. Our recommendation is to use the "poetry
-dotenv" plugin to handle those (`poetry self add poetry-dotenv-plugin`), then add desired environment variables to the `.env` file.  You can copy `.env.example` to get started.
+dotenv" plugin to handle those (`poetry self add poetry-dotenv-plugin`), then add desired environment variables to the `.env` file. You can copy `.env.example` to get started.
 
 ## Database Options
 Quipucords currently supports both SQLite and PostgreSQL. The default database is an internal postgres container.
 
 ### Option 1) PostgreSQL container
-All defaults point to this option. Just run the following (requires docker-compose)
+All defaults point to this option. Just run the following:
 ```
 make setup-postgres
 ```

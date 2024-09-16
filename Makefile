@@ -21,23 +21,13 @@ ifneq ($(GITHUB_API_TOKEN),)
 	GITHUB_API_AUTH = -H "Authorization: Bearer $(GITHUB_API_TOKEN)"
 endif
 
-ifndef DOCKER_HOST
-	PODMAN_SOCKET := $(shell podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' 2> /dev/null || podman info --format '{{.Host.RemoteSocket.Path}}' 2> /dev/null || echo -n "")
-
-	ifneq ($(PODMAN_SOCKET),)
-		ifneq ($(wildcard $(PODMAN_SOCKET)),)
-			export DOCKER_HOST := unix://$(PODMAN_SOCKET)
-		endif
-	endif
-endif
-
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                          to show this message"
 	@echo "  all                           to execute all following targets (except test)"
 	@echo "  celery-worker                 to run the celery worker"
 	@echo "  clean                         to remove pyc/cache files"
-	@echo "  clean-db                      to remove postgres docker container / sqlite db"
+	@echo "  clean-db                      to remove postgres container / sqlite db"
 	@echo "  clean-ui                      to remove UI assets"
 	@echo "  lint                          to run all linters"
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
@@ -71,8 +61,9 @@ clean-ui:
 
 clean-db:
 	rm -rf quipucords/db.sqlite3
-	docker-compose stop qpc-db
-	docker-compose rm -f qpc-db
+	podman stop quipucords-dev-db || true
+	podman rm -f quipucords-dev-db || true
+	podman volume rm -f quipucords-dev-db
 
 lock-requirements: lock-main-requirements lock-build-requirements
 
@@ -153,8 +144,15 @@ server-set-superuser:
 server-init: server-migrate server-set-superuser
 
 setup-postgres:
-	docker-compose up -d qpc-db
-	docker-compose exec qpc-db psql -c 'alter role qpc with CREATEDB'
+	podman run --name quipucords-dev-db --replace \
+		-p 54321:5432 \
+	  	-e POSTGRESQL_USER=qpc \
+      	-e POSTGRESQL_PASSWORD=qpc \
+      	-e POSTGRESQL_DATABASE=qpc \
+		-v quipucords-dev-db:/var/lib/pgsql/data \
+		-itd registry.redhat.io/rhel9/postgresql-15:latest
+	sleep 3
+	podman exec quipucords-dev-db psql -c 'alter role qpc with CREATEDB'
 
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
