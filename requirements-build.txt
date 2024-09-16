@@ -22,7 +22,6 @@ flit-core==3.9.0
     #   jinja2
     #   more-itertools
     #   packaging
-    #   pathspec
     #   ptyprocess
     #   typing-extensions
     #   wheel
@@ -55,8 +54,6 @@ setuptools-rust==1.10.1
     # via
     #   bcrypt
     #   maturin
-setuptools-scm==7.1.0
-    # via python-dateutil
 setuptools-scm==8.1.0
     # via
     #   django-axes
@@ -64,7 +61,9 @@ setuptools-scm==8.1.0
     #   setuptools-scm
 setuptools-scm==8.0.4
     # via ansible-runner
-trove-classifiers==2024.7.2
+setuptools-scm==7.1.0
+    # via python-dateutil
+trove-classifiers==2024.9.12
     # via hatchling
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
     # via setuptools-scm
@@ -84,21 +83,23 @@ wheel==0.44.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
+setuptools==75.1.0 ; python_version >= "3.12" and python_version < "4.0"
+    # via
+    #   cryptography
+    #   python-dateutil
 setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==73.0.1 ; python_version >= "3.12" and python_version < "4.0"
-    # via cryptography
 setuptools==74.1.1 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
     #   ansible-core
     #   cachetools
+    #   calver
     #   cffi
     #   click-repl
     #   django
-    #   django-axes
     #   django-cors-headers
     #   gunicorn
     #   maturin
@@ -109,7 +110,6 @@ setuptools==74.1.1 ; python_version >= "3.12" and python_version < "4.0"
     #   python-daemon
     #   pyyaml
     #   resolvelib
-    #   setuptools-rust
     #   setuptools-scm
     #   tzdata
     #   whitenoise
