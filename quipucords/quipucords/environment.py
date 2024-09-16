@@ -47,18 +47,6 @@ def python_version():
     return sys.version.replace("\n", "")
 
 
-def modules():
-    """Collect the installed modules.
-
-    :returns: A dictonary of module names and versions.
-    """
-    module_data = {}
-    for name, module in sorted(sys.modules.items()):
-        if hasattr(module, "__version__"):
-            module_data[str(name)] = str(module.__version__)
-    return module_data
-
-
 def init_server_identifier():
     """Create or retrieve server's global identifier."""
     from api.status.model import ServerInformation
@@ -74,12 +62,6 @@ def log_system_info():
         logger.info("%s - %s ", name, value)
 
     logger.info("Python: %s", python_version())
-    module_list = []
-    for name, value in modules().items():
-        mod = f"{name} - {value}"
-        module_list.append(mod)
-
-    logger.info("Modules: %s", ", ".join(module_list))
 
 
 def log_all_environment_variables():

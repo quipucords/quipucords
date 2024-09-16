@@ -3,7 +3,7 @@
 import os
 from collections import namedtuple
 from importlib.metadata import PackageNotFoundError
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import ANY, patch
 
 import pytest
 from django.test import TestCase
@@ -57,16 +57,6 @@ class EnvironmentTest(TestCase):
         expected = "Python 3.6"
         mock_sys_ver.replace.return_value = expected
         result = environment.python_version()
-        self.assertEqual(result, expected)
-
-    @patch("sys.modules")
-    def test_modules(self, mock_modules):
-        """Test the modules method."""
-        expected = {"module1": "version1", "module2": "version2"}
-        mod1 = Mock(__version__="version1")
-        mod2 = Mock(__version__="version2")
-        mock_modules.items.return_value = (("module1", mod1), ("module2", mod2))
-        result = environment.modules()
         self.assertEqual(result, expected)
 
     @patch("quipucords.environment.logger.info")
