@@ -17,7 +17,7 @@ class InvalidPasswordError(ValidationError):
 def make_random_password():
     """Create a random password for a User."""
     length = settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH
-    return secrets.token_hex(length)[:length]
+    return secrets.token_hex(length)
 
 
 def validate_password(password: str, user: User | None = None):
