@@ -22,9 +22,8 @@ class TestUserRandomPasswords:
 
     def test_make_random_password_size(self):
         """Test user random password is minimum size."""
-        assert (
-            len(make_random_password()) == settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH
-        )
+        pass_length = len(make_random_password())
+        assert pass_length == settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH * 2
 
     def test_make_random_password_includes_allowed_characters(self):
         """Test user random password includes only allowed characters."""
