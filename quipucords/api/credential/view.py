@@ -1,5 +1,6 @@
 """Describes the views associated with the API models."""
 
+import warnings
 from itertools import groupby
 
 from django.db import transaction
@@ -110,6 +111,12 @@ class CredentialFilter(FilterSet):
         fields = ["name", "cred_type", "search_by_name"]
 
 
+CREDENTIAL_V1_DEPRECATION_MESSAGE = (
+    "The credential v1 API is deprecated and will be removed soon. "
+    "Please use the v2 API."
+)
+
+
 class CredentialViewSetV1(ModelViewSet):
     """A view set for the Credential model."""
 
@@ -120,8 +127,14 @@ class CredentialViewSetV1(ModelViewSet):
     ordering_fields = ("name", "cred_type")
     ordering = ("name",)
 
+    def list(self, request, *args, **kwargs):
+        """List credentials."""
+        warnings.warn(CREDENTIAL_V1_DEPRECATION_MESSAGE, DeprecationWarning)
+        return super().list(request, *args, **kwargs)
+
     def retrieve(self, request, pk=None):
         """Get a host credential."""
+        warnings.warn(CREDENTIAL_V1_DEPRECATION_MESSAGE, DeprecationWarning)
         if not pk or not is_int(pk):
             error = {"id": [_(messages.COMMON_ID_INV)]}
             raise ValidationError(error)
@@ -130,6 +143,7 @@ class CredentialViewSetV1(ModelViewSet):
     @transaction.atomic
     def destroy(self, request, pk):
         """Delete a cred."""
+        warnings.warn(CREDENTIAL_V1_DEPRECATION_MESSAGE, DeprecationWarning)
         try:
             cred = Credential.objects.get(pk=pk)
             sources = Source.objects.filter(credentials__pk=pk).values("id", "name")
