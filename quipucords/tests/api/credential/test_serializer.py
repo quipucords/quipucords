@@ -9,7 +9,7 @@ from django.forms.models import model_to_dict
 from rest_framework.serializers import ListSerializer
 
 from api import messages
-from api.credential.serializer import (
+from api.credential.serializer_v1 import (
     AuthTokenOrUserPassSerializerV1,
     AuthTokenSerializerV1,
     CredentialSerializerV1,
