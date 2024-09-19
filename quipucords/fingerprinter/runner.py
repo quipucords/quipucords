@@ -10,14 +10,7 @@ from django.db import DataError
 from rest_framework.serializers import DateField
 
 from api.common.common_report import create_report_version
-from api.common.util import (
-    convert_to_boolean,
-    convert_to_float,
-    convert_to_int,
-    is_boolean,
-    is_float,
-    is_int,
-)
+from api.common.util import convert_to_bool_or_none
 from api.models import DeploymentsReport, Product, ScanTask, SystemFingerprint
 from api.serializers import SystemFingerprintSerializer
 from constants import DataSources
@@ -79,6 +72,9 @@ NAME_RELATED_FACTS = ["name", "vm_dns_name", "virtual_host_name"]
 
 # Fingerprint keys
 COMBINED_KEY = "combined_fingerprints"
+
+# custom object for not provided values (None is a valid value)
+NOT_PROVIDED = object()
 
 
 def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
@@ -906,7 +902,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         raw_fact: dict,
         fingerprint_key: str,
         fingerprint: dict,
-        fact_value=None,
+        fact_value=NOT_PROVIDED,
         fact_formatter=None,
     ):
         """Create the fingerprint fact and metadata.
@@ -922,28 +918,22 @@ class FingerprintTaskRunner(ScanTaskRunner):
         :param fact_formatter: A function that will format the fact - it should expect
         the raw fact in its signature.
         """
-        actual_fact_value = None
-        raw_fact_value = deepget(raw_fact, raw_fact_key)
-        if fact_value is not None and fact_formatter is not None:
+        if fact_value is NOT_PROVIDED and not fact_formatter:
+            raise AssertionError(
+                "either fact_value or fact_formatter MUST be provided."
+            )
+        if fact_value is not NOT_PROVIDED and fact_formatter is not None:
             raise AssertionError(
                 "fact_value and fact_formatter can't be used together."
             )
-        if fact_value is not None:
+        actual_fact_value = None
+        raw_fact_value = deepget(raw_fact, raw_fact_key)
+        if fact_value is not NOT_PROVIDED:
             actual_fact_value = fact_value
         elif fact_formatter is not None:
             actual_fact_value = fact_formatter(raw_fact_value)
         elif raw_fact_value is not None:
             actual_fact_value = raw_fact_value
-
-        # Remove empty string values
-        if isinstance(actual_fact_value, str) and not actual_fact_value:
-            actual_fact_value = None
-        if is_boolean(actual_fact_value):
-            actual_fact_value = convert_to_boolean(actual_fact_value)
-        elif is_float(actual_fact_value):
-            actual_fact_value = convert_to_float(actual_fact_value)
-        elif is_int(actual_fact_value):
-            actual_fact_value = convert_to_int(actual_fact_value)
 
         fingerprint[fingerprint_key] = actual_fact_value
         fingerprint[META_DATA_KEY][fingerprint_key] = {
@@ -1015,21 +1005,25 @@ class FingerprintTaskRunner(ScanTaskRunner):
         fingerprint = {META_DATA_KEY: {}}
 
         # Use a list to drive direct mappings of raw_fact_key, fingerprint_key pairs.
-        raw_fact_keys_to_fingerprint_keys = [
+        raw_fact_fingerprint_fn = [
             # Common facts
-            ("uname_hostname", "name"),
-            ("uname_processor", "architecture"),
+            ("uname_hostname", "name", formatters.str_or_none),
+            ("uname_processor", "architecture", formatters.str_or_none),
             # Red Hat facts
-            ("redhat_packages_gpg_num_rh_packages", "redhat_package_count"),
-            ("redhat_packages_certs", "redhat_certs"),
-            ("redhat_packages_gpg_is_redhat", "is_redhat"),
-            ("etc_machine_id", "etc_machine_id"),
+            (
+                "redhat_packages_gpg_num_rh_packages",
+                "redhat_package_count",
+                formatters.int_or_none,
+            ),
+            ("redhat_packages_certs", "redhat_certs", formatters.str_or_none),
+            ("redhat_packages_gpg_is_redhat", "is_redhat", convert_to_bool_or_none),
+            ("etc_machine_id", "etc_machine_id", formatters.str_or_none),
             # Set OS information
-            ("etc_release_name", "os_name"),
-            ("etc_release_version", "os_version"),
-            ("etc_release_release", "os_release"),
+            ("etc_release_name", "os_name", formatters.str_or_none),
+            ("etc_release_version", "os_version", formatters.str_or_none),
+            ("etc_release_release", "os_release", formatters.str_or_none),
             # Installed products (name + product/eng ID pairs)
-            ("installed_products", "installed_products"),
+            ("installed_products", "installed_products", formatters.list_of_dicts),
             # Get IPv4 addresses from ifconfig's fact if present, else from ip's fact.
             (
                 (
@@ -1038,43 +1032,59 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     else "ip_address_show_ipv4"
                 ),
                 "ip_addresses",
+                formatters.list_or_none,
             ),
             # Set CPU facts
-            ("cpu_count", "cpu_count"),
+            ("cpu_count", "cpu_count", formatters.int_or_none),
             # Network scan specific facts
-            ("dmi_system_uuid", "bios_uuid"),
-            ("subscription_manager_id", "subscription_manager_id"),
+            ("dmi_system_uuid", "bios_uuid", formatters.str_or_none),
+            (
+                "subscription_manager_id",
+                "subscription_manager_id",
+                formatters.str_or_none,
+            ),
             # System information
-            ("cpu_socket_count", "cpu_socket_count"),
-            ("cpu_core_count", "cpu_core_count"),
-            ("cpu_core_per_socket", "cpu_core_per_socket"),
-            ("cpu_hyperthreading", "cpu_hyperthreading"),
+            ("cpu_socket_count", "cpu_socket_count", formatters.int_or_none),
+            ("cpu_core_count", "cpu_core_count", formatters.float_or_none),
+            ("cpu_core_per_socket", "cpu_core_per_socket", formatters.int_or_none),
+            ("cpu_hyperthreading", "cpu_hyperthreading", convert_to_bool_or_none),
             # Determine system_creation_date
-            ("date_machine_id", "date_machine_id"),
-            ("date_anaconda_log", "date_anaconda_log"),
-            ("date_filesystem_create", "date_filesystem_create"),
-            ("insights_client_id", "insights_client_id"),
+            ("date_machine_id", "date_machine_id", formatters.str_or_none),
+            ("date_anaconda_log", "date_anaconda_log", formatters.str_or_none),
+            (
+                "date_filesystem_create",
+                "date_filesystem_create",
+                formatters.str_or_none,
+            ),
+            ("insights_client_id", "insights_client_id", formatters.str_or_none),
             # public cloud fact
-            ("cloud_provider", "cloud_provider"),
+            ("cloud_provider", "cloud_provider", formatters.str_or_none),
             # user data facts
-            ("system_user_count", "system_user_count"),
+            ("system_user_count", "system_user_count", formatters.int_or_none),
             # System purpose facts
-            ("system_purpose_json", "system_purpose"),
-            ("system_purpose_json__role", "system_role"),
-            ("system_purpose_json__addons", "system_addons"),
+            ("system_purpose_json", "system_purpose", formatters.dict_or_none),
+            ("system_purpose_json__role", "system_role", formatters.str_or_none),
+            ("system_purpose_json__addons", "system_addons", formatters.str_or_none),
             (
                 "system_purpose_json__service_level_agreement",
                 "system_service_level_agreement",
+                formatters.str_or_none,
             ),
-            ("system_purpose_json__usage", "system_usage_type"),
+            ("system_purpose_json__usage", "system_usage_type", formatters.str_or_none),
             # Determine if VM facts
-            ("virt_type", "virtualized_type"),
-            ("system_memory_bytes", "system_memory_bytes"),
+            ("virt_type", "virtualized_type", formatters.str_or_none),
+            # memory
+            ("system_memory_bytes", "system_memory_bytes", formatters.int_or_none),
         ]
 
-        for raw_fact_key, fingerprint_key in raw_fact_keys_to_fingerprint_keys:
+        for raw_fact_key, fingerprint_key, formatter_func in raw_fact_fingerprint_fn:
             self._add_fact_to_fingerprint(
-                source, raw_fact_key, fact, fingerprint_key, fingerprint
+                source,
+                raw_fact_key,
+                fact,
+                fingerprint_key,
+                fingerprint,
+                fact_formatter=formatter_func,
             )
 
         # Get MAC addresses from ifconfig's fact if present, else from ip's fact.
@@ -1142,9 +1152,23 @@ class FingerprintTaskRunner(ScanTaskRunner):
         else:
             raw_fact_key = "vm.name"
 
-        self._add_fact_to_fingerprint(source, raw_fact_key, fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(
+            source,
+            raw_fact_key,
+            fact,
+            "name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
 
-        self._add_fact_to_fingerprint(source, "vm.os", fact, "os_release", fingerprint)
+        self._add_fact_to_fingerprint(
+            source,
+            "vm.os",
+            fact,
+            "os_release",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
         self._add_fact_to_fingerprint(
             source,
             "vm.os",
@@ -1159,7 +1183,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "infrastructure_type",
             fingerprint,
-            fact_value="virtualized",
+            fact_value=SystemFingerprint.VIRTUALIZED,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1170,18 +1194,47 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_formatter=formatters.format_mac_addresses,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.ip_addresses", fact, "ip_addresses", fingerprint
+            source,
+            "vm.ip_addresses",
+            fact,
+            "ip_addresses",
+            fingerprint,
+            fact_formatter=formatters.list_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.cpu_count", fact, "cpu_count", fingerprint
+            source,
+            "vm.cpu_count",
+            fact,
+            "cpu_count",
+            fingerprint,
+            fact_formatter=formatters.int_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "uname_processor", fact, "architecture", fingerprint
+            source,
+            "uname_processor",
+            fact,
+            "architecture",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         # VCenter specific facts
-        self._add_fact_to_fingerprint(source, "vm.state", fact, "vm_state", fingerprint)
-        self._add_fact_to_fingerprint(source, "vm.uuid", fact, "vm_uuid", fingerprint)
+        self._add_fact_to_fingerprint(
+            source,
+            "vm.state",
+            fact,
+            "vm_state",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "vm.uuid",
+            fact,
+            "vm_uuid",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
 
         last_checkin = None
         if fact.get("vm.last_check_in"):
@@ -1201,25 +1254,60 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
 
         self._add_fact_to_fingerprint(
-            source, "vm.dns_name", fact, "vm_dns_name", fingerprint
+            source,
+            "vm.dns_name",
+            fact,
+            "vm_dns_name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.host.name", fact, "virtual_host_name", fingerprint
+            source,
+            "vm.host.name",
+            fact,
+            "virtual_host_name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.host.uuid", fact, "virtual_host_uuid", fingerprint
+            source,
+            "vm.host.uuid",
+            fact,
+            "virtual_host_uuid",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.host.cpu_count", fact, "vm_host_socket_count", fingerprint
+            source,
+            "vm.host.cpu_count",
+            fact,
+            "vm_host_socket_count",
+            fingerprint,
+            fact_formatter=formatters.int_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.host.cpu_cores", fact, "vm_host_core_count", fingerprint
+            source,
+            "vm.host.cpu_cores",
+            fact,
+            "vm_host_core_count",
+            fingerprint,
+            fact_formatter=formatters.int_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.datacenter", fact, "vm_datacenter", fingerprint
+            source,
+            "vm.datacenter",
+            fact,
+            "vm_datacenter",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "vm.cluster", fact, "vm_cluster", fingerprint
+            source,
+            "vm.cluster",
+            fact,
+            "vm_cluster",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         # VcenterRawFacts.MEMORY_SIZE is formatted in GB. lets convert it to mb
@@ -1256,9 +1344,23 @@ class FingerprintTaskRunner(ScanTaskRunner):
         fingerprint = {META_DATA_KEY: {}}
 
         # Common facts
-        self._add_fact_to_fingerprint(source, "hostname", fact, "name", fingerprint)
+        self._add_fact_to_fingerprint(
+            source,
+            "hostname",
+            fact,
+            "name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
 
-        self._add_fact_to_fingerprint(source, "os_name", fact, "os_name", fingerprint)
+        self._add_fact_to_fingerprint(
+            source,
+            "os_name",
+            fact,
+            "os_name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
         # Get the os name
         satellite_os_name = default_getter(fact, "os_name", "")
         is_redhat = False
@@ -1300,11 +1402,21 @@ class FingerprintTaskRunner(ScanTaskRunner):
             )
         else:
             self._add_fact_to_fingerprint(
-                source, "os_release", fact, "os_release", fingerprint
+                source,
+                "os_release",
+                fact,
+                "os_release",
+                fingerprint,
+                fact_formatter=formatters.str_or_none,
             )
 
         self._add_fact_to_fingerprint(
-            source, "os_version", fact, "os_version", fingerprint
+            source,
+            "os_version",
+            fact,
+            "os_version",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         self._add_fact_to_fingerprint(
@@ -1316,28 +1428,65 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_formatter=formatters.format_mac_addresses,
         )
         self._add_fact_to_fingerprint(
-            source, "ip_addresses", fact, "ip_addresses", fingerprint
+            source,
+            "ip_addresses",
+            fact,
+            "ip_addresses",
+            fingerprint,
+            fact_formatter=formatters.list_or_none,
         )
 
-        self._add_fact_to_fingerprint(source, "cores", fact, "cpu_count", fingerprint)
         self._add_fact_to_fingerprint(
-            source, "architecture", fact, "architecture", fingerprint
+            source,
+            "cores",
+            fact,
+            "cpu_count",
+            fingerprint,
+            fact_formatter=formatters.int_or_none,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "architecture",
+            fact,
+            "architecture",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         # Common network/satellite
         self._add_fact_to_fingerprint(
-            source, "uuid", fact, "subscription_manager_id", fingerprint
+            source,
+            "uuid",
+            fact,
+            "subscription_manager_id",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "virt_type", fact, "virtualized_type", fingerprint
+            source,
+            "virt_type",
+            fact,
+            "virtualized_type",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         # Add a virtual guest's host name if available
         self._add_fact_to_fingerprint(
-            source, "virtual_host_name", fact, "virtual_host_name", fingerprint
+            source,
+            "virtual_host_name",
+            fact,
+            "virtual_host_name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "virtual_host_uuid", fact, "virtual_host_uuid", fingerprint
+            source,
+            "virtual_host_uuid",
+            fact,
+            "virtual_host_uuid",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         is_virtualized = default_getter(fact, "is_virtualized", "")
@@ -1364,10 +1513,20 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         # Satellite specific facts
         self._add_fact_to_fingerprint(
-            source, "cores", fact, "cpu_core_count", fingerprint
+            source,
+            "cores",
+            fact,
+            "cpu_core_count",
+            fingerprint,
+            fact_formatter=formatters.float_or_none,
         )
         self._add_fact_to_fingerprint(
-            source, "num_sockets", fact, "cpu_socket_count", fingerprint
+            source,
+            "num_sockets",
+            fact,
+            "cpu_socket_count",
+            fingerprint,
+            fact_formatter=formatters.int_or_none,
         )
 
         # Raw fact for system_creation_date
@@ -1418,9 +1577,21 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ENTITLEMENTS_KEY: [],
             PRODUCTS_KEY: [],
         }
-        self._add_fact_to_fingerprint(source, "node__name", fact, "name", fingerprint)
         self._add_fact_to_fingerprint(
-            source, "node__capacity__cpu", fact, "cpu_count", fingerprint
+            source,
+            "node__name",
+            fact,
+            "name",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
+        )
+        self._add_fact_to_fingerprint(
+            source,
+            "node__capacity__cpu",
+            fact,
+            "cpu_count",
+            fingerprint,
+            fact_formatter=formatters.int_or_none,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1431,7 +1602,12 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact_formatter=formatters.convert_architecture,
         )
         self._add_fact_to_fingerprint(
-            source, "node__machine_id", fact, "etc_machine_id", fingerprint
+            source,
+            "node__machine_id",
+            fact,
+            "etc_machine_id",
+            fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1445,8 +1621,9 @@ class FingerprintTaskRunner(ScanTaskRunner):
             source,
             "node__creation_timestamp",
             fact,
-            "creation_timestamp",
+            "system_creation_date",
             fingerprint,
+            fact_formatter=formatters.date_or_none,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1454,6 +1631,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "vm_cluster",
             fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
 
         self._add_fact_to_fingerprint(
@@ -1480,6 +1658,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "name",
             fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         self._add_fact_to_fingerprint(
             source,
@@ -1487,6 +1666,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
             fact,
             "os_version",
             fingerprint,
+            fact_formatter=formatters.str_or_none,
         )
         return fingerprint
 

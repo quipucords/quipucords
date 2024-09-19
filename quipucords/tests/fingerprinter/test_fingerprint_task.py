@@ -13,6 +13,7 @@ from api.deployments_report.model import SystemFingerprint
 from api.models import DeploymentsReport, Report, ServerInformation, Source
 from api.scantask.model import ScanTask
 from constants import DataSources
+from fingerprinter import formatters
 from fingerprinter.constants import ENTITLEMENTS_KEY, META_DATA_KEY, PRODUCTS_KEY
 from fingerprinter.runner import (
     FINGERPRINT_GLOBAL_ID_KEY,
@@ -162,10 +163,10 @@ def _create_network_details_report_json(  # noqa: PLR0913, PLR0912, PLR0915, C90
     etc_release_release="RHEL 7.4 (Maipo)",
     ifconfig_ip_addresses=None,
     ifconfig_mac_addresses=None,
-    dmi_system_uuid=1234,
-    subman_virt_uuid=4567,
+    dmi_system_uuid="1234",
+    subman_virt_uuid="4567",
     subman_consumed=SUBMAN_CONSUMED,
-    subscription_manager_id=42,
+    subscription_manager_id="42",
     connection_uuid="a037f26f-2988-57bd-85d8-de7617a3aab0",
     connection_host="1.2.3.4",
     connection_port=22,
@@ -338,7 +339,7 @@ def _create_satellite_details_report_json(  # noqa: PLR0913, PLR0912, C901
     hostname="9.8.7.6",
     os_name="RHEL",
     os_release="RHEL 7.3",
-    os_version=7.3,
+    os_version="7.3",
     mac_addresses=None,
     ip_addresses=None,
     cores=32,
@@ -439,7 +440,10 @@ def _validate_network_result(fingerprint, fact):
     if system_purpose_json := fact.get("system_purpose_json"):
         assert system_purpose_json == fingerprint.get("system_purpose")
         assert system_purpose_json.get("role") == fingerprint.get("system_role")
-        assert system_purpose_json.get("addons") == fingerprint.get("system_addons")
+        # SystemFingerprint.system_addons is a TextField
+        assert formatters.str_or_none(
+            system_purpose_json.get("addons")
+        ) == fingerprint.get("system_addons")
         assert system_purpose_json.get("service_level_agreement") == fingerprint.get(
             "system_service_level_agreement"
         )
@@ -823,7 +827,7 @@ def test_merge_network_and_vcenter(server_id, fingerprint_task_runner):
         _create_network_fingerprint(
             server_id,
             fingerprint_task_runner,
-            dmi_system_uuid=1,
+            dmi_system_uuid="1",
             ifconfig_mac_addresses=["2"],
         ),
     ]
@@ -831,7 +835,7 @@ def test_merge_network_and_vcenter(server_id, fingerprint_task_runner):
         _create_vcenter_fingerprint(
             server_id, fingerprint_task_runner, vm_uuid="match"
         ),
-        _create_vcenter_fingerprint(server_id, fingerprint_task_runner, vm_uuid=2),
+        _create_vcenter_fingerprint(server_id, fingerprint_task_runner, vm_uuid="2"),
     ]
 
     n_cpu_count = nfingerprints[0]["cpu_count"]
@@ -1377,6 +1381,7 @@ def test_all_facts_with_null_value_in_process_network_scan(
     expected_fingerprints[PRODUCTS_KEY] = mock.ANY
     expected_fingerprints[ENTITLEMENTS_KEY] = []
     expected_fingerprints["infrastructure_type"] = SystemFingerprint.UNKNOWN
+    expected_fingerprints["installed_products"] = []
     assert result == expected_fingerprints
 
 
