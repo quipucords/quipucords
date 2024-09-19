@@ -131,12 +131,28 @@ def _network_raw_facts():
             if _faker.pybool()
             else None,
             "uname_hostname": _faker.uuid4() if _faker.pybool() else None,
+            "redhat_packages_gpg_num_rh_packages": _faker.pyint(
+                min_value=0, max_value=100
+            )
+            if _faker.pybool()
+            else None,
+            "redhat_packages_certs": fake_redhat_packages_certs()
+            if _faker.pybool()
+            else None,
         }
     )
 
     # use integer division as a float will be invalid in fingerprint validation
     facts["cpu_core_per_socket"] = facts["cpu_core_count"] // facts["cpu_socket_count"]
     return facts
+
+
+def fake_redhat_packages_certs():
+    """Return a string representing the fact "redhat_packages_certs"."""
+    return ";".join(
+        str(_faker.pyint(min_value=1, max_value=500))
+        for _ in range(_faker.pyint(min_value=1, max_value=10))
+    )
 
 
 def fake_virt_what(values=None, return_code=None) -> dict:

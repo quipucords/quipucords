@@ -13,6 +13,7 @@ from scanner.network.utils import raw_facts_template
 from tests.integration.test_smoker import Smoker
 from tests.utils import raw_facts_generator
 from tests.utils.facts import RawFactComparator, fact_expander
+from utils import deepget
 
 logger = getLogger(__name__)
 
@@ -381,10 +382,47 @@ class TestNetworkScan(Smoker):
         return [facts]
 
     @pytest.fixture
-    def expected_fingerprints(self, fingerprint_fact_map, mocker):
+    def expected_fingerprints(self, fingerprint_fact_map, mocker, raw_facts):
         """Return expected fingerprint dict."""
-        # TODO: this shall be expanded in the context of DISCOVERY-783
-        return {key: mocker.ANY for key in fingerprint_fact_map.keys()}
+        fingerprints = {key: mocker.ANY for key in fingerprint_fact_map.keys()}
+        # ONLY raw facts with direct map to a fingerprint
+        raw_fact2fingerprint = (
+            ("uname_hostname", "name"),
+            ("uname_processor", "architecture"),
+            ("redhat_packages_gpg_num_rh_packages", "redhat_package_count"),
+            ("redhat_packages_certs", "redhat_certs"),
+            ("redhat_packages_gpg_is_redhat", "is_redhat"),
+            ("etc_machine_id", "etc_machine_id"),
+            ("etc_release_name", "os_name"),
+            ("etc_release_version", "os_version"),
+            ("etc_release_release", "os_release"),
+            ("installed_products", "installed_products"),
+            ("cpu_count", "cpu_count"),
+            ("dmi_system_uuid", "bios_uuid"),
+            ("subscription_manager_id", "subscription_manager_id"),
+            ("cpu_socket_count", "cpu_socket_count"),
+            ("cpu_core_count", "cpu_core_count"),
+            ("cpu_core_per_socket", "cpu_core_per_socket"),
+            ("cpu_hyperthreading", "cpu_hyperthreading"),
+            ("insights_client_id", "insights_client_id"),
+            ("cloud_provider", "cloud_provider"),
+            ("system_purpose_json", "system_purpose"),
+            ("system_purpose_json__role", "system_role"),
+            ("system_purpose_json__addons", "system_addons"),
+            (
+                "system_purpose_json__service_level_agreement",
+                "system_service_level_agreement",
+            ),
+            ("system_purpose_json__usage", "system_usage_type"),
+            ("virt_type", "virtualized_type"),
+            ("system_memory_bytes", "system_memory_bytes"),
+        )
+        for raw_name, fp_name in raw_fact2fingerprint:
+            fingerprints[fp_name] = deepget(raw_facts, raw_name)
+        # installed_products formatter will transform None -> []
+        if fingerprints["installed_products"] is None:
+            fingerprints["installed_products"] = []
+        return fingerprints
 
     @pytest.fixture
     def expected_products(self, mocker):
