@@ -10,11 +10,13 @@ env = environ.Env()
 
 DEBUGPY = env.bool("QUIPUCORDS_DEBUGPY", False)
 DEBUGPY_PORT = env.int("QUIPUCORDS_DEBUGPY_PORT", 5678)
-
+PRODUCTION = env.bool("PRODUCTION", False)
 
 def start_debugger_if_required():
     """Start a debugger session if QUIPUCORDS_DEBUGPY envvar is set."""
-    if DEBUGPY:
+    if PRODUCTION and DEBUGPY:
+        logger.debug("Debugger won't be started in production mode")
+    if DEBUGPY and not PRODUCTION:
         try:
             import debugpy
         except ImportError:
