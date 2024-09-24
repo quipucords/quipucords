@@ -220,10 +220,3 @@ class NormalizedResult:
     value: Any
     raw_fact_keys: list
     has_error: bool = False
-
-
-def str_or_none(value):
-    """Normalize value to be a string (or None when "empty")."""
-    if not value:
-        return None
-    return str(value)
