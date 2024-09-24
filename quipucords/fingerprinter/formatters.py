@@ -31,3 +31,12 @@ def convert_architecture(architecture):
     if not architecture_map.get(architecture):
         return architecture
     return architecture_map.get(architecture)
+
+
+def str_or_none(value):
+    """Normalize value to be a string (or None when "empty")."""
+    if value is None:
+        return None
+    if isinstance(value, str) and value.strip() == "":
+        return None
+    return str(value).strip()
