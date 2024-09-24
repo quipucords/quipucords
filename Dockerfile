@@ -10,11 +10,11 @@ ENV DJANGO_SECRET_PATH=/var/data/secret.txt
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV PATH="/opt/venv/bin:${PATH}"
-ENV PRODUCTION=True
 ENV PYTHONPATH=/app/quipucords
 ENV QUIPUCORDS_DATA_DIR=/var/data
-ENV QUIPUCORDS_LOG_LEVEL=INFO
 ENV QUIPUCORDS_LOG_DIRECTORY=/var/log
+ENV QUIPUCORDS_LOG_LEVEL=INFO
+ENV QUIPUCORDS_PRODUCTION=True
 
 COPY scripts/dnf /usr/local/bin/dnf
 ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.12-devel"
