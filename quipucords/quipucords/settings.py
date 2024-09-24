@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).absolute().parent.parent
 # DEFAULT_DATA_DIR is ./var, which is on .gitignore
 DEFAULT_DATA_DIR = Path(env.str("QUIPUCORDS_DATA_DIR", BASE_DIR.parent / "var"))
 
-PRODUCTION = env.bool("PRODUCTION", False)
+PRODUCTION = env.bool("QUIPUCORDS_PRODUCTION", True)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # This suppresses warnings for models where an explicit primary key is not defined.
@@ -316,9 +316,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "/client/"
 
 STATICFILES_DIRS = [BASE_DIR / "client"]
-
-if not PRODUCTION:
-    TESTDATA_DIR = BASE_DIR / "testdata"
 
 STORAGES = {
     "staticfiles": {

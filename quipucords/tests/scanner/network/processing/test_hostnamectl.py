@@ -10,7 +10,7 @@ from scanner.network.processing import hostnamectl
 from scanner.network.processing.process import ProcessedResult
 from tests.scanner.network.processing.util_for_test import ansible_result
 
-hostnamectl_files_dir = settings.TESTDATA_DIR / "hostnamectl-status"
+hostnamectl_files_dir = settings.BASE_DIR / "testdata" / "hostnamectl-status"
 
 
 def test_hostnamectl_process_success():
