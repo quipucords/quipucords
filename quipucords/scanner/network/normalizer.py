@@ -5,7 +5,7 @@ import ipaddress
 from api.deployments_report.model import SystemFingerprint
 from constants import DataSources
 from fingerprinter import formatters
-from scanner.normalizer import BaseNormalizer, FactMapper, NormalizedResult, str_or_none
+from scanner.normalizer import BaseNormalizer, FactMapper, NormalizedResult
 from utils import deepget
 
 
@@ -81,9 +81,11 @@ class Normalizer(BaseNormalizer):
         "ifconfig_mac_addresses", formatters.format_mac_addresses
     )
     ip_addresses = FactMapper("ifconfig_ip_addresses", ip_address_normalizer)
-    bios_uuid = FactMapper("dmi_system_uuid", str_or_none)
-    insights_id = FactMapper("insights_client_id", str_or_none)
-    subscription_manager_id = FactMapper("subscription_manager_id", str_or_none)
+    bios_uuid = FactMapper("dmi_system_uuid", formatters.str_or_none)
+    insights_id = FactMapper("insights_client_id", formatters.str_or_none)
+    subscription_manager_id = FactMapper(
+        "subscription_manager_id", formatters.str_or_none
+    )
     number_of_cpus = FactMapper("cpu_core_count", int)
     number_of_sockets = FactMapper("cpu_socket_count", int)
     cores_per_socket = FactMapper("cpu_core_per_socket", int)
@@ -92,13 +94,13 @@ class Normalizer(BaseNormalizer):
         ["virt_what", "subman_virt_is_guest", "hostnamectl"],
         infrastructure_type_normalizer,
     )
-    infrastructure_vendor = FactMapper("virt_type", str_or_none)
-    os_release = FactMapper("etc_release_release", str_or_none)
-    arch = FactMapper("uname_processor", str_or_none)
-    cloud_provider = FactMapper("cloud_provider", str_or_none)
+    infrastructure_vendor = FactMapper("virt_type", formatters.str_or_none)
+    os_release = FactMapper("etc_release_release", formatters.str_or_none)
+    arch = FactMapper("uname_processor", formatters.str_or_none)
+    cloud_provider = FactMapper("cloud_provider", formatters.str_or_none)
     system_purpose = FactMapper("system_purpose_json", dict)
     network_interfaces = FactMapper(
         None, network_interfaces, dependencies=["ip_addresses"]
     )
     # ----- non canonical/system profile facts ---
-    etc_machine_id = FactMapper("etc_machine_id", str_or_none)
+    etc_machine_id = FactMapper("etc_machine_id", formatters.str_or_none)
