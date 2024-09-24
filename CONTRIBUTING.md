@@ -39,10 +39,9 @@ make lint
 
 ### Debugging
 
-You can easily attach a debugger to the running qpc-server on docker compose, which
-is also running debugpy by default.
+You can easily attach a debugger to a container running quipucords server or celery worker.
 
-For VSCode this can be easily achieved adding the following to `.vscode/launch.json`
+For VSCode this can be achieved adding the following to `.vscode/launch.json`
 
 ```json
 
@@ -50,7 +49,7 @@ For VSCode this can be easily achieved adding the following to `.vscode/launch.j
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Docker compose attach",
+            "name": "Container attach",
             "type": "python",
             "request": "attach",
             "connect": {
