@@ -151,8 +151,6 @@ INSTALLED_APPS = [
 if env.bool("QUIPUCORDS_ENABLE_DJANGO_EXTENSIONS", False):
     INSTALLED_APPS.append("django_extensions")
 
-if not PRODUCTION:
-    INSTALLED_APPS.append("coverage")
 
 AUTHENTICATION_BACKENDS = [
     # AxesStandaloneBackend should be the first backend.
