@@ -134,10 +134,10 @@ class SourceFilter(FilterSet):
 
     name = ListFilter(field_name="name")
     search_by_name = CharFilter(
-        field_name="name", lookup_expr="contains", distinct=True
+        field_name="name", lookup_expr="icontains", distinct=True
     )
     search_credentials_by_name = CharFilter(
-        field_name="credentials__name", lookup_expr="contains", distinct=True
+        field_name="credentials__name", lookup_expr="icontains", distinct=True
     )
 
     class Meta:
