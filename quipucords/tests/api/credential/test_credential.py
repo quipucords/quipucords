@@ -40,7 +40,12 @@ def alt_cred_type(cred_type):
 
 @pytest.mark.django_db
 class TestCredential:
-    """Tests against the Credential model and view set."""
+    """
+    Tests against the Credential model and view set.
+
+    TODO Delete this test class when we delete the deprecated v1 classes.
+    This test class only covers the old deprecated v1 classes.
+    """
 
     def create_credential(
         self,
