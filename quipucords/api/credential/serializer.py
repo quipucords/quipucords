@@ -1,32 +1,23 @@
-"""Module for serializing all model object for database storage."""
+"""Credential API/model serializers."""
 
-import os
 from collections import defaultdict
-from pathlib import Path
 
-from django.utils.translation import gettext as _
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
-from rest_framework.serializers import ValidationError, empty
+from rest_framework.serializers import ModelSerializer
+from rest_framework.settings import api_settings as drf_settings
 
 from api import messages
 from api.common.serializer import NotEmptySerializer
-from api.models import Credential, Source
-from constants import ENCRYPTED_DATA_MASK, DataSources
+from api.credential.model import Credential
+from api.source.model import Source
 
-
-def expand_filepath(filepath):
-    """Expand the ssh_keyfile filepath if necessary."""
-    if filepath is not None:
-        expanded = Path(os.path.expandvars(filepath)).expanduser().absolute()
-        return str(expanded)
-    return filepath
-
-
-ENCRYPTED_FIELD_KWARGS = {"style": {"input_type": "password"}}
-NO_TRIM_ENCRYPTED_FIELD_KWARGS = {
-    **ENCRYPTED_FIELD_KWARGS,
-    **{"trim_whitespace": False},
+ENCRYPTED_FIELD_KWARGS = {
+    "style": {"input_type": "password"},
+    "write_only": True,
+    "trim_whitespace": False,
 }
+NON_FIELD_ERRORS_KEY = drf_settings.NON_FIELD_ERRORS_KEY
 
 
 class RelatedSourceSerializer(NotEmptySerializer):
@@ -39,11 +30,42 @@ class RelatedSourceSerializer(NotEmptySerializer):
         fields = ["id", "name"]
 
 
-class CredentialSerializer(NotEmptySerializer):
-    """Base Serializer for the Credential model."""
+class CredentialSerializerV2(ModelSerializer):
+    """Serializer for the Credential model."""
 
     sources = RelatedSourceSerializer(many=True, read_only=True)
+
     auth_type = SerializerMethodField()
+    has_auth_token = SerializerMethodField()
+    has_password = SerializerMethodField()
+    has_ssh_key = SerializerMethodField()
+    has_ssh_passphrase = SerializerMethodField()
+    has_become_password = SerializerMethodField()
+
+    class Meta:
+        """Metadata for the serializer."""
+
+        model = Credential
+        fields = "__all__"
+        extra_kwargs = {
+            "auth_token": ENCRYPTED_FIELD_KWARGS,
+            "become_password": ENCRYPTED_FIELD_KWARGS,
+            "password": ENCRYPTED_FIELD_KWARGS,
+            "ssh_key": ENCRYPTED_FIELD_KWARGS,
+            "ssh_keyfile": {"read_only": True},
+            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
+        }
+        optional_type_specific_fields = {
+            "auth_token",
+            "become_method",
+            "become_password",
+            "become_user",
+            "password",
+            "ssh_key",
+            "ssh_keyfile",
+            "ssh_passphrase",
+            "username",
+        }
 
     def get_auth_type(self, credential: Credential) -> str:
         """Determine a credential's authentication type."""
@@ -57,229 +79,226 @@ class CredentialSerializer(NotEmptySerializer):
             return "ssh_keyfile"
         return "unknown"
 
-    class Meta:
-        """Metadata for the serializer."""
+    def get_has_auth_token(self, credential: Credential) -> bool:
+        """Determine if credential has a non-empty auth token."""
+        return credential.auth_token is not None and credential.auth_token != ""
 
-        model = Credential
-        fields = "__all__"
-        extra_kwargs = {
-            "password": ENCRYPTED_FIELD_KWARGS,
-            "auth_token": ENCRYPTED_FIELD_KWARGS,
-            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
-            "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
-            "become_password": ENCRYPTED_FIELD_KWARGS,
-        }
+    def get_has_password(self, credential: Credential) -> bool:
+        """Determine if credential has a non-empty password."""
+        return credential.password is not None and credential.password != ""
 
-    # Instead of following DRF BaseSerializer.__new__ signature (cls, *args, **kwargs),
-    # our __new__ method uses BaseSerializer.__init__ signature. This is OK, because:
-    # A) class level __new__ just calls __init__ with the same *args, *kwargs [1];
-    # B) DRF BaseSerializer.__new__ only modifies kwargs [3];
-    #
-    # References
-    # [1]: https://docs.python.org/3/reference/datamodel.html#object.__new__
-    # [2]: https://github.com/encode/django-rest-framework/blob/3.14.0/rest_framework/serializers.py#L121  # noqa: E501
+    def get_has_ssh_key(self, credential: Credential) -> bool:
+        """Determine if credential has a non-empty ssh_key."""
+        return credential.ssh_key is not None and credential.ssh_key != ""
 
-    def __new__(cls, instance=None, data=empty, **kwargs):
-        """Overloaded __new__ to return the appropriate serializer."""
-        if cls != CredentialSerializer:
-            # shortcut for subclasses - if we already know the subclass, no need to
-            # go through the subclassing logic below.
-            return super().__new__(cls, instance=instance, data=data, **kwargs)
-        cred_type = cls._get_cred_type(instance, data)
-        subclass = cls._get_serializer_class(cred_type)
-        return super().__new__(subclass, instance=instance, data=data, **kwargs)
+    def get_has_ssh_passphrase(self, credential: Credential) -> bool:
+        """Determine if credential has a non-empty ssh_passphrase."""
+        return credential.ssh_passphrase is not None and credential.ssh_passphrase != ""
 
-    @classmethod
-    def _get_serializer_class(cls, cred_type):
-        """Return the appropriate serializer based on 'cred_type'."""
-        serializer_per_datasource = defaultdict(
-            lambda: CredentialSerializer,
-            {
-                DataSources.NETWORK: NetworkCredentialSerializer,
-                DataSources.OPENSHIFT: AuthTokenOrUserPassSerializer,
-                DataSources.VCENTER: UsernamePasswordSerializer,
-                DataSources.SATELLITE: UsernamePasswordSerializer,
-                DataSources.ANSIBLE: UsernamePasswordSerializer,
-                DataSources.RHACS: AuthTokenSerializer,
-            },
+    def get_has_become_password(self, credential: Credential) -> bool:
+        """Determine if credential has a non-empty become_password."""
+        return (
+            credential.become_password is not None and credential.become_password != ""
         )
-
-        return serializer_per_datasource[cred_type]
-
-    @classmethod
-    def _get_cred_type(cls, instance, data):
-        if isinstance(instance, Credential):
-            return instance.cred_type
-        if isinstance(data, dict):
-            return data.get("cred_type")
-        return None
-
-    def __init__(self, instance=None, data=empty, **kwargs):
-        """Customize class initialization."""
-        if instance and isinstance(data, dict):
-            # assume cred_type == instance.cred_type if not provided
-            # this is only required to avoid breaking current functionality
-            # that was treating 'cred_type' as optional for updates and required for
-            # credential creation
-            data.setdefault("cred_type", instance.cred_type)
-        super().__init__(instance=instance, data=data, **kwargs)
 
     def validate_cred_type(self, cred_type):
         """Validate cred_type field."""
         if self.instance and cred_type != self.instance.cred_type:
-            raise ValidationError(_(messages.CRED_TYPE_NOT_ALLOWED_UPDATE))
+            raise ValidationError(messages.CRED_TYPE_NOT_ALLOWED_UPDATE)
         return cred_type
 
-    def to_representation(self, instance):
-        """Overload DRF representation method to mask encrypted fields."""
-        _data = super().to_representation(instance)
-        for field in Credential.ENCRYPTED_FIELDS:
-            if field in _data:
-                _data[field] = ENCRYPTED_DATA_MASK
-        return _data
+    def get_fields_to_clear(self) -> set:
+        """Get a set of unwanted field names to clear during validation."""
+        if self.Meta.fields == ["__all__"]:
+            return set()  # because we can't do anything with the generic "all" token
+        all_fields = set(CredentialSerializerV2.Meta.optional_type_specific_fields)
+        my_type_fields = set(self.Meta.fields)
+        fields_to_clear = all_fields - my_type_fields
+        return fields_to_clear
+
+    def validate(self, attrs: dict) -> dict:
+        """
+        Perform validation with the side effect of clearing unwanted fields.
+
+        Why would you want this? Consider the use case for OpenShift-type Credentials
+        that must use either an auth_token or a username and password combination but
+        never both. When saving partial/PATCH updates to an existing instance, if the
+        user changes from one auth type to the other, we do not require the client to
+        set empty/null values for the other fields. Instead, we clear the fields used
+        by the other type on the user's behalf. This method performs that clearing on
+        the incoming attrs data being validated.
+        """
+        attrs = super().validate(attrs)
+        fields_to_clear = self.get_fields_to_clear()
+        attrs.update({field: None for field in fields_to_clear})
+        return attrs
+
+    def create(self, *args, **kwargs) -> Credential:
+        """
+        Protect against invoking CredentialSerializerV2.create directly.
+
+        Model write operations must happen through type-specific subclasses.
+        """
+        if self.__class__ == CredentialSerializerV2:
+            raise NotImplementedError("Use type-specific serializer for 'create'.")
+        return super().create(*args, **kwargs)
+
+    def update(self, *args, **kwargs) -> Credential:
+        """
+        Protect against invoking CredentialSerializerV2.update directly.
+
+        Model write operations must happen through type-specific subclasses.
+        """
+        if self.__class__ == CredentialSerializerV2:
+            raise NotImplementedError("Use type-specific serializer for 'update'.")
+        return super().update(*args, **kwargs)
 
 
-class AuthTokenSerializer(CredentialSerializer):
-    """Serializer for credentials that require only auth_token."""
+class AuthTokenSerializerV2(CredentialSerializerV2):
+    """
+    Credential serializer that requires auth_token.
+
+    This serializer should be used only for Credential write operations.
+    The Meta class defines only the fields required for writing to the model.
+    """
 
     class Meta:
         """Serializer configuration."""
 
         model = Credential
-        fields = ["auth_type", "id", "name", "cred_type", "auth_token", "sources"]
+        fields = ["auth_token", "cred_type", "name"]
         extra_kwargs = {
-            "auth_token": {"required": True, **ENCRYPTED_FIELD_KWARGS},
+            "auth_token": {
+                "required": True,
+                "allow_blank": False,
+                **ENCRYPTED_FIELD_KWARGS,
+            },
         }
 
 
-class UsernamePasswordSerializer(CredentialSerializer):
-    """Serializer for credentials that require username and password."""
+class UsernamePasswordSerializerV2(CredentialSerializerV2):
+    """
+    Credential serializer that requires username and password.
+
+    This serializer should be used only for Credential write operations.
+    The Meta class defines only the fields required for writing to the model.
+    """
+
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = ["cred_type", "name", "password", "username"]
+        extra_kwargs = {
+            "password": {
+                "required": True,
+                "allow_blank": False,
+                **ENCRYPTED_FIELD_KWARGS,
+            },
+            "username": {"required": True, "allow_blank": False},
+        }
+
+
+class SshCredentialSerializerV2(CredentialSerializerV2):
+    """
+    Credential serializer that requires fields for an SSH connection.
+
+    This serializer should be used only for Credential write operations.
+    The Meta class defines only the fields required for writing to the model.
+    """
 
     class Meta:
         """Serializer configuration."""
 
         model = Credential
         fields = [
-            "auth_type",
-            "cred_type",
-            "id",
-            "name",
-            "password",
-            "username",
-            "sources",
-        ]
-        extra_kwargs = {
-            "password": {"required": True, **ENCRYPTED_FIELD_KWARGS},
-            "username": {"required": True},
-        }
-
-
-class NetworkCredentialSerializer(CredentialSerializer):
-    """Serializer class for network scan credentials."""
-
-    class Meta:
-        """Serializer configuration."""
-
-        model = Credential
-        fields = [
-            "auth_type",
-            "id",
-            "name",
             "become_method",
             "become_password",
             "become_user",
             "cred_type",
+            "name",
             "password",
-            "ssh_keyfile",
             "ssh_key",
+            "ssh_keyfile",
             "ssh_passphrase",
             "username",
-            "sources",
         ]
         extra_kwargs = {
             "become_method": {"default": Credential.BECOME_SUDO},
             "become_password": ENCRYPTED_FIELD_KWARGS,
             "become_user": {"default": Credential.BECOME_USER_DEFAULT},
             "password": ENCRYPTED_FIELD_KWARGS,
-            "ssh_key": NO_TRIM_ENCRYPTED_FIELD_KWARGS,
+            "ssh_key": ENCRYPTED_FIELD_KWARGS,
+            "ssh_keyfile": {"read_only": True},
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
             "username": {"required": True},
         }
 
-    def validate_ssh_keyfile(self, ssh_keyfile):
-        """Validate ssh_keyfile field."""
-        if ssh_keyfile is None:
-            return None
-        keyfile = expand_filepath(ssh_keyfile)
-        if not Path(keyfile).is_file():
-            raise ValidationError(_(messages.HC_KEY_INVALID % ssh_keyfile))
-        return keyfile
+    def validate(self, attrs: dict):
+        """Run validations that require more than one field."""
+        attrs = super().validate(attrs)
+        has_password, has_ssh_key = self._has_password_or_ssh_key(attrs)
 
-    def validate(self, attrs):
-        """Validate fields that need to be evaluated together."""
-        data = super().validate(attrs)
         errors = defaultdict(list)
-        password = data.get("password")
-        ssh_keyfile = data.get("ssh_keyfile")
-        ssh_key = data.get("ssh_key")
-        ssh_passphrase = data.get("ssh_passphrase")
-        instance_ssh_keyfile = getattr(self.instance, "ssh_keyfile", None)
-        instance_ssh_key = getattr(self.instance, "ssh_key", None)
-
-        if ssh_keyfile and ssh_key:
-            errors["non_field_errors"].append(_(messages.HC_KEYFILE_OR_KEY))
-        if password:
-            if ssh_keyfile:
-                errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEYFILE))
-            if ssh_key:
-                errors["non_field_errors"].append(_(messages.HC_PWD_NOT_WITH_KEY))
-        if not self.partial and not (password or ssh_keyfile or ssh_key):
-            errors["non_field_errors"].append(_(messages.HC_PWD_OR_KEYFILE_OR_KEY))
-        if ssh_passphrase and not (
-            ssh_keyfile or instance_ssh_keyfile or ssh_key or instance_ssh_key
-        ):
-            errors["ssh_passphrase"].append(_(messages.HC_NO_KEY_W_PASS))
+        if has_password and has_ssh_key:
+            errors[NON_FIELD_ERRORS_KEY].append(messages.HC_PWD_NOT_WITH_KEY)
+        if not has_password and not has_ssh_key:
+            errors[NON_FIELD_ERRORS_KEY].append(messages.HC_PWD_OR_KEY)
+        if attrs.get("ssh_passphrase") and not has_ssh_key:
+            errors["ssh_passphrase"].append(messages.HC_NO_KEY_W_PASS)
         if errors:
             raise ValidationError(errors)
-        if self.instance:
-            self.prepare_data_for_update(data)
-        return data
 
-    @classmethod
-    def prepare_data_for_update(cls, data: dict):
-        """Transform validated data prior to an update."""
-        password = data.get("password")
-        ssh_keyfile = data.get("ssh_keyfile")
-        ssh_key = data.get("ssh_key")
-        # a credential should have either password, ssh_key or ssh_keyfile
-        # (this method assumes the premise that data is properly validated)
-        if password:
-            data["ssh_keyfile"] = None
-            data["ssh_key"] = None
-        elif ssh_key:
-            data["password"] = None
-            data["ssh_keyfile"] = None
-        elif ssh_keyfile:
-            data["password"] = None
-            data["ssh_key"] = None
+        # Clear unspecified attributes to ensure data integrity
+        # in case this request effectively changes the auth type.
+        if has_password:
+            attrs["ssh_key"] = None
+            attrs["ssh_passphrase"] = None
+        elif has_ssh_key:
+            attrs["password"] = None
+        if attrs.get("ssh_passphrase") == "":
+            # Converts empty string to None because it should be not-empty if set.
+            attrs["ssh_passphrase"] = None
+        if has_password or has_ssh_key:
+            attrs["ssh_keyfile"] = None
+
+        return attrs
+
+    def _has_password_or_ssh_key(self, attrs: dict) -> tuple[bool, bool]:
+        """
+        Detect if input data has password and/or ssh_key.
+
+        Returns a tuple of booleans: has_password and has_ssh_key in this order.
+        """
+        has_password = bool(attrs.get("password"))
+        has_ssh_key = bool(attrs.get("ssh_key"))
+
+        # self.partial means PATCH, so it's OK to infer from instance
+        if self.partial and not has_password and not has_ssh_key:
+            has_password = bool(getattr(self.instance, "password"))
+            has_ssh_key = bool(getattr(self.instance, "ssh_key"))
+
+        return has_password, has_ssh_key
 
 
-class AuthTokenOrUserPassSerializer(CredentialSerializer):
-    """Serialize credentials that require username+password or auth token."""
+class AuthTokenOrUserPassSerializerV2(CredentialSerializerV2):
+    """
+    Credential serializer that requires either username and password or auth_token.
+
+    This serializer should be used only for Credential write operations.
+    The Meta class defines only the fields required for writing to the model.
+    """
 
     class Meta:
         """Serializer configuration."""
 
         model = Credential
         fields = [
-            "auth_type",
             "cred_type",
-            "id",
             "name",
             "password",
             "username",
             "auth_token",
-            "sources",
         ]
         extra_kwargs = {
             "password": {**ENCRYPTED_FIELD_KWARGS},
@@ -292,29 +311,21 @@ class AuthTokenOrUserPassSerializer(CredentialSerializer):
         has_user_or_pass, has_auth_token = self._get_user_pass_or_auth_token(attrs)
 
         if not has_auth_token and not has_user_or_pass:
-            raise ValidationError(_(messages.TOKEN_OR_USER_PASS))
+            raise ValidationError(messages.TOKEN_OR_USER_PASS)
 
         if has_auth_token and has_user_or_pass:
-            raise ValidationError(_(messages.TOKEN_OR_USER_PASS_NOT_BOTH))
+            raise ValidationError(messages.TOKEN_OR_USER_PASS_NOT_BOTH)
+
         # defer the rest of the validation to specialized serializers
-        if has_auth_token:
-            none_fields = {"username": None, "password": None}
-            validator_class = AuthTokenSerializer
-        else:
-            none_fields = {"auth_token": None}
-            validator_class = UsernamePasswordSerializer
-        self._setup_default_data(attrs)
-        # force values to some fields to None to ensure non-sense combinations (like
-        # auth_token + username) can't happen
-        attrs.update(**none_fields)
-        validator = validator_class(self.instance, data=attrs, partial=False)
+        validator_class = (
+            AuthTokenSerializerV2 if has_auth_token else UsernamePasswordSerializerV2
+        )
+        validator = validator_class(self.instance, data=attrs, partial=self.partial)
         validator.is_valid(raise_exception=True)
         data = validator.validated_data
-        # add none fields again since specialized validators will remove them
-        data.update(**none_fields)
         return data
 
-    def _get_user_pass_or_auth_token(self, attrs):
+    def _get_user_pass_or_auth_token(self, attrs: dict) -> tuple[bool, bool]:
         """
         Detect if input data has username/password and/or auth token.
 
@@ -329,15 +340,3 @@ class AuthTokenOrUserPassSerializer(CredentialSerializer):
             )
             has_auth_token = bool(getattr(self.instance, "auth_token"))
         return has_user_or_pass, has_auth_token
-
-    def _setup_default_data(self, attrs):
-        """Set default data for partial updates."""
-        # we can't pass partial=True to validator_class, otherwise required fields
-        # would not be validated. This isn't a issue on most DRF use cases because
-        # the same serializer class is used for everything. Because of that we simulate
-        # "partial=True" behavior by setting all non-defined fields to what's on the
-        # model instance
-        if self.instance and self.partial:
-            for field in self.Meta.fields:
-                if not self.fields[field].read_only:
-                    attrs.setdefault(field, getattr(self.instance, field))

@@ -1,23 +1,27 @@
-"""Describes the views associated with the API models."""
+"""Credential API views."""
 
 from itertools import groupby
 
 from django.db import transaction
-from django.http import Http404
 from django.utils.translation import gettext as _
-from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
-from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
-from api import messages
-from api.common.util import ALL_IDS_MAGIC_STRING, is_int, set_of_ids_or_all_str
-from api.filters import ListFilter
-from api.models import Credential, Source
-from api.serializers import CredentialSerializer
+from api.common.util import ALL_IDS_MAGIC_STRING, set_of_ids_or_all_str
+from api.credential.model import Credential
+from api.credential.serializer import (
+    AuthTokenOrUserPassSerializerV2,
+    AuthTokenSerializerV2,
+    CredentialSerializerV2,
+    SshCredentialSerializerV2,
+    UsernamePasswordSerializerV2,
+)
+from api.credential.view_v1 import CredentialFilter
+from constants import DataSources
 
 
 @api_view(["post"])
@@ -95,54 +99,75 @@ def credential_bulk_delete(request):
     return Response(data=response_data, status=status.HTTP_200_OK)
 
 
-class CredentialFilter(FilterSet):
-    """Filter for host credentials by name."""
-
-    name = ListFilter(field_name="name")
-    search_by_name = CharFilter(
-        field_name="name", lookup_expr="icontains", distinct=True
-    )
-
-    class Meta:
-        """Metadata for filterset."""
-
-        model = Credential
-        fields = ["name", "cred_type", "search_by_name"]
-
-
-class CredentialViewSet(ModelViewSet):
+class CredentialViewSetV2(ModelViewSet):
     """A view set for the Credential model."""
 
     queryset = Credential.objects.all()
-    serializer_class = CredentialSerializer
+    serializer_class = CredentialSerializerV2
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = CredentialFilter
     ordering_fields = ("name", "cred_type")
     ordering = ("name",)
 
-    def retrieve(self, request, pk=None):
-        """Get a host credential."""
-        if not pk or not is_int(pk):
-            error = {"id": [_(messages.COMMON_ID_INV)]}
-            raise ValidationError(error)
-        return super().retrieve(request, pk=pk)
+    serializer_by_type = {
+        DataSources.NETWORK: SshCredentialSerializerV2,
+        DataSources.OPENSHIFT: AuthTokenOrUserPassSerializerV2,
+        DataSources.VCENTER: UsernamePasswordSerializerV2,
+        DataSources.SATELLITE: UsernamePasswordSerializerV2,
+        DataSources.ANSIBLE: UsernamePasswordSerializerV2,
+        DataSources.RHACS: AuthTokenSerializerV2,
+    }
 
-    @transaction.atomic
-    def destroy(self, request, pk):
-        """Delete a cred."""
-        try:
-            cred = Credential.objects.get(pk=pk)
-            sources = Source.objects.filter(credentials__pk=pk).values("id", "name")
-            if sources:
-                message = messages.CRED_DELETE_NOT_VALID_W_SOURCES
-                error = {"detail": message}
-                slim_sources = []
-                for source in sources:
-                    slim_sources.append(source)
-                error["sources"] = slim_sources
-                raise ValidationError(error)
-            cred.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+    def get_input_serializer_class(self, cred_type):
+        """Get the type-specific serializer for processing create/update inputs."""
+        if serializer := self.serializer_by_type.get(cred_type):
+            return serializer
+        raise ValueError("Invalid credential type.")
 
-        except Credential.DoesNotExist as exception:
-            raise Http404 from exception
+    def create(self, request, *args, **kwargs) -> Response:
+        """
+        Create a credential.
+
+        That this method is based on rest_framework.mixins.CreateModelMixin.create.
+        Modifications were made only to use different input and output serializers.
+        """
+        cred_type = request.data.get("cred_type")
+        input_serializer_class = self.get_input_serializer_class(cred_type)
+
+        input_serializer = input_serializer_class(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        instance = input_serializer.save()  # Save the validated data.
+        # We are not using `self.perform_create(input_serializer)` here because we need
+        # the instance to pass through a different serializer for output.
+
+        # Use the common output serializer for the response.
+        output_serializer = self.get_serializer_class()(instance)
+        headers = self.get_success_headers(output_serializer.data)
+        return Response(
+            output_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    def update(self, request, *args, **kwargs) -> Response:
+        """
+        Update a credential.
+
+        That this method is based on rest_framework.mixins.UpdateModelMixin.update.
+        Modifications were made only to use different input and output serializers.
+        """
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        cred_type = request.data.get("cred_type", instance.cred_type)
+        input_serializer_class = self.get_input_serializer_class(cred_type)
+        input_serializer = input_serializer_class(
+            instance, data=request.data, partial=partial
+        )
+        input_serializer.is_valid(raise_exception=True)
+        self.perform_update(input_serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        output_serializer = self.get_serializer_class()(instance)
+        return Response(output_serializer.data)

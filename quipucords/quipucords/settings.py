@@ -14,6 +14,7 @@ import logging
 import os
 import random
 import string
+import warnings
 from pathlib import Path
 
 import environ
@@ -409,8 +410,22 @@ LOGGING = {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
+        "quipucords.warnings": {
+            "handlers": LOGGING_HANDLERS,
+            "level": QUIPUCORDS_LOGGING_LEVEL,
+        },
     },
 }
+
+
+def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
+    """Redirect deprecation warnings to our logger."""
+    logger = logging.getLogger("quipucords.warnings")
+    logger.warning(f"{message} (from {filename}:{lineno})")
+
+
+warnings.showwarning = warn_on_deprecation
+warnings.simplefilter("always", DeprecationWarning)
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
