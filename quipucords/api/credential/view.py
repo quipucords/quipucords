@@ -1,18 +1,15 @@
 """Credential API views."""
 
-from itertools import groupby
-
-from django.db import transaction
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api.common.util import ALL_IDS_MAGIC_STRING, set_of_ids_or_all_str
-from api.credential.model import Credential
+from api.common.util import set_of_ids_or_all_str
+from api.credential.model import Credential, credential_bulk_delete_ids
 from api.credential.serializer import (
     AuthTokenOrUserPassSerializerV2,
     AuthTokenSerializerV2,
@@ -22,81 +19,6 @@ from api.credential.serializer import (
 )
 from api.credential.view_v1 import CredentialFilter
 from constants import DataSources
-
-
-@api_view(["post"])
-def credential_bulk_delete(request):
-    """
-    Bulk delete credentials.
-
-    Response payload contains IDs of credentials deleted, skipped, and not found.
-    Example response:
-
-        {
-            "message": \
-                "Deleted 3 credentials. "\
-                "Could not find 0 credentials. "\
-                "Failed to delete 2 credentials.",
-            "deleted": [1, 2, 3],
-            "missing": [],
-            "skipped": [
-                {"credential": 6, "sources": [1]},
-                {"credential": 7, "sources": [2, 3]},
-            ],
-        }
-
-    input:      "ids" : List of ids to delete, or string ALL_IDS_MAGIC_STRING
-    returns:    200 OK - upon successfully deleting any credentials.
-                400 Bad Request - ids list is missing or empty.
-    """
-    ids = set_of_ids_or_all_str(request.data.get("ids"))
-
-    with transaction.atomic():
-        creds = Credential.objects.all()
-        if ids != ALL_IDS_MAGIC_STRING:
-            creds = creds.filter(id__in=ids)
-        credential_ids_requested = ids if isinstance(ids, set) else set()
-        credential_ids_found = set(creds.values_list("id", flat=True))
-        credential_ids_with_sources = (
-            creds.exclude(sources=None)
-            .prefetch_related("sources")
-            .values_list("id", "sources")
-            .order_by("id")  # later groupby needs sorted input
-        )
-        creds.filter(sources=None).delete()
-
-    credential_ids_missing = credential_ids_requested - credential_ids_found
-    credential_ids_skipped = []
-
-    for credential_id, grouper in groupby(
-        credential_ids_with_sources, key=lambda c: c[0]
-    ):
-        credential_ids_skipped.append(
-            {
-                "credential": credential_id,
-                "sources": [g[1] for g in grouper],
-            }
-        )
-    credential_ids_deleted = credential_ids_found - set(
-        c["credential"] for c in credential_ids_skipped
-    )
-
-    message = _(
-        "Deleted {count_deleted} credentials. "
-        "Could not find {count_missing} credentials. "
-        "Failed to delete {count_failed} credentials."
-    ).format(
-        count_deleted=len(credential_ids_deleted),
-        count_missing=len(credential_ids_missing),
-        count_failed=len(credential_ids_skipped),
-    )
-    response_data = {
-        "message": message,
-        "deleted": credential_ids_deleted,
-        "missing": credential_ids_missing,
-        "skipped": credential_ids_skipped,
-    }
-    return Response(data=response_data, status=status.HTTP_200_OK)
 
 
 class CredentialViewSetV2(ModelViewSet):
@@ -174,3 +96,45 @@ class CredentialViewSetV2(ModelViewSet):
 
         output_serializer = self.get_serializer_class()(instance)
         return Response(output_serializer.data)
+
+    @action(detail=False, methods=["post"], url_path="bulk_delete")
+    def bulk_delete(self, request) -> Response:
+        """
+        Bulk delete credentials.
+
+        The `ids` POST parameter of the request may be either a list of ids or the
+        ALL_IDS_MAGIC_STRING string.
+
+        The returned Response payload contains IDs of credentials deleted, not found,
+        and skipped, and a human-readable message describing the overall results,
+        and it will have status `200 OK` upon successfully deleting any credentials or
+        `400 Bad Request` (ParseError) if the `ids` parameter was missing or empty.
+
+        Example response body:
+
+            {
+                "message": \
+                    "Deleted 3 credentials. "\
+                    "Could not find 0 credentials. "\
+                    "Failed to delete 2 credentials.",
+                "deleted": [1, 2, 3],
+                "missing": [],
+                "skipped": [
+                    {"credential": 6, "sources": [1]},
+                    {"credential": 7, "sources": [2, 3]},
+                ],
+            }
+        """
+        ids = set_of_ids_or_all_str(request.data.get("ids"))
+        results = credential_bulk_delete_ids(ids)
+        message = _(
+            "Deleted {count_deleted} credentials. "
+            "Could not find {count_missing} credentials. "
+            "Failed to delete {count_failed} credentials."
+        ).format(
+            count_deleted=len(results["deleted"]),
+            count_missing=len(results["missing"]),
+            count_failed=len(results["skipped"]),
+        )
+        results["message"] = message
+        return Response(data=results, status=status.HTTP_200_OK)

@@ -1036,35 +1036,41 @@ class TestCredential:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("api_version", [1, 2])
 class TestCredentialBulkDelete:
-    """Tests the Credential bulk_delete function."""
+    """
+    Tests Credential bulk delete (credential_bulk_delete_ids) by using the views.
 
-    def test_bulk_delete_specific_ids(self, client_logged_in):
+    TODO Remove the parametrized api_version when we remove CredentialSerializerV1
+    and its related v1 views.
+    """
+
+    def test_bulk_delete_specific_ids(self, client_logged_in, api_version):
         """Test that bulk delete deletes all requested credentials."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
         delete_request = {"ids": [cred1.id, cred2.id]}
         response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
+            reverse(f"v{api_version}:credentials-bulk-delete"),
             data=delete_request,
         )
         assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
 
-    def test_bulk_delete_all_ids(self, client_logged_in):
+    def test_bulk_delete_all_ids(self, client_logged_in, api_version):
         """Test that bulk delete deletes all credentials."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
         delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
+            reverse(f"v{api_version}:credentials-bulk-delete"),
             data=delete_request,
         )
         assert response.ok
         assert len(Credential.objects.filter(id__in=[cred1.id, cred2.id])) == 0
         assert Credential.objects.count() == 0
 
-    def test_bulk_delete_rejects_invalid_inputs(self, client_logged_in):
+    def test_bulk_delete_rejects_invalid_inputs(self, client_logged_in, api_version):
         """
         Test that bulk delete rejects unexpected value types in "ids".
 
@@ -1072,19 +1078,21 @@ class TestCredentialBulkDelete:
         """
         invalid_delete_params = {"ids": []}
         response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
+            reverse(f"v{api_version}:credentials-bulk-delete"),
             data=invalid_delete_params,
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_bulk_delete_ignores_missing_ids(self, client_logged_in, faker):
+    def test_bulk_delete_ignores_missing_ids(
+        self, client_logged_in, faker, api_version
+    ):
         """Test bulk delete succeeds and reports missing IDs."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
         non_existent_id = generate_invalid_id(faker)
         delete_request = {"ids": [non_existent_id, cred1.id, cred2.id]}
         response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
+            reverse(f"v{api_version}:credentials-bulk-delete"),
             data=delete_request,
         )
         assert response.ok
@@ -1094,7 +1102,7 @@ class TestCredentialBulkDelete:
         assert response_json["skipped"] == []
         assert not Credential.objects.filter(pk__in=[cred1.id, cred2.id]).exists()
 
-    def test_bulk_delete_ignores_errors(self, client_logged_in):
+    def test_bulk_delete_ignores_errors(self, client_logged_in, api_version):
         """Test bulk delete succeeds and reports skipped IDs."""
         cred = CredentialFactory()
         cred_in_use = CredentialFactory()
@@ -1102,7 +1110,7 @@ class TestCredentialBulkDelete:
         source2 = SourceFactory(credentials=[cred_in_use])
         delete_request = {"ids": [cred_in_use.id, cred.id]}
         response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
+            reverse(f"v{api_version}:credentials-bulk-delete"),
             data=delete_request,
         )
         assert response.ok
@@ -1117,7 +1125,7 @@ class TestCredentialBulkDelete:
         assert not Credential.objects.filter(pk=cred.id).exists()
         assert Credential.objects.filter(pk=cred_in_use.id).exists()
 
-    def test_bulk_delete_all(self, client_logged_in):
+    def test_bulk_delete_all(self, client_logged_in, api_version):
         """Test bulk delete succeeds with magic "all" token."""
         cred1 = CredentialFactory()
         cred2 = CredentialFactory()
@@ -1125,7 +1133,7 @@ class TestCredentialBulkDelete:
         source = SourceFactory(credentials=[cred_in_use])
         delete_request = {"ids": ALL_IDS_MAGIC_STRING}
         response = client_logged_in.post(
-            reverse("v1:credentials-bulk-delete"),
+            reverse(f"v{api_version}:credentials-bulk-delete"),
             data=delete_request,
         )
         assert response.ok
