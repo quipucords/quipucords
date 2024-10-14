@@ -1,7 +1,8 @@
 """Credential API views."""
 
 from django.utils.translation import gettext as _
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import CharFilter
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
@@ -17,8 +18,23 @@ from api.credential.serializer import (
     SshCredentialSerializerV2,
     UsernamePasswordSerializerV2,
 )
-from api.credential.view_v1 import CredentialFilter
+from api.filters import ListFilter
 from constants import DataSources
+
+
+class CredentialFilter(FilterSet):
+    """Filter for host credentials by name."""
+
+    name = ListFilter(field_name="name")
+    search_by_name = CharFilter(
+        field_name="name", lookup_expr="icontains", distinct=True
+    )
+
+    class Meta:
+        """Metadata for filterset."""
+
+        model = Credential
+        fields = ["name", "cred_type", "search_by_name"]
 
 
 class CredentialViewSetV2(ModelViewSet):
