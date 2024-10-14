@@ -3,11 +3,14 @@
 These models are used in the REST definitions
 """
 
-from django.db import models
+from itertools import groupby
+
+from django.db import models, transaction
 from django.utils.translation import gettext as _
 
 from api import messages
 from api.common.models import BaseModel
+from api.common.util import ALL_IDS_MAGIC_STRING
 from api.vault import encrypt_data_as_unicode
 from constants import DataSources
 
@@ -100,3 +103,59 @@ class Credential(BaseModel):
         """Metadata for the model."""
 
         verbose_name_plural = _(messages.PLURAL_HOST_CREDENTIALS_MSG)
+
+
+def credential_bulk_delete_ids(ids: list | str) -> dict:
+    """
+    Bulk delete credentials by IDs.
+
+    The `ids` parameter may be either a list of ids or the ALL_IDS_MAGIC_STRING string.
+
+    Returned dict contains lists of IDs for credentials deleted, not found ("missing"),
+    and skipped. Example return value:
+
+        {
+            "deleted": [1, 2, 3],
+            "missing": [],
+            "skipped": [
+                {"credential": 6, "sources": [1]},
+                {"credential": 7, "sources": [2, 3]},
+            ],
+        }
+    """
+    with transaction.atomic():
+        creds = Credential.objects.all()
+        if ids != ALL_IDS_MAGIC_STRING:
+            creds = creds.filter(id__in=ids)
+        credential_ids_requested = ids if isinstance(ids, set) else set()
+        credential_ids_found = set(creds.values_list("id", flat=True))
+        credential_ids_with_sources = (
+            creds.exclude(sources=None)
+            .prefetch_related("sources")
+            .values_list("id", "sources")
+            .order_by("id")  # later groupby needs sorted input
+        )
+        creds.filter(sources=None).delete()
+
+    credential_ids_missing = credential_ids_requested - credential_ids_found
+    credential_ids_skipped = []
+
+    for credential_id, grouper in groupby(
+        credential_ids_with_sources, key=lambda c: c[0]
+    ):
+        credential_ids_skipped.append(
+            {
+                "credential": credential_id,
+                "sources": [g[1] for g in grouper],
+            }
+        )
+    credential_ids_deleted = credential_ids_found - set(
+        c["credential"] for c in credential_ids_skipped
+    )
+
+    results = {
+        "deleted": credential_ids_deleted,
+        "missing": credential_ids_missing,
+        "skipped": credential_ids_skipped,
+    }
+    return results
