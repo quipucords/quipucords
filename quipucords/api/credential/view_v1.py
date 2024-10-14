@@ -5,7 +5,7 @@ import warnings
 from django.db import transaction
 from django.http import Http404
 from django.utils.translation import gettext as _
-from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter
@@ -16,25 +16,9 @@ from rest_framework.viewsets import ModelViewSet
 from api import messages
 from api.common.util import is_int, set_of_ids_or_all_str
 from api.credential.model import credential_bulk_delete_ids
-from api.filters import ListFilter
+from api.credential.view import CredentialFilter
 from api.models import Credential, Source
 from api.serializers import CredentialSerializerV1
-
-
-class CredentialFilter(FilterSet):
-    """Filter for host credentials by name."""
-
-    name = ListFilter(field_name="name")
-    search_by_name = CharFilter(
-        field_name="name", lookup_expr="icontains", distinct=True
-    )
-
-    class Meta:
-        """Metadata for filterset."""
-
-        model = Credential
-        fields = ["name", "cred_type", "search_by_name"]
-
 
 CREDENTIAL_V1_DEPRECATION_MESSAGE = (
     "The credential v1 API is deprecated and will be removed soon. "
