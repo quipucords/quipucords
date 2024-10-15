@@ -48,37 +48,6 @@ def convert_to_int(value):
     return int(value)
 
 
-def is_float(value):
-    """Check if a value is convertable to float.
-
-    :param value: The value to convert
-    :returns: bool indicating if it can be converted
-    """
-    if isinstance(value, float):
-        return True
-    if isinstance(value, int):
-        return False
-    if not isinstance(value, str):
-        return False
-
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
-
-def convert_to_float(value):
-    """Convert value to float if possible.
-
-    :param value: The value to convert
-    :returns: The int or None if not convertable
-    """
-    if not is_float(value):
-        return None
-    return float(value)
-
-
 def is_boolean(value):
     """Check if a value is a bool cast as string.
 
@@ -103,6 +72,19 @@ def convert_to_boolean(value):
     if is_boolean(value):
         return value.lower() == "true"
     return False
+
+
+def convert_to_bool_or_none(value):
+    """Convert a string "True" or "False" to boolean.
+
+    If value already is a boolean, returns it untouched.
+    Otherwise, return None.
+    """
+    if isinstance(value, bool):
+        return value
+    if is_boolean(value):
+        return value.lower() == "true"
+    return None
 
 
 def check_for_existing_name(queryset, name, error_message, search_id=None):
