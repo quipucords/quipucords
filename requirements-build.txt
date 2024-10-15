@@ -22,6 +22,7 @@ flit-core==3.9.0
     #   jinja2
     #   more-itertools
     #   packaging
+    #   pathspec
     #   ptyprocess
     #   typing-extensions
     #   wheel
@@ -32,7 +33,7 @@ hatchling==1.25.0
     #   colorama
     #   hatch-vcs
     #   sqlparse
-maturin==1.7.3
+maturin==1.7.4
     # via cryptography
 packaging==24.1 ; python_version >= "3.12" and python_version < "4.0"
     # via
@@ -44,7 +45,7 @@ pbr==6.1.0
     # via lockfile
 pluggy==1.5.0
     # via hatchling
-poetry-core==1.9.0
+poetry-core==1.9.1
     # via
     #   click-didyoumean
     #   rsa
@@ -52,21 +53,20 @@ pycparser==2.22 ; python_version >= "3.12" and python_version < "4.0"
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
-setuptools-rust==1.10.1
+setuptools-rust==1.10.2
     # via
     #   bcrypt
     #   maturin
+setuptools-scm==8.0.4
+    # via ansible-runner
 setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.1.0
     # via
     #   django-axes
-    #   hatch-vcs
+    #   pluggy
     #   setuptools-rust
-    #   setuptools-scm
-setuptools-scm==8.0.4
-    # via ansible-runner
-trove-classifiers==2024.9.12
+trove-classifiers==2024.10.13
     # via hatchling
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
     # via setuptools-scm
@@ -86,27 +86,26 @@ wheel==0.44.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==72.1.0 ; python_version >= "3.12" and python_version < "4.0"
-    # via ansible-core
 setuptools==75.1.0 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
+    #   ansible-core
     #   cachetools
-    #   calver
     #   cffi
     #   click-repl
     #   django
-    #   django-axes
     #   django-cors-headers
     #   gunicorn
+    #   markupsafe
+    #   pathspec
     #   pyasn1
     #   pyasn1-modules
+    #   pynacl
     #   python-daemon
-    #   python-dateutil
     #   pyyaml
     #   resolvelib
-    #   setuptools-rust
     #   setuptools-scm
+    #   trove-classifiers
     #   tzdata
     #   whitenoise
 setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
