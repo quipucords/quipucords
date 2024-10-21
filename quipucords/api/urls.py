@@ -60,7 +60,7 @@ v1_urls = [
     path("reports/<int:report_id>/", reports, name="reports-detail"),
     path("reports/merge/", async_merge_reports, name="reports-merge"),
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
-    path("token/", QuipucordsExpiringAuthTokenView),
+    path("token/", QuipucordsExpiringAuthTokenView, name="token"),
     path("status/", status, name="server-status"),
     path("ping/", ping, name="server-ping"),
     *ROUTER_V1.urls,

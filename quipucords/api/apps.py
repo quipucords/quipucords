@@ -11,4 +11,8 @@ class ApiConfig(AppConfig):
 
     def ready(self):
         """Mark server ready."""
+        # We need to import any general signal handlers when the app becomes ready
+        # because nothing else explicitly imports and loads them.
+        from . import signals  # noqa: F401
+
         settings.QUIPUCORDS_CACHED_REPORTS_DATA_DIR.mkdir(parents=True, exist_ok=True)
