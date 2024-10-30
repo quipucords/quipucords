@@ -17,13 +17,13 @@ class RawFactComparator:
 
     This comparator supports:
     - simple fact notation (i.e. "fact_name")
-    - ambigous fact notation (i.e. "fact_name/other_fact_name")
+    - ambiguous fact notation (i.e. "fact_name/other_fact_name")
     - parent from nested facts (i.e. "fact_name__some_nested_key")
 
     Note:
     Distinct "child" facts coming from the same "parent" (i.e.
     "system_purpose_json__addons" and "system_purpose_json__usage") are considered
-    equal as they are comming from the fact.
+    equal as they are coming from the fact.
     """
 
     def __init__(self, fact_name):
