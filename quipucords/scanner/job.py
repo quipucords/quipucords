@@ -101,6 +101,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
             creds = [str(cred) for cred in failed_task.source.credentials.all()]
             context_message += f"SOURCE: {failed_task.source}\nCREDENTIALS: [{creds}]"
         failed_task.status_fail(context_message)
+        logger.exception(context_message)
 
         message = f"FATAL ERROR. {str(error)}"
         runner.scan_job.status_fail(message)
