@@ -42,9 +42,16 @@ class InspectCallback:
         self._skipped_facts = defaultdict(set)
         self.stopped = False
 
+    @property
+    def ansible_facts(self) -> dict[str, dict]:
+        """Facts collected per host."""
+        # we don't expect public access to this method. This was only added
+        # to make testing easier (so this could be patched).
+        return self._ansible_facts
+
     def iter_results(self) -> Generator[AnsibleResults]:
         """Yield host completion state and ansible facts."""
-        for host, facts in self._ansible_facts.items():
+        for host, facts in self.ansible_facts.items():
             if host in self._unreachable_hosts:
                 host_status = InspectResult.UNREACHABLE
             elif facts.get(HOST_DONE, False) is True:
