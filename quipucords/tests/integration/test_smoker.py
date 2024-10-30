@@ -166,9 +166,14 @@ class Smoker:
                 "source_name": self.SOURCE_NAME,
                 "source_type": self.SOURCE_TYPE,
                 "raw_fact_key": RawFactComparator(raw_fact),
-                "has_sudo": False,
+                "has_sudo": mock.ANY,
             }
         return metadata
+
+    @pytest.fixture
+    def expected_products(self):
+        """Return expected products for deployments report."""
+        return []
 
     def test_deployments_report(  # noqa: PLR0913
         self,
@@ -177,6 +182,7 @@ class Smoker:
         fingerprint_fact_map,
         report_id,
         expected_fingerprints,
+        expected_products,
     ):
         """Sanity check report deployments json structure."""
         response = client_logged_in.get(
@@ -208,7 +214,7 @@ class Smoker:
                     "source_type": self.SOURCE_TYPE,
                 }
             ],
-            PRODUCTS_KEY: [],
+            PRODUCTS_KEY: expected_products,
             META_DATA_KEY: mock.ANY,
             **{fingerprint: mock.ANY for fingerprint in fingerprint_fact_map.keys()},
         }

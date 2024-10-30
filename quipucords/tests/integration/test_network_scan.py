@@ -1,11 +1,17 @@
 """Integration test for network scan."""
 
 from logging import getLogger
+from unittest.mock import Mock
 
 import pytest
 from django.conf import settings
 
 from api.models import SystemFingerprint
+from constants import DataSources
+from scanner.network.inspect_callback import HOST_DONE, InspectCallback
+from scanner.network.utils import raw_facts_template
+from tests.integration.test_smoker import Smoker
+from tests.utils import raw_facts_generator
 from tests.utils.facts import fact_expander
 
 logger = getLogger(__name__)
@@ -61,6 +67,7 @@ def expected_network_scan_facts():
         "fuse_camel_version",
         "fuse_cxf_version",
         "host_done",
+        "hostnamectl",
         "ifconfig_ip_addresses",
         "ifconfig_mac_addresses",
         "insights_client_id",
@@ -133,8 +140,7 @@ def expected_network_scan_facts():
         "virt_num_guests",
         "virt_num_running_guests",
         "virt_type",
-        "virt_virt",
-        "virt_what_type",
+        "virt_what",
         "yum_enabled_repolist",
     }
     if not settings.QUIPUCORDS_EXCLUDE_INTERNAL_FACTS:
@@ -187,12 +193,12 @@ def fingerprint_fact_map():
         "cpu_hyperthreading": "cpu_hyperthreading",
         "cpu_socket_count": "cpu_socket_count",
         "etc_machine_id": "etc_machine_id",
-        "infrastructure_type": "virt_what_type/virt_type",
+        "infrastructure_type": "virt_what/hostnamectl",
         "insights_client_id": "insights_client_id",
         "installed_products": "installed_products",
-        "ip_addresses": "ip_address_show_ipv4",
+        "ip_addresses": "ip_address_show_ipv4/ifconfig_ip_addresses",
         "is_redhat": "redhat_packages_gpg_is_redhat",
-        "mac_addresses": "ip_address_show_mac",
+        "mac_addresses": "ip_address_show_mac/ifconfig_mac_addresses",
         "name": "uname_hostname",
         "os_name": "etc_release_name",
         "os_release": "etc_release_release",
@@ -255,3 +261,124 @@ def test_sanity_check_raw_fact_matches(
         SystemFingerprint.get_valid_fact_names() - unexpected_fingerprints
     )
     assert network_scan_fingerprints == set(fingerprint_fact_map.keys())
+
+
+@pytest.fixture
+def target_ip(faker):
+    """Fake target machine IP used during testing."""
+    return faker.ipv4()
+
+
+@pytest.fixture
+def raw_facts(target_ip):
+    """Return expected raw facts."""
+    _raw_facts = next(raw_facts_generator(DataSources.NETWORK.value, n=1))
+    # HOST_DONE must be true so the scan can be considered successful; connection_host
+    # must match scanned system ip (target_ip)
+    _raw_facts.update(**{HOST_DONE: True, "connection_host": target_ip})
+    return _raw_facts
+
+
+class PatchedAnsibleRunner:
+    """Class based helper that patches ansible_runner.run."""
+
+    def __init__(self, event_data: list[dict]):
+        self._runner_counter = 0
+        self._event_data = event_data
+
+    def __call__(self, **kwargs):
+        """Patched ansible_runner.run.
+
+        Should be used as a side effect of 'Mock.patch'.
+        """
+        # ansible_runner will be invoked twice during our test: once during connect
+        # phase, and once during inspect phase. During connect phase we need to patch it
+        # differently, hence the need of _runner_counter variable
+        if self._runner_counter < len(self._event_data):
+            self._patched_ansible_runner_for_connect_scan(**kwargs)
+        fake_ansible_result = Mock()
+        fake_ansible_result.stdout.read.side_effect = lambda: "ansible stdout"
+        fake_ansible_result.stderr.read.side_effect = lambda: "ansible stderr"
+        fake_ansible_result.status = "successful"
+        self._runner_counter += 1
+        return fake_ansible_result
+
+    def _patched_ansible_runner_for_connect_scan(self, *, event_handler, **kwargs):
+        event = self._event_data[self._runner_counter]
+        event_handler(event)
+
+
+@pytest.fixture
+def patched_scan_data(mocker, target_ip, raw_facts):
+    """Patched data for network scan.
+
+    This fixture aims to mock very surgical points on network scan, allowing to exercise
+    most of the code.
+    """
+
+    def _patched_process(scan_task, previous_host_facts, fact_key, fact_value, host):
+        # should be used as a replacement of scanner.network.processing.process
+        return fact_value
+
+    # bare bones ansible event for a successful "connection phase"
+    event_data = {
+        "event": "runner_on_ok",
+        "event_data": {"res": {"rc": 0}, "host": target_ip},
+    }
+
+    mocker.patch("ansible_runner.run", side_effect=PatchedAnsibleRunner([event_data]))
+    # patching ansible_runner.run should cover connect phase, but this mocking mechanism
+    # is not providing anything for inspect phase. we will cover that by mocking its
+    # callback class
+    raw_facts_per_ip = {target_ip: raw_facts}
+    mocker.patch.object(InspectCallback, "ansible_facts", raw_facts_per_ip)
+    # Finally, given we are generating "raw facts" already post processed, we need to
+    # turn off the real post processor.
+    mocker.patch("scanner.network.inspect.process", side_effect=_patched_process)
+
+
+@pytest.mark.integration
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.usefixtures("patched_scan_data")
+class TestNetworkScan(Smoker):
+    """Smoke test network scanner."""
+
+    SOURCE_NAME = "testing source"
+    SOURCE_TYPE = DataSources.NETWORK.value
+
+    @pytest.fixture
+    def credential_payload(self):
+        """Return payload to create credential."""
+        return {
+            "name": "testing credential",
+            "username": "<USER>",
+            "password": "<PASSWORD>",
+        }
+
+    @pytest.fixture
+    def source_payload(self, target_ip):
+        """Return Payload used to create source."""
+        return {
+            "hosts": [target_ip],
+            "name": self.SOURCE_NAME,
+        }
+
+    @pytest.fixture
+    def expected_facts(self, raw_facts):
+        """Return expected facts."""
+        facts = raw_facts_template()
+        facts.update(raw_facts)
+        return [facts]
+
+    @pytest.fixture
+    def expected_fingerprints(self, fingerprint_fact_map, mocker):
+        """Return expected fingerprint dict."""
+        # TODO: this shall be expanded in the context of DISCOVERY-783
+        return {key: mocker.ANY for key in fingerprint_fact_map.keys()}
+
+    @pytest.fixture
+    def expected_products(self, mocker):
+        """Return expected products."""
+        # TODO: this should be expanded to match expected products (which vary based on
+        # raw_facts)
+        return mocker.ANY

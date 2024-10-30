@@ -96,6 +96,7 @@ def fake_semver():
 def _network_raw_facts():
     # bare minimal network scan raw facts
     facts = {
+        "connection_host": _faker.ipv4(),
         "cloud_provider": _faker.random_element(["aws", "gcp"]),
         "cpu_core_count": _faker.pyint(min_value=1, max_value=9),
         "cpu_count": _faker.pyint(min_value=1, max_value=9),
