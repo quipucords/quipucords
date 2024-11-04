@@ -12,7 +12,7 @@ from scanner.network.inspect_callback import HOST_DONE, InspectCallback
 from scanner.network.utils import raw_facts_template
 from tests.integration.test_smoker import Smoker
 from tests.utils import raw_facts_generator
-from tests.utils.facts import fact_expander
+from tests.utils.facts import RawFactComparator, fact_expander
 
 logger = getLogger(__name__)
 
@@ -181,9 +181,9 @@ def expected_network_scan_facts():
 
 
 @pytest.fixture
-def fingerprint_fact_map():
+def fingerprint_fact_map(raw_facts):
     """Map fingerprint to raw fact name."""
-    return {
+    fact_map = {
         "architecture": "uname_processor",
         "bios_uuid": "dmi_system_uuid",
         "cloud_provider": "cloud_provider",
@@ -217,6 +217,16 @@ def fingerprint_fact_map():
         "system_user_count": "system_user_count",
         "virtualized_type": "virt_type",
     }
+    # system_creation_date is a special case and might not always be part of the report
+    system_creation_date_comparator = RawFactComparator(
+        fact_map["system_creation_date"]
+    )
+    valid_raw_facts = set(
+        name for name, value in raw_facts.items() if value is not None
+    )
+    if valid_raw_facts not in system_creation_date_comparator:
+        fact_map.pop("system_creation_date")
+    return fact_map
 
 
 @pytest.fixture
