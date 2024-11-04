@@ -31,6 +31,12 @@ class RawFactComparator:
         self._fact = fact_name
         self._vals = fact_expander(self._fact)
 
+    def _raise_unsupported_object(self, object):
+        raise TypeError(
+            f"'{object}' is unsupported comparison with facts "
+            f"(type={type(object).__name__})"
+        )
+
     def __eq__(self, other):
         """Operator for ==."""
         if isinstance(other, str):
@@ -39,10 +45,19 @@ class RawFactComparator:
             return other & self._vals != set()
         if isinstance(other, self.__class__):
             return other._vals == self
-        raise TypeError(
-            f"'{other}' is unsupported comparison with facts "
-            f"(type={type(other).__name__})"
-        )
+        self._raise_unsupported_object(other)
+
+    def __contains__(self, other):
+        """Operator for 'in'."""
+        if isinstance(other, str):
+            other_set = {other}
+        elif isinstance(other, set):
+            other_set = other
+        elif isinstance(other, self.__class__):
+            other_set = other._vals
+        else:
+            self._raise_unsupported_object(other)
+        return bool(other_set & self._vals)
 
     def __str__(self):
         """Dunder str."""
