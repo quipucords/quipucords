@@ -112,7 +112,6 @@ def _network_raw_facts():
         "installed_products": fake_installed_products(),
         "subscription_manager_id": _faker.uuid4(),
         "system_memory_bytes": _faker.pyint(max_value=2**63),  # max value for bigint
-        "system_purpose_json": None,
         "uname_processor": _faker.random_element(["x86_64", "ARM"]),
         "virt_type": _faker.random_element(["vmware", "xen", "kvm", None]),
         "virt_what": fake_virt_what(),
