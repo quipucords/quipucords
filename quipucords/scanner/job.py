@@ -11,7 +11,7 @@ from django.db.models import Sum
 
 from api.common.common_report import create_report_version
 from api.models import ScanJob, ScanTask
-from api.reports.model import Report
+from api.report.model import Report
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 from scanner.runner import ScanTaskRunner
