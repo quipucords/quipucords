@@ -4,7 +4,6 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from api.aggregate_report.view import aggregate_report
-from api.reports.view import upload_raw_facts
 from api.scan.view import scan_bulk_delete
 from api.views import (
     CredentialViewSetV1,
@@ -25,6 +24,7 @@ from api.views import (
     reports,
     source_bulk_delete,
     status,
+    upload_raw_facts,
 )
 
 ROUTER_V1 = SimpleRouter()

@@ -35,7 +35,7 @@ from api.deployments_report.view import build_cached_json_report
 from api.details_report.serializer import DetailsReportSerializer
 from api.details_report.util import create_details_csv
 from api.inspectresult.model import InspectGroup
-from api.reports.model import Report
+from api.report.model import Report
 from api.scantask.model import ScanTask
 from constants import SCAN_JOB_LOG, DataSources
 from tests.constants import (

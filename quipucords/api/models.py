@@ -14,7 +14,7 @@ from api.deployments_report.model import (
     SystemFingerprint,
 )
 from api.inspectresult.model import InspectGroup, InspectResult, RawFact
-from api.reports.model import Report
+from api.report.model import Report
 from api.scan.model import Scan
 from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask
