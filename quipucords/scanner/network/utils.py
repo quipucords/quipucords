@@ -13,7 +13,7 @@ from django.conf import settings
 from api.vault import decrypt_data_as_unicode
 
 
-def _credential_vars(credential):
+def _credential_vars(credential: dict) -> dict:
     """Build a dictionary containing cred information."""
     ansible_dict = {}
     username = credential.get("username")
@@ -42,7 +42,7 @@ def _credential_vars(credential):
     return ansible_dict
 
 
-def _construct_vars(connection_port, credential=None):
+def _construct_vars(connection_port, credential: dict = None) -> dict:
     """Get the Ansible host vars that implement a credential.
 
     :param connection_port: The connection port
@@ -60,13 +60,13 @@ def _construct_vars(connection_port, credential=None):
 
 
 def construct_inventory(
-    hosts,
+    hosts: list,
     connection_port,
-    concurrency_count,
+    concurrency_count: int,
     *,
-    credential=None,
-    exclude_hosts=None,
-):
+    credential: dict = None,
+    exclude_hosts: list | None = None,
+) -> tuple[list[str], dict]:
     """Create a dictionary inventory for Ansible to execute with.
 
     :param hosts: The collection of hosts (or hosts/credential tuples)
