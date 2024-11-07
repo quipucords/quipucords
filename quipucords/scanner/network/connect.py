@@ -230,6 +230,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
         f" with use_paramiko: {use_paramiko} and {forks:d} forks"
     )
     scan_task.log_message(log_message)
+    any_successful_connection = False
     for idx, group_name in enumerate(group_names):
         group_ips = (
             inventory.get("all").get("children").get(group_name).get("hosts").keys()
@@ -292,6 +293,7 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
         delete_ssh_keyfiles(inventory)
 
         final_status = runner_obj.status
+        any_successful_connection |= scan_task.systems_scanned >= 1
         if final_status == "canceled":
             msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
                 "CONNECT",
@@ -313,6 +315,8 @@ def _connect(  # noqa: PLR0913, PLR0912, PLR0915
             else:
                 msg = log_messages.NETWORK_CONNECT_FAIL % (final_status, error)
                 return msg, scan_task.FAILED
+    if not any_successful_connection:
+        return "No successful connections", scan_task.FAILED
     return None, scan_task.COMPLETED
 
 
