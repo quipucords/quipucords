@@ -9,6 +9,7 @@ from api.views import (
     CredentialViewSetV1,
     CredentialViewSetV2,
     QuipucordsExpiringAuthTokenView,
+    RawFactsReportView,
     ScanJobViewSet,
     ScanJobViewSetV1,
     ScanViewSet,
@@ -66,6 +67,9 @@ v1_urls = [
 
 v2_urls = [
     *ROUTER_V2.urls,
+    path(
+        "reports/<int:report_id>/raw/", RawFactsReportView.as_view(), name="report-raw"
+    ),
 ]
 
 urlpatterns = [
