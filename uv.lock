@@ -582,6 +582,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-json-agg"
+version = "0.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e1/39/fcec7dade2716866a921cb5e59083c89cc9c00f4a65236ceaba5bc8dc2ff/django_json_agg-0.0.1.tar.gz", hash = "sha256:16aba728faf4bc6c8f541efc6c2c0851f973a47be9f1447d72bf609b4637ebd8", size = 17535, upload-time = "2024-08-15T15:04:51.76Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/35/e3/9adeb56515e736f62ebcf5294bf218160490b6d25b583113252d9b486195/django_json_agg-0.0.1-py3-none-any.whl", hash = "sha256:c58e70a714d6e0583cbea0c667cff91cf012f2d2dd8e163f11c61e4cf19879eb", size = 17613, upload-time = "2024-08-15T15:04:50.241Z" },
+]
+
+[[package]]
 name = "djangorestframework"
 version = "3.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1887,6 +1899,7 @@ dependencies = [
     { name = "django-cors-headers", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "django-environ", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "django-filter", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
+    { name = "django-json-agg", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "djangorestframework", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "drf-spectacular", extra = ["sidecar"], marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "fqdn", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
@@ -1939,6 +1952,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=4.3.1,<5.0.0" },
     { name = "django-environ", specifier = ">=0.10.0,<1.0.0" },
     { name = "django-filter", specifier = ">=22.1" },
+    { name = "django-json-agg", specifier = ">=0.0.1" },
     { name = "djangorestframework", specifier = ">=3.14,<4.0" },
     { name = "drf-spectacular", extras = ["sidecar"], specifier = ">=0.28.0,<1.0.0" },
     { name = "fqdn", specifier = ">=1.5.1,<2.0.0" },
