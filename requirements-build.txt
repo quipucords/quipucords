@@ -14,7 +14,7 @@ cython==3.0.11
     # via pyyaml
 docutils==0.21.2 ; python_version >= "3.12" and python_version < "4.0"
     # via python-daemon
-flit-core==3.9.0
+flit-core==3.10.1
     # via
     #   django-filter
     #   docutils
@@ -28,14 +28,14 @@ flit-core==3.9.0
     #   wheel
 hatch-vcs==0.4.0
     # via urllib3
-hatchling==1.25.0
+hatchling==1.26.3
     # via
     #   colorama
-    #   hatch-vcs
     #   sqlparse
+    #   urllib3
 maturin==1.7.4
     # via cryptography
-packaging==24.1 ; python_version >= "3.12" and python_version < "4.0"
+packaging==24.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   hatchling
     #   setuptools-scm
@@ -64,13 +64,13 @@ setuptools-scm==7.1.0
 setuptools-scm==8.1.0
     # via
     #   django-axes
-    #   pluggy
     #   setuptools-rust
-trove-classifiers==2024.10.13
+    #   setuptools-scm
+trove-classifiers==2024.10.21.16
     # via hatchling
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
     # via setuptools-scm
-wheel==0.44.0
+wheel==0.45.0
     # via
     #   bcrypt
     #   cachetools
@@ -86,29 +86,29 @@ wheel==0.44.0
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==75.1.0 ; python_version >= "3.12" and python_version < "4.0"
+setuptools==75.4.0 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
-    #   ansible-core
     #   cachetools
     #   cffi
     #   click-repl
+    #   cryptography
     #   django
     #   django-cors-headers
     #   gunicorn
     #   markupsafe
-    #   pathspec
     #   pyasn1
     #   pyasn1-modules
-    #   pynacl
     #   python-daemon
     #   pyyaml
     #   resolvelib
+    #   setuptools-rust
     #   setuptools-scm
-    #   trove-classifiers
     #   tzdata
     #   whitenoise
 setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible-runner
     #   setuptools-scm
+setuptools==75.3.0 ; python_version >= "3.12" and python_version < "4.0"
+    # via ansible-core
