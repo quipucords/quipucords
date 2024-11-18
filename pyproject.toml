@@ -42,6 +42,7 @@ dependencies = [
     "pyyaml<7.0.0,>=6.0.1",
     "requests<3.0.0,>=2.32.2",
     "whitenoise<7.0.0,>=6.3.0",
+    "django-json-agg>=0.0.1",
 ]
 
 [dependency-groups]

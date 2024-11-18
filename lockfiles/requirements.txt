@@ -56,6 +56,7 @@ django==4.2.23 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     #   django-axes
     #   django-cors-headers
     #   django-filter
+    #   django-json-agg
     #   djangorestframework
     #   drf-spectacular
     #   drf-spectacular-sidecar
@@ -67,6 +68,8 @@ django-cors-headers==4.7.0 ; (implementation_name == 'cpython' and sys_platform 
 django-environ==0.12.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 django-filter==25.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+    # via quipucords
+django-json-agg==0.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 djangorestframework==3.16.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
