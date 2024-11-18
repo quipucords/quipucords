@@ -75,6 +75,7 @@ pluggy==1.5.0
 poetry-core==2.1.2
     # via
     #   click-didyoumean
+    #   django-json-agg
     #   rsa
 pycparser==2.22 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via cffi
