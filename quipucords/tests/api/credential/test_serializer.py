@@ -245,6 +245,19 @@ def test_openshift_cred_update_no_token(serializer_class, ocp_credential):
     assert decrypt_data_as_unicode(ocp_credential.auth_token) == original_auth_token
 
 
+@pytest.mark.xfail(reason="Missing mandatory field when updating token to user+pass")
+@pytest.mark.django_db
+def test_openshift_cred_update_no_password(ocp_credential):
+    """Test if serializer rejects update to username without password."""
+    updated_data = {
+        "username": "my ocp username",
+    }
+    serializer = AuthTokenOrUserPassSerializerV2(
+        data=updated_data, instance=ocp_credential, partial=True
+    )
+    assert not serializer.is_valid(), serializer.errors
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "serializer_class", [CredentialSerializerV1, AuthTokenOrUserPassSerializerV2]
@@ -846,3 +859,87 @@ def test_credential_secrets_preserve_surrounding_whitespace(faker):
     assert credential.password is None
     assert decrypt_data_as_unicode(credential.ssh_key) == password_with_spaces
     assert decrypt_data_as_unicode(credential.ssh_passphrase) == password_with_spaces
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "credential_type,serializer_class",
+    (
+        (DataSources.OPENSHIFT, AuthTokenOrUserPassSerializerV2),
+        (DataSources.NETWORK, SshCredentialSerializerV2),
+        (DataSources.ANSIBLE, UsernamePasswordSerializerV2),
+    ),
+)
+def test_credential_set_name_to_empty(faker, credential_type, serializer_class):
+    """Ensure you can't clear mandatory "name" field when editing credential."""
+    credential = CredentialFactory(
+        cred_type=credential_type,
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+    serializer = serializer_class(
+        instance=credential,
+        data={"name": ""},
+        partial=True,
+    )
+    assert not serializer.is_valid(), serializer.errors
+    assert serializer.errors["name"]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "credential_type,serializer_class",
+    (
+        (DataSources.OPENSHIFT, AuthTokenOrUserPassSerializerV2),
+        (DataSources.NETWORK, SshCredentialSerializerV2),
+        (DataSources.ANSIBLE, UsernamePasswordSerializerV2),
+    ),
+)
+def test_credential_set_username_to_empty(faker, credential_type, serializer_class):
+    """Ensure you can't clear mandatory "username" field when editing credential."""
+    credential = CredentialFactory(
+        cred_type=credential_type,
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+    serializer = serializer_class(
+        instance=credential,
+        data={"username": ""},
+        partial=True,
+    )
+    assert not serializer.is_valid(), serializer.errors
+    assert serializer.errors["username"]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "credential_type,serializer_class",
+    (
+        (DataSources.OPENSHIFT, AuthTokenOrUserPassSerializerV2),
+        pytest.param(
+            DataSources.NETWORK,
+            SshCredentialSerializerV2,
+            marks=pytest.mark.xfail(
+                reason=(
+                    "Server incorrectly allows to set mandatory password field to "
+                    "empty string; see DSC-860"
+                )
+            ),
+        ),
+        (DataSources.ANSIBLE, UsernamePasswordSerializerV2),
+    ),
+)
+def test_credential_set_password_to_empty(faker, credential_type, serializer_class):
+    """Ensure you can't clear mandatory "password" field when editing credential."""
+    credential = CredentialFactory(
+        cred_type=credential_type,
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+    serializer = serializer_class(
+        instance=credential,
+        data={"password": ""},
+        partial=True,
+    )
+    assert not serializer.is_valid(), serializer.errors
+    assert serializer.errors["password"]
