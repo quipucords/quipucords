@@ -21,10 +21,10 @@ def validate_data(
     assert metadata_filename in data.keys()
 
     report_slices = {}
-    for key in data:
+    for key, value in data.items():
         assert f"report_id_{report_id}/" in key
         if key != metadata_filename:
-            report_slices[key] = data[key]
+            report_slices[key] = value
     report_slices_in_metadata = data[metadata_filename]["report_slices"]
     assert (
         len(report_slices_in_metadata) == expected_number_of_slices
