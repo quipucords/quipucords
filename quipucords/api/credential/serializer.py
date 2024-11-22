@@ -231,7 +231,7 @@ class SshCredentialSerializerV2(CredentialSerializerV2):
             "ssh_key": ENCRYPTED_FIELD_KWARGS,
             "ssh_keyfile": {"read_only": True},
             "ssh_passphrase": ENCRYPTED_FIELD_KWARGS,
-            "username": {"required": True},
+            "username": {"required": True, "allow_blank": False},
         }
 
     def validate(self, attrs: dict):
