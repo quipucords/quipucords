@@ -13,7 +13,7 @@ from api.aggregate_report.model import (
 )
 from api.deployments_report.model import DeploymentsReport, Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
-from api.reports.model import Report
+from api.report.model import Report
 from constants import DataSources
 from fingerprinter import jboss_eap, jboss_web_server
 from tests.factories import (

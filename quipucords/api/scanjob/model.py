@@ -15,7 +15,7 @@ from api import messages
 from api.common.models import BaseModel
 from api.connresult.model import JobConnectionResult, TaskConnectionResult
 from api.inspectresult.model import InspectGroup, InspectResult, RawFact
-from api.reports.model import Report
+from api.report.model import Report
 from api.scan.model import Scan
 from api.scanjob.queryset import ScanJobQuerySet
 from api.scantask.model import ScanTask

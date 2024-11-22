@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from api.aggregate_report.model import get_aggregate_report_by_report_id
 from api.deployments_report.view import build_cached_json_report
 from api.models import DeploymentsReport, Report
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer
+from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import (
     DetailsReportSerializer,
     ReportUploadSerializer,

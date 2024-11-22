@@ -17,7 +17,7 @@ from api.inspectresult.serializer import (
     RawFactSerializer,
     SystemInspectionResultSerializer,
 )
-from api.reports.serializer import ReportUploadSerializer
+from api.report.serializer_v1 import ReportUploadSerializer
 from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import (
     ScanJobSerializerV1,
