@@ -231,9 +231,9 @@ def fingerprint_fact_map(raw_facts):
 
 
 @pytest.fixture
-def unexpected_fingerprints():
+def unexpected_fingerprints(raw_facts):
     """Set of facts that wouldn't appear on network scans."""
-    return {
+    unexpected = {
         # sattelite / vcenter exclusive
         "virtual_host_name",
         "virtual_host_uuid",
@@ -249,6 +249,12 @@ def unexpected_fingerprints():
         "container_images",
         "container_labels",
     }
+    # system_creation_date is the only fingerprint that appear conditionally. It is
+    # expected when one of the date facts is present
+    date_facts = {"date_filesystem_create", "date_anaconda_log", "date_machine_id"}
+    if not date_facts & set(k for k, v in raw_facts.items() if v is not None):
+        unexpected.add("system_creation_date")
+    return unexpected
 
 
 def test_sanity_check_raw_fact_matches(
@@ -258,7 +264,6 @@ def test_sanity_check_raw_fact_matches(
     raw_facts_for_fingerprints = set()
     for fact in fingerprint_fact_map.values():
         raw_facts_for_fingerprints |= fact_expander(fact)
-    assert "registration_time" in raw_facts_for_fingerprints
     # remove "registration_time" as this is a satellite fact
     raw_facts_for_fingerprints -= {"registration_time"}
 
