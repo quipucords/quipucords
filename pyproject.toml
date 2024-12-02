@@ -45,6 +45,7 @@ django-axes = "^6.3.0"
 # This has been fixed in python-daemon source but not yet released.
 # We should remove this pinned version as soon as >3.0.1 is available.
 python-daemon = "<3.0.0"
+drf-spectacular = {extras = ["sidecar"], version = "^0.28.0"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"

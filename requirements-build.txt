@@ -26,15 +26,32 @@ flit-core==3.10.1
     #   ptyprocess
     #   typing-extensions
     #   wheel
+hatch-fancy-pypi-readme==24.1.0
+    # via
+    #   attrs
+    #   jsonschema
 hatch-vcs==0.4.0
-    # via urllib3
+    # via
+    #   attrs
+    #   jsonschema
+    #   jsonschema-specifications
+    #   referencing
+    #   urllib3
 hatchling==1.26.3
     # via
+    #   attrs
     #   colorama
+    #   hatch-fancy-pypi-readme
     #   hatch-vcs
+    #   jsonschema
+    #   jsonschema-specifications
+    #   referencing
     #   sqlparse
+    #   urllib3
 maturin==1.7.7
-    # via cryptography
+    # via
+    #   cryptography
+    #   rpds-py
 packaging==24.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   hatchling
@@ -60,12 +77,14 @@ setuptools-rust==1.10.2
 setuptools-scm==8.1.0
     # via
     #   django-axes
+    #   hatch-vcs
+    #   pluggy
     #   setuptools-rust
     #   setuptools-scm
-setuptools-scm==7.1.0
-    # via python-dateutil
 setuptools-scm==8.0.4
     # via ansible-runner
+setuptools-scm==7.1.0
+    # via python-dateutil
 trove-classifiers==2024.10.21.16
     # via hatchling
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
@@ -86,31 +105,30 @@ wheel==0.45.1
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==75.6.0 ; python_version >= "3.12" and python_version < "4.0"
-    # via
-    #   ansible
-    #   cachetools
-    #   calver
-    #   cffi
-    #   click-repl
-    #   cryptography
-    #   django
-    #   django-cors-headers
-    #   gunicorn
-    #   markupsafe
-    #   pyasn1
-    #   pyasn1-modules
-    #   python-daemon
-    #   python-dateutil
-    #   pyyaml
-    #   resolvelib
-    #   setuptools-rust
-    #   setuptools-scm
-    #   tzdata
-    #   whitenoise
+setuptools==75.3.0 ; python_version >= "3.12" and python_version < "4.0"
+    # via ansible-core
 setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.3.0 ; python_version >= "3.12" and python_version < "4.0"
-    # via ansible-core
+setuptools==75.6.0 ; python_version >= "3.12" and python_version < "4.0"
+    # via
+    #   ansible
+    #   bcrypt
+    #   cachetools
+    #   cffi
+    #   click-repl
+    #   django
+    #   django-cors-headers
+    #   gunicorn
+    #   markupsafe
+    #   pathspec
+    #   pluggy
+    #   pyasn1
+    #   pyasn1-modules
+    #   python-daemon
+    #   pyyaml
+    #   resolvelib
+    #   setuptools-scm
+    #   tzdata
+    #   whitenoise
