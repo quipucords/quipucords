@@ -49,8 +49,12 @@ RUN dnf remove ${BUILD_PACKAGES} -y && \
     dnf clean all
 
 # Fetch UI code
+# TODO FIXME REMOVE THE UI CODE!
+# This bundles an old version of the UI while we are release a new version separately.
+# After we have released the "new" UI code and proven it to be stable, we must remove
+# these commands that bundle the old UI code with the quipucords image.
 COPY Makefile .
-ARG UI_RELEASE="latest"
+ARG UI_RELEASE="1.8.0"
 RUN --mount=type=secret,id=gh_api_token make fetch-ui -e QUIPUCORDS_UI_RELEASE=${UI_RELEASE}
 
 # Create /deploy
