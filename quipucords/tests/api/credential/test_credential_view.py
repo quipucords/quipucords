@@ -6,7 +6,7 @@ from rest_framework import status
 
 from api.vault import decrypt_data_as_unicode
 from constants import DataSources
-from tests.factories import CredentialFactory
+from tests.factories import CredentialFactory, SourceFactory
 
 
 @pytest.mark.django_db
@@ -329,3 +329,40 @@ def test_update_rhacs_credentials(client_logged_in, faker):
     assert response.status_code == status.HTTP_200_OK
     credential.refresh_from_db()
     assert decrypt_data_as_unicode(credential.auth_token) == patch_data["auth_token"]
+
+
+@pytest.fixture
+def network_credential(faker):
+    """Generate a network credential with fake data for tests."""
+    return CredentialFactory(
+        cred_type=DataSources.NETWORK,
+        name=faker.name(),
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+
+
+@pytest.mark.django_db
+def test_delete_unused_credential_success(network_credential, client_logged_in):
+    """Test deleting an unused credential is allowed."""
+    url = reverse("v2:credentials-detail", args=[network_credential.id])
+    response = client_logged_in.delete(url)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.django_db
+def test_delete_used_credential_error(network_credential, client_logged_in):
+    """Test deleting a credential that is assigned to a source returns an error."""
+    SourceFactory(credentials=[network_credential])
+    url = reverse("v2:credentials-detail", args=[network_credential.id])
+    response = client_logged_in.delete(url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_delete_unknown_credential_error(faker, client_logged_in):
+    """Test deleting an unknown credential ID returns an error."""
+    credential_id = faker.pyint(min_value=1701)
+    url = reverse("v2:credentials-detail", args=[credential_id])
+    response = client_logged_in.delete(url)
+    assert response.status_code == status.HTTP_404_NOT_FOUND

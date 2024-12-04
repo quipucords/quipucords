@@ -1,14 +1,17 @@
 """Credential API views."""
 
+from django.db import transaction
 from django.utils.translation import gettext as _
 from django_filters import CharFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api import messages
 from api.common.util import set_of_ids_or_all_str
 from api.credential.model import Credential, credential_bulk_delete_ids
 from api.credential.serializer import (
@@ -19,6 +22,7 @@ from api.credential.serializer import (
     UsernamePasswordSerializerV2,
 )
 from api.filters import ListFilter
+from api.source.model import Source
 from constants import DataSources
 
 
@@ -112,6 +116,19 @@ class CredentialViewSetV2(ModelViewSet):
 
         output_serializer = self.get_serializer_class()(instance)
         return Response(output_serializer.data)
+
+    @transaction.atomic
+    def destroy(self, request, pk):
+        """Delete a credential only if it is not related to a source."""
+        if sources := Source.objects.filter(credentials__pk=pk).values("id", "name"):
+            error = {
+                "detail": messages.CRED_DELETE_NOT_VALID_W_SOURCES,
+                "sources": list(sources),
+            }
+            raise ValidationError(error)
+        elif not Credential.objects.filter(pk=pk).exists():
+            raise NotFound
+        return super().destroy(request, pk)
 
     @action(detail=False, methods=["post"], url_path="bulk_delete")
     def bulk_delete(self, request) -> Response:
