@@ -195,8 +195,6 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_REDIRECT_URL = "/client/"
-
 WSGI_APPLICATION = "quipucords.wsgi.application"
 
 DEFAULT_PAGINATION_CLASS = "api.common.pagination.StandardResultsSetPagination"
@@ -312,9 +310,7 @@ TIME_ZONE = "UTC"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATIC_URL = "/client/"
-
-STATICFILES_DIRS = [BASE_DIR / "client"]
+STATIC_URL = "/api/static/"
 
 STORAGES = {
     "staticfiles": {
