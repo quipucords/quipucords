@@ -28,7 +28,6 @@ help:
 	@echo "  celery-worker                 to run the celery worker"
 	@echo "  clean                         to remove pyc/cache files"
 	@echo "  clean-db                      to remove postgres container / sqlite db"
-	@echo "  clean-ui                      to remove UI assets"
 	@echo "  lint                          to run all linters"
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
@@ -44,8 +43,6 @@ help:
 	@echo "  server-set-superuser          to create or update the superuser"
 	@echo "  serve                         to run the server with default db"
 	@echo "  serve-swagger                 to run the openapi/swagger ui for quipucords"
-	@echo "  build-ui                      to build ui and place result in django server"
-	@echo "  fetch-ui                      to fetch prebuilt ui and place it in django server"
 	@echo "  build-container               to build the container image for quipucords"
 	@echo "  check-db-migrations-needed    to check if new migration files are required"
 
@@ -53,11 +50,6 @@ all: lint test-coverage
 
 clean:
 	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -E '(.*\.pyc)|(\.coverage(\..+)*)$$|__pycache__')
-
-clean-ui:
-	rm -rf quipucords/client
-	rm -rf quipucords/quipucords/templates
-	rm -rf quipucords/staticfiles
 
 clean-db:
 	rm -rf quipucords/db.sqlite3
@@ -158,43 +150,7 @@ server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
 serve:
-	DJANGO_DEBUG=1 $(PYTHON) quipucords/manage.py runserver --nostatic
-
-$(QUIPUCORDS_UI_PATH):
-	@echo "Couldn't find quipucords-ui repo (${QUIPUCORDS_UI_PATH})"
-	@echo "Tip: git clone https://github.com/quipucords/quipucords-ui.git ${QUIPUCORDS_UI_PATH}"
-	exit 1
-
-build-ui: $(QUIPUCORDS_UI_PATH) clean-ui
-	cd $(QUIPUCORDS_UI_PATH);yarn;yarn build
-	cp -rf $(QUIPUCORDS_UI_PATH)/dist/client quipucords/client
-	cp -rf $(QUIPUCORDS_UI_PATH)/dist/templates quipucords/quipucords/templates
-
-fetch-ui: clean-ui
-	@if [[ $(QUIPUCORDS_UI_RELEASE) = "latest" ]]; then \
-		GH_FILE=`mktemp`; \
-		curl $(GITHUB_API_AUTH) --output "$${GH_FILE}" -sSf "https://api.github.com/repos/quipucords/quipucords-ui/releases/$(QUIPUCORDS_UI_RELEASE)"; \
-		DOWNLOAD_URL=`jq -r '.assets[] | select(.name | test("quipucords-ui-dist.tar.gz")) | .browser_download_url' "$${GH_FILE}"`; \
-		rm "$${GH_FILE}"; \
-	else \
-		DOWNLOAD_URL="https://github.com/quipucords/quipucords-ui/releases/download/$(QUIPUCORDS_UI_RELEASE)/quipucords-ui-dist.tar.gz"; \
-	fi; \
-	echo "download_url=$${DOWNLOAD_URL}"; \
-	curl -k -SL "$${DOWNLOAD_URL}" -o ui-dist.tar.gz &&\
-	tar -xzvf ui-dist.tar.gz &&\
-	mkdir -p quipucords/quipucords/ &&\
-	mv dist/templates quipucords/quipucords/. &&\
-	mv dist/client quipucords/. &&\
-	rm -rf ui-dist* dist
-
-quipucords_on_ui_dir = ${QUIPUCORDS_UI_PATH}/.qpc/quipucords
-$(quipucords_on_ui_dir): $(QUIPUCORDS_UI_PATH)
-	@echo "Creating quipucords symlink on UI repo"
-	mkdir -p $(QUIPUCORDS_UI_PATH)/.quipucords
-	ln -sf $(TOPDIR) $(QUIPUCORDS_UI_PATH)/.quipucords/quipucords
-
-serve-swagger: $(quipucords_on_ui_dir)
-	cd $(QUIPUCORDS_UI_PATH);yarn;node ./scripts/swagger.js
+	DJANGO_DEBUG=1 $(PYTHON) quipucords/manage.py runserver
 
 build-container:
 	podman build \

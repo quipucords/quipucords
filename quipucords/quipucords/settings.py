@@ -20,6 +20,8 @@ from pathlib import Path
 import environ
 from django.core.exceptions import ImproperlyConfigured
 
+from quipucords.release import infer_version
+
 from .featureflag import FeatureFlag
 
 logger = logging.getLogger(__name__)
@@ -146,6 +148,8 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     "axes",  # django-axes
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "api",
 ]
 
@@ -195,8 +199,6 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_REDIRECT_URL = "/client/"
-
 WSGI_APPLICATION = "quipucords.wsgi.application"
 
 DEFAULT_PAGINATION_CLASS = "api.common.pagination.StandardResultsSetPagination"
@@ -211,6 +213,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
@@ -220,7 +223,19 @@ REST_FRAMEWORK = {
         "user": QUIPUCORDS_THROTTLE_RATE_USER,
     },
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
-    "DEFAULT_VERSION": "v1",
+}
+# DRF SPECTACULAR is responsible for quipucords schema
+SPECTACULAR_SETTINGS = {
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+    "TITLE": "Quipucords API",
+    "DESCRIPTION": (
+        "Quipucords is a forensic tool that gathers Red Hat subscription metrics."
+    ),
+    "VERSION": infer_version(),
+    "SERVE_INCLUDE_SCHEMA": True,
+    "SCHEMA_PATH_PREFIX": "/api/v[1-2]",
 }
 
 # Database
@@ -312,9 +327,7 @@ TIME_ZONE = "UTC"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATIC_URL = "/client/"
-
-STATICFILES_DIRS = [BASE_DIR / "client"]
+STATIC_URL = "/api/static/"
 
 STORAGES = {
     "staticfiles": {

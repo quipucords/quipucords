@@ -17,38 +17,21 @@ Including another URLconf
 
 from django.conf.urls import include
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
-from django.urls import path, re_path
+from django.urls import path
 from django.views.generic import RedirectView
-from django.views.generic.base import TemplateView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
-    path("login/", auth_views.LoginView.as_view(), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
-    path("", RedirectView.as_view(url="/login", permanent=False), name="home"),
-    # ui routing
-    re_path(
-        r"^(client/(sources|scans|credentials|)(/|)(index.html|))$",
-        TemplateView.as_view(template_name="client/index.html"),
-        name="client",
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
     ),
-    # docs files
-    re_path(
-        r"^client/docs(/|)(index.html|use.html|)$",
-        RedirectView.as_view(url="/client/docs/use.html", permanent=False),
-        name="docs",
-    ),
-    re_path(
-        r"^client/docs(/|)(install.html|)$",
-        RedirectView.as_view(url="/client/docs/install.html", permanent=False),
-        name="docs",
-    ),
-    # static files (*.css, *.js, *.jpg etc.)
-    re_path(
-        r"^(?!/?client/)(?P<path>.*\..*)$",
-        RedirectView.as_view(url="/client/%(path)s", permanent=False),
-        name="client",
+    path(
+        "",
+        RedirectView.as_view(url="/api/schema/swagger-ui/?version=v2", permanent=False),
     ),
 ]
