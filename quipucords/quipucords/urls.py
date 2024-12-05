@@ -16,7 +16,6 @@ Including another URLconf
 """
 
 from django.conf.urls import include
-from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, re_path
 from django.views.generic import RedirectView
@@ -25,7 +24,6 @@ from django.views.generic.base import TemplateView
 urlpatterns = [
     path("login/", auth_views.LoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-    path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
     path("", RedirectView.as_view(url="/login", permanent=False), name="home"),
     # ui routing
