@@ -303,15 +303,35 @@ def request_host_details(  # noqa: PLR0913
     request_options,
 ):
     """Wrap _request_host_details to call it as an async Celery task."""
-    return _request_host_details(
-        scan_task,
-        logging_options,
-        host_id,
-        host_name,
-        fields_url,
-        subs_url,
-        request_options,
+    scan_task_id = (
+        scan_task
+        if isinstance(scan_task, int) is None
+        else getattr(ScanTask, "id", None)
     )
+    try:
+        return _request_host_details(
+            scan_task,
+            logging_options,
+            host_id,
+            host_name,
+            fields_url,
+            subs_url,
+            request_options,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.exception(
+            "Unexpected exception in request_host_details (ScanTask {scan_task_id})"
+        )
+
+    try:
+        scan_task = ScanTask.objects.get(id=scan_task_id)
+        scan_task.status_fail(
+            "Unexpected exception in request_host_details (ScanTask {scan_task_id})"
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.exception(
+            "Failed to record request_host_details failure (ScanTask {scan_task_id})"
+        )
 
 
 def _request_host_details(  # noqa: PLR0913
