@@ -73,8 +73,28 @@ def get_task_runner_class(source_type, scan_type) -> type[ScanTaskRunner]:
 def celery_run_task_runner(
     self: celery.Task, scan_task_id: int, source_type: str, scan_type: str
 ) -> tuple[bool, int, str]:
-    """Wrap _celery_run_task_runner to call it as an async Celery task."""
-    return _celery_run_task_runner(self, scan_task_id, source_type, scan_type)
+    """
+    Wrap _celery_run_task_runner to call it as an async Celery task.
+
+    Also wrap the call with try-except to handle any unexpected exceptions
+    and update the task's status to "failed" if any exception was raised.
+    """
+    try:
+        return _celery_run_task_runner(self, scan_task_id, source_type, scan_type)
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            f"Unexpected exception in celery_run_task_runner (ScanTask {scan_task_id})"
+        )
+
+    try:
+        scan_task = ScanTask.objects.get(id=scan_task_id)
+        scan_task.status_fail(
+            f"Unexpected exception in celery_run_task_runner (ScanTask {scan_task_id})"
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            f"Failed to record celery_run_task_runner failure (ScanTask {scan_task_id})"
+        )
 
 
 def _celery_run_task_runner(
@@ -105,8 +125,28 @@ def _celery_run_task_runner(
 
 @celery.shared_task(bind=True)
 def fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
-    """Wrap _fingerprint to call it as an async Celery task."""
-    return _fingerprint(self, scan_task_id)
+    """
+    Wrap _fingerprint to call it as an async Celery task.
+
+    Also wrap the call with try-except to handle any unexpected exceptions
+    and update the task's status to "failed" if any exception was raised.
+    """
+    try:
+        return _fingerprint(self, scan_task_id)
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            f"Unexpected exception in fingerprint (ScanTask {scan_task_id})"
+        )
+
+    try:
+        scan_task = ScanTask.objects.get(id=scan_task_id)
+        scan_task.status_fail(
+            f"Unexpected exception in fingerprint (ScanTask {scan_task_id})"
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            f"Failed to record fingerprint failure (ScanTask {scan_task_id})"
+        )
 
 
 def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
@@ -152,8 +192,28 @@ def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
 
 @celery.shared_task(bind=True)
 def finalize_scan(self: celery.Task, scan_job_id: int):
-    """Wrap _finalize_scan to call it as an async Celery task."""
-    return _finalize_scan(self, scan_job_id)
+    """
+    Wrap _finalize_scan to call it as an async Celery task.
+
+    Also wrap the call with try-except to handle any unexpected exceptions
+    and update the job's status to "failed" if any exception was raised.
+    """
+    try:
+        return _finalize_scan(self, scan_job_id)
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            f"Unexpected exception in finalize_scan for ScanJob {scan_job_id}"
+        )
+
+    try:
+        scan_job = ScanJob.objects.get(id=scan_job_id)
+        scan_job.status_fail(
+            f"Unexpected exception in finalize_scan for ScanJob {scan_job_id}"
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            f"Failed to record finalize_scan failure for ScanJob {scan_job_id}"
+        )
 
 
 def _finalize_scan(self: celery.Task, scan_job_id: int):
