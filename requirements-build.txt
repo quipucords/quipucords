@@ -33,7 +33,7 @@ hatchling==1.26.3
     #   colorama
     #   hatch-vcs
     #   sqlparse
-maturin==1.7.7
+maturin==1.7.8
     # via cryptography
 packaging==24.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
@@ -60,8 +60,8 @@ setuptools-rust==1.10.2
 setuptools-scm==8.1.0
     # via
     #   django-axes
+    #   pluggy
     #   setuptools-rust
-    #   setuptools-scm
 setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.0.4
@@ -89,22 +89,24 @@ wheel==0.45.1
 setuptools==75.6.0 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
+    #   ansible-core
     #   cachetools
     #   calver
     #   cffi
     #   click-repl
-    #   cryptography
     #   django
     #   django-cors-headers
     #   gunicorn
     #   markupsafe
+    #   maturin
+    #   pathspec
     #   pyasn1
     #   pyasn1-modules
+    #   pynacl
     #   python-daemon
     #   python-dateutil
     #   pyyaml
     #   resolvelib
-    #   setuptools-rust
     #   setuptools-scm
     #   tzdata
     #   whitenoise
@@ -112,5 +114,3 @@ setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.3.0 ; python_version >= "3.12" and python_version < "4.0"
-    # via ansible-core
