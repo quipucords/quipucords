@@ -294,7 +294,7 @@ def host_subscriptions(response):
 
 @celery.shared_task(name="request_host_details_sat_six")
 def request_host_details(  # noqa: PLR0913
-    scan_task: ScanTask | int,
+    scan_task_id: int,
     logging_options,
     host_id,
     host_name,
@@ -308,14 +308,9 @@ def request_host_details(  # noqa: PLR0913
     Also wrap the call with try-except to handle any unexpected exceptions
     and update the task's status to "failed" if any exception was raised.
     """
-    scan_task_id = (
-        scan_task
-        if isinstance(scan_task, int) is None
-        else getattr(ScanTask, "id", None)
-    )
     try:
         return _request_host_details(
-            scan_task,
+            scan_task_id,
             logging_options,
             host_id,
             host_name,
@@ -340,7 +335,7 @@ def request_host_details(  # noqa: PLR0913
 
 
 def _request_host_details(  # noqa: PLR0913
-    scan_task: ScanTask | int,
+    scan_task_id: int,
     logging_options,
     host_id,
     host_name,
@@ -350,7 +345,7 @@ def _request_host_details(  # noqa: PLR0913
 ):
     """Request detailed data about a specific host from the Satellite server.
 
-    :param scan_task: The current scan task
+    :param scan_task_id: The current scan task ID
     :param logging_options: The metadata for logging
     :param host_id: The id of the host we're inspecting or its ID
     :param host_name: The name of the host we're inspecting
@@ -362,8 +357,7 @@ def _request_host_details(  # noqa: PLR0913
         the response & url for host_fields request, and the
         response & url for the host_subs request.
     """
-    if isinstance(scan_task, int):
-        scan_task = ScanTask.objects.get(id=scan_task)
+    scan_task = ScanTask.objects.get(id=scan_task_id)
     unique_name = f"{host_name}_{host_id}"
     host_fields_json = {}
     host_subscriptions_json = {}
@@ -465,16 +459,15 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     HOSTS_URL: str
     SATELLITE_API_VERSION: int
 
-    def prepare_hosts(self, hosts: Iterable[dict], ids_only=False):
+    def prepare_hosts(self, hosts: Iterable[dict]):
         """Prepare each host with necessary information.
 
         :param hosts: an iterable of dicts that each contain information about one host
-        :param ids_only: bool to determine inclusion of ids or whole ScanTask objects
         :return: A list of tuples that contain information about each host.
         """
         host_params = [
             (
-                self.inspect_scan_task.id if ids_only else self.inspect_scan_task,
+                self.inspect_scan_task.id,
                 self._prepare_host_logging_options(),
                 host.get(ID),
                 host.get(NAME),
