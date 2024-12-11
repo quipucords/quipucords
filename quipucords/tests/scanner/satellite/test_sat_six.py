@@ -278,7 +278,7 @@ class TestSatelliteSixV1:
         )
         expected = [
             (
-                self.scan_task,
+                self.scan_task.id,
                 {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.sequence_number,
@@ -321,7 +321,7 @@ class TestSatelliteSixV1:
             url = construct_url(url=host_field_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
             result = request_host_details(
-                self.scan_task,
+                self.scan_task.id,
                 {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
@@ -671,7 +671,7 @@ class TestSatelliteSixV2:
             url = construct_url(url=host_field_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
             result = request_host_details(
-                self.scan_task,
+                self.scan_task.id,
                 {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
@@ -777,7 +777,7 @@ class TestSatelliteSixV2:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
             result = request_host_details(
-                self.scan_task,
+                self.scan_task.id,
                 {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
@@ -808,7 +808,7 @@ class TestSatelliteSixV2:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=404, text="error message")
             result = request_host_details(
-                self.scan_task,
+                self.scan_task.id,
                 {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
@@ -842,7 +842,7 @@ class TestSatelliteSixV2:
             }
             mocker.get(url, status_code=400, json=err_msg)
             result = request_host_details(
-                self.scan_task,
+                self.scan_task.id,
                 {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
