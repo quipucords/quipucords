@@ -1,5 +1,6 @@
 """Celery tasks for running scans."""
 
+import functools
 import logging
 
 import celery
@@ -69,7 +70,74 @@ def get_task_runner_class(source_type, scan_type) -> type[ScanTaskRunner]:
     return getattr(get_scanner(source_type), runner_class_name)
 
 
+def set_scan_task_failure_on_exception(func):
+    """
+    Set the ScanTask's FAILURE status when handling unexpected exceptions.
+
+    This decorator assumes `scan_task_id` will be the second argument or a keyword
+    argument of the function being wrapped.
+
+    Todo: Maybe merge/consolidate this with set_scan_job_failure_on_exception?
+    If we merge these two decorators, we probably need a clever way to determine
+    whether the relevant object to "fail" is a ScanJob or a ScanTask.
+    """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        scan_task_id = args[1] if len(args) > 1 else kwargs.get("scan_task_id", None)
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:  # noqa: BLE001
+            logger.exception(
+                f"Unexpected exception in {func.__name__} "
+                f"with scan_task_id={scan_task_id}: {e}"
+            )
+            try:
+                scan_task = ScanTask.objects.get(id=scan_task_id)
+                scan_task.status_fail(
+                    f"Unexpected failure in {func.__name__}. Check logs for details."
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.exception(f"ScanTask({scan_task_id}).status_fail failed: {e}")
+
+    return wrapper
+
+
+def set_scan_job_failure_on_exception(func):
+    """
+    Set the ScanJob's FAILURE status when handling unexpected exceptions.
+
+    This decorator assumes `scan_job_id` will be the second argument or a keyword
+    argument of the function being wrapped.
+
+    Todo: Maybe merge/consolidate this with set_scan_task_failure_on_exception?
+    If we merge these two decorators, we probably need a clever way to determine
+    whether the relevant object to "fail" is a ScanJob or a ScanTask.
+    """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        scan_job_id = args[1] if len(args) > 1 else kwargs.get("scan_job_id", None)
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:  # noqa: BLE001
+            logger.exception(
+                f"Unexpected exception in {func.__name__} "
+                f"with scan_job_id={scan_job_id}: {e}"
+            )
+            try:
+                scan_task = ScanJob.objects.get(id=scan_job_id)
+                scan_task.status_fail(
+                    f"Unexpected failure in {func.__name__}. Check logs for details."
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.exception(f"ScanJob({scan_job_id}).status_fail failed: {e}")
+
+    return wrapper
+
+
 @celery.shared_task(bind=True)
+@set_scan_task_failure_on_exception
 def celery_run_task_runner(
     self: celery.Task, scan_task_id: int, source_type: str, scan_type: str
 ) -> tuple[bool, int, str]:
@@ -104,6 +172,7 @@ def _celery_run_task_runner(
 
 
 @celery.shared_task(bind=True)
+@set_scan_task_failure_on_exception
 def fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
     """Wrap _fingerprint to call it as an async Celery task."""
     return _fingerprint(self, scan_task_id)
@@ -151,6 +220,7 @@ def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
 
 
 @celery.shared_task(bind=True)
+@set_scan_job_failure_on_exception
 def finalize_scan(self: celery.Task, scan_job_id: int):
     """Wrap _finalize_scan to call it as an async Celery task."""
     return _finalize_scan(self, scan_job_id)
