@@ -17,6 +17,7 @@ from api.models import InspectResult, ScanTask
 from scanner.satellite import utils
 from scanner.satellite.api import SatelliteError, SatelliteInterface
 from scanner.satellite.utils import raw_facts_template
+from scanner.tasks import set_scan_task_failure_on_exception
 
 logger = logging.getLogger(__name__)
 
@@ -293,6 +294,7 @@ def host_subscriptions(response):
 
 
 @celery.shared_task(name="request_host_details_sat_six")
+@set_scan_task_failure_on_exception
 def request_host_details(  # noqa: PLR0913
     scan_task_id: int,
     logging_options,
@@ -302,36 +304,16 @@ def request_host_details(  # noqa: PLR0913
     subs_url,
     request_options,
 ):
-    """
-    Wrap _request_host_details to call it as an async Celery task.
-
-    Also wrap the call with try-except to handle any unexpected exceptions
-    and update the task's status to "failed" if any exception was raised.
-    """
-    try:
-        return _request_host_details(
-            scan_task_id,
-            logging_options,
-            host_id,
-            host_name,
-            fields_url,
-            subs_url,
-            request_options,
-        )
-    except Exception:  # noqa: BLE001
-        logger.exception(
-            "Unexpected exception in request_host_details (ScanTask {scan_task_id})"
-        )
-
-    try:
-        scan_task = ScanTask.objects.get(id=scan_task_id)
-        scan_task.status_fail(
-            "Unexpected exception in request_host_details (ScanTask {scan_task_id})"
-        )
-    except Exception:  # noqa: BLE001
-        logger.exception(
-            "Failed to record request_host_details failure (ScanTask {scan_task_id})"
-        )
+    """Wrap _request_host_details to call it as an async Celery task."""
+    return _request_host_details(
+        scan_task_id,
+        logging_options,
+        host_id,
+        host_name,
+        fields_url,
+        subs_url,
+        request_options,
+    )
 
 
 def _request_host_details(  # noqa: PLR0913
