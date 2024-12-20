@@ -15,7 +15,7 @@ def test_finalize_scan_completed_if_all_tasks_are_completed():
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     ScanTaskFactory(status=ScanTask.COMPLETED, job=scan_job)
     ScanTaskFactory(status=ScanTask.COMPLETED, job=scan_job)
-    tasks.finalize_scan.delay(scan_job.id)
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id)
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.COMPLETED
 
@@ -34,7 +34,7 @@ def test_finalize_scan_completed_even_if_no_tasks_exist():
     test so we know if/when this behavior changes.
     """
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
-    tasks.finalize_scan.delay(scan_job.id)
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id)
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.COMPLETED
 
@@ -46,6 +46,6 @@ def test_finalize_scan_failed_if_any_task_failed():
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     ScanTaskFactory(status=ScanTask.FAILED, job=scan_job)
     ScanTaskFactory(status=ScanTask.COMPLETED, job=scan_job)
-    tasks.finalize_scan.delay(scan_job.id)
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id)
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.FAILED
