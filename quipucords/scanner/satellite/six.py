@@ -296,6 +296,7 @@ def host_subscriptions(response):
 @celery.shared_task(name="request_host_details_sat_six")
 @set_scan_task_failure_on_exception
 def request_host_details(  # noqa: PLR0913
+    *,
     scan_task_id: int,
     logging_options,
     host_id,
@@ -306,17 +307,18 @@ def request_host_details(  # noqa: PLR0913
 ):
     """Wrap _request_host_details to call it as an async Celery task."""
     return _request_host_details(
-        scan_task_id,
-        logging_options,
-        host_id,
-        host_name,
-        fields_url,
-        subs_url,
-        request_options,
+        scan_task_id=scan_task_id,
+        logging_options=logging_options,
+        host_id=host_id,
+        host_name=host_name,
+        fields_url=fields_url,
+        subs_url=subs_url,
+        request_options=request_options,
     )
 
 
 def _request_host_details(  # noqa: PLR0913
+    *,
     scan_task_id: int,
     logging_options,
     host_id,
@@ -441,22 +443,22 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     HOSTS_URL: str
     SATELLITE_API_VERSION: int
 
-    def prepare_hosts(self, hosts: Iterable[dict]):
+    def prepare_hosts(self, hosts: Iterable[dict]) -> Iterable[dict]:
         """Prepare each host with necessary information.
 
         :param hosts: an iterable of dicts that each contain information about one host
-        :return: A list of tuples that contain information about each host.
+        :return: A list of dicts that contain information about each host.
         """
         host_params = [
-            (
-                self.inspect_scan_task.id,
-                self._prepare_host_logging_options(),
-                host.get(ID),
-                host.get(NAME),
-                self.HOSTS_FIELDS_URL,
-                self.HOSTS_SUBS_URL,
-                self._prepare_host_request_options(),
-            )
+            {
+                "scan_task_id": self.inspect_scan_task.id,
+                "logging_options": self._prepare_host_logging_options(),
+                "host_id": host.get(ID),
+                "host_name": host.get(NAME),
+                "fields_url": self.HOSTS_FIELDS_URL,
+                "subs_url": self.HOSTS_SUBS_URL,
+                "request_options": self._prepare_host_request_options(),
+            }
             for host in hosts
         ]
 

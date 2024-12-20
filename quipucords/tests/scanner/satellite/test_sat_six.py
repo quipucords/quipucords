@@ -277,27 +277,27 @@ class TestSatelliteSixV1:
             "/v2/organizations/{org_id}/systems/{host_id}/subscriptions"
         )
         expected = [
-            (
-                self.scan_task.id,
-                {
+            {
+                "scan_task_id": self.scan_task.id,
+                "logging_options": {
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.sequence_number,
                     "scan_type": self.scan_task.scan_type,
                     "source_type": self.scan_task.source.source_type,
                     "source_name": self.scan_task.source.name,
                 },
-                1,
-                "sys",
-                url1,
-                url2,
-                {
+                "host_id": 1,
+                "host_name": "sys",
+                "fields_url": url1,
+                "subs_url": url2,
+                "request_options": {
                     "host": {"id": 1, "name": "sys"},
                     "port": "443",
                     "user": self.cred.username,
                     "password": self.cred.password,
                     "ssl_cert_verify": True,
                 },
-            )
+            }
         ]
         host = {"id": 1, "name": "sys"}
         chunk = [host]
@@ -321,19 +321,19 @@ class TestSatelliteSixV1:
             url = construct_url(url=host_field_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
             result = request_host_details(
-                self.scan_task.id,
-                {
+                scan_task_id=self.scan_task.id,
+                logging_options={
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
                     "scan_type": self.scan_task.scan_type,
                     "source_type": self.scan_task.source.source_type,
                     "source_name": self.scan_task.source.name,
                 },
-                1,
-                "sys",
-                url,
-                url,
-                {},
+                host_id=1,
+                host_name="sys",
+                fields_url=url,
+                subs_url=url,
+                request_options={},
             )
 
             expected = {
@@ -671,19 +671,19 @@ class TestSatelliteSixV2:
             url = construct_url(url=host_field_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
             result = request_host_details(
-                self.scan_task.id,
-                {
+                scan_task_id=self.scan_task.id,
+                logging_options={
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
                     "scan_type": self.scan_task.scan_type,
                     "source_type": self.scan_task.source.source_type,
                     "source_name": self.scan_task.source.name,
                 },
-                1,
-                "sys",
-                url,
-                url,
-                {},
+                host_id=1,
+                host_name="sys",
+                fields_url=url,
+                subs_url=url,
+                request_options={},
             )
             expected = {
                 "unique_name": "sys_1",
@@ -777,19 +777,19 @@ class TestSatelliteSixV2:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=500)
             result = request_host_details(
-                self.scan_task.id,
-                {
+                scan_task_id=self.scan_task.id,
+                logging_options={
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
                     "scan_type": self.scan_task.scan_type,
                     "source_type": self.scan_task.source.source_type,
                     "source_name": self.scan_task.source.name,
                 },
-                1,
-                "sys",
-                url,
-                url,
-                {},
+                host_id=1,
+                host_name="sys",
+                fields_url=url,
+                subs_url=url,
+                request_options={},
             )
 
             expected = {
@@ -808,19 +808,19 @@ class TestSatelliteSixV2:
             url = construct_url(url=sub_url, sat_host="1.2.3.4", host_id=1)
             mocker.get(url, status_code=404, text="error message")
             result = request_host_details(
-                self.scan_task.id,
-                {
+                scan_task_id=self.scan_task.id,
+                logging_options={
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
                     "scan_type": self.scan_task.scan_type,
                     "source_type": self.scan_task.source.source_type,
                     "source_name": self.scan_task.source.name,
                 },
-                1,
-                "sys",
-                url,
-                url,
-                {},
+                host_id=1,
+                host_name="sys",
+                fields_url=url,
+                subs_url=url,
+                request_options={},
             )
 
             process_results(self.api, [result], 1)
@@ -842,19 +842,19 @@ class TestSatelliteSixV2:
             }
             mocker.get(url, status_code=400, json=err_msg)
             result = request_host_details(
-                self.scan_task.id,
-                {
+                scan_task_id=self.scan_task.id,
+                logging_options={
                     "job_id": self.scan_job.id,
                     "task_sequence_number": self.scan_task.id,
                     "scan_type": self.scan_task.scan_type,
                     "source_type": self.scan_task.source.source_type,
                     "source_name": self.scan_task.source.name,
                 },
-                1,
-                "sys",
-                url,
-                url,
-                {},
+                host_id=1,
+                host_name="sys",
+                fields_url=url,
+                subs_url=url,
+                request_options={},
             )
 
         process_results(self.api, [result], 1)
