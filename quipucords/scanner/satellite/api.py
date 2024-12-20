@@ -174,7 +174,7 @@ class SatelliteInterface(ABC):
         # https://github.com/quipucords/quipucords/pull/2364#discussion_r1229832809
         results = (
             celery.group(
-                request_host_details.s(*host_params)
+                request_host_details.s(**host_params)
                 for host_params in all_prepared_hosts
             )
             .apply_async()
@@ -192,7 +192,7 @@ class SatelliteInterface(ABC):
         }
 
     @abstractmethod
-    def prepare_hosts(self, hosts: Iterable[dict]) -> Iterable[tuple]:
+    def prepare_hosts(self, hosts: Iterable[dict]) -> Iterable[dict]:
         """Prepare each host with necessary information."""
 
     @abstractmethod

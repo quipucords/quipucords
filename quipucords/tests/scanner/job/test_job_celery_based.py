@@ -9,7 +9,7 @@ carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
 
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 from django.test import override_settings
@@ -203,11 +203,12 @@ def test_run_celery_based_job_runner_only_connect(
     scan_task = connect_scan_job.tasks.first()
     source_type = scan_task.source.source_type
     mock__celery_run_task_runner.assert_called_once()
-    assert mock__celery_run_task_runner.call_args[0][1:] == (
-        scan_task.id,
-        source_type,
-        ScanTask.SCAN_TYPE_CONNECT,
-    )
+    assert mock__celery_run_task_runner.call_args.kwargs == {
+        "scan_task_id": scan_task.id,
+        "source_type": source_type,
+        "scan_type": ScanTask.SCAN_TYPE_CONNECT,
+        "task_instance": ANY,
+    }
     mock__fingerprint.assert_not_called()
     mock__finalize_scan.assert_called_once()
 

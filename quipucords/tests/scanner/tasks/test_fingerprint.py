@@ -31,7 +31,9 @@ def test_fingerprint_happy_path_details_report_already_exists(mocker):
         "scanner.tasks.create_report_for_scan_job"
     )
 
-    success, scan_task_id, status = tasks.fingerprint.delay(scan_task.id).get()
+    success, scan_task_id, status = tasks.fingerprint.delay(
+        scan_task_id=scan_task.id
+    ).get()
     scan_job.refresh_from_db()
     report.refresh_from_db()
 
@@ -64,7 +66,9 @@ def test_fingerprint_happy_path_creates_details_report(mocker):
     )
     mock_fingerprint_runner_class = mocker.patch.object(tasks, "FingerprintTaskRunner")
 
-    success, scan_task_id, status = tasks.fingerprint.delay(scan_task.id).get()
+    success, scan_task_id, status = tasks.fingerprint.delay(
+        scan_task_id=scan_task.id
+    ).get()
     scan_job.refresh_from_db()
     report.refresh_from_db()
 
@@ -92,7 +96,9 @@ def test_fingerprint_fails_when_create_details_report_fails(mocker):
     mock_run_task_runner = mocker.patch("scanner.tasks.run_task_runner")
     mock_fingerprint_runner_class = mocker.patch.object(tasks, "FingerprintTaskRunner")
 
-    success, scan_task_id, status = tasks.fingerprint.delay(scan_task.id).get()
+    success, scan_task_id, status = tasks.fingerprint.delay(
+        scan_task_id=scan_task.id
+    ).get()
     scan_job.refresh_from_db()
 
     assert not success

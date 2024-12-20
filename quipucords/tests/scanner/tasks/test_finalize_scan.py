@@ -22,7 +22,7 @@ def test_finalize_scan_none_failed():
         ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.COMPLETED)
     )
 
-    tasks.finalize_scan.delay(scan_job.id).get()
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id).get()
 
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.COMPLETED
@@ -42,7 +42,7 @@ def test_finalize_scan_some_failed(caplog):
         ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.COMPLETED)
     )
 
-    tasks.finalize_scan.delay(scan_job.id).get()
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id).get()
 
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.FAILED

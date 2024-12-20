@@ -12,9 +12,10 @@ from tests.factories import ScanTaskFactory
 
 
 def fake_six_request_host_details(  # noqa: PLR0913
-    scan_task,
+    *,
+    scan_task_id,
     logging_options,
-    host,
+    host_id,
     host_name,
     fields_url,
     subs_url,
@@ -24,19 +25,28 @@ def fake_six_request_host_details(  # noqa: PLR0913
 
     This function's signature must match six._request_host_details's signature.
     """
-    # Note that `host` is normally a dict with keys other than "name",
-    # but we can simplify and assume "name" since we are mocking/patching calls.
     return {
-        "unique_name": f"{host['name']}-unique_name",
-        "system_inspection_result": f"{host['name']}-system_inspection_result",
-        "host_fields_response": f"{host['name']}-host_fields_response",
-        "host_subscriptions_response": f"{host['name']}-host_subscriptions_response",
+        "unique_name": f"{host_id}-unique_name",
+        "system_inspection_result": f"{host_id}-system_inspection_result",
+        "host_fields_response": f"{host_id}-host_fields_response",
+        "host_subscriptions_response": f"{host_id}-host_subscriptions_response",
     }
 
 
-def fake_prepare_hosts(hosts, *args, **kwargs):
+def fake_prepare_hosts(hosts, *args, **kwargs) -> list[dict]:
     """Prepare a minimally-populated object to mimic SatelliteSix.prepare_hosts."""
-    return [(None, None, name, None, None, None, {}) for name in hosts]
+    return [
+        {
+            "scan_task_id": None,
+            "logging_options": None,
+            "host_id": host["id"],
+            "host_name": host["name"],
+            "fields_url": None,
+            "subs_url": None,
+            "request_options": {},
+        }
+        for host in hosts
+    ]
 
 
 @pytest.fixture
@@ -91,12 +101,24 @@ def test__prepare_and_process_hosts_using_celery(
     inspect_scan_task = inspect_scan_job.tasks.first()
     satellite = six.SatelliteSixV2(inspect_scan_job, inspect_scan_task)
 
-    hosts = [{"name": "host_a"}, {"name": "host_b"}, {"name": "host_c"}]
+    hosts = [
+        {"name": "host_a", "id": 1},
+        {"name": "host_b", "id": 2},
+        {"name": "host_c", "id": 3},
+    ]
 
     expected_prepare_host_return = [
         # All these Nones are just to fill out the function signature.
         # Since we are patching, we do not need to supply real values for everything.
-        fake_six_request_host_details(None, None, host, None, None, None, None)
+        fake_six_request_host_details(
+            scan_task_id=None,
+            logging_options=None,
+            host_id=host["id"],
+            host_name=host["name"],
+            fields_url=None,
+            subs_url=None,
+            request_options=None,
+        )
         for host in hosts
     ]
 

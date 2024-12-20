@@ -190,7 +190,9 @@ class CeleryBasedScanJobRunner:
             scan_task_id = scan_task.id
             source_type = scan_task.source.source_type
             scan_type = scan_task.scan_type
-            signature = celery_run_task_runner.si(scan_task_id, source_type, scan_type)
+            signature = celery_run_task_runner.si(
+                scan_task_id=scan_task_id, source_type=source_type, scan_type=scan_type
+            )
             celery_signatures_by_source[source_id].append(signature)
 
         # Start a chain with a group that contains n chains, one chain for each Source.
@@ -208,8 +210,8 @@ class CeleryBasedScanJobRunner:
             scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
             status__in=[ScanTask.RUNNING, ScanTask.PENDING],
         ).first():
-            task_chain |= fingerprint.si(scan_task.id)
+            task_chain |= fingerprint.si(scan_task_id=scan_task.id)
 
         # Add a final post-processing task to the chain.
-        task_chain |= finalize_scan.si(self.scan_job.id)
+        task_chain |= finalize_scan.si(scan_job_id=self.scan_job.id)
         return task_chain.apply_async()
