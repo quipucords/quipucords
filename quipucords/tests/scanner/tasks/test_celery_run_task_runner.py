@@ -33,7 +33,7 @@ def test_celery_run_task_runner(mocker, runner_return_value, expect_success):
     )
 
     success, scan_task_id, task_status = tasks.celery_run_task_runner.delay(
-        scan_task.id, source_type, scan_type
+        scan_task_id=scan_task.id, source_type=source_type, scan_type=scan_type
     ).get()
 
     mock_get_task_runner_class.assert_called_once_with(source_type, scan_type)
@@ -57,7 +57,7 @@ def test_celery_run_task_runner_canceled(mocker):
     mocker.patch.object(tasks, "scan_job_is_canceled", return_value=True)
 
     success, scan_task_id, task_status = tasks.celery_run_task_runner.delay(
-        scan_task.id, source_type, scan_type
+        scan_task_id=scan_task.id, source_type=source_type, scan_type=scan_type
     ).get()
 
     mock_get_task_runner_class.assert_called_once_with(source_type, scan_type)

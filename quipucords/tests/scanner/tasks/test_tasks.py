@@ -26,7 +26,7 @@ def test_finalize_scan_completed_if_all_tasks_are_completed():
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     ScanTaskFactory(status=ScanTask.COMPLETED, job=scan_job)
     ScanTaskFactory(status=ScanTask.COMPLETED, job=scan_job)
-    tasks.finalize_scan.delay(scan_job.id)
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id)
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.COMPLETED
 
@@ -45,7 +45,7 @@ def test_finalize_scan_completed_even_if_no_tasks_exist():
     test so we know if/when this behavior changes.
     """
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
-    tasks.finalize_scan.delay(scan_job.id)
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id)
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.COMPLETED
 
@@ -57,16 +57,17 @@ def test_finalize_scan_failed_if_any_task_failed():
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     ScanTaskFactory(status=ScanTask.FAILED, job=scan_job)
     ScanTaskFactory(status=ScanTask.COMPLETED, job=scan_job)
-    tasks.finalize_scan.delay(scan_job.id)
+    tasks.finalize_scan.delay(scan_job_id=scan_job.id)
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.FAILED
 
 
 @pytest.mark.django_db
-def test_set_scan_task_failure_on_exception_happy_path(scan_task, faker, caplog):
+def test_set_scan_task_failure_on_exception_happy_path(faker, caplog):
     """Test set_scan_task_failure_on_exception as a function decorator."""
     caplog.set_level(logging.WARNING)
     expected_return_value = faker.pyint()
+    scan_task = ScanTaskFactory(status=ScanTask.PENDING)
 
     @tasks.set_scan_task_failure_on_exception
     def decorated_function(scan_task_id):
@@ -101,6 +102,48 @@ def test_set_scan_job_failure_on_exception_happy_path(faker, caplog):
     assert not caplog.messages
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.COMPLETED
+
+
+@pytest.mark.django_db
+def test_set_scan_task_failure_on_exception_missing_kwarg_warning(
+    faker, mocker, caplog
+):
+    """Test set_scan_task_failure_on_exception warns on missing kwarg."""
+    caplog.set_level(logging.WARNING)
+    mock_inner_function = mocker.Mock()
+    expected_return_value = faker.pyint()
+
+    @tasks.set_scan_task_failure_on_exception
+    def decorated_function():
+        mock_inner_function()
+        return expected_return_value
+
+    assert decorated_function() == expected_return_value
+    mock_inner_function.assert_called_once()
+    assert (
+        "Missing scan_task_id kwarg for decorated function decorated_function"
+        in caplog.messages[0]
+    )
+
+
+@pytest.mark.django_db
+def test_set_scan_job_failure_on_exception_missing_kwarg_warning(faker, mocker, caplog):
+    """Test set_scan_job_failure_on_exception warns on missing kwarg."""
+    caplog.set_level(logging.WARNING)
+    mock_inner_function = mocker.Mock()
+    expected_return_value = faker.pyint()
+
+    @tasks.set_scan_job_failure_on_exception
+    def decorated_function():
+        mock_inner_function()
+        return expected_return_value
+
+    assert decorated_function() == expected_return_value
+    mock_inner_function.assert_called_once()
+    assert (
+        "Missing scan_job_id kwarg for decorated function decorated_function"
+        in caplog.messages[0]
+    )
 
 
 @pytest.mark.django_db

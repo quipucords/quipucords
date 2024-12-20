@@ -74,8 +74,8 @@ def set_scan_task_failure_on_exception(func):
     """
     Set the ScanTask's FAILURE status when handling unexpected exceptions.
 
-    This decorator assumes `scan_task_id` will be the second argument or a keyword
-    argument of the function being wrapped.
+    This decorator assumes `scan_task_id` will be a keyword argument of the
+    function being wrapped.
 
     Todo: Maybe merge/consolidate this with set_scan_job_failure_on_exception?
     If we merge these two decorators, we probably need a clever way to determine
@@ -84,7 +84,10 @@ def set_scan_task_failure_on_exception(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        scan_task_id = args[1] if len(args) > 1 else kwargs.get("scan_task_id", None)
+        if not (scan_task_id := kwargs.get("scan_task_id", None)):
+            logger.warning(
+                f"Missing scan_task_id kwarg for decorated function {func.__name__}"
+            )
         try:
             return func(*args, **kwargs)
         except Exception as e:  # noqa: BLE001
@@ -107,8 +110,8 @@ def set_scan_job_failure_on_exception(func):
     """
     Set the ScanJob's FAILURE status when handling unexpected exceptions.
 
-    This decorator assumes `scan_job_id` will be the second argument or a keyword
-    argument of the function being wrapped.
+    This decorator assumes `scan_job_id` will be a keyword argument of the
+    function being wrapped.
 
     Todo: Maybe merge/consolidate this with set_scan_task_failure_on_exception?
     If we merge these two decorators, we probably need a clever way to determine
@@ -117,7 +120,10 @@ def set_scan_job_failure_on_exception(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        scan_job_id = args[1] if len(args) > 1 else kwargs.get("scan_job_id", None)
+        if not (scan_job_id := kwargs.get("scan_job_id", None)):
+            logger.warning(
+                f"Missing scan_job_id kwarg for decorated function {func.__name__}"
+            )
         try:
             return func(*args, **kwargs)
         except Exception as e:  # noqa: BLE001
@@ -139,14 +145,19 @@ def set_scan_job_failure_on_exception(func):
 @celery.shared_task(bind=True)
 @set_scan_task_failure_on_exception
 def celery_run_task_runner(
-    self: celery.Task, scan_task_id: int, source_type: str, scan_type: str
+    self: celery.Task, *, scan_task_id: int, source_type: str, scan_type: str
 ) -> tuple[bool, int, str]:
     """Wrap _celery_run_task_runner to call it as an async Celery task."""
-    return _celery_run_task_runner(self, scan_task_id, source_type, scan_type)
+    return _celery_run_task_runner(
+        task_instance=self,
+        scan_task_id=scan_task_id,
+        source_type=source_type,
+        scan_type=scan_type,
+    )
 
 
 def _celery_run_task_runner(
-    task_instance: celery.Task, scan_task_id: int, source_type: str, scan_type: str
+    *, task_instance: celery.Task, scan_task_id: int, source_type: str, scan_type: str
 ) -> tuple[bool, int, str]:
     """Run a single ScanTaskRunner.
 
@@ -173,12 +184,12 @@ def _celery_run_task_runner(
 
 @celery.shared_task(bind=True)
 @set_scan_task_failure_on_exception
-def fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
+def fingerprint(self: celery.Task, *, scan_task_id: int) -> tuple[bool, int, str]:
     """Wrap _fingerprint to call it as an async Celery task."""
-    return _fingerprint(self, scan_task_id)
+    return _fingerprint(self=self, scan_task_id=scan_task_id)
 
 
-def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
+def _fingerprint(self: celery.Task, *, scan_task_id: int) -> tuple[bool, int, str]:
     """Create and assign the Report, and update the related ScanJob status.
 
     This task should run once after all inspection tasks have collected and stored
@@ -221,9 +232,9 @@ def _fingerprint(self: celery.Task, scan_task_id: int) -> tuple[bool, int, str]:
 
 @celery.shared_task(bind=True)
 @set_scan_job_failure_on_exception
-def finalize_scan(self: celery.Task, scan_job_id: int):
+def finalize_scan(self: celery.Task, *, scan_job_id: int):
     """Wrap _finalize_scan to call it as an async Celery task."""
-    return _finalize_scan(self, scan_job_id)
+    return _finalize_scan(self=self, scan_job_id=scan_job_id)
 
 
 def _finalize_scan(self: celery.Task, scan_job_id: int):
