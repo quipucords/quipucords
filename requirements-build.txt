@@ -16,6 +16,7 @@ docutils==0.21.2 ; python_version >= "3.12" and python_version < "4.0"
     # via python-daemon
 flit-core==3.10.1
     # via
+    #   click
     #   django-filter
     #   docutils
     #   idna
@@ -37,7 +38,7 @@ hatch-vcs==0.4.0
     #   jsonschema-specifications
     #   referencing
     #   urllib3
-hatchling==1.26.3
+hatchling==1.27.0
     # via
     #   attrs
     #   colorama
@@ -48,10 +49,14 @@ hatchling==1.26.3
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.7.8
+maturin==1.8.1
     # via
     #   cryptography
     #   rpds-py
+mypy==1.14.0
+    # via charset-normalizer
+mypy-extensions==1.0.0
+    # via mypy
 packaging==24.2 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   hatchling
@@ -76,18 +81,25 @@ setuptools-rust==1.10.2
     #   maturin
 setuptools-scm==8.1.0
     # via
+    #   charset-normalizer
     #   django-axes
     #   hatch-vcs
     #   setuptools-rust
     #   setuptools-scm
-setuptools-scm==7.1.0
-    # via python-dateutil
 setuptools-scm==8.0.4
     # via ansible-runner
+setuptools-scm==7.1.0
+    # via python-dateutil
 trove-classifiers==2024.10.21.16
     # via hatchling
+types-psutil==6.1.0.20241221
+    # via mypy
+types-setuptools==75.6.0.20241223
+    # via mypy
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "4.0"
-    # via setuptools-scm
+    # via
+    #   mypy
+    #   setuptools-scm
 wheel==0.45.1
     # via
     #   bcrypt
@@ -104,20 +116,16 @@ wheel==0.45.1
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
-    # via
-    #   ansible-runner
-    #   setuptools-scm
 setuptools==75.6.0 ; python_version >= "3.12" and python_version < "4.0"
     # via
     #   ansible
     #   ansible-core
+    #   bcrypt
     #   cachetools
     #   calver
     #   cffi
     #   click-repl
     #   django
-    #   django-axes
     #   django-cors-headers
     #   gunicorn
     #   markupsafe
@@ -127,7 +135,10 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "4.0"
     #   python-daemon
     #   pyyaml
     #   resolvelib
-    #   setuptools-rust
     #   setuptools-scm
     #   tzdata
     #   whitenoise
+setuptools==69.0.2 ; python_version >= "3.12" and python_version < "4.0"
+    # via
+    #   ansible-runner
+    #   setuptools-scm
