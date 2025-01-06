@@ -142,7 +142,7 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   setuptools-scm
     #   tzdata
     #   whitenoise
-setuptools==69.0.2 ; python_version >= "3.12" and python_version < "3.14"
+setuptools==70.0.0 ; python_version >= "3.12" and python_version < "3.14"
     # via
     #   ansible-runner
     #   setuptools-scm
