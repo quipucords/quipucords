@@ -29,6 +29,7 @@ jobs:
 
       - name: Check dependencies
         run: |
+          poetry self add poetry-plugin-export
           make lock-main-requirements
           make check-requirements
   test:
