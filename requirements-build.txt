@@ -44,6 +44,7 @@ hatchling==1.27.0
     #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
+    #   jsonschema
     #   jsonschema-specifications
     #   referencing
     #   sqlparse
@@ -117,14 +118,24 @@ wheel==0.45.1
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
+setuptools==69.0.2 ; python_version >= "3.12" and python_version < "3.14"
+    # via
+    #   ansible-runner
+    #   setuptools-scm
+setuptools==75.7.0 ; python_version >= "3.12" and python_version < "3.14"
+    # via
+    #   python-dateutil
+    #   setuptools-scm
 setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     # via
     #   ansible
     #   ansible-core
     #   cachetools
+    #   calver
     #   cffi
     #   charset-normalizer
     #   click-repl
+    #   cryptography
     #   django
     #   django-axes
     #   django-cors-headers
@@ -136,20 +147,10 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   psycopg-c
     #   pyasn1
     #   pyasn1-modules
-    #   pynacl
     #   python-daemon
     #   pyyaml
     #   resolvelib
     #   setuptools-rust
     #   setuptools-scm
-    #   trove-classifiers
     #   tzdata
     #   whitenoise
-setuptools==69.0.2 ; python_version >= "3.12" and python_version < "3.14"
-    # via
-    #   ansible-runner
-    #   setuptools-scm
-setuptools==75.7.0 ; python_version >= "3.12" and python_version < "3.14"
-    # via
-    #   python-dateutil
-    #   setuptools-scm
