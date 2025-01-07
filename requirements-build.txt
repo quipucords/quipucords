@@ -44,6 +44,7 @@ hatchling==1.27.0
     #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
+    #   jsonschema
     #   jsonschema-specifications
     #   referencing
     #   sqlparse
@@ -130,9 +131,9 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   ansible
     #   ansible-core
     #   cachetools
+    #   calver
     #   cffi
     #   click-repl
-    #   cryptography
     #   django
     #   django-axes
     #   django-cors-headers
@@ -145,11 +146,10 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   psycopg-c
     #   pyasn1
     #   pyasn1-modules
+    #   pynacl
     #   python-daemon
     #   pyyaml
     #   resolvelib
-    #   setuptools-rust
     #   setuptools-scm
-    #   trove-classifiers
     #   tzdata
     #   whitenoise
