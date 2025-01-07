@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install poetry
-        run: pipx install "poetry<2"
+        run: pipx install "poetry>=2.0"
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install poetry
-        run: pipx install "poetry<2"
+        run: pipx install "poetry>=2.0"
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0

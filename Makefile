@@ -60,7 +60,7 @@ clean-db:
 lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
-	poetry lock --no-update
+	poetry lock
 	poetry export -f requirements.txt --only=main --without-hashes -o requirements.txt
 
 lock-build-requirements:

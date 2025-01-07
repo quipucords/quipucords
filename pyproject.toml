@@ -1,17 +1,15 @@
-[tool.poetry]
+[project]
 name = "quipucords"
 version = "1.11.1"
 description = "Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment."
-authors = ["Quipucords Dev Team <quipucords@redhat.com>"]
+authors = [{"name" = "Quipucords Dev Team", "email" = "quipucords@redhat.com"}]
 readme = "README.md"
 license = "GPLv3"
-
-[project]
 requires-python = ">=3.12,<3.14"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core<2"]
+requires = ["poetry-core>=2.0"]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.14"
@@ -47,10 +45,6 @@ drf-spectacular = {extras = ["sidecar"], version = "^0.28.0"}
 # This has been fixed in python-daemon source but not yet released.
 # We should remove this pinned version as soon as >3.0.1 is available.
 python-daemon = "<3.0.0"
-# Temporarily block updating poetry-core while we don't adapt 
-# pyproject.toml (and other relevant configuration); once this is done,
-# remove this dependency as poetry-core is an indirect dependency.
-poetry-core = "<2.0.0"
 # =====================================================================
 
 [tool.poetry.group.dev.dependencies]
@@ -103,7 +97,7 @@ lint.select = [
 ]
 lint.ignore = [
     "D107",
-    "D203", 
+    "D203",
     "D403",
 ]
 src = ["quipucords"]
@@ -125,7 +119,7 @@ known-first-party = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "D104"]
 "**test**" = [
-    "PLC1901", 
+    "PLC1901",
     "PLR2004",
     "S101",
     "S105",
