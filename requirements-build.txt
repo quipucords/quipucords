@@ -6,13 +6,13 @@
 #
 calver==2022.6.26
     # via trove-classifiers
-cffi==1.17.1 ; python_version >= "3.12" and python_version < "3.14"
+cffi==1.17.1
     # via
     #   cryptography
     #   pynacl
 cython==3.0.11
     # via pyyaml
-docutils==0.21.2 ; python_version >= "3.12" and python_version < "3.14"
+docutils==0.21.2
     # via python-daemon
 flit-core==3.10.1
     # via
@@ -44,10 +44,8 @@ hatchling==1.27.0
     #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
-    #   jsonschema-specifications
-    #   referencing
+    #   jsonschema
     #   sqlparse
-    #   urllib3
 maturin==1.8.1
     # via
     #   cryptography
@@ -56,7 +54,7 @@ mypy==1.14.0
     # via charset-normalizer
 mypy-extensions==1.0.0
     # via mypy
-packaging==24.2 ; python_version >= "3.12" and python_version < "3.14"
+packaging==24.2
     # via
     #   hatchling
     #   setuptools-scm
@@ -66,11 +64,11 @@ pbr==6.1.0
     # via lockfile
 pluggy==1.5.0
     # via hatchling
-poetry-core==1.9.1
+poetry-core==2.0.0
     # via
     #   click-didyoumean
     #   rsa
-pycparser==2.22 ; python_version >= "3.12" and python_version < "3.14"
+pycparser==2.22
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
@@ -78,6 +76,10 @@ setuptools-rust==1.10.2
     # via
     #   bcrypt
     #   maturin
+setuptools-scm==7.1.0
+    # via python-dateutil
+setuptools-scm==8.0.4
+    # via ansible-runner
 setuptools-scm==8.1.0
     # via
     #   charset-normalizer
@@ -86,17 +88,13 @@ setuptools-scm==8.1.0
     #   pluggy
     #   setuptools-rust
     #   setuptools-scm
-setuptools-scm==8.0.4
-    # via ansible-runner
-setuptools-scm==7.1.0
-    # via python-dateutil
-trove-classifiers==2024.10.21.16
+trove-classifiers==2025.1.6.15
     # via hatchling
 types-psutil==6.1.0.20241221
     # via mypy
 types-setuptools==75.6.0.20241223
     # via mypy
-typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "3.14"
+typing-extensions==4.12.2
     # via
     #   mypy
     #   setuptools-scm
@@ -116,25 +114,30 @@ wheel==0.45.1
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
+setuptools==75.6.0
+    # via ansible-core
+setuptools==69.0.2
+    # via
+    #   ansible-runner
+    #   setuptools-scm
+setuptools==75.7.0
     # via
     #   ansible
-    #   ansible-core
-    #   bcrypt
     #   cachetools
+    #   calver
     #   cffi
+    #   charset-normalizer
     #   click-repl
+    #   cryptography
     #   django
     #   django-axes
     #   django-cors-headers
     #   gunicorn
     #   markupsafe
-    #   maturin
     #   pathspec
     #   pluggy
     #   pyasn1
     #   pyasn1-modules
-    #   pynacl
     #   python-daemon
     #   python-dateutil
     #   pyyaml
@@ -142,7 +145,3 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   setuptools-scm
     #   tzdata
     #   whitenoise
-setuptools==69.0.2 ; python_version >= "3.12" and python_version < "3.14"
-    # via
-    #   ansible-runner
-    #   setuptools-scm
