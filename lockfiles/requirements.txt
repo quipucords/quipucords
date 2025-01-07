@@ -1,79 +1,83 @@
-amqp==5.3.1 ; python_version >= "3.12" and python_version < "3.14"
-ansible-core==2.17.9 ; python_version >= "3.12" and python_version < "3.14"
-ansible-runner==2.4.0 ; python_version >= "3.12" and python_version < "3.14"
-ansible==10.7.0 ; python_version >= "3.12" and python_version < "3.14"
-asgiref==3.8.1 ; python_version >= "3.12" and python_version < "3.14"
-attrs==25.1.0 ; python_version >= "3.12" and python_version < "3.14"
-bcrypt==4.2.1 ; python_version >= "3.12" and python_version < "3.14"
-billiard==4.2.1 ; python_version >= "3.12" and python_version < "3.14"
-cachetools==5.5.2 ; python_version >= "3.12" and python_version < "3.14"
-celery[redis]==5.3.6 ; python_version >= "3.12" and python_version < "3.14"
-certifi==2025.1.31 ; python_version >= "3.12" and python_version < "3.14"
-cffi==1.17.1 ; python_version >= "3.12" and python_version < "3.14"
-charset-normalizer==3.4.1 ; python_version >= "3.12" and python_version < "3.14"
-click-didyoumean==0.3.1 ; python_version >= "3.12" and python_version < "3.14"
-click-plugins==1.1.1 ; python_version >= "3.12" and python_version < "3.14"
-click-repl==0.3.0 ; python_version >= "3.12" and python_version < "3.14"
-click==8.1.8 ; python_version >= "3.12" and python_version < "3.14"
-colorama==0.4.6 ; python_version >= "3.12" and python_version < "3.14" and platform_system == "Windows"
-cryptography==44.0.1 ; python_version >= "3.12" and python_version < "3.14"
-django-axes==6.5.2 ; python_version >= "3.12" and python_version < "3.14"
-django-cors-headers==4.7.0 ; python_version >= "3.12" and python_version < "3.14"
-django-environ==0.10.0 ; python_version >= "3.12" and python_version < "3.14"
-django-filter==25.1 ; python_version >= "3.12" and python_version < "3.14"
-django==4.2.19 ; python_version >= "3.12" and python_version < "3.14"
-djangorestframework==3.15.2 ; python_version >= "3.12" and python_version < "3.14"
-drf-spectacular-sidecar==2025.2.1 ; python_version >= "3.12" and python_version < "3.14"
-drf-spectacular[sidecar]==0.28.0 ; python_version >= "3.12" and python_version < "3.14"
-durationpy==0.9 ; python_version >= "3.12" and python_version < "3.14"
-fqdn==1.5.1 ; python_version >= "3.12" and python_version < "3.14"
-google-auth==2.38.0 ; python_version >= "3.12" and python_version < "3.14"
-gunicorn==22.0.0 ; python_version >= "3.12" and python_version < "3.14"
-idna==3.10 ; python_version >= "3.12" and python_version < "3.14"
-inflection==0.5.1 ; python_version >= "3.12" and python_version < "3.14"
-jinja2==3.1.5 ; python_version >= "3.12" and python_version < "3.14"
-jmespath==1.0.1 ; python_version >= "3.12" and python_version < "3.14"
-jsonschema-specifications==2024.10.1 ; python_version >= "3.12" and python_version < "3.14"
-jsonschema==4.23.0 ; python_version >= "3.12" and python_version < "3.14"
-kombu==5.4.2 ; python_version >= "3.12" and python_version < "3.14"
-kubernetes==32.0.1 ; python_version >= "3.12" and python_version < "3.14"
-lockfile==0.12.2 ; python_version >= "3.12" and python_version < "3.14"
-markupsafe==3.0.2 ; python_version >= "3.12" and python_version < "3.14"
-more-itertools==9.1.0 ; python_version >= "3.12" and python_version < "3.14"
-oauthlib==3.2.2 ; python_version >= "3.12" and python_version < "3.14"
-openshift==0.13.2 ; python_version >= "3.12" and python_version < "3.14"
-packaging==24.2 ; python_version >= "3.12" and python_version < "3.14"
-paramiko==3.5.1 ; python_version >= "3.12" and python_version < "3.14"
-pexpect==4.9.0 ; python_version >= "3.12" and python_version < "3.14"
-poetry-core==1.9.1 ; python_version >= "3.12" and python_version < "3.14"
-prompt-toolkit==3.0.50 ; python_version >= "3.12" and python_version < "3.14"
-psycopg-c==3.2.5 ; implementation_name != "pypy" and python_version >= "3.12" and python_version < "3.14"
-psycopg[c]==3.2.5 ; python_version >= "3.12" and python_version < "3.14"
-ptyprocess==0.7.0 ; python_version >= "3.12" and python_version < "3.14"
-pyasn1-modules==0.4.1 ; python_version >= "3.12" and python_version < "3.14"
-pyasn1==0.6.1 ; python_version >= "3.12" and python_version < "3.14"
-pycparser==2.22 ; python_version >= "3.12" and python_version < "3.14"
-pydantic==1.10.21 ; python_version >= "3.12" and python_version < "3.14"
-pynacl==1.5.0 ; python_version >= "3.12" and python_version < "3.14"
-python-daemon==3.1.2 ; python_version >= "3.12" and python_version < "3.14"
-python-dateutil==2.9.0.post0 ; python_version >= "3.12" and python_version < "3.14"
-python-string-utils==1.0.0 ; python_version >= "3.12" and python_version < "3.14"
-pyvmomi==8.0.3.0.1 ; python_version >= "3.12" and python_version < "3.14"
-pyyaml==6.0.2 ; python_version >= "3.12" and python_version < "3.14"
-redis==5.2.1 ; python_version >= "3.12" and python_version < "3.14"
-referencing==0.36.2 ; python_version >= "3.12" and python_version < "3.14"
-requests-oauthlib==2.0.0 ; python_version >= "3.12" and python_version < "3.14"
-requests==2.32.3 ; python_version >= "3.12" and python_version < "3.14"
-resolvelib==1.0.1 ; python_version >= "3.12" and python_version < "3.14"
-rpds-py==0.23.1 ; python_version >= "3.12" and python_version < "3.14"
-rsa==4.9 ; python_version >= "3.12" and python_version < "3.14"
-six==1.17.0 ; python_version >= "3.12" and python_version < "3.14"
-sqlparse==0.5.3 ; python_version >= "3.12" and python_version < "3.14"
-typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "3.14"
-tzdata==2025.1 ; python_version >= "3.12" and python_version < "3.14"
-uritemplate==4.1.1 ; python_version >= "3.12" and python_version < "3.14"
-urllib3==2.3.0 ; python_version >= "3.12" and python_version < "3.14"
-vine==5.1.0 ; python_version >= "3.12" and python_version < "3.14"
-wcwidth==0.2.13 ; python_version >= "3.12" and python_version < "3.14"
-websocket-client==1.8.0 ; python_version >= "3.12" and python_version < "3.14"
-whitenoise==6.9.0 ; python_version >= "3.12" and python_version < "3.14"
+# This file was autogenerated by uv via the following command:
+#    uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
+amqp==5.3.1
+ansible==10.7.0
+ansible-core==2.17.7
+ansible-runner==2.4.0
+asgiref==3.8.1
+attrs==24.3.0
+bcrypt==4.2.1
+billiard==4.2.1
+cachetools==5.5.0
+celery==5.3.6
+certifi==2024.12.14
+cffi==1.17.1
+charset-normalizer==3.4.1
+click==8.1.8
+click-didyoumean==0.3.1
+click-plugins==1.1.1
+click-repl==0.3.0
+colorama==0.4.6 ; sys_platform == 'win32'
+cryptography==44.0.0
+django==4.2.17
+django-axes==6.5.2
+django-cors-headers==4.6.0
+django-environ==0.11.2
+django-filter==24.3
+djangorestframework==3.15.2
+docutils==0.21.2
+drf-spectacular==0.28.0
+drf-spectacular-sidecar==2024.12.1
+durationpy==0.9
+fqdn==1.5.1
+google-auth==2.37.0
+gunicorn==22.0.0
+idna==3.10
+inflection==0.5.1
+jinja2==3.1.5
+jmespath==1.0.1
+jsonschema==4.23.0
+jsonschema-specifications==2024.10.1
+kombu==5.4.2
+kubernetes==31.0.0
+lockfile==0.12.2
+markupsafe==3.0.2
+more-itertools==9.1.0
+oauthlib==3.2.2
+openshift==0.13.2
+packaging==24.2
+paramiko==3.5.0
+pexpect==4.9.0
+prompt-toolkit==3.0.48
+psycopg==3.2.6
+psycopg-c==3.2.6 ; implementation_name != 'pypy'
+ptyprocess==0.7.0
+pyasn1==0.6.1
+pyasn1-modules==0.4.1
+pycparser==2.22
+pydantic==1.10.19
+pynacl==1.5.0
+python-daemon==2.3.2
+python-dateutil==2.9.0.post0
+python-string-utils==1.0.0
+pyvmomi==8.0.3.0.1
+pyyaml==6.0.2
+redis==5.2.1
+referencing==0.35.1
+requests==2.32.3
+requests-oauthlib==2.0.0
+resolvelib==1.0.1
+rpds-py==0.22.3
+rsa==4.9
+setuptools==75.7.0
+six==1.17.0
+sqlparse==0.5.3
+typing-extensions==4.12.2
+tzdata==2024.2
+uritemplate==4.1.1
+urllib3==1.26.20 ; platform_python_implementation == 'PyPy'
+urllib3==2.3.0 ; platform_python_implementation != 'PyPy'
+vine==5.1.0
+wcwidth==0.2.13
+websocket-client==1.8.0
+whitenoise==6.8.2

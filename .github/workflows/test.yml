@@ -17,15 +17,13 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
 
-      - name: Install poetry
-        run: pipx install "poetry<2"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-          cache-dependency-path: "poetry.lock"
 
       - name: Check dependencies
         run: |
@@ -61,18 +59,16 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
 
-      - name: Install poetry
-        run: pipx install "poetry<2"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-          cache-dependency-path: "poetry.lock"
 
       - name: Install Python dependencies
-        run: poetry install
+        run: uv sync
 
       - name: Install additional tools
         run: sudo apt-get install -y shellcheck

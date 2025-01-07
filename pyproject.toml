@@ -1,75 +1,71 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools >= 70"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["quipucords"]
+
+[project]
 name = "quipucords"
 version = "1.13.0"
 description = "Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment."
-authors = ["Quipucords Dev Team <quipucords@redhat.com>"]
+requires-python = "<3.14,>=3.12"
+authors = [
+    {name = "Quipucords Dev Team", email = "quipucords@redhat.com"},
+]
+# license should preferably follow identifiers listed at the SPDX Open Source License Registry.
+# https://spdx.org/licenses/
+license = {text = "GPL-3.0-or-later"}
 readme = "README.md"
-license = "GPLv3"
+dependencies = [
+    "ansible-runner<3.0.0,>=2.4.0",
+    "ansible<11,>=10",
+    "celery[redis]<6,>=5.3.0",
+    "django-axes<7.0.0,>=6.3.0",
+    "django-cors-headers<5.0.0,>=4.3.1",
+    "django-environ<1.0.0,>=0.10.0",
+    "django-filter>=22.1",
+    "django<5.0.0,>=4.2.17",
+    "djangorestframework<4.0,>=3.14",
+    "drf-spectacular[sidecar]<1.0.0,>=0.28.0",
+    "fqdn<2.0.0,>=1.5.1",
+    "gunicorn<23.0.0,>=22.0.0",
+    "jmespath<2.0.0,>=1.0.1",
+    "more-itertools<10.0.0,>=9.1.0",
+    "openshift>=0.13",
+    "paramiko<4.0.0,>=3.0.0",
+    "pexpect<5.0.0,>=4.8.0",
+    "psycopg[c]<4.0.0,>=3.2.3",
+    "pydantic<2.0.0,>=1.10.4",
+    "pyvmomi<9.0.0,>=8.0.2",
+    "pyyaml<7.0.0,>=6.0.1",
+    "requests<3.0.0,>=2.32.2",
+    "whitenoise<7.0.0,>=6.3.0",
+]
 
-[project]
-requires-python = ">=3.12,<3.14"
+[dependency-groups]
+dev = [
+    "coverage<8.0.0,>=7.0.5",
+    "django-extensions<4.0.0,>=3.2.1",
+    "factory-boy<4.0.0,>=3.2.1",
+    "httpretty<2.0.0,>=1.1.4",
+    "ipython<9.0.0,>=8.10.0",
+    "notebook<7.0.0,>=6.5.3",
+    "pybuild-deps<1.0.0,>=0.4.1",
+    "pytest-cov<4",
+    "pytest-django<5.0.0,>=4.5.2",
+    "pytest-lazy-fixture<1.0.0,>=0.6.3",
+    "pytest-mock<4.0.0,>=3.10.0",
+    "pytest-profiling<2.0.0,>=1.7.0",
+    "pytest-recording<1.0.0,>=0.12.1",
+    "pytest-timeout<3.0.0,>=2.1.0",
+    "pytest-xdist<4.0.0,>=3.1.0",
+    "pytest<8.0.0,>=7.2.1",
+    "requests-mock<2.0.0,>=1.10.0",
+    "ruff<1,>=0",
+    "watchdog[watchmedo]<3.0.0,>=2.2.1",
+]
 
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core<2"]
-
-[tool.poetry.dependencies]
-python = ">=3.12,<3.14"
-ansible = ">=10,<11"  # important note: ansible>=10 (ansible-core>=2.17) dropped support for python 2.7 on remote hosts
-django = "^4.2.17"
-django-filter = ">=22.1"
-djangorestframework = "^3.14"
-jmespath = "^1.0.1"
-paramiko = "^3.0.0"
-pexpect = "^4.8.0"
-pyvmomi = "^8.0.2"
-pyyaml = "^6.0.1"
-requests = "^2.32.2"
-whitenoise = "^6.3.0"
-psycopg = {extras = ["c"], version = "^3.2.3"}
-ansible-runner = "^2.4.0"
-gunicorn = "^22.0.0"
-openshift = ">=0.13"
-pydantic = "^1.10.4"
-django-environ = "^0.10.0"
-celery = {extras = ["redis"], version = "^5.3.0"}
-more-itertools = "^9.1.0"
-django-cors-headers = "^4.3.1"
-django-axes = "^6.3.0"
-drf-spectacular = {extras = ["sidecar"], version = "^0.28.0"}
-
-# ======================== DIRTY HACKS  ===========================
-# Temporarily block updating poetry-core while we don't adapt 
-# pyproject.toml (and other relevant configuration); once this is done,
-# remove this dependency as poetry-core is an indirect dependency.
-poetry-core = "<2.0.0"
-# =====================================================================
-fqdn = "^1.5.1"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
-coverage = "^7.0.5"
-factory-boy = "^3.2.1"
-pytest-cov = "<4"
-pytest-django = "^4.5.2"
-pytest-lazy-fixture = "^0.6.3"
-pytest-mock = "^3.10.0"
-pytest-recording = "^0.12.1"
-pytest-timeout = "^2.1.0"
-pytest-xdist = "^3.1.0"
-requests-mock = "^1.10.0"
-httpretty = "^1.1.4"
-pip-tools = "^7.3.0"
-watchdog = {extras = ["watchmedo"], version = "^2.2.1"}
-pybuild-deps = "^0.4.1"
-pytest-profiling = "^1.7.0"
-ipython = "^8.10.0"
-django-extensions = "^3.2.1"
-notebook = "^6.5.3"
-ruff = "^0"
-# FixMe: we had to hold back celery version because 5.4.0 introduced
-# some regressions in our unit tests
-celery = {extras = ["pytest"], version = ">=5.3,<5.4"}
 
 [tool.pytest.ini_options]
 pythonpath = "quipucords/"
@@ -133,3 +129,6 @@ max-complexity = 10
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
+
+[tool.uv]
+package = true
