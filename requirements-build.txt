@@ -44,7 +44,6 @@ hatchling==1.27.0
     #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
-    #   jsonschema
     #   jsonschema-specifications
     #   referencing
     #   sqlparse
@@ -122,10 +121,6 @@ setuptools==69.0.2 ; python_version >= "3.12" and python_version < "3.14"
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.7.0 ; python_version >= "3.12" and python_version < "3.14"
-    # via
-    #   python-dateutil
-    #   setuptools-scm
 setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     # via
     #   ansible
@@ -146,10 +141,13 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   psycopg-c
     #   pyasn1
     #   pyasn1-modules
-    #   pynacl
     #   python-daemon
     #   pyyaml
     #   resolvelib
     #   setuptools-scm
     #   tzdata
     #   whitenoise
+setuptools==75.7.0 ; python_version >= "3.12" and python_version < "3.14"
+    # via
+    #   python-dateutil
+    #   setuptools-scm
