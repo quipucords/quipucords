@@ -1,51 +1,55 @@
-[tool.poetry]
+[project]
 name = "quipucords"
 version = "1.11.1"
 description = "Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment."
-authors = ["Quipucords Dev Team <quipucords@redhat.com>"]
+authors = [
+    {name = "Quipucords Dev Team", email = "quipucords@redhat.com"},
+]
 readme = "README.md"
-license = "GPLv3"
-
-[project]
-requires-python = ">=3.12,<3.14"
+license = {text = "GPLv3"}
+requires-python = "<3.14,>=3.12"
+dependencies = [
+    "ansible<11,>=10",
+    "django<5.0.0,>=4.2.17",
+    "django-filter>=22.1",
+    "djangorestframework<4.0,>=3.14",
+    "jmespath<2.0.0,>=1.0.1",
+    "paramiko<4.0.0,>=3.0.0",
+    "pexpect<5.0.0,>=4.8.0",
+    "pyvmomi<9.0.0,>=8.0.2",
+    "pyyaml<7.0.0,>=6.0.1",
+    "requests<3.0.0,>=2.32.2",
+    "whitenoise<7.0.0,>=6.3.0",
+    "psycopg2<3",
+    "ansible-runner<3.0.0,>=2.4.0",
+    "gunicorn<23.0.0,>=22.0.0",
+    "openshift>=0.13",
+    "pydantic<2.0.0,>=1.10.4",
+    "django-environ<1.0.0,>=0.10.0",
+    "celery[redis]<6.0.0,>=5.3.0",
+    "more-itertools<10.0.0,>=9.1.0",
+    "django-cors-headers<5.0.0,>=4.3.1",
+    "django-axes<7.0.0,>=6.3.0",
+    "drf-spectacular[sidecar]<1.0.0,>=0.28.0",
+    # Temporary hack to handle: https://pagure.io/python-daemon/issue/92
+    # quipucords does not directly use python-daemon, but our requirement
+    # ansible-runner does, and ansible-runner simply declares '*' version.
+    # Pinning python-daemon<3.0.0 works around this downstream build error:
+    #   ModuleNotFoundError: No module named 'setuptools.extern'
+    # This has been fixed in python-daemon source but not yet released.
+    # We should remove this pinned version as soon as >3.0.1 is available.
+    "python-daemon<3.0.0",
+]
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0"]
 
-[tool.poetry.dependencies]
-python = ">=3.12,<3.14"
-ansible = ">=10,<11"  # important note: ansible>=10 (ansible-core>=2.17) dropped support for python 2.7 on remote hosts
-django = "^4.2.17"
-django-filter = ">=22.1"
-djangorestframework = "^3.14"
-jmespath = "^1.0.1"
-paramiko = "^3.0.0"
-pexpect = "^4.8.0"
-pyvmomi = "^8.0.2"
-pyyaml = "^6.0.1"
-requests = "^2.32.2"
-whitenoise = "^6.3.0"
-psycopg2 = "<3"
-ansible-runner = "^2.4.0"
-gunicorn = "^22.0.0"
-openshift = ">=0.13"
-pydantic = "^1.10.4"
-django-environ = "^0.10.0"
-celery = {extras = ["redis"], version = "^5.3.0"}
-more-itertools = "^9.1.0"
-django-cors-headers = "^4.3.1"
-django-axes = "^6.3.0"
+[tool.poetry]
+requires-poetry = ">=2.0"
 
-# Temporary hack to handle: https://pagure.io/python-daemon/issue/92
-# quipucords does not directly use python-daemon, but our requirement
-# ansible-runner does, and ansible-runner simply declares '*' version.
-# Pinning python-daemon<3.0.0 works around this downstream build error:
-#   ModuleNotFoundError: No module named 'setuptools.extern'
-# This has been fixed in python-daemon source but not yet released.
-# We should remove this pinned version as soon as >3.0.1 is available.
-python-daemon = "<3.0.0"
-drf-spectacular = {extras = ["sidecar"], version = "^0.28.0"}
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
@@ -68,9 +72,6 @@ ipython = "^8.10.0"
 django-extensions = "^3.2.1"
 notebook = "^6.5.3"
 ruff = "^0"
-# FixMe: we had to hold back celery version because 5.4.0 introduced
-# some regressions in our unit tests
-celery = {extras = ["pytest"], version = ">=5.3,<5.4"}
 
 [tool.pytest.ini_options]
 pythonpath = "quipucords/"
