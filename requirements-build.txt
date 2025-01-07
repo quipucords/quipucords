@@ -44,7 +44,6 @@ hatchling==1.27.0
     #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
-    #   jsonschema
     #   jsonschema-specifications
     #   referencing
     #   sqlparse
@@ -141,6 +140,7 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   django-cors-headers
     #   gunicorn
     #   markupsafe
+    #   maturin
     #   pathspec
     #   pluggy
     #   psycopg
@@ -150,7 +150,6 @@ setuptools==75.6.0 ; python_version >= "3.12" and python_version < "3.14"
     #   python-daemon
     #   pyyaml
     #   resolvelib
-    #   setuptools-rust
     #   setuptools-scm
     #   tzdata
     #   whitenoise
