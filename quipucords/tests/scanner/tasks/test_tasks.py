@@ -105,11 +105,8 @@ def test_set_scan_job_failure_on_exception_happy_path(faker, caplog):
 
 
 @pytest.mark.django_db
-def test_set_scan_task_failure_on_exception_missing_kwarg_warning(
-    faker, mocker, caplog
-):
-    """Test set_scan_task_failure_on_exception warns on missing kwarg."""
-    caplog.set_level(logging.WARNING)
+def test_set_scan_task_failure_on_exception_missing_kwarg(faker, mocker):
+    """Test set_scan_task_failure_on_exception raises exception on missing kwarg."""
     mock_inner_function = mocker.Mock()
     expected_return_value = faker.pyint()
 
@@ -118,18 +115,14 @@ def test_set_scan_task_failure_on_exception_missing_kwarg_warning(
         mock_inner_function()
         return expected_return_value
 
-    assert decorated_function() == expected_return_value
-    mock_inner_function.assert_called_once()
-    assert (
-        "Missing scan_task_id kwarg for decorated function decorated_function"
-        in caplog.messages[0]
-    )
+    with pytest.raises(NotImplementedError):
+        decorated_function()
+    mock_inner_function.assert_not_called()
 
 
 @pytest.mark.django_db
-def test_set_scan_job_failure_on_exception_missing_kwarg_warning(faker, mocker, caplog):
-    """Test set_scan_job_failure_on_exception warns on missing kwarg."""
-    caplog.set_level(logging.WARNING)
+def test_set_scan_job_failure_on_exception_missing_kwarg(faker, mocker):
+    """Test set_scan_job_failure_on_exception raises exception on missing kwarg."""
     mock_inner_function = mocker.Mock()
     expected_return_value = faker.pyint()
 
@@ -138,12 +131,9 @@ def test_set_scan_job_failure_on_exception_missing_kwarg_warning(faker, mocker, 
         mock_inner_function()
         return expected_return_value
 
-    assert decorated_function() == expected_return_value
-    mock_inner_function.assert_called_once()
-    assert (
-        "Missing scan_job_id kwarg for decorated function decorated_function"
-        in caplog.messages[0]
-    )
+    with pytest.raises(NotImplementedError):
+        decorated_function()
+    mock_inner_function.assert_not_called()
 
 
 @pytest.mark.django_db
