@@ -37,7 +37,7 @@ def fake_prepare_hosts(hosts, *args, **kwargs) -> list[dict]:
     """Prepare a minimally-populated object to mimic SatelliteSix.prepare_hosts."""
     return [
         {
-            "scan_task_id": None,
+            "scan_task_id": number,
             "logging_options": None,
             "host_id": host["id"],
             "host_name": host["name"],
@@ -45,7 +45,10 @@ def fake_prepare_hosts(hosts, *args, **kwargs) -> list[dict]:
             "subs_url": None,
             "request_options": {},
         }
-        for host in hosts
+        for number, host in enumerate(hosts, start=42)
+        # Any number will do for the scan_task_id, and
+        # this starts at an arbitrary number (42) in case
+        # we need to debug a test and recognize some ids.
     ]
 
 
@@ -85,7 +88,11 @@ def inspect_scan_job():
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @pytest.mark.django_db(transaction=True)
 def test__prepare_and_process_hosts_using_celery(
-    mock_prepare_hosts, mock__request_host_details, celery_worker, inspect_scan_job
+    mock_prepare_hosts,
+    mock__request_host_details,
+    celery_worker,
+    inspect_scan_job,
+    faker,
 ):
     """Test SatelliteInterface._prepare_and_process_hosts Celery task interaction.
 
@@ -111,7 +118,7 @@ def test__prepare_and_process_hosts_using_celery(
         # All these Nones are just to fill out the function signature.
         # Since we are patching, we do not need to supply real values for everything.
         fake_six_request_host_details(
-            scan_task_id=None,
+            scan_task_id=faker.pyint(),
             logging_options=None,
             host_id=host["id"],
             host_name=host["name"],

@@ -85,7 +85,7 @@ def set_scan_task_failure_on_exception(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if not (scan_task_id := kwargs.get("scan_task_id", None)):
-            logger.warning(
+            raise NotImplementedError(
                 f"Missing scan_task_id kwarg for decorated function {func.__name__}"
             )
         try:
@@ -121,7 +121,7 @@ def set_scan_job_failure_on_exception(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if not (scan_job_id := kwargs.get("scan_job_id", None)):
-            logger.warning(
+            raise NotImplementedError(
                 f"Missing scan_job_id kwarg for decorated function {func.__name__}"
             )
         try:
