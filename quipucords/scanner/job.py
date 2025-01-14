@@ -92,6 +92,8 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
         # Note: It should be very unlikely for this exception handling to be triggered.
         # runner.run should already handle *most* exception types, and only a bug or
         # truly unforeseen exception type should end up in here.
+        # Some networking errors (host timeout, bad cert) may end up here.
+        # TODO Evaluate removing this `except` in favor of higher level error handling.
         failed_task = runner.scan_task
         context_message = (
             "Unexpected failure occurred. See context below.\n"
@@ -118,6 +120,7 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
         runner.scan_task.status_complete(status_message)
     elif task_status == ScanTask.FAILED:
         runner.scan_task.status_fail(status_message)
+        runner.scan_job.status_fail(status_message)
     else:
         error_message = (
             f"ScanTask {runner.scan_task.sequence_number:d} failed."
