@@ -14,6 +14,7 @@ from api.models import Credential, Scan, ScanTask, Source
 from api.serializers import SourceSerializer
 from api.source.view import format_source
 from constants import DataSources
+from tests.factories import SourceFactory
 from tests.scanner.test_util import create_scan_job
 
 ACCEPT_JSON_HEADER = {"Accept": "application/json"}
@@ -3324,3 +3325,13 @@ class TestSourceV2:
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
         assert response.ok
+
+
+@pytest.mark.django_db
+def test_source_model_str():
+    """Test the __str__ method."""
+    source = SourceFactory()
+    source_str = f"{source}"
+    assert f"id={source.id}" in source_str
+    assert f"source_type={source.source_type}" in source_str
+    assert f"name={source.name}" in source_str

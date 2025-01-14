@@ -73,6 +73,18 @@ class ScanTask(BaseModel):
         TaskConnectionResult, null=True, on_delete=models.SET_NULL
     )
 
+    def __str__(self):
+        """Get a rudimentary string representation."""
+        return (
+            f"{self.__class__.__name__}("
+            f"id={self.id}, "
+            f"scan_type={self.scan_type}, "
+            f"status={self.status}, "
+            f"job_id={self.job_id}, "
+            f"sequence_number={self.sequence_number}"
+            ")"
+        )
+
     @cached_property
     def scan_job_task_count(self):
         """

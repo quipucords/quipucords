@@ -62,6 +62,16 @@ class ScanJob(BaseModel):
 
     objects = ScanJobQuerySet.as_manager()
 
+    def __str__(self):
+        """Get a rudimentary string representation."""
+        return (
+            f"{self.__class__.__name__}("
+            f"id={self.id}, "
+            f"scan_type={self.scan_type}, "
+            f"status={self.status}"
+            ")"
+        )
+
     class Meta:
         """Metadata for model."""
 
