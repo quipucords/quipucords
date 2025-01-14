@@ -2008,3 +2008,13 @@ def test_delete_inspect_results_bound_to_other_scanjobs(
     scanjob.delete_inspect_results()
     assert InspectResult.objects.filter(inspect_group__tasks__job=scanjob).count() == 0
     assert not InspectResult.objects.filter(id=inspect_res_id).exists()
+
+
+@pytest.mark.django_db
+def test_scanjob_model_str():
+    """Test the __str__ method."""
+    scan_job = ScanJobFactory()
+    scan_job_str = f"{scan_job}"
+    assert f"id={scan_job.id}" in scan_job_str
+    assert f"scan_type={scan_job.scan_type}" in scan_job_str
+    assert f"status={scan_job.status}" in scan_job_str
