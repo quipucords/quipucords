@@ -4,19 +4,21 @@
 # https://url.corp.redhat.com/prefetch-rpm
 
 packages:
+  # build dependencies (will be removed after quipucords is built)
   - crypto-policies-scripts
   - gcc
+  - libpq-devel
+  - python3.12-devel
+  # actual dependencies
   - git
   - glibc-langpack-en
   - jq
   - libpq
-  - libpq-devel
   - make
   - nmap-ncat
   - openssh-clients
   - procps-ng
   - python3.12
-  - python3.12-devel
   - python3.12-pip
   - sshpass
   - tar
