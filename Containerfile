@@ -1,5 +1,11 @@
 FROM registry.access.redhat.com/ubi9/ubi-minimal
 
+ARG K8S_DESCRIPTION="Quipucords"
+ARG K8S_DISPLAY_NAME="quipucords-server"
+ARG K8S_NAME="quipucords/quipucords-server"
+ARG OCP_TAGS="quipucords"
+ARG REDHAT_COMPONENT="quipucords-container"
+
 ENV DJANGO_DB_PATH=/var/data/
 ENV DJANGO_DEBUG=False
 ENV DJANGO_LOG_FILE=/var/log/app.log
@@ -72,3 +78,11 @@ RUN git config --file /.gitconfig --add safe.directory /app
 
 EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
+
+LABEL com.redhat.component=${REDHAT_COMPONENT} \
+    description=${K8S_DESCRIPTION} \
+    io.k8s.description=${K8S_DESCRIPTION} \
+    io.k8s.display-name=${K8S_DISPLAY_NAME} \
+    io.openshift.tags=${OCP_TAGS} \
+    name=${K8S_NAME} \
+    summary=${K8S_DESCRIPTION}
