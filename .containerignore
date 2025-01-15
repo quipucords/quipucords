@@ -28,3 +28,4 @@ quipucords/testdata
 quipucords/tests
 var
 venv
+dependencies/ubi.repo
