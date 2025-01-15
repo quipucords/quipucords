@@ -134,3 +134,6 @@ var/
 
 # test profiling results
 prof/
+
+# transitive files
+dependencies/ubi.repo

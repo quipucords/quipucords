@@ -36,7 +36,7 @@ spec:
     value: "true"
   # TODO: once proper cachi2-rust support is implemented, remove "allow_binary"
   - name: prefetch-input
-    value: '{"type": "pip", "allow_binary": "true"}'
+    value: '[{"type": "pip", "allow_binary": "true"}, {"type": "rpm", "path": "dependencies"}]'
   - name: build-args-file
     value: ".tekton/downstream-build-arguments.conf"
   pipelineSpec:
@@ -200,6 +200,10 @@ spec:
       params:
       - name: input
         value: $(params.prefetch-input)
+      # enabling dev-package-managers is required for rpm support
+      # TODO: disable once it rpm support becomes official
+      - name: dev-package-managers
+        value: "true"
       runAfter:
       - clone-repository
       taskRef:
