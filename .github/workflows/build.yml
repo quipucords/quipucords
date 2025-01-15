@@ -39,7 +39,7 @@ jobs:
           archs: amd64
           tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }} ${{ contains( env.RELEASE_TAG , '.' ) && env.RELEASE_TAG || '' }}
           containerfiles: |
-            ./Dockerfile
+            ./Containerfile
           labels: |
             ${{ env.EXPIRATION_LABEL }}
             quipucords.backend.git_sha=${{ github.sha }}
