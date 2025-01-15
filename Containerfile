@@ -5,6 +5,7 @@ ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
 ARG OCP_TAGS="quipucords"
 ARG REDHAT_COMPONENT="quipucords-server-container"
+ARG QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL="quipucords"
 
 ENV DJANGO_DB_PATH=/var/data/
 ENV DJANGO_DEBUG=False
@@ -21,6 +22,7 @@ ENV QUIPUCORDS_DATA_DIR=/var/data
 ENV QUIPUCORDS_LOG_DIRECTORY=/var/log
 ENV QUIPUCORDS_LOG_LEVEL=INFO
 ENV QUIPUCORDS_PRODUCTION=True
+ENV QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL=${QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL}
 
 COPY scripts/dnf /usr/local/bin/dnf
 ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.12-devel"
