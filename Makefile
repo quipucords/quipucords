@@ -11,15 +11,7 @@ TEST_TIMEOUT ?= 15
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT) --durations=10
 QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY ?= 10
 QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
-
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
-QUIPUCORDS_UI_PATH ?= ../quipucords-ui
-QUIPUCORDS_UI_RELEASE ?= latest
-GITHUB_API_TOKEN_SECRET ?= /run/secrets/gh_api_token
-GITHUB_API_TOKEN := $(file < $(GITHUB_API_TOKEN_SECRET))
-ifneq ($(GITHUB_API_TOKEN),)
-	GITHUB_API_AUTH = -H "Authorization: Bearer $(GITHUB_API_TOKEN)"
-endif
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
@@ -153,10 +145,7 @@ serve:
 	DJANGO_DEBUG=1 $(PYTHON) quipucords/manage.py runserver
 
 build-container:
-	podman build \
-		--build-arg UI_RELEASE=$(QUIPUCORDS_UI_RELEASE) \
-		--secret=id=gh_api_token,src=.github_api_token \
-		-t $(QUIPUCORDS_CONTAINER_TAG) .
+	podman build -t $(QUIPUCORDS_CONTAINER_TAG) .
 
 check-db-migrations-needed:
 	$(PYTHON) quipucords/manage.py makemigrations --check
