@@ -13,7 +13,6 @@
 .venv
 .vscode
 Containerfile
-Dockerfile.scan-target
 client
 dev-requirements.in
 dev-requirements.txt
