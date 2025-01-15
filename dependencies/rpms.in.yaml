@@ -1,0 +1,31 @@
+# for more configuration options, see upstream rpm-lockfile-prototype docs 
+# and the relevant konflux documentation section
+# https://github.com/konflux-ci/rpm-lockfile-prototype?tab=readme-ov-file#whats-the-input_file
+# https://url.corp.redhat.com/prefetch-rpm
+
+packages:
+  - crypto-policies-scripts
+  - gcc
+  - git
+  - glibc-langpack-en
+  - jq
+  - libpq
+  - libpq-devel
+  - make
+  - nmap-ncat
+  - openssh-clients
+  - procps-ng
+  - python3.12
+  - python3.12-devel
+  - python3.12-pip
+  - sshpass
+  - tar
+  - which
+
+contentOrigin:
+  # make lock-rpms automatically generates ubi.repo file
+  repofiles: ["./ubi.repo"]
+
+arches:
+  - aarch64
+  - x86_64
