@@ -54,6 +54,16 @@ class Source(BaseModel):
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
     )
 
+    def __str__(self):
+        """Get a rudimentary string representation."""
+        return (
+            f"{self.__class__.__name__}("
+            f"id={self.id}, "
+            f"source_type={self.source_type}, "
+            f"name={self.name}"
+            ")"
+        )
+
     @property
     def options(self):
         """Return the v1 compatible options attribute for the source object."""

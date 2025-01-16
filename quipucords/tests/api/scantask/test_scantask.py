@@ -285,3 +285,13 @@ def test_log_scan_message_problematic(scan_job, caplog, faker):
     assert len(caplog.messages) == 2
     assert "Missing source" in caplog.messages[0]
     assert message in caplog.messages[1]
+
+
+@pytest.mark.django_db
+def test_scantask_model_str():
+    """Test the __str__ method."""
+    scan_task = ScanTaskFactory()
+    scan_task_str = f"{scan_task}"
+    assert f"id={scan_task.id}" in scan_task_str
+    assert f"scan_type={scan_task.scan_type}" in scan_task_str
+    assert f"status={scan_task.status}" in scan_task_str
