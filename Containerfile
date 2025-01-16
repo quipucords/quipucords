@@ -60,11 +60,10 @@ RUN dnf remove ${BUILD_PACKAGES} -y && \
 COPY deploy  /deploy
 
 # Create log directories
-VOLUME /var/log
+RUN mkdir -p /var/log
 
 # Create /var/data
 RUN mkdir -p /var/data
-VOLUME /var/data
 
 # Copy server code
 COPY . .
@@ -81,6 +80,13 @@ RUN git config --file /.gitconfig --add safe.directory /app
 # konflux requires the application license at /licenses
 RUN mkdir -p /licenses
 COPY LICENSE /licenses/LICENSE
+
+# konflux requires a non-root user
+# let's follow software collection tradition and use uid 1001 & gid 0
+# https://github.com/sclorg/s2i-base-container/blob/master/core/Dockerfile#L72
+RUN useradd -u 1001 -r -g 0 -d /app -c "Quipucords user" quipucords && \
+    chown 1001:0 -R /app /licenses /deploy /var /opt/venv
+USER 1001
 
 EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
