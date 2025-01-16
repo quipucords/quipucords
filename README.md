@@ -169,3 +169,5 @@ See the [CONTRIBUTING](CONTRIBUTING.md) guide for information about contributing
 Copyright 2017-2024, Red Hat, Inc.
 
 quipucords is released under the [GNU Public License version 3](LICENSE).
+
+aaaa
