@@ -78,6 +78,10 @@ RUN make server-static
 # Allow git to run in /app
 RUN git config --file /.gitconfig --add safe.directory /app
 
+# konflux requires the application license at /licenses
+RUN mkdir -p /licenses
+COPY LICENSE /licenses/LICENSE
+
 EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
 
