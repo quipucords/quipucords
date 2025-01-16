@@ -78,11 +78,14 @@ RUN make server-static
 # Allow git to run in /app
 RUN git config --file /.gitconfig --add safe.directory /app
 
+# konflux requires the application license at /licenses
+RUN mkdir -p /licenses
+COPY LICENSE /licenses/LICENSE
 # konflux requires a non-root user
 # let's follow software collection tradition and use uid 1001
 # https://github.com/sclorg/s2i-base-container/blob/3598eab2/core/Dockerfile#L72
 RUN useradd -u 1001 -r -g 0 -d /app -c "Quipucords user" quipucords && \
-    chown 1001:0 -R /app /deploy /var /opt/venv
+    chown 1001:0 -R /app /deploy /var /opt/venv /licenses
 USER 1001
 
 EXPOSE 8000
