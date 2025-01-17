@@ -172,7 +172,7 @@ setup-rpm-lockfile:
 		--build-arg BASE_IMAGE=$(UBI_IMAGE) -
 
 lock-rpms: setup-rpm-lockfile update-ubi-repo
-	podman run -w /workdir --rm -v ${PWD}/lockfiles:/workdir $(RPM_LOCKFILE_IMAGE):latest \
+	podman run -w /workdir --rm -v ${PWD}/lockfiles:/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
 		--image $(UBI_MINIMAL_IMAGE) \
 		--outfile=/workdir/rpms.lock.yaml \
 		/workdir/rpms.in.yaml
