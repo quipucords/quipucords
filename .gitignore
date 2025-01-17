@@ -136,4 +136,4 @@ var/
 prof/
 
 # transitive files
-dependencies/ubi.repo
+lockfiles/ubi.repo
