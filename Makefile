@@ -58,17 +58,17 @@ lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
 	poetry lock --no-update
-	poetry export -f requirements.txt --only=main --without-hashes -o requirements.txt
+	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
-	poetry run pybuild-deps compile -o requirements-build.txt
+	poetry run pybuild-deps compile -o lockfiles/requirements-build.txt lockfiles/requirements.txt
 
 update-requirements:
 	poetry update --no-cache
 	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
 
 check-requirements:
-ifeq ($(shell git diff --exit-code requirements.txt >/dev/null 2>&1; echo $$?), 0)
+ifeq ($(shell git diff --exit-code lockfiles/requirements.txt >/dev/null 2>&1; echo $$?), 0)
 	@exit 0
 else
 	@echo "requirements.txt not in sync with poetry.lock. Run 'make lock-requirements' and commit the changes"
