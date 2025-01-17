@@ -51,7 +51,7 @@ RUN update-crypto-policies --set LEGACY
 RUN pip install --upgrade pip wheel
 
 WORKDIR /app
-COPY requirements.txt .
+COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 RUN dnf remove ${BUILD_PACKAGES} -y && \
     dnf clean all
