@@ -91,7 +91,7 @@ setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.0.4
     # via ansible-runner
-trove-classifiers==2025.1.7.14
+trove-classifiers==2025.1.15.22
     # via hatchling
 types-psutil==6.1.0.20241221
     # via mypy
