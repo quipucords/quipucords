@@ -53,7 +53,7 @@ maturin==1.8.1
     # via
     #   cryptography
     #   rpds-py
-mypy==1.14.0
+mypy==1.14.1
     # via charset-normalizer
 mypy-extensions==1.0.0
     # via mypy
