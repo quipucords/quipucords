@@ -39,7 +39,17 @@ def deployments(request, report_id=None):
             },
             status=status.HTTP_424_FAILED_DEPENDENCY,
         )
-    deployments_json = build_cached_json_report(deployments_report)
+
+    try:
+        deployments_json = build_cached_json_report(deployments_report)
+    except FileNotFoundError:
+        return Response(
+            {
+                "detail": f"Deployment report {deployments_report.report.id}"
+                " could not be created. See server logs."
+            },
+            status=status.HTTP_424_FAILED_DEPENDENCY,
+        )
     return Response(deployments_json)
 
 

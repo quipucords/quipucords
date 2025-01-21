@@ -1,6 +1,8 @@
 """Misc utils for quipucords."""
 
 import json
+import os
+from pathlib import Path
 
 
 def load_json_from_tarball(json_filename, tarball):
@@ -34,3 +36,17 @@ def sanitize_for_utf8_compatibility(value):
     if isinstance(value, tuple):
         return tuple(sanitize_for_utf8_compatibility(value) for value in value)
     return value
+
+
+def is_valid_cache_file(file_path: str | None) -> bool:
+    """Check if a file exists, has non-zero size, and is both readable and writable."""
+    if not file_path:
+        return False
+    path = Path(file_path).absolute()
+    return (
+        path.exists()
+        and path.is_file()
+        and path.stat().st_size > 0
+        and os.access(file_path, os.R_OK)
+        and os.access(file_path, os.W_OK)
+    )
