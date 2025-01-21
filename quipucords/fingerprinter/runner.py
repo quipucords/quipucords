@@ -134,7 +134,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
     def execute_task(self):
         """Execute fingerprint task."""
-        deployment_report = DeploymentsReport(report_version=create_report_version())
+        # If a DeploymentsReport already exists for this job/report, use that.
+        # One may already exist if we are simply rerunning the fingerprint task,
+        # but we need to clear any invalid cached file paths before proceeding.
+        if self.scan_job.report and self.scan_job.report.deployment_report:
+            deployment_report = self.scan_job.report.deployment_report
+            if not deployment_report.cached_fingerprints_file_exists:
+                deployment_report.cached_fingerprints_file_path = None
+            if not deployment_report.cached_csv_file_exists:
+                deployment_report.cached_csv_file_path = None
+        else:
+            deployment_report = DeploymentsReport()
+        deployment_report.report_version = create_report_version()
         deployment_report.save()
 
         self.scan_job.report.deployment_report = deployment_report
