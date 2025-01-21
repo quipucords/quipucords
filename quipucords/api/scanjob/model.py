@@ -379,6 +379,7 @@ class ScanJob(BaseModel):
             fingerprint_task.prerequisites.set(prerequisites)
 
             self.tasks.add(fingerprint_task)
+            return fingerprint_task
 
     def status_start(self):
         """Change status from PENDING to RUNNING.
