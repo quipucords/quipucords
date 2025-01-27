@@ -176,3 +176,9 @@ lock-rpms: setup-rpm-lockfile update-ubi-repo
 		--image $(UBI_MINIMAL_IMAGE) \
 		--outfile=/workdir/rpms.lock.yaml \
 		/workdir/rpms.in.yaml
+
+lock-baseimage:
+	podman pull $(UBI_MINIMAL_IMAGE)
+	$(eval ESCAPED_IMAGE=$(shell echo $(UBI_MINIMAL_IMAGE) | sed 's/\//\\\//g'))
+	$(eval UPDATED_SHA=$(shell skopeo inspect --raw "docker://$(UBI_MINIMAL_IMAGE)" | sha256sum | cut -d ' ' -f1))
+	sed -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
