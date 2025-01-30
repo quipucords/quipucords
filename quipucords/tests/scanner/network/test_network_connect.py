@@ -10,12 +10,11 @@ from django.forms import model_to_dict
 from api.connresult.model import SystemConnectionResult
 from api.models import Credential, Scan, ScanTask, Source
 from api.serializers import SourceSerializer
+from constants import GENERATED_SSH_KEYFILE
 from scanner.network import ConnectTaskRunner
 from scanner.network.connect import ConnectResultStore, _connect, construct_inventory
 from scanner.network.utils import (
     _construct_vars,
-    delete_ssh_keyfiles,
-    is_gen_ssh_keyfile,
 )
 from tests.factories import generate_openssh_pkey
 from tests.scanner.test_util import create_scan_job
@@ -229,36 +228,31 @@ class TestNetworkConnectTaskRunner:
             ssh_key=openssh_key,
         )
 
-    def test_construct_vars_key(self, cred_ssh):
+    def test_construct_vars_key(self, cred_ssh: Credential):
         """Test constructing ansible vars dictionary for ssh_key credentials."""
-        cred_ssh = model_to_dict(cred_ssh)
-        vars_dict = _construct_vars(22, cred_ssh)
-        expected = {
-            "ansible_ssh_private_key_file": Mock(),
-            "ansible_user": "username2",
-        }
-        assert set(expected).issubset(set(vars_dict))
-        Path(vars_dict["ansible_ssh_private_key_file"]).unlink()
+        cred_data = model_to_dict(cred_ssh)
+        with cred_ssh.generate_ssh_keyfile() as ssh_keyfile:
+            cred_data[GENERATED_SSH_KEYFILE] = ssh_keyfile
+            vars_dict = _construct_vars(22, cred_data)
+            expected = {
+                "ansible_ssh_private_key_file": ssh_keyfile,
+                "ansible_user": cred_ssh.username,
+            }
+            assert expected.items() <= vars_dict.items()
+            assert Path(ssh_keyfile).exists()
+        # ensure the key was destroyed outside of generate_ssh_keyfile scope
+        assert not Path(ssh_keyfile).exists()
 
-    def test_construct_vars_key_to_keyfile(self, cred_ssh):
-        """Test constructing ansible vars dictionary generates a real keyfile."""
-        vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
-        ssh_keyfile = vars_dict["ansible_ssh_private_key_file"]
-
-        assert is_gen_ssh_keyfile(ssh_keyfile)
-        Path(ssh_keyfile).unlink()
-
-    def test_construct_vars_key_to_valid_keyfile(self, openssh_key, cred_ssh):
+    def test_construct_vars_key_to_valid_keyfile(
+        self, openssh_key, cred_ssh: Credential
+    ):
         """Test constructing ansible vars dictionary generates a valid keyfile."""
-        vars_dict = _construct_vars(22, model_to_dict(cred_ssh))
-        ssh_keyfile = Path(vars_dict["ansible_ssh_private_key_file"])
-
-        assert ssh_keyfile.is_file()
-        # File content should be the un-encrypted SSH Key value.
-        key_value = ssh_keyfile.read_text()
-
-        assert key_value == f"{openssh_key}\n"
-        ssh_keyfile.unlink()
+        with cred_ssh.generate_ssh_keyfile() as ssh_keyfile_as_str:
+            ssh_keyfile = Path(ssh_keyfile_as_str)
+            assert ssh_keyfile.is_file()
+            # File content should be the un-encrypted SSH Key value.
+            key_value = ssh_keyfile.read_text()
+            assert key_value == f"{openssh_key}\n"
 
     def test_get_exclude_host(self):
         """Test get_exclude_hosts() method."""
@@ -324,29 +318,6 @@ class TestNetworkConnectTaskRunner:
         }
         assert inventory_dict == expected
 
-    def test_connect_ssh_key_inventory_delete(self, cred_ssh):
-        """Test ssh_key support deletes generated ssh_key files."""
-        serializer = SourceSerializer(self.source)
-        source = serializer.data
-        hosts = source["hosts"]
-        exclude_hosts = source["exclude_hosts"]
-        connection_port = source["port"]
-        _, inventory_dict = construct_inventory(
-            hosts=hosts,
-            credential=model_to_dict(cred_ssh),
-            connection_port=connection_port,
-            concurrency_count=1,
-            exclude_hosts=exclude_hosts,
-        )
-
-        ssh_keyfile = inventory_dict.get("all").get("vars")[
-            "ansible_ssh_private_key_file"
-        ]
-        assert is_gen_ssh_keyfile(ssh_keyfile)
-
-        delete_ssh_keyfiles(inventory_dict)
-        assert not Path(ssh_keyfile).exists()
-
     @patch("ansible_runner.run")
     @patch(
         "scanner.network.connect._handle_ssh_passphrase", side_effect=mock_handle_ssh
@@ -368,6 +339,7 @@ class TestNetworkConnectTaskRunner:
                 connection_port=connection_port,
                 forks=self.concurrency,
                 exclude_hosts=exclude_hosts,
+                ssh_keyfile=None,
             )
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
@@ -389,6 +361,7 @@ class TestNetworkConnectTaskRunner:
             connection_port=connection_port,
             forks=self.concurrency,
             exclude_hosts=exclude_hosts,
+            ssh_keyfile=None,
         )
         mock_run.assert_called()
 
@@ -409,6 +382,7 @@ class TestNetworkConnectTaskRunner:
             connection_port=connection_port,
             forks=self.concurrency,
             exclude_hosts=exclude_hosts,
+            ssh_keyfile=None,
         )
         mock_run.assert_called()
 
@@ -429,6 +403,7 @@ class TestNetworkConnectTaskRunner:
             connection_port=connection_port,
             forks=self.concurrency,
             exclude_hosts=exclude_hosts,
+            ssh_keyfile=None,
         )
         mock_run.assert_called()
 
@@ -617,6 +592,7 @@ class TestNetworkConnectTaskRunner:
                 credential=self.cred,
                 connection_port=connection_port,
                 forks=self.concurrency,
+                ssh_keyfile=None,
             )
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
@@ -636,6 +612,7 @@ class TestNetworkConnectTaskRunner:
             credential=self.cred,
             connection_port=connection_port,
             forks=self.concurrency,
+            ssh_keyfile=None,
         )
         mock_run.assert_called()
 
@@ -655,6 +632,7 @@ class TestNetworkConnectTaskRunner:
                 credential=self.cred,
                 connection_port=connection_port,
                 forks=self.concurrency,
+                ssh_keyfile=None,
             )
             mock_run.assert_called()
 
@@ -673,6 +651,7 @@ class TestNetworkConnectTaskRunner:
             credential=self.cred,
             connection_port=connection_port,
             forks=self.concurrency,
+            ssh_keyfile=None,
         )
         mock_run.assert_called()
 
@@ -692,6 +671,7 @@ class TestNetworkConnectTaskRunner:
             credential=self.cred,
             connection_port=connection_port,
             forks=self.concurrency,
+            ssh_keyfile=None,
         )
         mock_run.assert_called()
         calls = mock_run.mock_calls
@@ -715,6 +695,7 @@ class TestNetworkConnectTaskRunner:
                 credential=self.cred,
                 connection_port=connection_port,
                 forks=self.concurrency,
+                ssh_keyfile=None,
             )
             mock_run.assert_called()
 

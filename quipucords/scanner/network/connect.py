@@ -20,10 +20,10 @@ from api.models import (
 )
 from api.serializers import SourceSerializer
 from api.vault import decrypt_data_as_unicode, write_to_yaml
+from constants import GENERATED_SSH_KEYFILE
 from scanner.network.connect_callback import ConnectResultCallback
 from scanner.network.utils import (
     construct_inventory,
-    delete_ssh_keyfiles,
     expand_hostpattern,
 )
 from scanner.runner import ScanTaskRunner
@@ -158,26 +158,27 @@ class ConnectTaskRunner(ScanTaskRunner):
 
             message = f"Attempting credential {credential.name}."
             self.scan_task.log_message(message)
-
-            try:
-                scan_message, scan_result = _connect(
-                    scan_task=self.scan_task,
-                    hosts=remaining_hosts,
-                    result_store=result_store,
-                    credential=credential,
-                    connection_port=connection_port,
-                    forks=forks,
-                    use_paramiko=use_paramiko,
-                )
-                if scan_result != ScanTask.COMPLETED:
-                    return scan_message, scan_result
-            except AnsibleRunnerException as ansible_error:
-                remaining_hosts_str = ", ".join(result_store.remaining_hosts())
-                error_message = (
-                    f"Connect scan task failed with credential {credential.name}."
-                    f" Error: {ansible_error} Hosts: {remaining_hosts_str}"
-                )
-                return error_message, ScanTask.FAILED
+            with credential.generate_ssh_keyfile() as ssh_keyfile:
+                try:
+                    scan_message, scan_result = _connect(
+                        scan_task=self.scan_task,
+                        hosts=remaining_hosts,
+                        result_store=result_store,
+                        credential=credential,
+                        connection_port=connection_port,
+                        forks=forks,
+                        use_paramiko=use_paramiko,
+                        ssh_keyfile=ssh_keyfile,
+                    )
+                    if scan_result != ScanTask.COMPLETED:
+                        return scan_message, scan_result
+                except AnsibleRunnerException as ansible_error:
+                    remaining_hosts_str = ", ".join(result_store.remaining_hosts())
+                    error_message = (
+                        f"Connect scan task failed with credential {credential.name}."
+                        f" Error: {ansible_error} Hosts: {remaining_hosts_str}"
+                    )
+                    return error_message, ScanTask.FAILED
 
             remaining_hosts = result_store.remaining_hosts()
 
@@ -201,6 +202,7 @@ def _connect(  # noqa: PLR0913, PLR0915
     credential,
     connection_port,
     forks,
+    ssh_keyfile: str | None,
     use_paramiko=False,
     exclude_hosts=None,
 ):
@@ -214,10 +216,12 @@ def _connect(  # noqa: PLR0913, PLR0915
     :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with
     :param exclude_hosts: Optional. Hosts to exclude from test connections
+    :param ssh_keyfile: Path to credential ssh_keyfile. Can be none if not applicable.
     :returns: list of connected hosts credential tuples and
             list of host that failed connection
     """
     cred_data = model_to_dict(credential)
+    cred_data[GENERATED_SSH_KEYFILE] = ssh_keyfile
     group_names, inventory = construct_inventory(
         hosts=hosts,
         credential=cred_data,
@@ -289,11 +293,7 @@ def _connect(  # noqa: PLR0913, PLR0915
             )
         except Exception as err_msg:  # noqa: BLE001
             logger.exception("Uncaught exception during Ansible Runner execution")
-            delete_ssh_keyfiles(inventory)
             raise AnsibleRunnerException(err_msg) from err_msg
-
-        # Let's delete any private ssh key files that we generated
-        delete_ssh_keyfiles(inventory)
 
         final_status = runner_obj.status
         any_successful_connection |= scan_task.systems_scanned >= 1

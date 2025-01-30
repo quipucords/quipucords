@@ -1,6 +1,7 @@
 """ScanTask used for network connection discovery."""
 
 import logging
+from contextlib import ExitStack
 from functools import cached_property
 from pathlib import Path
 
@@ -20,7 +21,7 @@ from api.models import (
 )
 from api.status.misc import get_server_id
 from api.vault import write_to_yaml
-from constants import SCAN_JOB_LOG
+from constants import GENERATED_SSH_KEYFILE, SCAN_JOB_LOG
 from quipucords.environment import server_version
 from scanner.exceptions import ScanFailureError
 from scanner.network.exceptions import ScannerError
@@ -28,7 +29,6 @@ from scanner.network.inspect_callback import AnsibleResults, InspectCallback
 from scanner.network.processing.process import NO_DATA, process
 from scanner.network.utils import (
     construct_inventory,
-    delete_ssh_keyfiles,
     raw_facts_template,
 )
 from scanner.runner import ScanTaskRunner
@@ -97,7 +97,26 @@ class InspectTaskRunner(ScanTaskRunner):
                 for unprocessed in connected
                 if unprocessed[0] not in processed_hosts
             ]
-            scan_message, scan_result = self._inspect_scan(remaining)
+            # prepare ssh keys and format credential data
+            credential_ssh_key: dict[int, str] = {}
+            formatted_hosts = []
+            with ExitStack() as stack:
+                # ExitStack is required because we have a variable number of contexts.
+                # Each unique credential will have its own ssh_keyfile, which will be
+                # destroyed outside of this with block.
+                for host_name, credential in remaining:
+                    cred_data = model_to_dict(credential)
+                    try:
+                        ssh_keypath = credential_ssh_key[credential.id]
+                    except KeyError:
+                        ssh_keypath = stack.enter_context(
+                            credential.generate_ssh_keyfile()
+                        )
+                        credential_ssh_key[credential.id] = ssh_keypath
+                    cred_data[GENERATED_SSH_KEYFILE] = ssh_keypath
+                    formatted_hosts.append(tuple((host_name, cred_data)))
+                # finally, run the scan
+                scan_message, scan_result = self._inspect_scan(formatted_hosts)
 
             self.scan_task.cleanup_facts(NETWORK_SCAN_IDENTITY_KEY)
             temp_facts = self.scan_task.get_facts()
@@ -255,8 +274,6 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             self.scan_task.log_message(log_message, log_level=logging.INFO)
 
-            # Let's delete any private ssh key files that we generated
-            delete_ssh_keyfiles(inventory)
             # persist facts
             for result in call.iter_results():
                 self._persist_results(result)
@@ -422,9 +439,7 @@ class InspectTaskRunner(ScanTaskRunner):
         nostatus = []
         for result in self.connect_scan_task.connection_result.systems.all():
             if result.status == SystemConnectionResult.SUCCESS:
-                host_cred = result.credential
-                cred_data = model_to_dict(host_cred)
-                connected.append((result.name, cred_data))
+                connected.append(tuple((result.name, result.credential)))
 
         for result in self.scan_task.get_result():
             if result.status == InspectResult.SUCCESS:

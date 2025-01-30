@@ -17,11 +17,10 @@ from api.models import (
     SystemConnectionResult,
 )
 from api.serializers import SourceSerializer
-from constants import SCAN_JOB_LOG
+from constants import GENERATED_SSH_KEYFILE, SCAN_JOB_LOG
 from scanner.network import InspectTaskRunner
 from scanner.network.inspect import construct_inventory
 from scanner.network.inspect_callback import InspectCallback
-from scanner.network.utils import delete_ssh_keyfiles, is_gen_ssh_keyfile
 from tests.factories import generate_openssh_pkey
 from tests.scanner.test_util import create_scan_job
 
@@ -46,6 +45,7 @@ class TestNetworkInspectScanner:
         self.cred.save()
 
         self.cred_data = model_to_dict(self.cred)
+        self.cred_data[GENERATED_SSH_KEYFILE] = None
 
         # setup source for scan
         self.source = Source(name="source1", port=22, hosts=["1.2.3.4"])
@@ -134,9 +134,12 @@ class TestNetworkInspectScanner:
         return source_ssh
 
     @pytest.fixture
-    def host_ssh_list(self, cred_ssh):
+    def host_ssh_list(self, cred_ssh: Credential):
         """Return the Host list for the SSH Credential."""
-        return [("1.2.3.5", model_to_dict(cred_ssh))]
+        with cred_ssh.generate_ssh_keyfile() as ssh_keypath:
+            cred_data = model_to_dict(cred_ssh)
+            cred_data[GENERATED_SSH_KEYFILE] = ssh_keypath
+            yield [("1.2.3.5", cred_data)]
 
     def test_scan_inventory_with_valid_ssh_key(self, source_ssh, host_ssh_list):
         """Test construct ansible inventory dictionary with ssh_key."""
@@ -148,22 +151,7 @@ class TestNetworkInspectScanner:
         ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"]["1.2.3.5"][
             "ansible_ssh_private_key_file"
         ]
-        assert is_gen_ssh_keyfile(ssh_keyfile)
-        Path(ssh_keyfile).unlink()
-
-    def test_scan_inventory_with_ssh_key_delete(self, source_ssh, host_ssh_list):
-        """Test ansible inventory dictionary with ssh_key are deleted."""
-        serializer = SourceSerializer(source_ssh)
-        source_ssh = serializer.data
-        connection_port = source_ssh["port"]
-        _, inventory_dict = construct_inventory(host_ssh_list, connection_port, 50)
-
-        ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"]["1.2.3.5"][
-            "ansible_ssh_private_key_file"
-        ]
         assert Path(ssh_keyfile).exists()
-        delete_ssh_keyfiles(inventory_dict)
-        assert not Path(ssh_keyfile).exists()
 
     def test_scan_inventory_grouping(self):
         """Test construct ansible inventory dictionary."""
@@ -358,7 +346,6 @@ class TestAnsibleLogCollector:
         # for this test purpose because they generate input for the main functions we
         # will patch later
         mocker.patch("scanner.network.inspect.write_to_yaml")
-        mocker.patch("scanner.network.inspect.delete_ssh_keyfiles")
         mocker.patch("scanner.network.inspect.InspectCallback")
         # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
         # this test requires
