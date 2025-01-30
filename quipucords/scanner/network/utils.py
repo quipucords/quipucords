@@ -1,9 +1,6 @@
 """Scanner used for host connection discovery."""
 
-import re
-import tempfile
 from functools import cache
-from pathlib import Path
 
 import yaml
 from ansible.parsing.utils.addresses import parse_address
@@ -11,6 +8,7 @@ from ansible.plugins.inventory import detect_range, expand_hostname_range
 from django.conf import settings
 
 from api.vault import decrypt_data_as_unicode
+from constants import GENERATED_SSH_KEYFILE
 
 
 def _credential_vars(credential: dict) -> dict:
@@ -18,8 +16,8 @@ def _credential_vars(credential: dict) -> dict:
     ansible_dict = {}
     username = credential.get("username")
     password = credential.get("password")
-    ssh_keyfile = credential.get("ssh_keyfile")
-    ssh_key = credential.get("ssh_key")
+    # TODO: remove the deprecated ssh_keyfile from Credential model
+    ssh_keyfile = credential.get(GENERATED_SSH_KEYFILE) or credential.get("ssh_keyfile")
     become_method = credential.get("become_method")
     become_user = credential.get("become_user")
     become_password = credential.get("become_password")
@@ -29,10 +27,6 @@ def _credential_vars(credential: dict) -> dict:
         ansible_dict["ansible_ssh_pass"] = decrypt_data_as_unicode(password)
     if ssh_keyfile:
         ansible_dict["ansible_ssh_private_key_file"] = ssh_keyfile
-    if ssh_key:
-        ansible_dict["ansible_ssh_private_key_file"] = generate_ssh_keyfile(
-            credential, decrypt_data_as_unicode(ssh_key)
-        )
     if become_password:
         ansible_dict["ansible_become_pass"] = decrypt_data_as_unicode(become_password)
     if become_method:
@@ -161,62 +155,3 @@ def get_fact_names():
 def raw_facts_template():
     """Results template for fact collection on network scans."""
     return {fact_name: None for fact_name in get_fact_names()}
-
-
-GEN_KEYFILES_DIRECTORY = "quipucords_generated_ssh_private_keys"
-GEN_KEYFILE_PREFIX = "quipucords_ssh_private_key_credential"
-
-
-def generate_ssh_keyfile(credential, ssh_key):
-    """Generate an ssh private keyfile for the ssh key content specified."""
-    ssh_pkey_dir = Path(tempfile.gettempdir()) / GEN_KEYFILES_DIRECTORY
-    ssh_pkey_dir.mkdir(parents=True, exist_ok=True)
-    private_keyfile_path = Path(
-        tempfile.NamedTemporaryFile(
-            prefix=f"{GEN_KEYFILE_PREFIX}_{credential.get('id')}_",
-            dir=ssh_pkey_dir,
-        ).name
-    )
-    private_keyfile_path.write_text(f"{ssh_key}\n")
-    private_keyfile_path.chmod(0o600)
-    return str(private_keyfile_path)
-
-
-def delete_ssh_keyfiles(inventory):
-    """Delete all generated ansible_ssh_private_key_files."""
-    if not inventory:
-        return
-
-    # Defined during connects
-    ansible_vars = inventory.get("all", {}).get("vars", {})
-    ssh_pkf = ansible_vars.get("ansible_ssh_private_key_file")
-    if ssh_pkf:
-        delete_ssh_keyfile(ssh_pkf)
-    # Defined during inspects
-    children = inventory.get("all", {}).get("children", {})
-    for group in children.keys():
-        hosts = children.get(group).get("hosts", {})
-        for host in hosts.keys():
-            ssh_pkf = hosts.get(host).get("ansible_ssh_private_key_file")
-            if ssh_pkf:
-                delete_ssh_keyfile(ssh_pkf)
-
-
-def is_gen_ssh_keyfile(private_keyfile_path):
-    """Return True if the file path exists and is a generated ssh keyfile."""
-    keyfile_pattern = (
-        f"^{tempfile.gettempdir()}"
-        f"/{GEN_KEYFILES_DIRECTORY}/{GEN_KEYFILE_PREFIX}_[0-9]+_.*$"
-    )
-    if (
-        re.match(keyfile_pattern, private_keyfile_path)
-        and Path(private_keyfile_path).is_file()
-    ):
-        return True
-    return False
-
-
-def delete_ssh_keyfile(private_keyfile_path):
-    """Remove a generated ssh_keyfile."""
-    if is_gen_ssh_keyfile(private_keyfile_path):
-        Path(private_keyfile_path).unlink()

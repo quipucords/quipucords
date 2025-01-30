@@ -3,7 +3,10 @@
 These models are used in the REST definitions
 """
 
+import tempfile
+from contextlib import contextmanager
 from itertools import groupby
+from pathlib import Path
 
 from django.db import models, transaction
 from django.utils.translation import gettext as _
@@ -11,7 +14,7 @@ from django.utils.translation import gettext as _
 from api import messages
 from api.common.models import BaseModel
 from api.common.util import ALL_IDS_MAGIC_STRING
-from api.vault import encrypt_data_as_unicode
+from api.vault import decrypt_data_as_unicode, encrypt_data_as_unicode
 from constants import DataSources
 
 
@@ -103,6 +106,23 @@ class Credential(BaseModel):
         """Metadata for the model."""
 
         verbose_name_plural = _(messages.PLURAL_HOST_CREDENTIALS_MSG)
+
+    @contextmanager
+    def generate_ssh_keyfile(self):
+        """Generate a temporary ssh keyfile if credential contains a ssh_key."""
+        if self.ssh_key:
+            tmp_path = tempfile.NamedTemporaryFile(
+                prefix=f"private_key_credential_{self.id}_"
+            )
+            ssh_key = decrypt_data_as_unicode(self.ssh_key)
+            private_keyfile_path = Path(tmp_path.name)
+            private_keyfile_path.write_text(f"{ssh_key}\n")
+            private_keyfile_path.chmod(0o600)
+            yield str(private_keyfile_path)
+            # after the context manager is closed, cleanup the file
+            tmp_path.close()
+        else:
+            yield None
 
 
 def credential_bulk_delete_ids(ids: list | str) -> dict:
