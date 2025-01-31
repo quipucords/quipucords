@@ -216,9 +216,9 @@ class TestNetworkConnectTaskRunner:
         assert vars_dict == expected
 
     @pytest.fixture
-    def openssh_key(self, faker):
+    def openssh_key(self):
         """Return a fake OpenSSH private key."""
-        return generate_openssh_pkey(faker)
+        return generate_openssh_pkey()
 
     @pytest.fixture
     def cred_ssh(self, openssh_key):

@@ -111,9 +111,9 @@ class TestNetworkInspectScanner:
         assert inventory_dict[1] == expected
 
     @pytest.fixture
-    def openssh_key(self, faker):
+    def openssh_key(self):
         """Return an openssh_key random OpenSSH private key."""
-        return generate_openssh_pkey(faker)
+        return generate_openssh_pkey()
 
     @pytest.fixture
     def cred_ssh(self, openssh_key):
