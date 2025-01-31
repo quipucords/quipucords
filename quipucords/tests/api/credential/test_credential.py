@@ -114,14 +114,14 @@ class TestCredential:
         assert Credential.objects.get().name == "cred1"
 
     @pytest.fixture
-    def openssh_key(self, faker):
+    def openssh_key(self):
         """Return an openssh_key random OpenSSH private key."""
-        return generate_openssh_pkey(faker)
+        return generate_openssh_pkey()
 
     @pytest.fixture
-    def updated_openssh_key(self, faker):
+    def updated_openssh_key(self):
         """Return an openssh_key random OpenSSH private key."""
-        return generate_openssh_pkey(faker)
+        return generate_openssh_pkey()
 
     def test_hostcred_create_with_ssh_key(self, client_logged_in, openssh_key):
         """Ensure we can create a new host credential object with an ssh_key."""

@@ -16,6 +16,7 @@ from faker import Faker
 from api import models
 from api.serializers import SystemFingerprintSerializer
 from api.status import get_server_id
+from api.vault import encrypt_data_as_unicode
 from constants import DataSources
 from tests.utils import fake_rhel, raw_facts_generator
 from tests.utils.raw_facts_generator import (
@@ -349,6 +350,16 @@ class CredentialFactory(DjangoModelFactory):
 
         model = models.Credential
 
+    class Params:
+        """Factory params."""
+
+        with_ssh_key = factory.Trait(
+            ssh_key=factory.LazyFunction(
+                lambda: encrypt_data_as_unicode(generate_openssh_pkey())
+            ),
+            cred_type=DataSources.NETWORK,
+        )
+
     @factory.lazy_attribute
     def auth_token(self):
         """Set auth_token lazily."""
@@ -444,10 +455,10 @@ def generate_invalid_id(faker: factory.Faker) -> int:
     return faker.pyint(min_value=990000, max_value=999999)
 
 
-def generate_openssh_pkey(faker: factory.Faker) -> str:
+def generate_openssh_pkey() -> str:
     """Generate a random OpenSSH private key."""
     pkey = "-----BEGIN OPENSSH EXAMPLE KEY-----\n"
     for __ in range(5):
-        pkey += f"{faker.lexify('?' * 70)}\n"
+        pkey += f"{_faker.lexify('?' * 70)}\n"
     pkey += "-----END OPENSSH EXAMPLE KEY-----\n"
     return pkey
