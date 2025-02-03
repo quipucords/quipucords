@@ -1,5 +1,7 @@
 """ScanTask used for network connection discovery."""
 
+from __future__ import annotations
+
 import logging
 
 import ansible_runner
@@ -159,13 +161,13 @@ class ConnectTaskRunner(ScanTaskRunner):
 
             try:
                 scan_message, scan_result = _connect(
-                    self.scan_task,
-                    remaining_hosts,
-                    result_store,
-                    credential,
-                    connection_port,
-                    forks,
-                    use_paramiko,
+                    scan_task=self.scan_task,
+                    hosts=remaining_hosts,
+                    result_store=result_store,
+                    credential=credential,
+                    connection_port=connection_port,
+                    forks=forks,
+                    use_paramiko=use_paramiko,
                 )
                 if scan_result != ScanTask.COMPLETED:
                     return scan_message, scan_result
@@ -191,7 +193,8 @@ class ConnectTaskRunner(ScanTaskRunner):
         return None, ScanTask.COMPLETED
 
 
-def _connect(  # noqa: PLR0913, PLR0912, PLR0915
+def _connect(  # noqa: PLR0913, PLR0915
+    *,
     scan_task: ScanTask,
     hosts,
     result_store: ConnectResultStore,

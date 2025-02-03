@@ -361,13 +361,13 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                self.scan_task,
-                hosts,
-                Mock(),
-                self.cred,
-                connection_port,
-                self.concurrency,
-                exclude_hosts,
+                scan_task=self.scan_task,
+                hosts=hosts,
+                result_store=Mock(),
+                credential=self.cred,
+                connection_port=connection_port,
+                forks=self.concurrency,
+                exclude_hosts=exclude_hosts,
             )
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
@@ -382,13 +382,13 @@ class TestNetworkConnectTaskRunner:
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
         _connect(
-            self.scan_task,
-            hosts,
-            Mock(),
-            self.cred,
-            connection_port,
-            self.concurrency,
-            exclude_hosts,
+            scan_task=self.scan_task,
+            hosts=hosts,
+            result_store=Mock(),
+            credential=self.cred,
+            connection_port=connection_port,
+            forks=self.concurrency,
+            exclude_hosts=exclude_hosts,
         )
         mock_run.assert_called()
 
@@ -402,13 +402,13 @@ class TestNetworkConnectTaskRunner:
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
         _connect(
-            self.scan_task,
-            hosts,
-            Mock(),
-            self.cred,
-            connection_port,
-            self.concurrency,
-            exclude_hosts,
+            scan_task=self.scan_task,
+            hosts=hosts,
+            result_store=Mock(),
+            credential=self.cred,
+            connection_port=connection_port,
+            forks=self.concurrency,
+            exclude_hosts=exclude_hosts,
         )
         mock_run.assert_called()
 
@@ -422,13 +422,13 @@ class TestNetworkConnectTaskRunner:
         exclude_hosts = source["exclude_hosts"]
         connection_port = source["port"]
         _connect(
-            self.scan_task,
-            hosts,
-            Mock(),
-            self.cred,
-            connection_port,
-            self.concurrency,
-            exclude_hosts,
+            scan_task=self.scan_task,
+            hosts=hosts,
+            result_store=Mock(),
+            credential=self.cred,
+            connection_port=connection_port,
+            forks=self.concurrency,
+            exclude_hosts=exclude_hosts,
         )
         mock_run.assert_called()
 
@@ -611,12 +611,12 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                self.scan_task,
-                hosts,
-                Mock(),
-                self.cred,
-                connection_port,
-                self.concurrency,
+                scan_task=self.scan_task,
+                hosts=hosts,
+                result_store=Mock(),
+                credential=self.cred,
+                connection_port=connection_port,
+                forks=self.concurrency,
             )
             mock_run.assert_called()
             mock_ssh_pass.assert_called()
@@ -630,12 +630,12 @@ class TestNetworkConnectTaskRunner:
         hosts = source["hosts"]
         connection_port = source["port"]
         _connect(
-            self.scan_task,
-            hosts,
-            Mock(),
-            self.cred,
-            connection_port,
-            self.concurrency,
+            scan_task=self.scan_task,
+            hosts=hosts,
+            result_store=Mock(),
+            credential=self.cred,
+            connection_port=connection_port,
+            forks=self.concurrency,
         )
         mock_run.assert_called()
 
@@ -649,12 +649,12 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                self.scan_task,
-                hosts,
-                Mock(),
-                self.cred,
-                connection_port,
-                self.concurrency,
+                scan_task=self.scan_task,
+                hosts=hosts,
+                result_store=Mock(),
+                credential=self.cred,
+                connection_port=connection_port,
+                forks=self.concurrency,
             )
             mock_run.assert_called()
 
@@ -667,12 +667,12 @@ class TestNetworkConnectTaskRunner:
         hosts = source["hosts"]
         connection_port = source["port"]
         _connect(
-            self.scan_task,
-            hosts,
-            Mock(),
-            self.cred,
-            connection_port,
-            self.concurrency,
+            scan_task=self.scan_task,
+            hosts=hosts,
+            result_store=Mock(),
+            credential=self.cred,
+            connection_port=connection_port,
+            forks=self.concurrency,
         )
         mock_run.assert_called()
 
@@ -686,12 +686,12 @@ class TestNetworkConnectTaskRunner:
         hosts = source["hosts"]
         connection_port = source["port"]
         _connect(
-            self.scan_task,
-            hosts,
-            Mock(),
-            self.cred,
-            connection_port,
-            self.concurrency,
+            scan_task=self.scan_task,
+            hosts=hosts,
+            result_store=Mock(),
+            credential=self.cred,
+            connection_port=connection_port,
+            forks=self.concurrency,
         )
         mock_run.assert_called()
         calls = mock_run.mock_calls
@@ -709,12 +709,12 @@ class TestNetworkConnectTaskRunner:
         connection_port = source["port"]
         with pytest.raises(AnsibleRunnerException):
             _connect(
-                self.scan_task,
-                hosts,
-                Mock(),
-                self.cred,
-                connection_port,
-                self.concurrency,
+                scan_task=self.scan_task,
+                hosts=hosts,
+                result_store=Mock(),
+                credential=self.cred,
+                connection_port=connection_port,
+                forks=self.concurrency,
             )
             mock_run.assert_called()
 
