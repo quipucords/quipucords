@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install poetry
-        run: pipx install "poetry<2"
+        run: pipx install "poetry>=2.0"
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
@@ -29,6 +29,7 @@ jobs:
 
       - name: Check dependencies
         run: |
+          poetry self add poetry-plugin-export
           make lock-main-requirements
           make check-requirements
   test:
@@ -62,7 +63,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install poetry
-        run: pipx install "poetry<2"
+        run: pipx install "poetry>=2.0"
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
