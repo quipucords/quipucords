@@ -30,9 +30,9 @@ def test_check_host_done(inspect_yml_path):
     assert isinstance(inspect_data, list)
     assert len(inspect_data) == 1
     assert isinstance(inspect_data[0], dict)
-    assert (
-        inspect_data[0]["roles"][-1] == "host_done"
-    ), "host_done SHOULD be the last role"
+    assert inspect_data[0]["roles"][-1] == "host_done", (
+        "host_done SHOULD be the last role"
+    )
 
 
 def test_check_all_roles_are_included(inspect_yml_path, path_to_playbooks):

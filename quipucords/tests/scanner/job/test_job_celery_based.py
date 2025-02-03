@@ -259,9 +259,9 @@ def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
 @pytest.mark.dbcompat
 def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     """Test that a fingerprint-only scanjob can be run successfully."""
-    assert (
-        not fingerprint_only_scanjob.report.deployment_report
-    ), "scanjob seems to be already completed"
+    assert not fingerprint_only_scanjob.report.deployment_report, (
+        "scanjob seems to be already completed"
+    )
     job_runner = job.ScanJobRunner(fingerprint_only_scanjob)
     assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
     with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
@@ -281,9 +281,9 @@ def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
 @pytest.mark.django_db
 def test_fingerprint_job_canceled(fingerprint_only_scanjob, mocker):
     """Test that a fingerprint scan job handles if a scan job is canceled."""
-    assert (
-        not fingerprint_only_scanjob.report.deployment_report
-    ), "scanjob seems to be already completed"
+    assert not fingerprint_only_scanjob.report.deployment_report, (
+        "scanjob seems to be already completed"
+    )
     job_runner = job.ScanJobRunner(fingerprint_only_scanjob)
     assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
     mocker.patch.object(tasks, "scan_job_is_canceled", return_value=True)

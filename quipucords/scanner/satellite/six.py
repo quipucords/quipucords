@@ -71,8 +71,7 @@ ENTITLEMENTS = "entitlements"
 ORGS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations"
 HOSTS_V1_URL = "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems"
 HOSTS_FIELDS_V1_URL = (
-    "https://{sat_host}:{port}/katello/api"
-    "/v2/organizations/{org_id}/systems/{host_id}"
+    "https://{sat_host}:{port}/katello/api/v2/organizations/{org_id}/systems/{host_id}"
 )
 HOSTS_SUBS_V1_URL = (
     "https://{sat_host}:{port}/katello/api"
@@ -161,7 +160,7 @@ def request_results(  # noqa: PLR0913
         )
         if response.status_code != requests.codes.ok:
             raise SatelliteError(
-                f"Invalid response code {response.status_code}" f" for url: {url}"
+                f"Invalid response code {response.status_code} for url: {url}"
             )
         response_body = response.json()
         results = response_body.get(RESULTS, [])

@@ -103,6 +103,6 @@ class TestRHACSScan(Smoker):
     def test_insights_report(self, client_logged_in, report_id):
         """Smoke test insights report."""
         response = client_logged_in.get(f"reports/{report_id}/insights/")
-        assert (
-            response.status_code == 404
-        ), "'systems' from rhacs sources should not be part of insights report"
+        assert response.status_code == 404, (
+            "'systems' from rhacs sources should not be part of insights report"
+        )

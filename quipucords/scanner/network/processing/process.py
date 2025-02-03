@@ -140,8 +140,7 @@ def process(  # noqa: PLR0911, PLR0912, C901
 
         if fact_value.get(SKIPPED, False):
             log_message = (
-                f"SKIPPED POST PROCESSING {host}."
-                f" fact {fact_key} skipped, no results"
+                f"SKIPPED POST PROCESSING {host}. fact {fact_key} skipped, no results"
             )
             scan_task.log_message(log_message, log_level=DEBUG)
             return NO_DATA

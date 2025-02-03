@@ -128,8 +128,7 @@ class ScanJob(BaseModel):
         """
         elapsed_time = self._compute_elapsed_time()
         actual_message = (
-            f"Job {self.id:d}"
-            f" ({self.scan_type}, elapsed_time: {elapsed_time:.0f}s) - "
+            f"Job {self.id:d} ({self.scan_type}, elapsed_time: {elapsed_time:.0f}s) - "
         )
         actual_message += message
         logger.log(log_level, actual_message)

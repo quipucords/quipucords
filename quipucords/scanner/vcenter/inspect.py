@@ -57,8 +57,7 @@ class InspectTaskRunner(ScanTaskRunner):
         connect_scan_task = self.scan_task.prerequisites.first()
         if connect_scan_task.status != ScanTask.COMPLETED:
             error_message = (
-                f"Prerequisites scan task {connect_scan_task.sequence_number}"
-                " failed."
+                f"Prerequisites scan task {connect_scan_task.sequence_number} failed."
             )
             return error_message, ScanTask.FAILED
 
@@ -68,7 +67,7 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message = (
                 f"Unable to connect to VCenter source, {source.name}, "
                 f"with supplied credential, {credential.name}.\n"
-                f"Discovery scan failed for {self.scan_task,}. {vm_error}"
+                f"Discovery scan failed for {(self.scan_task,)}. {vm_error}"
             )
             return error_message, ScanTask.FAILED
 

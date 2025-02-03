@@ -80,9 +80,9 @@ class Smoker:
             reverse("v1:scan-list"),
             data={"name": "test scan", "sources": [source_id]},
         )
-        assert (
-            create_scan_response.status_code == status.HTTP_201_CREATED
-        ), create_scan_response.json()
+        assert create_scan_response.status_code == status.HTTP_201_CREATED, (
+            create_scan_response.json()
+        )
         scan_id = create_scan_response.json()["id"]
         return scan_id
 
@@ -93,9 +93,9 @@ class Smoker:
             reverse("v1:scan-filtered-jobs", args=(scan_id,))
         )
         scan_detail_url = reverse("v1:scan-detail", args=(scan_id,))
-        assert (
-            create_scan_job_response.status_code == status.HTTP_201_CREATED
-        ), create_scan_job_response.json()
+        assert create_scan_job_response.status_code == status.HTTP_201_CREATED, (
+            create_scan_job_response.json()
+        )
         response = client_logged_in.get(scan_detail_url)
         assert response.ok, response.json()
 
