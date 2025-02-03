@@ -542,9 +542,9 @@ class TestNetworkCredentialV1:
             decrypt_data_as_unicode(credential_with_ssh_key.password)
             == "super-duper-secret"
         )
-        assert (
-            credential_with_ssh_key.ssh_keyfile is None
-        ), "the same credential can't have both ssh_keyfile and password"
+        assert credential_with_ssh_key.ssh_keyfile is None, (
+            "the same credential can't have both ssh_keyfile and password"
+        )
 
     def test_replace_ssh_keyfile(self, credential_with_password, fake_ssh_key):
         """Test replacing ssh_keyfile with password."""
@@ -557,9 +557,9 @@ class TestNetworkCredentialV1:
         )
         assert serializer.is_valid(), serializer.errors
         serializer.save()
-        assert (
-            credential_with_password.password is None
-        ), "the same credential can't have both ssh_keyfile and password"
+        assert credential_with_password.password is None, (
+            "the same credential can't have both ssh_keyfile and password"
+        )
         assert credential_with_password.ssh_keyfile == fake_ssh_key
 
     @pytest.fixture(scope="class")

@@ -26,9 +26,9 @@ def validate_data(
         if key != metadata_filename:
             report_slices[key] = value
     report_slices_in_metadata = data[metadata_filename]["report_slices"]
-    assert (
-        len(report_slices_in_metadata) == expected_number_of_slices
-    ), "unexpected number of report slices"
+    assert len(report_slices_in_metadata) == expected_number_of_slices, (
+        "unexpected number of report slices"
+    )
 
     total_returned_hosts_num = 0
     for key_1, key_2 in zip(report_slices_in_metadata, report_slices):
@@ -51,9 +51,9 @@ def validate_data(
     assert returned_bios_uuids == expected_bios_uuids, "unexpected bios uuids"
     # sum of all hosts in a slice is equal to
     # the total number of host (before call)
-    assert total_returned_hosts_num == len(
-        expected_bios_uuids
-    ), "unexpected hosts count"
+    assert total_returned_hosts_num == len(expected_bios_uuids), (
+        "unexpected hosts count"
+    )
 
     # Assert that the Insights report has all the expected installed_products.
     expected_installed_products = [
@@ -164,9 +164,9 @@ def test_get_insights_report_not_found_because_no_fingerprints(client_logged_in)
         cloud_provider=None,
     )
     fingerprint_count = deployment_report.system_fingerprints.count()
-    assert (
-        fingerprint_count == 1
-    ), f"unexpected fingerprint count {fingerprint_count} != 1"
+    assert fingerprint_count == 1, (
+        f"unexpected fingerprint count {fingerprint_count} != 1"
+    )
     response = client_logged_in.get(reverse("v1:reports-insights", args=(report_id,)))
     assert response.status_code == status.HTTP_404_NOT_FOUND
 

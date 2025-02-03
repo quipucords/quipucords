@@ -216,8 +216,7 @@ class InspectTaskRunner(ScanTaskRunner):
         # Build Ansible Runner Dependencies
         for idx, group_name in enumerate(group_names):
             log_message = (
-                "START INSPECT PROCESSING GROUP"
-                f" {(idx + 1):d} of {len(group_names):d}"
+                f"START INSPECT PROCESSING GROUP {(idx + 1):d} of {len(group_names):d}"
             )
             self.scan_task.log_message(log_message)
             call = InspectCallback()

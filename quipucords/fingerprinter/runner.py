@@ -550,7 +550,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 )
             except NotImplementedError:
                 self.scan_task.log_message(
-                    "Could not process source, " f"unknown source type: {source_type}",
+                    f"Could not process source, unknown source type: {source_type}",
                     log_level=logging.ERROR,
                 )
 

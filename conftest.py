@@ -173,9 +173,9 @@ def _vcr_uri_map():
             continue
         attr_value = getattr(ConstantsFromEnv, attr_name)
         if isinstance(attr_value, EnvVar) and attr_value.coercer == BaseURI:
-            assert (
-                attr_value.value not in uri_map
-            ), f"URI {attr_value.value} already in use."
+            assert attr_value.value not in uri_map, (
+                f"URI {attr_value.value} already in use."
+            )
             uri_map[attr_value.value] = attr_value.fallback_value
             uri_map[attr_value.fallback_value] = attr_value.fallback_value
     return uri_map

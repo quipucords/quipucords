@@ -182,13 +182,13 @@ def test_get_deployment_report_as_tarball(client_logged_in, deployments_report):
     gzip_response = client_logged_in.get(
         path, headers={"Accept": "application/json+gzip"}
     )
-    assert (
-        gzip_response.ok
-    ), f"gzip response was not ok; status {gzip_response.status_code}"
+    assert gzip_response.ok, (
+        f"gzip response was not ok; status {gzip_response.status_code}"
+    )
     json_response = client_logged_in.get(path, headers={"Accept": "application/json"})
-    assert (
-        json_response.ok
-    ), f"json response was not ok; status {json_response.status_code}"
+    assert json_response.ok, (
+        f"json response was not ok; status {json_response.status_code}"
+    )
 
     extracted_files = extract_files_from_tarball(
         gzip_response.content, decode_json=True

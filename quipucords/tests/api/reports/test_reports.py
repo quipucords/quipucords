@@ -130,9 +130,9 @@ def test_report_tarball_sha256sum(client_logged_in, deployment_with_logs):
     expected_filenames = TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
         {f"scan-job-{deployments_report.report.scanjob.id}-test.txt"}
     )
-    assert expected_filenames == set(
-        files_contents.keys()
-    ), "incorrect files in tarball"
+    assert expected_filenames == set(files_contents.keys()), (
+        "incorrect files in tarball"
+    )
 
     sha256sum_dict = dict(
         (line.split()[1], line.split()[0])  # swap order to look like {name: contents}
@@ -145,9 +145,9 @@ def test_report_tarball_sha256sum(client_logged_in, deployment_with_logs):
     for name, downloaded_digest in sha256sum_dict.items():
         assert name in files_contents
         recalculated_digest = hashlib.sha256(files_contents[name]).hexdigest()
-        assert (
-            downloaded_digest == recalculated_digest
-        ), f"incorrect SHA256SUM digest for {name}"
+        assert downloaded_digest == recalculated_digest, (
+            f"incorrect SHA256SUM digest for {name}"
+        )
 
 
 @pytest.mark.django_db
