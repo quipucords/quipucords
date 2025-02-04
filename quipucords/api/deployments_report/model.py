@@ -19,6 +19,7 @@ from fingerprinter.constants import (
     PRODUCTS_KEY,
     SOURCES_KEY,
 )
+from utils.misc import is_valid_cache_file
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,11 @@ class DeploymentsReport(BaseModel):
     )
 
     @property
+    def cached_fingerprints_file_exists(self) -> bool:
+        """Return True if cached fingerprints file exists."""
+        return is_valid_cache_file(self.cached_fingerprints_file_path)
+
+    @property
     def cached_fingerprints(self) -> dict | None:
         """Return cached fingerprints data if it exists."""
         if not self.cached_fingerprints_file_path:
@@ -84,6 +90,7 @@ class DeploymentsReport(BaseModel):
                 self.id,
                 file_path,
             )
+            self._rerun_latest_fingerprint()
             raise
 
     @cached_fingerprints.setter
@@ -97,6 +104,11 @@ class DeploymentsReport(BaseModel):
         with file_path.open("w") as f:
             json.dump(data, f)
         self.cached_fingerprints_file_path = file_path
+
+    @property
+    def cached_csv_file_exists(self) -> bool:
+        """Return True if cached csv file exists."""
+        return is_valid_cache_file(self.cached_csv_file_path)
 
     @property
     def cached_csv(self):
@@ -126,6 +138,7 @@ class DeploymentsReport(BaseModel):
                 self.id,
                 self.cached_csv_file_path,
             )
+            self._rerun_latest_fingerprint()
             raise
 
     @cached_csv.setter
@@ -139,6 +152,41 @@ class DeploymentsReport(BaseModel):
         with file_path.open("w") as f:
             f.write(data)
         self.cached_csv_file_path = file_path
+
+    def _rerun_latest_fingerprint(self, wait=False) -> None:
+        """
+        Trigger the latest fingerprint task to rerun.
+
+        Why would you want to do this? If you expect the cached_fingerprints or
+        cached_csv data to exist but either is missing, you may recreate them by
+        calling this method.
+
+        :param wait: if true, wait for task to complete
+        """
+        logger.info("Rerunning the last fingerprint task for %s", self)
+
+        # local imports to avoid possible import loop
+        from api.scantask.model import ScanTask
+        from scanner import tasks
+
+        scan_task = (
+            ScanTask.objects.filter(
+                job__report__deployment_report_id=self.id,
+                scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+            )
+            .order_by("-id")
+            .first()
+        )
+        if not scan_task:
+            # It is unclear how this is possible, but just in case, raise an
+            # exception because we cannot proceed here without a ScanTask,
+            # and we may not want to (or be able to) create a new one on demand.
+            raise ScanTask.DoesNotExist(f"No fingerprint ScanTask is related to {self}")
+
+        logger.info("Found %s for %s", scan_task, self)
+        fingerprint_task = tasks.fingerprint.delay(scan_task_id=scan_task.id)
+        if wait:
+            fingerprint_task.get()
 
 
 @receiver(post_delete, sender=DeploymentsReport)

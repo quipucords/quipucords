@@ -25,6 +25,7 @@ from api.deployments_report.model import (
     time as time_module,
 )
 from api.deployments_report.util import sanitize_row
+from api.scantask.model import ScanTask
 from constants import DataSources
 from tests.factories import DeploymentReportFactory
 from tests.report_utils import extract_files_from_tarball
@@ -225,6 +226,24 @@ def test_get_deployments_report_cached_csv_not_set():
 
 
 @pytest.mark.django_db
+def test_get_deployments_report_cached_files_missing(client_logged_in, faker, mocker):
+    """Test getting a report with missing files responds with 424, triggers rerun."""
+    mock_rerun = mocker.patch.object(DeploymentsReport, "_rerun_latest_fingerprint")
+    bogus_csv_path = str(cached_files_path() / faker.slug())
+    bogus_fingerprints_path = str(cached_files_path() / faker.slug())
+    deployments_report = DeploymentReportFactory(
+        cached_csv_file_path=bogus_csv_path,
+        cached_fingerprints_file_path=bogus_fingerprints_path,
+        _set_cached_fingerprints__skip=True,
+    )
+    response = client_logged_in.get(
+        reverse("v1:reports-deployments", args=(deployments_report.report.id,))
+    )
+    assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY
+    mock_rerun.assert_called_once()
+
+
+@pytest.mark.django_db
 def test_get_deployments_report_cached_fingerprints_not_set():
     """Test getting cached_fingerprints when its path is not set."""
     # `_set_cached_fingerprints__skip=True` is REQUIRED here because
@@ -232,6 +251,30 @@ def test_get_deployments_report_cached_fingerprints_not_set():
     # try to set cached_fingerprints before we are ready to set it for this test.
     deployments_report = DeploymentReportFactory(_set_cached_fingerprints__skip=True)
     assert deployments_report.cached_fingerprints is None
+
+
+@pytest.mark.django_db
+def test_get_deployments_report_cached_files_exist(
+    deployments_report, tmpdir, faker, mocker
+):
+    """Test checking that cached files exist."""
+    cvs_file_path = Path(tmpdir) / faker.slug()
+    cvs_file_path.write_text("hello,world")
+    fingerprints_file_path = Path(tmpdir) / faker.slug()
+    fingerprints_file_path.write_text('{"hello":"world"}')
+    mocker.patch("api.deployments_report.model.cached_files_path", return_value=tmpdir)
+    deployments_report.cached_csv_file_path = cvs_file_path
+    deployments_report.cached_fingerprints_file_path = fingerprints_file_path
+    deployments_report.save()
+
+    assert deployments_report.cached_csv_file_exists
+    assert deployments_report.cached_fingerprints_file_exists
+
+    cvs_file_path.unlink()
+    fingerprints_file_path.unlink()
+
+    assert not deployments_report.cached_csv_file_exists
+    assert not deployments_report.cached_fingerprints_file_exists
 
 
 @pytest.mark.django_db
@@ -269,10 +312,11 @@ def test_get_deployments_report_cached_fingerprints_unsupported_path(faker, capl
 
 
 @pytest.mark.django_db
-def test_get_deployments_report_cached_csv_not_found(faker, caplog):
+def test_get_deployments_report_cached_csv_not_found(faker, caplog, mocker):
     """Test getting cached_csv when its path does not find a file."""
     not_found_path = f"{cached_files_path()}/{faker.slug()}.csv"
     deployments_report = DeploymentReportFactory(cached_csv_file_path=not_found_path)
+    mocker.patch.object(deployments_report, "_rerun_latest_fingerprint")
     expected_error = (
         f"Cached CSV file for DeploymentsReport {deployments_report.id} "
         f"not found at '{not_found_path}'"
@@ -280,11 +324,12 @@ def test_get_deployments_report_cached_csv_not_found(faker, caplog):
     caplog.set_level(logging.ERROR)
     with pytest.raises(FileNotFoundError):
         unexpected_data = deployments_report.cached_csv  # noqa: F841
+    deployments_report._rerun_latest_fingerprint.assert_called_once()
     assert expected_error in caplog.messages[-1]
 
 
 @pytest.mark.django_db
-def test_get_deployments_report_cached_fingerprints_not_found(faker, caplog):
+def test_get_deployments_report_cached_fingerprints_not_found(faker, caplog, mocker):
     """Test getting cached_fingerprints when its path does not find a file."""
     not_found_path = f"{cached_files_path()}/{faker.slug()}.json"
     # `_set_cached_fingerprints__skip=True` is REQUIRED here because
@@ -294,6 +339,7 @@ def test_get_deployments_report_cached_fingerprints_not_found(faker, caplog):
         cached_fingerprints_file_path=not_found_path,
         _set_cached_fingerprints__skip=True,
     )
+    mocker.patch.object(deployments_report, "_rerun_latest_fingerprint")
     expected_error = (
         f"Cached fingerprints file for DeploymentsReport {deployments_report.id} "
         f"not found at '{not_found_path}'"
@@ -301,6 +347,7 @@ def test_get_deployments_report_cached_fingerprints_not_found(faker, caplog):
     caplog.set_level(logging.ERROR)
     with pytest.raises(FileNotFoundError):
         unexpected_data = deployments_report.cached_fingerprints  # noqa: F841
+    deployments_report._rerun_latest_fingerprint.assert_called_once()
     assert expected_error in caplog.messages[-1]
 
 
@@ -407,3 +454,60 @@ def test_delete_deployments_report_ignores_missing_files(
 
     deployments_report_with_cached_files.delete()
     # Nothing left to assert; just be happy it raised no exceptions!
+
+
+@pytest.mark.django_db
+def test_rerun_latest_fingerprint_missing_calls_celery_task(
+    deployments_report, tmpdir, faker, mocker
+):
+    """Test calling _rerun_latest_fingerprint invokes expected Celery task."""
+    cvs_file_path = Path(tmpdir) / faker.slug()
+    cvs_file_path.write_text("hello,world")
+    fingerprints_file_path = Path(tmpdir) / faker.slug()
+    fingerprints_file_path.write_text('{"hello":"world"}')
+    mocker.patch("api.deployments_report.model.cached_files_path", return_value=tmpdir)
+    deployments_report.cached_csv_file_path = cvs_file_path
+    deployments_report.cached_fingerprints_file_path = fingerprints_file_path
+    deployments_report.save()
+
+    mock_tasks = mocker.patch("scanner.tasks")
+
+    # A fingerprint ScanTask needs to exist, and it normally would exist in a real
+    # flow of the running service, but our simplified factory does not create one.
+    deployments_report.report.scanjob._create_fingerprint_task(
+        conn_tasks=[], inspect_tasks=list(deployments_report.report.scanjob.tasks.all())
+    )
+
+    # Default call expects the Celery task to "delay" for async processing.
+    deployments_report._rerun_latest_fingerprint()
+    mock_tasks.fingerprint.delay.assert_called_once()
+
+    mock_tasks.reset_mock()
+    # Call with "wait=True" expects to get the Celery task result synchronously.
+    deployments_report._rerun_latest_fingerprint(wait=True)
+    mock_tasks.fingerprint.delay.assert_called_once()
+    mock_tasks.fingerprint.delay.return_value.get.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_rerun_latest_fingerprint_missing_fingerprint_task_exception(
+    deployments_report, tmpdir, faker, mocker
+):
+    """
+    Test calling _rerun_latest_fingerprint fails if no fingerprint task.
+
+    This test covers a use case that normally should *not be possible*.
+    The "cached file path" fields on DeploymentsReport are None by default,
+    and they normally are only set as part of the fingerprint task.
+    If the fingerprint task does not exist, but the fields are not None,
+    then something very strange and unexpected has happened.
+    """
+    cvs_file_path = Path(tmpdir) / faker.slug()
+    fingerprints_file_path = Path(tmpdir) / faker.slug()
+    mocker.patch("api.deployments_report.model.cached_files_path", return_value=tmpdir)
+    deployments_report.cached_csv_file_path = cvs_file_path
+    deployments_report.cached_fingerprints_file_path = fingerprints_file_path
+    deployments_report.save()
+
+    with pytest.raises(ScanTask.DoesNotExist):
+        deployments_report._rerun_latest_fingerprint()
