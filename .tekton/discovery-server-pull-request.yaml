@@ -28,7 +28,9 @@ spec:
     value: 5d
   - name: build-platforms
     value:
+    # reference of available instances/architectures https://url.corp.redhat.com/c01e9c0
     - linux/x86_64
+    - linux/arm64
   - name: dockerfile
     value: Containerfile
   - name: path-context
