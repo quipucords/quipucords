@@ -25,7 +25,9 @@ spec:
     value: quay.io/redhat-user-workloads/discovery-tenant/discovery/discovery-server:{{revision}}
   - name: build-platforms
     value:
+    # reference of available instances/architectures https://url.corp.redhat.com/c01e9c0
     - linux/x86_64
+    - linux/arm64
   - name: dockerfile
     value: Containerfile
   - name: path-context
