@@ -393,6 +393,9 @@ spec:
         value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
       - name: CACHI2_ARTIFACT
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+      - name: ARGS
+        # This customization makes snyk results available on its UI
+        value: "--project-name=Discovery/discovery-server --report --org=3e74668d-0a76-49f9-8822-a84cec963cde"
       runAfter:
       - build-image-index
       taskRef:
