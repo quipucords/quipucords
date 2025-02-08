@@ -65,7 +65,7 @@ packaging==24.2 ; python_version >= "3.12" and python_version < "3.14"
     #   setuptools-scm
 pathspec==0.12.1
     # via hatchling
-pbr==6.1.0
+pbr==6.1.1
     # via lockfile
 pluggy==1.5.0
     # via hatchling
