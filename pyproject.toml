@@ -39,14 +39,6 @@ django-axes = "^6.3.0"
 drf-spectacular = {extras = ["sidecar"], version = "^0.28.0"}
 
 # ======================== DIRTY HACKS  ===========================
-# Temporary hack to handle: https://pagure.io/python-daemon/issue/92
-# quipucords does not directly use python-daemon, but our requirement
-# ansible-runner does, and ansible-runner simply declares '*' version.
-# Pinning python-daemon<3.0.0 works around this downstream build error:
-#   ModuleNotFoundError: No module named 'setuptools.extern'
-# This has been fixed in python-daemon source but not yet released.
-# We should remove this pinned version as soon as >3.0.1 is available.
-python-daemon = "<3.0.0"
 # Temporarily block updating poetry-core while we don't adapt 
 # pyproject.toml (and other relevant configuration); once this is done,
 # remove this dependency as poetry-core is an indirect dependency.
@@ -68,7 +60,7 @@ requests-mock = "^1.10.0"
 httpretty = "^1.1.4"
 pip-tools = "^7.3.0"
 watchdog = {extras = ["watchmedo"], version = "^2.2.1"}
-pybuild-deps = "^0.3.0"
+pybuild-deps = "^0.4.1"
 pytest-profiling = "^1.7.0"
 ipython = "^8.10.0"
 django-extensions = "^3.2.1"
