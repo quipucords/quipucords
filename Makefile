@@ -42,6 +42,7 @@ help:
 	@echo "  serve-swagger                 to run the openapi/swagger ui for quipucords"
 	@echo "  build-container               to build the container image for quipucords"
 	@echo "  check-db-migrations-needed    to check if new migration files are required"
+	@echo "  update-lockfiles		       update all 'lockfiles'"
 
 all: lint test-coverage
 
@@ -190,3 +191,5 @@ lock-baseimage:
 	$(eval UPDATED_SHA=$(shell skopeo inspect --raw "docker://$(UBI_MINIMAL_IMAGE)" | sha256sum | cut -d ' ' -f1))
 	# update Containerfile with the new digest
 	sed -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
+
+update-lockfiles: lock-baseimage lock-rpms update-requirements
