@@ -13,6 +13,10 @@ QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY ?= 10
 QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 
+UBI_IMAGE=registry.access.redhat.com/ubi9
+UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi9/ubi-minimal
+RPM_LOCKFILE_IMAGE=localhost/rpm-lockfile-prototype
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                          to show this message"
@@ -25,6 +29,7 @@ help:
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
 	@echo "  lint-shell                    to run the shellcheck linter"
 	@echo "  lock-requirements             to lock all python dependencies"
+	@echo "  lock-rpms  		           to lock all dnf dependencies"
 	@echo "  update-requirements           to update all python dependencies"
 	@echo "  check-requirements            to check python dependency files"
 	@echo "  test                          to run unit tests"
@@ -37,6 +42,7 @@ help:
 	@echo "  serve-swagger                 to run the openapi/swagger ui for quipucords"
 	@echo "  build-container               to build the container image for quipucords"
 	@echo "  check-db-migrations-needed    to check if new migration files are required"
+	@echo "  update-lockfiles		       update all 'lockfiles'"
 
 all: lint test-coverage
 
@@ -53,17 +59,17 @@ lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
 	poetry lock --no-update
-	poetry export -f requirements.txt --only=main --without-hashes -o requirements.txt
+	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
-	poetry run pybuild-deps compile -o requirements-build.txt
+	poetry run pybuild-deps compile -o lockfiles/requirements-build.txt lockfiles/requirements.txt
 
 update-requirements:
 	poetry update --no-cache
 	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
 
 check-requirements:
-ifeq ($(shell git diff --exit-code requirements.txt >/dev/null 2>&1; echo $$?), 0)
+ifeq ($(shell git diff --exit-code lockfiles/requirements.txt >/dev/null 2>&1; echo $$?), 0)
 	@exit 0
 else
 	@echo "requirements.txt not in sync with poetry.lock. Run 'make lock-requirements' and commit the changes"
@@ -155,3 +161,27 @@ generate-sudo-list:
 
 test-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1
+
+update-ubi-repo:
+	podman pull $(UBI_MINIMAL_IMAGE)
+	podman run -it $(UBI_MINIMAL_IMAGE) cat /etc/yum.repos.d/ubi.repo > lockfiles/ubi.repo
+
+setup-rpm-lockfile:
+	podman pull $(UBI_IMAGE)
+	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
+		podman build -t $(RPM_LOCKFILE_IMAGE) \
+		--build-arg BASE_IMAGE=$(UBI_IMAGE) -
+
+lock-rpms: setup-rpm-lockfile update-ubi-repo
+	podman run -w /workdir --rm -v ${PWD}/lockfiles:/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
+		--image $(UBI_MINIMAL_IMAGE) \
+		--outfile=/workdir/rpms.lock.yaml \
+		/workdir/rpms.in.yaml
+
+lock-baseimage:
+	podman pull $(UBI_MINIMAL_IMAGE)
+	$(eval ESCAPED_IMAGE=$(shell echo $(UBI_MINIMAL_IMAGE) | sed 's/\//\\\//g'))
+	$(eval UPDATED_SHA=$(shell skopeo inspect --raw "docker://$(UBI_MINIMAL_IMAGE)" | sha256sum | cut -d ' ' -f1))
+	sed -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
+
+update-lockfiles: lock-baseimage lock-rpms update-requirements
