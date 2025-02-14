@@ -70,5 +70,12 @@ RUN make server-static
 # Allow git to run in /app
 RUN git config --file /.gitconfig --add safe.directory /app
 
+# konflux requires a non-root user
+# let's follow software collection tradition and use uid 1001
+# https://github.com/sclorg/s2i-base-container/blob/3598eab2/core/Dockerfile#L72
+RUN useradd -u 1001 -r -g 0 -d /app -c "Quipucords user" quipucords && \
+    chown 1001:0 -R /app /deploy /var /opt/venv
+USER 1001
+
 EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
