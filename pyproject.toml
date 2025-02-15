@@ -68,7 +68,7 @@ notebook = "^6.5.3"
 ruff = "^0"
 # FixMe: we had to hold back celery version because 5.4.0 introduced
 # some regressions in our unit tests
-celery = {extras = ["pytest"], version = ">=5.3,<5.4"}
+celery = {extras = ["pytest"], version = ">=5.4,<5.5"}
 
 [tool.pytest.ini_options]
 pythonpath = "quipucords/"
