@@ -4,7 +4,7 @@
 #
 #    pybuild-deps compile --output-file=lockfiles/requirements-build.txt lockfiles/requirements.txt
 #
-calver==2022.6.26
+calver==2025.4.2
     # via trove-classifiers
 cffi==1.17.1 ; python_version >= "3.12" and python_version < "3.14"
     # via
@@ -20,7 +20,7 @@ docutils==0.21.2
     # via
     #   changelog-chug
     #   python-daemon
-flit-core==3.11.0
+flit-core==3.12.0
     # via
     #   click
     #   django-filter
@@ -55,7 +55,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.8.2
+maturin==1.8.3
     # via
     #   cryptography
     #   rpds-py
@@ -83,7 +83,7 @@ semantic-version==2.10.0
     # via setuptools-rust
 semver==3.0.4
     # via changelog-chug
-setuptools-rust==1.10.2
+setuptools-rust==1.11.0
     # via
     #   bcrypt
     #   maturin
@@ -98,11 +98,11 @@ setuptools-scm==8.2.0
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.2.18.16
+trove-classifiers==2025.3.19.19
     # via hatchling
-types-psutil==7.0.0.20250218
+types-psutil==7.0.0.20250401
     # via mypy
-types-setuptools==75.8.0.20250225
+types-setuptools==78.1.0.20250329
     # via mypy
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "3.14"
     # via
@@ -132,7 +132,7 @@ setuptools==69.0.2
     #   setuptools-scm
 setuptools==75.8.0
     # via ansible-core
-setuptools==75.8.1
+setuptools==78.1.0
     # via
     #   ansible
     #   bcrypt
@@ -167,5 +167,6 @@ setuptools==75.8.1
     #   setuptools-rust
     #   setuptools-scm
     #   trove-classifiers
+    #   types-psutil
     #   tzdata
     #   whitenoise
