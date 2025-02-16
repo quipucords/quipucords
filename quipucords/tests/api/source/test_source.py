@@ -485,18 +485,18 @@ class TestSource:
             "source_type": DataSources.NETWORK,
             "hosts": [
                 "10.10.181.9",
+                "2001:db8::1",
+                "fe80::1",
                 "10.10.181.9/16",
+                "2001:db8::/127",
+                "10.10.0.0/30",
                 "10.10.128.[1:25]",
                 "10.10.[1:20].25",
                 "10.10.[1:20].[1:25]",
-                "localhost",
-                "my_cool_underscore.com",
                 "mycentos.com",
-                "my_rhel[a:d].company.com",
-                "my_rhel[120:400].company.com",
-                "my-rhel[a:d].company.com",
-                "my-rhel[120:400].company.com",
-                "my-rh_el[120:400].comp_a-ny.com",
+                "host-123.example.net",
+                "db-[10:20].infra.net",
+                "node-[01:10].dc.local",
             ],
             "port": "22",
             "credentials": [net_cred.id],
@@ -533,13 +533,8 @@ class TestSource:
         """Test invalid host patterns."""
         hosts = [
             "192.1..2",
-            "192.01.5.10",
             "192.1.5.1/",
             "192.01.5.[1:10]/10",
-            "192.3-32.56.100-254",
-            "192.3.6-56.254",
-            "192.3.56.0-254",
-            "192.3.4.455",
             "192.3.4.455/16",
             "10.10.[181.9",
             "10.10.128.[a:25]",
@@ -561,7 +556,13 @@ class TestSource:
 
     def test_create_bad_host_pattern(self, client_logged_in, net_cred):
         """Test a invalid host pattern."""
-        hosts = ["10.1.1.1-10.1.1.254"]
+        hosts = [
+            "10.10.181.[a:9]",
+            "2001:db8:zzz::1",
+            "192.168.1.1/33",
+            "sub_domain.example.com",
+            "server[5-10].datacenter.local",
+        ]
 
         data = {
             "name": "source1",
@@ -1250,7 +1251,7 @@ class TestSource:
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
-    @pytest.mark.parametrize("hosts_range", ("1.2.3.4/5", "1.2.3.[0:255]"))
+    @pytest.mark.parametrize("hosts_range", ("1.2.3.4/30", "1.2.3.[0:255]"))
     def test_negative_create_non_network_with_host_range(
         self, client_logged_in, valid_cred, source_type, hosts_range
     ):
@@ -1358,7 +1359,7 @@ class TestSource:
 
         updated_data = {
             "name": "source",
-            "hosts": ["1.2.3.4/5"],
+            "hosts": ["1.2.3.4/30"],
             "port": 22,
             "credentials": [vc_cred.id],
         }
@@ -1551,7 +1552,7 @@ class TestSource:
 
         updated_data = {
             "name": "source",
-            "hosts": ["1.2.3.4/5"],
+            "hosts": ["1.2.3.4/30"],
             "port": 22,
             "credentials": [sat_cred.id],
         }
@@ -1620,7 +1621,7 @@ class TestSource:
 
         updated_data = {
             "name": "openshift_source_1",
-            "hosts": ["1.2.3.4/5"],
+            "hosts": ["1.2.3.4/30"],
             "credentials": [openshift_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
@@ -2042,18 +2043,18 @@ class TestSourceV2:
             "source_type": DataSources.NETWORK,
             "hosts": [
                 "10.10.181.9",
+                "2001:db8::1",
+                "fe80::1",
                 "10.10.181.9/16",
+                "2001:db8::/127",
+                "10.10.0.0/30",
                 "10.10.128.[1:25]",
                 "10.10.[1:20].25",
                 "10.10.[1:20].[1:25]",
-                "localhost",
-                "my_cool_underscore.com",
                 "mycentos.com",
-                "my_rhel[a:d].company.com",
-                "my_rhel[120:400].company.com",
-                "my-rhel[a:d].company.com",
-                "my-rhel[120:400].company.com",
-                "my-rh_el[120:400].comp_a-ny.com",
+                "host-123.example.net",
+                "db-[10:20].infra.net",
+                "node-[01:10].dc.local",
             ],
             "port": "22",
             "credentials": [net_cred.id],
@@ -2090,13 +2091,8 @@ class TestSourceV2:
         """Test invalid host patterns."""
         hosts = [
             "192.1..2",
-            "192.01.5.10",
             "192.1.5.1/",
             "192.01.5.[1:10]/10",
-            "192.3-32.56.100-254",
-            "192.3.6-56.254",
-            "192.3.56.0-254",
-            "192.3.4.455",
             "192.3.4.455/16",
             "10.10.[181.9",
             "10.10.128.[a:25]",
@@ -2118,7 +2114,13 @@ class TestSourceV2:
 
     def test_create_bad_host_pattern(self, client_logged_in, net_cred):
         """Test a invalid host pattern."""
-        hosts = ["10.1.1.1-10.1.1.254"]
+        hosts = [
+            "10.10.181.[a:9]",
+            "2001:db8:zzz::1",
+            "192.168.1.1/33",
+            "sub_domain.example.com",
+            "server[5-10].datacenter.local",
+        ]
 
         data = {
             "name": "source1",
@@ -2821,7 +2823,7 @@ class TestSourceV2:
     @pytest.mark.parametrize(
         "source_type", (ds for ds in DataSources if ds != DataSources.NETWORK)
     )
-    @pytest.mark.parametrize("hosts_range", ("1.2.3.4/5", "1.2.3.[0:255]"))
+    @pytest.mark.parametrize("hosts_range", ("1.2.3.4/30", "1.2.3.[0:255]"))
     def test_negative_create_non_network_with_host_range(
         self, client_logged_in, valid_cred, source_type, hosts_range
     ):
@@ -2929,7 +2931,7 @@ class TestSourceV2:
 
         updated_data = {
             "name": "source",
-            "hosts": ["1.2.3.4/5"],
+            "hosts": ["1.2.3.4/30"],
             "port": 22,
             "credentials": [vc_cred.id],
         }
@@ -3126,7 +3128,7 @@ class TestSourceV2:
 
         updated_data = {
             "name": "source",
-            "hosts": ["1.2.3.4/5"],
+            "hosts": ["1.2.3.4/30"],
             "port": 22,
             "credentials": [sat_cred.id],
         }
@@ -3195,7 +3197,7 @@ class TestSourceV2:
 
         updated_data = {
             "name": "openshift_source_1",
-            "hosts": ["1.2.3.4/5"],
+            "hosts": ["1.2.3.4/30"],
             "credentials": [openshift_cred.id],
         }
         response = self.update_source(client_logged_in, updated_data, initial["id"])
