@@ -273,43 +273,6 @@ class TestSource:
         }
         assert out == expected
 
-    def test_source_create_with_false_scan(self, client_logged_in, net_cred):
-        """Test creating a source with a valid scan query param of False."""
-        query = "?scan=False"
-        data = {
-            "name": "source1",
-            "source_type": DataSources.NETWORK,
-            "hosts": ["1.2.3.4"],
-            "port": "22",
-            "credentials": [net_cred.id],
-        }
-        response = self.create_expect_201_with_query(query, data, client_logged_in)
-        assert "id" in response
-
-    def test_source_create_with_true_scan(self, client_logged_in, net_cred):
-        """Test creating source with valid scan query param of True."""
-        query = "?scan=True"
-        data = {
-            "name": "source1",
-            "source_type": DataSources.NETWORK,
-            "hosts": ["1.2.3.4"],
-            "port": "22",
-            "credentials": [net_cred.id],
-        }
-        self.create_expect_201_with_query(query, data, client_logged_in)
-
-    def test_source_create_with_invalid_scan(self, client_logged_in, net_cred):
-        """Test the source create method with invalid query param."""
-        query = "?scan=Foo"
-        data = {
-            "name": "source1",
-            "source_type": DataSources.NETWORK,
-            "hosts": ["1.2.3.4"],
-            "port": "22",
-            "credentials": [net_cred.id],
-        }
-        self.create_expect_400_with_query(query, data, client_logged_in)
-
     @pytest.mark.parametrize("source_type", (ds for ds in DataSources))
     def test_successful_create(self, client_logged_in, valid_cred, source_type):
         """A valid create request should succeed."""
@@ -1866,43 +1829,6 @@ class TestSourceV2:
             },
         }
         assert out == expected
-
-    def test_source_create_with_false_scan(self, client_logged_in, net_cred):
-        """Test creating a source with a valid scan query param of False."""
-        query = "?scan=False"
-        data = {
-            "name": "source1",
-            "source_type": DataSources.NETWORK,
-            "hosts": ["1.2.3.4"],
-            "port": "22",
-            "credentials": [net_cred.id],
-        }
-        response = self.create_expect_201_with_query(query, data, client_logged_in)
-        assert "id" in response
-
-    def test_source_create_with_true_scan(self, client_logged_in, net_cred):
-        """Test creating source with valid scan query param of True."""
-        query = "?scan=True"
-        data = {
-            "name": "source1",
-            "source_type": DataSources.NETWORK,
-            "hosts": ["1.2.3.4"],
-            "port": "22",
-            "credentials": [net_cred.id],
-        }
-        self.create_expect_201_with_query(query, data, client_logged_in)
-
-    def test_source_create_with_invalid_scan(self, client_logged_in, net_cred):
-        """Test the source create method with invalid query param."""
-        query = "?scan=Foo"
-        data = {
-            "name": "source1",
-            "source_type": DataSources.NETWORK,
-            "hosts": ["1.2.3.4"],
-            "port": "22",
-            "credentials": [net_cred.id],
-        }
-        self.create_expect_400_with_query(query, data, client_logged_in)
 
     @pytest.mark.parametrize("source_type", (ds for ds in DataSources))
     def test_successful_create(self, client_logged_in, valid_cred, source_type):

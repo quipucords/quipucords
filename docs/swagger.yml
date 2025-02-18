@@ -279,11 +279,6 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/SourceIn"
-        - in: "query"
-          name: "scan"
-          type: "boolean"
-          description: "Query parameter for optional connection scan upon source creation"
-          required: false
       responses:
         201:
           description: "Source created"
