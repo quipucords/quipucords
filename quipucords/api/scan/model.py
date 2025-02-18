@@ -28,7 +28,7 @@ class Scan(BaseModel):
     """Configuration for the scan jobs that will run."""
 
     SCAN_TYPE_CHOICES = (
-        (ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_CONNECT),
+        (ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_CONNECT),  # TODO Remove this.
         (ScanTask.SCAN_TYPE_INSPECT, ScanTask.SCAN_TYPE_INSPECT),
     )
 

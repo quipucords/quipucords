@@ -50,6 +50,17 @@ def system_fingerprint_source_types():
     return all_types - ignored_types
 
 
+def source_types_with_legacy_connect_scan_job():
+    """
+    Return source types that still have the legacy connect scan job.
+
+    TODO Remove this when we have removed all connect scan jobs.
+    """
+    all_types = set(DataSources.values)
+    ignored_types = {DataSources.SATELLITE}
+    return all_types - ignored_types
+
+
 class SystemFingerprintFactory(DjangoModelFactory):
     """SystemFingerprint factory."""
 
@@ -343,7 +354,7 @@ class CredentialFactory(DjangoModelFactory):
     """Factory for Credential model."""
 
     name = factory.Faker("slug")
-    cred_type = factory.Iterator(DataSources.values)
+    cred_type = factory.Iterator(source_types_with_legacy_connect_scan_job())
 
     class Meta:
         """Factory options."""
@@ -375,7 +386,7 @@ class SourceFactory(DjangoModelFactory):
     """Factory for Source model."""
 
     name = factory.Faker("slug")
-    source_type = factory.Iterator(DataSources.values)
+    source_type = factory.Iterator(source_types_with_legacy_connect_scan_job())
 
     class Meta:
         """Factory options."""
