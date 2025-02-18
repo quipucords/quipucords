@@ -17,16 +17,13 @@ from rest_framework.viewsets import ModelViewSet
 from api import messages
 from api.common.util import (
     ALL_IDS_MAGIC_STRING,
-    convert_to_boolean,
     expand_scanjob_with_times,
-    is_boolean,
     is_int,
     set_of_ids_or_all_str,
 )
 from api.filters import ListFilter
-from api.models import Scan, ScanJob, ScanTask, Source
+from api.models import Scan, ScanJob, Source
 from api.serializers import SourceSerializerV1, SourceSerializerV2
-from api.signal.scanjob_signal import start_scan
 from api.source.util import expand_credential
 
 IDENTIFIER_KEY = "id"
@@ -190,36 +187,10 @@ class SourceViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create a source."""
-        # check to see if a connection scan was requested
-        # through query parameter
-        scan = request.query_params.get("scan", False)
-        scan_job = None
         with transaction.atomic():
             response = super().create(request, args, kwargs)
-
-            # Modify json for response
-            if not is_boolean(scan):
-                error = {"scan": [_(messages.SOURCE_CONNECTION_SCAN)]}
-                raise ValidationError(error)
-
-            # If the scan was requested, create a connection scan
-            if convert_to_boolean(scan):
-                # Grab the source id
-                source_id = response.data["id"]
-
-                # Create the scan job
-                scan_job = ScanJob.objects.create(scan_type=ScanTask.SCAN_TYPE_CONNECT)
-
-                # Add the source
-                scan_job.sources.add(source_id)
-                response.data["most_recent_connect_scan"] = scan_job.id
-
             # format source after creating scan to populate connection
             format_source(response.data)
-        if scan_job:
-            # start the scan outside of the transaction to avoid celery trying to start
-            # the process with an id that doesn't exist in the DB yet.
-            start_scan.send(sender=self.__class__, instance=scan_job)
         return response
 
     def retrieve(self, request, pk=None):
