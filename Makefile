@@ -1,6 +1,21 @@
 DATE		= $(shell date)
 PYTHON		= $(shell poetry run which python 2>/dev/null || which python)
 
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+  # macOS/Darwin's built-in `sed` is BSD-style and is incompatible with Linux/GNU-style `sed` arguments.
+  # However, macOS users can install GNU sed as `gsed` alongside the built-in `sed` using Homebrew.
+  ifneq ($(shell command -v gsed),)
+    SED := gsed
+  else
+    $(info "Warning: gsed may be required on macOS, but it is not installed.")
+    $(info "Please run 'brew install gnu-sed' to install it.")
+    SED := sed # Fall back to default sed for now
+  endif
+else
+  SED := sed
+endif
+
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
@@ -166,7 +181,7 @@ test-sudo-list:
 update-ubi-repo:
 	podman pull $(UBI_MINIMAL_IMAGE)
 	podman run -it $(UBI_MINIMAL_IMAGE) cat /etc/yum.repos.d/ubi.repo | \
-		sed 's/\r$$//' > lockfiles/ubi.repo
+		$(SED) 's/\r$$//' > lockfiles/ubi.repo
 
 # prepare rpm-lockfile-prototype tool to lock our rpms
 setup-rpm-lockfile:
@@ -186,10 +201,10 @@ lock-rpms: setup-rpm-lockfile update-ubi-repo
 lock-baseimage:
 	podman pull $(UBI_MINIMAL_IMAGE)
 	# escape "/" for use in sed later
-	$(eval ESCAPED_IMAGE=$(shell echo $(UBI_MINIMAL_IMAGE) | sed 's/\//\\\//g'))
+	$(eval ESCAPED_IMAGE=$(shell echo $(UBI_MINIMAL_IMAGE) | $(SED) 's/\//\\\//g'))
 	# extract the digest
 	$(eval UPDATED_SHA=$(shell skopeo inspect --raw "docker://$(UBI_MINIMAL_IMAGE)" | sha256sum | cut -d ' ' -f1))
 	# update Containerfile with the new digest
-	sed -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
+	$(SED) -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
 
 update-lockfiles: lock-baseimage lock-rpms update-requirements
