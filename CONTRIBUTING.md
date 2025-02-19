@@ -91,6 +91,14 @@ Run all tests on the current Python with coverage
 make test-coverage
 ```
 
+### Update dependencies
+There's a dedicated make target for easily updating ALL lockfiles and base image digests on the Containerfile
+```
+make update-lockfiles
+```
+Besides python dependencies required for development, this command also requires `podman`, `skopeo`,
+and, if you are on macOS, `gsed`.
+
 -----
 
-See [Makefile](https://github.com/quipucords/quipucords/blob/main/Makefile) for additional development utilities.
+See [Makefile](Makefile) for additional development utilities.
