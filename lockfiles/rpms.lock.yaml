@@ -88,20 +88,20 @@ arches:
     name: libnsl2
     evr: 2.0.0-1.el9
     sourcerpm: libnsl2-2.0.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-13.15-1.el9.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-13.20-1.el9_5.aarch64.rpm
     repoid: ubi-9-appstream-rpms
-    size: 213895
-    checksum: sha256:14f69d760f2dac30e0f14fccb32365df6b59039027200092a6482fde67bf68a0
+    size: 215513
+    checksum: sha256:6f0c91540499e5d653a55930cdbcbacba3dd2cf89a9f3cfc5647b999b02fa792
     name: libpq
-    evr: 13.15-1.el9
-    sourcerpm: libpq-13.15-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-devel-13.15-1.el9.aarch64.rpm
+    evr: 13.20-1.el9_5
+    sourcerpm: libpq-13.20-1.el9_5.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-devel-13.20-1.el9_5.aarch64.rpm
     repoid: ubi-9-appstream-rpms
-    size: 103216
-    checksum: sha256:530557fe50e33b57cb8d8ebe610068ad5b1ba2fc588c274bc2c92060dea93b58
+    size: 103686
+    checksum: sha256:aafd573aa951e8fd3d20f8b25f118ca017489249ddabefb43265fa7de23ccbe4
     name: libpq-devel
-    evr: 13.15-1.el9
-    sourcerpm: libpq-13.15-1.el9.src.rpm
+    evr: 13.20-1.el9_5
+    sourcerpm: libpq-13.20-1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libubsan-11.5.0-5.el9_5.aarch64.rpm
     repoid: ubi-9-appstream-rpms
     size: 183667
@@ -1149,20 +1149,20 @@ arches:
     name: libnsl2
     evr: 2.0.0-1.el9
     sourcerpm: libnsl2-2.0.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-13.15-1.el9.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-13.20-1.el9_5.x86_64.rpm
     repoid: ubi-9-appstream-rpms
-    size: 216224
-    checksum: sha256:553eca1d18cd947bb3350618d3e8934adadeb16482905bc5e5742cb12c786826
+    size: 218118
+    checksum: sha256:49223c484013c214fe1b785d92232a9eff0f0329c5c0cdda8705d992b3ef51f7
     name: libpq
-    evr: 13.15-1.el9
-    sourcerpm: libpq-13.15-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-devel-13.15-1.el9.x86_64.rpm
+    evr: 13.20-1.el9_5
+    sourcerpm: libpq-13.20-1.el9_5.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-devel-13.20-1.el9_5.x86_64.rpm
     repoid: ubi-9-appstream-rpms
-    size: 104316
-    checksum: sha256:f76518d5c96b236cf99b62613f7316fb00a2d02fb10207ff6fdcf9eed5f51792
+    size: 104767
+    checksum: sha256:5ada557e3b9570b8d475647140cb380bdc5096103fa9cfba2b692563c49afa85
     name: libpq-devel
-    evr: 13.15-1.el9
-    sourcerpm: libpq-13.15-1.el9.src.rpm
+    evr: 13.20-1.el9_5
+    sourcerpm: libpq-13.20-1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libxcrypt-compat-4.4.18-3.el9.x86_64.rpm
     repoid: ubi-9-appstream-rpms
     size: 93189
