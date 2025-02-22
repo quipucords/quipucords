@@ -20,7 +20,7 @@ docutils==0.21.2
     # via
     #   changelog-chug
     #   python-daemon
-flit-core==3.10.1
+flit-core==3.11.0
     # via
     #   click
     #   django-filter
