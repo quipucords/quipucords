@@ -57,6 +57,10 @@ def generate_and_save_cached_csv(deployments_report_id: int):
         # regardless of whether it succeeds. We might arrive here if the
         # DeploymentsReport also lacks the cached fingerprints data which
         # is required for building the CSV data.
-        logger.exception(e)
+        logger.exception(
+            "Failed to generate cached fingerprints for DeploymentsReport %s: %s",
+            deployments_report_id,
+            e,
+        )
         return False
     return True
