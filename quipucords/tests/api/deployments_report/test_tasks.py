@@ -69,4 +69,5 @@ def test_generate_and_save_cached_csv_failure(mocker, caplog):
     message = "Nobody expects the Spanish Inquisition!"
     mock_build.side_effect = Exception(message)
     assert not generate_and_save_cached_csv(deployments_report.id)
-    assert message in caplog.messages
+    assert f"DeploymentsReport {deployments_report.id}" in caplog.messages[0]
+    assert message in caplog.messages[0]
