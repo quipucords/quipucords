@@ -3,7 +3,10 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from api.deployments_report.model import DeploymentsReport
-from api.deployments_report.tasks import generate_and_save_cached_csv
+from api.deployments_report.tasks import (
+    generate_and_save_cached_csv,
+    generate_cached_fingerprints,
+)
 from utils.misc import is_valid_cache_file
 
 
@@ -71,16 +74,10 @@ class Command(BaseCommand):
         """Generate cached fingerprints for the given deployments report IDs."""
         success_ids = []
         failure_ids = []
-        deployments_report_ids = sorted(list(deployments_report_ids))
-        for _id in deployments_report_ids:
-            deployments_report = DeploymentsReport.objects.get(pk=_id)
-            self.write_info(f"Rerunning fingerprint task for {deployments_report}")
-            try:
-                deployments_report._rerun_latest_fingerprint(wait=True)
-                success_ids.append(_id)
-            except Exception as e:  # noqa: BLE001
-                self.stdout.write(self.style.ERROR(str(e)))
-                failure_ids.append(_id)
+        for _id in sorted(list(deployments_report_ids)):
+            success_ids.append(_id) if generate_cached_fingerprints(
+                _id
+            ) else failure_ids.append(_id)
 
         return success_ids, failure_ids
 
