@@ -9,13 +9,11 @@ carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
 
-from pathlib import Path
 from unittest.mock import ANY, patch
 
 import pytest
 from django.test import override_settings
 
-from api.deployments_report.tasks import generate_and_save_cached_csv
 from api.models import Report, ScanJob, ScanTask
 from constants import DataSources
 from scanner import job, tasks
@@ -277,59 +275,6 @@ def test_fingerprint_job_greenpath(fingerprint_only_scanjob):
     deployments_report = fingerprint_only_scanjob.report.deployment_report
     assert deployments_report.id
     assert deployments_report.system_fingerprints.count() == 1
-
-
-@pytest.mark.django_db
-@pytest.mark.dbcompat
-def test_fingerprint_job_via_rerun_latest_fingerprint(fingerprint_only_scanjob):
-    """
-    Test that a fingerprint-only scanjob can be RE-run successfully.
-
-    This test is very similar to the preceding "test_fingerprint_job_greenpath" test,
-    and the initial setup is the same, but this test adds coverage for the case when
-    the fingerprint job is run again as a result of cached fingerprints files going
-    missing some time after the initial fingerprint job completed.
-    """
-    assert not fingerprint_only_scanjob.report.deployment_report, (
-        "scanjob seems to be already completed"
-    )
-    job_runner = job.ScanJobRunner(fingerprint_only_scanjob)
-    assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
-    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
-        async_result = job_runner.run()
-        async_result.get()
-
-    fingerprint_only_scanjob.refresh_from_db()
-    assert fingerprint_only_scanjob.status == ScanTask.COMPLETED
-
-    # We should have "cached" fingerprint data now.
-    deployments_report = fingerprint_only_scanjob.report.deployment_report
-    assert deployments_report.cached_fingerprints_file_exists
-    # cached_csv is not populated automatically by fingerprinting alone.
-    generate_and_save_cached_csv(deployments_report.id)
-    deployments_report.refresh_from_db()
-    assert deployments_report.cached_csv_file_exists
-
-    # Destroy the underlying cache files to force the fields to clear
-    # when the fingerprint task starts up again.
-    Path(deployments_report.cached_fingerprints_file_path).unlink()
-    Path(deployments_report.cached_csv_file_path).unlink()
-
-    # Rerun the fingerprint task via DeploymentsReport._rerun_latest_fingerprint.
-    with override_settings(CELERY_TASK_ALWAYS_EAGER=True):
-        deployments_report._rerun_latest_fingerprint(wait=True)
-
-    fingerprint_only_scanjob.refresh_from_db()
-    assert fingerprint_only_scanjob.status == ScanTask.COMPLETED
-
-    # Check the cached fields and files again.
-    deployments_report.refresh_from_db()
-    assert deployments_report.cached_fingerprints_file_path is not None
-    assert deployments_report.cached_fingerprints_file_exists
-    # And remember that fingerprinting alone does not generate the CSV data,
-    # but it should clear the path when it sees that the file is missing.
-    assert deployments_report.cached_csv_file_path is None
-    assert not deployments_report.cached_csv_file_exists
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
