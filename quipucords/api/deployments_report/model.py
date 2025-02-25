@@ -13,6 +13,7 @@ from django.dispatch import receiver
 
 from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DEPLOYMENT
 from api.common.models import BaseModel
+from api.deployments_report import tasks
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
     META_DATA_KEY,
@@ -90,7 +91,7 @@ class DeploymentsReport(BaseModel):
                 self.id,
                 file_path,
             )
-            self._rerun_latest_fingerprint()
+            tasks.generate_cached_fingerprints.delay(self.id)
             raise
 
     @cached_fingerprints.setter
@@ -138,7 +139,7 @@ class DeploymentsReport(BaseModel):
                 self.id,
                 self.cached_csv_file_path,
             )
-            self._rerun_latest_fingerprint()
+            tasks.generate_and_save_cached_csv.delay(self.id)
             raise
 
     @cached_csv.setter
@@ -152,41 +153,6 @@ class DeploymentsReport(BaseModel):
         with file_path.open("w") as f:
             f.write(data)
         self.cached_csv_file_path = file_path
-
-    def _rerun_latest_fingerprint(self, wait=False) -> None:
-        """
-        Trigger the latest fingerprint task to rerun.
-
-        Why would you want to do this? If you expect the cached_fingerprints or
-        cached_csv data to exist but either is missing, you may recreate them by
-        calling this method.
-
-        :param wait: if true, wait for task to complete
-        """
-        logger.info("Rerunning the last fingerprint task for %s", self)
-
-        # local imports to avoid possible import loop
-        from api.scantask.model import ScanTask
-        from scanner import tasks
-
-        scan_task = (
-            ScanTask.objects.filter(
-                job__report__deployment_report_id=self.id,
-                scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-            )
-            .order_by("-id")
-            .first()
-        )
-        if not scan_task:
-            # It is unclear how this is possible, but just in case, raise an
-            # exception because we cannot proceed here without a ScanTask,
-            # and we may not want to (or be able to) create a new one on demand.
-            raise ScanTask.DoesNotExist(f"No fingerprint ScanTask is related to {self}")
-
-        logger.info("Found %s for %s", scan_task, self)
-        fingerprint_task = tasks.fingerprint.delay(scan_task_id=scan_task.id)
-        if wait:
-            fingerprint_task.get()
 
 
 @receiver(post_delete, sender=DeploymentsReport)
