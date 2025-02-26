@@ -20,7 +20,7 @@ docutils==0.21.2
     # via
     #   changelog-chug
     #   python-daemon
-flit-core==3.10.1
+flit-core==3.11.0
     # via
     #   click
     #   django-filter
@@ -91,18 +91,18 @@ setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.0.4
     # via ansible-runner
-setuptools-scm==8.1.0
+setuptools-scm==8.2.0
     # via
     #   charset-normalizer
     #   django-axes
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.1.15.22
+trove-classifiers==2025.2.18.16
     # via hatchling
-types-psutil==6.1.0.20241221
+types-psutil==7.0.0.20250218
     # via mypy
-types-setuptools==75.8.0.20250210
+types-setuptools==75.8.0.20250225
     # via mypy
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "3.14"
     # via
@@ -131,9 +131,10 @@ setuptools==69.0.2
     #   ansible-runner
     #   setuptools-scm
 setuptools==75.8.0
+    # via ansible-core
+setuptools==75.8.1
     # via
     #   ansible
-    #   ansible-core
     #   bcrypt
     #   cachetools
     #   calver
