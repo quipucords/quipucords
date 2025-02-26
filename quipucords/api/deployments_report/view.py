@@ -53,10 +53,10 @@ def deployments(request, report_id=None):
     return Response(deployments_json)
 
 
-def build_cached_json_report(deployments_report):
+def build_cached_json_report(deployments_report: DeploymentsReport) -> dict:
     """Create a count report based on the fingerprints and the group.
 
-    :param report: the DeploymentsReport used to group count
+    :param deployments_report: the DeploymentsReport used to group count
     :returns: json report data
     :raises: Raises validation error group_count on non-existent field.
     """
