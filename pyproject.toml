@@ -62,7 +62,7 @@ pip-tools = "^7.3.0"
 watchdog = {extras = ["watchmedo"], version = "^2.2.1"}
 pybuild-deps = "^0.4.1"
 pytest-profiling = "^1.7.0"
-ipython = "^8.10.0"
+ipython = "^9.0.0"
 django-extensions = "^3.2.1"
 notebook = "^6.5.3"
 ruff = "^0"
