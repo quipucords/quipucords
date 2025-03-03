@@ -74,10 +74,9 @@ class Command(BaseCommand):
         """Generate cached fingerprints for the given deployments report IDs."""
         success_ids = []
         failure_ids = []
-        for _id in sorted(list(deployments_report_ids)):
-            success_ids.append(_id) if generate_cached_fingerprints(
-                _id
-            ) else failure_ids.append(_id)
+        for _id in sorted(deployments_report_ids):
+            success = generate_cached_fingerprints(_id)
+            success_ids.append(_id) if success else failure_ids.append(_id)
 
         return success_ids, failure_ids
 
@@ -85,7 +84,7 @@ class Command(BaseCommand):
         """Generate cached CSV files for the given deployments report IDs."""
         success_ids = []
         failure_ids = []
-        for _id in sorted(list(deployments_report_ids)):
+        for _id in sorted(deployments_report_ids):
             success = generate_and_save_cached_csv(_id)
             success_ids.append(_id) if success else failure_ids.append(_id)
 
