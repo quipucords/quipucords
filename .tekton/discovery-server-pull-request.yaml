@@ -199,7 +199,7 @@ spec:
         - clone-repository
       taskSpec:
         description: |
-          Custom task that generates dynamic labels based on "package.json" version. This produce the labels
+          Custom task that generates dynamic labels based on "pyproject.toml" version. This produce the labels
           "version" and "version_minor".
         params:
           - description: The Trusted Artifact URI pointing to the artifact with the application source code.
@@ -227,12 +227,12 @@ spec:
             image: quay.io/konflux-ci/yq:latest@sha256:85a04f04bb1b84e0ea5aedd74962e9516694a3575b47bc3f9c004dd0fc3e0fa7
             workingDir: /var/workdir/source
             script: |
-              echo "Extracting full version (X.Y.Z) from package.json"
-              VERSION=$(yq -r '.version' package.json)
+              echo "Extracting full version (X.Y.Z) from pyproject.toml"
+              VERSION=$(yq -r '.tool.poetry.version' pyproject.toml)
               echo "version=${VERSION}"
 
               echo "Computing minor version ta  g (X.Y only)"
-              VERSION_MINOR=$(yq -r '.version | split(".").[:2] | join(".")' package.json)
+              VERSION_MINOR=$(yq -r '.tool.poetry.version | split(".").[:2] | join(".")' pyproject.toml)
               echo "version_minor=${VERSION_MINOR}"
 
               echo "Writing results..."
@@ -301,7 +301,7 @@ spec:
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       - name: IMAGE_APPEND_PLATFORM
         value: "true"
-      # Customization added to allow using the version extracted from package.json
+      # Customization added to allow using the version extracted from pyproject.toml
       # as version label
       - name: LABELS
         value:
