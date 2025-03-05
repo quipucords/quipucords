@@ -5,6 +5,8 @@ metadata:
     build.appstudio.openshift.io/repo: https://github.com/quipucords/quipucords?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
+    # custom tasks defined in this repo https://pipelinesascode.com/docs/guide/resolver/#tasks-or-pipelines-inside-the-repository
+    pipelinesascode.tekton.dev/task: '[.tekton/task/generate-version-labels.yaml]'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
       == "main"
@@ -184,6 +186,17 @@ spec:
       workspaces:
       - name: basic-auth
         workspace: git-auth
+    # ===========================================================================
+    # Custom task that generates version labels
+    - name: generate-version-labels
+      params:
+        - name: SOURCE_ARTIFACT
+          value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+      runAfter:
+        - clone-repository
+      taskRef:
+        name: generate-version-labels
+    # ===========================================================================
     - name: prefetch-dependencies
       params:
       - name: input
@@ -246,8 +259,14 @@ spec:
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       - name: IMAGE_APPEND_PLATFORM
         value: "true"
+      # Customization added to allow using the version extracted from package.json
+      # as version label
+      - name: LABELS
+        value:
+          - $(tasks.generate-version-labels.results.labels[*])
       runAfter:
       - prefetch-dependencies
+      - generate-version-labels
       taskRef:
         params:
         - name: name
