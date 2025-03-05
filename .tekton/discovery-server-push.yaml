@@ -184,6 +184,58 @@ spec:
       workspaces:
       - name: basic-auth
         workspace: git-auth
+    # ======================================================================================================
+    # Custom task based on upstream tekton and konflux docs.
+    # Given this is pipeline requires using trusted artifacts, some boilerplate is required
+    # https://konflux-ci.dev/docs/advanced-how-tos/using-trusted-artifacts/#migrate-to-trusted-artifacts
+    - name: generate-version-labels
+      params:
+        - name: SOURCE_ARTIFACT
+          value: $(tasks.clone-repository.results.SOURCE_ARTIFACT)
+      runAfter:
+        - clone-repository
+      taskSpec:
+        description: |
+          Custom task that generates dynamic labels based on "package.json" version. This produce the labels
+          "version" and "version_minor".
+        params:
+          - description: The Trusted Artifact URI pointing to the artifact with the application source code.
+            name: SOURCE_ARTIFACT
+            type: string
+        stepTemplate:
+          volumeMounts:
+            - mountPath: /var/workdir
+              name: workdir
+        volumes:
+          # New volume to store a copy of the source code accessible only to this Task.
+          - name: workdir
+            emptyDir: {}
+        results:
+          - name: labels
+            description: The rendered labels
+            type: array
+        steps:
+          - name: use-trusted-artifact
+            image: quay.io/redhat-appstudio/build-trusted-artifacts:latest@sha256:8391272c4e5011120e9e7fee2c1f339e9405366110bf239dadcbc21e953ce099
+            args:
+              - use
+              - $(params.SOURCE_ARTIFACT)=/var/workdir/source
+          - name: generate-version-labels
+            image: quay.io/konflux-ci/yq:latest@sha256:85a04f04bb1b84e0ea5aedd74962e9516694a3575b47bc3f9c004dd0fc3e0fa7
+            workingDir: /var/workdir/source
+            script: |
+              echo "Extracting full version (X.Y.Z) from package.json"
+              VERSION=$(yq -r '.version' package.json)
+              echo "version=${VERSION}"
+
+              echo "Computing minor version ta  g (X.Y only)"
+              VERSION_MINOR=$(yq -r '.version | split(".").[:2] | join(".")' package.json)
+              echo "version_minor=${VERSION_MINOR}"
+
+              echo "Writing results..."
+              # version and version_minor are the labels expected in downstream RPA configuration
+              echo [\"version=${VERSION}\", \"version_minor=${VERSION_MINOR}\"] | tee "$(results.labels.path)"
+    # ======================================================================================================
     - name: prefetch-dependencies
       params:
       - name: input
@@ -246,6 +298,11 @@ spec:
         value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
       - name: IMAGE_APPEND_PLATFORM
         value: "true"
+      # Customization added to allow using the version extracted from package.json
+      # as version label
+      - name: LABELS
+        value:
+          - $(tasks.generate-version-labels.results.labels[*])
       runAfter:
       - prefetch-dependencies
       taskRef:
