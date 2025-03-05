@@ -199,12 +199,21 @@ spec:
         - clone-repository
       taskSpec:
         description: |
-          Custom task that generates dynamic labels based on "pyproject.toml" version. This produce the labels
-          "version" and "version_minor".
+          Custom task that generates dynamic labels based on information extracted with yq.
         params:
           - description: The Trusted Artifact URI pointing to the artifact with the application source code.
             name: SOURCE_ARTIFACT
             type: string
+          - name: labels
+            description: Object describing the labels that will be generated
+            type: object
+            properties:
+              label:
+                type: string
+              yqCommand:
+                type: string
+              filePath:
+                type: string
         stepTemplate:
           volumeMounts:
             - mountPath: /var/workdir
@@ -227,17 +236,9 @@ spec:
             image: quay.io/konflux-ci/yq:latest@sha256:85a04f04bb1b84e0ea5aedd74962e9516694a3575b47bc3f9c004dd0fc3e0fa7
             workingDir: /var/workdir/source
             script: |
-              echo "Extracting full version (X.Y.Z) from pyproject.toml"
-              VERSION=$(yq -r '.tool.poetry.version' pyproject.toml)
-              echo "version=${VERSION}"
-
-              echo "Computing minor version ta  g (X.Y only)"
-              VERSION_MINOR=$(yq -r '.tool.poetry.version | split(".").[:2] | join(".")' pyproject.toml)
-              echo "version_minor=${VERSION_MINOR}"
-
-              echo "Writing results..."
-              # version and version_minor are the labels expected in downstream RPA configuration
-              echo [\"version=${VERSION}\", \"version_minor=${VERSION_MINOR}\"] | tee "$(results.labels.path)"
+              for label in "${params.labels[*]}"; do
+                echo $label
+              done
     # ======================================================================================================
     - name: prefetch-dependencies
       params:
