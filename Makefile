@@ -28,8 +28,9 @@ QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY ?= 10
 QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 
-UBI_IMAGE=registry.access.redhat.com/ubi9
-UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi9/ubi-minimal
+UBI_VERSION=9
+UBI_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)
+UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)/ubi-minimal
 RPM_LOCKFILE_IMAGE=localhost/rpm-lockfile-prototype
 
 help:
@@ -180,7 +181,15 @@ test-sudo-list:
 # extracts ubi.repo file from updated ubi image; this file is required for updating rpms locks
 update-ubi-repo:
 	podman pull $(UBI_MINIMAL_IMAGE)
+	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way 
+	# the EC checks expect
+	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
+	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
 	podman run -it $(UBI_MINIMAL_IMAGE) cat /etc/yum.repos.d/ubi.repo | \
+		$(SED) 's/ubi-$(UBI_VERSION)-\(baseos-[[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
+		$(SED) 's/ubi-$(UBI_VERSION)-\(appstream-[[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
+		$(SED) 's/ubi-$(UBI_VERSION)-\(appstream-[[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
+		$(SED) 's/ubi-$(UBI_VERSION)-codeready-builder-\([[:alnum:]-]*rpms\)/codeready-builder-for-ubi-$(UBI_VERSION)-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
 
 # prepare rpm-lockfile-prototype tool to lock our rpms
