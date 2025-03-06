@@ -60,13 +60,13 @@ arches:
     name: jq
     evr: 1.6-15.el9
     sourcerpm: jq-1.6-15.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-503.26.1.el9_5.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-503.29.1.el9_5.aarch64.rpm
     repoid: ubi-9-appstream-rpms
-    size: 3890829
-    checksum: sha256:16663c5a90ef1be3bf9348dc14bc78aa6eca55f7daf8bbdae078fa513784dcb9
+    size: 3896005
+    checksum: sha256:12f60a30fc3c080b2a4b818b56ccde4ec8e0cf396fa92c05b5fd0b951383cfac
     name: kernel-headers
-    evr: 5.14.0-503.26.1.el9_5
-    sourcerpm: kernel-5.14.0-503.26.1.el9_5.src.rpm
+    evr: 5.14.0-503.29.1.el9_5
+    sourcerpm: kernel-5.14.0-503.29.1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libasan-11.5.0-5.el9_5.aarch64.rpm
     repoid: ubi-9-appstream-rpms
     size: 413819
@@ -1128,13 +1128,13 @@ arches:
     name: jq
     evr: 1.6-15.el9
     sourcerpm: jq-1.6-15.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-503.26.1.el9_5.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-503.29.1.el9_5.x86_64.rpm
     repoid: ubi-9-appstream-rpms
-    size: 3929365
-    checksum: sha256:e3f6f637b01b759feb82ec8604552afb1c1d455381e06da7080bd666ebc45d68
+    size: 3934489
+    checksum: sha256:9395568f2a4fe739578785b5edb70951dba83d957117a13b00dd951fa751b482
     name: kernel-headers
-    evr: 5.14.0-503.26.1.el9_5
-    sourcerpm: kernel-5.14.0-503.26.1.el9_5.src.rpm
+    evr: 5.14.0-503.29.1.el9_5
+    sourcerpm: kernel-5.14.0-503.29.1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libmpc-1.2.1-4.el9.x86_64.rpm
     repoid: ubi-9-appstream-rpms
     size: 66075
