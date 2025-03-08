@@ -5,10 +5,14 @@
 
 packages:
   # build dependencies (will be removed after quipucords is built)
+  - cargo
   - crypto-policies-scripts
   - gcc
+  - libffi-devel
   - libpq-devel
+  - openssl-devel
   - python3.12-devel
+  - findutils
   # actual dependencies
   - git
   - glibc-langpack-en
