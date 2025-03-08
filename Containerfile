@@ -11,11 +11,11 @@ RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
     dnf clean all &&\
     python3.12 -m venv /opt/venv
 
-COPY scripts/prepare-rust-deps.py .
-RUN python prepare-rust-deps.py "${CRATES_PATH}"
+COPY scripts/prepare_rust_deps.py .
+RUN python prepare_rust_deps.py "${CRATES_PATH}"
 
 COPY lockfiles/requirements.txt .
-RUN pip install --verbose -r requirements.txt
+RUN pip install -r requirements.txt
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0
 ARG K8S_DESCRIPTION="Quipucords"
