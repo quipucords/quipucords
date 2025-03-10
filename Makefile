@@ -77,8 +77,12 @@ lock-main-requirements:
 	poetry lock --no-update
 	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
 
+lock-rustdeps:
+	$(PYTHON) scripts/rusted.py -o lockfiles/artifacts.lock.yaml lockfiles/requirements.txt lockfiles/requirements-build.txt
+
 lock-build-requirements:
 	poetry run pybuild-deps compile -o lockfiles/requirements-build.txt lockfiles/requirements.txt
+	$(MAKE) lock-rustdeps
 
 update-requirements:
 	poetry update --no-cache
@@ -205,13 +209,21 @@ lock-rpms: setup-rpm-lockfile update-ubi-repo
 		/workdir/rpms.in.yaml
 
 # update image digest
-lock-baseimage:
-	podman pull $(UBI_MINIMAL_IMAGE)
-	# escape "/" for use in sed later
-	$(eval ESCAPED_IMAGE=$(shell echo $(UBI_MINIMAL_IMAGE) | $(SED) 's/\//\\\//g'))
-	# extract the digest
-	$(eval UPDATED_SHA=$(shell skopeo inspect --raw "docker://$(UBI_MINIMAL_IMAGE)" | sha256sum | cut -d ' ' -f1))
-	# update Containerfile with the new digest
-	$(SED) -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
+.PHONY: lock-baseimages
+lock-baseimages:
+	separator="================================================================"; \
+	baseimages=($$(grep '^FROM ' Containerfile | sed 's/FROM\s*\(.*\)@.*/\1/g' | sort -u)); \
+	for image in $${baseimages[@]}; do \
+		echo "$${separator}"; \
+		echo "updating $${image}..."; \
+		podman pull $${image}; \
+		# escape "/" for use in $(SED) later \
+		escaped_img=$$(echo $${image} | $(SED) 's/\//\\\//g') ;\
+		# extract the image digest \
+		updated_sha=$$(skopeo inspect --raw "docker://$${image}" | sha256sum | cut -d ' ' -f1); \
+		# update Containerfile with the new digest \
+		$(SED) -i "s/^\(FROM $${escaped_img}@sha256:\)[[:alnum:]]*/\1$${updated_sha}/g" Containerfile; \
+	done; \
+	echo "$${separator}"
 
-update-lockfiles: lock-baseimage lock-rpms update-requirements
+update-lockfiles: lock-baseimages lock-rpms update-requirements

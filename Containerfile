@@ -1,5 +1,23 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0
+FROM quay.io/konflux-ci/yq@sha256:37130a138e008c68c618a7ae727f8deb6021ea181b22d559c3de2cb435c5820f as yq
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0 as builder
+# Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
+ARG CRATES_PATH="/tmp/output/deps/generic"
+ENV PATH="/opt/venv/bin:${PATH}"
+COPY --from=yq /usr/bin/yq /usr/bin/yq
+COPY scripts/dnf /usr/local/bin/dnf
+COPY lockfiles/rpms.in.yaml rpms.in.yaml
+RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
+    dnf install ${RPMS} -y &&\
+    dnf clean all &&\
+    python3.12 -m venv /opt/venv
 
+COPY scripts/prepare_rust_deps.py .
+RUN python prepare_rust_deps.py "${CRATES_PATH}"
+
+COPY lockfiles/requirements.txt .
+RUN pip install -r requirements.txt
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
@@ -25,7 +43,7 @@ ENV QUIPUCORDS_PRODUCTION=True
 ENV QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL=${QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL}
 
 COPY scripts/dnf /usr/local/bin/dnf
-ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.12-devel"
+ARG BUILD_PACKAGES="crypto-policies-scripts"
 RUN dnf install \
         git \
         glibc-langpack-en \
@@ -42,20 +60,13 @@ RUN dnf install \
         which \
         ${BUILD_PACKAGES} \
         -y &&\
-    dnf clean all &&\
-    python3.12 -m venv /opt/venv
-
+    dnf clean all    
 # set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
 RUN update-crypto-policies --set LEGACY
-
-RUN pip install --upgrade pip wheel
-
-WORKDIR /app
-COPY lockfiles/requirements.txt .
-RUN pip install -r requirements.txt
 RUN dnf remove ${BUILD_PACKAGES} -y && \
     dnf clean all
 
+WORKDIR /app
 # Create /deploy
 COPY deploy  /deploy
 
@@ -65,6 +76,9 @@ VOLUME /var/log
 # Create /var/data
 RUN mkdir -p /var/data
 VOLUME /var/data
+
+# copy virtual env prepared on builder layer
+COPY --from=builder /opt/venv /opt/venv
 
 # Copy server code
 COPY . .
