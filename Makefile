@@ -199,19 +199,27 @@ setup-rpm-lockfile:
 
 # update rpm locks
 lock-rpms: setup-rpm-lockfile update-ubi-repo
-	podman run -w /workdir --rm -v ${PWD}/lockfiles:/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
+	podman run -w /workdir --rm -v $(TOPDIR):/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
 		--image $(UBI_MINIMAL_IMAGE) \
-		--outfile=/workdir/rpms.lock.yaml \
-		/workdir/rpms.in.yaml
+		--outfile=/workdir/lockfiles/rpms.lock.yaml \
+		rpms.in.yaml
 
 # update image digest
-lock-baseimage:
-	podman pull $(UBI_MINIMAL_IMAGE)
-	# escape "/" for use in sed later
-	$(eval ESCAPED_IMAGE=$(shell echo $(UBI_MINIMAL_IMAGE) | $(SED) 's/\//\\\//g'))
-	# extract the digest
-	$(eval UPDATED_SHA=$(shell skopeo inspect --raw "docker://$(UBI_MINIMAL_IMAGE)" | sha256sum | cut -d ' ' -f1))
-	# update Containerfile with the new digest
-	$(SED) -i 's/^\(FROM $(ESCAPED_IMAGE)@sha256:\).*$$/\1$(UPDATED_SHA)/' Containerfile
+.PHONY: lock-baseimages
+lock-baseimages:
+	separator="================================================================"; \
+	baseimages=($$(grep '^FROM ' Containerfile | sed 's/FROM\s*\(.*\)@.*/\1/g' | sort -u)); \
+	for image in $${baseimages[@]}; do \
+		echo "$${separator}"; \
+		echo "updating $${image}..."; \
+		podman pull $${image}; \
+		# escape "/" for use in $(SED) later \
+		escaped_img=$$(echo $${image} | $(SED) 's/\//\\\//g') ;\
+		# extract the image digest \
+		updated_sha=$$(skopeo inspect --raw "docker://$${image}" | sha256sum | cut -d ' ' -f1); \
+		# update Containerfile with the new digest \
+		$(SED) -i "s/^\(FROM $${escaped_img}@sha256:\)[[:alnum:]]*/\1$${updated_sha}/g" Containerfile; \
+	done; \
+	echo "$${separator}"
 
-update-lockfiles: lock-baseimage lock-rpms update-requirements
+update-lockfiles: lock-baseimages lock-rpms update-requirements
