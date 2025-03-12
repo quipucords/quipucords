@@ -32,7 +32,7 @@ The Python packages that are required for running quipucords on a system can be 
 "tool.poetry.dependencies". Packages for development and testing are in the section "tool.poetry.group.dev.dependencies".
 Finally, python packages for compiling quipucords from source can be found in `requirements-build.txt`.
 # <a name="installation"></a> Installation
-quipucords server is delivered as a container image on quay.io. As so, the only requirement for 
+quipucords server is delivered as a container image on quay.io. As so, the only requirement for
 it is having `podman`, `docker` or any alternative to those.
 
 ## Quick installation
@@ -64,6 +64,21 @@ poetry install
 
 Quipucords environment variables for configuration. Our recommendation is to use the "poetry
 dotenv" plugin to handle those (`poetry self add poetry-dotenv-plugin`), then add desired environment variables to the `.env` file. You can copy `.env.example` to get started.
+
+### macOS build requirements
+
+If you are building on macOS, you need to install `skopeo`, a modern version of `make`, and a modern version of `sed`. The default `make` and `sed` versions included by Apple in macOS are too old and incompatible with our build commands. If using Homebrew (`brew`), run the following:
+
+```sh
+brew install make gnu-sed skopeo
+```
+
+After installing `make`, put the updated version earlier on your `PATH` or always remember to use `gmake` instead of `make` when invoking Make targets in this project. For example:
+
+```sh
+# optionally put this in your shell rc file or add to local environment:
+PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+```
 
 ## Database Options
 Quipucords currently supports both SQLite and PostgreSQL. The default database is an internal postgres container.
@@ -106,7 +121,7 @@ make fetch-ui
 make server-static
 ```
 
-If you prefer to build it from source, then `make build-ui` rule will be used instead. 
+If you prefer to build it from source, then `make build-ui` rule will be used instead.
 See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.
 
 To run the development server, run the following command:
