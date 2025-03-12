@@ -13,7 +13,6 @@ packages:
   # ONLY ADD RUNTIME DEPENDENCIES AFTER THIS LINE
   - git
   - glibc-langpack-en
-  - jq
   - libpq
   - make
   - nmap-ncat
