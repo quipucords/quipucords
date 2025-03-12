@@ -1,13 +1,19 @@
 FROM quay.io/konflux-ci/yq@sha256:ff08fe74188fbadf23ce6b2e4d1db8cadd170203214031d093ff4e4e574a45d6 as yq
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:30bbd445046a3a63f5f5557a3c67dee74e3c8e7855eb0347630b020f3689823f as builder
+# Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
+ARG CRATES_PATH="/tmp/output/deps/generic"
 ENV PATH="/opt/venv/bin:${PATH}"
-COPY --from=yq /usr/bin/yq /usr/local/bin/yq
+COPY --from=yq /usr/bin/yq /usr/bin/yq
 COPY scripts/dnf /usr/local/bin/dnf
 COPY rpms.in.yaml rpms.in.yaml
 RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
     dnf install ${RPMS} -y &&\
     dnf clean all &&\
     python3.12 -m venv /opt/venv
+
+# TODO remove prepare_rust_deps script when cachi2/hermeto supports pip+cargo dependencies 
+COPY scripts/prepare_rust_deps.py .
+RUN python prepare_rust_deps.py "${CRATES_PATH}"
 
 COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
