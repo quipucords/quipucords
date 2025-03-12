@@ -9,7 +9,8 @@ packages:
   - gcc
   - libpq-devel
   - python3.12-devel
-  # actual dependencies
+  # runtime dependencies
+  # ONLY ADD RUNTIME DEPENDENCIES AFTER THIS LINE
   - git
   - glibc-langpack-en
   - jq
@@ -26,7 +27,7 @@ packages:
 
 contentOrigin:
   # make lock-rpms automatically generates ubi.repo file
-  repofiles: ["./ubi.repo"]
+  repofiles: ["lockfiles/ubi.repo"]
 
 arches:
   - aarch64

@@ -1,5 +1,18 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0
+FROM quay.io/konflux-ci/yq@sha256:37130a138e008c68c618a7ae727f8deb6021ea181b22d559c3de2cb435c5820f as yq
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0 as builder
+ENV PATH="/opt/venv/bin:${PATH}"
+COPY --from=yq /usr/bin/yq /usr/local/bin/yq
+COPY scripts/dnf /usr/local/bin/dnf
+COPY rpms.in.yaml rpms.in.yaml
+RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
+    dnf install ${RPMS} -y &&\
+    dnf clean all &&\
+    python3.12 -m venv /opt/venv
 
+COPY lockfiles/requirements.txt .
+RUN pip install -r requirements.txt
+
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
@@ -24,37 +37,20 @@ ENV QUIPUCORDS_LOG_LEVEL=INFO
 ENV QUIPUCORDS_PRODUCTION=True
 ENV QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL=${QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL}
 
+WORKDIR /app
 COPY scripts/dnf /usr/local/bin/dnf
-ARG BUILD_PACKAGES="crypto-policies-scripts gcc libpq-devel python3.12-devel"
-RUN dnf install \
-        git \
-        glibc-langpack-en \
-        jq \
-        libpq \
-        make \
-        nmap-ncat \
-        openssh-clients \
-        procps-ng \
-        python3.12 \
-        python3.12-pip \
-        sshpass \
-        tar \
-        which \
-        ${BUILD_PACKAGES} \
-        -y &&\
-    dnf clean all &&\
-    python3.12 -m venv /opt/venv
-
+COPY --from=yq /usr/bin/yq /usr/local/bin/yq
+COPY rpms.in.yaml .
+ARG BUILD_DEPS="crypto-policies-scripts"
+RUN DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -A1000 | yq 'join(" ")') &&\
+    dnf install ${DEPS} ${BUILD_DEPS} -y &&\
+    dnf clean all
 # set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
 RUN update-crypto-policies --set LEGACY
-
-RUN pip install --upgrade pip wheel
-
-WORKDIR /app
-COPY lockfiles/requirements.txt .
-RUN pip install -r requirements.txt
-RUN dnf remove ${BUILD_PACKAGES} -y && \
-    dnf clean all
+# cleanup unecessary 
+RUN dnf remove ${BUILD_DEPS} -y && \
+    dnf clean all &&\
+    rm -rf /usr/local/bin/yq /usr/local/bin/dnf
 
 # Create /deploy
 COPY deploy  /deploy
@@ -65,6 +61,9 @@ VOLUME /var/log
 # Create /var/data
 RUN mkdir -p /var/data
 VOLUME /var/data
+
+# copy virtual env prepared on builder layer
+COPY --from=builder /opt/venv /opt/venv
 
 # Copy server code
 COPY . .
