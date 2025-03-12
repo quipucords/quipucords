@@ -1,5 +1,5 @@
-FROM quay.io/konflux-ci/yq@sha256:37130a138e008c68c618a7ae727f8deb6021ea181b22d559c3de2cb435c5820f as yq
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0 as builder
+FROM quay.io/konflux-ci/yq@sha256:ff08fe74188fbadf23ce6b2e4d1db8cadd170203214031d093ff4e4e574a45d6 as yq
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:30bbd445046a3a63f5f5557a3c67dee74e3c8e7855eb0347630b020f3689823f as builder
 ENV PATH="/opt/venv/bin:${PATH}"
 COPY --from=yq /usr/bin/yq /usr/local/bin/yq
 COPY scripts/dnf /usr/local/bin/dnf
@@ -12,7 +12,7 @@ RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
 COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:14f14e03d68f7fd5f2b18a13478b6b127c341b346c86b6e0b886ed2b7573b8e0
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:30bbd445046a3a63f5f5557a3c67dee74e3c8e7855eb0347630b020f3689823f
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
