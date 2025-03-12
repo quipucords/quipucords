@@ -77,8 +77,12 @@ lock-main-requirements:
 	poetry lock --no-update
 	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
 
+lock-rustdeps:
+	$(PYTHON) scripts/lock_crates.py -o lockfiles/artifacts.lock.yaml lockfiles/requirements.txt lockfiles/requirements-build.txt
+
 lock-build-requirements:
 	poetry run pybuild-deps compile -o lockfiles/requirements-build.txt lockfiles/requirements.txt
+	$(MAKE) lock-rustdeps
 
 update-requirements:
 	poetry update --no-cache

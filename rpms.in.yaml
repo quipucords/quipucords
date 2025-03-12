@@ -5,9 +5,13 @@
 
 packages:
   # build dependencies (will be removed after quipucords is built)
+  - cargo
   - crypto-policies-scripts
+  - findutils
   - gcc
+  - libffi-devel
   - libpq-devel
+  - openssl-devel
   - python3.12-devel
   # runtime dependencies
   # ONLY ADD RUNTIME DEPENDENCIES AFTER THIS LINE
