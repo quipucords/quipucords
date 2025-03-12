@@ -19,7 +19,6 @@ endif
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
-PIP_COMPILE_ARGS = --no-upgrade
 BINDIR  = bin
 PARALLEL_NUM ?= $(shell $(PYTHON) -c 'import multiprocessing as m;print(int(max(m.cpu_count()/2, 2)))')
 TEST_TIMEOUT ?= 15
@@ -74,7 +73,7 @@ clean-db:
 lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
-	poetry lock --no-update
+	poetry lock
 	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
@@ -82,7 +81,7 @@ lock-build-requirements:
 
 update-requirements:
 	poetry update --no-cache
-	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
+	$(MAKE) lock-requirements
 
 check-requirements:
 ifeq ($(shell git diff --exit-code lockfiles/requirements.txt >/dev/null 2>&1; echo $$?), 0)
