@@ -99,24 +99,16 @@ make server-init QUIPUCORDS_SERVER_PASSWORD="SuperAdmin1"
 Both of the above commands create a superuser with name `admin` and password of `SuperAdmin1`.
 
 ## Running the Server
-Currently, quipucords needs quipucords-ui to run. In order to get it's latest version, run
-
 ```
-make fetch-ui
 make server-static
-```
-
-If you prefer to build it from source, then `make build-ui` rule will be used instead. 
-See [quipucords-ui installation instructions](https://github.com/quipucords/quipucords-ui) for further information.
-
-To run the development server, run the following command:
-```
 make serve
 ```
 To log in to the server, you must connect to http://127.0.0.1:8000 and provide the superuser credentials stated above.
 
 After logging in, you can change the password and also go to some browsable APIs such as http://127.0.0.1:8000/api/v1/credentials/.
 To use the command line interface, you can configure access to the server by entering `qpc server config`. You can then log in by using `qpc server login`.
+
+If you want to also use the UI, please refer to [quipucords-ui](https://github.com/quipucords/quipucords-ui) for further information.
 
 ### macOS Dependencies
 If you intend to run on Mac OS, there are several more steps that are required.
