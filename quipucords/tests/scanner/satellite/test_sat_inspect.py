@@ -65,18 +65,6 @@ class TestInspectTaskRunner:
         return scan_job, inspect_task
 
     @pytest.mark.django_db
-    def test_run_failed_prereq(self):
-        """Test the running connect task with no source options."""
-        scan_job, inspect_task = self.create_scan_job()
-        connect_task = inspect_task.prerequisites.first()
-        connect_task.status = ScanTask.FAILED
-        connect_task.save()
-        task = InspectTaskRunner(scan_job, inspect_task)
-        status = task.run()
-
-        assert status[1] == ScanTask.FAILED
-
-    @pytest.mark.django_db
     def test_run_unknown_sat(self):
         """Test running the inspect scan for unknown sat."""
         scan_job, inspect_task = self.create_scan_job()
@@ -189,12 +177,18 @@ class TestInspectTaskRunner:
         scan_job, inspect_task = self.create_scan_job()
         task = InspectTaskRunner(scan_job, inspect_task)
 
-        with patch(
-            "scanner.satellite.runner.utils.status",
-            return_value=(200, 2, SATELLITE_VERSION_6),
-        ) as mock_sat_status:
-            with patch.object(SatelliteSixV2, "hosts_facts") as mock_facts:
-                status = task.run()
-                mock_sat_status.assert_called_once_with(ANY)
-                mock_facts.assert_called_once_with()
-                assert status[1] == ScanTask.COMPLETED
+        with (
+            patch(
+                "scanner.satellite.runner.utils.status",
+                return_value=(200, 2, SATELLITE_VERSION_6),
+            ) as mock_sat_status,
+            patch.object(SatelliteSixV2, "host_count") as mock_host_count,
+            patch.object(SatelliteSixV2, "hosts") as mock_hosts,
+            patch.object(SatelliteSixV2, "hosts_facts") as mock_facts,
+        ):
+            status = task.run()
+            mock_sat_status.assert_called_once_with(ANY)
+            mock_host_count.assert_called_once_with()
+            mock_hosts.assert_called_once_with()
+            mock_facts.assert_called_once_with()
+            assert status[1] == ScanTask.COMPLETED

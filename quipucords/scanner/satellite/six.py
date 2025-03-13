@@ -466,7 +466,7 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     def _request_and_record_hosts(self, credential, org_id=None):
         """Request and record hosts for the given credential and optional org filter."""
         hosts = []
-        for result in request_results(self.connect_scan_task, self.HOSTS_URL, org_id):
+        for result in request_results(self.inspect_scan_task, self.HOSTS_URL, org_id):
             host_name = result.get(NAME)
             host_id = result.get(ID)
 
@@ -482,9 +482,10 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
 
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
-        systems_count = len(self.connect_scan_task.connection_result.systems.all())
+        systems_count = len(self.inspect_scan_task.connection_result.systems.all())
         if self.inspect_scan_task is None:
             raise SatelliteError("hosts_facts cannot be called for a connection scan")
+        self.inspect_scan_task.reset_stats()
         self.inspect_scan_task.update_stats(
             "INITIAL SATELLITE STATS", sys_count=systems_count
         )
@@ -528,7 +529,7 @@ class SatelliteSixV1(SatelliteSix):
 
         self.orgs = [
             result.get(ID)
-            for result in request_results(self.connect_scan_task, ORGS_V1_URL)
+            for result in request_results(self.inspect_scan_task, ORGS_V1_URL)
             if result.get(ID) is not None
         ]
         return self.orgs
@@ -540,7 +541,7 @@ class SatelliteSixV1(SatelliteSix):
         for org_id in orgs:
             params = {PAGE: 1, PER_PAGE: 100, THIN: 1}
             response, url = utils.execute_request(
-                self.connect_scan_task,
+                self.inspect_scan_task,
                 url=HOSTS_V1_URL,
                 org_id=org_id,
                 query_params=params,
@@ -550,14 +551,14 @@ class SatelliteSixV1(SatelliteSix):
                     f"Invalid response code {response.status_code} for url: {url}"
                 )
             systems_count += response.json().get("total", 0)
-            self.connect_scan_task.update_stats(
+            self.inspect_scan_task.update_stats(
                 "INITIAL SATELLITE STATS", sys_count=systems_count
             )
             return systems_count
 
     def hosts(self):
         """Obtain the managed hosts."""
-        credential = utils.get_credential(self.connect_scan_task)
+        credential = utils.get_credential(self.inspect_scan_task)
 
         hosts = list(
             itertools.chain.from_iterable(
@@ -590,21 +591,21 @@ class SatelliteSixV2(SatelliteSix):
         """Obtain the count of managed hosts."""
         params = {PAGE: 1, PER_PAGE: 10, THIN: 1}
         response, url = utils.execute_request(
-            self.connect_scan_task, url=HOSTS_V2_URL, query_params=params
+            self.inspect_scan_task, url=HOSTS_V2_URL, query_params=params
         )
         if response.status_code != requests.codes.ok:
             raise SatelliteError(
                 f"Invalid response code {response.status_code} for url: {url}"
             )
         systems_count = response.json().get("total", 0)
-        self.connect_scan_task.update_stats(
+        self.inspect_scan_task.update_stats(
             "INITIAL SATELLITE STATS", sys_count=systems_count
         )
         return systems_count
 
     def hosts(self):
         """Obtain the managed hosts."""
-        credential = utils.get_credential(self.connect_scan_task)
+        credential = utils.get_credential(self.inspect_scan_task)
         return self._request_and_record_hosts(credential)
 
     def _requests_hosts_unique(self):
