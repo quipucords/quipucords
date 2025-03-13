@@ -44,7 +44,6 @@ drf-spectacular = {extras = ["sidecar"], version = "^0.28.0"}
 # remove this dependency as poetry-core is an indirect dependency.
 poetry-core = "<2.0.0"
 # =====================================================================
-fqdn = "^1.5.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"

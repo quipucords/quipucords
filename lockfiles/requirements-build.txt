@@ -98,11 +98,11 @@ setuptools-scm==8.2.0
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.3.3.18
+trove-classifiers==2025.2.18.16
     # via hatchling
 types-psutil==7.0.0.20250218
     # via mypy
-types-setuptools==75.8.2.20250305
+types-setuptools==75.8.0.20250225
     # via mypy
 typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "3.14"
     # via
@@ -132,7 +132,7 @@ setuptools==69.0.2
     #   setuptools-scm
 setuptools==75.8.0
     # via ansible-core
-setuptools==75.8.2
+setuptools==75.8.1
     # via
     #   ansible
     #   bcrypt
