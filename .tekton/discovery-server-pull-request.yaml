@@ -572,6 +572,8 @@ spec:
       params:
       - name: IMAGE
         value: $(tasks.build-image-index.results.IMAGE_URL)
+      - name: ADDITIONAL_TAGS
+        value: ["pr-{{pull_request_number}}"]
       runAfter:
       - build-image-index
       taskRef:
