@@ -182,29 +182,33 @@ generate-sudo-list:
 test-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1
 
-# extracts ubi.repo file from updated ubi image; this file is required for updating rpms locks
-update-ubi-repo:
-	podman pull $(UBI_MINIMAL_IMAGE)
+# prepare rpm-lockfile-prototype tool to lock our rpms
+setup-rpm-lockfile:
+	$(PYTHON) scripts/build_rpm_lockfile.py
+
+# update rpm locks
+lock-rpms: setup-rpm-lockfile
+	# the last layer will be considered the base image here; 
+	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
+	# extract ubi.repo from BASE_IMAGE
 	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way 
 	# the EC checks expect
 	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
 	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
-	podman run -it $(UBI_MINIMAL_IMAGE) cat /etc/yum.repos.d/ubi.repo | \
+	podman run -it --rm "$(BASE_IMAGE)" cat /etc/yum.repos.d/ubi.repo | \
 		$(SED) 's/ubi-$(UBI_VERSION)-codeready-builder-\([[:alnum:]-]*rpms\)/codeready-builder-for-ubi-$(UBI_VERSION)-$$basearch-\1/g' | \
 		$(SED) 's/ubi-$(UBI_VERSION)-\([[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
-
-# prepare rpm-lockfile-prototype tool to lock our rpms
-setup-rpm-lockfile:
-	podman pull $(UBI_IMAGE)
-	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
-		podman build -t $(RPM_LOCKFILE_IMAGE) \
-		--build-arg BASE_IMAGE=$(UBI_IMAGE) -
-
-# update rpm locks
-lock-rpms: setup-rpm-lockfile update-ubi-repo
-	podman run -w /workdir --rm -v $(TOPDIR):/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
-		--image $(UBI_MINIMAL_IMAGE) \
+	# finally, update the rpm locks
+	# CACHE_PATH => rpm-lockfile-prototype has an undocumented cache
+	# https://github.com/konflux-ci/rpm-lockfile-prototype/blob/283ee2cd7938a2142d8ac98de33ba0d0e3ac146f/rpm_lockfile/utils.py#L18C1-L18C11
+	CACHE_PATH=".cache/rpm-lockfile-prototype"; \
+	mkdir -p "$${HOME}/$${CACHE_PATH}"; \
+	podman run -w /workdir --rm \
+		-v $(TOPDIR):/workdir:Z \
+		-v "$${HOME}/$${CACHE_PATH}:/root/$${CACHE_PATH}:Z" \
+		$(RPM_LOCKFILE_IMAGE):latest \
+		--image $(BASE_IMAGE) \
 		--outfile=/workdir/lockfiles/rpms.lock.yaml \
 		rpms.in.yaml
 
@@ -216,11 +220,10 @@ lock-baseimages:
 	for image in $${baseimages[@]}; do \
 		echo "$${separator}"; \
 		echo "updating $${image}..."; \
-		podman pull $${image}; \
 		# escape "/" for use in $(SED) later \
 		escaped_img=$$(echo $${image} | $(SED) 's/\//\\\//g') ;\
 		# extract the image digest \
-		updated_sha=$$(skopeo inspect --raw "docker://$${image}" | sha256sum | cut -d ' ' -f1); \
+		updated_sha=$$(skopeo inspect --raw "docker://$${image}:latest" | sha256sum | cut -d ' ' -f1); \
 		# update Containerfile with the new digest \
 		$(SED) -i "s/^\(FROM $${escaped_img}@sha256:\)[[:alnum:]]*/\1$${updated_sha}/g" Containerfile; \
 	done; \

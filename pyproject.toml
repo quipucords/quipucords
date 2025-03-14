@@ -70,6 +70,7 @@ ruff = "^0"
 # FixMe: we had to hold back celery version because 5.4.0 introduced
 # some regressions in our unit tests
 celery = {extras = ["pytest"], version = ">=5.3,<5.4"}
+podman = "^5.4.0.1"
 
 [tool.pytest.ini_options]
 pythonpath = "quipucords/"
