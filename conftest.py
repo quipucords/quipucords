@@ -13,6 +13,8 @@ from django.contrib.auth import get_user_model
 from django.core import management
 from django.test import Client as DjangoClient
 
+pytest_plugins = ("celery.contrib.pytest",)
+
 
 @pytest.fixture(scope="session")
 def django_db_setup(django_db_setup, django_db_blocker):

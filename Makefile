@@ -1,5 +1,5 @@
 DATE		= $(shell date)
-PYTHON		= $(shell poetry run which python 2>/dev/null || which python)
+PYTHON		= $(shell uv run which python 2>/dev/null || which python)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -74,30 +74,30 @@ clean-db:
 lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
-	poetry lock --no-update
-	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
+	uv lock
+	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
 lock-rustdeps:
 	$(PYTHON) scripts/lock_crates.py -o lockfiles/artifacts.lock.yaml lockfiles/requirements.txt lockfiles/requirements-build.txt
 
 lock-build-requirements:
-	poetry run pybuild-deps compile -o lockfiles/requirements-build.txt lockfiles/requirements.txt
+	uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
 	$(MAKE) lock-rustdeps
 
 update-requirements:
-	poetry update --no-cache
-	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
+	uv lock --upgrade
+	$(MAKE) lock-requirements
 
 check-requirements:
 ifeq ($(shell git diff --exit-code lockfiles/requirements.txt >/dev/null 2>&1; echo $$?), 0)
 	@exit 0
 else
-	@echo "requirements.txt not in sync with poetry.lock. Run 'make lock-requirements' and commit the changes"
+	@echo "requirements.txt not in sync with uv.lock. Run 'make lock-requirements' and commit the changes"
 	@exit 1
 endif
 
 test:
-	poetry run pytest $(TEST_OPTS)
+	uv run pytest $(TEST_OPTS)
 
 test-case:
 	echo $(pattern)
@@ -112,10 +112,10 @@ test-coverage:
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QUIPUCORDS_DBMS=postgres COVERAGE_FILE=.coverage.notslow
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QUIPUCORDS_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
 	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m slow --cov=quipucords" COVERAGE_FILE=.coverage.slow
-	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.slow
-	poetry run coverage report
+	uv run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.slow
+	uv run coverage report
 	# We must run `coverage xml` explicitly to make GitHub codecov action happy.
-	poetry run coverage xml
+	uv run coverage xml
 
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
@@ -126,12 +126,12 @@ swagger-valid:
 lint: lint-shell lint-ruff lint-ansible
 
 lint-ruff:
-	poetry run ruff check .
-	poetry run ruff format --check .
+	uv run ruff check .
+	uv run ruff format --check .
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
-	poetry run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
+	uv run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
 
 lint-shell:
 	shellcheck ./deploy/*.sh
@@ -182,29 +182,48 @@ generate-sudo-list:
 test-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1
 
-# extracts ubi.repo file from updated ubi image; this file is required for updating rpms locks
-update-ubi-repo:
-	podman pull $(UBI_MINIMAL_IMAGE)
+# prepare rpm-lockfile-prototype tool to lock our rpms
+setup-rpm-lockfile:
+	latest_digest=$$(skopeo inspect --raw "docker://$(UBI_IMAGE):latest" | sha256sum | cut -d ' ' -f1); \
+	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
+		podman build -t $(RPM_LOCKFILE_IMAGE) \
+		--build-arg "BASE_IMAGE=$(UBI_IMAGE)@sha256:$${latest_digest}" -
+
+setup-rpm-lockfile-if-needed:
+ifneq ($(shell podman image exists $(RPM_LOCKFILE_IMAGE) >/dev/null 2>&1; echo $$?), 0)
+	$(MAKE) setup-rpm-lockfile
+else
+	$(eval image_created_at=$(shell date -d $$(podman inspect --format '{{json .Created}}' $(RPM_LOCKFILE_IMAGE) | tr -d '"') +"%s"))
+	$(eval 36h_ago=$(shell date -d "36 hours ago" +"%s"))
+	# recreate the rpm-lockfile container if it is "old"
+	@if [ "$(image_created_at)" -lt "$(36h_ago)" ]; then \
+		$(MAKE) setup-rpm-lockfile; \
+	fi
+endif
+
+# update rpm locks
+lock-rpms: setup-rpm-lockfile-if-needed
+	# the last layer will be considered the base image here; 
+	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
+	# extract ubi.repo from BASE_IMAGE
 	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way 
 	# the EC checks expect
 	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
 	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
-	podman run -it $(UBI_MINIMAL_IMAGE) cat /etc/yum.repos.d/ubi.repo | \
+	podman run -it --rm "$(BASE_IMAGE)" cat /etc/yum.repos.d/ubi.repo | \
 		$(SED) 's/ubi-$(UBI_VERSION)-codeready-builder-\([[:alnum:]-]*rpms\)/codeready-builder-for-ubi-$(UBI_VERSION)-$$basearch-\1/g' | \
 		$(SED) 's/ubi-$(UBI_VERSION)-\([[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
-
-# prepare rpm-lockfile-prototype tool to lock our rpms
-setup-rpm-lockfile:
-	podman pull $(UBI_IMAGE)
-	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
-		podman build -t $(RPM_LOCKFILE_IMAGE) \
-		--build-arg BASE_IMAGE=$(UBI_IMAGE) -
-
-# update rpm locks
-lock-rpms: setup-rpm-lockfile update-ubi-repo
-	podman run -w /workdir --rm -v $(TOPDIR):/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
-		--image $(UBI_MINIMAL_IMAGE) \
+	# finally, update the rpm locks
+	# CACHE_PATH => rpm-lockfile-prototype has an undocumented cache
+	# https://github.com/konflux-ci/rpm-lockfile-prototype/blob/283ee2cd7938a2142d8ac98de33ba0d0e3ac146f/rpm_lockfile/utils.py#L18C1-L18C11
+	CACHE_PATH=".cache/rpm-lockfile-prototype"; \
+	mkdir -p "$${HOME}/$${CACHE_PATH}"; \
+	podman run -w /workdir --rm \
+		-v $(TOPDIR):/workdir:Z \
+		-v "$${HOME}/$${CACHE_PATH}:/root/$${CACHE_PATH}:Z" \
+		$(RPM_LOCKFILE_IMAGE):latest \
+		--image $(BASE_IMAGE) \
 		--outfile=/workdir/lockfiles/rpms.lock.yaml \
 		rpms.in.yaml
 
@@ -216,11 +235,10 @@ lock-baseimages:
 	for image in $${baseimages[@]}; do \
 		echo "$${separator}"; \
 		echo "updating $${image}..."; \
-		podman pull $${image}; \
 		# escape "/" for use in $(SED) later \
 		escaped_img=$$(echo $${image} | $(SED) 's/\//\\\//g') ;\
 		# extract the image digest \
-		updated_sha=$$(skopeo inspect --raw "docker://$${image}" | sha256sum | cut -d ' ' -f1); \
+		updated_sha=$$(skopeo inspect --raw "docker://$${image}:latest" | sha256sum | cut -d ' ' -f1); \
 		# update Containerfile with the new digest \
 		$(SED) -i "s/^\(FROM $${escaped_img}@sha256:\)[[:alnum:]]*/\1$${updated_sha}/g" Containerfile; \
 	done; \
