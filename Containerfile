@@ -1,7 +1,7 @@
 FROM quay.io/konflux-ci/yq@sha256:ff08fe74188fbadf23ce6b2e4d1db8cadd170203214031d093ff4e4e574a45d6 as yq
 # builder and the "final" stages (and any stage that install rpms) MUST be compatible and derived from
 # the same ubi base (for instance, don't use a ubi8 "builder" stage with a "final" ubi9)
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:30bbd445046a3a63f5f5557a3c67dee74e3c8e7855eb0347630b020f3689823f as builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:bafd57451de2daa71ed301b277d49bd120b474ed438367f087eac0b885a668dc as builder
 # Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
 ARG CRATES_PATH="/tmp/output/deps/generic"
 ENV PATH="/opt/venv/bin:${PATH}"
@@ -20,7 +20,7 @@ RUN python prepare_rust_deps.py "${CRATES_PATH}"
 COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:30bbd445046a3a63f5f5557a3c67dee74e3c8e7855eb0347630b020f3689823f
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:bafd57451de2daa71ed301b277d49bd120b474ed438367f087eac0b885a668dc
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
