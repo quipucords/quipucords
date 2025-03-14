@@ -189,8 +189,20 @@ setup-rpm-lockfile:
 		podman build -t $(RPM_LOCKFILE_IMAGE) \
 		--build-arg "BASE_IMAGE=$(UBI_IMAGE)@sha256:$${latest_digest}" -
 
+setup-rpm-lockfile-if-needed:
+ifneq ($(shell podman image exists $(RPM_LOCKFILE_IMAGE) >/dev/null 2>&1; echo $$?), 0)
+	$(MAKE) setup-rpm-lockfile
+else
+	$(eval image_created_at=$(shell date -d $$(podman inspect --format '{{json .Created}}' $(RPM_LOCKFILE_IMAGE) | tr -d '"') +"%s"))
+	$(eval 36h_ago=$(shell date -d "36 hours ago" +"%s"))
+	# recreate the rpm-lockfile container if it is "old"
+	@if [ "$(image_created_at)" -lt "$(36h_ago)" ]; then \
+		$(MAKE) setup-rpm-lockfile; \
+	fi
+endif
+
 # update rpm locks
-lock-rpms: setup-rpm-lockfile
+lock-rpms: setup-rpm-lockfile-if-needed
 	# the last layer will be considered the base image here; 
 	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
 	# extract ubi.repo from BASE_IMAGE
@@ -198,7 +210,7 @@ lock-rpms: setup-rpm-lockfile
 	# the EC checks expect
 	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
 	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
-	podman run -it "$(BASE_IMAGE)" cat /etc/yum.repos.d/ubi.repo | \
+	podman run -it --rm "$(BASE_IMAGE)" cat /etc/yum.repos.d/ubi.repo | \
 		$(SED) 's/ubi-$(UBI_VERSION)-codeready-builder-\([[:alnum:]-]*rpms\)/codeready-builder-for-ubi-$(UBI_VERSION)-$$basearch-\1/g' | \
 		$(SED) 's/ubi-$(UBI_VERSION)-\([[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
