@@ -203,7 +203,14 @@ lock-rpms: setup-rpm-lockfile
 		$(SED) 's/ubi-$(UBI_VERSION)-\([[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
 	# finally, update the rpm locks
-	podman run -w /workdir --rm -v $(TOPDIR):/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
+	# CACHE_PATH => rpm-lockfile-prototype has an undocumented cache
+	# https://github.com/konflux-ci/rpm-lockfile-prototype/blob/283ee2cd7938a2142d8ac98de33ba0d0e3ac146f/rpm_lockfile/utils.py#L18C1-L18C11
+	CACHE_PATH=".cache/rpm-lockfile-prototype"; \
+	mkdir -p "$${HOME}/$${CACHE_PATH}"; \
+	podman run -w /workdir --rm \
+		-v $(TOPDIR):/workdir:Z \
+		-v "$${HOME}/$${CACHE_PATH}:/root/$${CACHE_PATH}:Z" \
+		$(RPM_LOCKFILE_IMAGE):latest \
 		--image $(BASE_IMAGE) \
 		--outfile=/workdir/lockfiles/rpms.lock.yaml \
 		rpms.in.yaml
