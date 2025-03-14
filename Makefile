@@ -182,29 +182,29 @@ generate-sudo-list:
 test-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1
 
-# extracts ubi.repo file from updated ubi image; this file is required for updating rpms locks
-update-ubi-repo:
-	podman pull $(UBI_MINIMAL_IMAGE)
+# prepare rpm-lockfile-prototype tool to lock our rpms
+setup-rpm-lockfile:
+	latest_digest=$$(skopeo inspect --raw "docker://$(UBI_IMAGE):latest" | sha256sum | cut -d ' ' -f1); \
+	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
+		podman build -t $(RPM_LOCKFILE_IMAGE) \
+		--build-arg "BASE_IMAGE=$(UBI_IMAGE)@sha256:$${latest_digest}" -
+
+# update rpm locks
+lock-rpms: setup-rpm-lockfile
+	# the last layer will be considered the base image here; 
+	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
+	# extract ubi.repo from BASE_IMAGE
 	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way 
 	# the EC checks expect
 	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
 	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
-	podman run -it $(UBI_MINIMAL_IMAGE) cat /etc/yum.repos.d/ubi.repo | \
+	podman run -it "$(BASE_IMAGE)" cat /etc/yum.repos.d/ubi.repo | \
 		$(SED) 's/ubi-$(UBI_VERSION)-codeready-builder-\([[:alnum:]-]*rpms\)/codeready-builder-for-ubi-$(UBI_VERSION)-$$basearch-\1/g' | \
 		$(SED) 's/ubi-$(UBI_VERSION)-\([[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
-
-# prepare rpm-lockfile-prototype tool to lock our rpms
-setup-rpm-lockfile:
-	podman pull $(UBI_IMAGE)
-	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
-		podman build -t $(RPM_LOCKFILE_IMAGE) \
-		--build-arg BASE_IMAGE=$(UBI_IMAGE) -
-
-# update rpm locks
-lock-rpms: setup-rpm-lockfile update-ubi-repo
+	# finally, update the rpm locks
 	podman run -w /workdir --rm -v $(TOPDIR):/workdir:Z $(RPM_LOCKFILE_IMAGE):latest \
-		--image $(UBI_MINIMAL_IMAGE) \
+		--image $(BASE_IMAGE) \
 		--outfile=/workdir/lockfiles/rpms.lock.yaml \
 		rpms.in.yaml
 
