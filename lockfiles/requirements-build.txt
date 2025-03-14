@@ -10,10 +10,16 @@ cffi==1.17.1
     # via
     #   cryptography
     #   pynacl
-cython==3.0.12
-    # via pyyaml
-docutils==0.21.2
+changelog-chug==0.0.3
     # via python-daemon
+cython==3.0.12
+    # via
+    #   pydantic
+    #   pyyaml
+docutils==0.21.2
+    # via
+    #   changelog-chug
+    #   python-daemon
 flit-core==3.11.0
     # via
     #   click
@@ -75,7 +81,9 @@ pycparser==2.22
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
-setuptools-rust==1.10.2
+semver==3.0.4
+    # via changelog-chug
+setuptools-rust==1.11.0
     # via
     #   bcrypt
     #   maturin
@@ -122,13 +130,16 @@ setuptools==69.0.2
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.7.0
+setuptools==75.8.0
+    # via ansible-core
+setuptools==76.0.0
     # via
     #   ansible
     #   bcrypt
     #   cachetools
     #   calver
     #   cffi
+    #   changelog-chug
     #   charset-normalizer
     #   click-repl
     #   cryptography
@@ -146,16 +157,15 @@ setuptools==75.7.0
     #   psycopg-c
     #   pyasn1
     #   pyasn1-modules
+    #   pydantic
     #   pynacl
     #   python-daemon
+    #   python-dateutil
     #   pyyaml
     #   resolvelib
+    #   semver
     #   setuptools-rust
     #   setuptools-scm
     #   trove-classifiers
     #   tzdata
     #   whitenoise
-setuptools==76.0.0
-    # via
-    #   python-dateutil
-    #   setuptools-scm
