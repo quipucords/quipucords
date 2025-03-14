@@ -51,7 +51,7 @@ dev = [
     "httpretty<2.0.0,>=1.1.4",
     "ipython<9.0.0,>=8.10.0",
     "notebook<7.0.0,>=6.5.3",
-    "pybuild-deps<1.0.0,>=0.4.1",
+    "pybuild-deps<1.0.0,>=0.5.0",
     "pytest-cov<4",
     "pytest-django<5.0.0,>=4.5.2",
     "pytest-lazy-fixture<1.0.0,>=0.6.3",

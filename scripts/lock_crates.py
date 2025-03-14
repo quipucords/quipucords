@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-import hashlib
-import shelve
 import tarfile
 import tomllib as toml
 from functools import cache as in_memory_cache
-from functools import wraps
 from pathlib import Path
 from typing import IO, Any
 
@@ -17,7 +14,8 @@ from click.utils import LazyFile
 from pip._internal.req import InstallRequirement
 from pip._internal.req.constructors import install_req_from_req_string
 from piptools.repositories import PyPIRepository
-from pybuild_deps.constants import PIP_CACHE_DIR
+from pybuild_deps.cache import persistent_cache
+from pybuild_deps.constants import PIPTOOLS_CACHE_DIR
 from pybuild_deps.finder import find_build_dependencies
 from pybuild_deps.logger import log
 from pybuild_deps.parsers import parse_requirements
@@ -26,30 +24,6 @@ from pybuild_deps.utils import get_version
 
 REQUIREMENTS_TXT = "requirements.txt"
 ROOT_DIR = Path(__file__).absolute().parent.parent
-CACHE_FILE = ROOT_DIR / "var" / "cargo_cache"
-
-
-def persistent_cache(cache_file: Path):
-    """Cache the results of decorated function to cache_file."""
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # Create a unique key for the function call based on its arguments
-            key = hashlib.md5((str(args) + str(kwargs)).encode()).hexdigest()  # noqa: S324
-            with shelve.open(cache_file) as cache:  # noqa: S301
-                # Check if the result is already cached
-                if key in cache:
-                    log.debug(f"Fetching from cache for key: {key}")
-                    return cache[key]
-                result = func(*args, **kwargs)
-                cache[key] = result
-                log.debug(f"Caching result for key: {key}")
-                return result
-
-        return wrapper
-
-    return decorator
 
 
 @click.command(context_settings={"help_option_names": ("-h", "--help")})
@@ -99,7 +73,7 @@ def lock(
 
     cargo_dependencies: list[dict] = []
 
-    repository = PyPIRepository([], cache_dir=PIP_CACHE_DIR)
+    repository = PyPIRepository([], cache_dir=PIPTOOLS_CACHE_DIR)
     pip_dependencies: list[InstallRequirement] = []
     for src_file in src_files:
         pip_dependencies.extend(
@@ -126,7 +100,7 @@ def lock(
     output_file.write(lock_contents.encode())
 
 
-@persistent_cache(CACHE_FILE)
+@persistent_cache("lock-crates")
 def _get_cargo_dependencies(dep_name: str, dep_version: str):
     raw_build_deps = find_build_dependencies(dep_name, dep_version)
     build_deps = {
