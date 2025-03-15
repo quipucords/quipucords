@@ -65,7 +65,7 @@ pybuild-deps = "^0.4.1"
 pytest-profiling = "^1.7.0"
 ipython = "^8.10.0"
 django-extensions = "^3.2.1"
-notebook = "^6.5.3"
+notebook = "^7.0.0"
 ruff = "^0"
 # FixMe: we had to hold back celery version because 5.4.0 introduced
 # some regressions in our unit tests
