@@ -130,9 +130,9 @@ setuptools==69.0.2
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.8.0
+setuptools==75.9.1
     # via ansible-core
-setuptools==75.8.2
+setuptools==75.9.1
     # via
     #   ansible
     #   bcrypt
