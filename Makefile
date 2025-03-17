@@ -2,6 +2,7 @@ PYTHON		= $(shell poetry run which python 2>/dev/null || which python)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
+  DEFAULT_CACHE_DIR := $(HOME)/Library/Caches
   # macOS/Darwin's built-in `sed` and `date` are BSD-style and incompatible with Linux/GNU-style arguments.
   # However, macOS users can install GNU sed as `gsed` and GNU date as `gdate` using Homebrew.
   ifneq ($(shell command -v gsed),)
@@ -19,10 +20,11 @@ ifeq ($(UNAME_S),Darwin)
     DATE := date # Fall back to default date for now
   endif
 else
+  DEFAULT_CACHE_DIR := $(HOME)/.cache
   SED := sed
   DATE := date
 endif
-
+CACHE_DIR := $(shell [ -n "$(XDG_CACHE_HOME)" ] && echo "$(XDG_CACHE_HOME)" || echo "$(DEFAULT_CACHE_DIR)")
 TOPDIR = $(shell pwd)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
@@ -222,13 +224,13 @@ lock-rpms: setup-rpm-lockfile-if-needed
 		$(SED) 's/ubi-$(UBI_VERSION)-\([[:alnum:]-]*rpms\)/ubi-$(UBI_VERSION)-for-$$basearch-\1/g' | \
 		$(SED) 's/\r$$//' > lockfiles/ubi.repo
 	# finally, update the rpm locks
-	# CACHE_PATH => rpm-lockfile-prototype has an undocumented cache
+	# RPMDB_CACHE => rpm-lockfile-prototype has an undocumented cache
 	# https://github.com/konflux-ci/rpm-lockfile-prototype/blob/283ee2cd7938a2142d8ac98de33ba0d0e3ac146f/rpm_lockfile/utils.py#L18C1-L18C11
-	CACHE_PATH=".cache/rpm-lockfile-prototype"; \
-	mkdir -p "$${HOME}/$${CACHE_PATH}"; \
+	RPMDB_CACHE_PATH="$(CACHE_DIR)/rpm-lockfile-prototype"; \
+	mkdir -p "$${RPMDB_CACHE_PATH}"; \
 	podman run -w /workdir --rm \
 		-v $(TOPDIR):/workdir:Z \
-		-v "$${HOME}/$${CACHE_PATH}:/root/$${CACHE_PATH}:Z" \
+		-v "$${RPMDB_CACHE_PATH}:/root/.cache/rpm-lockfile-prototype:Z" \
 		$(RPM_LOCKFILE_IMAGE):latest \
 		--image $(BASE_IMAGE) \
 		--outfile=/workdir/lockfiles/rpms.lock.yaml \
