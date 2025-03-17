@@ -6,7 +6,7 @@
 #
 calver==2022.6.26
     # via trove-classifiers
-cffi==1.17.1
+cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   cryptography
     #   pynacl
@@ -47,7 +47,6 @@ hatch-vcs==0.4.0
 hatchling==1.27.0
     # via
     #   attrs
-    #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
     #   jsonschema
@@ -63,7 +62,7 @@ mypy-extensions==1.0.0
     # via mypy
 mypy==1.14.0
     # via charset-normalizer
-packaging==24.2
+packaging==24.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   hatchling
     #   setuptools-scm
@@ -77,7 +76,7 @@ poetry-core==2.1.1
     # via
     #   click-didyoumean
     #   rsa
-pycparser==2.22
+pycparser==2.22 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
@@ -104,7 +103,7 @@ types-psutil==7.0.0.20250218
     # via mypy
 types-setuptools==76.0.0.20250313
     # via mypy
-typing-extensions==4.12.2
+typing-extensions==4.12.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   mypy
     #   setuptools-scm
