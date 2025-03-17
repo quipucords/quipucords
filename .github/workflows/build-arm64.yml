@@ -25,7 +25,7 @@ jobs:
   # for changing this job name, please consult the dev team first and update
   # discovery-ci accordingly.
   build-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Clone repository
