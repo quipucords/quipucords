@@ -184,10 +184,25 @@ test-sudo-list:
 
 # prepare rpm-lockfile-prototype tool to lock our rpms
 setup-rpm-lockfile:
-	$(PYTHON) scripts/build_rpm_lockfile.py
+	latest_digest=$$(skopeo inspect --raw "docker://$(UBI_IMAGE):latest" | sha256sum | cut -d ' ' -f1); \
+	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
+		podman build -t $(RPM_LOCKFILE_IMAGE) \
+		--build-arg "BASE_IMAGE=$(UBI_IMAGE)@sha256:$${latest_digest}" -
+
+setup-rpm-lockfile-if-needed:
+ifneq ($(shell podman image exists $(RPM_LOCKFILE_IMAGE) >/dev/null 2>&1; echo $$?), 0)
+	$(MAKE) setup-rpm-lockfile
+else
+	$(eval image_created_at=$(shell date -d $$(podman inspect --format '{{json .Created}}' $(RPM_LOCKFILE_IMAGE) | tr -d '"') +"%s"))
+	$(eval 36h_ago=$(shell date -d "36 hours ago" +"%s"))
+	# recreate the rpm-lockfile container if it is "old"
+	@if [ "$(image_created_at)" -lt "$(36h_ago)" ]; then \
+		$(MAKE) setup-rpm-lockfile; \
+	fi
+endif
 
 # update rpm locks
-lock-rpms: setup-rpm-lockfile
+lock-rpms: setup-rpm-lockfile-if-needed
 	# the last layer will be considered the base image here; 
 	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
 	# extract ubi.repo from BASE_IMAGE
