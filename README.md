@@ -42,8 +42,6 @@ podman run -d --name quipucords -e "QUIPUCORDS_DBMS=sqlite" -p 9443:443 -i quay.
 ```
 Then open a browser and head to https://localhost:9443
 
-For more info on how to install, configure, and/or even build from source refer to [installation instructions](docs/installation.md)
-
 ## Command Line
 See [qpc cli installation instructions](https://github.com/quipucords/qpc#-installation) for information.
 
@@ -90,6 +88,20 @@ To use sqlite just set the following environment variable
 QUIPUCORDS_DBMS=sqlite
 ```
 
+## Redis Setup
+Quipucords requires a Redis server running on port 6379 for handling background tasks and caching. There are several ways to set this up:
+
+### Option 1) Podman
+```
+podman run --name redis-server -d -p 6379:6379 <your-redis-image>
+```
+
+### Option 2) Native Redis Installation
+If you have Redis installed locally, ensure it's running:
+```
+redis-server --port 6379
+```
+
 ## Initializing the Server
 
 ```
@@ -99,16 +111,46 @@ make server-init QUIPUCORDS_SERVER_PASSWORD="SuperAdmin1"
 Both of the above commands create a superuser with name `admin` and password of `SuperAdmin1`.
 
 ## Running the Server
+
+### Starting the API Server
+To start the server with API functionality only:
 ```
 make server-static
 make serve
 ```
-To log in to the server, you must connect to http://127.0.0.1:8000 and provide the superuser credentials stated above.
+This will make the API accessible at http://127.0.0.1:8000. 
 
-After logging in, you can change the password and also go to some browsable APIs such as http://127.0.0.1:8000/api/v1/credentials/.
 To use the command line interface, you can configure access to the server by entering `qpc server config`. You can then log in by using `qpc server login`.
 
-If you want to also use the UI, please refer to [quipucords-ui](https://github.com/quipucords/quipucords-ui) for further information.
+### Starting the Celery Worker
+
+Open a separate terminal and run the Celery worker process:
+```
+make celery-worker
+```
+This starts a Celery worker for handling background tasks and asynchronous operations. The Celery worker must remain running alongside the server for proper operation of scheduled tasks and scans.
+
+### Running with UI (Optional)
+If you want to use the UI, you need to install [quipucords-ui](https://github.com/quipucords/quipucords-ui). Follow these steps:
+
+1. Clone the **quipucords-ui** repository.
+2. Navigate to the **quipucords-ui** directory.
+3. Follow the **installation instructions** in the [quipucords-ui repository](https://github.com/quipucords/quipucords-ui).
+4. Set the following environment variables according to the server configuration:
+```
+export QUIPUCORDS_SERVER_PROTOCOL
+export QUIPUCORDS_SERVER_HOST
+export QUIPUCORDS_SERVER_PORT
+```
+5. Start the UI with:
+```
+npm run start:using-server
+```
+This will start a proxy to communicate with the server and open the UI in your browser, typically at http://localhost:3000. The UI provides a more user-friendly way to interact with the API and manage your quipucords server.
+
+You can log in using the **credentials provided during server setup** (e.g., **Username:** `admin`, **Password:** `SuperAdmin1` unless changed).
+
+The full command (`npm run start:using-server`) sets up environment variables and runs parallel processes to start both the JavaScript application and open it in a browser.
 
 ### macOS Dependencies
 If you intend to run on Mac OS, there are several more steps that are required.
