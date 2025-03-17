@@ -1,25 +1,4 @@
 FROM quay.io/konflux-ci/yq@sha256:ff08fe74188fbadf23ce6b2e4d1db8cadd170203214031d093ff4e4e574a45d6 as yq
-# builder and the "final" stages (and any stage that install rpms) MUST be compatible and derived from
-# the same ubi base (for instance, don't use a ubi8 "builder" stage with a "final" ubi9)
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:bafd57451de2daa71ed301b277d49bd120b474ed438367f087eac0b885a668dc as builder
-# Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
-ARG CRATES_PATH="/tmp/output/deps/generic"
-ENV PATH="/opt/venv/bin:${PATH}"
-COPY --from=yq /usr/bin/yq /usr/bin/yq
-COPY scripts/dnf /usr/local/bin/dnf
-COPY rpms.in.yaml rpms.in.yaml
-RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
-    dnf install ${RPMS} -y &&\
-    dnf clean all &&\
-    python3.12 -m venv /opt/venv
-
-# TODO remove prepare_rust_deps script when cachi2/hermeto supports pip+cargo dependencies 
-COPY scripts/prepare_rust_deps.py .
-RUN python prepare_rust_deps.py "${CRATES_PATH}"
-
-COPY lockfiles/requirements.txt .
-RUN pip install -r requirements.txt
-
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:bafd57451de2daa71ed301b277d49bd120b474ed438367f087eac0b885a668dc
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
@@ -45,20 +24,34 @@ ENV QUIPUCORDS_LOG_LEVEL=INFO
 ENV QUIPUCORDS_PRODUCTION=True
 ENV QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL=${QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL}
 
-WORKDIR /app
+# Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
+ARG CRATES_PATH="/tmp/output/deps/generic"
+COPY --from=yq /usr/bin/yq /usr/bin/yq
 COPY scripts/dnf /usr/local/bin/dnf
-COPY --from=yq /usr/bin/yq /usr/local/bin/yq
-COPY rpms.in.yaml .
-ARG BUILD_DEPS="crypto-policies-scripts"
-RUN DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -A1000 | yq 'join(" ")') &&\
-    dnf install ${DEPS} ${BUILD_DEPS} -y &&\
-    dnf clean all
+COPY rpms.in.yaml rpms.in.yaml
+RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
+    dnf install ${RPMS} -y &&\
+    dnf clean all &&\
+    python3.12 -m venv /opt/venv
+
+# TODO remove prepare_rust_deps script when cachi2/hermeto supports pip+cargo dependencies 
+COPY scripts/prepare_rust_deps.py .
+RUN python prepare_rust_deps.py "${CRATES_PATH}"
+
+COPY lockfiles/requirements.txt .
+RUN pip install -r requirements.txt
+
 # set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
 RUN update-crypto-policies --set LEGACY
-# cleanup unecessary 
-RUN dnf remove ${BUILD_DEPS} -y && \
+
+# remove build dependencies and unecessary build files
+RUN BUILD_DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -B10000 | yq 'join(" ")') &&\
+    dnf remove ${BUILD_DEPS} -y && \
     dnf clean all &&\
-    rm -rf /usr/local/bin/yq /usr/local/bin/dnf
+    rm -rf /usr/local/bin/yq /usr/local/bin/dnf rpms.in.yaml requirements.txt
+
+# Allow git to run in /app
+RUN git config --file /.gitconfig --add safe.directory /app
 
 # Create /deploy
 COPY deploy  /deploy
@@ -70,29 +63,29 @@ VOLUME /var/log
 RUN mkdir -p /var/data
 VOLUME /var/data
 
-# copy virtual env prepared on builder layer
-COPY --from=builder /opt/venv /opt/venv
+# konflux requires the application license at /licenses
+RUN mkdir -p /licenses
+COPY LICENSE /licenses/LICENSE
+
+# konflux requires a non-root user
+# let's follow software collection tradition and use uid 1001
+# https://github.com/sclorg/s2i-base-container/blob/3598eab2/core/Dockerfile#L72
+RUN useradd -u 1001 -r -g 0 -d /app -c "Quipucords user" quipucords && \
+    chown 1001:0 -R /deploy /var /opt/venv /licenses
+
+WORKDIR /app
 
 # Copy server code
 COPY . .
 
 # Install quipucords as package
-RUN pip install -v -e .
+RUN pip install -e .
 
 # Collect static files
 RUN make server-static
 
-# Allow git to run in /app
-RUN git config --file /.gitconfig --add safe.directory /app
-
-# konflux requires the application license at /licenses
-RUN mkdir -p /licenses
-COPY LICENSE /licenses/LICENSE
-# konflux requires a non-root user
-# let's follow software collection tradition and use uid 1001
-# https://github.com/sclorg/s2i-base-container/blob/3598eab2/core/Dockerfile#L72
-RUN useradd -u 1001 -r -g 0 -d /app -c "Quipucords user" quipucords && \
-    chown 1001:0 -R /app /deploy /var /opt/venv /licenses
+# also set the ownership in /app and finally change to 1001 user
+RUN chown 1001:0 -R /app
 USER 1001
 
 EXPOSE 8000
