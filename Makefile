@@ -1,10 +1,9 @@
-DATE		= $(shell date)
 PYTHON		= $(shell poetry run which python 2>/dev/null || which python)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-  # macOS/Darwin's built-in `sed` is BSD-style and is incompatible with Linux/GNU-style `sed` arguments.
-  # However, macOS users can install GNU sed as `gsed` alongside the built-in `sed` using Homebrew.
+  # macOS/Darwin's built-in `sed` and `date` are BSD-style and incompatible with Linux/GNU-style arguments.
+  # However, macOS users can install GNU sed as `gsed` and GNU date as `gdate` using Homebrew.
   ifneq ($(shell command -v gsed),)
     SED := gsed
   else
@@ -12,8 +11,16 @@ ifeq ($(UNAME_S),Darwin)
     $(info "Please run 'brew install gnu-sed' to install it.")
     SED := sed # Fall back to default sed for now
   endif
+  ifneq ($(shell command -v gdate),)
+    DATE := gdate
+  else
+    $(info "Warning: gdate may be required on macOS, but it is not installed.")
+    $(info "Please run 'brew install coreutils' to install it.")
+    DATE := date # Fall back to default date for now
+  endif
 else
   SED := sed
+  DATE := date
 endif
 
 TOPDIR = $(shell pwd)
@@ -193,8 +200,8 @@ setup-rpm-lockfile-if-needed:
 ifneq ($(shell podman image exists $(RPM_LOCKFILE_IMAGE) >/dev/null 2>&1; echo $$?), 0)
 	$(MAKE) setup-rpm-lockfile
 else
-	$(eval image_created_at=$(shell date -d $$(podman inspect --format '{{json .Created}}' $(RPM_LOCKFILE_IMAGE) | tr -d '"') +"%s"))
-	$(eval 36h_ago=$(shell date -d "36 hours ago" +"%s"))
+	$(eval image_created_at=$(shell $(DATE) -d $$(podman inspect --format '{{json .Created}}' $(RPM_LOCKFILE_IMAGE) | tr -d '"') +"%s"))
+	$(eval 36h_ago=$(shell $(DATE) -d "36 hours ago" +"%s"))
 	# recreate the rpm-lockfile container if it is "old"
 	@if [ "$(image_created_at)" -lt "$(36h_ago)" ]; then \
 		$(MAKE) setup-rpm-lockfile; \

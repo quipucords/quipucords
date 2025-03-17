@@ -67,10 +67,10 @@ dotenv" plugin to handle those (`poetry self add poetry-dotenv-plugin`), then ad
 
 ### macOS build requirements
 
-If you are building on macOS, you need to install `skopeo`, a modern version of `make`, and a modern version of `sed`. The default `make` and `sed` versions included by Apple in macOS are too old and incompatible with our build commands. If using Homebrew (`brew`), run the following:
+If you are building on macOS, you need to install `skopeo` and modern versions of `make`, `sed`, and `date`. The default `make`, `sed`, and `date` versions included by Apple in macOS are too old and incompatible with our build commands. If using Homebrew (`brew`), run the following:
 
 ```sh
-brew install make gnu-sed skopeo
+brew install make coreutils gnu-sed skopeo
 ```
 
 After installing `make`, put the updated version earlier on your `PATH` or always remember to use `gmake` instead of `make` when invoking Make targets in this project. For example:
