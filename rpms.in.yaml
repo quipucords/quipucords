@@ -13,8 +13,6 @@ packages:
   - libpq-devel
   - openssl-devel
   - python3.12-devel
-  - rust
-  - rust-std-static
   # runtime dependencies
   # ONLY ADD RUNTIME DEPENDENCIES AFTER THIS LINE
   - git

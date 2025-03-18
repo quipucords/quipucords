@@ -29,8 +29,13 @@ ARG CRATES_PATH="/tmp/output/deps/generic"
 COPY --from=yq /usr/bin/yq /usr/bin/yq
 COPY scripts/dnf /usr/local/bin/dnf
 COPY rpms.in.yaml rpms.in.yaml
-RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
-    dnf install ${RPMS} -y &&\
+# distinguish RUNTIME and BUILD dependencies so the latter can be removed later
+RUN RUNTIME_DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -A10000 | yq 'join(" ")') &&\
+    BUILD_DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -B10000 | yq 'join(" ")') &&\
+    dnf install ${RUNTIME_DEPS} -y &&\
+    rpm -qa > runtime_deps.txt &&\
+    dnf install ${BUILD_DEPS} -y &&\
+    rpm -qa > all_deps.txt &&\
     dnf clean all &&\
     python3.12 -m venv /opt/venv
 
@@ -45,10 +50,9 @@ RUN pip install -r requirements.txt
 RUN update-crypto-policies --set LEGACY
 
 # remove build dependencies and unecessary build files
-RUN BUILD_DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -B10000 | yq 'join(" ")') &&\
-    dnf remove ${BUILD_DEPS} -y && \
+RUN dnf remove $(comm -13 runtime_deps.txt all_deps.txt) -y && \
     dnf clean all &&\
-    rm -rf /usr/local/bin/yq /usr/local/bin/dnf rpms.in.yaml requirements.txt
+    rm -rf /usr/local/bin/yq /usr/local/bin/dnf rpms.in.yaml requirements.txt *_deps.txt
 
 # Allow git to run in /app
 RUN git config --file /.gitconfig --add safe.directory /app
