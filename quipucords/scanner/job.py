@@ -63,14 +63,12 @@ def create_report_for_scan_job(scan_job: ScanJob):
     :returns: tuple[Report,str] with the created Report (if successful)
         and error string (if not successful)
     """
-    if not scan_job.no_connect_tasks:
-        # TODO Remove this when we have removed all connect scan jobs/tasks.
-        conn_query = ScanTask.objects.filter(
-            job=scan_job, scan_type=ScanTask.SCAN_TYPE_CONNECT
-        ).aggregate(successful_connections=Sum("systems_scanned"))
+    conn_query = ScanTask.objects.filter(
+        job=scan_job, scan_type=ScanTask.SCAN_TYPE_CONNECT
+    ).aggregate(successful_connections=Sum("systems_scanned"))
 
-        if not conn_query["successful_connections"]:
-            return None, "No connection results found."
+    if not conn_query["successful_connections"]:
+        return None, "No connection results found."
 
     inspect_query = ScanTask.objects.filter(
         job=scan_job, scan_type=ScanTask.SCAN_TYPE_INSPECT

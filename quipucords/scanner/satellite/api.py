@@ -13,6 +13,7 @@ from api.models import (
     InspectResult,
     RawFact,
     Scan,
+    ScanTask,
     SystemConnectionResult,
 )
 from api.status.misc import get_server_id
@@ -43,7 +44,12 @@ class SatelliteInterface(ABC):
         else:
             self.max_concurrency = scan_job.options.get(Scan.MAX_CONCURRENCY)
 
-        self.inspect_scan_task = scan_task
+        if scan_task.scan_type == ScanTask.SCAN_TYPE_CONNECT:
+            self.connect_scan_task = scan_task
+            self.inspect_scan_task = None
+        else:
+            self.connect_scan_task = scan_task.prerequisites.first()
+            self.inspect_scan_task = scan_task
         self.source = scan_task.source
 
     @transaction.atomic
@@ -58,11 +64,11 @@ class SatelliteInterface(ABC):
             source=self.source,
             credential=credential,
             status=SystemConnectionResult.SUCCESS,
-            task_connection_result=self.inspect_scan_task.connection_result,
+            task_connection_result=self.connect_scan_task.connection_result,
         )
         sys_result.save()
 
-        self.inspect_scan_task.increment_stats(name, increment_sys_scanned=True)
+        self.connect_scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @cached_property
     def _inspect_group(self):

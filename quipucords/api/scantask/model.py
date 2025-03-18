@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 class ScanTask(BaseModel):
     """The scan task captures a single source for a scan."""
 
-    SCAN_TYPE_CONNECT = "connect"  # TODO Remove SCAN_TYPE_CONNECT.
+    SCAN_TYPE_CONNECT = "connect"
     SCAN_TYPE_INSPECT = "inspect"
     SCAN_TYPE_FINGERPRINT = "fingerprint"
     SCANTASK_TYPE_CHOICES = (
-        (SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),  # TODO Remove SCAN_TYPE_CONNECT choice.
+        (SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),
         (SCAN_TYPE_INSPECT, SCAN_TYPE_INSPECT),
         (SCAN_TYPE_FINGERPRINT, SCAN_TYPE_FINGERPRINT),
     )
@@ -455,7 +455,6 @@ class ScanTask(BaseModel):
                 inspect_group__in=self.inspect_groups.all()
             ).all()
         elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-            # TODO Remove SCAN_TYPE_CONNECT logic.
             return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             return self.job.report
