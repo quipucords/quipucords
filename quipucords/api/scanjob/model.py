@@ -20,7 +20,6 @@ from api.scan.model import Scan
 from api.scanjob.queryset import ScanJobQuerySet
 from api.scantask.model import ScanTask
 from api.source.model import Source
-from constants import DataSources
 
 logger = logging.getLogger(__name__)
 
@@ -92,20 +91,6 @@ class ScanJob(BaseModel):
         if self.scan:
             self.scan.options = value
             self.scan.save()
-
-    @property
-    def no_connect_tasks(self):
-        """
-        Determine if we should use modernized code for no connect-type jobs/tasks.
-
-        This is a temporary crutch until we have refactored all source types to remove
-        their use of connect-type jobs and tasks.
-
-        TODO Remove this function once we stop using connect-type jobs/tasks.
-        """
-        if self.tasks.filter(scan_type=ScanTask.SCAN_TYPE_CONNECT).exists():
-            return False
-        return self.sources.filter(source_type__in=[DataSources.SATELLITE]).exists()
 
     def get_extra_vars(self):
         """Return the extra vars from the related Scan."""
@@ -298,9 +283,7 @@ class ScanJob(BaseModel):
 
     def _create_pending_tasks(self):
         # TODO Remove conn_tasks.
-        conn_tasks = (
-            self._create_connection_tasks() if not self.no_connect_tasks else []
-        )
+        conn_tasks = self._create_connection_tasks()
         inspect_tasks = self._create_inspection_tasks(conn_tasks)
         self._create_fingerprint_task(conn_tasks, inspect_tasks)
 
@@ -324,8 +307,6 @@ class ScanJob(BaseModel):
         :return: list of connection_tasks
         """
         # TODO Remove this function when we stop using connection tasks.
-        if self.no_connect_tasks:
-            raise Exception("This should never happen.")
         conn_tasks = []
         if self.scan_type in [ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_INSPECT]:
             count = 1
@@ -362,31 +343,7 @@ class ScanJob(BaseModel):
         :return: list of inspection_tasks
         """
         inspect_tasks = []
-        if (
-            not conn_tasks
-            and self.no_connect_tasks
-            and self.scan_type == ScanTask.SCAN_TYPE_INSPECT
-        ):
-            # Eventually all logic in this function routes here.
-            # The complex condition is temporary while we migrate
-            # all the different source types.
-            for index, source in enumerate(self.sources.all(), start=1):
-                inspect_task = ScanTask.objects.create(
-                    job=self,
-                    source=source,
-                    scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                    status=ScanTask.PENDING,
-                    status_message=_(messages.ST_STATUS_MSG_PENDING),
-                    sequence_number=index,
-                    connection_result=TaskConnectionResult.objects.create(
-                        job_connection_result=self.connection_results
-                    ),
-                )
-
-                self.tasks.add(inspect_task)
-                inspect_tasks.append(inspect_task)
-        elif conn_tasks and self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            # TODO Remove this.
+        if conn_tasks and self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
             count = len(conn_tasks) + 1
             for conn_task in conn_tasks:
                 # Create inspect tasks
