@@ -43,6 +43,9 @@ class SatelliteInterface(ABC):
         else:
             self.max_concurrency = scan_job.options.get(Scan.MAX_CONCURRENCY)
 
+        # Next line assumes scan_task has type 'inspect'.
+        # TODO Delete next line when we stop using connect scan tasks.
+        self.connect_scan_task = scan_task.prerequisites.first()
         self.inspect_scan_task = scan_task
         self.source = scan_task.source
 
@@ -58,11 +61,11 @@ class SatelliteInterface(ABC):
             source=self.source,
             credential=credential,
             status=SystemConnectionResult.SUCCESS,
-            task_connection_result=self.inspect_scan_task.connection_result,
+            task_connection_result=self.connect_scan_task.connection_result,
         )
         sys_result.save()
 
-        self.inspect_scan_task.increment_stats(name, increment_sys_scanned=True)
+        self.connect_scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @cached_property
     def _inspect_group(self):
