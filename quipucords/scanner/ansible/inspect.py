@@ -6,13 +6,14 @@ from logging import getLogger
 
 from django.conf import settings
 from django.db import transaction
+from requests import ConnectionError as RequestConnError
 from requests import RequestException
 
+from api.connresult.model import SystemConnectionResult
 from api.models import InspectGroup, InspectResult, RawFact, Scan, ScanTask
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
 from scanner.ansible.runner import AnsibleTaskRunner
-from scanner.exceptions import ScanFailureError
 
 logger = getLogger(__name__)
 
@@ -43,7 +44,85 @@ class InspectTaskRunner(AnsibleTaskRunner):
 
         :returns: tuple of human readable message and ScanTask.STATUS_CHOICE
         """
-        self._check_prerequisites()
+        message, status = self.check_connection()
+        if status != ScanTask.COMPLETED:
+            return message, status
+
+        message, status = self.inspect()
+        return message, status
+
+    def check_connection(self):
+        """
+        Check the connection before inspecting.
+
+        This is redundant because we could just scan immediately and handle
+        its failure as needed, but this exists due to legacy design decision
+        that requires an existing list of connection results to be referenced
+        later during the inspection. This could (should) be flattened into a
+        single operation.
+
+        TODO Remove this function when we remove connect scan tasks.
+        """
+        self._init_connection_stats()
+        try:
+            self.client.get(
+                "/api/v2/me/",
+                timeout=settings.QUIPUCORDS_CONNECT_TASK_TIMEOUT,
+                raise_for_status=True,
+            )
+            conn_result = SystemConnectionResult.SUCCESS
+        except RequestException as exception:
+            logger.exception("Unable to connect to '%s'.", self.system_name)
+            if isinstance(exception, RequestConnError):
+                conn_result = SystemConnectionResult.UNREACHABLE
+            else:
+                conn_result = SystemConnectionResult.FAILED
+        self._save_initial_connection_results(conn_result)
+        if conn_result == SystemConnectionResult.SUCCESS:
+            return self.success_message, ScanTask.COMPLETED
+        return self.failure_message, ScanTask.FAILED
+
+    def _init_connection_stats(self):
+        """
+        Initialize AAP connection stats.
+
+        This is called at the start of a scan to set the number of scan tasks.
+        """
+        # Next line assumes self.scan_task has type 'inspect'.
+        # TODO Delete connect_scan_task when we stop using connect scan tasks.
+        connect_scan_task = self.scan_task.prerequisites.first()
+        connect_scan_task.update_stats(
+            "INITIAL AAP CONNECT STATS.",
+            sys_count=1,
+            sys_scanned=0,
+            sys_failed=0,
+            sys_unreachable=0,
+        )
+
+    @transaction.atomic
+    def _save_initial_connection_results(self, conn_result):
+        """Save results of connection."""
+        # Next line assumes self.scan_task has type 'inspect'.
+        # TODO Delete connect_scan_task when we stop using connect scan tasks.
+        connect_scan_task = self.scan_task.prerequisites.first()
+
+        increment_kwargs = self._get_increment_kwargs(conn_result)
+        source = connect_scan_task.source
+        credential = source.single_credential
+        sys_result = SystemConnectionResult(
+            name=self.system_name,
+            source=source,
+            credential=credential,
+            status=conn_result,
+            task_connection_result=connect_scan_task.connection_result,
+        )
+        sys_result.save()
+        connect_scan_task.increment_stats(
+            "UPDATED AAP CONNECT STATS.", **increment_kwargs
+        )
+
+    def inspect(self):
+        """Perform the actual inspect operations and progressively save results."""
         results = {}
         inspection_status = InspectResult.SUCCESS
         collectable_facts = ("instance_details", "hosts", "jobs")
@@ -209,17 +288,10 @@ class InspectTaskRunner(AnsibleTaskRunner):
             )
         return raw_facts
 
-    def _check_prerequisites(self):
-        """
-         Check prerequisites of ScanTask are completed.
-
-        Raises ScanFailureError if prerequisites are not met.
-        """
-        connect_scan_task = self.scan_task.prerequisites.first()
-        if connect_scan_task.status != ScanTask.COMPLETED:
-            raise ScanFailureError("Prerequisite scan have failed.")
-
     def _get_increment_kwargs(self, inspection_status):
+        # TODO FIXME Why sometimes InspectResult vs SystemConnectionResult?
+        # These are used inconsistently throughout the code, not just here.
+        # They hide the problem by coincidentally providing the same attributes.
         return {
             InspectResult.SUCCESS: {
                 "increment_sys_scanned": True,
@@ -228,5 +300,9 @@ class InspectTaskRunner(AnsibleTaskRunner):
             InspectResult.FAILED: {
                 "increment_sys_failed": True,
                 "prefix": "FAILED",
+            },
+            SystemConnectionResult.UNREACHABLE: {
+                "increment_sys_unreachable": True,
+                "prefix": "UNREACHABLE",
             },
         }[inspection_status]
