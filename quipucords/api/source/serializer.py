@@ -532,22 +532,24 @@ class SourceSerializerV2(SourceSerializerBase):
             "disable_ssl",
             "use_paramiko",
             "http_proxy",
-            "https_proxy",            
+            "https_proxy",
             "credentials",
             "most_recent_connect_scan",
         )
 
     def _validate_proxy(self, value, protocol_name: str):
         if value:
-            if not re.match(r'^([\w\.-]+):(\d+)$', value):
-                raise ValidationError(f"Enter a valid {protocol_name} proxy in the format 'host:port'.")
+            if not re.match(r"^([\w\.-]+):(\d+)$", value):
+                raise ValidationError(
+                    f"Enter a valid {protocol_name} proxy in the format 'host:port'."
+                )
         return value
 
     def validate_http_proxy(self, value):
         return self._validate_proxy(value, "HTTP")
 
     def validate_https_proxy(self, value):
-        return self._validate_proxy(value, "HTTPS")       
+        return self._validate_proxy(value, "HTTPS")
 
     @transaction.atomic
     def create(self, validated_data):

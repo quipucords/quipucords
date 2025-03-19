@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0055_remove_systemfingerprint_user_login_history'),
+        ("api", "0055_remove_systemfingerprint_user_login_history"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='source',
-            name='http_proxy',
+            model_name="source",
+            name="http_proxy",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='source',
-            name='https_proxy',
+            model_name="source",
+            name="https_proxy",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]
