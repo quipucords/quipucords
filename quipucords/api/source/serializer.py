@@ -512,6 +512,8 @@ class SourceSerializerV2(SourceSerializerBase):
     ssl_cert_verify = BooleanField(allow_null=True, required=False)
     disable_ssl = BooleanField(allow_null=True, required=False)
     use_paramiko = BooleanField(allow_null=True, required=False)
+    http_proxy = CharField(required=False, allow_blank=True, max_length=255)
+    https_proxy = CharField(required=False, allow_blank=True, max_length=255)
 
     # Dropping options in preference for showing the direct ssl option attributes.
     class Meta:
@@ -529,9 +531,23 @@ class SourceSerializerV2(SourceSerializerBase):
             "ssl_cert_verify",
             "disable_ssl",
             "use_paramiko",
+            "http_proxy",
+            "https_proxy",            
             "credentials",
             "most_recent_connect_scan",
         )
+
+    def _validate_proxy(self, value, protocol_name: str):
+        if value:
+            if not re.match(r'^([\w\.-]+):(\d+)$', value):
+                raise ValidationError(f"Enter a valid {protocol_name} proxy in the format 'host:port'.")
+        return value
+
+    def validate_http_proxy(self, value):
+        return self._validate_proxy(value, "HTTP")
+
+    def validate_https_proxy(self, value):
+        return self._validate_proxy(value, "HTTPS")       
 
     @transaction.atomic
     def create(self, validated_data):
