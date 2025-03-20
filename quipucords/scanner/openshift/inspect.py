@@ -1,15 +1,16 @@
 """OpenShift inspect task runner."""
 
+import logging
 from functools import cached_property
 
 from django.conf import settings
 from django.db import transaction
 
+from api.connresult.model import SystemConnectionResult
 from api.inspectresult.model import InspectGroup
 from api.models import InspectResult, RawFact, ScanTask
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
-from scanner.exceptions import ScanFailureError
 from scanner.openshift import metrics
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import OCPBaseEntity, OCPCluster, OCPError, OCPNode
@@ -19,6 +20,7 @@ from scanner.openshift.runner import OpenShiftTaskRunner
 class InspectTaskRunner(OpenShiftTaskRunner):
     """OpenShift inspect task runner."""
 
+    FAILURE_TO_CONNECT_MESSAGE = "Unable to connect to OpenShift host."
     SUCCESS_MESSAGE = "Inspected OpenShift host successfully."
     PARTIAL_SUCCESS_MESSAGE = (
         "Inspected some data from OpenShift host. Check details report for errors."
@@ -27,7 +29,89 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     def execute_task(self):
         """Scan satellite manager and obtain host facts."""
-        self._check_prerequisites()
+        message, status = self.check_connection()
+        if status != ScanTask.COMPLETED:
+            return message, status
+
+        message, status = self.inspect()
+        return message, status
+
+    def check_connection(self):
+        """
+        Check the connection before inspecting.
+
+        This is redundant because we could just scan immediately and handle
+        its failure as needed, but this exists due to legacy design decision
+        that requires an existing list of connection results to be referenced
+        later during the inspection. This could (should) be flattened into a
+        single operation.
+
+        TODO Remove this function when we remove connect scan tasks.
+        """
+        self._init_connection_stats()
+        ocp_client = self.get_ocp_client(self.scan_task)
+        try:
+            ocp_client.can_connect(
+                raise_exception=True,
+                timeout_seconds=settings.QUIPUCORDS_CONNECT_TASK_TIMEOUT,
+            )
+            conn_result = SystemConnectionResult.SUCCESS
+        except OCPError as error:
+            conn_result = self._handle_ocp_error(error)
+
+        self._save_results(conn_result)
+
+        if conn_result == SystemConnectionResult.SUCCESS:
+            return self.SUCCESS_MESSAGE, ScanTask.COMPLETED
+        return self.FAILURE_TO_CONNECT_MESSAGE, ScanTask.FAILED
+
+    def _init_connection_stats(self):
+        # Next line assumes self.scan_task has type 'inspect'.
+        # TODO Delete connect_scan_task when we stop using connect scan tasks.
+        connect_scan_task = self.scan_task.prerequisites.first()
+        connect_scan_task.update_stats(
+            "INITIAL OCP CONNECT STATS.",
+            sys_count=1,
+            sys_scanned=0,
+            sys_failed=0,
+            sys_unreachable=0,
+        )
+
+    @cached_property
+    def _inspect_group(self):
+        inspect_group = InspectGroup.objects.create(
+            source_type=self.scan_task.source.source_type,
+            source_name=self.scan_task.source.name,
+            server_id=get_server_id(),
+            server_version=server_version(),
+            source=self.scan_task.source,
+        )
+        inspect_group.tasks.add(self.scan_task)
+        return inspect_group
+
+    @transaction.atomic
+    def _save_results(self, conn_result):
+        # Next line assumes self.scan_task has type 'inspect'.
+        # TODO Delete connect_scan_task when we stop using connect scan tasks.
+        connect_scan_task = self.scan_task.prerequisites.first()
+
+        increment_kwargs = self._get_increment_kwargs(conn_result)
+        source = connect_scan_task.source
+        credential = source.single_credential
+        sys_result = SystemConnectionResult(
+            name=source.get_hosts()[0],
+            source=source,
+            credential=credential,
+            status=conn_result,
+            task_connection_result=connect_scan_task.connection_result,
+        )
+        sys_result.save()
+        connect_scan_task.increment_stats(
+            "UPDATED OCP CONNECT STATS.", **increment_kwargs
+        )
+
+    def inspect(self):
+        """Perform the actual inspect operations and progressively save results."""
         ocp_client = self.get_ocp_client(self.scan_task)
 
         self.log("Retrieving essential cluster facts.")
@@ -58,18 +142,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         if self.scan_task.systems_scanned:
             return self.SUCCESS_MESSAGE, ScanTask.COMPLETED
         return self.FAILURE_MESSAGE, ScanTask.FAILED
-
-    @cached_property
-    def _inspect_group(self):
-        inspect_group = InspectGroup.objects.create(
-            source_type=self.scan_task.source.source_type,
-            source_name=self.scan_task.source.name,
-            server_id=get_server_id(),
-            server_version=server_version(),
-            source=self.scan_task.source,
-        )
-        inspect_group.tasks.add(self.scan_task)
-        return inspect_group
 
     def _extra_cluster_facts(self, ocp_client: OpenShiftApi, cluster):
         """Retrieve extra cluster facts."""
@@ -103,11 +175,6 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
         return extra_facts
 
-    def _check_prerequisites(self):
-        connect_scan_task = self.scan_task.prerequisites.first()
-        if connect_scan_task.status != ScanTask.COMPLETED:
-            raise ScanFailureError("Prerequisite scan have failed.")
-
     def _init_stats(self, number_of_systems):
         return self.scan_task.update_stats(
             "INITIAL OCP INSPECT STATS.",
@@ -116,6 +183,26 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             sys_failed=0,
             sys_unreachable=0,
         )
+
+    def _handle_ocp_error(self, error: OCPError):
+        if error.status == 401:  # noqa: PLR2004
+            self.log(
+                "Unable to Login to OpenShift host with credentials provided.",
+                log_level=logging.ERROR,
+            )
+            return SystemConnectionResult.FAILED
+        if error.status == -1:
+            self.log(
+                "Unable to login to OpenShift host. Check system logs.",
+                log_level=logging.ERROR,
+                exception=error,
+            )
+        else:
+            self.log(
+                f"Unable to reach OpenShift host. Got error {error}.",
+                log_level=logging.ERROR,
+            )
+        return SystemConnectionResult.UNREACHABLE
 
     @transaction.atomic
     def _save_cluster(self, cluster: OCPCluster, cluster_facts):
@@ -184,6 +271,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         return InspectResult.SUCCESS
 
     def _get_increment_kwargs(self, inspection_status):
+        # TODO FIXME Why sometimes InspectResult vs SystemConnectionResult?
+        # These are used inconsistently throughout the code, not just here.
+        # They hide the problem by coincidentally providing the same attributes.
         return {
             InspectResult.SUCCESS: {
                 "increment_sys_scanned": True,
@@ -192,5 +282,9 @@ class InspectTaskRunner(OpenShiftTaskRunner):
             InspectResult.FAILED: {
                 "increment_sys_failed": True,
                 "prefix": "FAILED",
+            },
+            SystemConnectionResult.UNREACHABLE: {
+                "increment_sys_unreachable": True,
+                "prefix": "UNREACHABLE",
             },
         }[inspection_status]
