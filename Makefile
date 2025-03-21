@@ -1,4 +1,4 @@
-PYTHON		= $(shell poetry run which python 2>/dev/null || which python)
+PYTHON		= $(shell uv run which python 2>/dev/null || which python)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -83,30 +83,30 @@ clean-db:
 lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
-	poetry lock --no-update
-	poetry export -f requirements.txt --only=main --without-hashes -o lockfiles/requirements.txt
+	uv lock
+	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
 lock-rustdeps:
 	$(PYTHON) scripts/lock_crates.py -o lockfiles/artifacts.lock.yaml lockfiles/requirements.txt lockfiles/requirements-build.txt
 
 lock-build-requirements:
-	poetry run pybuild-deps compile -o lockfiles/requirements-build.txt lockfiles/requirements.txt
+	uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
 	$(MAKE) lock-rustdeps
 
 update-requirements:
-	poetry update --no-cache
-	$(MAKE) lock-requirements PIP_COMPILE_ARGS="--upgrade"
+	uv lock --upgrade
+	$(MAKE) lock-requirements
 
 check-requirements:
 ifeq ($(shell git diff --exit-code lockfiles/requirements.txt >/dev/null 2>&1; echo $$?), 0)
 	@exit 0
 else
-	@echo "requirements.txt not in sync with poetry.lock. Run 'make lock-requirements' and commit the changes"
+	@echo "requirements.txt not in sync with uv.lock. Run 'make lock-requirements' and commit the changes"
 	@exit 1
 endif
 
 test:
-	poetry run pytest $(TEST_OPTS)
+	uv run pytest $(TEST_OPTS)
 
 test-case:
 	echo $(pattern)
@@ -121,10 +121,10 @@ test-coverage:
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} --cov=quipucords" QUIPUCORDS_DBMS=postgres COVERAGE_FILE=.coverage.notslow
 	$(MAKE) test TEST_OPTS="${TEST_OPTS} -m dbcompat --cov=quipucords" QUIPUCORDS_DBMS=sqlite COVERAGE_FILE=.coverage.dbcompat
 	$(MAKE) test TEST_OPTS="-n $(PARALLEL_NUM) -ra -m slow --cov=quipucords" COVERAGE_FILE=.coverage.slow
-	poetry run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.slow
-	poetry run coverage report
+	uv run coverage combine --keep .coverage.notslow .coverage.dbcompat .coverage.slow
+	uv run coverage report
 	# We must run `coverage xml` explicitly to make GitHub codecov action happy.
-	poetry run coverage xml
+	uv run coverage xml
 
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
@@ -135,12 +135,12 @@ swagger-valid:
 lint: lint-shell lint-ruff lint-ansible
 
 lint-ruff:
-	poetry run ruff check .
-	poetry run ruff format --check .
+	uv run ruff check .
+	uv run ruff format --check .
 
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
-	poetry run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
+	uv run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
 
 lint-shell:
 	shellcheck ./deploy/*.sh

@@ -6,7 +6,7 @@
 #
 calver==2022.6.26
     # via trove-classifiers
-cffi==1.17.1 ; python_version >= "3.12" and python_version < "3.14"
+cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   cryptography
     #   pynacl
@@ -47,7 +47,6 @@ hatch-vcs==0.4.0
 hatchling==1.27.0
     # via
     #   attrs
-    #   colorama
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
     #   jsonschema
@@ -55,7 +54,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.8.2
+maturin==1.8.3
     # via
     #   cryptography
     #   rpds-py
@@ -63,7 +62,7 @@ mypy-extensions==1.0.0
     # via mypy
 mypy==1.14.0
     # via charset-normalizer
-packaging==24.2 ; python_version >= "3.12" and python_version < "3.14"
+packaging==24.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   hatchling
     #   setuptools-scm
@@ -73,17 +72,17 @@ pbr==6.1.1
     # via lockfile
 pluggy==1.5.0
     # via hatchling
-poetry-core==1.9.1 ; python_version >= "3.12" and python_version < "3.14"
+poetry-core==2.1.1
     # via
     #   click-didyoumean
     #   rsa
-pycparser==2.22 ; python_version >= "3.12" and python_version < "3.14"
+pycparser==2.22 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
 semver==3.0.4
     # via changelog-chug
-setuptools-rust==1.10.2
+setuptools-rust==1.11.0
     # via
     #   bcrypt
     #   maturin
@@ -98,13 +97,13 @@ setuptools-scm==8.2.0
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.3.3.18
+trove-classifiers==2025.3.13.13
     # via hatchling
 types-psutil==7.0.0.20250218
     # via mypy
-types-setuptools==75.8.2.20250305
+types-setuptools==76.0.0.20250313
     # via mypy
-typing-extensions==4.12.2 ; python_version >= "3.12" and python_version < "3.14"
+typing-extensions==4.12.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   mypy
     #   setuptools-scm
@@ -132,7 +131,7 @@ setuptools==69.0.2
     #   setuptools-scm
 setuptools==75.8.0
     # via ansible-core
-setuptools==75.8.2
+setuptools==76.0.0
     # via
     #   ansible
     #   bcrypt
