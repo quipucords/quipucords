@@ -180,7 +180,10 @@ serve:
 	DJANGO_DEBUG=1 $(PYTHON) quipucords/manage.py runserver
 
 build-container:
-	podman build -t $(QUIPUCORDS_CONTAINER_TAG) .
+	mkdir -p $(CACHE_DIR)/pip
+	podman build \
+		-v "$(CACHE_DIR)/pip:/root/.cache/pip:Z" \
+		-t $(QUIPUCORDS_CONTAINER_TAG) .
 
 check-db-migrations-needed:
 	$(PYTHON) quipucords/manage.py makemigrations --check
