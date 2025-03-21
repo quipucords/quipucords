@@ -105,7 +105,9 @@ class SatelliteInterface(ABC):
     def _prepare_host_request_options(self):
         if self.inspect_scan_task is None:
             raise SatelliteError("host_details cannot be called for a connection scan")
-        host, port, user, password = utils.get_connect_data(self.inspect_scan_task)
+        host, port, user, password, http_proxy, https_proxy = utils.get_connect_data(
+            self.inspect_scan_task
+        )
 
         ssl_cert_verify = self.inspect_scan_task.source.ssl_cert_verify
         if ssl_cert_verify is None:
@@ -117,6 +119,8 @@ class SatelliteInterface(ABC):
             "user": user,
             "password": password,
             "ssl_cert_verify": ssl_cert_verify,
+            "http_proxy": http_proxy,
+            "https_proxy": https_proxy,
         }
         return request_options
 
