@@ -9,7 +9,6 @@ from kubernetes.client import ApiException
 from api.models import ScanTask
 from constants import DataSources
 from quipucords.featureflag import FeatureFlag
-from scanner.exceptions import ScanFailureError
 from scanner.openshift import InspectTaskRunner, metrics
 from scanner.openshift.api import OpenShiftApi
 from scanner.openshift.entities import (
@@ -180,15 +179,30 @@ def workloads_enabled(settings):
 
 
 @pytest.mark.django_db
-def test_inspect_prerequisite_failure(mocker, scan_task: ScanTask):
-    """Test Inspect scan prerequisite failure."""
-    conn_task = scan_task.prerequisites.first()
-    conn_task.status = ScanTask.FAILED
-    conn_task.save()
-
+@pytest.mark.parametrize(
+    "err_status,expected_failed,expected_unreachable",
+    [
+        (401, 1, 0),
+        (999, 0, 1),
+    ],
+)
+def test_connect_with_error(
+    mocker, err_status, expected_failed, expected_unreachable, scan_task: ScanTask
+):
+    """Test connecting to OpenShift host with failure."""
+    error = OCPError(status=err_status, reason="fail", message="fail")
+    mocker.patch.object(OpenShiftApi, "can_connect", side_effect=error)
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
-    with pytest.raises(ScanFailureError, match="Prerequisite scan have failed."):
-        runner.execute_task()
+    message, status = runner.execute_task()
+    # Next line assumes self.scan_task has type 'inspect'.
+    # TODO Delete connect_scan_task when we stop using connect scan tasks.
+    connect_scan_task = scan_task.prerequisites.first()
+    assert message == InspectTaskRunner.FAILURE_TO_CONNECT_MESSAGE
+    assert status == ScanTask.FAILED
+    assert connect_scan_task.systems_count == 1
+    assert connect_scan_task.systems_scanned == 0
+    assert connect_scan_task.systems_failed == expected_failed
+    assert connect_scan_task.systems_unreachable == expected_unreachable
 
 
 @pytest.mark.django_db
@@ -200,7 +214,8 @@ def test_inspect_with_success(  # noqa: PLR0913
     operators,
     rhacm_metrics,
 ):
-    """Test connecting to OpenShift host with success."""
+    """Test inspecting OpenShift host with success."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
@@ -229,7 +244,8 @@ def test_inspect_with_success_cluster_metrics(  # noqa: PLR0913
     rhacm_metrics,
     cluster_metrics,
 ):
-    """Test connecting to OpenShift host and successfully retrieving cluster metrics."""
+    """Test inspecting OpenShift host and successfully retrieving cluster metrics."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
@@ -275,6 +291,7 @@ def test_inspect_with_partial_success(  # noqa: PLR0913
     rhacm_metrics,
 ):
     """Test connecting to OpenShift host with success."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value=[])
     mocker.patch.object(
@@ -305,6 +322,7 @@ def test_inspect_with_failure(  # noqa: PLR0913
     rhacm_metrics,
 ):
     """Test connecting to OpenShift host with success."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster_err)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_err])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
@@ -337,6 +355,7 @@ def test_inspect_errors_on_extra_cluster_facts(  # noqa: PLR0913
     workloads_enabled,
 ):
     """Test connecting to OpenShift host with errors collecting extra cluster facts."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(metrics, "retrieve_cluster_metrics", return_value=[])
@@ -389,6 +408,7 @@ def test_inspect_with_enabled_workloads(  # noqa: PLR0913
     rhacm_metrics,
 ):
     """Test connecting to OpenShift host with enabled workloads."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_workloads", return_value=[workload])
@@ -411,6 +431,7 @@ def test_inspect_with_disabled_workloads(  # noqa: PLR0913
     mocker, scan_task: ScanTask, cluster, node_ok, operators, rhacm_metrics
 ):
     """Test connecting to OpenShift host with workloads default behavior."""
+    mocker.patch.object(OpenShiftApi, "can_connect", return_value=True)
     mocker.patch.object(OpenShiftApi, "retrieve_cluster", return_value=cluster)
     mocker.patch.object(OpenShiftApi, "retrieve_nodes", return_value=[node_ok])
     mocker.patch.object(OpenShiftApi, "retrieve_operators", return_value=operators)
