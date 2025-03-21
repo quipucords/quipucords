@@ -86,6 +86,7 @@ class ScanJobFilterV2(FilterSet):
             "status": ["exact"],
             "scan_type": ["exact"],
             "scan_id": ["exact", "isnull"],
+            "report_id": ["exact"],
         }
 
 
