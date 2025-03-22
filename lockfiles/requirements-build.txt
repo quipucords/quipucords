@@ -126,13 +126,13 @@ wheel==0.45.1
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.0.2
+setuptools==77.0.3
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.8.0
+setuptools==77.0.3
     # via ansible-core
-setuptools==75.8.2
+setuptools==77.0.3
     # via
     #   ansible
     #   bcrypt
