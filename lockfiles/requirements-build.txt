@@ -87,9 +87,9 @@ setuptools-rust==1.10.2
     # via
     #   bcrypt
     #   maturin
-setuptools-scm==7.1.0
+setuptools-scm==8.2.0
     # via python-dateutil
-setuptools-scm==8.0.4
+setuptools-scm==8.2.0
     # via ansible-runner
 setuptools-scm==8.2.0
     # via
