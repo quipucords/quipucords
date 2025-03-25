@@ -1,19 +1,70 @@
 """Test the vcenter inspect capabilities."""
 
 from datetime import UTC, datetime
+from socket import gaierror
 from unittest.mock import ANY, Mock, patch
 
 import pytest
 from pyVmomi import vim
 
 from api.models import Credential, ScanTask, Source
-from scanner.vcenter.inspect import InspectTaskRunner, get_nics
+from scanner.vcenter.inspect import InspectTaskRunner, get_nics, get_vm_names
 from tests.scanner.test_util import create_scan_job
 
 
 def invalid_login():
     """Mock with invalid login exception."""
     raise vim.fault.InvalidLogin()
+
+
+def unreachable_host():
+    """Mock with gaierror."""
+    raise gaierror("Unreachable")
+
+
+def test_get_vm_names():
+    """Test the get_vm_names function."""
+    objects = [
+        vim.ObjectContent(
+            obj=vim.VirtualMachine("vm-1"),
+            propSet=[vim.DynamicProperty(name="name", val="vm1")],
+        ),
+        vim.ObjectContent(
+            obj=vim.VirtualMachine("vm-2"),
+            propSet=[vim.DynamicProperty(name="name", val="vm2")],
+        ),
+    ]
+
+    content = Mock()
+    content.rootFolder = vim.Folder("group-d1")
+    content.propertyCollector.RetrievePropertiesEx(ANY).token = None
+    content.propertyCollector.RetrievePropertiesEx(ANY).objects = objects
+
+    vm_names = get_vm_names(content)
+    assert isinstance(vm_names, list) is True
+    assert vm_names == ["vm1", "vm2"]
+
+
+def test_get_nics():
+    """Test the get_nics function."""
+    guest = Mock()
+    nics = []
+    for k in range(0, 2):
+        nic = Mock()
+        network = Mock()
+        nic.network = network
+        nic.macAddress = "mac" + str(k)
+        ip_config = Mock()
+        ip_addr = Mock()
+        ip_addr.ipAddress = "ip" + str(k)
+        addresses = [ip_addr]
+        ip_config.ipAddress = addresses
+        nic.ipConfig = ip_config
+        nics.append(nic)
+    guest.net = nics
+    mac_addresses, ip_addresses = get_nics(guest.net)
+    assert mac_addresses == ["mac0", "mac1"]
+    assert ip_addresses == ["ip0", "ip1"]
 
 
 @pytest.mark.django_db
@@ -24,22 +75,19 @@ class TestVCenterInspectTaskRunnerTest:
 
     def setup_method(self, _test_method):
         """Create test case setup."""
-        cred = Credential(
+        self.cred = Credential.objects.create(
             name="cred1",
             username="username",
             password="password",
             become_password=None,
             ssh_keyfile=None,
         )
-        cred.save()
 
-        source = Source(name="source1", port=22, hosts=["1.2.3.4"])
-
-        source.save()
-        source.credentials.add(cred)
+        self.source = Source.objects.create(name="source1", port=22, hosts=["1.2.3.4"])
+        self.source.credentials.add(self.cred)
 
         self.scan_job, self.scan_task = create_scan_job(
-            source, ScanTask.SCAN_TYPE_INSPECT
+            self.source, ScanTask.SCAN_TYPE_INSPECT
         )
 
         self.connect_scan_task = self.scan_task.prerequisites.first()
@@ -51,26 +99,36 @@ class TestVCenterInspectTaskRunnerTest:
             scan_job=self.scan_job, scan_task=self.scan_task
         )
 
-    def test_get_nics(self):
-        """Test the get_nics method."""
-        guest = Mock()
-        nics = []
-        for k in range(0, 2):
-            nic = Mock()
-            network = Mock()
-            nic.network = network
-            nic.macAddress = "mac" + str(k)
-            ip_config = Mock()
-            ip_addr = Mock()
-            ip_addr.ipAddress = "ip" + str(k)
-            addresses = [ip_addr]
-            ip_config.ipAddress = addresses
-            nic.ipConfig = ip_config
-            nics.append(nic)
-        guest.net = nics
-        mac_addresses, ip_addresses = get_nics(guest.net)
-        assert mac_addresses == ["mac0", "mac1"]
-        assert ip_addresses == ["ip0", "ip1"]
+    def test_invalid_login_fails_connection_check(self, mocker):
+        """Test the run method with invalid login."""
+        mock_connect = mocker.patch.object(
+            InspectTaskRunner, "connect", side_effect=invalid_login
+        )
+        mock_inspect = mocker.patch.object(InspectTaskRunner, "inspect")
+
+        status = self.runner.run()
+        assert ScanTask.FAILED == status[1]
+        mock_connect.assert_called_once_with()
+        mock_inspect.assert_not_called()
+
+    def test_unreachable_host_fails_connection_check(self, mocker):
+        """Test the run method with unreachable host."""
+        mock_connect = mocker.patch.object(
+            InspectTaskRunner, "connect", side_effect=unreachable_host
+        )
+        mock_inspect = mocker.patch.object(InspectTaskRunner, "inspect")
+
+        status = self.runner.run()
+        assert ScanTask.FAILED == status[1]
+        mock_connect.assert_called_once_with()
+        mock_inspect.assert_not_called()
+
+    def test_store_connect_data(self):
+        """Test the connection data method."""
+        vm_names = ["vm1", "vm2"]
+
+        self.runner._store_connect_data(vm_names, self.cred, self.source)
+        assert len(self.scan_job.connection_results.task_results.all()) == 1
 
     def test__none(self):
         """Test get result method when no results exist."""
@@ -283,38 +341,34 @@ class TestVCenterInspectTaskRunnerTest:
             mock_parse_host_props.assert_called_with(ANY, ANY)
             mock_parse_vm_props.assert_called_with(ANY, ANY)
 
-    def test_inspect(self):
+    def test_inspect(self, mocker):
         """Test the inspect method."""
-        with patch(
+        mock_vcenter_connect = mocker.patch(
             "scanner.vcenter.inspect.vcenter_connect", return_value=Mock()
-        ) as mock_vcenter_connect:
-            with patch.object(
-                InspectTaskRunner, "retrieve_properties"
-            ) as mock_retrieve_props:
-                self.runner.connect_scan_task = self.connect_scan_task
-                self.runner.inspect()
-                mock_vcenter_connect.assert_called_once_with(ANY)
-                mock_retrieve_props.assert_called_once_with(ANY)
+        )
+        mocker.patch.object(
+            InspectTaskRunner,
+            "check_connection",
+            side_effect=[None, ScanTask.COMPLETED],
+        )
+        mock_retrieve_props = mocker.patch.object(
+            InspectTaskRunner, "retrieve_properties"
+        )
 
-    def test_failed_run(self):
-        """Test the run method."""
-        with patch.object(
-            InspectTaskRunner, "inspect", side_effect=invalid_login
-        ) as mock_connect:
-            status = self.runner.run()
-            assert ScanTask.FAILED == status[1]
-            mock_connect.assert_called_once_with()
+        self.runner.connect_scan_task = self.connect_scan_task
+        self.runner.inspect()
+        mock_vcenter_connect.assert_called_once_with(ANY)
+        mock_retrieve_props.assert_called_once_with(ANY)
 
-    def test_prereq_failed(self):
+    def test_run_happy_path(self, mocker):
         """Test the run method."""
-        self.connect_scan_task.status = ScanTask.FAILED
-        self.connect_scan_task.save()
+        mocker.patch.object(
+            InspectTaskRunner,
+            "check_connection",
+            return_value=[None, ScanTask.COMPLETED],
+        )
+        mock__inspect = mocker.patch.object(InspectTaskRunner, "_inspect")
+
         status = self.runner.run()
-        assert ScanTask.FAILED == status[1]
-
-    def test_run(self):
-        """Test the run method."""
-        with patch.object(InspectTaskRunner, "inspect") as mock_connect:
-            status = self.runner.run()
-            assert ScanTask.COMPLETED == status[1]
-            mock_connect.assert_called_once_with()
+        assert ScanTask.COMPLETED == status[1]
+        mock__inspect.assert_called_once_with()
