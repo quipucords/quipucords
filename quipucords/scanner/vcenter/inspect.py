@@ -3,12 +3,13 @@
 import logging
 from datetime import UTC, datetime
 from functools import cached_property
+from socket import gaierror
 
 from django.db import transaction
 from pyVmomi import vim, vmodl
 
 from api.inspectresult.model import InspectGroup
-from api.models import InspectResult, RawFact, ScanTask
+from api.models import InspectResult, RawFact, ScanTask, SystemConnectionResult
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
 from scanner.runner import ScanTaskRunner
@@ -17,6 +18,7 @@ from scanner.vcenter.utils import (
     HostRawFacts,
     VcenterRawFacts,
     raw_facts_template,
+    retrieve_properties,
     vcenter_connect,
 )
 
@@ -42,6 +44,56 @@ def get_nics(guest_net):
     return mac_addresses, ip_addresses
 
 
+def get_vm_names(content):
+    """Get the vm names from the container view.
+
+    :param vm_container_view: The VM container view.
+    :returns: list of vm names.
+    """
+    vm_names = []
+
+    visit_folders = vmodl.query.PropertyCollector.TraversalSpec(
+        name="visitFolders", type=vim.Folder, path="childEntity", skip=False
+    )
+
+    visit_folders.selectSet.extend(
+        [
+            vmodl.query.PropertyCollector.SelectionSpec(name="visitFolders"),
+            vmodl.query.PropertyCollector.SelectionSpec(name="dcToVmFolder"),
+        ]
+    )
+
+    dc_to_vm_folder = vmodl.query.PropertyCollector.TraversalSpec(
+        name="dcToVmFolder", type=vim.Datacenter, path="vmFolder", skip=False
+    )
+    dc_to_vm_folder.selectSet.extend(
+        [vmodl.query.PropertyCollector.SelectionSpec(name="visitFolders")]
+    )
+
+    filter_spec = vmodl.query.PropertyCollector.FilterSpec(
+        objectSet=[
+            vmodl.query.PropertyCollector.ObjectSpec(
+                obj=content.rootFolder,
+                skip=False,
+                selectSet=[visit_folders, dc_to_vm_folder],
+            ),
+        ],
+        propSet=[
+            vmodl.query.PropertyCollector.PropertySpec(
+                all=False,
+                type=vim.VirtualMachine,
+                pathSet=["name"],
+            ),
+        ],
+    )
+
+    objects = retrieve_properties(content, [filter_spec])
+    for object_content in objects:
+        vm_names.append(object_content.propSet[0].val)
+
+    return vm_names
+
+
 class InspectTaskRunner(ScanTaskRunner):
     """InspectTaskRunner vcenter connection capabilities.
 
@@ -51,6 +103,84 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def execute_task(self):
         """Scan vcenter range and attempt scan."""
+        message, status = self.check_connection()
+        if status != ScanTask.COMPLETED:
+            return message, status
+
+        message, status = self.inspect()
+        return message, status
+
+    def check_connection(self):
+        """
+        Check the connection before inspecting.
+
+        This is redundant because we could just scan immediately and handle
+        its failure as needed, but this exists due to legacy design decision
+        that requires an existing list of connection results to be referenced
+        later during the inspection. This could (should) be flattened into a
+        single operation.
+
+        TODO Remove this function when we remove connect scan tasks.
+        """
+        source = self.scan_task.source
+        credential = self.scan_task.source.credentials.all().first()
+        try:
+            connected = self.connect()
+            self._store_connect_data(connected, credential, source)
+        except vim.fault.InvalidLogin as vm_error:
+            error_message = (
+                f"Unable to connect to VCenter source, {source.name},"
+                f" with supplied credential, {credential.name}.\n"
+            )
+            error_message += f"Connect scan failed for {self.scan_task}. {vm_error}"
+            return error_message, ScanTask.FAILED
+        except gaierror as error:
+            error_message = f"Unable to connect to VCenter source {source.name}.\n"
+            error_message += f"Reason for failure: {error}"
+            return error_message, ScanTask.FAILED
+
+        return None, ScanTask.COMPLETED
+
+    def _store_connect_data(self, connected, credential, source):
+        """Update the scan counts."""
+        # Next line assumes self.scan_task has type 'inspect'.
+        # TODO Delete connect_scan_task when we stop using connect scan tasks.
+        connect_scan_task = self.scan_task.prerequisites.first()
+        connect_scan_task.update_stats(
+            "INITIAL VCENTER CONNECT STATS.", sys_count=len(connected)
+        )
+
+        for system in connected:
+            sys_result = SystemConnectionResult(
+                name=system,
+                status=SystemConnectionResult.SUCCESS,
+                credential=credential,
+                source=source,
+                task_connection_result=connect_scan_task.connection_result,
+            )
+            sys_result.save()
+            connect_scan_task.increment_stats(
+                sys_result.name, increment_sys_scanned=True
+            )
+
+        connect_scan_task.connection_result.save()
+
+    def connect(self):
+        """Execute the connect scan with the initialized source.
+
+        :returns: list of connected vm credential tuples
+        """
+        # Next line assumes self.scan_task has type 'inspect'.
+        # TODO Delete connect_scan_task when we stop using connect scan tasks.
+        connect_scan_task = self.scan_task.prerequisites.first()
+        vcenter = vcenter_connect(connect_scan_task)
+        content = vcenter.RetrieveContent()
+        vm_names = get_vm_names(content)
+
+        return vm_names
+
+    def inspect(self):
+        """Perform the actual inspect operations and progressively save results."""
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()
 
@@ -62,7 +192,7 @@ class InspectTaskRunner(ScanTaskRunner):
             return error_message, ScanTask.FAILED
 
         try:
-            self.inspect()
+            self._inspect()
         except vim.fault.InvalidLogin as vm_error:
             error_message = (
                 f"Unable to connect to VCenter source, {source.name}, "
@@ -398,7 +528,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         return filter_spec
 
-    def inspect(self):
+    def _inspect(self):
         """Execute the inspection scan with the initialized source."""
         # Save counts
         self._init_stats()
