@@ -20,7 +20,7 @@ docutils==0.21.2
     # via
     #   changelog-chug
     #   python-daemon
-flit-core==3.11.0
+flit-core==3.12.0
     # via
     #   click
     #   django-filter
@@ -98,7 +98,7 @@ setuptools-scm==8.2.0
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.3.13.13
+trove-classifiers==2025.3.19.19
     # via hatchling
 types-psutil==7.0.0.20250218
     # via mypy
@@ -132,7 +132,7 @@ setuptools==69.0.2
     #   setuptools-scm
 setuptools==75.8.0
     # via ansible-core
-setuptools==76.0.0
+setuptools==78.0.2
     # via
     #   ansible
     #   bcrypt
