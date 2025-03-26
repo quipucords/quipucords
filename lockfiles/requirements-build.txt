@@ -131,7 +131,7 @@ setuptools==69.0.2
     #   setuptools-scm
 setuptools==75.8.0
     # via ansible-core
-setuptools==78.0.2
+setuptools==78.1.0
     # via
     #   ansible
     #   bcrypt
