@@ -1,4 +1,4 @@
-FROM quay.io/konflux-ci/yq@sha256:ff08fe74188fbadf23ce6b2e4d1db8cadd170203214031d093ff4e4e574a45d6 as yq
+FROM quay.io/konflux-ci/yq@sha256:59c7f165cf9aa88fa9d435fc9c301ab70bd7365b725811243cbc776c9ee1cada as yq
 # builder and the "final" stages (and any stage that install rpms) MUST be compatible and derived from
 # the same ubi base (for instance, don't use a ubi8 "builder" stage with a "final" ubi9)
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:bafd57451de2daa71ed301b277d49bd120b474ed438367f087eac0b885a668dc as builder
