@@ -1,3 +1,4 @@
+
 name: Build Container Image
 
 on:
@@ -9,6 +10,7 @@ on:
     branches: [main, 'release/*']
 
 env:
+  # Forks that do not set secrets and override the variables may fail build steps using them.
   STABLE_TAG: ${{ github.event_name == 'push' && github.ref_name || format('pr-{0}', github.event.pull_request.number) }}
   # We had a problem with GitHub setting quay expiration label also during
   # merge to main, so we just set meaningless value as a workaround.
@@ -17,7 +19,7 @@ env:
   REGISTRY: ${{ vars.REGISTRY || 'quay.io' }}
 
 jobs:
-  build:
+  build-amd64:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,31 +28,133 @@ jobs:
         with:
           fetch-depth: 0  # fetches all commits/tags
 
-      - name: Define Release Tag
-        id: define-release-tag
+      - name: Define Release Tag Amd64
+        id: define-release-tag-amd64
         shell: bash
-        run: echo "RELEASE_TAG=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*} || echo)" >> "$GITHUB_ENV"
+        run: echo "RELEASE_TAG_AMD64=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*}-amd64 || echo)" >> "$GITHUB_ENV"
 
-      - name: Build quipucords image
-        id: build-image
+      - name: Build Amd64 quipucords image
+        # Tags: pr-#-amd64, main-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
+        id: build-image-amd64
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
           archs: amd64
-          tags: ${{ env.STABLE_TAG }} ${{ env.STABLE_TAG == 'main' && 'latest' || '' }} ${{ contains( env.RELEASE_TAG , '.' ) && env.RELEASE_TAG || '' }}
+          tags: ${{ env.STABLE_TAG }}-amd64 ${{ env.STABLE_TAG == 'main' && 'latest-amd64' || '' }} ${{ contains( env.RELEASE_TAG_AMD64 , '.' ) && env.RELEASE_TAG_AMD64 || '' }}
           containerfiles: |
             ./Containerfile
           labels: |
             ${{ env.EXPIRATION_LABEL }}
             quipucords.backend.git_sha=${{ github.sha }}
 
-      - name: Push To quay.io
-        # Forks that do not set secrets and override the variables may fail this step.
+      - name: Push Amd64 To quay.io
+        # Tags: pr-#-amd64, main-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.build-image.outputs.tags }}
+          tags: ${{ steps.build-image-amd64.outputs.tags }}
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
-        continue-on-error: true
+
+  build-arm64:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # fetches all commits/tags
+
+      - name: Define Release Tag Arm64
+        id: define-release-tag-arm64
+        shell: bash
+        run: echo "RELEASE_TAG_ARM64=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*}-arm64 || echo)" >> "$GITHUB_ENV"
+
+      - name: Build Arm64 quipucords image
+        # Tags: pr-#-arm64, main-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
+        id: build-image-arm64
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          archs: arm64
+          tags: ${{ env.STABLE_TAG }}-arm64 ${{ env.STABLE_TAG == 'main' && 'latest-arm64' || '' }} ${{ contains( env.RELEASE_TAG_ARM64 , '.' ) && env.RELEASE_TAG_ARM64 || '' }}
+          containerfiles: |
+            ./Containerfile
+          labels: |
+            ${{ env.EXPIRATION_LABEL }}
+            quipucords.backend.git_sha=${{ github.sha }}
+
+      - name: Push Arm64 To quay.io
+        # Tags: pr-#-arm64, main-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ steps.build-image-arm64.outputs.tags }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+
+    steps:
+      - name: Define Release Tag
+        id: define-release-tag
+        shell: bash
+        run: echo "RELEASE_TAG=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*} || echo)" >> "$GITHUB_ENV"
+
+      - name: Define Image Tag
+        id: define-image-tag
+        shell: bash
+        run: echo "IMAGE_TAG=${{ env.STABLE_TAG == 'main' && 'latest' || contains( env.RELEASE_TAG , '.' ) && env.RELEASE_TAG || env.STABLE_TAG }}" >> "${GITHUB_ENV}"
+
+      - name: Login to Registry
+        id: login-to-registry
+        shell: bash
+        run: podman login --username "${{ secrets.QUAYIO_USERNAME }}" --password "${{ secrets.QUAYIO_PASSWORD }}" "${{ env.REGISTRY }}"
+
+      - name: Create Manifest
+        # Tags: pr-#, latest, x.y
+        id: create-manifest
+        shell: bash
+        run:  |
+              echo "Creating manifest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ..."
+              buildah manifest create --all ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-amd64 \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-arm64
+
+      - name: Push Manifest
+        # Tags: pr-#, latest, x.y
+        id: push-manifest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.IMAGE_TAG }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
+      - name: Create Patch Version Manifest
+        # Tags: x.y.z
+        id: create-patch-version-manifest
+        if: contains( env.RELEASE_TAG, '.' )
+        shell: bash
+        run:  |
+              echo "Creating patch version manifest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }} ..."
+              buildah manifest create --all ${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }} \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }}-amd64 \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }}-arm64
+
+      - name: Push Patch Version Manifest
+        # Tags: x.y.z
+        id: push-patch-version-manifest
+        if: contains( env.RELEASE_TAG, '.' )
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.STABLE_TAG }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
