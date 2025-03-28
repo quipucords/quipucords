@@ -60,13 +60,13 @@ arches:
     name: glibc-devel
     evr: 2.34-125.el9_5.3
     sourcerpm: glibc-2.34-125.el9_5.3.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-503.33.1.el9_5.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-503.34.1.el9_5.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 3900913
-    checksum: sha256:651ca9eb7ec3f514074cf7c4974f3ce83a58d8747d92dbeb00bb452fd462fd58
+    size: 3901117
+    checksum: sha256:db92d19a7caaf6800014e7fede11141f781fe7a4aed36e621334f3cd3f06022c
     name: kernel-headers
-    evr: 5.14.0-503.33.1.el9_5
-    sourcerpm: kernel-5.14.0-503.33.1.el9_5.src.rpm
+    evr: 5.14.0-503.34.1.el9_5
+    sourcerpm: kernel-5.14.0-503.34.1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libasan-11.5.0-5.el9_5.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 413819
@@ -1058,13 +1058,13 @@ arches:
     name: glibc-headers
     evr: 2.34-125.el9_5.3
     sourcerpm: glibc-2.34-125.el9_5.3.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-503.33.1.el9_5.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-503.34.1.el9_5.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 3939413
-    checksum: sha256:a1f3794548d4ffbbfb167d816698715e7f364f7af88153cd6a30d43012a789c9
+    size: 3939641
+    checksum: sha256:b8977e764e4e74aa901d5c883e527cc76cf809946750cf8dae1f3a769542e59e
     name: kernel-headers
-    evr: 5.14.0-503.33.1.el9_5
-    sourcerpm: kernel-5.14.0-503.33.1.el9_5.src.rpm
+    evr: 5.14.0-503.34.1.el9_5
+    sourcerpm: kernel-5.14.0-503.34.1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libffi-devel-3.4.2-8.el9.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 32520
