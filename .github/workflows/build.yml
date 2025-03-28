@@ -9,6 +9,7 @@ on:
     branches: [main, 'release/*']
 
 env:
+  # Forks that do not set secrets and override the variables may fail build steps using them.
   STABLE_TAG: ${{ github.event_name == 'push' && github.ref_name || format('pr-{0}', github.event.pull_request.number) }}
   # We had a problem with GitHub setting quay expiration label also during
   # merge to main, so we just set meaningless value as a workaround.
@@ -45,7 +46,6 @@ jobs:
             quipucords.backend.git_sha=${{ github.sha }}
 
       - name: Push Amd64 To quay.io
-        # Forks that do not set secrets and override the variables may fail this step.
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.IMAGE_NAME }}
@@ -82,7 +82,6 @@ jobs:
             quipucords.backend.git_sha=${{ github.sha }}
 
       - name: Push Arm64 To quay.io
-        # Forks that do not set secrets and override the variables may fail this step.
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.IMAGE_NAME }}
@@ -106,24 +105,49 @@ jobs:
         shell: bash
         run: echo "IMAGE_TAG=${{ env.STABLE_TAG == 'main' && 'latest' || contains( env.RELEASE_TAG , '.' ) && env.RELEASE_TAG || env.STABLE_TAG }}" >> "${GITHUB_ENV}"
 
+      - name: Login to Registry
+        id: login-to-registry
+        shell: bash
+        run: podman login --username "${{ secrets.QUAYIO_USERNAME }}" --password "${{ secrets.QUAYIO_PASSWORD }}" "${{ env.REGISTRY }}"
+
+      - name: Create Manifest
+        id: create-manifest
+        if: ${{ ! contains( env.RELEASE_TAG, '.' ) }}
+        shell: bash
+        run:  |
+              echo "Creating manifest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ..."
+              buildah manifest create --all ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-amd64 \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-arm64
+
       - name: Push Manifest
         id: push-manifest
         if: ${{ ! contains( env.RELEASE_TAG, '.' ) }}
-        uses: pixelfederation/gh-action-manifest-tool@v0.1.7
+        uses: redhat-actions/push-to-registry@v2
         with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.IMAGE_TAG }}
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
-          platforms: linux/amd64,linux/arm64
-          template: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}-ARCH
-          target: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
-      - name: Push Versioned Manifest
-        id: push-versioned-manifest
+      - name: Create Release Manifest
+        id: create-release-manifest
         if: contains( env.RELEASE_TAG, '.' )
-        uses: pixelfederation/gh-action-manifest-tool@v0.1.7
+        shell: bash
+        run:  |
+              echo "Creating manifest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }} ..."
+              buildah manifest create --all ${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }} \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }}-amd64 \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }}-arm64
+
+      - name: Push Release Manifest
+        id: push-release-manifest
+        if: contains( env.RELEASE_TAG, '.' )
+        uses: redhat-actions/push-to-registry@v2
         with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.STABLE_TAG }}
+          registry: ${{ env.REGISTRY }}
           username: ${{ secrets.QUAYIO_USERNAME }}
           password: ${{ secrets.QUAYIO_PASSWORD }}
-          platforms: linux/amd64,linux/arm64
-          template: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }}-ARCH
-          target: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.STABLE_TAG }}
