@@ -8,8 +8,8 @@ import pytest
 from api.models import Source
 from api.scantask.model import ScanTask
 from constants import DataSources
-from scanner.network.connect import ConnectResultStore
 from scanner.network.connect_callback import ConnectResultCallback
+from scanner.network.inspect import ConnectResultStore
 from tests.factories import ScanTaskFactory, SourceFactory
 
 
