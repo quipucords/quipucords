@@ -132,6 +132,7 @@ convention = "pep257"
 
 [tool.uv]
 package = true
+required-version = ">=0.6.11,<0.7"
 # Use environment markers to limit library selection to only cpython and linux/macos
 # https://docs.python.org/3/library/sys.html#sys.platform
 environments = [

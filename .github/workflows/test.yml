@@ -19,6 +19,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          pyproject-file: "pyproject.toml"
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
@@ -67,6 +69,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          pyproject-file: "pyproject.toml"
 
       - name: Set up Python
         uses: actions/setup-python@v4.7.0
