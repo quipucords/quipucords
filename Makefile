@@ -253,4 +253,12 @@ lock-baseimages:
 	done; \
 	echo "$${separator}"
 
-update-lockfiles: lock-baseimages lock-rpms update-requirements
+update-konflux-pipeline:
+	@if which pipeline-patcher > /dev/null 2>&1; then \
+		pipeline-patcher bump-task-refs .; \
+	else \
+		echo "'pipeline-patcher' not found in PATH; Refer to https://github.com/simonbaird/konflux-pipeline-patcher/blob/main/README.md."; \
+		exit 1; \
+	fi
+
+update-lockfiles: lock-baseimages lock-rpms update-requirements update-konflux-pipeline
