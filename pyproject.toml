@@ -9,7 +9,7 @@ packages = ["quipucords"]
 name = "quipucords"
 version = "1.13.0"
 description = "Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment."
-requires-python = "<3.14,>=3.12"
+requires-python = "<3.14,>=3.13"
 authors = [
     {name = "Quipucords Dev Team", email = "quipucords@redhat.com"},
 ]
