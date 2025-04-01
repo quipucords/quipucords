@@ -4,7 +4,7 @@
 #
 #    pybuild-deps compile --output-file=lockfiles/requirements-build.txt lockfiles/requirements.txt
 #
-calver==2022.6.26
+calver==2025.3.31
     # via trove-classifiers
 cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
@@ -72,7 +72,7 @@ pbr==6.1.1
     # via lockfile
 pluggy==1.5.0
     # via hatchling
-poetry-core==2.1.1
+poetry-core==2.1.2
     # via
     #   click-didyoumean
     #   rsa
@@ -88,7 +88,7 @@ setuptools-rust==1.11.0
     #   maturin
 setuptools-scm==7.1.0
     # via python-dateutil
-setuptools-scm==8.0.4
+setuptools-scm==8.1.0
     # via ansible-runner
 setuptools-scm==8.2.0
     # via
@@ -101,9 +101,9 @@ trove-classifiers==2025.3.19.19
     # via hatchling
 types-psutil==7.0.0.20250218
     # via mypy
-types-setuptools==76.0.0.20250313
+types-setuptools==78.1.0.20250329
     # via mypy
-typing-extensions==4.12.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+typing-extensions==4.13.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   mypy
     #   setuptools-scm
@@ -125,11 +125,11 @@ wheel==0.45.1
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
-setuptools==69.0.2
+setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==75.8.0
+setuptools==76.0.0
     # via ansible-core
 setuptools==78.1.0
     # via
