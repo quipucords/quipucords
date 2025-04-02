@@ -221,10 +221,15 @@ class InspectTaskRunner(ScanTaskRunner):
             self.scan_task.log_message(log_message)
             call = InspectCallback()
 
-            # Build Ansible Runner Parameters
-            job_timeout = int(settings.QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT) * len(
-                group_names
+            number_of_hosts = len(
+                inventory.get("all").get("children").get(group_name).get("hosts").keys()
             )
+
+            # Build Ansible Runner Parameters
+            job_timeout = (
+                int(settings.QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT) * number_of_hosts
+            )
+
             runner_settings = {
                 "idle_timeout": job_timeout,
                 "job_timeout": job_timeout,
