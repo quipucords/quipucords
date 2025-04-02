@@ -2,7 +2,7 @@
 
 import pytest
 
-from api.reports.serializer import SourceSerializer
+from api.reports.serializer_v1 import SourceSerializer
 from api.serializers import ReportUploadSerializer
 from constants import DataSources
 
