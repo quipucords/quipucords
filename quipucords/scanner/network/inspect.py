@@ -285,6 +285,10 @@ class InspectTaskRunner(ScanTaskRunner):
                 quiet_bool = False
                 verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
 
+            self.scan_task.log_message(
+                f"ansible_runner.run for {number_of_hosts} hosts "
+                f"has timeout settings: {runner_settings}"
+            )
             try:
                 runner_obj = ansible_runner.run(
                     quiet=quiet_bool,
@@ -631,10 +635,11 @@ def _connect(  # noqa: PLR0913, PLR0915
         scan_task.log_message(log_message)
         call = ConnectResultCallback(result_store, credential, scan_task.source)
 
+        number_of_hosts = len(group_ips)
         # Create parameters for ansible runner. For more info, see:
         # https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
-        job_timeout = int(settings.QUIPUCORDS_NETWORK_CONNECT_JOB_TIMEOUT) * len(
-            group_ips
+        job_timeout = (
+            int(settings.QUIPUCORDS_NETWORK_CONNECT_JOB_TIMEOUT) * number_of_hosts
         )
         runner_settings = {
             "idle_timeout": job_timeout,  # Ansible default = 600 sec
@@ -660,6 +665,10 @@ def _connect(  # noqa: PLR0913, PLR0915
             quiet_bool = False
             verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
         try:
+            scan_task.log_message(
+                f"ansible_runner.run for {number_of_hosts} hosts "
+                f"has timeout settings: {runner_settings}"
+            )
             runner_obj = ansible_runner.run(
                 quiet=quiet_bool,
                 settings=runner_settings,

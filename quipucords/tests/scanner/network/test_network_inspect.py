@@ -360,9 +360,22 @@ def test_inspect_scan_with_multiple_inspection_groups_stdout_logs(mocker, settin
     mocker.patch("scanner.network.inspect.InspectCallback")
     # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
     # this test requires
+    dummy_inventory = {
+        "all": {
+            "children": {
+                "group1": {"hosts": {"hostA": None, "hostB": None}},
+                "group2": {"hosts": {"hostC": None, "hostD": None}},
+            }
+        }
+    }
     mocker.patch(
         "scanner.network.inspect.construct_inventory",
-        Mock(return_value=(("group1", "group2"), Mock())),
+        Mock(
+            return_value=(
+                dummy_inventory["all"]["children"].keys(),
+                dummy_inventory,
+            )
+        ),
     )
     # mock representing the output of ansible_runner.run
     ansible_runner_obj = Mock()
