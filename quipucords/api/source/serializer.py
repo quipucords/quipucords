@@ -562,3 +562,13 @@ match API_VERSION:
         SourceSerializer = SourceSerializerV2
     case _:
         SourceSerializer = SourceSerializerV1
+
+
+class InternalSourceSerializer(ModelSerializer):
+    """Summarized source serializer for ScanJobSerializer."""
+
+    class Meta:
+        """Serializer metadata."""
+
+        model = Source
+        fields = ["id", "name", "source_type"]

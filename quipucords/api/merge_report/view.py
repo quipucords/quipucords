@@ -28,7 +28,7 @@ def async_merge_reports(request):
             scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
             report=Report.objects.create(),
         )
-        merge_job.copy_raw_facts_from_reports(report_ids)
+        merge_job.copy_raw_facts(from_reports=report_ids)
     start_scan.send(sender=__name__, instance=merge_job)
     serializer = SimpleScanJobSerializer(merge_job)
     return Response(serializer.data, status=status.HTTP_201_CREATED)

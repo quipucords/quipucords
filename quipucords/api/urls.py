@@ -4,7 +4,8 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from api.aggregate_report.view import aggregate_report
-from api.reports.view import upload_raw_facts
+from api.reports.view import ReportViewSet
+from api.reports.view_v1 import upload_raw_facts
 from api.scan.view import scan_bulk_delete
 from api.views import (
     CredentialViewSetV1,
@@ -38,6 +39,7 @@ ROUTER_V2 = SimpleRouter()
 ROUTER_V2.register(r"credentials", CredentialViewSetV2, basename="credentials")
 ROUTER_V2.register(r"sources", SourceViewSet, basename="source")
 ROUTER_V2.register(r"jobs", ScanJobViewSetV2, basename="job")
+ROUTER_V2.register(r"reports", ReportViewSet, basename="report")
 
 
 v1_urls = [

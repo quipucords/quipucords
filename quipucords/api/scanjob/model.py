@@ -3,6 +3,8 @@
 These models are used in the REST definitions.
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import UTC, datetime
 
@@ -368,7 +370,9 @@ class ScanJob(BaseModel):
         :param conn_tasks: list of connection tasks
         :param inspect_tasks: list of inspection tasks
         """
-        if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT or inspect_tasks:
+        if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT or (
+            inspect_tasks and settings.AUTOMATIC_REPORT_GENERATION
+        ):
             prerequisites = conn_tasks + inspect_tasks
             count = len(prerequisites) + 1
             # Create a single fingerprint task with dependencies
@@ -584,8 +588,16 @@ class ScanJob(BaseModel):
         )
         inspect_task.inspect_groups.set(inspect_group_list)
 
-    def copy_raw_facts_from_reports(self, report_id_list, task_sequence_number=1):
+    def copy_raw_facts(
+        self,
+        *,
+        from_reports: list = None,
+        from_jobs: list = None,
+        task_sequence_number=1,
+    ):
         """Create raw facts associated to this job."""
+        from_jobs = from_jobs or []
+        from_reports = from_reports or []
         inspect_task = ScanTask.objects.create(
             job=self,
             scan_type=ScanTask.SCAN_TYPE_INSPECT,
@@ -593,6 +605,8 @@ class ScanJob(BaseModel):
             sequence_number=task_sequence_number,
         )
         inspect_groups = InspectGroup.objects.filter(
-            tasks__job__report_id__in=report_id_list
+            Q(tasks__job__report_id__in=from_reports) | Q(tasks__job__id__in=from_jobs)
         ).all()
         inspect_task.inspect_groups.set(inspect_groups)
+        # also "copy" related sources
+        self.sources.set(Source.objects.filter(inspectgroup__in=inspect_groups))
