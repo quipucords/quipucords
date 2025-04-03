@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quipucords"
-version = "1.13.0"
+version = "1.13.1"
 description = "Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment."
 authors = ["Quipucords Dev Team <quipucords@redhat.com>"]
 readme = "README.md"
@@ -28,7 +28,7 @@ requests = "^2.32.2"
 whitenoise = "^6.3.0"
 psycopg = {extras = ["c"], version = "^3.2.3"}
 ansible-runner = "^2.4.0"
-gunicorn = "^22.0.0"
+gunicorn = "^23.0.0"
 openshift = ">=0.13"
 pydantic = "^1.10.4"
 django-environ = "^0.10.0"
