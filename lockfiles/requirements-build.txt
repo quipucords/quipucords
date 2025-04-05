@@ -82,7 +82,7 @@ semantic-version==2.10.0
     # via setuptools-rust
 semver==3.0.4
     # via changelog-chug
-setuptools-rust==1.11.0
+setuptools-rust==1.11.1
     # via
     #   bcrypt
     #   maturin
