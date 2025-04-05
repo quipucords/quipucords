@@ -4,7 +4,7 @@
 #
 #    pybuild-deps compile --output-file=lockfiles/requirements-build.txt lockfiles/requirements.txt
 #
-calver==2025.3.31
+calver==2025.4.2
     # via trove-classifiers
 cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
