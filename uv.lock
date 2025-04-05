@@ -1119,11 +1119,11 @@ wheels = [
 
 [[package]]
 name = "more-itertools"
-version = "9.1.0"
+version = "10.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2e/d0/bea165535891bd1dcb5152263603e902c0ec1f4c9a2e152cc4adff6b3a38/more-itertools-9.1.0.tar.gz", hash = "sha256:cabaa341ad0389ea83c17a94566a53ae4c9d07349861ecb14dc6d0345cf9ac5d", size = 107389 }
+sdist = { url = "https://files.pythonhosted.org/packages/88/3b/7fa1fe835e2e93fd6d7b52b2f95ae810cf5ba133e1845f726f5a992d62c2/more-itertools-10.6.0.tar.gz", hash = "sha256:2cd7fad1009c31cc9fb6a035108509e6547547a7a738374f10bd49a09eb3ee3b", size = 125009 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/85/01/e2678ee4e0d7eed4fd6be9e5b043fff9d22d245d06c8c91def8ced664189/more_itertools-9.1.0-py3-none-any.whl", hash = "sha256:d2bc7f02446e86a68911e58ded76d6561eea00cddfb2a91e7019bbb586c799f3", size = 54207 },
+    { url = "https://files.pythonhosted.org/packages/23/62/0fe302c6d1be1c777cab0616e6302478251dfbf9055ad426f5d0def75c89/more_itertools-10.6.0-py3-none-any.whl", hash = "sha256:6eb054cb4b6db1473f6e15fcc676a08e4732548acd47c708f0e179c2c7c01e89", size = 63038 },
 ]
 
 [[package]]
@@ -1941,7 +1941,7 @@ requires-dist = [
     { name = "fqdn", specifier = ">=1.5.1,<2.0.0" },
     { name = "gunicorn", specifier = ">=23.0.0,<24.0.0" },
     { name = "jmespath", specifier = ">=1.0.1,<2.0.0" },
-    { name = "more-itertools", specifier = ">=9.1.0,<10.0.0" },
+    { name = "more-itertools", specifier = ">=10.6.0,<10.7.0" },
     { name = "openshift", specifier = ">=0.13" },
     { name = "paramiko", specifier = ">=3.0.0,<4.0.0" },
     { name = "pexpect", specifier = ">=4.8.0,<5.0.0" },
