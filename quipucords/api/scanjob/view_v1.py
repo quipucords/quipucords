@@ -17,7 +17,7 @@ from api.common.pagination import StandardResultsSetPagination
 from api.common.util import is_int
 from api.inspectresult.model import InspectResult
 from api.models import Credential, ScanJob, ScanTask, Source
-from api.scanjob.serializer import expand_scanjob
+from api.scanjob.serializer_v1 import expand_scanjob
 from api.serializers import (
     ScanJobSerializerV1,
     SystemConnectionResultSerializer,
