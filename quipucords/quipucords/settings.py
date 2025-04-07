@@ -14,7 +14,6 @@ import logging
 import os
 import random
 import string
-import warnings
 from pathlib import Path
 
 import environ
@@ -38,6 +37,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # This suppresses warnings for models where an explicit primary key is not defined.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+AUTOMATIC_REPORT_GENERATION = env.bool("QUIPUCORDS_AUTOMATIC_REPORT_GENERATION", True)
 
 
 class RelativePathnameFormatter(logging.Formatter):
@@ -430,14 +430,14 @@ LOGGING = {
 }
 
 
-def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
-    """Redirect deprecation warnings to our logger."""
-    logger = logging.getLogger("quipucords.warnings")
-    logger.warning(f"{message} (from {filename}:{lineno})")
+# def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
+#     """Redirect deprecation warnings to our logger."""
+#     logger = logging.getLogger("quipucords.warnings")
+#     logger.warning(f"{message} (from {filename}:{lineno})")
 
 
-warnings.showwarning = warn_on_deprecation
-warnings.simplefilter("always", DeprecationWarning)
+# warnings.showwarning = warn_on_deprecation
+# warnings.simplefilter("always", DeprecationWarning)
 
 # Reverse default behavior to avoid host key checking
 os.environ.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")

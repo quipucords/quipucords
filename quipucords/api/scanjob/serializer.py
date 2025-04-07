@@ -18,6 +18,7 @@ from api.common.util import convert_to_int, is_int
 from api.models import Scan, ScanJob, ScanTask, Source
 from api.scan.serializer import ScanSerializer
 from api.scantask.serializer import ScanTaskSerializer, SourceField
+from api.source.serializer import InternalSourceSerializer
 
 SCAN_KEY = "scan"
 SOURCES_KEY = "sources"
@@ -158,16 +159,6 @@ class ScanJobSerializerV1(NotEmptySerializer):
         if options is not None:
             ScanSerializer.validate_options(options)
         return options
-
-
-class InternalSourceSerializer(ModelSerializer):
-    """Summarized source serializer for ScanJobSerializer."""
-
-    class Meta:
-        """Serializer metadata."""
-
-        model = Source
-        fields = ["id", "name", "source_type"]
 
 
 class ScanJobSerializerV2(ModelSerializer):

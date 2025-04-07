@@ -26,6 +26,11 @@ class Report(BaseModel):
     )
     cached_csv = models.TextField(null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["report_platform_id"], name="report_platform_id_idx"),
+        ]
+
     @cached_property
     def sources(self):
         """

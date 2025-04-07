@@ -1,71 +1,54 @@
-"""Serializers for reports."""
-
-import re
-
-from django.db import transaction
 from rest_framework.serializers import (
     CharField,
-    ChoiceField,
-    DictField,
+    DateTimeField,
     ListField,
+    ModelSerializer,
+    PrimaryKeyRelatedField,
     Serializer,
-    UUIDField,
     ValidationError,
 )
 
-from api.models import (
-    Report,
-    ScanJob,
-    ScanTask,
+from api.models import ScanJob, ScanTask
+from api.reports.model import Report
+from api.source.serializer import InternalSourceSerializer
+
+SCANJOB_QUERYSET = ScanJob.objects.filter(
+    # scan_type=ScanTask.SCAN_TYPE_INSPECT,
+    status=ScanTask.COMPLETED,
 )
-from constants import MINIMUM_REPORT_VERSION, DataSources
 
 
-class SourceSerializer(Serializer):
-    """Serializer for 'details report' sources."""
+class CreateReportSerializer(Serializer):
+    from_jobs = ListField(
+        child=PrimaryKeyRelatedField(queryset=SCANJOB_QUERYSET),
+        required=False,
+    )
+    from_reports = ListField(
+        child=PrimaryKeyRelatedField(
+            queryset=Report.objects.filter(scanjob__in=SCANJOB_QUERYSET)
+        ),
+        required=False,
+    )
 
-    server_id = UUIDField()
-    report_version = CharField()
-    source_name = CharField()
-    source_type = ChoiceField(choices=DataSources.choices)
-    facts = ListField(child=DictField(), min_length=1)
-
-    def validate_report_version(self, value):
-        """Validate report version."""
-        regex_match = re.match(r"(\d+)\.(\d+)\.(\d+)\+\S", value)
-        if not regex_match:
-            raise ValidationError("Invalid report_version.")
-        source_version = tuple(map(int, regex_match.groups()))
-        if source_version < MINIMUM_REPORT_VERSION:
-            source_version_str = ".".join(map(str, source_version))
-            minimum_version_str = ".".join(map(str, MINIMUM_REPORT_VERSION))
-            raise ValidationError(
-                f"Source version ({source_version_str}) is below the minimum "
-                f"supported report version ({minimum_version_str})"
-            )
-        return value
+    def validate(self, attrs):
+        if not attrs:
+            raise ValidationError("Either from_jobs or from_reports is required.")
+        return super().validate(attrs)
 
 
-class ReportUploadSerializer(Serializer):
-    """Serializer for uploaded details reports."""
+class ReportOverviewSerializer(ModelSerializer):
+    status = CharField(source="scanjob.status", read_only=True)
+    start_time = DateTimeField(source="scanjob.start_time", read_only=True)
+    end_time = DateTimeField(source="scanjob.end_time", read_only=True)
+    sources = InternalSourceSerializer(source="scanjob.sources", many=True)
 
-    report_type = ChoiceField(choices=["details"])
-    sources = SourceSerializer(many=True)
-
-    def validate_sources(self, value):
-        """Validate sources."""
-        if len(value) == 0:
-            raise ValidationError("minimum length required for 'sources' is 1.")
-        return value
-
-    @transaction.atomic
-    def create(self, validated_data):
-        """Create a report filled with raw data and a fingerprint-type ScanJob."""
-        report = Report.objects.create()
-        # create a scan job and required scan tasks for a "upload" job
-        scan_job = ScanJob.objects.create(
-            scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-            report=report,
-        )
-        scan_job.ingest_sources(validated_data["sources"])
-        return report
+    class Meta:
+        model = Report
+        fields = [
+            "id",
+            "report_platform_id",
+            "status",
+            "start_time",
+            "end_time",
+            "sources",
+        ]

@@ -1,68 +1,53 @@
-"""View for reports."""
-
-import logging
-
-from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext as _
-from rest_framework import status
-from rest_framework.decorators import api_view, renderer_classes
+from django.db import transaction
+from django_filters import NumberFilter
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from drf_spectacular.utils import extend_schema
+from rest_framework import mixins, status, viewsets
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from api.aggregate_report.model import get_aggregate_report_by_report_id
-from api.deployments_report.view import build_cached_json_report
-from api.models import DeploymentsReport, Report
-from api.reports.reports_gzip_renderer import ReportsGzipRenderer
-from api.serializers import (
-    DetailsReportSerializer,
-    ReportUploadSerializer,
-    SimpleScanJobSerializer,
-)
+from api.models import Report, ScanJob, ScanTask
 from api.signal.scanjob_signal import start_scan
 
-logger = logging.getLogger(__name__)
+from .serializer import CreateReportSerializer, ReportOverviewSerializer
 
 
-@api_view(["GET"])
-@renderer_classes((ReportsGzipRenderer,))
-def reports(request, report_id):
-    """Lookup and return reports."""
-    reports_dict = {}
-    reports_dict["report_id"] = report_id
-    report = get_object_or_404(Report, id=report_id)
-    # add scan job id to allow detection of related logs on GzipRenderer
-    reports_dict["scan_job_id"] = report.scanjob.id
-    serializer = DetailsReportSerializer(report)
-    json_details = serializer.data
-    json_details.pop("cached_csv", None)
-    reports_dict["details_json"] = json_details
-    deployments_report = get_object_or_404(DeploymentsReport, report__id=report_id)
-    # deployments_report.status seems redundant considering scan job already
-    # has a "state machine". Consider removing this in future iterations (we will
-    # be forced to revisit this idea when Report replaces Deployments models)
-    if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
-        return Response(
-            {
-                "detail": _(
-                    f"Deployment report {report_id} could not be created."
-                    " See server logs."
-                )
-            },
-            status=status.HTTP_424_FAILED_DEPENDENCY,
-        )
-    deployments_json = build_cached_json_report(deployments_report)
-    reports_dict["deployments_json"] = deployments_json
-    aggregate_json = get_aggregate_report_by_report_id(report_id)
-    reports_dict["aggregate_json"] = aggregate_json
-    return Response(reports_dict)
+class ReportFilter(FilterSet):
+    """Filter for ScanJobs."""
+
+    source_id = NumberFilter(field_name="scanjob__sources__id", lookup_expr="exact")
+    status = NumberFilter(field_name="scanjob__status", lookup_expr="exact")
+    report_id = NumberFilter(field_name="report_platform_id", lookup_expr="exact")
+
+    class Meta:
+        """Metadata for filterset."""
+
+        model = Report
+        fields = ["source_id", "status", "report_id"]
 
 
-@api_view(["POST"])
-def upload_raw_facts(request):
-    """Dedicated view for uploading reports."""
-    input_serializer = ReportUploadSerializer(data=request.data)
-    input_serializer.is_valid(raise_exception=True)
-    report = input_serializer.save()
-    # start fingerprint job
-    start_scan.send(sender=__name__, instance=report.scanjob)
-    output_serializer = SimpleScanJobSerializer(report.scanjob)
-    return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+class ReportViewSet(
+    mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    queryset = Report.objects.prefetch_related("scanjob").prefetch_related(
+        "scanjob__sources"
+    )
+    serializer_class = ReportOverviewSerializer
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filterset_class = ReportFilter
+    ordering_fields = ("id", "status", "start_time", "end_time")
+    ordering = ("-id",)
+
+    @extend_schema(request=CreateReportSerializer)
+    def create(self, request, *args, **kwargs):
+        input_serializer = CreateReportSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            scan_job = ScanJob.objects.create(
+                scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
+                report=Report.objects.create(),
+            )
+            scan_job.copy_raw_facts(**input_serializer.data)
+        start_scan.send(sender="ReportViewSet.create", instance=scan_job)
+        serializer = self.get_serializer_class()(scan_job.report)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
