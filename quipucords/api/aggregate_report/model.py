@@ -23,10 +23,12 @@ iterates through all the facts exactly once to minimize expected execution time.
 import logging
 from collections import defaultdict
 from collections.abc import Iterable
-from dataclasses import asdict, dataclass, field
-from datetime import date
 from math import ceil
 
+from django.db import models
+from django.forms import model_to_dict
+
+from api.common.models import BaseModel
 from api.deployments_report.model import Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
 from api.report.model import Report
@@ -39,60 +41,85 @@ logger = logging.getLogger(__name__)
 UNKNOWN: str = "unknown"  # placeholder string for missing names/versions/kinds.
 
 
-@dataclass
-class AggregateReport:
+class AggregateReport(BaseModel):
     """Results of the aggregate report."""
+
+    report = models.OneToOneField(
+        "Report", models.CASCADE, related_name="aggregate_report", null=False
+    )
 
     # Note the lack of special reporting needs for Satellite or RHACS here.
     # At the time of this writing, Justin says this is correct and we have none.
 
-    # TODO Convert this to a full Django model that we can store and look up.
-
-    ansible_hosts_all: int = 0
-    ansible_hosts_in_database: int = 0
-    ansible_hosts_in_jobs: int = 0
-    inspect_result_status_failed: int = 0
-    inspect_result_status_success: int = 0
-    inspect_result_status_unknown: int = 0
-    inspect_result_status_unreachable: int = 0
-    instances_hypervisor: int = 0
-    instances_not_redhat: int = 0
-    instances_physical: int = 0
-    instances_unknown: int = 0
-    instances_virtual: int = 0
-    jboss_eap_cores_physical: int = 0
-    jboss_eap_cores_virtual: int = 0
-    jboss_eap_instances: int = 0
-    jboss_ws_cores_physical: int = 0
-    jboss_ws_cores_virtual: int = 0
-    jboss_ws_instances: int = 0
-    missing_cpu_core_count: int = 0
-    missing_cpu_socket_count: int = 0
-    missing_name: int = 0
-    missing_pem_files: int = 0
-    missing_system_creation_date: int = 0
-    missing_system_purpose: int = 0
-    openshift_cores: int = 0
-    openshift_operators_by_name: dict = field(default_factory=dict)
-    openshift_operators_by_kind: dict = field(default_factory=dict)
-    os_by_name_and_version: dict = field(default_factory=dict)
-    socket_pairs: int = 0
-    system_creation_date_average: date | None = None
-    vmware_hosts: int = 0
-    vmware_vm_to_host_ratio: float = 0
-    vmware_vms: int = 0
+    ansible_hosts_all = models.PositiveIntegerField(default=0, blank=True, null=True)
+    ansible_hosts_in_database = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    ansible_hosts_in_jobs = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    inspect_result_status_failed = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    inspect_result_status_success = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    inspect_result_status_unknown = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    inspect_result_status_unreachable = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    instances_hypervisor = models.PositiveIntegerField(default=0, blank=True, null=True)
+    instances_not_redhat = models.PositiveIntegerField(default=0, blank=True, null=True)
+    instances_physical = models.PositiveIntegerField(default=0, blank=True, null=True)
+    instances_unknown = models.PositiveIntegerField(default=0, blank=True, null=True)
+    instances_virtual = models.PositiveIntegerField(default=0, blank=True, null=True)
+    jboss_eap_cores_physical = models.FloatField(default=0.0, blank=True, null=True)
+    jboss_eap_cores_virtual = models.FloatField(default=0.0, blank=True, null=True)
+    jboss_eap_instances = models.PositiveIntegerField(default=0, blank=True, null=True)
+    jboss_ws_cores_physical = models.FloatField(default=0.0, blank=True, null=True)
+    jboss_ws_cores_virtual = models.FloatField(default=0.0, blank=True, null=True)
+    jboss_ws_instances = models.PositiveIntegerField(default=0, blank=True, null=True)
+    missing_cpu_core_count = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    missing_cpu_socket_count = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    missing_name = models.PositiveIntegerField(default=0, blank=True, null=True)
+    missing_pem_files = models.PositiveIntegerField(default=0, blank=True, null=True)
+    missing_system_creation_date = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    missing_system_purpose = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    openshift_cores = models.PositiveIntegerField(default=0, blank=True, null=True)
+    openshift_operators_by_name = models.JSONField(null=False, default=dict)
+    openshift_operators_by_kind = models.JSONField(null=False, default=dict)
+    os_by_name_and_version = models.JSONField(null=False, default=dict)
+    socket_pairs = models.PositiveIntegerField(default=0, blank=True, null=True)
+    system_creation_date_average = models.DateField(blank=True, null=True)
+    vmware_hosts = models.PositiveIntegerField(default=0, blank=True, null=True)
+    vmware_vm_to_host_ratio = models.FloatField(default=0, blank=True, null=True)
+    vmware_vms = models.PositiveIntegerField(default=0, blank=True, null=True)
 
     # Note: The following attributes come exclusively from raw facts.
     # For now, that's our only option, and these are required outputs.
     # TODO Refactor how we populate these when we restructure the underlying data.
-    openshift_cluster_instances: int = 0
-    openshift_node_instances: int = 0
+    openshift_cluster_instances = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
+    openshift_node_instances = models.PositiveIntegerField(
+        default=0, blank=True, null=True
+    )
 
 
 def reformat_aggregate_report_to_dict(aggregated: AggregateReport) -> dict:
     """Reformat an AggregateReport into a slightly more readable dict."""
     results, diagnostics = {}, {}
-    for key, value in asdict(aggregated).items():
+    for key, value in model_to_dict(aggregated).items():
         if key.startswith("missing_") or key.startswith("inspect_result_status_"):
             diagnostics[key] = value
         else:
