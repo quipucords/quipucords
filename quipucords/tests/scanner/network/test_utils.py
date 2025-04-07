@@ -8,7 +8,6 @@ import pytest
 from django.forms import model_to_dict
 
 from api import vault
-from api.models import Credential
 from api.serializers import SourceSerializer
 from constants import GENERATED_SSH_KEYFILE, DataSources
 from scanner.network import utils
@@ -50,10 +49,7 @@ def test_construct_inventory_from_source_and_credential_models(faker):
 
     credential = CredentialFactory(
         cred_type=DataSources.NETWORK,
-        name=faker.name(),
-        username=faker.user_name(),
         password=faker.password(),
-        become_method=faker.random_element(Credential.BECOME_METHOD_CHOICES)[0],
         become_password=faker.password(),
         become_user=faker.slug(),
     )
