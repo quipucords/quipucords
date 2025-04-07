@@ -19,7 +19,7 @@ from api.models import (
     SystemConnectionResult,
 )
 from api.scan.serializer import ScanSerializer
-from api.scanjob.serializer import ScanJobSerializerV1
+from api.scanjob.serializer_v1 import ScanJobSerializerV1
 from api.scanjob.view_v1 import expand_scanjob
 from tests.api.scan.test_scan import (
     disabled_optional_products_default,

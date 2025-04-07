@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
 
 from api.models import ScanJob
-from api.scanjob.serializer import ScanJobSerializerV2
+from api.scanjob.serializer import ScanJobSerializer
 
 
 class ScanJobFilter(FilterSet):
@@ -27,7 +27,7 @@ class ScanJobViewSet(viewsets.ReadOnlyModelViewSet):
     """A viewset for ScanJobs."""
 
     queryset = ScanJob.objects.prefetch_related("sources").with_counts()
-    serializer_class = ScanJobSerializerV2
+    serializer_class = ScanJobSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = ScanJobFilter
     ordering_fields = ("id", "scan_type", "status", "start_time", "end_time")
