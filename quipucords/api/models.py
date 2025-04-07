@@ -1,6 +1,7 @@
 """quipucords models."""
 # ruff: noqa: F401
 
+from api.aggregate_report.model import AggregateReport
 from api.connresult.model import (
     JobConnectionResult,
     SystemConnectionResult,
