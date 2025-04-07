@@ -5,29 +5,14 @@ import pytest
 from api.credential.model import Credential
 from api.source.model import Source
 from constants import DataSources
-from tests.factories import generate_openssh_pkey
-
-
-@pytest.fixture
-def openssh_key() -> str:
-    """Return an openssh_key random OpenSSH private key."""
-    return generate_openssh_pkey()
+from tests.factories import CredentialFactory
 
 
 @pytest.mark.django_db
 @pytest.fixture
-def network_credential(openssh_key: str, faker) -> Credential:
+def network_credential() -> Credential:
     """Return a Credential with an ssh_key."""
-    return Credential.objects.create(
-        name="network-credential-name",
-        username="network-credential-username",
-        become_method=faker.random_element(Credential.BECOME_METHOD_CHOICES)[0],
-        become_password=faker.password(),
-        become_user=faker.slug(),
-        cred_type=DataSources.NETWORK,
-        password=faker.password(),
-        ssh_key=openssh_key,
-    )
+    return CredentialFactory(cred_type=DataSources.NETWORK, with_ssh_key=True)
 
 
 @pytest.fixture

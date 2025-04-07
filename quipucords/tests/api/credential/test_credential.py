@@ -1157,6 +1157,7 @@ class TestCredentialSerialization:
             {
                 "name": "network",
                 "cred_type": DataSources.NETWORK.value,
+                "become_method": mock.ANY,
                 "username": "some-user",
                 "password": "some-password",
                 "become_password": "become-pass",
@@ -1168,6 +1169,7 @@ class TestCredentialSerialization:
                 "id": mock.ANY,
                 "name": "network",
                 "cred_type": DataSources.NETWORK.value,
+                "become_method": mock.ANY,
                 "username": "some-user",
                 "password": ENCRYPTED_DATA_MASK,
                 "become_password": ENCRYPTED_DATA_MASK,
@@ -1179,6 +1181,7 @@ class TestCredentialSerialization:
             {
                 "name": "network-ssh-key",
                 "cred_type": DataSources.NETWORK.value,
+                "become_method": mock.ANY,
                 "username": "some-user",
                 "ssh_key": "some private SSH Key",
             },
@@ -1187,6 +1190,7 @@ class TestCredentialSerialization:
                 "id": mock.ANY,
                 "name": "network-ssh-key",
                 "cred_type": DataSources.NETWORK.value,
+                "become_method": mock.ANY,
                 "username": "some-user",
                 "ssh_key": ENCRYPTED_DATA_MASK,
             },
@@ -1196,6 +1200,7 @@ class TestCredentialSerialization:
             {
                 "name": "network-ssh-key-passphrase",
                 "cred_type": DataSources.NETWORK.value,
+                "become_method": mock.ANY,
                 "username": "some-user",
                 "ssh_key": "some private SSH Key",
                 "ssh_passphrase": "some private SSH Key passphrase",
@@ -1205,6 +1210,7 @@ class TestCredentialSerialization:
                 "id": mock.ANY,
                 "name": "network-ssh-key-passphrase",
                 "cred_type": DataSources.NETWORK.value,
+                "become_method": mock.ANY,
                 "username": "some-user",
                 "ssh_key": ENCRYPTED_DATA_MASK,
                 "ssh_passphrase": ENCRYPTED_DATA_MASK,
