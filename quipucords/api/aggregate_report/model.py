@@ -39,6 +39,7 @@ from utils.datetime import average_date
 logger = logging.getLogger(__name__)
 
 UNKNOWN: str = "unknown"  # placeholder string for missing names/versions/kinds.
+AGGREGATE_REPORT_SKIP_ATTRS: list = ["id", "report"]
 
 
 class AggregateReport(BaseModel):
@@ -120,6 +121,8 @@ def reformat_aggregate_report_to_dict(aggregated: AggregateReport) -> dict:
     """Reformat an AggregateReport into a slightly more readable dict."""
     results, diagnostics = {}, {}
     for key, value in model_to_dict(aggregated).items():
+        if key in AGGREGATE_REPORT_SKIP_ATTRS:
+            continue
         if key.startswith("missing_") or key.startswith("inspect_result_status_"):
             diagnostics[key] = value
         else:
@@ -131,11 +134,7 @@ def reformat_aggregate_report_to_dict(aggregated: AggregateReport) -> dict:
 
 
 def get_aggregate_report_by_report_id(report_id: int) -> dict | None:
-    """
-    Get the aggregate report data for the given report ID.
-
-    TODO Turn this into a database lookup after we start storing AggregateReport.
-    """
+    """Get the aggregate report data for the given report ID."""
     try:
         report = Report.objects.get(pk=report_id)
         aggregated = build_aggregate_report(report.id)
@@ -348,7 +347,12 @@ def _aggregate_from_raw_facts(
 def build_aggregate_report(report_id: int) -> AggregateReport:
     """Aggregate various totals from the facts related to the given report ID."""
     report = Report.objects.get(pk=report_id)
-    aggregated = AggregateReport()
+    try:
+        aggregated = AggregateReport.objects.get(report_id=report_id)
+        if report.updated_at <= aggregated.updated_at:
+            return aggregated
+    except AggregateReport.DoesNotExist:
+        aggregated = AggregateReport.objects.create(report_id=report_id)
 
     # Note that `aggregated` is treated as a pass-by-reference here and is updated
     # directly in these functions instead of returning a new instance.
@@ -377,4 +381,8 @@ def build_aggregate_report(report_id: int) -> AggregateReport:
         ),
     )
 
+    aggregated.save()
+    # Make sure aggregated reflects the database's declared schema
+    # i.e. floats stored as int to be represented as such.
+    aggregated.refresh_from_db()
     return aggregated
