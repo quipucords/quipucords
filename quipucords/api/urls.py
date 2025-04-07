@@ -9,8 +9,8 @@ from api.views import (
     CredentialViewSetV1,
     CredentialViewSetV2,
     QuipucordsExpiringAuthTokenView,
+    ScanJobViewSet,
     ScanJobViewSetV1,
-    ScanJobViewSetV2,
     ScanViewSet,
     SourceViewSet,
     UserViewSet,
@@ -37,7 +37,7 @@ ROUTER_V1.register(r"users", UserViewSet, basename="users")
 ROUTER_V2 = SimpleRouter()
 ROUTER_V2.register(r"credentials", CredentialViewSetV2, basename="credentials")
 ROUTER_V2.register(r"sources", SourceViewSet, basename="source")
-ROUTER_V2.register(r"jobs", ScanJobViewSetV2, basename="job")
+ROUTER_V2.register(r"jobs", ScanJobViewSet, basename="job")
 
 
 v1_urls = [
