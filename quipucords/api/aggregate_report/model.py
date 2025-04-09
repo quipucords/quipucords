@@ -332,8 +332,7 @@ def build_aggregate_report(report_id: int) -> AggregateReport:
         aggregated,
         (
             result
-            for task in report.scanjob.tasks.all()
-            for group in task.inspect_groups.all()
+            for group in report.inspect_groups.all()
             for result in group.inspect_results.all()
         ),
     )
