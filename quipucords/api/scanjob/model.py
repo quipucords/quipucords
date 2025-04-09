@@ -253,7 +253,7 @@ class ScanJob(BaseModel):
             self.connection_results = job_conn_result
             self.save()
 
-        if self.tasks and not self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
+        if self.tasks:
             # It appears the initialization didn't complete
             # so remove partial results
             self.delete_inspect_results()
@@ -298,7 +298,11 @@ class ScanJob(BaseModel):
         if scan_task_id:
             filters = filters & Q(inspect_group__tasks__in=[scan_task_id])
         InspectResult.objects.filter(filters).exclude(
-            inspect_group__tasks__in=ScanTask.objects.exclude(job_id=self.id)
+            inspect_group__reports__scanjob__in=ScanJob.objects.exclude(id=self.id)
+        ).delete()
+        # cleanup orphan InspectGroups
+        InspectGroup.objects.exclude(
+            inspect_results__in=InspectResult.objects.all()
         ).delete()
 
     def _create_connection_tasks(self):
@@ -546,12 +550,11 @@ class ScanJob(BaseModel):
 
     def ingest_sources(self, source_list, task_sequence_number=1):
         """Create raw facts associated to this job."""
-        inspect_task = ScanTask.objects.create(
-            job=self,
-            scan_type=ScanTask.SCAN_TYPE_INSPECT,
-            status=ScanTask.COMPLETED,
-            sequence_number=task_sequence_number,
-        )
+        # TODO: adjust this method (or create a new one) for v2 api "raw facts" format.
+        # This method will be problematic for source_lists containing thousands
+        # of entries. We might keep it in the future, but consider invoking it in small
+        # chunks.
+        report = self.report or Report.objects.create(scanjob=self)
         inspect_group_list = []
         inspect_result_list = []
         raw_fact_list = []
@@ -567,6 +570,7 @@ class ScanJob(BaseModel):
                 # InspectResult is lacking 'name' and 'status'. While
                 # 'details report' isn't modified (or replaced), there's
                 # nothing we can do.
+                # TODO: make this non optional for v2 equivalent
                 inspect_result = InspectResult(inspect_group=inspect_group)
                 inspect_result_list.append(inspect_result)
                 raw_fact_list.extend(
@@ -582,17 +586,11 @@ class ScanJob(BaseModel):
         RawFact.objects.bulk_create(
             raw_fact_list, batch_size=settings.QUIPUCORDS_BULK_CREATE_BATCH_SIZE
         )
-        inspect_task.inspect_groups.set(inspect_group_list)
+        report.inspect_groups.set(inspect_group_list)
 
     def copy_raw_facts_from_reports(self, report_id_list, task_sequence_number=1):
         """Create raw facts associated to this job."""
-        inspect_task = ScanTask.objects.create(
-            job=self,
-            scan_type=ScanTask.SCAN_TYPE_INSPECT,
-            status=ScanTask.COMPLETED,
-            sequence_number=task_sequence_number,
-        )
         inspect_groups = InspectGroup.objects.filter(
-            tasks__job__report_id__in=report_id_list
+            reports__id__in=report_id_list,
         ).all()
-        inspect_task.inspect_groups.set(inspect_groups)
+        self.report.inspect_groups.set(inspect_groups)

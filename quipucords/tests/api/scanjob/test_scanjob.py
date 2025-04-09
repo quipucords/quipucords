@@ -1,6 +1,7 @@
 """Test the API application."""
 
 import random
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -29,6 +30,7 @@ from tests.factories import (
     CredentialFactory,
     InspectGroupFactory,
     InspectResultFactory,
+    ReportFactory,
     ScanFactory,
     ScanJobFactory,
     ScanTaskFactory,
@@ -39,6 +41,9 @@ from tests.scanner.test_util import (
     create_scan_job_two_tasks,
     scan_options_products,
 )
+
+if TYPE_CHECKING:
+    from api.models import Report, ScanJob
 
 
 @pytest.mark.django_db
@@ -1977,7 +1982,7 @@ def scanjob_with_inspect_results():
 
 
 @pytest.mark.django_db
-def test_delete_inspect_results(scanjob_with_inspect_results):
+def test_delete_inspect_results(scanjob_with_inspect_results: ScanJob):
     """Test ScanJob.delete_inspect_results method."""
     scanjob = scanjob_with_inspect_results
     assert InspectResult.objects.filter(inspect_group__tasks__job=scanjob).exists()
@@ -1986,14 +1991,13 @@ def test_delete_inspect_results(scanjob_with_inspect_results):
 
 
 @pytest.mark.django_db
-def test_delete_inspect_results_bound_to_other_scanjobs(
-    scanjob_with_inspect_results,
+def test_delete_inspect_results_bound_to_other_reports(
+    scanjob_with_inspect_results: ScanJob,
 ):
     """Ensure only InspectResults uniquely bound to a ScanJob are deleted."""
     inspect_res = InspectResult.objects.first()
-    other_scanjob = ScanJobFactory()
-    task = ScanTaskFactory(job=other_scanjob)
-    inspect_res.inspect_group.tasks.add(task)
+    other_report: Report = ReportFactory()
+    inspect_res.inspect_group.reports.add(other_report)
     # save id in a variable so we can check later for existence
     inspect_res_id = inspect_res.id
 
@@ -2002,9 +2006,8 @@ def test_delete_inspect_results_bound_to_other_scanjobs(
     scanjob.delete_inspect_results()
     assert InspectResult.objects.filter(inspect_group__tasks__job=scanjob).count() == 1
     assert InspectResult.objects.filter(id=inspect_res_id).exists()
-    # get rid of other_scanjob should make delete_inspection_results clear the results
-    # (scantask will be deleted in cascade)
-    other_scanjob.delete()
+    # deleting the other report should make the results deletable
+    other_report.delete()
     scanjob.delete_inspect_results()
     assert InspectResult.objects.filter(inspect_group__tasks__job=scanjob).count() == 0
     assert not InspectResult.objects.filter(id=inspect_res_id).exists()
