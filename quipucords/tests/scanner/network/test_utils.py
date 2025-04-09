@@ -1,11 +1,98 @@
 """Test the network scanner utility functions."""
 
 import unittest
+from pathlib import Path
 from unittest import mock
 
+import pytest
+from django.forms import model_to_dict
+
+from api import vault
+from api.serializers import SourceSerializer
+from constants import GENERATED_SSH_KEYFILE, DataSources
 from scanner.network import utils
+from tests.factories import CredentialFactory, SourceFactory
 
 
+@pytest.mark.django_db
+def test_scan_inventory_with_valid_ssh_key(
+    network_credential, network_host_addresses, faker
+):
+    """Test construct_inventory returns dict with valid path to the SSH key."""
+    with network_credential.generate_ssh_keyfile() as ssh_keypath:
+        cred_data = model_to_dict(network_credential)
+        cred_data[GENERATED_SSH_KEYFILE] = ssh_keypath
+        # network_host_addresses[0] because it has only one address by default.
+        host_address = network_host_addresses[0]
+        _, inventory_dict = utils.construct_inventory(
+            [(host_address, cred_data)],
+            connection_port=faker.pyint(),
+            concurrency_count=faker.pyint(),
+        )
+
+        ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"][
+            host_address
+        ]["ansible_ssh_private_key_file"]
+        assert Path(ssh_keyfile).exists()
+    # check context manager cleanup
+    assert not Path(ssh_keyfile).exists()
+
+
+@pytest.mark.django_db
+def test_construct_inventory_from_source_and_credential_models(faker):
+    """Test construct_inventory using data from full Source and Credential objects."""
+    # TODO Simplify this test. Does this really need to use full model objects?
+    # We are not directly mimicking runtime behaviors here, and this test's general
+    # implementation is an historic artifact from a previous version of tests.
+    # Maybe we should just define the inputs to `utils.construct_inventory` directly
+    # and avoid the (seemingly useless) overhead of instantiating the models.
+
+    credential = CredentialFactory(
+        cred_type=DataSources.NETWORK,
+        password=faker.password(),
+        become_password=faker.password(),
+        become_user=faker.slug(),
+    )
+    source = SourceFactory(
+        source_type=DataSources.NETWORK,
+        credentials=[credential],
+        port=faker.pyint(),
+        hosts=[faker.ipv4_private()],
+    )
+    serializer = SourceSerializer(source)
+    source_data = serializer.data
+    credential_data = model_to_dict(credential)
+
+    expected = {
+        "all": {
+            "children": {
+                "group_0": {
+                    "hosts": {source.hosts[0]: {"ansible_host": source.hosts[0]}}
+                }
+            },
+            "vars": {
+                "ansible_port": source.port,
+                "ansible_user": credential.username,
+                "ansible_ssh_pass": vault.decrypt_data_as_unicode(credential.password),
+                "ansible_become_pass": vault.decrypt_data_as_unicode(
+                    credential.become_password
+                ),
+                "ansible_become_method": credential.become_method,
+                "ansible_become_user": credential.become_user,
+            },
+        }
+    }
+
+    _, inventory_dict = utils.construct_inventory(
+        hosts=source_data["hosts"],
+        credential=credential_data,
+        connection_port=source_data["port"],
+        concurrency_count=1,
+    )
+    assert inventory_dict == expected
+
+
+# TODO Convert this TestCase class to plain pytest test functions.
 class TestConstructVars(unittest.TestCase):
     """Test _construct_vars."""
 
@@ -37,6 +124,7 @@ class TestConstructVars(unittest.TestCase):
         self.assertEqual(vars_dict, expected)
 
 
+# TODO Convert this TestCase class to plain pytest test functions.
 class TestExpandHostpattern(unittest.TestCase):
     """Test utils.expand_hostpattern."""
 

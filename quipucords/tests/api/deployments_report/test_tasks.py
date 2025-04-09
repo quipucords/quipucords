@@ -10,7 +10,7 @@ from api.deployments_report.tasks import (
     generate_and_save_cached_csv,
     generate_cached_fingerprints,
 )
-from api.reports.model import Report
+from api.models import Report
 from tests.factories import DeploymentReportFactory
 from utils.misc import is_valid_cache_file
 

@@ -17,11 +17,11 @@ from api.inspectresult.serializer import (
     RawFactSerializer,
     SystemInspectionResultSerializer,
 )
-from api.reports.serializer import ReportUploadSerializer
+from api.report.serializer_v1 import ReportUploadSerializer
 from api.scan.serializer import ScanSerializer
-from api.scanjob.serializer import (
+from api.scanjob.serializer import ScanJobSerializer
+from api.scanjob.serializer_v1 import (
     ScanJobSerializerV1,
-    ScanJobSerializerV2,
     SimpleScanJobSerializer,
     SourceField,
 )

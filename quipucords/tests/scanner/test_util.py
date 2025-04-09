@@ -13,6 +13,7 @@ def create_scan_job(
     :param scan_options: Job scan options
     :return: the scan job and task
     """
+    # TODO Change scan_type default to SCAN_TYPE_INSPECT we stop using connect scans.
     # Create scan configuration
     scan = Scan.objects.create(name=scan_name, scan_type=scan_type)
 

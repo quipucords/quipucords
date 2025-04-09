@@ -26,7 +26,7 @@ from api.common.util import (
 )
 from api.filters import ListFilter
 from api.models import Scan, ScanJob, ScanTask, Source
-from api.scanjob.serializer import expand_scanjob
+from api.scanjob.serializer_v1 import expand_scanjob
 from api.serializers import ScanJobSerializerV1, ScanSerializer
 from api.signal.scanjob_signal import cancel_scan, start_scan
 

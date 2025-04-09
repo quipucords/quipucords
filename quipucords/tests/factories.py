@@ -14,6 +14,7 @@ from factory.django import DjangoModelFactory
 from faker import Faker
 
 from api import models
+from api.credential.model import Credential
 from api.serializers import SystemFingerprintSerializer
 from api.status import get_server_id
 from api.vault import encrypt_data_as_unicode
@@ -379,6 +380,13 @@ class CredentialFactory(DjangoModelFactory):
         )
         if self.cred_type == DataSources.OPENSHIFT and not has_user_or_pass:
             return _faker.password()
+        return None
+
+    @factory.lazy_attribute
+    def become_method(self):
+        """Set become_method if cred_type is NETWORK."""
+        if self.cred_type == DataSources.NETWORK:
+            return _faker.random_element(Credential.BECOME_METHOD_CHOICES)[0]
         return None
 
 

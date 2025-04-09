@@ -1,6 +1,7 @@
 """Models to capture system facts."""
 
 import uuid
+import warnings
 from functools import cached_property
 
 from django.db import models
@@ -33,6 +34,10 @@ class Report(BaseModel):
 
         Returns a InspectGroupQuerySet.
         """
+        warnings.warn(
+            "Report.sources will be deprecated in the near future.",
+            DeprecationWarning,
+        )
         return (
             InspectGroup.objects.with_raw_facts()
             .filter(tasks__job__report_id=self.id)

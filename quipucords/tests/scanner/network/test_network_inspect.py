@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 import pytest
 from ansible_runner.exceptions import AnsibleRunnerException
 from django.forms import model_to_dict
+from django.test import override_settings
 
 from api.inspectresult.model import RawFact
 from api.models import (
@@ -19,12 +20,35 @@ from api.models import (
 from api.serializers import SourceSerializer
 from constants import GENERATED_SSH_KEYFILE, SCAN_JOB_LOG
 from scanner.network import InspectTaskRunner
-from scanner.network.inspect import construct_inventory
-from scanner.network.inspect_callback import InspectCallback
-from tests.factories import generate_openssh_pkey
+from scanner.network.inspect import construct_inventory, run_with_result_store
 from tests.scanner.test_util import create_scan_job
 
 ANSIBLE_FACTS = "ansible_facts"
+
+
+class MockResultStore:
+    """A mock ConnectResultStore."""
+
+    def __init__(self, hosts):
+        """Minimal internal variables, just to fake the state."""
+        self._remaining_hosts = set(hosts)
+        self.succeeded = []
+        self.failed = []
+
+    def record_result(self, name, source, credential, status):
+        """Keep a list of successes and failures."""
+        if status == SystemConnectionResult.SUCCESS:
+            self.succeeded.append((name, source, credential, status))
+        elif status == SystemConnectionResult.FAILED:
+            self.failed.append((name, source, credential, status))
+        else:
+            raise ValueError()
+
+        self._remaining_hosts.remove(name)
+
+    def remaining_hosts(self):
+        """Need this method because the task runner uses it."""
+        return list(self._remaining_hosts)
 
 
 @pytest.mark.django_db
@@ -85,6 +109,38 @@ class TestNetworkInspectScanner:
         self.scan_job.save()
         self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL, ScanJob.JOB_TERMINATE_PAUSE]
 
+    @patch("scanner.network.inspect.run_with_result_store")
+    def test_check_connection_basic_happy_path(self, mock_run, mocker):
+        """Test expected output of successful initial check_connection."""
+        mock_run.side_effect = [[None, ScanTask.COMPLETED]]
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mock_inspect = mocker.patch.object(
+            scanner, "inspect", return_value=[None, ScanTask.COMPLETED]
+        )
+        _, scan_result = scanner.run()
+        assert scan_result == ScanTask.COMPLETED
+        mock_inspect.assert_called()
+
+    @patch("scanner.network.inspect._connect")
+    def test_handle_ansible_exception_during_check_connection(self, mock_run, mocker):
+        """Test early return due to Ansible exception."""
+        mock_run.side_effect = AnsibleRunnerException("fail")
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mock_inspect = mocker.patch.object(scanner, "inspect")
+        _, scan_result = scanner.run()
+        assert scan_result == ScanTask.FAILED
+        mock_inspect.assert_not_called()
+
+    @patch("ansible_runner.run")
+    def test_check_connection_run_with_result_store_empty_hosts(self, mock_run):
+        """Test happy path with initial check_connection via run_with_result_store."""
+        mock_run.return_value.status = "successful"
+        result_store = MockResultStore([])
+        _, result = run_with_result_store(
+            self.connect_scan_task, self.scan_job, result_store
+        )
+        assert result == ScanTask.COMPLETED
+
     def test_scan_inventory(self):
         """Test construct ansible inventory dictionary."""
         serializer = SourceSerializer(self.source)
@@ -109,49 +165,6 @@ class TestNetworkInspectScanner:
         }
 
         assert inventory_dict[1] == expected
-
-    @pytest.fixture
-    def openssh_key(self):
-        """Return an openssh_key random OpenSSH private key."""
-        return generate_openssh_pkey()
-
-    @pytest.fixture
-    def cred_ssh(self, openssh_key):
-        """Return a Credential with an ssh_key."""
-        return Credential.objects.create(
-            name="cred_ssh",
-            username="username_ssh",
-            ssh_key=openssh_key,
-        )
-
-    @pytest.fixture
-    def source_ssh(self, cred_ssh):
-        """Return a Source with an SSH Credential for scan."""
-        source_ssh = Source.objects.create(
-            name="source_ssh", port=22, hosts=["1.2.3.5"]
-        )
-        source_ssh.credentials.add(cred_ssh)
-        return source_ssh
-
-    @pytest.fixture
-    def host_ssh_list(self, cred_ssh: Credential):
-        """Return the Host list for the SSH Credential."""
-        with cred_ssh.generate_ssh_keyfile() as ssh_keypath:
-            cred_data = model_to_dict(cred_ssh)
-            cred_data[GENERATED_SSH_KEYFILE] = ssh_keypath
-            yield [("1.2.3.5", cred_data)]
-
-    def test_scan_inventory_with_valid_ssh_key(self, source_ssh, host_ssh_list):
-        """Test construct ansible inventory dictionary with ssh_key."""
-        serializer = SourceSerializer(source_ssh)
-        source_ssh = serializer.data
-        connection_port = source_ssh["port"]
-        _, inventory_dict = construct_inventory(host_ssh_list, connection_port, 50)
-
-        ssh_keyfile = inventory_dict["all"]["children"]["group_0"]["hosts"]["1.2.3.5"][
-            "ansible_ssh_private_key_file"
-        ]
-        assert Path(ssh_keyfile).exists()
 
     def test_scan_inventory_grouping(self):
         """Test construct ansible inventory dictionary."""
@@ -215,10 +228,13 @@ class TestNetworkInspectScanner:
         assert inventory_dict[1] == expected
 
     @patch("ansible_runner.run")
-    def test_inspect_scan_failure(self, mock_run, caplog):
+    def test_inspect_scan_failure(self, mock_run, caplog, mocker):
         """Test scan flow with mocked manager and failure."""
         mock_run.side_effect = AnsibleRunnerException()
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
         scanner.connect_scan_task = self.connect_scan_task
         caplog.set_level(logging.ERROR)
         _, scan_result = scanner._inspect_scan(self.host_list)
@@ -228,38 +244,50 @@ class TestNetworkInspectScanner:
         assert RawFact.objects.count() == 0
 
     @patch("scanner.network.inspect.InspectTaskRunner._inspect_scan")
-    def test_inspect_scan_error(self, mock_scan):
+    def test_inspect_scan_error(self, mock_scan, mocker):
         """Test scan flow with mocked manager and failure."""
         mock_scan.side_effect = AnsibleRunnerException()
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
         scan_task_status = scanner.run()
         mock_scan.assert_called_with(self.host_list)
         assert scan_task_status[1] == ScanTask.FAILED
 
     @patch("ansible_runner.run")
-    def test_inspect_scan_fail_no_facts(self, mock_run):
+    def test_inspect_scan_fail_no_facts(self, mock_run, mocker):
         """Test running a inspect scan with mocked connection."""
         mock_run.return_value.status = "successful"
-        with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
-            scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-            scanner.connect_scan_task = self.connect_scan_task
-            scan_task_status = scanner.run()
-            mock_run.assert_called()
-            assert scan_task_status[1] == ScanTask.FAILED
+        mocker.patch.object(InspectTaskRunner, "_persist_ansible_logs")
+        scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
+        scanner.connect_scan_task = self.connect_scan_task
+        scan_task_status = scanner.run()
+        mock_run.assert_called()
+        assert scan_task_status[1] == ScanTask.FAILED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
-    def test_ssh_crash(self):
+    def test_ssh_crash(self, mocker):
         """Simulate an ssh crash."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
         path = Path(__file__).absolute().parent / "test_util/crash.py"
 
         _, result = scanner._inspect_scan(self.host_list, base_ssh_executable=path)
         assert result == ScanTask.COMPLETED
 
     @pytest.mark.skip("This test is not running properly and taking a long time")
-    def test_ssh_hang(self):
+    def test_ssh_hang(self, mocker):
         """Simulate an ssh hang."""
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
         path = Path(__file__).absolute().parent / "test_util/hang.py"
 
         scanner._inspect_scan(
@@ -267,7 +295,7 @@ class TestNetworkInspectScanner:
         )
 
     @patch("ansible_runner.run")
-    def test_scan_with_options(self, mock_run):
+    def test_scan_with_options(self, mock_run, mocker):
         """Setup second scan with scan and source options."""
         # setup source with paramiko option for scan
         self.source = Source(
@@ -285,105 +313,101 @@ class TestNetworkInspectScanner:
 
         # run scan
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
 
         scanner.connect_scan_task = self.connect_scan_task
         with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
             scanner._inspect_scan(self.host_list)
         mock_run.assert_called()
 
-    def test_populate_callback(self):
-        """Test the population of the callback object for inspect scan."""
-        callback = InspectCallback()
-        # cleaned unused variable from event_dict
-        event_dict = {
-            "runner_ident": "f2100bac-7d64-43d2-8e6a-022c6f5104ac",
-            "event": "runner_on_unreachable",
-            "event_data": {
-                "play": "group_0",
-                "play_pattern": " group_0 ",
-                "task": "test if user has sudo cmd",
-                "task_action": "raw",
-                "role": "check_dependencies",
-                "host": "1.2.3.4",
-                "res": {
-                    "unreachable": True,
-                    "msg": "Failed to connect to the host via ssh: ",
-                    "changed": False,
-                },
-                "pid": 2210,
-            },
-        }
-        callback.task_on_unreachable(event_dict)
-
     @patch("scanner.network.inspect.InspectTaskRunner._obtain_discovery_data")
-    def test_no_reachable_host(self, discovery):
-        """Test no reachable host."""
+    def test_no_reachable_host_after_check_connection(self, discovery, mocker):
+        """Test FAILED end state when no reachable hosts exist."""
         discovery.return_value = [], [], [], []
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
         scan_task_status = scanner.run()
         assert scan_task_status[1] == ScanTask.FAILED
 
     @patch("ansible_runner.run")
-    @patch("scanner.network.inspect.settings.ANSIBLE_LOG_LEVEL", "1")
-    def test_modifying_log_level(self, mock_run):
-        """Test modifying the log level."""
+    @override_settings(ANSIBLE_LOG_LEVEL=1)
+    def test__inspect_scan_with_modified_ansible_log_level(self, mock_run, mocker):
+        """Test modifying ANSIBLE_LOG_LEVEL (from default 3 to 1) sends arg to run."""
         mock_run.return_value.status = "successful"
         scanner = InspectTaskRunner(self.scan_job, self.scan_task)
-        with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
-            scanner._inspect_scan(self.host_list)
-        mock_run.assert_called()
-        calls = mock_run.mock_calls
+        mocker.patch.object(
+            scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
+        )
+        mocker.patch.object(scanner, "_persist_ansible_logs")
+        scanner._inspect_scan(self.host_list)
+        mock_run.assert_called_once()
+        run_call = mock_run.mock_calls[0]
         # Check to see if the parameter was passed into the runner.run()
-        assert "verbosity=1" in str(calls[0])
+        assert "verbosity" in run_call.kwargs
+        assert run_call.kwargs["verbosity"] == 1
 
 
-class TestAnsibleLogCollector:
-    """Test if ansible logs are properly collected."""
-
-    def test_with_multiple_inspection_groups(self, mocker, settings):
-        """Ensure all logs are collected when inspection have multiple groups."""
-        # mock functions with side-effects writing to files or db - we don't need those
-        # for this test purpose because they generate input for the main functions we
-        # will patch later
-        mocker.patch("scanner.network.inspect.write_to_yaml")
-        mocker.patch("scanner.network.inspect.InspectCallback")
-        # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
-        # this test requires
-        mocker.patch(
-            "scanner.network.inspect.construct_inventory",
-            Mock(return_value=(("group1", "group2"), Mock())),
-        )
-        # mock representing the output of ansible_runner.run
-        ansible_runner_obj = Mock()
-        ansible_runner_obj.stdout.read.side_effect = lambda: "ansible stdout"
-        ansible_runner_obj.stderr.read.side_effect = lambda: "ansible stderr"
-        ansible_runner_obj.status = "successful"
-        mocker.patch(
-            "scanner.network.inspect.ansible_runner.run",
-            Mock(return_value=ansible_runner_obj),
-        )
-        # we should be using a scanjob from db, but that would make the test
-        # unnecessarily slow (just by initializing db in a test we "lose" 2 seconds
-        # while this unit test alone takes less than half a second)
-        scanjob = Mock(id=999)
-        scanjob.get_extra_vars.side_effect = lambda: {}
-        # InspectTaskRunner requires scanjob and scan_task
-        inspect_runner = InspectTaskRunner(scanjob, Mock())
-        # sanity check expected files
-        stdout_log: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
-            scan_job_id=scanjob.id, output_type="ansible-stdout"
-        )
-        assert not stdout_log.exists()
-        stderr_log: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
-            scan_job_id=scanjob.id, output_type="ansible-stderr"
-        )
-        assert not stderr_log.exists()
-        # finally, call the method that will "execute" the inspection scan
-        # and persist logs
-        inspect_runner._inspect_scan(Mock())
-        assert stdout_log.exists()
-        assert stderr_log.exists()
-        # rationale: since we have 2 inspection groups, content from ansible runner
-        # output shall be saved twice
-        assert stdout_log.read_text().splitlines() == 2 * ["ansible stdout"]
-        assert stderr_log.read_text().splitlines() == 2 * ["ansible stderr"]
+def test_inspect_scan_with_multiple_inspection_groups_stdout_logs(mocker, settings):
+    """Ensure all logs are collected when inspection have multiple groups."""
+    # mock functions with side effects writing to files or db - we don't need those
+    # for this test purpose because they generate input for the main functions we
+    # will patch later
+    mocker.patch("scanner.network.inspect.write_to_yaml")
+    mocker.patch("scanner.network.inspect.InspectCallback")
+    # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
+    # this test requires
+    dummy_inventory = {
+        "all": {
+            "children": {
+                "group1": {"hosts": {"hostA": None, "hostB": None}},
+                "group2": {"hosts": {"hostC": None, "hostD": None}},
+            }
+        }
+    }
+    mocker.patch(
+        "scanner.network.inspect.construct_inventory",
+        Mock(
+            return_value=(
+                dummy_inventory["all"]["children"].keys(),
+                dummy_inventory,
+            )
+        ),
+    )
+    # mock representing the output of ansible_runner.run
+    ansible_runner_obj = Mock()
+    ansible_runner_obj.stdout.read.side_effect = lambda: "ansible stdout"
+    ansible_runner_obj.stderr.read.side_effect = lambda: "ansible stderr"
+    ansible_runner_obj.status = "successful"
+    mocker.patch(
+        "scanner.network.inspect.ansible_runner.run",
+        Mock(return_value=ansible_runner_obj),
+    )
+    # we should be using a scanjob from db, but that would make the test
+    # unnecessarily slow (just by initializing db in a test we "lose" 2 seconds
+    # while this unit test alone takes less than half a second)
+    scanjob = Mock(id=999)
+    scanjob.get_extra_vars.side_effect = lambda: {}
+    # InspectTaskRunner requires scanjob and scan_task
+    inspect_runner = InspectTaskRunner(scanjob, Mock())
+    # sanity check expected files
+    stdout_log: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
+        scan_job_id=scanjob.id, output_type="ansible-stdout"
+    )
+    assert not stdout_log.exists()
+    stderr_log: Path = settings.LOG_DIRECTORY / SCAN_JOB_LOG.format(
+        scan_job_id=scanjob.id, output_type="ansible-stderr"
+    )
+    assert not stderr_log.exists()
+    # finally, call the method that will "execute" the inspection scan
+    # and persist logs
+    inspect_runner._inspect_scan(Mock())
+    assert stdout_log.exists()
+    assert stderr_log.exists()
+    # rationale: since we have 2 inspection groups, content from ansible runner
+    # output shall be saved twice
+    assert stdout_log.read_text().splitlines() == 2 * ["ansible stdout"]
+    assert stderr_log.read_text().splitlines() == 2 * ["ansible stderr"]
