@@ -99,6 +99,9 @@ class TestAsyncMergeReports:
         assert json_response == expected
         report = Report.objects.get(id=json_response["report_id"])
         assert report.scanjob.id == json_response["job_id"]
+        # make sure only the fingerprint scantask was created
+        assert report.scanjob.tasks.count() == 1
+        assert report.scanjob.tasks.first().scan_type == ScanTask.SCAN_TYPE_FINGERPRINT
         source_sorter = partial(sorted, key=lambda x: x["source_name"])
         assert source_sorter(report.sources) == source_sorter(
             list(report1.sources) + list(report2.sources)

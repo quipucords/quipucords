@@ -255,6 +255,7 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     # Ansible-specific raw facts
     inspect_group = InspectGroupFactory(source_type=DataSources.ANSIBLE)
     inspect_group.tasks.add(scan_task)
+    report.inspect_groups.add(inspect_group)
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={
@@ -280,6 +281,7 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     # OpenShift-specific raw facts
     inspect_group = InspectGroupFactory(source_type=DataSources.OPENSHIFT)
     inspect_group.tasks.add(scan_task)
+    report.inspect_groups.add(inspect_group)
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={

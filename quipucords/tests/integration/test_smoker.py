@@ -10,7 +10,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from api.models import ScanTask
+from api.models import InspectGroup, Report, ScanTask
 from constants import DataSources
 from fingerprinter.constants import (
     ENTITLEMENTS_KEY,
@@ -120,7 +120,21 @@ class Smoker:
         """Return the latest report id from performed scan."""
         return scan_response.json()["most_recent"]["report_id"]
 
-    @pytest.mark.dbcompat
+    @pytest.fixture
+    def report(self, report_id):
+        """Return the latest report object from performed scan."""
+        return Report.objects.get(id=report_id)
+
+    def test_raw_results(self, report: Report):
+        """Ensure raw facts tied to inspect result are also directly bound to Report."""
+        ig_from_tasks = set(
+            InspectGroup.objects.filter(tasks__job__report_id=report.id)
+            .values_list("id")
+            .all()
+        )
+        ig_from_report = set(report.inspect_groups.values_list("id").all())
+        assert ig_from_report == ig_from_tasks
+
     def test_details_report(
         self,
         client_logged_in,
