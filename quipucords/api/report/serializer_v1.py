@@ -62,7 +62,9 @@ class ReportUploadSerializer(Serializer):
     def create(self, validated_data):
         """Create a report filled with raw data and a fingerprint-type ScanJob."""
         report = Report.objects.create()
-        # create a scan job and required scan tasks for a "upload" job
+        # ScanJob is required in order to trigger the "async task"
+        # TODO: should we keep relying on "ScanJob" to trigger async tasks?
+        # we could simply trigger a celery task without this infra
         scan_job = ScanJob.objects.create(
             scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
             report=report,

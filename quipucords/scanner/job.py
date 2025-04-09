@@ -10,8 +10,7 @@ from celery.result import AsyncResult
 from django.db.models import Sum
 
 from api.common.common_report import create_report_version
-from api.models import ScanJob, ScanTask
-from api.report.model import Report
+from api.models import InspectGroup, Report, ScanJob, ScanTask
 from fingerprinter.runner import FingerprintTaskRunner
 from scanner.get_scanner import get_scanner
 from scanner.runner import ScanTaskRunner
@@ -70,7 +69,12 @@ def create_report_for_scan_job(scan_job: ScanJob):
     if not inspect_query["successful_connections"]:
         return None, "No facts gathered from scan."
 
-    return Report.objects.create(report_version=create_report_version()), None
+    report = Report.objects.create(
+        report_version=create_report_version(), scanjob=scan_job
+    )
+    inspect_groups = InspectGroup.objects.filter(tasks__job_id=scan_job.id)
+    report.inspect_groups.set(inspect_groups)
+    return report, None
 
 
 def run_task_runner(runner: ScanTaskRunner, *run_args):

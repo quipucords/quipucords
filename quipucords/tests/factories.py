@@ -161,18 +161,21 @@ class ReportFactory(DjangoModelFactory):
 
     @staticmethod
     def get_or_create_inspect_task(report: models.Report):
-        """Get or create a inspect task."""
-        scan_job = report.scanjob
+        """Get or create a inspect task if it exists and/or can be created."""
+        scan_job: models.ScanJob = report.scanjob
         scan_task = (
             scan_job.tasks.filter(scan_type=models.ScanTask.SCAN_TYPE_INSPECT)
             .order_by("sequence_number")
             .first()
         )
-        if not scan_task:
-            scan_task = ScanTaskFactory(
+        if scan_task:
+            return scan_task
+        if scan_job.scan_type == models.ScanTask.SCAN_TYPE_INSPECT:
+            return ScanTaskFactory(
                 job=scan_job, scan_type=models.ScanTask.SCAN_TYPE_INSPECT
             )
-        return scan_task
+        # only inspect type scans require a "inspect" ScanTask
+        return None
 
     @factory.post_generation
     def generate_raw_facts(
@@ -193,7 +196,9 @@ class ReportFactory(DjangoModelFactory):
         scan_task = ReportFactory.get_or_create_inspect_task(obj)
         for source_type in source_types:
             inspect_group = InspectGroupFactory(source_type=source_type)
-            inspect_group.tasks.add(scan_task)
+            if scan_task:
+                inspect_group.tasks.add(scan_task)
+            obj.inspect_groups.add(inspect_group)
             for fact_dict in raw_facts_generator(source_type, fact_number):
                 InspectResultFactory(
                     inspect_group=inspect_group, with_raw_facts=fact_dict
@@ -221,7 +226,9 @@ class ReportFactory(DjangoModelFactory):
                 k: v for k, v in inspect_group_kwargs.items() if v is not None
             }
             inspect_group = InspectGroupFactory(**inspect_group_kwargs)
-            inspect_group.tasks.add(scan_task)
+            if scan_task:
+                inspect_group.tasks.add(scan_task)
+            obj.inspect_groups.add(inspect_group)
             for fact_dict in fact_list:
                 InspectResultFactory(
                     inspect_group=inspect_group, with_raw_facts=fact_dict
