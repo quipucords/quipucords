@@ -27,4 +27,5 @@ class DetailsReportSerializer(NotEmptySerializer):
             "deployment_report",
             "created_at",
             "updated_at",
-        )  # TODO Include these datetime fields in a future API version.
+            "inspect_groups",
+        )  # TODO Include datetime fields in a future API version.

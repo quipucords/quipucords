@@ -8,7 +8,6 @@ from django.db import models
 
 from api.common.common_report import create_report_version
 from api.common.models import BaseModel
-from api.inspectresult.model import InspectGroup
 
 
 class Report(BaseModel):
@@ -19,6 +18,7 @@ class Report(BaseModel):
     )
     # report_platform_id is a unique identifier required by yupana/insights
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    inspect_groups = models.ManyToManyField("InspectGroup", related_name="reports")
     # ---------------------------- legacy fields ----------------------------
     # legacy data that should be (re)moved when we transition to the paradigm
     # of "normalization phase"
@@ -39,8 +39,7 @@ class Report(BaseModel):
             DeprecationWarning,
         )
         return (
-            InspectGroup.objects.with_raw_facts()
-            .filter(tasks__job__report_id=self.id)
+            self.inspect_groups.with_raw_facts()
             .annotate(report_version=models.F("server_version"))
             .values(
                 "server_id",
