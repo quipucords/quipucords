@@ -344,12 +344,14 @@ def _aggregate_from_raw_facts(
     aggregated.openshift_operators_by_name.update(openshift_operators_by_name)
 
 
-def build_aggregate_report(report_id: int) -> AggregateReport:
+def build_aggregate_report(
+    report_id: int, force_build: bool = False
+) -> AggregateReport:
     """Aggregate various totals from the facts related to the given report ID."""
     report = Report.objects.get(pk=report_id)
     try:
         aggregated = AggregateReport.objects.get(report_id=report_id)
-        if report.updated_at <= aggregated.updated_at:
+        if report.updated_at <= aggregated.updated_at and not force_build:
             return aggregated
     except AggregateReport.DoesNotExist:
         aggregated = AggregateReport.objects.create(report_id=report_id)
