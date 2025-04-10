@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import DataError
 from rest_framework.serializers import DateField
 
+from api.aggregate_report.model import build_aggregate_report
 from api.common.common_report import create_report_version
 from api.common.util import convert_to_bool_or_none
 from api.models import DeploymentsReport, Product, ScanTask, SystemFingerprint
@@ -159,6 +160,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             else:
                 deployment_report.status = DeploymentsReport.STATUS_FAILED
             deployment_report.save()
+            if status == ScanTask.COMPLETED:
+                self._create_aggregate_report(self.scan_job.report)
             return message, status
         except Exception as error:
             # Transition from persisted to failed after engine failed
@@ -173,6 +176,18 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 f"{error.__class__.__name__}:{error}", log_level=logging.ERROR
             )
             raise error
+
+    def _create_aggregate_report(self, report):
+        """Create aggregate reports upon successful Fingerprinting phase."""
+        self.scan_task.log_message("START CREATING AGGREGATE REPORT")
+        aggregate_report = build_aggregate_report(report_id=report.id, force_build=True)
+        self.scan_task.log_message(
+            "Aggregate report created"
+            f" report_id={report.id}"
+            f" aggregate_report_id={aggregate_report.id}"
+        )
+        self.scan_task.log_message("END CREATING AGGREGATE REPORT")
+        return aggregate_report
 
     def _process_details_report(self, report):  # noqa: PLR0915, C901, PLR0912
         """Process the details report.
