@@ -431,9 +431,17 @@ LOGGING = {
 
 
 def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
-    """Redirect deprecation warnings to our logger."""
-    logger = logging.getLogger("quipucords.warnings")
-    logger.warning(f"{message} (from {filename}:{lineno})")
+    """
+    Redirect deprecation warnings to our logger.
+
+    Note that we flip the filter to ignore while inside this function to avoid
+    potential recursion issues that could be triggered if casting the message to
+    a string would itself trigger a DeprecationWarning.
+    """
+    warnings_logger = logging.getLogger("quipucords.warnings")
+    warnings.simplefilter("ignore", DeprecationWarning)
+    warnings_logger.warning(f"{repr(message)} (from {filename}:{lineno})")
+    warnings.simplefilter("always", DeprecationWarning)
 
 
 warnings.showwarning = warn_on_deprecation
