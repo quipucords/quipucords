@@ -431,9 +431,19 @@ LOGGING = {
 
 
 def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
-    """Redirect deprecation warnings to our logger."""
-    logger = logging.getLogger("quipucords.warnings")
-    logger.warning(f"{message} (from {filename}:{lineno})")
+    """
+    Redirect deprecation warnings to our logger.
+
+    Note that we temporarily ignore all warnings while inside this function because
+    the act of logging a message could itself trigger a new warning and thus enter a
+    recursive loop. We've seen this happen, for example, with `DeprecationWarning`s
+    related to `datetime.datetime.utcnow()`.
+    """
+    with warnings.catch_warnings():
+        warnings.resetwarnings()
+        warnings.simplefilter("ignore")
+        warnings_logger = logging.getLogger("quipucords.warnings")
+        warnings_logger.warning(f"{message} (from {filename}:{lineno})")
 
 
 warnings.showwarning = warn_on_deprecation
