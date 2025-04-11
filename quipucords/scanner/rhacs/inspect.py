@@ -95,10 +95,7 @@ class InspectTaskRunner(RHACSTaskRunner):
         return self.failure_message, ScanTask.FAILED
 
     def _init_connection_stats(self):
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        connect_scan_task = self.scan_task.prerequisites.first()
-        connect_scan_task.update_stats(
+        self.scan_task.update_stats(
             "INITIAL RHACS CONNECT STATS.",
             sys_count=1,
             sys_scanned=0,
@@ -109,22 +106,17 @@ class InspectTaskRunner(RHACSTaskRunner):
     @transaction.atomic
     def _save_results(self, conn_result):
         """Save results of connection."""
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        connect_scan_task = self.scan_task.prerequisites.first()
-
         increment_kwargs = self._get_increment_kwargs(conn_result)
-        source = connect_scan_task.source
+        source = self.scan_task.source
         credential = source.single_credential
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name=self.system_name,
             source=source,
             credential=credential,
             status=conn_result,
-            task_connection_result=connect_scan_task.connection_result,
+            task_connection_result=self.scan_task.connection_result,
         )
-        sys_result.save()
-        connect_scan_task.increment_stats(
+        self.scan_task.increment_stats(
             "UPDATED RHACS CONNECT STATS.", **increment_kwargs
         )
 

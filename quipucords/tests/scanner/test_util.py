@@ -4,18 +4,19 @@ from api.models import Scan, ScanJob, ScanTask
 
 
 def create_scan_job(
-    source, scan_type=ScanTask.SCAN_TYPE_CONNECT, scan_name="test", scan_options=None
+    source, scan_type=ScanTask.SCAN_TYPE_INSPECT, scan_name="test", scan_options=None
 ):
     """Create a new scan job.
 
+    TODO: Refactor and simplify. Does anything actually need to set scan_name?
+
     :param source: the source for the scan job
-    :param scan_type: Either connect or inspect
+    :param scan_type: Only inspect. TODO Remove this.
     :param scan_options: Job scan options
     :return: the scan job and task
     """
-    # TODO Change scan_type default to SCAN_TYPE_INSPECT we stop using connect scans.
     # Create scan configuration
-    scan = Scan.objects.create(name=scan_name, scan_type=scan_type)
+    scan = Scan.objects.create(scan_type=scan_type, name=scan_name)
 
     # Add source to scan
     if source is not None:
@@ -42,7 +43,7 @@ def create_scan_job(
 def create_scan_job_two_tasks(
     source,
     source2,
-    scan_type=ScanTask.SCAN_TYPE_CONNECT,
+    scan_type=ScanTask.SCAN_TYPE_INSPECT,
     scan_name="test",
     scan_options=None,
 ):
@@ -50,7 +51,7 @@ def create_scan_job_two_tasks(
 
     :param source: the source for the scan job
     :param source2: the second source for the scan job
-    :param scan_type: Either connect or inspect
+    :param scan_type: Only inspect. TODO Remove this.
     :param scan_options: Job scan options
     :return: the scan job and task
     """

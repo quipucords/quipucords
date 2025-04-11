@@ -23,11 +23,9 @@ logger = logging.getLogger(__name__)
 class ScanTask(BaseModel):
     """The scan task captures a single source for a scan."""
 
-    SCAN_TYPE_CONNECT = "connect"  # TODO Remove SCAN_TYPE_CONNECT.
     SCAN_TYPE_INSPECT = "inspect"
     SCAN_TYPE_FINGERPRINT = "fingerprint"
     SCANTASK_TYPE_CHOICES = (
-        (SCAN_TYPE_CONNECT, SCAN_TYPE_CONNECT),  # TODO Remove SCAN_TYPE_CONNECT choice.
         (SCAN_TYPE_INSPECT, SCAN_TYPE_INSPECT),
         (SCAN_TYPE_FINGERPRINT, SCAN_TYPE_FINGERPRINT),
     )
@@ -277,6 +275,7 @@ class ScanTask(BaseModel):
     @transaction.atomic
     def reset_stats(self):
         """Reset scan task stats default state."""
+        # TODO REMOVE THIS ARE YOU SURE YOU WANT THIS??
         self.refresh_from_db()
         self.systems_count = 0
         self.systems_scanned = 0
@@ -447,6 +446,10 @@ class ScanTask(BaseModel):
         understand how to read persisted results into a dictionary
         using a ScanTask object so others can retrieve them if needed.
 
+        TODO Stop using this method. This kind of polymorphism is not helpful
+        because it has completely different return types based on scan_type,
+        and callers already need to know how to handle the differences by type.
+
         :returns: Scan result object for task (either TaskConnectionResult,
             TaskInspectionResult, or Report)
         """
@@ -454,9 +457,6 @@ class ScanTask(BaseModel):
             return InspectResult.objects.filter(
                 inspect_group__in=self.inspect_groups.all()
             ).all()
-        elif self.scan_type == ScanTask.SCAN_TYPE_CONNECT:
-            # TODO Remove SCAN_TYPE_CONNECT logic.
-            return self.connection_result
         elif self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT:
             return self.job.report
         return None

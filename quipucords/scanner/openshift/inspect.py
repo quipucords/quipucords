@@ -66,10 +66,7 @@ class InspectTaskRunner(OpenShiftTaskRunner):
         return self.FAILURE_TO_CONNECT_MESSAGE, ScanTask.FAILED
 
     def _init_connection_stats(self):
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        connect_scan_task = self.scan_task.prerequisites.first()
-        connect_scan_task.update_stats(
+        self.scan_task.update_stats(
             "INITIAL OCP CONNECT STATS.",
             sys_count=1,
             sys_scanned=0,
@@ -91,24 +88,17 @@ class InspectTaskRunner(OpenShiftTaskRunner):
 
     @transaction.atomic
     def _save_results(self, conn_result):
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        connect_scan_task = self.scan_task.prerequisites.first()
-
         increment_kwargs = self._get_increment_kwargs(conn_result)
-        source = connect_scan_task.source
+        source = self.scan_task.source
         credential = source.single_credential
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name=source.get_hosts()[0],
             source=source,
             credential=credential,
             status=conn_result,
-            task_connection_result=connect_scan_task.connection_result,
+            task_connection_result=self.scan_task.connection_result,
         )
-        sys_result.save()
-        connect_scan_task.increment_stats(
-            "UPDATED OCP CONNECT STATS.", **increment_kwargs
-        )
+        self.scan_task.increment_stats("UPDATED OCP CONNECT STATS.", **increment_kwargs)
 
     def inspect(self):
         """Perform the actual inspect operations and progressively save results."""

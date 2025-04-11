@@ -119,12 +119,10 @@ def check_path_validity(path_list):
     return invalid_paths
 
 
-def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C901
+def expand_scanjob_with_times(scanjob):  # noqa: PLR0912, C901
     """Expand a scanjob object into a JSON dict to send to the user.
 
     :param scanjob: a ScanJob.
-    :param connect_only: counts should only include
-    connection scan results
 
     :returns: a JSON dict with some of the ScanJob's fields.
     """
@@ -137,13 +135,12 @@ def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C9
         systems_failed,
         systems_unreachable,
         system_fingerprint_count,
-    ) = scanjob.calculate_counts(connect_only)
+    ) = scanjob.calculate_counts()
     report_id = scanjob.report_id
     start_time = scanjob.start_time
     end_time = scanjob.end_time
     job_status = scanjob.status
-    if not connect_only:
-        scan_type = scanjob.scan_type
+    scan_type = scanjob.scan_type
     job_status_message = scanjob.status_message
 
     job_json = {
@@ -166,7 +163,7 @@ def expand_scanjob_with_times(scanjob, connect_only=False):  # noqa: PLR0912, C9
         job_json["systems_unreachable"] = systems_unreachable
     if system_fingerprint_count is not None:
         job_json["system_fingerprint_count"] = system_fingerprint_count
-    if not connect_only and scan_type is not None:
+    if scan_type is not None:
         job_json["scan_type"] = scan_type
     if job_status_message is not None:
         job_json["status_details"] = {"job_status_message": job_status_message}

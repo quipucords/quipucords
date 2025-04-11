@@ -41,7 +41,7 @@ class TestConnectResultCallback:
     def test_task_on_ok(self, source: Source):
         """Test the callback on ok."""
         results_store = ConnectResultStore(
-            ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
+            ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
         )
         callback = ConnectResultCallback(
             results_store, source.single_credential, source
@@ -54,9 +54,9 @@ class TestConnectResultCallback:
         )
         for event in events:
             callback.event_callback(event)
-        callback.result_store.scan_task.systems_count == 3
-        callback.result_store.scan_task.systems_scanned == 1
-        callback.result_store.scan_task.systems_failed == 0
+        assert callback.result_store.scan_task.systems_count == 3
+        assert callback.result_store.scan_task.systems_scanned == 1
+        assert callback.result_store.scan_task.systems_failed == 0
 
     def test_task_on_failed(self, source: Source):
         """Test the callback on failed."""
@@ -79,7 +79,7 @@ class TestConnectResultCallback:
     def test_task_on_unreachable(self, source: Source):
         """Test the callback on unreachable."""
         results_store = ConnectResultStore(
-            ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_CONNECT)
+            ScanTaskFactory(source=source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
         )
         callback = ConnectResultCallback(
             results_store, source.single_credential, source
@@ -93,9 +93,9 @@ class TestConnectResultCallback:
         )
         for event in events:
             callback.event_callback(event)
-        callback.result_store.scan_task.systems_failed == 0
-        callback.result_store.scan_task.systems_unreachable == 1
-        callback.result_store.scan_task.systems_count == 3
+        assert callback.result_store.scan_task.systems_failed == 0
+        assert callback.result_store.scan_task.systems_unreachable == 1
+        assert callback.result_store.scan_task.systems_count == 3
 
     def test_exceptions_for_tasks(self, source: Source):
         """Test exception for each task."""

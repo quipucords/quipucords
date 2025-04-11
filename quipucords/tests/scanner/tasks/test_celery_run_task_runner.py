@@ -23,7 +23,7 @@ def test_celery_run_task_runner(mocker, runner_return_value, expect_success):
     other functions: to get and call an appropriate task runner and to return results.
     """
     # Just use known valid types because this test is not focused on unrelated errors.
-    scan_type = ScanTask.SCAN_TYPE_CONNECT
+    scan_type = ScanTask.SCAN_TYPE_INSPECT
     source_type = DataSources.NETWORK
     scan_task = ScanTaskFactory(source__source_type=source_type, scan_type=scan_type)
 
@@ -49,7 +49,7 @@ def test_celery_run_task_runner(mocker, runner_return_value, expect_success):
 @pytest.mark.django_db
 def test_celery_run_task_runner_canceled(mocker):
     """Test celery_run_task_runner's with scan job canceled."""
-    scan_type = ScanTask.SCAN_TYPE_CONNECT
+    scan_type = ScanTask.SCAN_TYPE_INSPECT
     source_type = DataSources.NETWORK
     scan_task = ScanTaskFactory(source__source_type=source_type, scan_type=scan_type)
 

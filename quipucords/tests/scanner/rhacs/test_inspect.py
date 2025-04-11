@@ -1,4 +1,4 @@
-"""Test RHACS ConnectTaskRunner."""
+"""Test RHACS InspectTaskRunner."""
 
 import logging
 
@@ -17,20 +17,13 @@ from tests.factories import ScanTaskFactory
 @pytest.fixture
 def scan_task():
     """Return a ScanTask for testing."""
-    connect_task = ScanTaskFactory(
+    inspect_task = ScanTaskFactory(
         source__source_type=DataSources.RHACS,
         source__hosts=["1.2.3.4"],
         source__port=4321,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
-        status=ScanTask.COMPLETED,
+        scan_type=ScanTask.SCAN_TYPE_INSPECT,
         sequence_number=1,
     )
-    inspect_task = ScanTaskFactory(
-        source=connect_task.source,
-        job=connect_task.job,
-        scan_type=ScanTask.SCAN_TYPE_INSPECT,
-    )
-    inspect_task.prerequisites.add(connect_task)
     return inspect_task
 
 
@@ -51,13 +44,10 @@ def test_connect_successfully(mocker, mock_client, scan_task: ScanTask):
     message, status = runner.execute_task()
     assert message == runner.success_message
     assert status == ScanTask.COMPLETED
-    # Next line assumes self.scan_task has type 'inspect'.
-    # TODO Delete connect_scan_task when we stop using connect scan tasks.
-    connect_scan_task = scan_task.prerequisites.first()
-    assert connect_scan_task.systems_count == 1
-    assert connect_scan_task.systems_scanned == 1
-    assert connect_scan_task.systems_failed == 0
-    assert connect_scan_task.systems_unreachable == 0
+    assert scan_task.systems_count == 1
+    assert scan_task.systems_scanned == 1
+    assert scan_task.systems_failed == 0
+    assert scan_task.systems_unreachable == 0
 
 
 @pytest.mark.django_db
@@ -78,13 +68,10 @@ def test_connect_with_error(
     message, status = runner.execute_task()
     assert message == runner.failure_message
     assert status == ScanTask.FAILED
-    # Next line assumes self.scan_task has type 'inspect'.
-    # TODO Delete connect_scan_task when we stop using connect scan tasks.
-    connect_scan_task = scan_task.prerequisites.first()
-    assert connect_scan_task.systems_count == 1
-    assert connect_scan_task.systems_scanned == 0
-    assert connect_scan_task.systems_failed == 1
-    assert connect_scan_task.systems_unreachable == 0
+    assert scan_task.systems_count == 1
+    assert scan_task.systems_scanned == 0
+    assert scan_task.systems_failed == 1
+    assert scan_task.systems_unreachable == 0
     assert err_message in caplog.text
 
 
@@ -134,11 +121,8 @@ def test_handling_connection_errors(  # noqa: PLR0913
     message, status = runner.execute_task()
     assert message == runner.failure_message
     assert status == ScanTask.FAILED
-    # Next line assumes self.scan_task has type 'inspect'.
-    # TODO Delete connect_scan_task when we stop using connect scan tasks.
-    connect_scan_task = scan_task.prerequisites.first()
-    assert connect_scan_task.systems_count == 1
-    assert connect_scan_task.systems_scanned == 0
-    assert connect_scan_task.systems_failed == failed
-    assert connect_scan_task.systems_unreachable == unreachable
+    assert scan_task.systems_count == 1
+    assert scan_task.systems_scanned == 0
+    assert scan_task.systems_failed == failed
+    assert scan_task.systems_unreachable == unreachable
     assert err_message in caplog.text

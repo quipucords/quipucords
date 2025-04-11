@@ -114,12 +114,7 @@ def fingerprint_network_infrastructure_type(fact: dict) -> tuple[str, str]:
 
 
 class FingerprintTaskRunner(ScanTaskRunner):
-    """ConnectTaskRunner system connection capabilities.
-
-    Attempts connections to a source using a list of credentials
-    and gathers the set of successes (host/ip, credential) and
-    failures (host/ip).
-    """
+    """Fingerprint results of an inspection scan task and store derived reports."""
 
     @staticmethod
     def format_certs(redhat_certs):
