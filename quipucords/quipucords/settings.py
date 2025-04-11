@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import logging
 import os
 import random
+import stat
 import string
 import warnings
 from pathlib import Path
@@ -86,6 +87,7 @@ def app_secret_key_and_path():
     elif not django_secret_path.exists():
         django_secret_key = create_random_key()
         django_secret_path.write_text(django_secret_key, encoding="utf-8")
+        django_secret_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
     else:
         django_secret_key = django_secret_path.read_text(encoding="utf-8").strip()
     return django_secret_key, django_secret_path
