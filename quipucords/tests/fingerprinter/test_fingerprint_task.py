@@ -9,6 +9,7 @@ import pytest
 from django.db import DataError
 from django.test import override_settings
 
+from api.aggregate_report.model import AggregateReport
 from api.deployments_report.model import SystemFingerprint
 from api.models import DeploymentsReport, Report, ServerInformation, Source
 from api.scantask.model import ScanTask
@@ -1576,6 +1577,21 @@ def test_process_details_report_success(fingerprint_task_runner):
     assert "success" in status_message.lower()
     assert status == "completed"
     assert len(deployments_report.cached_fingerprints) == 1
+
+
+@pytest.mark.django_db
+@override_settings(QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS=False)
+def test_create_aggregate_report(fingerprint_task_runner, scan_job):
+    """Test create aggregate report generates a new AggregateReport."""
+    deployments_report = DeploymentsReport(id=1)
+    deployments_report.save()
+    report = Report(id=1, deployment_report=deployments_report)
+    report.save()
+    scan_job.report = report
+    scan_job.save()
+    aggregate_report = fingerprint_task_runner._create_aggregate_report(report)
+    assert aggregate_report is not None
+    assert AggregateReport.objects.filter(report_id=report.id).exists()
 
 
 @pytest.mark.django_db

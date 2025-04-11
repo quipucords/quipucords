@@ -328,9 +328,11 @@ def test_build_aggregate_report_system_fingerprint(
 ):
     """Test build_aggregate_report using generated Report, SystemFingerprints, etc."""
     report, expected_aggregate_report = report_and_expected_aggregate
-    aggregated: AggregateReport = build_aggregate_report(report.id)
+    aggregated = build_aggregate_report(report.id)
     assert aggregated is not None
-    assert aggregated == expected_aggregate_report
+    assert reformat_aggregate_report_to_dict(
+        aggregated
+    ) == reformat_aggregate_report_to_dict(expected_aggregate_report)
 
 
 @pytest.mark.django_db
@@ -341,6 +343,28 @@ def test_get_aggregate_report_by_report_id(
     report, expected_aggregate_report = report_and_expected_aggregate
     aggregate = get_aggregate_report_by_report_id(report.id)
     assert aggregate == reformat_aggregate_report_to_dict(expected_aggregate_report)
+
+
+@pytest.mark.django_db
+def test_get_aggregate_report_by_report_id_generated_db_record(
+    report_and_expected_aggregate: tuple[Report, AggregateReport],
+):
+    """Test that if the aggregate report is obtained, the DB Record exists."""
+    report, expected_aggregate_report = report_and_expected_aggregate
+    _aggregate = get_aggregate_report_by_report_id(report.id)
+    assert AggregateReport.objects.filter(report_id=report.id).exists()
+
+
+@pytest.mark.django_db
+def test_report_deletes_delete_aggregate(
+    report_and_expected_aggregate: tuple[Report, AggregateReport],
+):
+    """Test that if the Report is deleted, the aggregate DB Record is also deleted."""
+    report, expected_aggregate_report = report_and_expected_aggregate
+    _aggregate = get_aggregate_report_by_report_id(report.id)
+    assert AggregateReport.objects.filter(report_id=report.id).exists()
+    report.delete()
+    assert not AggregateReport.objects.filter(report_id=report.id).exists()
 
 
 @pytest.mark.django_db
