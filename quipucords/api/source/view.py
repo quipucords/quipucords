@@ -41,7 +41,7 @@ def format_source(json_source):
     if conn_job_id:
         scan_job = ScanJob.objects.get(pk=conn_job_id)
 
-        json_scan_job = expand_scanjob_with_times(scan_job, connect_only=True)
+        json_scan_job = expand_scanjob_with_times(scan_job)
         source_id = json_source.get("id")
         task_for_source = scan_job.tasks.filter(source=source_id).first()
 

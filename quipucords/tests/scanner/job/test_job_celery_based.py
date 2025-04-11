@@ -9,7 +9,7 @@ carefully whether you want the live worker or CELERY_TASK_ALWAYS_EAGER as
 you update or add more tests.
 """
 
-from unittest.mock import ANY, patch
+from unittest.mock import patch
 
 import pytest
 from django.test import override_settings
@@ -19,19 +19,6 @@ from constants import DataSources
 from scanner import job, tasks
 from tests.factories import ScanJobFactory, ScanTaskFactory, SourceFactory
 from tests.utils import fake_semver, raw_facts_generator
-
-
-@pytest.fixture
-def connect_scan_job():
-    """Prepare a "connect" type ScanJob."""
-    connect_task = ScanTaskFactory(
-        source__source_type=DataSources.OPENSHIFT,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
-        status=ScanTask.PENDING,
-        job__scan_type=ScanTask.SCAN_TYPE_CONNECT,
-        job__status=ScanTask.PENDING,
-    )
-    return connect_task.job
 
 
 @pytest.fixture
@@ -45,12 +32,6 @@ def inspect_scan_job():
     )
     source = SourceFactory()
     scan_tasks = [
-        ScanTaskFactory(
-            job=scan_job,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-            source=source,
-        ),
         ScanTaskFactory(
             job=scan_job,
             scan_type=ScanTask.SCAN_TYPE_INSPECT,
@@ -80,18 +61,6 @@ def inspect_scan_job_multiple_sources():
     )
     source_a, source_b = SourceFactory.create_batch(size=2)
     scan_tasks = [
-        ScanTaskFactory(
-            job=scan_job,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-            source=source_a,
-        ),
-        ScanTaskFactory(
-            job=scan_job,
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
-            status=ScanTask.PENDING,
-            source=source_b,
-        ),
         ScanTaskFactory(
             job=scan_job,
             scan_type=ScanTask.SCAN_TYPE_INSPECT,
@@ -179,38 +148,10 @@ def mock__finalize_scan():
 
 
 @pytest.mark.django_db
-def test_celery_based_job_runner(connect_scan_job):
+def test_celery_based_job_runner(inspect_scan_job):
     """Test that the correct not-CeleryBasedScanJobRunner class is chosen."""
-    job_runner = job.ScanJobRunner(connect_scan_job)
+    job_runner = job.ScanJobRunner(inspect_scan_job)
     assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
-
-
-@pytest.mark.django_db(transaction=True)
-def test_run_celery_based_job_runner_only_connect(
-    mock__celery_run_task_runner,
-    mock__fingerprint,
-    mock__finalize_scan,
-    celery_worker,
-    connect_scan_job,
-):
-    """Test the task calls for running a connect-type ScanJob."""
-    job_runner = job.ScanJobRunner(connect_scan_job)
-    assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
-
-    async_result = job_runner.run()
-    async_result.get()
-
-    scan_task = connect_scan_job.tasks.first()
-    source_type = scan_task.source.source_type
-    mock__celery_run_task_runner.assert_called_once()
-    assert mock__celery_run_task_runner.call_args.kwargs == {
-        "scan_task_id": scan_task.id,
-        "source_type": source_type,
-        "scan_type": ScanTask.SCAN_TYPE_CONNECT,
-        "task_instance": ANY,
-    }
-    mock__fingerprint.assert_not_called()
-    mock__finalize_scan.assert_called_once()
 
 
 @pytest.mark.django_db(transaction=True)
@@ -229,7 +170,7 @@ def test_run_celery_based_job_runner_inspect_one_job_one_source(
     async_result.get()
 
     mock__celery_run_task_runner.assert_called()
-    assert mock__celery_run_task_runner.call_count == 2  # 1 inspect and 1 connect
+    assert mock__celery_run_task_runner.call_count == 1  # 1 inspect
     mock__fingerprint.assert_called_once()
     mock__finalize_scan.assert_called_once()
 
@@ -250,7 +191,7 @@ def test_run_celery_based_job_runner_inspect_one_job_multiple_sources(
     async_result.get()
 
     mock__celery_run_task_runner.assert_called()
-    assert mock__celery_run_task_runner.call_count == 4  # 2 sources * 2 tasks
+    assert mock__celery_run_task_runner.call_count == 2  # 2 sources * 1 tasks
     mock__fingerprint.assert_called_once()
     mock__finalize_scan.assert_called_once()
 

@@ -18,7 +18,7 @@ class ScanJobQuerySet(QuerySet):
                     scan_type=ScanTask.SCAN_TYPE_INSPECT,
                     then=Sum(
                         "tasks__systems_count",
-                        filter=Q(tasks__scan_type=ScanTask.SCAN_TYPE_CONNECT),
+                        filter=Q(tasks__scan_type=ScanTask.SCAN_TYPE_INSPECT),
                         default=0,
                     ),
                 ),
@@ -43,10 +43,7 @@ class ScanJobQuerySet(QuerySet):
                     then=Sum(
                         "tasks__systems_failed",
                         filter=Q(
-                            tasks__scan_type__in=(
-                                ScanTask.SCAN_TYPE_CONNECT,
-                                ScanTask.SCAN_TYPE_INSPECT,
-                            )
+                            tasks__scan_type=ScanTask.SCAN_TYPE_INSPECT,
                         ),
                         default=0,
                     ),
@@ -63,10 +60,7 @@ class ScanJobQuerySet(QuerySet):
                     then=Sum(
                         "tasks__systems_unreachable",
                         filter=Q(
-                            tasks__scan_type__in=(
-                                ScanTask.SCAN_TYPE_CONNECT,
-                                ScanTask.SCAN_TYPE_INSPECT,
-                            )
+                            tasks__scan_type=ScanTask.SCAN_TYPE_INSPECT,
                         ),
                         default=0,
                     ),

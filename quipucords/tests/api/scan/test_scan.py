@@ -54,9 +54,7 @@ def scan_options_default():
 class TestScanCreate:
     """Test POST /api/v1/scans/."""
 
-    @pytest.mark.parametrize(
-        "scan_type", [ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_INSPECT, None]
-    )
+    @pytest.mark.parametrize("scan_type", [ScanTask.SCAN_TYPE_INSPECT, None])
     def test_successful_create(self, client_logged_in, faker, scan_type, mocker):
         """Ensure a scan is successfully created."""
         source = SourceFactory()
@@ -132,10 +130,7 @@ class TestScanCreate:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {"scan_type": [mocker.ANY]}
         error_message = response.json()["scan_type"][0]
-        matched_pattern = re.match(
-            r"(\w+), is an invalid choice. Valid values are connect,inspect.",
-            error_message,
-        )
+        matched_pattern = re.match(r"(\w+), is an invalid choice.", error_message)
         assert matched_pattern
         assert matched_pattern.group(1) == scan_type
 
@@ -153,9 +148,7 @@ class TestScanCreate:
         response = client_logged_in.post(reverse("v1:scan-list"), data=payload)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
-            "scan_type": [
-                "This field may not be blank. Valid values are connect,inspect."
-            ]
+            "scan_type": ["This field may not be blank. Valid values are inspect."]
         }
 
     def test_create_invalid_sources_type(self, client_logged_in, faker):
@@ -364,7 +357,7 @@ class TestScanUpdate:
         payload = {
             "name": faker.bothify("Scan ????-######"),
             "sources": [new_source.id],
-            "scan_type": ScanTask.SCAN_TYPE_CONNECT,
+            "scan_type": ScanTask.SCAN_TYPE_INSPECT,
         }
         response = client_logged_in.put(url, data=payload)
         assert response.ok, response.json()
@@ -514,16 +507,17 @@ class TestScanUpdate:
         ] = ["/some/path/"]
         assert updated_response.json() == expected_result
 
-    def test_partial_update_scan_type(self, client_logged_in):
+    def test_partial_update_scan_type(self, client_logged_in, faker):
         """Test partial update retains unprovided info."""
         scan = ScanFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT)
         url = reverse("v1:scan-detail", args=(scan.id,))
+        new_name = faker.slug()
         response = client_logged_in.patch(
             url,
-            data={"scan_type": ScanTask.SCAN_TYPE_CONNECT},
+            data={"name": new_name},
         )
         assert response.ok, response.json()
-        assert response.json()["scan_type"] == ScanTask.SCAN_TYPE_CONNECT
+        assert response.json()["name"] == new_name
 
 
 @pytest.mark.django_db
@@ -567,7 +561,7 @@ class TestScanList:
         start_time1 = faker.date_time(tzinfo=UTC)
         scan1 = ScanFactory(
             name="SCAN1",
-            scan_type=ScanTask.SCAN_TYPE_CONNECT,
+            scan_type=ScanTask.SCAN_TYPE_INSPECT,
             most_recent_scanjob__start_time=start_time1,
         )
         # scan 2 has start time before scan1 - this will be useful
@@ -612,15 +606,13 @@ class TestScanList:
 
     def test_filtered_list(self, client_logged_in, expected_scans):
         """Test filtered scan list."""
-        response = client_logged_in.get(
-            reverse("v1:scan-list"), data={"scan_type": ScanTask.SCAN_TYPE_CONNECT}
-        )
+        response = client_logged_in.get(reverse("v1:scan-list"), data={"name": "SCAN1"})
         assert response.ok, response.json()
         assert response.json() == {
             "count": 1,
             "next": None,
             "previous": None,
-            # connect is the first scan result
+            # first of expected_scans is the only result
             "results": [expected_scans[0]],
         }
 

@@ -11,7 +11,6 @@ from scanner.runner import ScanTaskRunner
 def test_scanner_module(data_source):
     """Sanity check scanner packages."""
     scanner = get_scanner(data_source)
-    assert issubclass(scanner.ConnectTaskRunner, ScanTaskRunner)
     assert issubclass(scanner.InspectTaskRunner, ScanTaskRunner)
 
 

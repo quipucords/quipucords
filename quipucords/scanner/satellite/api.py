@@ -18,18 +18,9 @@ from api.models import (
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
 from scanner.satellite import utils
+from scanner.satellite.exceptions import SatelliteError
 
 logger = logging.getLogger(__name__)
-
-SATELLITE_VERSION_6 = "6"
-
-
-class SatelliteAuthError(Exception):
-    """Exception for Satellite Authentication interaction."""
-
-
-class SatelliteError(Exception):
-    """Exception for Satellite interaction."""
 
 
 class SatelliteInterface(ABC):
@@ -43,9 +34,6 @@ class SatelliteInterface(ABC):
         else:
             self.max_concurrency = scan_job.options.get(Scan.MAX_CONCURRENCY)
 
-        # Next line assumes scan_task has type 'inspect'.
-        # TODO Delete next line when we stop using connect scan tasks.
-        self.connect_scan_task = scan_task.prerequisites.first()
         self.inspect_scan_task = scan_task
         self.source = scan_task.source
 
@@ -56,16 +44,13 @@ class SatelliteInterface(ABC):
         :param name: The host name
         :param credential: The authentication credential
         """
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name=name,
             source=self.source,
             credential=credential,
             status=SystemConnectionResult.SUCCESS,
-            task_connection_result=self.connect_scan_task.connection_result,
+            task_connection_result=self.inspect_scan_task.connection_result,
         )
-        sys_result.save()
-
-        self.connect_scan_task.increment_stats(name, increment_sys_scanned=True)
 
     @cached_property
     def _inspect_group(self):

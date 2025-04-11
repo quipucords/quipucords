@@ -18,9 +18,8 @@ def test_result_store_when_host_address_is_unreachable(faker):
     scan = ScanFactory(sources=[source])
     scan_job = scan.most_recent_scanjob
     scan_job.sources.add(source)
-    # TODO replace with inspect type
     scan_task = ScanTaskFactory(
-        job=scan_job, scan_type=ScanTask.SCAN_TYPE_CONNECT, source=source
+        job=scan_job, scan_type=ScanTask.SCAN_TYPE_INSPECT, source=source
     )
 
     result_store = ConnectResultStore(scan_task)
@@ -57,9 +56,8 @@ def test_result_store_with_multiple_conditions(faker):
     scan = ScanFactory(sources=[source])
     scan_job = scan.most_recent_scanjob
     scan_job.sources.add(source)
-    # TODO replace with inspect type
     scan_task = ScanTaskFactory(
-        job=scan_job, scan_type=ScanTask.SCAN_TYPE_CONNECT, source=source
+        job=scan_job, scan_type=ScanTask.SCAN_TYPE_INSPECT, source=source
     )
 
     result_store = ConnectResultStore(scan_task)

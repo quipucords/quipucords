@@ -2,7 +2,7 @@
 
 from requests import exceptions
 
-from scanner.satellite.api import SatelliteAuthError, SatelliteError
+from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 from scanner.satellite.runner import SatelliteTaskRunner
 
 

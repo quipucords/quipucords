@@ -82,29 +82,19 @@ class TestNetworkInspectScanner:
             self.source, ScanTask.SCAN_TYPE_INSPECT
         )
 
-        self.connect_scan_task = self.scan_task.prerequisites.first()
-        self.connect_scan_task.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
-
-        conn_result = self.connect_scan_task.connection_result
-        success_sys = SystemConnectionResult(
+        self.scan_task.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
+        conn_result = self.scan_task.connection_result
+        SystemConnectionResult.objects.create(
             name="1.2.3.4",
             credential=self.cred,
             status=SystemConnectionResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        success_sys.save()
-        failed_sys = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name="1.1.1.2",
             status=SystemConnectionResult.FAILED,
             task_connection_result=conn_result,
         )
-        failed_sys.save()
-        conn_result.save()
-
-        self.connect_scan_task.update_stats(
-            "TEST_VC.", sys_count=2, sys_failed=1, sys_scanned=1
-        )
-        self.connect_scan_task.status_complete()
         self.scan_task.update_stats("TEST NETWORK INSPECT.", sys_failed=0)
         self.scan_job.save()
         self.stop_states = [ScanJob.JOB_TERMINATE_CANCEL, ScanJob.JOB_TERMINATE_PAUSE]
@@ -136,9 +126,7 @@ class TestNetworkInspectScanner:
         """Test happy path with initial check_connection via run_with_result_store."""
         mock_run.return_value.status = "successful"
         result_store = MockResultStore([])
-        _, result = run_with_result_store(
-            self.connect_scan_task, self.scan_job, result_store
-        )
+        _, result = run_with_result_store(self.scan_task, self.scan_job, result_store)
         assert result == ScanTask.COMPLETED
 
     def test_scan_inventory(self):
@@ -235,7 +223,6 @@ class TestNetworkInspectScanner:
         mocker.patch.object(
             scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
         )
-        scanner.connect_scan_task = self.connect_scan_task
         caplog.set_level(logging.ERROR)
         _, scan_result = scanner._inspect_scan(self.host_list)
         # an error should not prevent scan completion
@@ -264,7 +251,6 @@ class TestNetworkInspectScanner:
         mocker.patch.object(
             scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
         )
-        scanner.connect_scan_task = self.connect_scan_task
         scan_task_status = scanner.run()
         mock_run.assert_called()
         assert scan_task_status[1] == ScanTask.FAILED
@@ -317,7 +303,6 @@ class TestNetworkInspectScanner:
             scanner, "check_connection", return_value=[None, ScanTask.COMPLETED]
         )
 
-        scanner.connect_scan_task = self.connect_scan_task
         with patch.object(InspectTaskRunner, "_persist_ansible_logs"):
             scanner._inspect_scan(self.host_list)
         mock_run.assert_called()

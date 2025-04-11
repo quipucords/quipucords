@@ -7,12 +7,9 @@ import requests_mock
 
 from api.models import Credential, ScanTask, Source
 from constants import DataSources
-from scanner.satellite.api import (
-    SATELLITE_VERSION_6,
-    SatelliteAuthError,
-    SatelliteError,
-)
+from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 from scanner.satellite.utils import (
+    SATELLITE_VERSION_6,
     construct_url,
     data_map,
     execute_request,
@@ -48,7 +45,7 @@ class TestSatelliteUtils:
         self.source.credentials.add(self.cred)
 
         self.scan_job, self.scan_task = create_scan_job(
-            self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT
+            self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT
         )
 
     @pytest.mark.django_db

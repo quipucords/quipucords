@@ -16,9 +16,6 @@ def test_finalize_scan_none_failed():
     """Test finalize_scan sets job status COMPLETED if all tasks are COMPLETED."""
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     scan_job.tasks.add(
-        ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_CONNECT, status=ScanTask.COMPLETED)
-    )
-    scan_job.tasks.add(
         ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.COMPLETED)
     )
 
@@ -35,12 +32,9 @@ def test_finalize_scan_some_failed(caplog):
     caplog.set_level(logging.ERROR, logger="api.scanjob.model")
     scan_job = ScanJobFactory(status=ScanTask.RUNNING)
     running_task = ScanTaskFactory(
-        scan_type=ScanTask.SCAN_TYPE_CONNECT, status=ScanTask.RUNNING
+        scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.RUNNING
     )
     scan_job.tasks.add(running_task)
-    scan_job.tasks.add(
-        ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.COMPLETED)
-    )
 
     tasks.finalize_scan.delay(scan_job_id=scan_job.id).get()
 
