@@ -7,16 +7,14 @@ from django.conf import settings
 from rest_framework import status as codes
 
 from api.vault import decrypt_data_as_unicode
-from scanner.satellite.api import (
-    SATELLITE_VERSION_6,
-    SatelliteAuthError,
-    SatelliteError,
-)
+from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 
 logger = logging.getLogger(__name__)
 
 # Disable warnings for satellite requests
 requests.packages.urllib3.disable_warnings()
+
+SATELLITE_VERSION_6 = "6"
 
 
 def get_credential(scan_task):

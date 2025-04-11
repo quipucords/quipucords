@@ -7,13 +7,10 @@ from requests import exceptions
 
 from api.models import Credential, ScanTask, Source
 from constants import DataSources
-from scanner.satellite.api import (
-    SATELLITE_VERSION_6,
-    SatelliteAuthError,
-    SatelliteError,
-)
+from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 from scanner.satellite.inspect import InspectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
+from scanner.satellite.utils import SATELLITE_VERSION_6
 from tests.scanner.test_util import create_scan_job
 
 

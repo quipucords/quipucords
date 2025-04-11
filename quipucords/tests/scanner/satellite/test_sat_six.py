@@ -63,29 +63,23 @@ class TestSatelliteSixV1:
         job_conn_result.save()
         connection_results = TaskConnectionResult(job_connection_result=job_conn_result)
         connection_results.save()
-        self.api.connect_scan_task.connection_result = connection_results
-        self.api.connect_scan_task.connection_result.save()
 
-        conn_result = self.api.connect_scan_task.connection_result
-        sys_result = SystemConnectionResult(
+        conn_result = self.api.inspect_scan_task.connection_result
+        SystemConnectionResult.objects.create(
             name="sys1",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name="sys2",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name="sys3",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
-        self.api.connect_scan_task.save()
 
     @pytest.mark.django_db
     def test_get_orgs(self):
@@ -584,17 +578,17 @@ class TestSatelliteSixV2:
         job_conn_result.save()
         connection_results = TaskConnectionResult(job_connection_result=job_conn_result)
         connection_results.save()
-        self.api.connect_scan_task.connection_result = connection_results
-        self.api.connect_scan_task.connection_result.save()
+        self.api.inspect_scan_task.connection_result = connection_results
+        self.api.inspect_scan_task.connection_result.save()
 
-        conn_result = self.api.connect_scan_task.connection_result
+        conn_result = self.api.inspect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name="sys1_1",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
         sys_result.save()
-        self.api.connect_scan_task.save()
+        self.api.inspect_scan_task.save()
 
     @pytest.mark.django_db
     def test_host_count(self):
@@ -1069,16 +1063,16 @@ class TestSatelliteSixV2:
         job_conn_result.save()
         connection_results = TaskConnectionResult(job_connection_result=job_conn_result)
         connection_results.save()
-        api.connect_scan_task.connection_result = connection_results
-        api.connect_scan_task.connection_result.save()
+        api.inspect_scan_task.connection_result = connection_results
+        api.inspect_scan_task.connection_result.save()
 
-        sys_result = SystemConnectionResult(
+        sys_result = SystemConnectionResult.objects.create(
             name="sys1_1",
             status=InspectResult.SUCCESS,
-            task_connection_result=api.connect_scan_task.connection_result,
+            task_connection_result=api.inspect_scan_task.connection_result,
         )
         sys_result.save()
-        api.connect_scan_task.save()
+        api.inspect_scan_task.save()
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
 
         _request_host_details = [

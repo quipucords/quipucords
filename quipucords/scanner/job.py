@@ -22,9 +22,6 @@ def get_task_runner_class(scan_task: ScanTask):
     """Get the appropriate ScanTaskRunner class for the ScanTask."""
     scan_type = scan_task.scan_type
     source_type = scan_task.source.source_type if scan_task.source else None
-    if scan_type == ScanTask.SCAN_TYPE_CONNECT:
-        scanner = get_scanner(source_type)
-        return scanner.ConnectTaskRunner
     if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         scanner = get_scanner(source_type)
         return scanner.InspectTaskRunner
@@ -182,7 +179,7 @@ class CeleryBasedScanJobRunner:
         # Get and group relevant IDs and types for Celery tasks to fetch later.
         incomplete_scan_tasks = self.scan_job.tasks.filter(
             status__in=[ScanTask.RUNNING, ScanTask.PENDING],
-            scan_type__in=[ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_INSPECT],
+            scan_type=ScanTask.SCAN_TYPE_INSPECT,
         ).order_by("source_id", "sequence_number")
         celery_signatures_by_source = defaultdict(list)
         for scan_task in incomplete_scan_tasks:

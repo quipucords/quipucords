@@ -133,11 +133,9 @@ class ScanJob(BaseModel):
         actual_message += message
         logger.log(log_level, actual_message)
 
-    def calculate_counts(self, connect_only=False):
+    def calculate_counts(self):
         """Calculate scan counts from tasks.
 
-        :param connect_only: counts should only include
-        connection scan results
         :return: systems_count, systems_scanned,
         systems_failed, systems_unreachable
         """
@@ -148,30 +146,12 @@ class ScanJob(BaseModel):
         system_fingerprint_count = 0
 
         (
-            connection_systems_count,
-            connection_systems_scanned,
-            connection_systems_failed,
-            connection_systems_unreachable,
-        ) = self._calculate_counts(ScanTask.SCAN_TYPE_CONNECT)
-        if self.scan_type == ScanTask.SCAN_TYPE_CONNECT or connect_only:
-            # TODO Remove SCAN_TYPE_CONNECT logic.
-            systems_count = connection_systems_count
-            systems_scanned = connection_systems_scanned
-            systems_failed = connection_systems_failed
-            systems_unreachable = connection_systems_unreachable
-        else:
-            (
-                _,
-                inspect_systems_scanned,
-                inspect_systems_failed,
-                inspect_systems_unreachable,
-            ) = self._calculate_counts(ScanTask.SCAN_TYPE_INSPECT)
-            systems_count = connection_systems_count
-            systems_scanned = inspect_systems_scanned
-            systems_failed = inspect_systems_failed + connection_systems_failed
-            systems_unreachable = (
-                inspect_systems_unreachable + connection_systems_unreachable
-            )
+            systems_count,
+            systems_scanned,
+            systems_failed,
+            systems_unreachable,
+        ) = self._calculate_counts()
+
         self.refresh_from_db()
         if self.report_id and self.report:
             self.report.refresh_from_db()
@@ -189,7 +169,7 @@ class ScanJob(BaseModel):
             system_fingerprint_count,
         )
 
-    def _calculate_counts(self, scan_type):
+    def _calculate_counts(self):
         """Calculate scan counts from tasks.
 
         :return: systems_count, systems_scanned,
@@ -199,7 +179,8 @@ class ScanJob(BaseModel):
         systems_scanned = 0
         systems_failed = 0
         systems_unreachable = 0
-        tasks = self.tasks.filter(scan_type=scan_type).order_by("sequence_number")
+        # TODO Evaluate if this filter and order_by are useful and remove them.
+        tasks = self.tasks.filter(scan_type=self.scan_type).order_by("sequence_number")
         for task in tasks:
             systems_count += task.systems_count
             systems_scanned += task.systems_scanned
@@ -282,10 +263,8 @@ class ScanJob(BaseModel):
         self.log_current_status()
 
     def _create_pending_tasks(self):
-        # TODO Remove conn_tasks.
-        conn_tasks = self._create_connection_tasks()
-        inspect_tasks = self._create_inspection_tasks(conn_tasks)
-        self._create_fingerprint_task(conn_tasks, inspect_tasks)
+        inspect_tasks = self._create_inspection_tasks()
+        self._create_fingerprint_task(inspect_tasks)
 
     def delete_inspect_results(self, scan_task_id=None):
         """
@@ -305,85 +284,61 @@ class ScanJob(BaseModel):
             inspect_results__in=InspectResult.objects.all()
         ).delete()
 
-    def _create_connection_tasks(self):
-        """Create initial connection tasks.
-
-        :return: list of connection_tasks
-        """
-        # TODO Remove this function when we stop using connection tasks.
-        conn_tasks = []
-        if self.scan_type in [ScanTask.SCAN_TYPE_CONNECT, ScanTask.SCAN_TYPE_INSPECT]:
-            count = 1
-            for source in self.sources.all():
-                # Create connect tasks
-                conn_task = ScanTask.objects.create(
-                    job=self,
-                    source=source,
-                    scan_type=ScanTask.SCAN_TYPE_CONNECT,
-                    status=ScanTask.PENDING,
-                    status_message=_(messages.ST_STATUS_MSG_PENDING),
-                    sequence_number=count,
-                )
-                self.tasks.add(conn_task)
-                conn_tasks.append(conn_task)
-
-                # Create task result
-                conn_task_result = TaskConnectionResult.objects.create(
-                    job_connection_result=self.connection_results
-                )
-
-                # Add the task result to task
-                conn_task.connection_result = conn_task_result
-                conn_task.save()
-
-                count += 1
-
-        return conn_tasks
-
-    def _create_inspection_tasks(self, conn_tasks):
+    def _create_inspection_tasks(self):
         """Create initial inspection tasks.
 
-        :param conn_tasks: list of connection tasks
         :return: list of inspection_tasks
         """
+        if self.scan_type != ScanTask.SCAN_TYPE_INSPECT:
+            return []
         inspect_tasks = []
-        if conn_tasks and self.scan_type == ScanTask.SCAN_TYPE_INSPECT:
-            count = len(conn_tasks) + 1
-            for conn_task in conn_tasks:
-                # Create inspect tasks
-                inspect_task = ScanTask.objects.create(
-                    job=self,
-                    source=conn_task.source,
-                    scan_type=ScanTask.SCAN_TYPE_INSPECT,
-                    status=ScanTask.PENDING,
-                    status_message=_(messages.ST_STATUS_MSG_PENDING),
-                    sequence_number=count,
-                )
-                inspect_task.prerequisites.add(conn_task)
-                self.tasks.add(inspect_task)
-                inspect_tasks.append(conn_task)
-                inspect_task.save()
-                count += 1
+        # TODO Remove the index/count-based sequence_number.
+        # Relying on the index/count to drive sequence_number is a brittle kludge.
+        # Inspect tasks should be asynchronous, not needing a sequence or order.
+        for index, source in enumerate(self.sources.all()):
+            # Note: We create a TaskConnectionResult with each inspect-type ScanTask.
+            # This is an artifact from an old design where the acts of connecting to a
+            # source and inspecting that source were two wholly separate operations.
+            # However, at the time of this writing, we are mid-refactor of simplifying
+            # the inspection process, and we still store TaskConnectionResults just
+            # before we perform the actual inspection.
+            # TODO remove connection_result and TaskConnectionResult.
+            inspect_task = ScanTask.objects.create(
+                job=self,
+                source=source,
+                scan_type=ScanTask.SCAN_TYPE_INSPECT,
+                status=ScanTask.PENDING,
+                status_message=_(messages.ST_STATUS_MSG_PENDING),
+                sequence_number=index,
+                connection_result=TaskConnectionResult.objects.create(
+                    job_connection_result=self.connection_results
+                ),
+            )
+            inspect_tasks.append(inspect_task)
+            self.tasks.add(inspect_task)
+
         return inspect_tasks
 
-    def _create_fingerprint_task(self, conn_tasks, inspect_tasks):
+    def _create_fingerprint_task(self, inspect_tasks):
         """Create initial inspection tasks.
 
-        :param conn_tasks: list of connection tasks
         :param inspect_tasks: list of inspection tasks
         """
         if self.scan_type == ScanTask.SCAN_TYPE_FINGERPRINT or inspect_tasks:
-            prerequisites = conn_tasks + inspect_tasks
-            count = len(prerequisites) + 1
+            # TODO Remove this len/count-based sequence_number.
+            # Relying on the count to drive sequence_number is a brittle kludge.
+            # The fingerprint task should simply run after all inspect tasks,
+            # regardless of how many inspect tasks preceded it.
+            sequence_number = len(inspect_tasks) + 1
             # Create a single fingerprint task with dependencies
             fingerprint_task = ScanTask.objects.create(
                 job=self,
                 scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
                 status=ScanTask.PENDING,
                 status_message=_(messages.ST_STATUS_MSG_PENDING),
-                sequence_number=count,
+                sequence_number=sequence_number,
             )
-            fingerprint_task.prerequisites.set(prerequisites)
+            fingerprint_task.prerequisites.set(inspect_tasks)
 
             self.tasks.add(fingerprint_task)
             return fingerprint_task
