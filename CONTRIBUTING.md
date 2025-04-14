@@ -96,8 +96,8 @@ There's a dedicated make target for easily updating ALL lockfiles and base image
 ```
 make update-lockfiles
 ```
-Besides python dependencies required for development, this command also requires `podman`, `skopeo`,
-and, if you are on macOS, `gsed`.
+Besides python dependencies required for development, this command also requires `podman`, `skopeo`, `yq` (the go version, not the on on pypi),
+[`konflux-pipeline-patcher`](https://github.com/simonbaird/konflux-pipeline-patcher) and, if you are on macOS, `gsed`.
 
 -----
 
