@@ -17,4 +17,5 @@ class RawFactsReportView(ReportViewMixin, ListAPIView):
         raw_facts=JSONObjectAgg("facts__name", "facts__value", sqlite_func="json")
     )
     lookup_field = "inspect_group__tasks__job__report_id"
+    # lookup_field = "inspect_group__reports__id"
     serializer_class = InspectResultSerializer
