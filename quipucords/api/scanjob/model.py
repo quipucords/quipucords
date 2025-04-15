@@ -179,8 +179,7 @@ class ScanJob(BaseModel):
         systems_scanned = 0
         systems_failed = 0
         systems_unreachable = 0
-        # TODO Evaluate if this filter and order_by are useful and remove them.
-        tasks = self.tasks.filter(scan_type=self.scan_type).order_by("sequence_number")
+        tasks = self.tasks.filter(scan_type=self.scan_type)
         for task in tasks:
             systems_count += task.systems_count
             systems_scanned += task.systems_scanned
