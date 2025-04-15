@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.utils.translation import gettext as _
 
 from api import messages
@@ -175,17 +175,19 @@ class ScanJob(BaseModel):
         :return: systems_count, systems_scanned,
         systems_failed, systems_unreachable
         """
-        systems_count = 0
-        systems_scanned = 0
-        systems_failed = 0
-        systems_unreachable = 0
-        tasks = self.tasks.filter(scan_type=self.scan_type)
-        for task in tasks:
-            systems_count += task.systems_count
-            systems_scanned += task.systems_scanned
-            systems_failed += task.systems_failed
-            systems_unreachable += task.systems_unreachable
-        return systems_count, systems_scanned, systems_failed, systems_unreachable
+        systems_sums = self.tasks.filter(scan_type=self.scan_type).aggregate(
+            systems_count=Sum("systems_count"),
+            systems_scanned=Sum("systems_scanned"),
+            systems_failed=Sum("systems_failed"),
+            systems_unreachable=Sum("systems_unreachable"),
+        )
+        # Need to handle None result as 0 if no tasks are found.
+        return (
+            systems_sums["systems_count"] or 0,
+            systems_sums["systems_scanned"] or 0,
+            systems_sums["systems_failed"] or 0,
+            systems_sums["systems_unreachable"] or 0,
+        )
 
     def _log_stats(self, prefix):
         """Log stats for scan."""
