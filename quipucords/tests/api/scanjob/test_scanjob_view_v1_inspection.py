@@ -15,7 +15,7 @@ def test_inspection_paging(client_logged_in):
     """Test paging of ScanJob inspection results."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
 
     # Create an inspection system result
     inspect_sys_result = InspectResult(
@@ -389,7 +389,7 @@ def test_inspection_delete_source(client_logged_in):
     """Get ScanJob inspection results after source has been deleted."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
     # Create an inspection system result
     inspect_result = InspectResult(
         name="Foo",
@@ -439,7 +439,7 @@ def test_inspection_bad_ordering_filter(client_logged_in):
     """Test ScanJob inspection results with bad ordering filter."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
 
     # Create an inspect system result
     inspect_sys_result = InspectResult(
@@ -468,7 +468,7 @@ def test_inspection_bad_status_filter(client_logged_in):
     """Test ScanJob inspection results with bad status filter."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
 
     # Create an inspection system result
     inspect_sys_result = InspectResult(
@@ -499,7 +499,7 @@ def test_inspection_bad_source_id_filter(client_logged_in):
     """Test ScanJob inspection results with bad source_id filter."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
 
     # Create an inspection system result
     inspect_sys_result = InspectResult(
@@ -530,7 +530,7 @@ def test_inspection_filter_status(client_logged_in):
     """Get ScanJob inspection results with a filtered status."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scan_job, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
 
     # Create an inspection system result
     inspect_sys_result = InspectResult(

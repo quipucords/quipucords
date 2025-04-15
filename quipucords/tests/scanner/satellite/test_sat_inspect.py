@@ -54,9 +54,7 @@ class TestInspectTaskRunner:
 
     def create_scan_job(self):
         """Create scan job for tests."""
-        scan_job, inspect_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        scan_job, inspect_task = create_scan_job(self.source)
 
         inspect_task.update_stats("TEST_SAT.", sys_scanned=0)
         return scan_job, inspect_task
