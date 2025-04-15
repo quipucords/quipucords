@@ -273,20 +273,6 @@ class ScanTask(BaseModel):
 
     # All task types
     @transaction.atomic
-    def reset_stats(self):
-        """Reset scan task stats default state."""
-        # TODO REMOVE THIS ARE YOU SURE YOU WANT THIS??
-        self.refresh_from_db()
-        self.systems_count = 0
-        self.systems_scanned = 0
-        self.systems_failed = 0
-        self.systems_unreachable = 0
-
-        self.save()
-        self._log_stats("INITIALIZING SYSTEM COUNTS - default all to 0")
-
-    # All task types
-    @transaction.atomic
     def increment_stats(  # noqa: PLR0913
         self,
         name,
