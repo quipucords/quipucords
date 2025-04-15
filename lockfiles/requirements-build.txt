@@ -97,13 +97,13 @@ setuptools-scm==8.2.0
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.3.19.19
+trove-classifiers==2025.4.11.15
     # via hatchling
 types-psutil==7.0.0.20250401
     # via mypy
 types-setuptools==78.1.0.20250329
     # via mypy
-typing-extensions==4.13.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   mypy
     #   setuptools-scm
