@@ -24,9 +24,7 @@ def test_get_extra_vars():
         "disabled_optional_products": disabled_optional_products_default(),
         "enabled_extended_product_search": (enabled_extended_product_search_default()),
     }
-    scan_job, _ = create_scan_job(
-        SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
-    )
+    scan_job, _ = create_scan_job(SourceFactory(), scan_options=scan_options)
     extra_vars = scan_job.get_extra_vars()
 
     expected_vars = {
@@ -53,9 +51,7 @@ def test_get_extra_vars():
 def test_get_extra_vars_missing_disable_product():
     """Tests the get_extra_vars with extended search None."""
     scan_options = {"disabled_optional_products": disabled_optional_products_default()}
-    scan_job, _ = create_scan_job(
-        SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
-    )
+    scan_job, _ = create_scan_job(SourceFactory(), scan_options=scan_options)
     extra_vars = scan_job.get_extra_vars()
 
     expected_vars = {
@@ -81,9 +77,7 @@ def test_get_extra_vars_missing_extended_search():
     scan_options = {
         "enabled_extended_product_search": (enabled_extended_product_search_default()),
     }
-    scan_job, _ = create_scan_job(
-        SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
-    )
+    scan_job, _ = create_scan_job(SourceFactory(), scan_options=scan_options)
     extra_vars = scan_job.get_extra_vars()
 
     expected_vars = {
@@ -119,9 +113,7 @@ def test_get_extra_vars_extended_search():
         "disabled_optional_products": disabled_optional_products_default(),
         "enabled_extended_product_search": extended,
     }
-    scan_job, _ = create_scan_job(
-        SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
-    )
+    scan_job, _ = create_scan_job(SourceFactory(), scan_options=scan_options)
     extra_vars = scan_job.get_extra_vars()
 
     expected_vars = {
@@ -156,9 +148,7 @@ def test_get_extra_vars_mixed():
         "disabled_optional_products": disabled,
         "enabled_extended_product_search": (enabled_extended_product_search_default()),
     }
-    scan_job, _ = create_scan_job(
-        SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
-    )
+    scan_job, _ = create_scan_job(SourceFactory(), scan_options=scan_options)
     extra_vars = scan_job.get_extra_vars()
 
     expected_vars = {
@@ -197,9 +187,7 @@ def test_get_extra_vars_false():
         "disabled_optional_products": disabled,
         "enabled_extended_product_search": extended,
     }
-    scan_job, _ = create_scan_job(
-        SourceFactory(), ScanTask.SCAN_TYPE_INSPECT, scan_options=scan_options
-    )
+    scan_job, _ = create_scan_job(SourceFactory(), scan_options=scan_options)
 
     extra_vars = scan_job.get_extra_vars()
 
@@ -226,9 +214,7 @@ def test_get_extra_vars_false():
 
 def test_expand_scanjob():
     """Test view expand_scanjob."""
-    scan_job, scan_task = create_scan_job(
-        SourceFactory(), scan_type=ScanTask.SCAN_TYPE_INSPECT
-    )
+    scan_job, scan_task = create_scan_job(SourceFactory())
     scan_job.status = ScanTask.RUNNING
     scan_job.save()
     scan_task.update_stats(

@@ -524,7 +524,7 @@ class TestScanUpdate:
 def test_expand_scan():
     """Test view expand_scan."""
     source = SourceFactory()
-    scan_job, scan_task = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
     scan_task.update_stats(
         "TEST_VC.", sys_count=2, sys_failed=1, sys_scanned=1, sys_unreachable=0
     )

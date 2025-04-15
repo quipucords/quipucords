@@ -15,7 +15,7 @@ def test_connection(client_logged_in):
     """Get ScanJob connection results."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     # Create a connection system result
     conn_result = scan_task.connection_result
@@ -54,7 +54,7 @@ def test_connection_bad_filters(client_logged_in, param):
     """Test ScanJob connection results with bad filters."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     # Create a connection system result
     conn_result = scan_task.connection_result
@@ -75,7 +75,7 @@ def test_connection_filter_status(client_logged_in):
     """Get ScanJob connection results with a filtered status."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     # Create a connection system result
     conn_result = scan_task.connection_result
@@ -103,7 +103,7 @@ def test_connection_failed_success(client_logged_in):
     """Get ScanJob connection results for multiple systems."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     # Create two connection system results one failure & one success
     conn_result = scan_task.connection_result
@@ -160,7 +160,7 @@ def test_connection_name_ordering(client_logged_in):
     """Get ScanJob connection results for systems ordered by name."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     # Create two connection system results one failure & one success
     conn_result = scan_task.connection_result
@@ -538,7 +538,7 @@ def test_connection_delete_source_and_cred(client_logged_in):
     """Get ScanJob connection results after source & cred are deleted."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     # Create a connection system result
     conn_result = scan_task.connection_result
