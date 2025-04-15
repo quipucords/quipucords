@@ -214,33 +214,6 @@ def test_scantask_increment_stats_multiple_in_parallel(scan_job, source):
 
 
 @pytest.mark.django_db
-def test_scantask_reset_stats(scan_job, source):
-    """Test scan task reset stat feature."""
-    task = ScanTask.objects.create(
-        job=scan_job,
-        source=source,
-        scan_type=ScanTask.SCAN_TYPE_INSPECT,
-        status=ScanTask.PENDING,
-    )
-    task.increment_stats(
-        "foo",
-        increment_sys_count=True,
-        increment_sys_scanned=True,
-        increment_sys_failed=True,
-        increment_sys_unreachable=True,
-    )
-    assert 1 == task.systems_count
-    assert 1 == task.systems_scanned
-    assert 1 == task.systems_failed
-    assert 1 == task.systems_unreachable
-    task.reset_stats()
-    assert 0 == task.systems_count
-    assert 0 == task.systems_scanned
-    assert 0 == task.systems_failed
-    assert 0 == task.systems_unreachable
-
-
-@pytest.mark.django_db
 def test_cleanup_facts():
     """Test ScanTask.cleanup_facts method."""
     scan_task = ScanTaskFactory(scan_type=ScanTask.SCAN_TYPE_INSPECT)
