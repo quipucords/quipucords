@@ -5,7 +5,7 @@ from unittest.mock import ANY, patch
 import pytest
 import requests_mock
 
-from api.models import Credential, ScanTask, Source
+from api.models import Credential, Source
 from constants import DataSources
 from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 from scanner.satellite.utils import (
@@ -44,9 +44,7 @@ class TestSatelliteUtils:
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, scan_type=ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
 
     @pytest.mark.django_db
     def test_get_credential(self):

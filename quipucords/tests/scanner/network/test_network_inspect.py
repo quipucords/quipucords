@@ -78,9 +78,7 @@ class TestNetworkInspectScanner:
 
         self.host_list = [("1.2.3.4", self.cred_data)]
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
 
         self.scan_task.update_stats("TEST NETWORK CONNECT.", sys_failed=0)
         conn_result = self.scan_task.connection_result
@@ -294,7 +292,7 @@ class TestNetworkInspectScanner:
         scan_options = {"enabled_extended_product_search": {"search_directories": []}}
 
         self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT, "scan2", scan_options=scan_options
+            self.source, "scan2", scan_options=scan_options
         )
 
         # run scan

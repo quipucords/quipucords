@@ -71,7 +71,7 @@ def test_queue_task():
 
 def test_queue_invalid_state_changes():
     """Test create queue failed."""
-    scanjob, _ = create_scan_job(SourceFactory(), scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, _ = create_scan_job(SourceFactory())
     scanjob.status = ScanTask.FAILED
 
     # Queue job to run
@@ -107,7 +107,7 @@ def test_queue_invalid_state_changes():
 
 def test_start_task():
     """Test start pending task."""
-    scanjob, _ = create_scan_job(SourceFactory(), scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, _ = create_scan_job(SourceFactory())
 
     # Queue job to run
     scanjob.queue()
@@ -123,7 +123,7 @@ def test_start_task():
 
 def test_pause_restart_task():
     """Test pause and restart task."""
-    scanjob, _ = create_scan_job(SourceFactory(), scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, _ = create_scan_job(SourceFactory())
 
     # Queue job to run
     scanjob.queue()

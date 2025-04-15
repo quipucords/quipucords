@@ -11,7 +11,6 @@ from api.models import (
     Credential,
     InspectResult,
     JobConnectionResult,
-    ScanTask,
     Source,
     SystemConnectionResult,
     TaskConnectionResult,
@@ -54,9 +53,7 @@ class TestSatelliteSixV1:
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
 
         self.api = SatelliteSixV1(self.scan_job, self.scan_task)
         job_conn_result = JobConnectionResult()
@@ -569,9 +566,7 @@ class TestSatelliteSixV2:
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
         self.scan_task.update_stats("TEST_SAT.", sys_scanned=0)
         self.api = SatelliteSixV2(self.scan_job, self.scan_task)
         job_conn_result = JobConnectionResult()
@@ -1052,10 +1047,7 @@ class TestSatelliteSixV2:
         """Test the hosts_facts method."""
         scan_options = {"max_concurrency": 10}
         scan_job, scan_task = create_scan_job(
-            self.source,
-            ScanTask.SCAN_TYPE_INSPECT,
-            scan_name="test_62",
-            scan_options=scan_options,
+            self.source, scan_name="test_62", scan_options=scan_options
         )
         scan_task.update_stats("TEST_SAT.", sys_scanned=0)
         api = SatelliteSixV2(scan_job, scan_task)

@@ -4,19 +4,18 @@ from api.models import Scan, ScanJob, ScanTask
 
 
 def create_scan_job(
-    source, scan_type=ScanTask.SCAN_TYPE_INSPECT, scan_name="test", scan_options=None
-):
+    source, scan_name="test", scan_options=None
+) -> tuple[ScanJob, ScanTask]:
     """Create a new scan job.
 
-    TODO: Refactor and simplify. Does anything actually need to set scan_name?
+    TODO: Refactor and simplify. Consider replacing with factory classes.
 
     :param source: the source for the scan job
-    :param scan_type: Only inspect. TODO Remove this.
     :param scan_options: Job scan options
     :return: the scan job and task
     """
     # Create scan configuration
-    scan = Scan.objects.create(scan_type=scan_type, name=scan_name)
+    scan = Scan.objects.create(scan_type=ScanTask.SCAN_TYPE_INSPECT, name=scan_name)
 
     # Add source to scan
     if source is not None:
@@ -32,10 +31,8 @@ def create_scan_job(
 
     scan_job.queue()
 
+    # Note: first task after `queue` will always be type ScanTask.SCAN_TYPE_INSPECT.
     scan_task = scan_job.tasks.first()
-    if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        scan_task.status_complete()
-        scan_task = scan_job.tasks.filter(scan_type=ScanTask.SCAN_TYPE_INSPECT).first()
 
     return scan_job, scan_task
 

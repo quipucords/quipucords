@@ -86,9 +86,7 @@ class TestVCenterInspectTaskRunnerTest:
         self.source = Source.objects.create(name="source1", port=22, hosts=["1.2.3.4"])
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
         self.scan_task.update_stats("TEST_VC.", sys_count=5)
 
         # Create task runner

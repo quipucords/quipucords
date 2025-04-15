@@ -24,7 +24,7 @@ def test_delete_scan_cascade(client_logged_in):
     """Delete a scan and its related data."""
     credential = CredentialFactory()
     source = SourceFactory(credentials=[credential])
-    scanjob, scan_task = create_scan_job(source, ScanTask.SCAN_TYPE_INSPECT)
+    scanjob, scan_task = create_scan_job(source)
 
     scan = scanjob.scan
     scan_id = scan.id
