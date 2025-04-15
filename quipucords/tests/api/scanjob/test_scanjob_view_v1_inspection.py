@@ -4,7 +4,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from api.models import InspectResult, RawFact, ScanTask, SystemConnectionResult
+from api.models import InspectResult, RawFact, SystemConnectionResult
 from tests.factories import CredentialFactory, InspectGroupFactory, SourceFactory
 from tests.scanner.test_util import create_scan_job, create_scan_job_two_tasks
 
@@ -79,9 +79,7 @@ def test_inspection_ordering_by_name(client_logged_in):
     credential = CredentialFactory()
     source1 = SourceFactory(credentials=[credential])
     source2 = SourceFactory(credentials=[credential])
-    scan_job, scan_tasks = create_scan_job_two_tasks(
-        source1, source2, ScanTask.SCAN_TYPE_INSPECT
-    )
+    scan_job, scan_tasks = create_scan_job_two_tasks(source1, source2)
     task_inspect_source_1, task_inspect_source_2, _ = scan_tasks
 
     # Create an inspection system result
@@ -172,9 +170,7 @@ def test_inspection_filter_by_source_id(client_logged_in):
     credential = CredentialFactory()
     source1 = SourceFactory(credentials=[credential])
     source2 = SourceFactory(credentials=[credential])
-    scan_job, scan_tasks = create_scan_job_two_tasks(
-        source1, source2, ScanTask.SCAN_TYPE_INSPECT
-    )
+    scan_job, scan_tasks = create_scan_job_two_tasks(source1, source2)
     task_inspect_source_1, task_inspect_source_2, _ = scan_tasks
 
     # Create an inspection system result
@@ -248,9 +244,7 @@ def test_inspection_two_tasks(client_logged_in):
     credential = CredentialFactory()
     source1 = SourceFactory(credentials=[credential])
     source2 = SourceFactory(credentials=[credential])
-    scan_job, scan_tasks = create_scan_job_two_tasks(
-        source1, source2, ScanTask.SCAN_TYPE_INSPECT
-    )
+    scan_job, scan_tasks = create_scan_job_two_tasks(source1, source2)
     task_inspect_source_1, task_inspect_source_2, _ = scan_tasks
 
     # Create an inspection system result
@@ -347,9 +341,7 @@ def test_inspection_results_with_none(client_logged_in):
     credential = CredentialFactory()
     source1 = SourceFactory(credentials=[credential])
     source2 = SourceFactory(credentials=[credential])
-    scan_job, scan_tasks = create_scan_job_two_tasks(
-        source1, source2, ScanTask.SCAN_TYPE_INSPECT
-    )
+    scan_job, scan_tasks = create_scan_job_two_tasks(source1, source2)
 
     # Create an inspection system result
     inspect_sys_result = InspectResult(

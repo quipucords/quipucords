@@ -233,9 +233,7 @@ def test_expand_scanjob():
 
 def test_expand_scanjob_calc():
     """Test view expand_scanjob calculations."""
-    scan_job, scan_tasks = create_scan_job_two_tasks(
-        SourceFactory(), SourceFactory(), scan_type=ScanTask.SCAN_TYPE_INSPECT
-    )
+    scan_job, scan_tasks = create_scan_job_two_tasks(SourceFactory(), SourceFactory())
     scan_job.status = ScanTask.RUNNING
     scan_job.save()
     counts = (
