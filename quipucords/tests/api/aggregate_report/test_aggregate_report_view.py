@@ -7,7 +7,7 @@ from django.urls import reverse
 
 
 @pytest.mark.django_db
-@mock.patch("api.aggregate_report.view.get_aggregate_report_by_report_id")
+@mock.patch("api.aggregate_report.view.get_serialized_aggregate_report")
 def test_aggregate_report_view_success(
     mock_get_aggregate_report, faker, client_logged_in
 ):
@@ -23,7 +23,7 @@ def test_aggregate_report_view_success(
 
 
 @pytest.mark.django_db
-@mock.patch("api.aggregate_report.view.get_aggregate_report_by_report_id")
+@mock.patch("api.aggregate_report.view.get_serialized_aggregate_report")
 def test_aggregate_report_view_not_found(
     mock_get_aggregate_report, faker, client_logged_in
 ):

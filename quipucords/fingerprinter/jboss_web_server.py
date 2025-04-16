@@ -1,6 +1,6 @@
 """Ingests raw facts to determine the status of JBoss Web Server on system."""
 
-from api.deployments_report.model import Product
+from api.models import Product
 from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
 from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
 

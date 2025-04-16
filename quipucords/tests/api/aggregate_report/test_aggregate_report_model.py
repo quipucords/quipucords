@@ -1,5 +1,6 @@
 """Test the aggregate report model generation."""
 
+from collections import defaultdict
 from datetime import date
 
 import pytest
@@ -9,8 +10,8 @@ from api.aggregate_report.model import (
     AggregateReport,
     build_aggregate_report,
     get_aggregate_report_by_report_id,
-    reformat_aggregate_report_to_dict,
 )
+from api.aggregate_report.serializer import AggregateReportSerializer
 from api.deployments_report.model import DeploymentsReport, Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
 from api.report.model import Report
@@ -27,7 +28,57 @@ from tests.utils.raw_facts_generator import DEFAULT_RHEL_OS_NAME
 
 
 @pytest.fixture
-def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: PLR0915
+def expected_aggregate() -> dict:
+    """Return an AggregateReport dictionary with defaults."""
+    return {
+        "results": {
+            "ansible_hosts_all": 0,
+            "ansible_hosts_in_database": 0,
+            "ansible_hosts_in_jobs": 0,
+            "instances_hypervisor": 0,
+            "instances_not_redhat": 0,
+            "instances_physical": 0,
+            "instances_unknown": 0,
+            "instances_virtual": 0,
+            "jboss_eap_cores_physical": 0.0,
+            "jboss_eap_cores_virtual": 0.0,
+            "jboss_eap_instances": 0,
+            "jboss_ws_cores_physical": 0.0,
+            "jboss_ws_cores_virtual": 0.0,
+            "jboss_ws_instances": 0,
+            "openshift_cores": 0,
+            "openshift_operators_by_name": {},
+            "openshift_operators_by_kind": {},
+            "os_by_name_and_version": {
+                DEFAULT_RHEL_OS_NAME: defaultdict(int),
+                UNKNOWN: defaultdict(int),
+                "LCARS": defaultdict(int),
+            },
+            "socket_pairs": 0,
+            "system_creation_date_average": None,
+            "vmware_hosts": 0,
+            "vmware_vm_to_host_ratio": 0.0,
+            "vmware_vms": 0,
+            "openshift_cluster_instances": 0,
+            "openshift_node_instances": 0,
+        },
+        "diagnostics": {
+            "inspect_result_status_failed": 0,
+            "inspect_result_status_success": 0,
+            "inspect_result_status_unknown": 0,
+            "inspect_result_status_unreachable": 0,
+            "missing_cpu_core_count": 0,
+            "missing_cpu_socket_count": 0,
+            "missing_name": 0,
+            "missing_pem_files": 0,
+            "missing_system_creation_date": 0,
+            "missing_system_purpose": 0,
+        },
+    }
+
+
+@pytest.fixture
+def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  # noqa: PLR0915
     """
     Build a custom report for testing specific aggregate report use cases.
 
@@ -38,9 +89,12 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     Please read the expected_aggregate updates between objects carefully
     to understand how each new object should affect the end result.
     """
-    expected_aggregate = AggregateReport()
+    results = expected_aggregate["results"]
+    diagnostics = expected_aggregate["diagnostics"]
+    os_by_name_and_version = results["os_by_name_and_version"]
+
     # We construct fingerprints with different dates that should average to this:
-    expected_aggregate.system_creation_date_average = date(2024, 4, 1)
+    results["system_creation_date_average"] = str(date(2024, 4, 1))
 
     source_network = {"source_type": DataSources.NETWORK}
     source_ansible = {"source_type": DataSources.ANSIBLE}
@@ -71,11 +125,11 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     Product.objects.create(
         name=jboss_eap.PRODUCT, presence=Product.PRESENT, fingerprint=fingerprint
     )  # jboss_eap_instances++, jboss_eap_cores_virtual += 2
-    expected_aggregate.instances_virtual += 1
-    expected_aggregate.socket_pairs += 1
-    expected_aggregate.jboss_eap_instances += 1
-    expected_aggregate.jboss_eap_cores_virtual += 2
-    expected_aggregate.os_by_name_and_version[DEFAULT_RHEL_OS_NAME] = {"9.1": 1}
+    results["instances_virtual"] += 1
+    results["socket_pairs"] += 1
+    results["jboss_eap_instances"] += 1
+    results["jboss_eap_cores_virtual"] += 2
+    os_by_name_and_version[DEFAULT_RHEL_OS_NAME] = {"9.1": 1}
 
     # physical RHEL 9.1 w/ JBoss WS
     fingerprint = SystemFingerprintFactory(
@@ -93,13 +147,13 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
     Product.objects.create(
         name=jboss_web_server.PRODUCT, presence=Product.PRESENT, fingerprint=fingerprint
     )  # jboss_ws_instances++, jboss_ws_cores_physical += 8
-    expected_aggregate.instances_physical += 1
-    expected_aggregate.missing_system_purpose += 1
-    expected_aggregate.missing_pem_files += 1
-    expected_aggregate.socket_pairs += 2
-    expected_aggregate.jboss_ws_instances += 1
-    expected_aggregate.jboss_ws_cores_physical += 8
-    expected_aggregate.os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.1"] += 1
+    results["instances_physical"] += 1
+    diagnostics["missing_system_purpose"] += 1
+    diagnostics["missing_pem_files"] += 1
+    results["socket_pairs"] += 2
+    results["jboss_ws_instances"] += 1
+    results["jboss_ws_cores_physical"] += 8
+    os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.1"] += 1
 
     # hypervisor RHEL 9.2
     SystemFingerprintFactory(
@@ -114,13 +168,13 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         sources=[source_network],
         system_creation_date=None,  # missing_system_creation_date++
     )
-    expected_aggregate.instances_hypervisor += 1
-    expected_aggregate.missing_cpu_core_count += 1
-    expected_aggregate.missing_system_purpose += 1
-    expected_aggregate.missing_pem_files += 1
-    expected_aggregate.socket_pairs += 8
-    expected_aggregate.missing_system_creation_date += 1
-    expected_aggregate.os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.2"] = 1
+    results["instances_hypervisor"] += 1
+    diagnostics["missing_cpu_core_count"] += 1
+    diagnostics["missing_system_purpose"] += 1
+    diagnostics["missing_pem_files"] += 1
+    results["socket_pairs"] += 8
+    diagnostics["missing_system_creation_date"] += 1
+    os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.2"] = 1
 
     # RHEL with several important facts not set ("missing")
     SystemFingerprintFactory(
@@ -136,14 +190,14 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         sources=[source_network],
         system_creation_date=None,  # missing_system_creation_date++
     )
-    expected_aggregate.instances_unknown += 1
-    expected_aggregate.missing_cpu_core_count += 1
-    expected_aggregate.missing_cpu_socket_count += 1
-    expected_aggregate.missing_name += 1
-    expected_aggregate.missing_pem_files += 1
-    expected_aggregate.missing_system_creation_date += 1
-    expected_aggregate.missing_system_purpose += 1
-    expected_aggregate.os_by_name_and_version[DEFAULT_RHEL_OS_NAME][UNKNOWN] = 1
+    results["instances_unknown"] += 1
+    diagnostics["missing_cpu_core_count"] += 1
+    diagnostics["missing_cpu_socket_count"] += 1
+    diagnostics["missing_name"] += 1
+    diagnostics["missing_pem_files"] += 1
+    diagnostics["missing_system_creation_date"] += 1
+    diagnostics["missing_system_purpose"] += 1
+    os_by_name_and_version[DEFAULT_RHEL_OS_NAME][UNKNOWN] = 1
 
     # largely unknown system found via ansible
     SystemFingerprintFactory(
@@ -158,11 +212,11 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         sources=[source_ansible],
         system_creation_date=None,  # missing_system_creation_date++
     )
-    expected_aggregate.instances_unknown += 1
-    expected_aggregate.missing_name += 1
-    expected_aggregate.missing_cpu_socket_count += 1
-    expected_aggregate.missing_system_creation_date += 1
-    expected_aggregate.os_by_name_and_version[UNKNOWN] = {UNKNOWN: 1}
+    results["instances_unknown"] += 1
+    diagnostics["missing_name"] += 1
+    diagnostics["missing_cpu_socket_count"] += 1
+    diagnostics["missing_system_creation_date"] += 1
+    os_by_name_and_version[UNKNOWN] = {UNKNOWN: 1}
 
     # openshift with mysterious OS identifier
     SystemFingerprintFactory(
@@ -176,11 +230,11 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         sources=[source_openshift],
         system_creation_date=None,  # missing_system_creation_date++
     )
-    expected_aggregate.instances_virtual += 1
-    expected_aggregate.missing_cpu_socket_count += 1
-    expected_aggregate.openshift_cores += 32
-    expected_aggregate.missing_system_creation_date += 1
-    expected_aggregate.os_by_name_and_version[UNKNOWN]["NCC-1701"] = 1
+    results["instances_virtual"] += 1
+    diagnostics["missing_cpu_socket_count"] += 1
+    results["openshift_cores"] += 32
+    diagnostics["missing_system_creation_date"] += 1
+    os_by_name_and_version[UNKNOWN]["NCC-1701"] = 1
 
     # Not-RHEL system found by network scan
     # Unlike the openshift one above, this one DOES NOT increment counters,
@@ -197,8 +251,8 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         sources=[source_network],
         system_creation_date=date(1970, 1, 1),
     )
-    expected_aggregate.instances_not_redhat += 1
-    expected_aggregate.os_by_name_and_version["LCARS"] = {"NCC-1701-D": 1}
+    results["instances_not_redhat"] += 1
+    os_by_name_and_version["LCARS"] = {"NCC-1701-D": 1}
 
     # os_name, os_version, and name are frequently blank in real vcenter scans.
     # We set them to None here only to mimic this IRL behavior.
@@ -215,13 +269,13 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         vm_cluster="vmware_host1",
         virtual_host_uuid="vmware_vm1",
     )
-    expected_aggregate.instances_virtual += 1
-    expected_aggregate.missing_name += 1
-    expected_aggregate.missing_system_creation_date += 1
-    expected_aggregate.socket_pairs += 512
-    expected_aggregate.vmware_hosts += 1
-    expected_aggregate.vmware_vms += 1
-    expected_aggregate.os_by_name_and_version[UNKNOWN][UNKNOWN] += 1
+    results["instances_virtual"] += 1
+    diagnostics["missing_name"] += 1
+    diagnostics["missing_system_creation_date"] += 1
+    results["socket_pairs"] += 512
+    results["vmware_hosts"] += 1
+    results["vmware_vms"] += 1
+    os_by_name_and_version[UNKNOWN][UNKNOWN] += 1
 
     # os_name, os_version, and name are frequently blank in real vcenter scans.
     # We set them to None here only to mimic this IRL behavior.
@@ -238,14 +292,14 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         vm_cluster="vmware_host1",  # same as previous fingerprint
         virtual_host_uuid="vmware_vm2",  # different from previous fingerprint
     )
-    expected_aggregate.instances_virtual += 1
-    expected_aggregate.missing_cpu_socket_count += 1
-    expected_aggregate.missing_name += 1
-    expected_aggregate.missing_system_creation_date += 1
-    expected_aggregate.vmware_vms += 1
-    expected_aggregate.os_by_name_and_version[UNKNOWN][UNKNOWN] += 1
+    results["instances_virtual"] += 1
+    diagnostics["missing_cpu_socket_count"] += 1
+    diagnostics["missing_name"] += 1
+    diagnostics["missing_system_creation_date"] += 1
+    results["vmware_vms"] += 1
+    os_by_name_and_version[UNKNOWN][UNKNOWN] += 1
 
-    expected_aggregate.vmware_vm_to_host_ratio = 2.0  # (2/1)
+    results["vmware_vm_to_host_ratio"] = 2.0  # (2/1)
 
     report: Report = ReportFactory(
         deployment_report=deployments_report, generate_raw_facts=False
@@ -264,7 +318,7 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         },
         # because status=None by default, inspect_result_status_unknown++
     )
-    expected_aggregate.inspect_result_status_unknown += 1
+    diagnostics["inspect_result_status_unknown"] += 1
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={
@@ -273,10 +327,10 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         },
         status=InspectResult.SUCCESS,  # inspect_result_status_success++
     )
-    expected_aggregate.inspect_result_status_success += 1
-    expected_aggregate.ansible_hosts_all = 6  # {"a", "b", "c", "d", "e", "f"}
-    expected_aggregate.ansible_hosts_in_database = 3  # {"a", "b", "c"}
-    expected_aggregate.ansible_hosts_in_jobs = 4  # {"c", "d", "e", "f"}
+    diagnostics["inspect_result_status_success"] += 1
+    results["ansible_hosts_all"] = 6  # {"a", "b", "c", "d", "e", "f"}
+    results["ansible_hosts_in_database"] = 3  # {"a", "b", "c"}
+    results["ansible_hosts_in_jobs"] = 4  # {"c", "d", "e", "f"}
 
     # OpenShift-specific raw facts
     inspect_group = InspectGroupFactory(source_type=DataSources.OPENSHIFT)
@@ -297,31 +351,35 @@ def report_and_expected_aggregate() -> tuple[Report, AggregateReport]:  # noqa: 
         },
         status=InspectResult.SUCCESS,  # inspect_result_status_success++
     )
-    expected_aggregate.inspect_result_status_success += 1
-    expected_aggregate.openshift_cluster_instances += 1
-    expected_aggregate.openshift_operators_by_kind["unknown"] = 1
-    expected_aggregate.openshift_operators_by_kind["type1"] = 2
-    expected_aggregate.openshift_operators_by_kind["type2"] = 3
-    expected_aggregate.openshift_operators_by_name["unknown"] = 3
-    expected_aggregate.openshift_operators_by_name["name1"] = 1
-    expected_aggregate.openshift_operators_by_name["name2"] = 2
+    diagnostics["inspect_result_status_success"] += 1
+    results["openshift_cluster_instances"] += 1
+    results["openshift_operators_by_kind"] = {
+        "unknown": 1,
+        "type1": 2,
+        "type2": 3,
+    }
+    results["openshift_operators_by_name"] = {
+        "unknown": 3,
+        "name1": 1,
+        "name2": 2,
+    }
 
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={"node": {"kind": "node"}},  # openshift_node_instances++
         status=InspectResult.FAILED,  # inspect_result_status_failed++
     )
-    expected_aggregate.inspect_result_status_failed += 1
-    expected_aggregate.openshift_node_instances += 1
+    diagnostics["inspect_result_status_failed"] += 1
+    results["openshift_node_instances"] += 1
 
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={"asdf": {}},  # not a cluster or node? no effect.
         status=InspectResult.UNREACHABLE,  # inspect_result_status_unreachable++
     )
-    expected_aggregate.inspect_result_status_unreachable += 1
+    diagnostics["inspect_result_status_unreachable"] += 1
 
-    return report, expected_aggregate
+    return report, dict(expected_aggregate)
 
 
 @pytest.mark.django_db
@@ -332,9 +390,9 @@ def test_build_aggregate_report_system_fingerprint(
     report, expected_aggregate_report = report_and_expected_aggregate
     aggregated = build_aggregate_report(report.id)
     assert aggregated is not None
-    assert reformat_aggregate_report_to_dict(
-        aggregated
-    ) == reformat_aggregate_report_to_dict(expected_aggregate_report)
+    assert (
+        AggregateReportSerializer(instance=aggregated).data == expected_aggregate_report
+    )
 
 
 @pytest.mark.django_db
@@ -344,7 +402,9 @@ def test_get_aggregate_report_by_report_id(
     """Test that if the Report exists, a proper report is generated."""
     report, expected_aggregate_report = report_and_expected_aggregate
     aggregate = get_aggregate_report_by_report_id(report.id)
-    assert aggregate == reformat_aggregate_report_to_dict(expected_aggregate_report)
+    assert (
+        AggregateReportSerializer(instance=aggregate).data == expected_aggregate_report
+    )
 
 
 @pytest.mark.django_db

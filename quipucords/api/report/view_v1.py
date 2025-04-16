@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 
-from api.aggregate_report.model import get_aggregate_report_by_report_id
+from api.aggregate_report.view import get_serialized_aggregate_report
 from api.deployments_report.view import build_cached_json_report
 from api.models import DeploymentsReport, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
@@ -51,7 +51,7 @@ def reports(request, report_id):
         )
     deployments_json = build_cached_json_report(deployments_report)
     reports_dict["deployments_json"] = deployments_json
-    aggregate_json = get_aggregate_report_by_report_id(report_id)
+    aggregate_json = get_serialized_aggregate_report(report_id)
     reports_dict["aggregate_json"] = aggregate_json
     return Response(reports_dict)
 

@@ -3,7 +3,7 @@
 import bisect
 import logging
 
-from api.deployments_report.model import Product
+from api.models import Product
 from fingerprinter.constants import META_DATA_KEY
 from fingerprinter.utils import product_entitlement_found
 

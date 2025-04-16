@@ -26,20 +26,17 @@ from collections.abc import Iterable
 from math import ceil
 
 from django.db import models
-from django.forms import model_to_dict
 
 from api.common.models import BaseModel
 from api.deployments_report.model import Product, SystemFingerprint
 from api.inspectresult.model import InspectResult
 from api.report.model import Report
 from constants import DataSources
-from fingerprinter import jboss_eap, jboss_web_server
 from utils.datetime import average_date
 
 logger = logging.getLogger(__name__)
 
 UNKNOWN: str = "unknown"  # placeholder string for missing names/versions/kinds.
-AGGREGATE_REPORT_SKIP_ATTRS: list = ["id", "report"]
 
 
 class AggregateReport(BaseModel):
@@ -117,28 +114,12 @@ class AggregateReport(BaseModel):
     )
 
 
-def reformat_aggregate_report_to_dict(aggregated: AggregateReport) -> dict:
-    """Reformat an AggregateReport into a slightly more readable dict."""
-    results, diagnostics = {}, {}
-    for key, value in model_to_dict(aggregated).items():
-        if key in AGGREGATE_REPORT_SKIP_ATTRS:
-            continue
-        if key.startswith("missing_") or key.startswith("inspect_result_status_"):
-            diagnostics[key] = value
-        else:
-            results[key] = value
-    return {
-        "results": results,
-        "diagnostics": diagnostics,
-    }
-
-
-def get_aggregate_report_by_report_id(report_id: int) -> dict | None:
-    """Get the aggregate report data for the given report ID."""
+def get_aggregate_report_by_report_id(report_id: int) -> AggregateReport | None:
+    """Build and get the aggregate report for the given report ID."""
     try:
         report = Report.objects.get(pk=report_id)
         aggregated = build_aggregate_report(report.id)
-        return reformat_aggregate_report_to_dict(aggregated)
+        return aggregated
     except Report.DoesNotExist:
         return None
 
@@ -151,6 +132,11 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
 
     TODO Try to break up some to this to reduce the noqa: C901,PLR0912,PLR0915.
     """
+    # Note: importing jboss_eap and jboss_web_server here as to avoid the circular
+    # import error since api.models now imports AggregateReport and those jboss
+    # modules also import Product from api.models.
+    from fingerprinter import jboss_eap, jboss_web_server
+
     os_by_name_and_version = defaultdict(lambda: defaultdict(int))
     system_creation_dates = []
     vmware_vms_by_host = defaultdict(list)
