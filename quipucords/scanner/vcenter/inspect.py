@@ -143,37 +143,25 @@ class InspectTaskRunner(ScanTaskRunner):
 
     def _store_connect_data(self, connected, credential, source):
         """Update the scan counts."""
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        connect_scan_task = self.scan_task.prerequisites.first()
-        connect_scan_task.update_stats(
-            "INITIAL VCENTER CONNECT STATS.", sys_count=len(connected)
-        )
-
         for system in connected:
-            sys_result = SystemConnectionResult(
+            sys_result = SystemConnectionResult.objects.create(
                 name=system,
                 status=SystemConnectionResult.SUCCESS,
                 credential=credential,
                 source=source,
-                task_connection_result=connect_scan_task.connection_result,
+                task_connection_result=self.scan_task.connection_result,
             )
-            sys_result.save()
-            connect_scan_task.increment_stats(
-                sys_result.name, increment_sys_scanned=True
-            )
+            self.scan_task.increment_stats(sys_result.name, increment_sys_scanned=True)
 
-        connect_scan_task.connection_result.save()
+        self.scan_task.connection_result.save()
 
     def connect(self):
         """Execute the connect scan with the initialized source.
 
         :returns: list of connected vm credential tuples
         """
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        connect_scan_task = self.scan_task.prerequisites.first()
-        vcenter = vcenter_connect(connect_scan_task)
+        # TODO Remove this function and store vm names as part of inspect.
+        vcenter = vcenter_connect(self.scan_task)
         content = vcenter.RetrieveContent()
         vm_names = get_vm_names(content)
 
@@ -183,13 +171,6 @@ class InspectTaskRunner(ScanTaskRunner):
         """Perform the actual inspect operations and progressively save results."""
         source = self.scan_task.source
         credential = self.scan_task.source.credentials.all().first()
-
-        connect_scan_task = self.scan_task.prerequisites.first()
-        if connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = (
-                f"Prerequisites scan task {connect_scan_task.sequence_number} failed."
-            )
-            return error_message, ScanTask.FAILED
 
         try:
             self._inspect()
@@ -279,7 +260,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
     @transaction.atomic
     def parse_vm_props(self, props, host_dict):  # noqa: PLR0912, C901
-        """Parse Virtual Machine properties.
+        """Parse (and store) Virtual Machine properties.
 
         :param props: Array of Dynamic Properties
         :param host_dict: Dictionary of host properties
@@ -402,10 +383,9 @@ class InspectTaskRunner(ScanTaskRunner):
     def _init_stats(self):
         """Initialize the scan_task stats."""
         # Save counts
-        connect_scan_task = self.scan_task.prerequisites.first()
         self.scan_task.update_stats(
             "INITIAL VCENTER CONNECT STATS.",
-            sys_count=connect_scan_task.systems_count,
+            sys_count=self.scan_task.systems_count,
         )
 
     def _property_set(self):
@@ -532,7 +512,6 @@ class InspectTaskRunner(ScanTaskRunner):
         """Execute the inspection scan with the initialized source."""
         # Save counts
         self._init_stats()
-
         vcenter = vcenter_connect(self.scan_task)
         content = vcenter.RetrieveContent()
         self.retrieve_properties(content)

@@ -2,11 +2,11 @@
 
 import pytest
 
-from api.models import Credential, ScanTask, Source
+from api.models import Credential, Source
 from constants import DataSources
-from scanner.satellite.api import SATELLITE_VERSION_6
 from scanner.satellite.factory import create
 from scanner.satellite.six import SatelliteSixV1, SatelliteSixV2
+from scanner.satellite.utils import SATELLITE_VERSION_6
 from tests.scanner.test_util import create_scan_job
 
 
@@ -31,9 +31,7 @@ class TestSatelliteFactory:
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, scan_type=ScanTask.SCAN_TYPE_CONNECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
 
     @pytest.mark.django_db
     def test_create_sat_none(self):

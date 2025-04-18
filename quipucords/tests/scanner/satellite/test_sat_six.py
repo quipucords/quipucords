@@ -11,7 +11,6 @@ from api.models import (
     Credential,
     InspectResult,
     JobConnectionResult,
-    ScanTask,
     Source,
     SystemConnectionResult,
     TaskConnectionResult,
@@ -54,38 +53,30 @@ class TestSatelliteSixV1:
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
 
         self.api = SatelliteSixV1(self.scan_job, self.scan_task)
         job_conn_result = JobConnectionResult()
         job_conn_result.save()
         connection_results = TaskConnectionResult(job_connection_result=job_conn_result)
         connection_results.save()
-        self.api.connect_scan_task.connection_result = connection_results
-        self.api.connect_scan_task.connection_result.save()
 
-        conn_result = self.api.connect_scan_task.connection_result
-        sys_result = SystemConnectionResult(
+        conn_result = self.api.inspect_scan_task.connection_result
+        SystemConnectionResult.objects.create(
             name="sys1",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name="sys2",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name="sys3",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
-        sys_result.save()
-        self.api.connect_scan_task.save()
 
     @pytest.mark.django_db
     def test_get_orgs(self):
@@ -575,26 +566,24 @@ class TestSatelliteSixV2:
         self.source.save()
         self.source.credentials.add(self.cred)
 
-        self.scan_job, self.scan_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        self.scan_job, self.scan_task = create_scan_job(self.source)
         self.scan_task.update_stats("TEST_SAT.", sys_scanned=0)
         self.api = SatelliteSixV2(self.scan_job, self.scan_task)
         job_conn_result = JobConnectionResult()
         job_conn_result.save()
         connection_results = TaskConnectionResult(job_connection_result=job_conn_result)
         connection_results.save()
-        self.api.connect_scan_task.connection_result = connection_results
-        self.api.connect_scan_task.connection_result.save()
+        self.api.inspect_scan_task.connection_result = connection_results
+        self.api.inspect_scan_task.connection_result.save()
 
-        conn_result = self.api.connect_scan_task.connection_result
+        conn_result = self.api.inspect_scan_task.connection_result
         sys_result = SystemConnectionResult(
             name="sys1_1",
             status=InspectResult.SUCCESS,
             task_connection_result=conn_result,
         )
         sys_result.save()
-        self.api.connect_scan_task.save()
+        self.api.inspect_scan_task.save()
 
     @pytest.mark.django_db
     def test_host_count(self):
@@ -1058,10 +1047,7 @@ class TestSatelliteSixV2:
         """Test the hosts_facts method."""
         scan_options = {"max_concurrency": 10}
         scan_job, scan_task = create_scan_job(
-            self.source,
-            ScanTask.SCAN_TYPE_INSPECT,
-            scan_name="test_62",
-            scan_options=scan_options,
+            self.source, scan_name="test_62", scan_options=scan_options
         )
         scan_task.update_stats("TEST_SAT.", sys_scanned=0)
         api = SatelliteSixV2(scan_job, scan_task)
@@ -1069,16 +1055,16 @@ class TestSatelliteSixV2:
         job_conn_result.save()
         connection_results = TaskConnectionResult(job_connection_result=job_conn_result)
         connection_results.save()
-        api.connect_scan_task.connection_result = connection_results
-        api.connect_scan_task.connection_result.save()
+        api.inspect_scan_task.connection_result = connection_results
+        api.inspect_scan_task.connection_result.save()
 
-        sys_result = SystemConnectionResult(
+        sys_result = SystemConnectionResult.objects.create(
             name="sys1_1",
             status=InspectResult.SUCCESS,
-            task_connection_result=api.connect_scan_task.connection_result,
+            task_connection_result=api.inspect_scan_task.connection_result,
         )
         sys_result.save()
-        api.connect_scan_task.save()
+        api.inspect_scan_task.save()
         hosts_url = "https://{sat_host}:{port}/api/v2/hosts"
 
         _request_host_details = [

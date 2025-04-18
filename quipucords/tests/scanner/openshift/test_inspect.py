@@ -26,20 +26,13 @@ from tests.factories import ScanTaskFactory
 @pytest.fixture
 def scan_task():
     """Return a ScanTask for testing."""
-    connect_task = ScanTaskFactory(
+    inspect_task = ScanTaskFactory(
         source__source_type=DataSources.OPENSHIFT,
         source__hosts=["1.2.3.4"],
         source__port=4321,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
-        status=ScanTask.COMPLETED,
+        scan_type=ScanTask.SCAN_TYPE_INSPECT,
         sequence_number=1,
     )
-    inspect_task = ScanTaskFactory(
-        source=connect_task.source,
-        job=connect_task.job,
-        scan_type=ScanTask.SCAN_TYPE_INSPECT,
-    )
-    inspect_task.prerequisites.add(connect_task)
     return inspect_task
 
 
@@ -194,15 +187,12 @@ def test_connect_with_error(
     mocker.patch.object(OpenShiftApi, "can_connect", side_effect=error)
     runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
     message, status = runner.execute_task()
-    # Next line assumes self.scan_task has type 'inspect'.
-    # TODO Delete connect_scan_task when we stop using connect scan tasks.
-    connect_scan_task = scan_task.prerequisites.first()
     assert message == InspectTaskRunner.FAILURE_TO_CONNECT_MESSAGE
     assert status == ScanTask.FAILED
-    assert connect_scan_task.systems_count == 1
-    assert connect_scan_task.systems_scanned == 0
-    assert connect_scan_task.systems_failed == expected_failed
-    assert connect_scan_task.systems_unreachable == expected_unreachable
+    assert scan_task.systems_count == 1
+    assert scan_task.systems_scanned == 0
+    assert scan_task.systems_failed == expected_failed
+    assert scan_task.systems_unreachable == expected_unreachable
 
 
 @pytest.mark.django_db

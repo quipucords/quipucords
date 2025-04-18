@@ -30,7 +30,7 @@ def create_scan_task(
     )
     source.credentials.add(cred)
 
-    scan_job, scan_task = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(source)
     return scan_task
 
 

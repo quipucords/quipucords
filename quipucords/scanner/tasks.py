@@ -60,9 +60,7 @@ def get_task_runner_class(source_type, scan_type) -> type[ScanTaskRunner]:
 
     :returns: runner class type (not an instance of the class)
     """
-    if scan_type == ScanTask.SCAN_TYPE_CONNECT:
-        runner_class_name = "ConnectTaskRunner"
-    elif scan_type == ScanTask.SCAN_TYPE_INSPECT:
+    if scan_type == ScanTask.SCAN_TYPE_INSPECT:
         runner_class_name = "InspectTaskRunner"
     else:
         logger.exception("invalid scan_type %s", scan_type)

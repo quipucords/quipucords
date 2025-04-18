@@ -7,13 +7,10 @@ from requests import exceptions
 
 from api.models import Credential, ScanTask, Source
 from constants import DataSources
-from scanner.satellite.api import (
-    SATELLITE_VERSION_6,
-    SatelliteAuthError,
-    SatelliteError,
-)
+from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 from scanner.satellite.inspect import InspectTaskRunner
 from scanner.satellite.six import SatelliteSixV2
+from scanner.satellite.utils import SATELLITE_VERSION_6
 from tests.scanner.test_util import create_scan_job
 
 
@@ -57,9 +54,7 @@ class TestInspectTaskRunner:
 
     def create_scan_job(self):
         """Create scan job for tests."""
-        scan_job, inspect_task = create_scan_job(
-            self.source, ScanTask.SCAN_TYPE_INSPECT
-        )
+        scan_job, inspect_task = create_scan_job(self.source)
 
         inspect_task.update_stats("TEST_SAT.", sys_scanned=0)
         return scan_job, inspect_task

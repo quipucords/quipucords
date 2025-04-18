@@ -50,6 +50,7 @@ class Source(BaseModel):
     hosts = models.JSONField(unique=False, null=False, default=list)
     exclude_hosts = models.JSONField(unique=False, null=True)
 
+    # TODO Evaluate if we even need to keep this relationship.
     most_recent_connect_scan = models.ForeignKey(
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
     )

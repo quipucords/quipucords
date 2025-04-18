@@ -37,7 +37,7 @@ def source(credential: Credential) -> Source:
 @pytest.fixture
 def scan(source: Source) -> Scan:
     """Create a Scan instance for tests."""
-    _scan = Scan.objects.create(name="scan_name", scan_type=ScanTask.SCAN_TYPE_CONNECT)
+    _scan = Scan.objects.create(name="scan_name", scan_type=ScanTask.SCAN_TYPE_INSPECT)
     _scan.sources.add(source)
     return _scan
 
@@ -54,7 +54,7 @@ def test_successful_create(scan_job, source):
     task = ScanTask.objects.create(
         job=scan_job,
         source=source,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        scan_type=ScanTask.SCAN_TYPE_INSPECT,
         status=ScanTask.PENDING,
     )
     serializer = ScanTaskSerializer(task)
@@ -62,7 +62,7 @@ def test_successful_create(scan_job, source):
     expected = {
         "sequence_number": 0,
         "source": source.id,
-        "scan_type": ScanTask.SCAN_TYPE_CONNECT,
+        "scan_type": ScanTask.SCAN_TYPE_INSPECT,
         "status": "pending",
         "status_message": messages.ST_STATUS_MSG_PENDING,
         "systems_count": 0,
@@ -134,7 +134,7 @@ def test_scan_task_model_status_action(  # noqa: PLR0913
     task = ScanTask.objects.create(
         job=scan_job,
         source=source,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        scan_type=ScanTask.SCAN_TYPE_INSPECT,
         status=ScanTask.PENDING,
     )
     model_action(task)
@@ -152,7 +152,7 @@ def test_scantask_increment(scan_job, source):
     task = ScanTask.objects.create(
         job=scan_job,
         source=source,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        scan_type=ScanTask.SCAN_TYPE_INSPECT,
         status=ScanTask.PENDING,
     )
     task.increment_stats(
@@ -191,7 +191,7 @@ def test_scantask_increment_stats_multiple_in_parallel(scan_job, source):
     task_instance_a = ScanTask.objects.create(
         job=scan_job,
         source=source,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
+        scan_type=ScanTask.SCAN_TYPE_INSPECT,
         status=ScanTask.PENDING,
     )
     task_instance_b = ScanTask.objects.get(id=task_instance_a.id)
@@ -211,33 +211,6 @@ def test_scantask_increment_stats_multiple_in_parallel(scan_job, source):
 
     assert 2 == task_instance_a.systems_count
     assert 2 == task_instance_b.systems_count
-
-
-@pytest.mark.django_db
-def test_scantask_reset_stats(scan_job, source):
-    """Test scan task reset stat feature."""
-    task = ScanTask.objects.create(
-        job=scan_job,
-        source=source,
-        scan_type=ScanTask.SCAN_TYPE_CONNECT,
-        status=ScanTask.PENDING,
-    )
-    task.increment_stats(
-        "foo",
-        increment_sys_count=True,
-        increment_sys_scanned=True,
-        increment_sys_failed=True,
-        increment_sys_unreachable=True,
-    )
-    assert 1 == task.systems_count
-    assert 1 == task.systems_scanned
-    assert 1 == task.systems_failed
-    assert 1 == task.systems_unreachable
-    task.reset_stats()
-    assert 0 == task.systems_count
-    assert 0 == task.systems_scanned
-    assert 0 == task.systems_failed
-    assert 0 == task.systems_unreachable
 
 
 @pytest.mark.django_db

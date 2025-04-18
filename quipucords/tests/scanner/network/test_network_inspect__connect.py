@@ -6,7 +6,7 @@ import pytest
 from ansible_runner import AnsibleRunnerException
 from django.test import override_settings
 
-from api.models import Scan, ScanTask
+from api.models import Scan
 from scanner.network.inspect import _connect
 from tests.scanner.test_util import create_scan_job
 
@@ -17,7 +17,7 @@ pytestmark = pytest.mark.django_db  # all tests here require the database
 def test__connect_paramiko(mock_run, network_source):
     """Test _connect use_paramiko sends arg to run."""
     mock_run.return_value.status = "successful"
-    scan_job, scan_task = create_scan_job(network_source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(network_source)
     _connect(
         scan_task=scan_task,
         hosts=network_source.hosts,
@@ -39,7 +39,7 @@ def test__connect_raises_exception_when_ansible_runner_run_fails(
 ):
     """Test ansible_runner.run exception raises AnsibleRunnerException in _connect."""
     mock_run.side_effect = Exception()
-    scan_job, scan_task = create_scan_job(network_source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(network_source)
     with pytest.raises(AnsibleRunnerException):
         _connect(
             scan_task=scan_task,
@@ -58,7 +58,7 @@ def test__connect_raises_exception_when_ansible_runner_run_fails(
 def test__connect_with_modified_ansible_log_level(mock_run, network_source):
     """Test modifying ANSIBLE_LOG_LEVEL (from default 3 to 1) sends arg to run."""
     mock_run.return_value.status = "successful"
-    scan_job, scan_task = create_scan_job(network_source, ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, scan_task = create_scan_job(network_source)
     _connect(
         scan_task=scan_task,
         hosts=network_source.hosts,

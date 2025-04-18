@@ -10,7 +10,7 @@ from api.models import ScanTask
 from scanner.exceptions import ScanFailureError
 from scanner.runner import ScanTaskRunner
 from scanner.satellite import utils
-from scanner.satellite.api import SatelliteAuthError, SatelliteError
+from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
 from scanner.satellite.factory import create
 
 

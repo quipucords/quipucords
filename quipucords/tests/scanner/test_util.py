@@ -4,18 +4,18 @@ from api.models import Scan, ScanJob, ScanTask
 
 
 def create_scan_job(
-    source, scan_type=ScanTask.SCAN_TYPE_CONNECT, scan_name="test", scan_options=None
-):
+    source, scan_name="test", scan_options=None
+) -> tuple[ScanJob, ScanTask]:
     """Create a new scan job.
 
+    TODO: Refactor and simplify. Consider replacing with factory classes.
+
     :param source: the source for the scan job
-    :param scan_type: Either connect or inspect
     :param scan_options: Job scan options
     :return: the scan job and task
     """
-    # TODO Change scan_type default to SCAN_TYPE_INSPECT we stop using connect scans.
     # Create scan configuration
-    scan = Scan.objects.create(name=scan_name, scan_type=scan_type)
+    scan = Scan.objects.create(scan_type=ScanTask.SCAN_TYPE_INSPECT, name=scan_name)
 
     # Add source to scan
     if source is not None:
@@ -31,31 +31,24 @@ def create_scan_job(
 
     scan_job.queue()
 
+    # Note: first task after `queue` will always be type ScanTask.SCAN_TYPE_INSPECT.
     scan_task = scan_job.tasks.first()
-    if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        scan_task.status_complete()
-        scan_task = scan_job.tasks.filter(scan_type=ScanTask.SCAN_TYPE_INSPECT).first()
 
     return scan_job, scan_task
 
 
 def create_scan_job_two_tasks(
-    source,
-    source2,
-    scan_type=ScanTask.SCAN_TYPE_CONNECT,
-    scan_name="test",
-    scan_options=None,
-):
+    source, source2, scan_name="test", scan_options=None
+) -> tuple[ScanJob, list[ScanTask]]:
     """Create a new scan job with two sources.
 
     :param source: the source for the scan job
     :param source2: the second source for the scan job
-    :param scan_type: Either connect or inspect
     :param scan_options: Job scan options
-    :return: the scan job and task
+    :return: the scan job and tasks
     """
     # Create scan configuration
-    scan = Scan.objects.create(name=scan_name, scan_type=scan_type)
+    scan = Scan.objects.create(name=scan_name, scan_type=ScanTask.SCAN_TYPE_INSPECT)
 
     # Add source to scan
     if source is not None:
@@ -70,15 +63,10 @@ def create_scan_job_two_tasks(
 
     # Create Job
     scan_job = ScanJob.objects.create(scan=scan)
-
     scan_job.queue()
 
     # grab the scan tasks
     scan_tasks = scan_job.tasks.all().order_by("sequence_number")
-    if scan_type == ScanTask.SCAN_TYPE_INSPECT:
-        for task in scan_tasks:
-            task.status_complete()
-
     return scan_job, scan_tasks
 
 

@@ -49,18 +49,6 @@ class InspectTaskRunner(ScanTaskRunner):
     failures (host/ip).
     """
 
-    def __init__(self, scan_job, scan_task):
-        """Set context for task execution.
-
-        :param scan_job: the scan job that contains this task
-        :param scan_task: the scan task model for this task
-        to store results
-        """
-        super().__init__(scan_job, scan_task)
-        # Next line assumes self.scan_task has type 'inspect'.
-        # TODO Delete connect_scan_task when we stop using connect scan tasks.
-        self.connect_scan_task = self.scan_task.prerequisites.first()
-
     def execute_task(self):
         """Scan target systems to collect facts.
 
@@ -88,21 +76,14 @@ class InspectTaskRunner(ScanTaskRunner):
 
         TODO Remove this function when we remove connect scan tasks.
         """
-        result_store = ConnectResultStore(self.connect_scan_task)
+        result_store = ConnectResultStore(self.scan_task)
         scan_message, scan_result = run_with_result_store(
-            self.connect_scan_task, self.scan_job, result_store
+            self.scan_task, self.scan_job, result_store
         )
         return scan_message, scan_result
 
     def inspect(self):
         """Perform the actual inspect operations and progressively save results."""
-        if self.connect_scan_task.status != ScanTask.COMPLETED:
-            error_message = (
-                f"Prerequisites scan task {self.connect_scan_task.sequence_number}"
-                f" failed."
-            )
-            return error_message, ScanTask.FAILED
-
         try:
             # Execute scan
             connected, completed, failed, unreachable = self._obtain_discovery_data()
@@ -176,7 +157,7 @@ class InspectTaskRunner(ScanTaskRunner):
 
         :param systems_list: Current list of system results.
         """
-        connected_hosts = self.connect_scan_task.connection_result.systems.filter(
+        connected_hosts = self.scan_task.connection_result.systems.filter(
             status=SystemConnectionResult.SUCCESS
         ).values("name")
 
@@ -475,7 +456,7 @@ class InspectTaskRunner(ScanTaskRunner):
         completed = []
         unreachable = []
         nostatus = []
-        for result in self.connect_scan_task.connection_result.systems.all():
+        for result in self.scan_task.connection_result.systems.all():
             if result.status == SystemConnectionResult.SUCCESS:
                 connected.append(tuple((result.name, result.credential)))
 
@@ -538,14 +519,13 @@ class ConnectResultStore:
     @transaction.atomic
     def record_result(self, name, source, credential, status):
         """Record a new result, either a connection success or a failure."""
-        sys_result = SystemConnectionResult(
+        SystemConnectionResult.objects.create(
             name=name,
             source=source,
             credential=credential,
             status=status,
             task_connection_result=self.scan_task.connection_result,
         )
-        sys_result.save()
 
         if status == SystemConnectionResult.SUCCESS:
             message = f"{name} with {credential.name}"
@@ -741,15 +721,12 @@ def _handle_ssh_passphrase(credential):
             pass
 
 
-def run_with_result_store(
-    connect_scan_task, scan_job, result_store: ConnectResultStore
-):
+def run_with_result_store(scan_task, scan_job, result_store: ConnectResultStore):
     """Run connection test logic with a given ConnectResultStore.
 
     :param result_store: ConnectResultStore
     """
-    # TODO Replace connect_scan_task when we remove connect scan tasks.
-    serializer = SourceSerializer(connect_scan_task.source)
+    serializer = SourceSerializer(scan_task.source)
     source = serializer.data
 
     if scan_job.options is not None:
@@ -757,7 +734,7 @@ def run_with_result_store(
     else:
         forks = Scan.DEFAULT_MAX_CONCURRENCY
 
-    use_paramiko = connect_scan_task.source.use_paramiko
+    use_paramiko = scan_task.source.use_paramiko
     if use_paramiko is None:
         use_paramiko = False
 
@@ -770,15 +747,15 @@ def run_with_result_store(
         credential = Credential.objects.get(pk=cred_id)
         if not remaining_hosts:
             message = f"Skipping credential {credential.name}. No remaining hosts."
-            connect_scan_task.log_message(message)
+            scan_task.log_message(message)
             break
 
         message = f"Attempting credential {credential.name}."
-        connect_scan_task.log_message(message)
+        scan_task.log_message(message)
         with credential.generate_ssh_keyfile() as ssh_keyfile:
             try:
                 scan_message, scan_result = _connect(
-                    scan_task=connect_scan_task,
+                    scan_task=scan_task,
                     hosts=remaining_hosts,
                     result_store=result_store,
                     credential=credential,
@@ -805,7 +782,7 @@ def run_with_result_store(
         # We haven't connected to these hosts with any
         # credentials, so they have failed.
         result_store.record_result(
-            host, connect_scan_task.source, None, SystemConnectionResult.FAILED
+            host, scan_task.source, None, SystemConnectionResult.FAILED
         )
 
     return None, ScanTask.COMPLETED

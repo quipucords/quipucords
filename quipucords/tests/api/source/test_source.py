@@ -263,6 +263,7 @@ class TestSource:
                 "systems_failed": 1,
                 "systems_unreachable": 0,
                 "system_fingerprint_count": 0,
+                "scan_type": ScanTask.SCAN_TYPE_INSPECT,
                 "status_details": {"job_status_message": "Job is pending."},
                 "status": "completed",
                 "source_systems_count": 10,
@@ -1122,7 +1123,7 @@ class TestSource:
         source.save()
 
         scan = Scan.objects.create(
-            name="test_scan", scan_type=ScanTask.SCAN_TYPE_CONNECT
+            name="test_scan", scan_type=ScanTask.SCAN_TYPE_INSPECT
         )
         scan.sources.add(source)
 
@@ -1821,6 +1822,7 @@ class TestSourceV2:
                 "systems_failed": 1,
                 "systems_unreachable": 0,
                 "system_fingerprint_count": 0,
+                "scan_type": ScanTask.SCAN_TYPE_INSPECT,
                 "status_details": {"job_status_message": "Job is pending."},
                 "status": "completed",
                 "source_systems_count": 10,
@@ -2689,7 +2691,7 @@ class TestSourceV2:
         source.save()
 
         scan = Scan.objects.create(
-            name="test_scan", scan_type=ScanTask.SCAN_TYPE_CONNECT
+            name="test_scan", scan_type=ScanTask.SCAN_TYPE_INSPECT
         )
         scan.sources.add(source)
 

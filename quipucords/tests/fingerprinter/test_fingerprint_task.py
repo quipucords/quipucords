@@ -135,7 +135,7 @@ def source():
 @pytest.fixture
 def scan_job(source):
     """Create a ScanJob for tests."""
-    scan_job, _ = create_scan_job(source, scan_type=ScanTask.SCAN_TYPE_INSPECT)
+    scan_job, _ = create_scan_job(source)
     return scan_job
 
 
