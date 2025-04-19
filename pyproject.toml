@@ -46,7 +46,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "coverage<8.0.0,>=7.0.5",
-    "django-extensions<4.0.0,>=3.2.1",
+    "django-extensions<4.2.0,>=4.1",
     "factory-boy<4.0.0,>=3.2.1",
     "httpretty<2.0.0,>=1.1.4",
     "ipython<9.0.0,>=8.10.0",
