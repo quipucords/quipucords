@@ -179,7 +179,7 @@ rpds-py==0.24.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via
     #   jsonschema
     #   referencing
-rsa==4.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+rsa==4.9.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via google-auth
 six==1.17.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
