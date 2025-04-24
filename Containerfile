@@ -13,10 +13,6 @@ RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
     dnf clean all &&\
     python3.12 -m venv /opt/venv
 
-# TODO remove prepare_rust_deps script when cachi2/hermeto supports pip+cargo dependencies 
-COPY scripts/prepare_rust_deps.py .
-RUN python prepare_rust_deps.py "${CRATES_PATH}"
-
 COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 

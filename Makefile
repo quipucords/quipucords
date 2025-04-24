@@ -86,12 +86,8 @@ lock-main-requirements:
 	uv lock
 	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
-lock-rustdeps:
-	$(PYTHON) scripts/lock_crates.py -o lockfiles/artifacts.lock.yaml lockfiles/requirements.txt lockfiles/requirements-build.txt
-
 lock-build-requirements:
 	uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
-	$(MAKE) lock-rustdeps
 
 update-requirements:
 	uv lock --upgrade
