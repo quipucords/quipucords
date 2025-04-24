@@ -18,6 +18,7 @@ COPY scripts/prepare_rust_deps.py .
 RUN python prepare_rust_deps.py "${CRATES_PATH}"
 
 COPY lockfiles/requirements.txt .
+RUN pip install cryptography
 RUN pip install -r requirements.txt
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:ac61c96b93894b9169221e87718733354dd3765dd4a62b275893c7ff0d876869
