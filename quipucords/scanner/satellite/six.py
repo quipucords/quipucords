@@ -483,8 +483,6 @@ class SatelliteSix(SatelliteInterface, metaclass=ABCMeta):
     def hosts_facts(self):
         """Obtain the managed hosts detail raw facts."""
         systems_count = len(self.inspect_scan_task.connection_result.systems.all())
-        if self.inspect_scan_task is None:
-            raise SatelliteError("hosts_facts cannot be called for a connection scan")
         self.inspect_scan_task.update_stats(
             "INITIAL SATELLITE STATS", sys_count=systems_count
         )
