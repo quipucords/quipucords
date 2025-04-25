@@ -1,5 +1,6 @@
 """Test the satellite utils."""
 
+import logging
 from unittest.mock import ANY, patch
 
 import pytest
@@ -7,7 +8,7 @@ import requests_mock
 
 from api.models import Credential, Source
 from constants import DataSources
-from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
+from scanner.satellite.exceptions import SatelliteAuthError
 from scanner.satellite.utils import (
     SATELLITE_VERSION_6,
     construct_url,
@@ -134,8 +135,19 @@ class TestSatelliteUtils:
         validate_task_stats(self.scan_task)
 
     @pytest.mark.django_db
-    def test_validate_task_stats_error(self):
+    def test_validate_task_stats_error(self, faker, caplog):
         """Test validate task stats errors."""
-        with pytest.raises(SatelliteError):
-            self.scan_task.increment_stats("TEST", increment_sys_count=True)
-            validate_task_stats(self.scan_task)
+        caplog.set_level(logging.ERROR)
+        self.scan_task.increment_stats(faker.sentence(), increment_sys_count=True)
+        self.scan_task.increment_stats(faker.sentence(), increment_sys_scanned=True)
+        self.scan_task.increment_stats(faker.sentence(), increment_sys_scanned=True)
+        self.scan_task.refresh_from_db()
+        assert self.scan_task.systems_count == 1
+
+        validate_task_stats(self.scan_task)
+        expected_message = (
+            "Satellite inspection expected 1 systems but found 2 systems."
+        )
+        assert expected_message in caplog.messages[0]
+        self.scan_task.refresh_from_db()
+        assert self.scan_task.systems_count == 2

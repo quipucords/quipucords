@@ -156,7 +156,6 @@ def validate_task_stats(task):
     """Map data keys to new output.
 
     :param task: ScanTask to evaluate
-    :throws: SatelliteException if task stats are not valid
     """
     (systems_count, systems_scanned, systems_failed, systems_unreachable) = (
         task.systems_count,
@@ -166,12 +165,14 @@ def validate_task_stats(task):
     )
     totals = systems_scanned + systems_failed + systems_unreachable
     if totals != systems_count:
-        missing_sys = systems_count - totals
-        error = f"Scan failed to inspect {missing_sys:d} systems."
-        task.log_message(error, log_level=logging.ERROR)
-        new_failed = missing_sys + systems_failed
-        task.update_stats("Missed failed systems", sys_failed=new_failed)
-        raise SatelliteError("hosts_facts could not scan all systems")
+        message = (
+            f"Satellite inspection expected {systems_count:d} systems "
+            f"but found {totals:d} systems."
+        )
+        task.log_message(message, log_level=logging.ERROR)
+        task.update_stats(
+            "Updated systems_count based on actual inspection results", sys_count=totals
+        )
 
 
 def raw_facts_template():
