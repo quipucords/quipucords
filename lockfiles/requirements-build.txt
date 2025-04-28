@@ -4,7 +4,7 @@
 #
 #    pybuild-deps compile --output-file=lockfiles/requirements-build.txt lockfiles/requirements.txt
 #
-calver==2025.4.2
+calver==2025.4.17
     # via trove-classifiers
 cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
@@ -28,6 +28,7 @@ flit-core==3.12.0
     #   idna
     #   jinja2
     #   more-itertools
+    #   mypy-extensions
     #   packaging
     #   pathspec
     #   ptyprocess
@@ -58,11 +59,11 @@ maturin==1.8.3
     # via
     #   cryptography
     #   rpds-py
-mypy-extensions==1.0.0
+mypy-extensions==1.1.0
     # via mypy
 mypy==1.14.0
     # via charset-normalizer
-packaging==24.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+packaging==25.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   hatchling
     #   setuptools-scm
@@ -90,7 +91,7 @@ setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.1.0
     # via ansible-runner
-setuptools-scm==8.2.0
+setuptools-scm==8.3.1
     # via
     #   charset-normalizer
     #   django-axes
@@ -101,7 +102,7 @@ trove-classifiers==2025.4.11.15
     # via hatchling
 types-psutil==7.0.0.20250401
     # via mypy
-types-setuptools==78.1.0.20250329
+types-setuptools==79.0.0.20250422
     # via mypy
 typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
@@ -109,6 +110,7 @@ typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform =
     #   setuptools-scm
 wheel==0.45.1
     # via
+    #   ansible-core
     #   bcrypt
     #   cachetools
     #   click-repl
@@ -131,7 +133,7 @@ setuptools==70.0.0
     #   setuptools-scm
 setuptools==76.0.0
     # via ansible-core
-setuptools==78.1.0
+setuptools==80.0.0
     # via
     #   ansible
     #   bcrypt
@@ -152,6 +154,7 @@ setuptools==78.1.0
     #   pathspec
     #   pbr
     #   pluggy
+    #   prompt-toolkit
     #   psycopg
     #   psycopg-c
     #   pyasn1
@@ -167,5 +170,6 @@ setuptools==78.1.0
     #   setuptools-scm
     #   trove-classifiers
     #   types-psutil
+    #   types-setuptools
     #   tzdata
     #   whitenoise
