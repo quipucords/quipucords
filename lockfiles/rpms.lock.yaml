@@ -60,13 +60,13 @@ arches:
     name: glibc-devel
     evr: 2.34-125.el9_5.3
     sourcerpm: glibc-2.34-125.el9_5.3.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-503.35.1.el9_5.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-503.38.1.el9_5.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 3902477
-    checksum: sha256:488351f55f8a9fd1589bed0103364dc8acea59eb03d7474daa18f409c813591b
+    size: 3899953
+    checksum: sha256:8bb7c32ee90d7e92a3e022da62da9973fcc53573f7c8a4e94391d9d4c0b06ca1
     name: kernel-headers
-    evr: 5.14.0-503.35.1.el9_5
-    sourcerpm: kernel-5.14.0-503.35.1.el9_5.src.rpm
+    evr: 5.14.0-503.38.1.el9_5
+    sourcerpm: kernel-5.14.0-503.38.1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libasan-11.5.0-5.el9_5.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 413819
@@ -599,27 +599,27 @@ arches:
     name: python-unversioned-command
     evr: 3.9.21-1.el9_5
     sourcerpm: python3.9-3.9.21-1.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-3.12.5-2.el9_5.2.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-3.12.5-2.el9_5.3.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 29939
-    checksum: sha256:29edb86b86353a015bc63d3f57c5b59b91f48d2941c84918be9699cc09a0511c
+    size: 30067
+    checksum: sha256:596340dbdc0bdcfb82304173a30cce0cf697ee59f22a363021791467f180c354
     name: python3.12
-    evr: 3.12.5-2.el9_5.2
-    sourcerpm: python3.12-3.12.5-2.el9_5.2.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-devel-3.12.5-2.el9_5.2.aarch64.rpm
+    evr: 3.12.5-2.el9_5.3
+    sourcerpm: python3.12-3.12.5-2.el9_5.3.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-devel-3.12.5-2.el9_5.3.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 335868
-    checksum: sha256:ddb401262e805f37ec9ca53155ab7c58d668d5b2e37696f535ba5a35e01bfee6
+    size: 336005
+    checksum: sha256:d0c061a928abb1898871b0b0b385f08951fcc10d54896911e12db9cc1bc43207
     name: python3.12-devel
-    evr: 3.12.5-2.el9_5.2
-    sourcerpm: python3.12-3.12.5-2.el9_5.2.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-libs-3.12.5-2.el9_5.2.aarch64.rpm
+    evr: 3.12.5-2.el9_5.3
+    sourcerpm: python3.12-3.12.5-2.el9_5.3.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-libs-3.12.5-2.el9_5.3.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 10118290
-    checksum: sha256:17eb8da707b880019592c343d63166e5fb403b0ebeeb322b5acbcbe093f813ec
+    size: 10120487
+    checksum: sha256:e858b551d2a4d227a54fa09967c9a3c710f2cc627d61852b0875757dadaff0a0
     name: python3.12-libs
-    evr: 3.12.5-2.el9_5.2
-    sourcerpm: python3.12-3.12.5-2.el9_5.2.src.rpm
+    evr: 3.12.5-2.el9_5.3
+    sourcerpm: python3.12-3.12.5-2.el9_5.3.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/python3.12-pip-23.2.1-4.el9.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 3377244
@@ -1121,13 +1121,13 @@ arches:
     name: glibc-headers
     evr: 2.34-125.el9_5.3
     sourcerpm: glibc-2.34-125.el9_5.3.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-503.35.1.el9_5.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-503.38.1.el9_5.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 3940905
-    checksum: sha256:f91506b993223e0c8e43e8d8e07507f3177a0d5b7c3e3dcee4f55b25d2cfcbd8
+    size: 3938453
+    checksum: sha256:24dc9ef1eb84a8e8747aa74dbad7351d55ef7570e3de832255af72b0b680eca0
     name: kernel-headers
-    evr: 5.14.0-503.35.1.el9_5
-    sourcerpm: kernel-5.14.0-503.35.1.el9_5.src.rpm
+    evr: 5.14.0-503.38.1.el9_5
+    sourcerpm: kernel-5.14.0-503.38.1.el9_5.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libffi-devel-3.4.2-8.el9.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 32520
@@ -1653,27 +1653,27 @@ arches:
     name: python-unversioned-command
     evr: 3.9.21-1.el9_5
     sourcerpm: python3.9-3.9.21-1.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-3.12.5-2.el9_5.2.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-3.12.5-2.el9_5.3.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 29978
-    checksum: sha256:013713b46c2651394a589480c63d6863d9e00bf5768c7eef63285784a3ee87b1
+    size: 30119
+    checksum: sha256:d4e402c50a3324fdbf1ab172ca3ef4bbc5e54311507bf4fd13e6548baeb06c8c
     name: python3.12
-    evr: 3.12.5-2.el9_5.2
-    sourcerpm: python3.12-3.12.5-2.el9_5.2.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-devel-3.12.5-2.el9_5.2.x86_64.rpm
+    evr: 3.12.5-2.el9_5.3
+    sourcerpm: python3.12-3.12.5-2.el9_5.3.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-devel-3.12.5-2.el9_5.3.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 335921
-    checksum: sha256:954b053517261b6a8dbc368421bee66fd40de5ae712322b56c380edf8c6b9174
+    size: 336091
+    checksum: sha256:143d23444cfe9ac35a4bb50bb0679f2b5e18177f7bc7eaaeb6a8a628208f7db6
     name: python3.12-devel
-    evr: 3.12.5-2.el9_5.2
-    sourcerpm: python3.12-3.12.5-2.el9_5.2.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-libs-3.12.5-2.el9_5.2.x86_64.rpm
+    evr: 3.12.5-2.el9_5.3
+    sourcerpm: python3.12-3.12.5-2.el9_5.3.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-libs-3.12.5-2.el9_5.3.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 10183187
-    checksum: sha256:e93861b46f4b4e0ccd002710f89ec96b5a0779ece8a51a60d7ac89be3932ce4a
+    size: 10180353
+    checksum: sha256:1949f952a5a903593d17e9ca9e907baab3a0eb4b0b2cd194adfe8b63f2388945
     name: python3.12-libs
-    evr: 3.12.5-2.el9_5.2
-    sourcerpm: python3.12-3.12.5-2.el9_5.2.src.rpm
+    evr: 3.12.5-2.el9_5.3
+    sourcerpm: python3.12-3.12.5-2.el9_5.3.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/python3.12-pip-23.2.1-4.el9.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 3377244
