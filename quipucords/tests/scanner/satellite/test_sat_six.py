@@ -287,6 +287,7 @@ class TestSatelliteSixV1:
                     "user": self.cred.username,
                     "password": self.cred.password,
                     "ssl_cert_verify": True,
+                    "proxy_url": None,
                 },
             }
         ]
@@ -295,7 +296,7 @@ class TestSatelliteSixV1:
         port = "443"
         user = self.cred.username
         password = self.cred.password
-        connect_data_return_value = host, port, user, password
+        connect_data_return_value = host, port, user, password, None
         with patch(
             "scanner.satellite.utils.get_connect_data",
             return_value=connect_data_return_value,
@@ -303,6 +304,58 @@ class TestSatelliteSixV1:
             host_params = SatelliteSixV1.prepare_hosts(self.api, chunk)
             assert expected == host_params
             mock_connect.assert_called_once_with(ANY)
+
+    @pytest.mark.django_db
+    def test_prepare_hosts_s61_with_proxy(self):
+        """Test the prepare_hosts method includes proxy_url when present."""
+        url1 = (
+            "https://{sat_host}:{port}/katello/api"
+            "/v2/organizations/{org_id}/systems/{host_id}"
+        )
+        url2 = (
+            "https://{sat_host}:{port}/katello/api"
+            "/v2/organizations/{org_id}/systems/{host_id}/subscriptions"
+        )
+        expected = [
+            {
+                "scan_task_id": self.scan_task.id,
+                "logging_options": {
+                    "job_id": self.scan_job.id,
+                    "task_sequence_number": self.scan_task.sequence_number,
+                    "scan_type": self.scan_task.scan_type,
+                    "source_type": self.scan_task.source.source_type,
+                    "source_name": self.scan_task.source.name,
+                },
+                "host_id": 1,
+                "host_name": "sys",
+                "fields_url": url1,
+                "subs_url": url2,
+                "request_options": {
+                    "host": {"id": 1, "name": "sys"},
+                    "port": "443",
+                    "user": self.cred.username,
+                    "password": self.cred.password,
+                    "ssl_cert_verify": True,
+                    "proxy_url": "http://proxy.example.com:8080",
+                },
+            }
+        ]
+        host = {"id": 1, "name": "sys"}
+        chunk = [host]
+        connect_data_return_value = (
+            host,
+            "443",
+            self.cred.username,
+            self.cred.password,
+            "http://proxy.example.com:8080",
+        )
+
+        with patch(
+            "scanner.satellite.utils.get_connect_data",
+            return_value=connect_data_return_value,
+        ):
+            host_params = SatelliteSixV1.prepare_hosts(self.api, chunk)
+            assert expected == host_params
 
     @pytest.mark.django_db
     def test_request_host_details_err(self):

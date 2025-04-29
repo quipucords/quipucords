@@ -30,14 +30,15 @@ def get_connect_data(scan_task):
     """Extract the connection information from the scan task.
 
     :param scan_task: The scan tasks
-    :returns: A tuple of (host, port, user, password)
+    :returns: A tuple of (host, port, user, password, proxy_url)
     """
     credential = get_credential(scan_task)
     user = credential.username
     password = decrypt_data_as_unicode(credential.password)
     host = scan_task.source.get_hosts()[0]
     port = scan_task.source.port
-    return (host, port, user, password)
+    proxy_url = scan_task.source.proxy_url
+    return (host, port, user, password, proxy_url)
 
 
 def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
@@ -64,7 +65,7 @@ def execute_request(  # noqa: PLR0913
     :param host_id: The identifier of a satellite host
     :param query_params: A dictionary to use for query_params in the url
     :param options: A dictionary containing the values for ssl_cert_verify,
-        host, port, user, and password.
+        host, port, user, password and proxy_url.
     :returns: The response object
     :throws: Timeout
     """
@@ -74,15 +75,21 @@ def execute_request(  # noqa: PLR0913
         port = options.get("port")
         user = options.get("user")
         password = options.get("password")
+        proxy_url = options.get("proxy_url")
     else:
         ssl_verify = scan_task.source.ssl_cert_verify
         if ssl_verify is None:
             ssl_verify = True
-        host, port, user, password = get_connect_data(scan_task)
+        host, port, user, password, proxy_url = get_connect_data(scan_task)
     url = construct_url(url, host, port, org_id, host_id)
 
     connect_timeout = settings.QUIPUCORDS_SSH_CONNECT_TIMEOUT
     inspect_timeout = settings.QUIPUCORDS_SSH_INSPECT_TIMEOUT
+
+    proxies = None
+    if proxy_url:
+        protocol = "https" if str(url).startswith("https") else "http"
+        proxies = {protocol: proxy_url}
 
     response = requests.get(
         url,
@@ -90,6 +97,7 @@ def execute_request(  # noqa: PLR0913
         timeout=(connect_timeout, inspect_timeout),
         params=query_params,
         verify=ssl_verify,
+        proxies=proxies,
     )
     return response, url
 

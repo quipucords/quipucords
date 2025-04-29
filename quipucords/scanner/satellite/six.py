@@ -335,7 +335,7 @@ def _request_host_details(  # noqa: PLR0913
     :param fields_url: The sat61 or sat62 fields url
     :param subs_url: The sat61 or sat62 subs url
     :param request_options: A dictionary containing host, port,
-        ssl_cert_verify, user, and password
+        ssl_cert_verify, user, password and proxy_url
     :returns: A dictionary containing the unique name for the host,
         the response & url for host_fields request, and the
         response & url for the host_subs request.
