@@ -17,7 +17,15 @@ class AnsibleControllerApi(Session):
 
     @classmethod
     def from_connection_info(  # noqa: PLR0913
-        cls, *, host, protocol, port, username, password, ssl_verify: bool = True
+        cls,
+        *,
+        host,
+        protocol,
+        port,
+        username,
+        password,
+        ssl_verify: bool = True,
+        proxy_url: str = None,
     ):
         """
         Initialize AnsibleController session.
@@ -28,10 +36,19 @@ class AnsibleControllerApi(Session):
         :param username: The username to use for connecting to the server.
         :param password: The password to use for connecting to the server.
         :param ssl_verify: Whether to verify the SSL certificate.
+        :param proxy_url: proxy URL in the format 'http(s)://host:port'.
         """
         base_uri = f"{protocol}://{host}:{port}"
         auth = HTTPBasicAuth(username=username, password=password)
-        return cls(base_url=base_uri, verify=ssl_verify, auth=auth)
+        session = cls(base_url=base_uri, verify=ssl_verify, auth=auth)
+
+        proxies = {}
+        if proxy_url:
+            proxies[protocol] = proxy_url
+
+        if proxies:
+            session.proxies.update(proxies)
+        return session
 
     def get_paginated_results(self, url, max_concurrency=1, **kwargs):
         """Get a generator with results from a paginated endpoint."""
