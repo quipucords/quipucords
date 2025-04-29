@@ -30,7 +30,7 @@ def test_rhacsapi_instantiation_with_connection_info():
     )
 
     assert api.base_url == "https://localhost:8443"
-    assert api.auth.auth_token == "YOUR_AUTH_TOKEN"
+    assert api.auth.auth_token == "test_token"
     assert isinstance(api.auth, HTTPBearerAuth)
     assert api.verify is False
     assert api.proxies == {"https": "http://proxy.example.com:8080"}
