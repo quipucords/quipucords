@@ -26,7 +26,14 @@ class RHACSApi(Session):
 
     @classmethod
     def from_connection_info(  # noqa: PLR0913
-        cls, *, host, protocol, port, auth_token, ssl_verify: bool = True
+        cls,
+        *,
+        host,
+        protocol,
+        port,
+        auth_token,
+        ssl_verify: bool = True,
+        proxy_url: str = None,
     ):
         """
         Initialize RHACS session.
@@ -36,7 +43,12 @@ class RHACSApi(Session):
         :param port: The port to use for connecting to the server.
         :param auth_token: The admin token to use for connecting to the server.
         :param ssl_verify: Whether to verify the SSL certificate.
+        :param proxy_url: proxy URL in the format 'http(s)://host:port'.
         """
         base_uri = f"{protocol}://{host}:{port}"
         auth = HTTPBearerAuth(auth_token=auth_token)
-        return cls(base_url=base_uri, verify=ssl_verify, auth=auth)
+        session = cls(base_url=base_uri, verify=ssl_verify, auth=auth)
+
+        if proxy_url:
+            session.proxies.update({protocol: proxy_url})
+        return session

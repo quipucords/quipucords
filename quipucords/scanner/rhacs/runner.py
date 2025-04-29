@@ -46,12 +46,14 @@ class RHACSTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         port = scan_task.source.port
         ssl_enabled, ssl_verify = scan_task.source.get_ssl_options()
         credential = scan_task.source.single_credential
+        proxy_url = scan_task.source.proxy_url
         return {
             "host": host,
             "auth_token": decrypt_data_as_unicode(credential.auth_token),
             "port": port,
             "protocol": "https" if ssl_enabled else "http",
             "ssl_verify": ssl_verify,
+            "proxy_url": proxy_url,
         }
 
     @classmethod
