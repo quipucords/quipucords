@@ -40,7 +40,11 @@ class TestSatelliteUtils:
         self.cred.save()
 
         self.source = Source(
-            name="source1", port=443, hosts=["1.2.3.4"], ssl_cert_verify=False
+            name="source1",
+            port=443,
+            hosts=["1.2.3.4"],
+            ssl_cert_verify=False,
+            proxy_url=None,
         )
         self.source.save()
         self.source.credentials.add(self.cred)
@@ -56,7 +60,7 @@ class TestSatelliteUtils:
     @pytest.mark.django_db
     def test_get_connect_data(self):
         """Test method to get connection data from task."""
-        host, port, user, password = get_connect_data(self.scan_task)
+        host, port, user, password, proxy_url = get_connect_data(self.scan_task)
         assert host == "1.2.3.4"
         assert port == 443
         assert user == "username"
@@ -151,3 +155,74 @@ class TestSatelliteUtils:
         assert expected_message in caplog.messages[0]
         self.scan_task.refresh_from_db()
         assert self.scan_task.systems_count == 2
+
+    @pytest.mark.django_db
+    def test_execute_request_with_proxy_https(self):
+        """Test that HTTPS proxy is passed to requests.get() when proxy_url is set."""
+        self.source.proxy_url = "https://proxy.example.com:8080"
+        self.source.save()
+
+        status_url = "https://{sat_host}:{port}/api/status"
+        expected_url = construct_url(status_url, "1.2.3.4")
+        expected_proxies = {"https": "https://proxy.example.com:8080"}
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"api_version": 2}
+
+            response, formatted_url = execute_request(self.scan_task, status_url)
+
+            assert formatted_url == expected_url
+            assert response.status_code == 200
+            assert response.json() == {"api_version": 2}
+            mock_get.assert_called_once()
+            _, kwargs = mock_get.call_args
+            assert kwargs["proxies"] == expected_proxies
+
+    @pytest.mark.django_db
+    def test_execute_request_with_proxy_http(self):
+        """Test that HTTP proxy is passed to requests.get() when URL is HTTP."""
+        self.source.proxy_url = "http://proxy.example.com:8080"
+        self.source.save()
+
+        status_url = "http://{sat_host}:{port}/api/status"
+        expected_url = construct_url(status_url, "1.2.3.4")
+        expected_proxies = {"http": "http://proxy.example.com:8080"}
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"api_version": 2}
+
+            response, formatted_url = execute_request(self.scan_task, status_url)
+
+            assert formatted_url == expected_url
+            assert response.status_code == 200
+            assert response.json() == {"api_version": 2}
+            mock_get.assert_called_once()
+            _, kwargs = mock_get.call_args
+            assert kwargs["proxies"] == expected_proxies
+
+    @pytest.mark.django_db
+    def test_execute_request_without_proxy(self):
+        """Test that no proxies are passed if proxy_url is not set."""
+        self.source.proxy_url = None
+        self.source.save()
+
+        status_url = "https://{sat_host}:{port}/api/status"
+        expected_url = construct_url(status_url, "1.2.3.4")
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"api_version": 2}
+
+            response, formatted_url = execute_request(self.scan_task, status_url)
+
+            assert formatted_url == expected_url
+            assert response.status_code == 200
+            assert response.json() == {"api_version": 2}
+            mock_get.assert_called_once()
+            _, kwargs = mock_get.call_args
+            assert kwargs.get("proxies") is None
