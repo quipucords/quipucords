@@ -8,6 +8,7 @@ from uuid import UUID
 
 import httpretty
 import pytest
+from kubernetes.client import Configuration as KubeConfig
 from kubernetes.dynamic.exceptions import ResourceNotFoundError
 from kubernetes.dynamic.resource import ResourceInstance
 
@@ -566,3 +567,41 @@ def test_unschedulable_logic(
     node = ocp_client._init_ocp_nodes(mocked_node)
     assert isinstance(node, OCPNode)
     assert node.unschedulable == expected_value
+
+
+def test_with_config_info_sets_proxy_when_provided(mocker):
+    """Ensure proxy is set on KubeConfig when proxy_url is provided."""
+    kube_config_mock = mocker.Mock(spec=KubeConfig)
+    _ = mocker.patch(  # noqa: F841
+        "scanner.openshift.api.KubeConfig", return_value=kube_config_mock
+    )
+    patched_api_client = mocker.patch("scanner.openshift.api.ApiClient")
+
+    client = OpenShiftApi.with_config_info(
+        host="HOST",
+        protocol="https",
+        port="443",
+        auth_token="TOKEN",
+        proxy_url="http://proxy.example.com:8080",
+    )
+
+    assert kube_config_mock.proxy == {"https": "http://proxy.example.com:8080"}
+    assert isinstance(client, OpenShiftApi)
+    patched_api_client.assert_called_once_with(configuration=kube_config_mock)
+
+
+def test_with_config_info_does_not_set_proxy_when_none(mocker):
+    """Ensure proxy is not set on KubeConfig when proxy_url is None."""
+    kube_config_mock = mocker.Mock(spec=KubeConfig)
+    _ = mocker.patch(  # noqa: F841
+        "scanner.openshift.api.KubeConfig", return_value=kube_config_mock
+    )
+    patched_api_client = mocker.patch("scanner.openshift.api.ApiClient")
+
+    client = OpenShiftApi.with_config_info(
+        host="HOST", protocol="https", port="443", auth_token="TOKEN", proxy_url=None
+    )
+
+    assert not hasattr(kube_config_mock, "proxy")
+    assert isinstance(client, OpenShiftApi)
+    patched_api_client.assert_called_once_with(configuration=kube_config_mock)
