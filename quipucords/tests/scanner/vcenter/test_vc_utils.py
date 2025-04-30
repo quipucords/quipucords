@@ -42,7 +42,14 @@ def create_scan_task(
 def test_vcenter_connect(disable_ssl, ssl_cert_verify):
     """Test the SmartConnect connection arguments."""
     scan_task = create_scan_task(disable_ssl, ssl_cert_verify)
-    expected_connect_kwargs = {"host": ANY, "user": ANY, "pwd": ANY, "port": ANY}
+    expected_connect_kwargs = {
+        "host": ANY,
+        "user": ANY,
+        "pwd": ANY,
+        "port": ANY,
+        "httpProxyHost": None,
+        "httpProxyPort": None,
+    }
     if disable_ssl:
         expected_connect_kwargs["disableSslCertValidation"] = True
     elif ssl_cert_verify is not None:
@@ -55,3 +62,40 @@ def test_vcenter_connect(disable_ssl, ssl_cert_verify):
         vcenter = vcenter_connect(scan_task)
         assert mock_vcenter == vcenter
         mock_smart_connect.assert_called_once_with(**expected_connect_kwargs)
+
+
+@pytest.mark.django_db
+def test_vcenter_connect_with_proxy():
+    """Test that proxy information is passed correctly to SmartConnect."""
+    scan_task = create_scan_task(source_disable_ssl=False, source_ssl_cert_verify=True)
+    scan_task.source.proxy_url = "http://proxy.example.com:8888"
+    scan_task.source.save()
+
+    mock_vcenter = Mock()
+    with patch(
+        "scanner.vcenter.utils.SmartConnect", return_value=mock_vcenter
+    ) as mock_connect:
+        vcenter = vcenter_connect(scan_task)
+        assert mock_vcenter == vcenter
+        mock_connect.assert_called_once()
+        kwargs = mock_connect.call_args.kwargs
+        assert kwargs["httpProxyHost"] == "proxy.example.com"
+        assert kwargs["httpProxyPort"] == 8888
+
+
+@pytest.mark.django_db
+def test_vcenter_connect_with_invalid_proxy_format():
+    """Test that invalid proxy format does not set proxy values."""
+    scan_task = create_scan_task(source_disable_ssl=False, source_ssl_cert_verify=True)
+    scan_task.source.proxy_url = "proxyexample"
+    scan_task.source.save()
+
+    mock_vcenter = Mock()
+    with patch(
+        "scanner.vcenter.utils.SmartConnect", return_value=mock_vcenter
+    ) as mock_connect:
+        vcenter = vcenter_connect(scan_task)
+        assert mock_vcenter == vcenter
+        kwargs = mock_connect.call_args.kwargs
+        assert kwargs["httpProxyHost"] is None
+        assert kwargs["httpProxyPort"] is None

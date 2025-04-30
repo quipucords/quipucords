@@ -2,6 +2,7 @@
 
 import atexit
 import ssl
+from urllib.parse import urlparse
 
 from pyVim.connect import Disconnect, SmartConnect
 from pyVmomi import vmodl
@@ -21,12 +22,26 @@ def vcenter_connect(scan_task):
     host = scan_task.source.get_hosts()[0]
     password = decrypt_data_as_unicode(credential.password)
     port = scan_task.source.port
+    proxy_url = scan_task.source.proxy_url
 
     disable_ssl = source.disable_ssl
     ssl_cert_verify = source.ssl_cert_verify
     ssl_protocol = source.get_ssl_protocol()
 
-    smart_connect_kwargs = {"host": host, "user": user, "pwd": password, "port": port}
+    proxy_host, proxy_port = None, None
+    if proxy_url:
+        parsed = urlparse(proxy_url)
+        proxy_host = parsed.hostname
+        proxy_port = parsed.port
+
+    smart_connect_kwargs = {
+        "host": host,
+        "user": user,
+        "pwd": password,
+        "port": port,
+        "httpProxyHost": proxy_host,
+        "httpProxyPort": proxy_port,
+    }
 
     if disable_ssl:
         smart_connect_kwargs["disableSslCertValidation"] = True
