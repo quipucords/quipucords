@@ -106,10 +106,18 @@ class OpenShiftApi:
 
     @classmethod
     def with_config_info(
-        cls, *, host, protocol, port, ssl_verify: bool = True, **kwargs
+        cls,
+        *,
+        host,
+        protocol,
+        port,
+        ssl_verify: bool = True,
+        proxy_url: str = None,
+        **kwargs,
     ):
         """Initialize OpenShiftApi without providing a KubeConfig object."""
         host_uri = f"{protocol}://{host}:{port}"
+
         if kwargs.get("auth_token"):
             kube_config = cls._init_kube_config(
                 host_uri, ssl_verify=ssl_verify, **kwargs
@@ -118,6 +126,8 @@ class OpenShiftApi:
             kube_config = cls._init_ocp_login_config(
                 host_uri, ssl_verify=ssl_verify, **kwargs
             )
+        if proxy_url:
+            kube_config.proxy = {protocol: proxy_url}
         return cls(configuration=kube_config)
 
     @classmethod
