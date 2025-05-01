@@ -2,6 +2,7 @@
 
 import ipaddress
 import re
+from urllib.parse import urlparse
 
 from ansible.errors import AnsibleError
 from ansible.plugins.inventory import expand_hostname_range
@@ -28,6 +29,9 @@ from api.common.util import check_for_existing_name
 from api.models import Credential, Source
 from constants import DataSources
 from utils import get_from_object_or_dict
+
+MAX_PORT = 65536
+MIN_PORT = 0
 
 
 class CredentialsField(PrimaryKeyRelatedField):
@@ -403,10 +407,14 @@ class SourceSerializerBase(ModelSerializer):
 
     @staticmethod
     def validate_port(port):
-        """Validate the port."""
-        if not port:
-            pass
-        elif port < 0 or port > 65536:  # noqa: PLR2004
+        """Validate the port is either None or an integer within the allowed range."""
+        if port is None:
+            return port
+
+        if not isinstance(port, int):
+            raise ValidationError(_(messages.INVALID_PORT))
+
+        if port < MIN_PORT or port > MAX_PORT:
             raise ValidationError(_(messages.NET_INVALID_PORT))
 
         return port
@@ -512,6 +520,7 @@ class SourceSerializerV2(SourceSerializerBase):
     ssl_cert_verify = BooleanField(allow_null=True, required=False)
     disable_ssl = BooleanField(allow_null=True, required=False)
     use_paramiko = BooleanField(allow_null=True, required=False)
+    proxy_url = CharField(required=False, allow_null=True, max_length=255)
 
     # Dropping options in preference for showing the direct ssl option attributes.
     class Meta:
@@ -529,9 +538,32 @@ class SourceSerializerV2(SourceSerializerBase):
             "ssl_cert_verify",
             "disable_ssl",
             "use_paramiko",
+            "proxy_url",
             "credentials",
             "most_recent_connect_scan",
         )
+
+    def validate_proxy_url(self, value):
+        """Validate that proxy URL is in the 'http(s)://host:port' format."""
+        if not value:
+            return value
+
+        self.is_valid_proxy_url_format(value)
+        return value
+
+    @staticmethod
+    def is_valid_proxy_url_format(proxy_url):
+        """Check that the proxy URL is in 'http(s)://host:port' format."""
+        parsed = urlparse(proxy_url)
+
+        if parsed.scheme not in ("http", "https"):
+            raise ValidationError(_(messages.SOURCE_INVALID_SCHEMA_PROXY_URL))
+        if not parsed.hostname:
+            raise ValidationError(_(messages.SOURCE_INVALID_HOST_PROXY_URL))
+        if not re.match(r"^[a-zA-Z0-9.-]+$", parsed.hostname):
+            raise ValidationError(_(messages.SOURCE_INVALID_HOST_PROXY_URL))
+        if not parsed.port or not (MIN_PORT < parsed.port < MAX_PORT):
+            raise ValidationError(_(messages.SOURCE_INVALID_PORT_PROXY_URL))
 
     @transaction.atomic
     def create(self, validated_data):

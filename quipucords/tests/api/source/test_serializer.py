@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 from api import messages
 from api.models import Credential, Source
-from api.source.serializer import SourceSerializer
+from api.source.serializer import SourceSerializer, SourceSerializerV2
 from constants import DataSources
 
 
@@ -352,3 +352,107 @@ def test_openshift_source_update_options(openshift_source, openshift_cred_id):
     assert openshift_source.name == "source_updated"
     assert openshift_source.source_type == DataSources.OPENSHIFT
     assert not openshift_source.ssl_cert_verify
+
+
+@pytest.mark.parametrize(
+    "proxy_url",
+    [
+        "http://proxy.example.com:8080",
+        "https://localhost:3128",
+        "http://127.0.0.1:8000",
+    ],
+)
+def test_valid_proxy_url_formats(proxy_url):
+    """Test valid proxy URLs with proper schema and port."""
+    SourceSerializerV2.is_valid_proxy_url_format(proxy_url)
+
+
+@pytest.mark.parametrize(
+    "proxy_url",
+    [
+        pytest.param("proxy:port", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("", marks=pytest.mark.xfail(strict=True)),
+        pytest.param(None, marks=pytest.mark.xfail(strict=True)),
+        pytest.param("proxy.example.com:8080", marks=pytest.mark.xfail(strict=True)),
+        pytest.param(
+            "ftp://proxy.example.com:21", marks=pytest.mark.xfail(strict=True)
+        ),
+        pytest.param("proxy.example.com", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("8080", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("proxy@:8080", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("http://:8080", marks=pytest.mark.xfail(strict=True)),
+    ],
+)
+def test_invalid_proxy_url_formats(proxy_url):
+    """Test proxy URLs expected to fail validation."""
+    with pytest.raises(ValidationError) as exc_info:
+        SourceSerializerV2.is_valid_proxy_url_format(proxy_url)
+    assert "Enter a valid proxy URL" in str(exc_info.value.detail[0])
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "proxy_url",
+    [
+        "http://proxy.example.com:8080",
+        "https://localhost:3128",
+        "http://127.0.0.1:8000",
+        "http://192.168.0.1:8080",
+        "https://sub.domain.example.com:9999",
+        None,
+        pytest.param("", marks=pytest.mark.xfail(strict=True)),
+        pytest.param(
+            "ftp://proxy.example.com:21", marks=pytest.mark.xfail(strict=True)
+        ),
+        pytest.param("proxy:port", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("proxy.example.com", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("8080", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("proxy@:8080", marks=pytest.mark.xfail(strict=True)),
+        pytest.param("http://:8080", marks=pytest.mark.xfail(strict=True)),
+    ],
+)
+def test_validate_proxy_url(openshift_cred_id, proxy_url):
+    """Test proxy URL validation considering format."""
+    data = {
+        "name": "source",
+        "source_type": DataSources.OPENSHIFT,
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "proxy_url": proxy_url,
+    }
+
+    serializer = SourceSerializerV2(data=data)
+    assert serializer.is_valid(), serializer.errors
+    if proxy_url:
+        assert serializer.validated_data["proxy_url"] == proxy_url
+
+
+@pytest.mark.parametrize("port", [None, 0, 65536, 8080])
+def test_validate_port_valid_values(port):
+    """Test that valid ports pass validation."""
+    assert SourceSerializer.validate_port(port) == port
+
+
+@pytest.mark.parametrize(
+    "port,expected_msg",
+    [
+        pytest.param(
+            -1, messages.NET_INVALID_PORT, marks=pytest.mark.xfail(strict=True)
+        ),
+        pytest.param(
+            65537, messages.NET_INVALID_PORT, marks=pytest.mark.xfail(strict=True)
+        ),
+        pytest.param(
+            "8080", messages.INVALID_PORT, marks=pytest.mark.xfail(strict=True)
+        ),
+        pytest.param("", messages.INVALID_PORT, marks=pytest.mark.xfail(strict=True)),
+        pytest.param([], messages.INVALID_PORT, marks=pytest.mark.xfail(strict=True)),
+        pytest.param({}, messages.INVALID_PORT, marks=pytest.mark.xfail(strict=True)),
+    ],
+)
+def test_validate_port_invalid_values(port, expected_msg):
+    """Test that invalid ports raise ValidationError with the correct message."""
+    with pytest.raises(ValidationError) as exc_info:
+        SourceSerializer.validate_port(port)
+
+    assert str(exc_info.value.detail[0]) == expected_msg
