@@ -54,6 +54,7 @@ class Source(BaseModel):
     most_recent_connect_scan = models.ForeignKey(
         "api.ScanJob", null=True, on_delete=models.SET_NULL, related_name="+"
     )
+    proxy_url = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         """Get a rudimentary string representation."""

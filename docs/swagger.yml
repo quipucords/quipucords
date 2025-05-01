@@ -2146,6 +2146,12 @@ definitions:
           type: "string"
           example: "192.168.0.1"
         description: "The host(s) to exclude from the scan. Can be an IP addr or IP ranges for network. The exclude_hosts option is not valid for vcenter or satellite sources."
+      proxy_url:
+        type: "string"
+        description: >
+          Proxy server URL for routing API requests. Must include the protocol and port.
+          Format: http(s)://host:port
+        example: "http://proxy.example.com:8080"
   SourceDeletionError:
     allOf:
       - $ref: "#/definitions/DeletionError"

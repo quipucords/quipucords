@@ -55,7 +55,11 @@ SOURCE_MIN_CREDS = "Source must have at least one set of credentials."
 SOURCE_DELETE_NOT_VALID_W_SCANS = (
     "Source cannot be deleted because it is used by 1 or more scans."
 )
-
+SOURCE_INVALID_SCHEMA_PROXY_URL = (
+    "Enter a valid proxy URL including the protocol, such as 'http://host:port'."
+)
+SOURCE_INVALID_HOST_PROXY_URL = "Enter a valid proxy URL with a valid host."
+SOURCE_INVALID_PORT_PROXY_URL = "Port must be in range [1, 65535]."
 NET_INVALID_RANGE_FORMAT = "%s is not a valid IP range format."
 NET_INVALID_RANGE_CIDR = "%s is not a valid IP or CIDR pattern"
 NET_INVALID_HOST = "%s is invalid host"
@@ -72,6 +76,7 @@ NET_CIDR_RANGE = (
     " %(octet)s is not in the range [0,255]"
 )
 NET_INVALID_PORT = "Source of type network must have ssh port in range [0, 65535]"
+INVALID_PORT = "Port must be an integer."
 NET_HC_DO_NOT_EXIST = "Host credential with id=%d could not be found in database."
 NET_SSL_OPTIONS_NOT_ALLOWED = "Invalid SSL options for network source: %(options)s"
 INVALID_OPTIONS = "Invalid options for '%(source_type)s': %(options)s."
