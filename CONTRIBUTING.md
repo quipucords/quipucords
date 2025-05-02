@@ -4,37 +4,44 @@ Bug reports and code and documentation patches are welcome. You can
 help this project also by using the development version of quipucords
 and by reporting any bugs you might encounter.
 
-## Reporting bugs
-It's important that you provide the full explanation of the failure along
-with recreation steps, environment information, and any associated logs
+## Reporting issues
 
+Development of quipucords feature requests and bugs are handled under the `DISCOVERY` project in Red Hat's JIRA instance. You may find current issues at:
 
-## Contributing Code and Docs
-Before working on a new feature or a bug, please browse [existing issues](https://github.com/quipucords/quipucords/issues?state=open)
-to see whether it has been previously discussed. If the change in question
-is a bigger one, it's always good to discuss before you start working on
-it.
+https://issues.redhat.com/projects/DISCOVERY/issues
 
+If you have a bug to report, when submitting an issue, provide the following information:
 
-### Creating Development Environment
+* Provide a detailed description of the running environment including software and OS versions.
+* List the exact steps you can take to reproduce and observe the bug.
+* Describe what you observe to be the bug at that point.
+* Describe what you expected to happen instead.
+* Attach all logs from your running instance to the issue.
+    * However, you should review logs before attaching and be careful not to publicly post any private or sensitive information.
+* Attach any relevant report tar.gz files to the issue.
+* Attach any relevant screenshots to the issue.
 
-Go to https://github.com/quipucords/quipucords and fork the project repository. Each
-branch should correspond to an associated issue opened on the main repository
-(e.g. `issues/5` --> https://github.com/quipucords/quipucords/issues/5).
+Failure to include detailed descriptions and logs may result in the development team closing the issue with no further action.
 
+## Development environment
 
-```
-git clone https://github.com/quipucords/quipucords
-cd quipucords
-git checkout -b issues/my_issue_#
-poetry install
-```
+Follow the instructions in [README](README.md) to set up your local development environment.
 
-### Making Changes
-Please make sure your changes conform to [Style Guide for Python Code](http://python.org/dev/peps/pep-0008/) (PEP8).
-You can run the lint command on your branch to check compliance.
+## Submitting code
+
+Before opening a pull request, your work must be committed in a new branch off of `main`, and your branch should have a unique, short, and relevant name for the changes you propose.
+
+All changes should conform to [PEP8 Style Guide for Python Code](http://python.org/dev/peps/pep-0008/), and all unit tests must pass. Run the following make targets locally on your branch to verify:
+
 ```
 make lint
+make test
+```
+
+To check coverage of unit tests, run:
+
+```
+make test-coverage
 ```
 
 ### Debugging
@@ -68,28 +75,10 @@ For VSCode this can be achieved adding the following to `.vscode/launch.json`
 }
 ```
 
-And since debugpy implements microsoft Debugger adapter protocol (DAP), a similar 
+And since debugpy implements microsoft Debugger adapter protocol (DAP), a similar
 config can be done on other editors that support it:
 
 https://microsoft.github.io/debug-adapter-protocol/implementors/tools/
-
-### Testing
-Before opening a pull requests, please make sure the tests pass
-in a Python 3.9 environment.
-You should also add tests for any new features and bug fixes.
-
-quipucords uses [pytest](http://pytest.org/) for testing.
-
-
-### Running Tests
-Run all tests on the current Python interpreter
-```
-make test
-```
-Run all tests on the current Python with coverage
-```
-make test-coverage
-```
 
 ### Update dependencies
 There's a dedicated make target for easily updating ALL lockfiles and base image digests on the Containerfile
