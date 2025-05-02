@@ -19,15 +19,16 @@ This *README* file explains how you can run, develop, and test quipucords on you
 - [Contributing](#contributing)
 - [Copyright and License](#copyright)
 
-## Requirements and Assumptions
-Before installing quipucords on a system, review the following guidelines about installing and running quipucords:
+## Usage Requirements and Assumptions
 
- * quipucords is written to run as a container image.
- * The system that quipucords is installed on must have access to the systems to be discovered and inspected.
- * For network-type scans:
-   * The target systems must be running SSH.
-   * The user account that quipucords uses for the SSH connection into the target systems must have adequate permissions to run commands and read certain restricted files, such as `sudo` privilege escalation required for the `systemctl` command.
-   * The user account that is used as a credential for a scan requires the `bash` shell. The shell *cannot* be `/sbin/nologin`, `/bin/false`, or other programs.
+Before installing quipucords, please review the following general design principles and usage guidelines:
+
+ * quipucords runs in Podman containers and relies on other local containers to provide supporting services such as PostgreSQL and Redis.
+ * The system hosting quipucords must have direct network access to any target systems you intend to inspect.
+ * For network range scans spefically:
+   * Target systems must be running SSH and allow incoming connections from the quipucords host.
+   * The SSH user account on the target systems should have sufficient permissions to run commands and read system files, including (optionally) allowing `sudo` privilege escalation for commands like `systemctl`.
+   * The SSH user account must use the default `bash` shell. The shell *cannot* be `/sbin/nologin`, `/bin/false`, or other non-interactive programs.
 
 ## Dependencies
 
