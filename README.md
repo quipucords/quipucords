@@ -236,15 +236,12 @@ For example:
 uv run pytest quipucords/tests/utils/test_datetime.py::test_average_date_very_large_list_delta
 ```
 
-# <a name="authors"></a> Authors
-Authorship and current maintainer information can be found in [AUTHORS](AUTHORS.md).
+# Contributing
 
-
-# <a name="contributing"></a> Contributing
 See the [CONTRIBUTING](CONTRIBUTING.md) guide for information about contributing to the project.
 
+# Copyright and License
 
-# <a name="copyright"></a> Copyright and License
 Copyright 2017-2025, Red Hat, Inc.
 
 quipucords is released under the [GNU Public License version 3](LICENSE).
