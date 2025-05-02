@@ -5,9 +5,12 @@
 
 
 # Overview
-quipucords - Tool for discovery, inspection, collection, deduplication, and reporting on an IT environment.  quipucords is a *Python* based information gathering tool. quipucords provides a server base infrastructure for process tasks that discover and inspect remote systems by utilizing *Ansible* while additionally looking to integrate and extract data from systems management solutions. quipucords collects basic information about the operating system, hardware, and application data for each system. quipucords is intended to help simplify some of the basic system administrator tasks that are a part of the larger goal of managing licensing renewals and new deployments.
 
-This *README* file contains information about the installation and development of quipucords, as well as instructions about where to find basic usage, known issue, and best practices information.
+**quipucords** is a discovery and reporting tool that scans systems across one or more networks to identify Red Hat products in an IT environment. It inspects systems using multiple methods, including direct SSH connections and APIs from platforms such as OpenShift, Red Hat Satellite, Ansible Automation Platform, and VMware vCenter.
+
+quipucords collects and deduplicates information about operating systems, hardware, and software configurations, then generates detailed, downloadable reports. These reports help streamline routine system administration tasks related to license management, compliance tracking, and infrastructure planning.
+
+This *README* file explains how you can run, develop, and test quipucords on your local development environment.
 
 - [Installation](#installation)
 - [Development](#development)
@@ -133,7 +136,7 @@ To start the server with API functionality only:
 make server-static
 make serve
 ```
-This will make the API accessible at http://127.0.0.1:8000. 
+This will make the API accessible at http://127.0.0.1:8000.
 
 To use the command line interface, you can configure access to the server by entering `qpc server config`. You can then log in by using `qpc server login`.
 
