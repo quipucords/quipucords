@@ -173,6 +173,11 @@ setup-postgres:
 	sleep 3
 	podman exec quipucords-dev-db psql -c 'alter role qpc with CREATEDB'
 
+setup-redis:
+	podman run --name quipucords-dev-redis --replace \
+		-p 6379:6379 \
+		-d registry.redhat.io/rhel9/redis-7:latest
+
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
