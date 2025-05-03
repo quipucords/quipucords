@@ -74,7 +74,7 @@ djangorestframework==3.16.0 ; (implementation_name == 'cpython' and sys_platform
     #   quipucords
 drf-spectacular==0.28.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-drf-spectacular-sidecar==2025.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+drf-spectacular-sidecar==2025.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 durationpy==0.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
