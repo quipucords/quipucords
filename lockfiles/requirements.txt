@@ -33,7 +33,7 @@ cffi==1.17.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') o
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+charset-normalizer==3.4.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
 click==8.1.8 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
