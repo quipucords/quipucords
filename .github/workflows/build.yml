@@ -34,13 +34,13 @@ jobs:
         run: echo "RELEASE_TAG_AMD64=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*}-amd64 || echo)" >> "$GITHUB_ENV"
 
       - name: Build Amd64 quipucords image
-        # Tags: pr-#-amd64, main-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
+        # Tags: pr-#-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
         id: build-image-amd64
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
           archs: amd64
-          tags: ${{ env.STABLE_TAG }}-amd64 ${{ env.STABLE_TAG == 'main' && 'latest-amd64' || '' }} ${{ contains( env.RELEASE_TAG_AMD64 , '.' ) && env.RELEASE_TAG_AMD64 || '' }}
+          tags: ${{ env.STABLE_TAG != 'main' && format('{0}-amd64', env.STABLE_TAG) || 'latest-amd64' }} ${{ contains( env.RELEASE_TAG_AMD64 , '.' ) && env.RELEASE_TAG_AMD64 || '' }}
           containerfiles: |
             ./Containerfile
           labels: |
@@ -48,7 +48,7 @@ jobs:
             quipucords.backend.git_sha=${{ github.sha }}
 
       - name: Push Amd64 To quay.io
-        # Tags: pr-#-amd64, main-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
+        # Tags: pr-#-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.IMAGE_NAME }}
@@ -72,13 +72,13 @@ jobs:
         run: echo "RELEASE_TAG_ARM64=$([[ ${GITHUB_REF_NAME} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo ${GITHUB_REF_NAME%.[0-9]*}-arm64 || echo)" >> "$GITHUB_ENV"
 
       - name: Build Arm64 quipucords image
-        # Tags: pr-#-arm64, main-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
+        # Tags: pr-#-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
         id: build-image-arm64
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
           archs: arm64
-          tags: ${{ env.STABLE_TAG }}-arm64 ${{ env.STABLE_TAG == 'main' && 'latest-arm64' || '' }} ${{ contains( env.RELEASE_TAG_ARM64 , '.' ) && env.RELEASE_TAG_ARM64 || '' }}
+          tags: ${{ env.STABLE_TAG != 'main' && format('{0}-arm64', env.STABLE_TAG) || 'latest-arm64' }} ${{ contains( env.RELEASE_TAG_ARM64 , '.' ) && env.RELEASE_TAG_ARM64 || '' }}
           containerfiles: |
             ./Containerfile
           labels: |
@@ -86,7 +86,7 @@ jobs:
             quipucords.backend.git_sha=${{ github.sha }}
 
       - name: Push Arm64 To quay.io
-        # Tags: pr-#-arm64, main-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
+        # Tags: pr-#-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.IMAGE_NAME }}
