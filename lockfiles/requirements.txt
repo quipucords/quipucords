@@ -33,7 +33,7 @@ cffi==1.17.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') o
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+charset-normalizer==3.4.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
 click==8.1.8 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
@@ -47,11 +47,11 @@ click-plugins==1.1.1 ; (implementation_name == 'cpython' and sys_platform == 'da
     # via celery
 click-repl==0.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
-cryptography==44.0.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+cryptography==44.0.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   ansible-core
     #   paramiko
-django==4.2.20 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django==4.2.21 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
     #   django-cors-headers
@@ -74,13 +74,13 @@ djangorestframework==3.16.0 ; (implementation_name == 'cpython' and sys_platform
     #   quipucords
 drf-spectacular==0.28.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-drf-spectacular-sidecar==2025.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+drf-spectacular-sidecar==2025.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 durationpy==0.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
 fqdn==1.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-google-auth==2.39.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+google-auth==2.40.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
 gunicorn==23.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -125,9 +125,9 @@ pexpect==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     #   quipucords
 prompt-toolkit==3.0.51 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via click-repl
-psycopg==3.2.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+psycopg==3.2.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-psycopg-c==3.2.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+psycopg-c==3.2.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via psycopg
 ptyprocess==0.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via pexpect
@@ -141,6 +141,8 @@ pycparser==2.22 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via cffi
 pydantic==1.10.22 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
+pyjwt==2.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+    # via redis
 pynacl==1.5.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via paramiko
 python-daemon==3.1.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -160,7 +162,7 @@ pyyaml==6.0.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     #   drf-spectacular
     #   kubernetes
     #   quipucords
-redis==5.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+redis==5.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
 referencing==0.36.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
