@@ -184,9 +184,9 @@ artifacts:
 - download_url: https://crates.io/api/v1/crates/openssl-macros/0.1.1/download
   checksum: sha256:a948666b637a0f465e8564c73e89d4dde00d72d4d473cc972f390fc3dcee7d9c
   filename: openssl-macros-0.1.1.crate
-- download_url: https://crates.io/api/v1/crates/openssl-sys/0.9.104/download
-  checksum: sha256:45abf306cbf99debc8195b66b7346498d7b10c210de50418b5ccd7ceba08c741
-  filename: openssl-sys-0.9.104.crate
+- download_url: https://crates.io/api/v1/crates/openssl-sys/0.9.108/download
+  checksum: sha256:e145e1651e858e820e4860f7b9c5e169bc1d8ce1c86043be79fa7b7634821847
+  filename: openssl-sys-0.9.108.crate
 - download_url: https://crates.io/api/v1/crates/pem/3.0.4/download
   checksum: sha256:8e459365e590736a54c3fa561947c84837534b8e9af6fc5bf781307e82658fae
   filename: pem-3.0.4.crate
