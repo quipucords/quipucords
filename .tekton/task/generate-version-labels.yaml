@@ -37,7 +37,7 @@ spec:
       workingDir: /var/workdir/source
       script: |
         echo "Extracting full version (X.Y.Z) from pyproject.toml"
-        VERSION=$(yq -r '.tool.poetry.version' pyproject.toml)
+        VERSION=$(yq -r '.project.version' pyproject.toml)
         echo "version=${VERSION}"
 
         # fail if VERSION doesn't conform to the expected format
@@ -47,7 +47,7 @@ spec:
         fi
 
         echo "Computing minor version (X.Y only)"
-        VERSION_MINOR=$(yq -r '.tool.poetry.version | split(".").[:2] | join(".")' pyproject.toml)
+        VERSION_MINOR=$(yq -r '.project.version | split(".").[:2] | join(".")' pyproject.toml)
         echo "version_minor=${VERSION_MINOR}"
 
         # fail if VERSION_MINOR doesn't conform to the expected format
