@@ -40,9 +40,21 @@ spec:
         VERSION=$(yq -r '.tool.poetry.version' pyproject.toml)
         echo "version=${VERSION}"
 
+        # fail if VERSION doesn't conform to the expected format
+        if [[ -z "${VERSION}" || ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "version=${VERSION} does not match the required pattern."
+          exit 1
+        fi
+
         echo "Computing minor version (X.Y only)"
         VERSION_MINOR=$(yq -r '.tool.poetry.version | split(".").[:2] | join(".")' pyproject.toml)
         echo "version_minor=${VERSION_MINOR}"
+
+        # fail if VERSION_MINOR doesn't conform to the expected format
+        if [[ -z "${VERSION_MINOR}" || ! "${VERSION_MINOR}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+          echo "version_minor=${VERSION_MINOR} does not match the required pattern."
+          exit 1
+        fi
 
         echo "Writing results..."
         # version and version_minor are the labels expected in downstream RPA configuration
