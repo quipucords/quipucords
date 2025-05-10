@@ -12,7 +12,7 @@ cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") o
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.0.12
+cython==3.1.0
     # via
     #   pydantic
     #   pyyaml
