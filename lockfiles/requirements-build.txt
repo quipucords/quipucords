@@ -55,7 +55,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.8.3
+maturin==1.8.4
     # via
     #   cryptography
     #   rpds-py
