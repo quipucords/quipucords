@@ -162,7 +162,7 @@ pyyaml==6.0.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     #   drf-spectacular
     #   kubernetes
     #   quipucords
-redis==5.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+redis==6.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
 referencing==0.36.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
