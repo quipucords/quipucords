@@ -104,7 +104,7 @@ lockfile==0.12.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     # via python-daemon
 markupsafe==3.0.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via jinja2
-more-itertools==9.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+more-itertools==10.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 oauthlib==3.2.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
