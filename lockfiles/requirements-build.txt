@@ -98,7 +98,7 @@ setuptools-scm==8.3.1
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.5.7.19
+trove-classifiers==2025.5.9.12
     # via hatchling
 types-psutil==7.0.0.20250401
     # via mypy
