@@ -12,7 +12,7 @@ cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") o
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.0.12
+cython==3.1.0
     # via
     #   pydantic
     #   pyyaml
@@ -55,7 +55,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.8.3
+maturin==1.8.4
     # via
     #   cryptography
     #   rpds-py
@@ -98,11 +98,11 @@ setuptools-scm==8.3.1
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.5.7.19
+trove-classifiers==2025.5.9.12
     # via hatchling
 types-psutil==7.0.0.20250401
     # via mypy
-types-setuptools==80.3.0.20250505
+types-setuptools==80.4.0.20250511
     # via mypy
 typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
@@ -115,7 +115,6 @@ wheel==0.45.1
     #   cachetools
     #   click-repl
     #   django-axes
-    #   maturin
     #   psycopg
     #   psycopg-c
     #   pynacl
@@ -133,7 +132,7 @@ setuptools==70.0.0
     #   setuptools-scm
 setuptools==76.0.0
     # via ansible-core
-setuptools==80.3.1
+setuptools==80.4.0
     # via
     #   ansible
     #   bcrypt
