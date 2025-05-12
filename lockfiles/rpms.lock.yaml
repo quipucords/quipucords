@@ -18,13 +18,13 @@ arches:
     name: cpp
     evr: 11.5.0-5.el9_5
     sourcerpm: gcc-11.5.0-5.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/e/emacs-filesystem-27.2-11.el9_5.1.noarch.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/e/emacs-filesystem-27.2-11.el9_5.2.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 9756
-    checksum: sha256:0c0a41c8f61f7509326ccba340211fcd5638397df397d942fb486f1c37966d13
+    size: 8893
+    checksum: sha256:5c52135ae0f4ca0c46188cbb635a4d455c7648ccea179ce7a1f9e3c2be100302
     name: emacs-filesystem
-    evr: 1:27.2-11.el9_5.1
-    sourcerpm: emacs-27.2-11.el9_5.1.src.rpm
+    evr: 1:27.2-11.el9_5.2
+    sourcerpm: emacs-27.2-11.el9_5.2.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/gcc-11.5.0-5.el9_5.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 31300907
@@ -1072,13 +1072,13 @@ arches:
     name: cpp
     evr: 11.5.0-5.el9_5
     sourcerpm: gcc-11.5.0-5.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/e/emacs-filesystem-27.2-11.el9_5.1.noarch.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/e/emacs-filesystem-27.2-11.el9_5.2.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 9756
-    checksum: sha256:0c0a41c8f61f7509326ccba340211fcd5638397df397d942fb486f1c37966d13
+    size: 8893
+    checksum: sha256:5c52135ae0f4ca0c46188cbb635a4d455c7648ccea179ce7a1f9e3c2be100302
     name: emacs-filesystem
-    evr: 1:27.2-11.el9_5.1
-    sourcerpm: emacs-27.2-11.el9_5.1.src.rpm
+    evr: 1:27.2-11.el9_5.2
+    sourcerpm: emacs-27.2-11.el9_5.2.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/gcc-11.5.0-5.el9_5.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 34006000
