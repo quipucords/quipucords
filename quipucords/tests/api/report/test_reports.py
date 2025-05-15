@@ -81,7 +81,8 @@ def test_report_without_logs(client_logged_in, caplog):
     assert response.ok, response.text
     assert f"No logs were found for report_id={report_id}" in caplog.messages
     expected_files = {
-        f"report_id_{report_id}/{fname}" for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES
+        f"report_id_{report_id}/{fname.format(report_id=report_id)}"
+        for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
         assert set(tarball.getnames()) == expected_files
@@ -104,12 +105,12 @@ def deployment_with_logs(settings, faker):
 @pytest.mark.django_db
 def test_report_with_logs(client_logged_in, deployment_with_logs):
     """Test if scan job logs are included in tarball when present."""
-    report = deployment_with_logs.report
-    scan_job_id = report.scanjob.id
-    response = client_logged_in.get(reverse("v1:reports-detail", args=(report.id,)))
+    scan_job_id = deployment_with_logs.report.scanjob.id
+    report_id = deployment_with_logs.report.id
+    response = client_logged_in.get(reverse("v1:reports-detail", args=(report_id,)))
     assert response.ok, response.text
     expected_files = {
-        f"report_id_{report.id}/{fname}"
+        f"report_id_{report_id}/{fname.format(report_id=report_id)}"
         for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
             {f"scan-job-{scan_job_id}-test.txt"}
         )
@@ -122,12 +123,14 @@ def test_report_with_logs(client_logged_in, deployment_with_logs):
 def test_report_tarball_sha256sum(client_logged_in, deployment_with_logs):
     """Verify SHA256SUM files and digests are correct."""
     deployments_report = deployment_with_logs
-    response = client_logged_in.get(
-        reverse("v1:reports-detail", args=(deployments_report.report.id,))
-    )
+    report_id = deployments_report.report.id
+    response = client_logged_in.get(reverse("v1:reports-detail", args=(report_id,)))
     assert response.ok, response.text
     files_contents = extract_files_from_tarball(response.content)
-    expected_filenames = TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
+    report_filenames = set(
+        (name.format(report_id=report_id) for name in TARBALL_ALWAYS_EXPECTED_FILENAMES)
+    )
+    expected_filenames = report_filenames.union(
         {f"scan-job-{deployments_report.report.scanjob.id}-test.txt"}
     )
     assert expected_filenames == set(files_contents.keys()), (
@@ -158,17 +161,20 @@ def test_report_tarball_details_json(
     deployments_report = deployment_with_logs
     report = deployments_report.report
     tarball_response = client_logged_in.get(
-        reverse("v1:reports-detail", args=(deployments_report.report.id,))
+        reverse("v1:reports-detail", args=(report.id,))
     )
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_files_from_tarball(tarball_response.content)
-    assert FILENAME_DETAILS_JSON in files_contents
-    tarball_details_json = json.loads(files_contents[FILENAME_DETAILS_JSON].decode())
+    expected_details_json_filename = FILENAME_DETAILS_JSON.format(report_id=report.id)
+    assert expected_details_json_filename in files_contents
+    tarball_details_json = json.loads(
+        files_contents[expected_details_json_filename].decode()
+    )
 
     # Compare tarball details.json contents with the standalone API's response.
     api_details_response = client_logged_in.get(
-        reverse("v1:reports-details", args=(deployments_report.report.id,)),
+        reverse("v1:reports-details", args=(report.id,)),
         headers={"Accept": "application/json"},
     )
     assert api_details_response.ok, api_details_response.text
@@ -194,15 +200,19 @@ def test_report_tarball_deployments_json(
 ):
     """Test report tarball contains expected deployments.json."""
     deployments_report = deployment_with_logs
+    report_id = deployments_report.report.id
     tarball_response = client_logged_in.get(
-        reverse("v1:reports-detail", args=(deployments_report.report.id,))
+        reverse("v1:reports-detail", args=(report_id,))
     )
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_files_from_tarball(tarball_response.content)
-    assert FILENAME_DEPLOYMENTS_JSON in files_contents
+    expected_deployments_json_filename = FILENAME_DEPLOYMENTS_JSON.format(
+        report_id=report_id
+    )
+    assert expected_deployments_json_filename in files_contents
     tarball_deployments_json = json.loads(
-        files_contents[FILENAME_DEPLOYMENTS_JSON].decode()
+        files_contents[expected_deployments_json_filename].decode()
     )
 
     # Compare tarball details.json contents with our model serialized.
@@ -211,7 +221,7 @@ def test_report_tarball_deployments_json(
 
     # Compare tarball deployments.json contents with the standalone API's response.
     api_deployments_response = client_logged_in.get(
-        reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
+        reverse("v1:reports-deployments", args=(report_id,)),
         headers={"Accept": "application/json"},
     )
     assert api_deployments_response.ok, api_deployments_response.text
@@ -219,7 +229,7 @@ def test_report_tarball_deployments_json(
     assert tarball_deployments_json == api_deployments_json
 
     # Sanity-check the basic structure of the tarball deployments.json directly.
-    assert tarball_deployments_json["report_id"] == deployments_report.report.id
+    assert tarball_deployments_json["report_id"] == report_id
     assert tarball_deployments_json["report_type"] == REPORT_TYPE_DEPLOYMENT
 
 
@@ -227,18 +237,20 @@ def test_report_tarball_deployments_json(
 def test_report_details_csv(client_logged_in, deployment_with_logs: DeploymentsReport):
     """Test report tarball contains expected details.csv."""
     deployments_report = deployment_with_logs
+    report_id = deployments_report.report.id
     tarball_response = client_logged_in.get(
-        reverse("v1:reports-detail", args=(deployments_report.report.id,))
+        reverse("v1:reports-detail", args=(report_id,))
     )
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_files_from_tarball(tarball_response.content)
-    assert FILENAME_DETAILS_CSV in files_contents
-    tarball_details_csv = files_contents[FILENAME_DETAILS_CSV].decode()
+    expected_details_csv_filename = FILENAME_DETAILS_CSV.format(report_id=report_id)
+    assert expected_details_csv_filename in files_contents
+    tarball_details_csv = files_contents[expected_details_csv_filename].decode()
 
     # Compare tarball details.csv contents with the standalone API's response.
     details_csv_response = client_logged_in.get(
-        reverse("v1:reports-details", args=(deployments_report.report.id,)),
+        reverse("v1:reports-details", args=(report_id,)),
         headers={"Accept": "text/csv"},
     )
     assert details_csv_response.ok, details_csv_response.text
@@ -270,18 +282,22 @@ def test_report_deployments_csv(
 ):
     """Test report tarball contains expected deployments.csv."""
     deployments_report = deployment_with_logs
+    report_id = deployments_report.report.id
     tarball_response = client_logged_in.get(
-        reverse("v1:reports-detail", args=(deployments_report.report.id,))
+        reverse("v1:reports-detail", args=(report_id,))
     )
     assert tarball_response.ok, tarball_response.text
 
     files_contents = extract_files_from_tarball(tarball_response.content)
-    assert FILENAME_DEPLOYMENTS_CSV in files_contents
+    expected_deployments_csv_filename = FILENAME_DEPLOYMENTS_CSV.format(
+        report_id=report_id
+    )
+    assert expected_deployments_csv_filename in files_contents
 
     # Compare tarball deployments.csv contents with the standalone API's response.
-    tarball_deployments_csv = files_contents[FILENAME_DEPLOYMENTS_CSV].decode()
+    tarball_deployments_csv = files_contents[expected_deployments_csv_filename].decode()
     deployments_csv_response = client_logged_in.get(
-        reverse("v1:reports-deployments", args=(deployments_report.report.id,)),
+        reverse("v1:reports-deployments", args=(report_id,)),
         headers={"Accept": "text/csv"},
     )
     assert deployments_csv_response.ok, deployments_csv_response.text

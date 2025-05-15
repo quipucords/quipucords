@@ -38,9 +38,11 @@ def sanitize_row(row):
     return new_row
 
 
-def create_filename(file_name, file_ext, report_id):
+def create_filename(file_name, file_ext, report_id, detailed_filename=False):
     """Create the filename."""
     file_name = f"report_id_{report_id}/{file_name}"
+    if detailed_filename:
+        file_name += f"-{report_id}"
     if file_ext:
         file_name += f".{file_ext}"
     return file_name

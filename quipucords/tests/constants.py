@@ -9,11 +9,11 @@ from tests.env import BaseURI, EnvVar, as_bool
 PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent.parent
 
 CLEANUP_DOCKER_LAYERS = False
-FILENAME_AGGREGATE_JSON = "aggregate.json"
-FILENAME_DEPLOYMENTS_CSV = "deployments.csv"
-FILENAME_DEPLOYMENTS_JSON = "deployments.json"
-FILENAME_DETAILS_CSV = "details.csv"
-FILENAME_DETAILS_JSON = "details.json"
+FILENAME_AGGREGATE_JSON = "aggregate-{report_id}.json"
+FILENAME_DEPLOYMENTS_CSV = "deployments-{report_id}.csv"
+FILENAME_DEPLOYMENTS_JSON = "deployments-{report_id}.json"
+FILENAME_DETAILS_CSV = "details-{report_id}.csv"
+FILENAME_DETAILS_JSON = "details-{report_id}.json"
 FILENAME_SHA256SUM = "SHA256SUM"
 POSTGRES_DB = "qpc-db"
 POSTGRES_PASSWORD = "qpc"
