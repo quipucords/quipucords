@@ -46,11 +46,11 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
             return None
 
         # create the file names
-        aggregate_json_name = create_filename("aggregate", "json", report_id)
-        details_json_name = create_filename("details", "json", report_id)
-        deployments_json_name = create_filename("deployments", "json", report_id)
-        details_csv_name = create_filename("details", "csv", report_id)
-        deployments_csv_name = create_filename("deployments", "csv", report_id)
+        aggregate_json_name = create_filename("aggregate", "json", report_id, True)
+        details_json_name = create_filename("details", "json", report_id, True)
+        deployments_json_name = create_filename("deployments", "json", report_id, True)
+        details_csv_name = create_filename("details", "csv", report_id, True)
+        deployments_csv_name = create_filename("deployments", "csv", report_id, True)
         sha256sum_name = create_filename("SHA256SUM", None, report_id)
 
         # map the file names to the file data

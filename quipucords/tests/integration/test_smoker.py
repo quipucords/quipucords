@@ -263,11 +263,11 @@ class Smoker:
 
         with tarfile.open(fileobj=BytesIO(full_report_response.content)) as tarball:
             tarball_details_dict = load_json_from_tarball(
-                f"report_id_{report_id}/details.json", tarball
+                f"report_id_{report_id}/details-{report_id}.json", tarball
             )
             assert tarball_details_dict == details_response.json()
 
             tarball_deployments_dict = load_json_from_tarball(
-                f"report_id_{report_id}/deployments.json", tarball
+                f"report_id_{report_id}/deployments-{report_id}.json", tarball
             )
             assert tarball_deployments_dict == deployments_response.json()
