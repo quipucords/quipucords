@@ -9,7 +9,7 @@ import pytest
 from rest_framework.exceptions import ParseError
 
 from api.common.common_report import CSVHelper, create_tar_buffer, encode_content
-from api.common.util import ALL_IDS_MAGIC_STRING, set_of_ids_or_all_str
+from api.common.util import ALL_IDS_MAGIC_STRING, set_of_ids_or_all_str, split_filename
 from tests.report_utils import extract_files_from_tarball
 
 
@@ -179,3 +179,16 @@ def test_set_of_ids_or_all_str(input_ids, expected_ids, expect_exception):
             set_of_ids_or_all_str(input_ids)
     else:
         assert expected_ids == set_of_ids_or_all_str(input_ids)
+
+
+@pytest.mark.parametrize(
+    "filename,expected_output",
+    [
+        ["hello", ("hello", None)],
+        ["hello.txt", ("hello", "txt")],
+        ["hello.world.txt", ("hello.world", "txt")],
+    ],
+)
+def test_split_filename(filename, expected_output):
+    """Test split_filename returns expected values."""
+    assert split_filename(filename) == expected_output

@@ -112,7 +112,7 @@ def test_report_with_logs(client_logged_in, deployment_with_logs):
     expected_files = {
         f"report_id_{report_id}/{fname.format(report_id=report_id)}"
         for fname in TARBALL_ALWAYS_EXPECTED_FILENAMES.union(
-            {f"scan-job-{scan_job_id}-test.txt"}
+            {f"scan-job-{scan_job_id}-test-{report_id}.txt"}
         )
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
@@ -131,7 +131,7 @@ def test_report_tarball_sha256sum(client_logged_in, deployment_with_logs):
         (name.format(report_id=report_id) for name in TARBALL_ALWAYS_EXPECTED_FILENAMES)
     )
     expected_filenames = report_filenames.union(
-        {f"scan-job-{deployments_report.report.scanjob.id}-test.txt"}
+        {f"scan-job-{deployments_report.report.scanjob.id}-test-{report_id}.txt"}
     )
     assert expected_filenames == set(files_contents.keys()), (
         "incorrect files in tarball"
