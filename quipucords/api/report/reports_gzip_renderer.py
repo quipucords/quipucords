@@ -9,6 +9,7 @@ from rest_framework import renderers
 
 from api import messages
 from api.common.common_report import create_filename, create_tar_buffer, encode_content
+from api.common.util import split_filename
 from api.deployments_report.util import create_deployments_csv
 from api.details_report.util import create_details_csv
 
@@ -69,7 +70,8 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
         if not log_files:
             logger.warning("No logs were found for report_id=%s", report_id)
         for log in log_files:
-            file_name = create_filename(log.name, None, report_id)
+            basename, extension = split_filename(log.name)
+            file_name = create_filename(basename, extension, report_id, True)
             files_data[file_name] = encode_content(log.read_text(), "plaintext")
 
         # generate hashes

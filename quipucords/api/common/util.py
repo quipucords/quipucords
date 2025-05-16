@@ -119,6 +119,21 @@ def check_path_validity(path_list):
     return invalid_paths
 
 
+def split_filename(filename) -> tuple[str, str | None]:
+    """
+    Split a filename into its stem/main name and optional suffix/extension.
+
+    >>> split_filename("hello") == ("hello", None)
+    >>> split_filename("hello.txt") == ("hello", "txt")
+    >>> split_filename("hello.world.txt") == ("hello.world", "txt")
+    """
+    path = Path(filename)
+    if path.suffix:
+        return path.stem, path.suffix[1:]  # remove the leading dot
+    else:
+        return path.name, None
+
+
 def expand_scanjob_with_times(scanjob):  # noqa: PLR0912, C901
     """Expand a scanjob object into a JSON dict to send to the user.
 
