@@ -76,7 +76,7 @@ drf-spectacular==0.28.0 ; (implementation_name == 'cpython' and sys_platform == 
     # via quipucords
 drf-spectacular-sidecar==2025.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
-durationpy==0.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+durationpy==0.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
 fqdn==1.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
