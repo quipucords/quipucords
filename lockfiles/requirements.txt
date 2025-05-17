@@ -127,7 +127,7 @@ prompt-toolkit==3.0.51 ; (implementation_name == 'cpython' and sys_platform == '
     # via click-repl
 psycopg==3.2.8 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-psycopg-c==3.2.8 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+psycopg-c==3.2.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via psycopg
 ptyprocess==0.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via pexpect
