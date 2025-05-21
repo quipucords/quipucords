@@ -62,6 +62,7 @@ export LANG=C LC_ALL=C; ls -1 '{{ item }}/system/org/apache/activemq/activemq-ca
 export LANG=C LC_ALL=C; ls -1 '{{ item }}/system/org/apache/camel/camel-core' 2>/dev/null | grep fuse | sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
 export LANG=C LC_ALL=C; ls -1 '{{ item }}/system/org/apache/cxf/cxf-rt-bindings-coloc' 2>/dev/null | grep fuse |sed -n 's/^.*\(redhat-[0-9]\{6\}\).*/\1/p'
 export LANG=C LC_ALL=C; ps -A -o comm -o args e --columns 10000 | egrep '^java.*(eap|jboss).*' | tr -s ' =:' '\n' | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
+export LANG=C LC_ALL=C; subscription-manager facts --list 2>/dev/null | grep '^azure_offer:' | sed -n -e 's/^azure_offer:\s*//p'
 export LANG=C LC_ALL=C; subscription-manager facts --list 2>/dev/null | grep '^virt.uuid.' | sed -n -e 's/^.*virt.uuid.\s*//p'
 export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^cpu.core(s)_per_socket.' | sed -n -e 's/^.*cpu.core(s)_per_socket.\s*//p'
 export LANG=C LC_ALL=C; subscription-manager facts --list | grep '^cpu.cpu(s).' | sed -n -e 's/^.*cpu.cpu(s).\s*//p'
