@@ -168,3 +168,19 @@
   when:
     - '"stdout_lines" in internal_subscription_manager_id_cmd'
     - 'internal_subscription_manager_id_cmd["stdout_lines"] | length > 0'
+
+#  azure_offer fact
+- name: gather azure_offer fact
+  raw: export LANG=C LC_ALL=C; subscription-manager facts --list 2>/dev/null | grep '^azure_offer:' | sed -n -e 's/^azure_offer:\s*//p'
+  register: azure_offer_cmd
+  ignore_errors: yes
+  become: yes
+  when: 'user_has_sudo and internal_have_subscription_manager'
+
+- name: extract result value for azure_offer
+  set_fact:
+    azure_offer: "{{ azure_offer_cmd['stdout_lines'][-1] | trim | default(None) }}"
+  ignore_errors: yes
+  when:
+    - '"stdout_lines" in azure_offer_cmd'
+    - 'azure_offer_cmd["stdout_lines"] | length > 0'
