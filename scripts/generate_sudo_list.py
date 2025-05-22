@@ -29,8 +29,7 @@ def collect_sudo_commands(path=None):
 def generate_sudo_cmds_document():
     """Generate a document listing commands that require sudo."""
     list_cmds = collect_sudo_commands()
-    document = ""
-    document += "\n".join(cmd for cmd in list_cmds if cmd.strip())
+    document = "\n".join(cmd for cmd in list_cmds if cmd.strip()) + "\n"
     return document
 
 

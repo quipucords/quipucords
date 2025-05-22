@@ -92,7 +92,7 @@ def generated_document_mock():
     """Return sudo cmds document."""
     with mock.patch(
         "scripts.generate_sudo_list.generate_sudo_cmds_document",
-        return_value="sudo command 1\nsudo command 2",
+        return_value="sudo command 1\nsudo command 2\n",
     ) as mock_obj:
         yield mock_obj
 
@@ -126,7 +126,7 @@ def test_collect_mixed_cmds(return_playbook_path):
 def test_document_generation(list_cmds):
     """Verify if sudo cmd document is being generated correctly."""
     document = generate_sudo_cmds_document()
-    assert document == "sudo command 1\nsudo command 2"
+    assert document == "sudo command 1\nsudo command 2\n"
 
 
 def test_file_creation(tmp_path, generated_document_mock):
@@ -134,7 +134,7 @@ def test_file_creation(tmp_path, generated_document_mock):
     file_path = tmp_path / "sudo_list.txt"
     create_document_file(file_path)
     assert file_path.exists()
-    expected = ["sudo command 1\n", "sudo command 2"]
+    expected = ["sudo command 1\n", "sudo command 2\n"]
 
     with file_path.open("r") as f:
         lines = f.readlines()
