@@ -71,7 +71,7 @@ pathspec==0.12.1
     # via hatchling
 pbr==6.1.1
     # via lockfile
-pluggy==1.5.0
+pluggy==1.6.0
     # via hatchling
 poetry-core==2.1.3
     # via
