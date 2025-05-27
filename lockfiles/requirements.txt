@@ -177,9 +177,10 @@ requests-oauthlib==2.0.0 ; (implementation_name == 'cpython' and sys_platform ==
     # via kubernetes
 resolvelib==1.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible-core
-rpds-py==0.25.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+rpds-py==0.24.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   jsonschema
+    #   quipucords
     #   referencing
 rsa==4.9.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via google-auth
