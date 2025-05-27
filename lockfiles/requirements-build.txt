@@ -12,7 +12,9 @@ cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") o
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.1.0
+coherent-licensed==0.4.1
+    # via setuptools
+cython==3.1.1
     # via
     #   pydantic
     #   pyyaml
@@ -23,6 +25,7 @@ docutils==0.21.2
 flit-core==3.12.0
     # via
     #   click
+    #   coherent-licensed
     #   django-filter
     #   docutils
     #   idna
@@ -39,12 +42,13 @@ hatch-fancy-pypi-readme==25.1.0
     #   attrs
     #   jsonschema
 hatch-vcs==0.4.0
+    # via urllib3
+hatch-vcs==0.5.0
     # via
     #   attrs
     #   jsonschema
     #   jsonschema-specifications
     #   referencing
-    #   urllib3
 hatchling==1.27.0
     # via
     #   attrs
@@ -55,7 +59,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.8.4
+maturin==1.8.6
     # via
     #   cryptography
     #   rpds-py
@@ -71,7 +75,7 @@ pathspec==0.12.1
     # via hatchling
 pbr==6.1.1
     # via lockfile
-pluggy==1.5.0
+pluggy==1.6.0
     # via hatchling
 poetry-core==2.1.3
     # via
@@ -100,9 +104,9 @@ setuptools-scm==8.3.1
     #   setuptools-rust
 trove-classifiers==2025.5.9.12
     # via hatchling
-types-psutil==7.0.0.20250401
+types-psutil==7.0.0.20250516
     # via mypy
-types-setuptools==80.4.0.20250511
+types-setuptools==80.8.0.20250521
     # via mypy
 typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
@@ -130,9 +134,9 @@ setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==76.0.0
+setuptools==80.7.1
     # via ansible-core
-setuptools==80.4.0
+setuptools==80.9.0
     # via
     #   ansible
     #   bcrypt
