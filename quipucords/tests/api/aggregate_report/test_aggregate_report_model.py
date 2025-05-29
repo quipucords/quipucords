@@ -1,7 +1,7 @@
 """Test the aggregate report model generation."""
 
 from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -393,6 +393,31 @@ def test_build_aggregate_report_system_fingerprint(
     assert (
         AggregateReportSerializer(instance=aggregated).data == expected_aggregate_report
     )
+
+
+@pytest.mark.django_db
+def test_build_aggregate_report_already_exists(
+    report_and_expected_aggregate: tuple[Report, AggregateReport],
+):
+    """
+    Test build_aggregate_report destroys and recalculates if it needs update.
+
+    This logic should only be triggered if the related Report object has been modified
+    more recently than the AggregateReport object. That tends to happen when we update
+    on-disk cache files for the reports and write the file path into the Report model.
+    """
+    report, expected_aggregate_report = report_and_expected_aggregate
+    first_aggregated = build_aggregate_report(report.id)
+    first_aggregated_id = first_aggregated.id
+
+    report.updated_at = report.updated_at + timedelta(seconds=1)
+    report.save()
+    second_aggregated = build_aggregate_report(report.id)
+    second_aggregated_id = second_aggregated.id
+
+    assert first_aggregated_id != second_aggregated_id
+    with pytest.raises(AggregateReport.DoesNotExist):
+        first_aggregated.refresh_from_db()
 
 
 @pytest.mark.django_db
