@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from datetime import date, timedelta
+from itertools import combinations
 
 import pytest
 
@@ -440,6 +441,27 @@ def test_get_aggregate_report_by_report_id_generated_db_record(
     report, expected_aggregate_report = report_and_expected_aggregate
     _aggregate = get_aggregate_report_by_report_id(report.id)
     assert AggregateReport.objects.filter(report_id=report.id).exists()
+
+
+@pytest.mark.django_db
+def test_aggregate_report_keys_are_unique(
+    report_and_expected_aggregate: tuple[Report, AggregateReport],
+):
+    """Verify that aggregate report second-level keys are unique.
+
+    Aggregate report groups data into two buckets, "results" and "diagnostic".
+    However, UI draws from both buckets and uses bucket key as unique element
+    identifier. Which means that if the same key ever appears in both buckets,
+    UI is likely going to be confused.
+
+    That test exists to signal overlap of keys.
+    """
+    report, expected_aggregate_report = report_and_expected_aggregate
+    aggregated = build_aggregate_report(report.id)
+    assert aggregated is not None
+    aggregate_data = AggregateReportSerializer(instance=aggregated).data
+    for section1, section2 in combinations((s for s in aggregate_data.values()), 2):
+        assert not set(section1.keys()).intersection(set(section2.keys()))
 
 
 @pytest.mark.django_db
