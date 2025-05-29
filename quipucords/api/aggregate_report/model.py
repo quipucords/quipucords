@@ -339,8 +339,14 @@ def build_aggregate_report(
         aggregated = AggregateReport.objects.get(report_id=report_id)
         if report.updated_at <= aggregated.updated_at and not force_build:
             return aggregated
+        # If we are here, then we need to update the aggregate report.
+        # To be safe and eliminate any risk of double counting, delete the old
+        # report object and start fresh after exiting this try block.
+        aggregated.delete()
     except AggregateReport.DoesNotExist:
-        aggregated = AggregateReport.objects.create(report_id=report_id)
+        pass
+
+    aggregated = AggregateReport.objects.create(report_id=report_id)
 
     # Note that `aggregated` is treated as a pass-by-reference here and is updated
     # directly in these functions instead of returning a new instance.
