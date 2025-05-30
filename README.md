@@ -34,22 +34,41 @@ Building and running quipucords locally from source requires modern versions of:
 - podman (https://podman.io/getting-started/installation)
 - skopeo
 - make
+- oras
+- rename
+- yq ([the go version](https://github.com/mikefarah/yq), not the one on pypi)
+- [Konflux Pipeline Patcher](https://github.com/simonbaird/konflux-pipeline-patcher)
 
 Use your system's package manager to install or upgrade as necessary.
 
-## macOS prereqs
-
-If you are building on macOS, you must install `skopeo` and modern versions of `make`, `sed`, and `date` through Homebrew (`brew`). The default versions included by Apple in macOS are too old and incompatible with our build commands.
+Note that [Konflux Pipeline Patcher](https://github.com/simonbaird/konflux-pipeline-patcher) is simply a shell script you must download like this:
 
 ```sh
-brew install make coreutils gnu-sed skopeo
+# Replace $HOME/bin with wherever you keep custom scripts or programs.
+mkdir -p "$HOME/bin"
+curl -sL -o "$HOME/bin/pipeline-patcher" https://github.com/simonbaird/konflux-pipeline-patcher/raw/main/pipeline-patcher
+chmod a+x "$HOME/bin/pipeline-patcher"
+
+# You must include that bin dir in your PATH.
+# We strongly recommend you add this to your shell's rc/profile.
+export PATH="$HOME/bin:$PATH"
 ```
 
-After installing `make`, put the updated version earlier on your `PATH` or always remember to use `gmake` instead of `make` when invoking Make targets in this project. For example:
+## macOS prereqs
+
+The default versions in macOS of some programs like `make` and `sed` are too old or incompatible with our build commands. Install modern versions plus additional required programs using Homebrew:
 
 ```sh
-# optionally put this in your shell rc file or add to local environment:
-PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+brew install make coreutils gnu-sed skopeo oras rename yq
+```
+
+After installing some programs like `make`, update your `PATH` to override the system defaults. For example:
+
+```sh
+# We strongly recommend you add this to your shell's rc/profile.
+# Some build tools do not try to use the brew prefixed program names (like `gsed` and `gdate`),
+# and they WILL FAIL if you do not correctly update `PATH` to find the correct versions.
+export PATH="/usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/make/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 ```
 
 If you are running quipucords locally on macOS to perform network scans, additionally you may need:
