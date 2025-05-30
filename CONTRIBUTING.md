@@ -81,12 +81,15 @@ config can be done on other editors that support it:
 https://microsoft.github.io/debug-adapter-protocol/implementors/tools/
 
 ### Update dependencies
-There's a dedicated make target for easily updating ALL lockfiles and base image digests on the Containerfile
-```
+
+There's a dedicated make target for easily updating ALL lockfiles and base image digests in `Containerfile`:
+
+```sh
 make update-lockfiles
 ```
-Besides python dependencies required for development, this command also requires `podman`, `skopeo`, `yq` (the go version, not the on on pypi),
-[`konflux-pipeline-patcher`](https://github.com/simonbaird/konflux-pipeline-patcher) and, if you are on macOS, `gsed`.
+
+Besides python dependencies required for development, this command also requires `podman`, `skopeo`, `yq` (the go version, not the one on pypi),
+[`konflux-pipeline-patcher`](https://github.com/simonbaird/konflux-pipeline-patcher) and, if you are on macOS, `gsed`. You should already have these installed if you followed the instructions in `README.md`.
 
 -----
 
