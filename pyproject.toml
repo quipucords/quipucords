@@ -64,7 +64,7 @@ dev = [
     "pytest<8.0.0,>=7.2.1",
     "requests-mock<2.0.0,>=1.10.0",
     "ruff<1,>=0",
-    "watchdog[watchmedo]<3.0.0,>=2.2.1",
+    "watchdog[watchmedo]<6.1.0,>=6.0.0",
     # temporarily lock pip behind 25.1 (pybuild-deps will require a change)
     "pip<25.1",
 ]
