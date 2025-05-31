@@ -106,7 +106,7 @@ trove-classifiers==2025.5.9.12
     # via hatchling
 types-psutil==7.0.0.20250516
     # via mypy
-types-setuptools==80.8.0.20250521
+types-setuptools==80.9.0.20250529
     # via mypy
 typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
