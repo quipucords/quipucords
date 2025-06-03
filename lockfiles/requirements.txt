@@ -23,7 +23,7 @@ billiard==4.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via celery
 cachetools==5.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via google-auth
-celery==5.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+celery==5.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 certifi==2025.4.26 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
@@ -74,7 +74,7 @@ djangorestframework==3.16.0 ; (implementation_name == 'cpython' and sys_platform
     #   quipucords
 drf-spectacular==0.28.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-drf-spectacular-sidecar==2025.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+drf-spectacular-sidecar==2025.6.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 durationpy==0.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
@@ -96,7 +96,7 @@ jsonschema==4.24.0 ; (implementation_name == 'cpython' and sys_platform == 'darw
     # via drf-spectacular
 jsonschema-specifications==2025.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via jsonschema
-kombu==5.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+kombu==5.5.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
 kubernetes==32.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via openshift
@@ -117,6 +117,7 @@ packaging==25.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     #   ansible-core
     #   ansible-runner
     #   gunicorn
+    #   kombu
 paramiko==3.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 pexpect==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -141,8 +142,6 @@ pycparser==2.22 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via cffi
 pydantic==1.10.22 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-pyjwt==2.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via redis
 pynacl==1.5.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via paramiko
 python-daemon==3.1.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -162,8 +161,8 @@ pyyaml==6.0.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     #   drf-spectacular
     #   kubernetes
     #   quipucords
-redis==5.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via celery
+redis==5.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+    # via kombu
 referencing==0.36.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   jsonschema
@@ -192,14 +191,14 @@ six==1.17.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     #   pyvmomi
 sqlparse==0.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via django
-typing-extensions==4.13.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+typing-extensions==4.14.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   psycopg
     #   pydantic
     #   referencing
 tzdata==2025.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kombu
-uritemplate==4.1.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+uritemplate==4.2.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 urllib3==2.4.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
