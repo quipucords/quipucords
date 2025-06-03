@@ -12,7 +12,7 @@ cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") o
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-coherent-licensed==0.4.1
+coherent-licensed==0.5.2
     # via setuptools
 cython==3.1.1
     # via
@@ -104,11 +104,11 @@ setuptools-scm==8.3.1
     #   setuptools-rust
 trove-classifiers==2025.5.9.12
     # via hatchling
-types-psutil==7.0.0.20250516
+types-psutil==7.0.0.20250601
     # via mypy
-types-setuptools==80.8.0.20250521
+types-setuptools==80.9.0.20250529
     # via mypy
-typing-extensions==4.13.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+typing-extensions==4.14.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   mypy
     #   setuptools-scm
@@ -163,7 +163,6 @@ setuptools==80.9.0
     #   pyasn1
     #   pyasn1-modules
     #   pydantic
-    #   pyjwt
     #   pynacl
     #   python-daemon
     #   python-dateutil
