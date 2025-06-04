@@ -1911,7 +1911,6 @@ dependencies = [
     { name = "pyvmomi", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "pyyaml", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "requests", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
-    { name = "rpds-py", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "whitenoise", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
 ]
 
@@ -1963,7 +1962,6 @@ requires-dist = [
     { name = "pyvmomi", specifier = ">=8.0.2,<9.0.0" },
     { name = "pyyaml", specifier = ">=6.0.1,<7.0.0" },
     { name = "requests", specifier = ">=2.32.2,<3.0.0" },
-    { name = "rpds-py", specifier = "==0.24.0" },
     { name = "whitenoise", specifier = ">=6.3.0,<7.0.0" },
 ]
 
