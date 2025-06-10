@@ -14,7 +14,7 @@ changelog-chug==0.0.3
     # via python-daemon
 coherent-licensed==0.5.2
     # via setuptools
-cython==3.1.1
+cython==3.1.2
     # via
     #   pydantic
     #   pyyaml
@@ -59,7 +59,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.8.6
+maturin==1.8.7
     # via
     #   cryptography
     #   rpds-py
