@@ -202,7 +202,7 @@ class ScanTask(BaseModel):
                 f" elapsed_time: {elapsed_time:.0f}s) - "
             )
         actual_message += message.strip()
-        logger.log(log_level, actual_message)
+        logger.log(log_level, actual_message, extra={"task_id": self.job_id, "task_type": self.scan_type})
 
     # Fingerprint task type
     def _log_fingerprint_message(self, message: str, log_level=logging.INFO):
@@ -224,7 +224,7 @@ class ScanTask(BaseModel):
             f" elapsed_time: {elapsed_time:.0f}s) - "
         )
         actual_message += message.strip()
-        logger.log(log_level, actual_message)
+        logger.log(log_level, actual_message, extra={"task_id": self.job.id, "task_type": self.scan_type})
 
     def _compute_elapsed_time(self):
         """Compute elapsed time."""

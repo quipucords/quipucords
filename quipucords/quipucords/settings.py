@@ -53,6 +53,15 @@ class RelativePathnameFormatter(logging.Formatter):
             record.relative_pathname = Path(record.pathname).relative_to(BASE_DIR)
         else:
             record.relative_pathname = record.pathname
+        if "task_type" not in record.__dict__:
+            record.__dict__["task_type"] = "default"
+        if "task_id" not in record.__dict__:
+            record.__dict__["task_id"] = 0
+        else:
+            base = record.__dict__["task_id"]
+            for char in record.__dict__["task_type"]:
+                base = base + ord(char)
+            record.__dict__["task_id"] = base
         return super().format(record)
 
 
@@ -344,6 +353,7 @@ LOGGING_HANDLERS = env.list("DJANGO_LOG_HANDLERS", default=["console"])
 QUIPUCORDS_LOGGING_VERBOSE_FORMAT = env.str(
     "QUIPUCORDS_LOGGING_VERBOSE_FORMAT",
     "[%(levelname)s %(asctime)s pid=%(process)d tid=%(thread)d "
+    "task_id=%(task_id)d task_type=%(task_type)s "
     "%(relative_pathname)s:%(funcName)s:%(lineno)d] %(message)s",
 )
 LOG_DIRECTORY = Path(

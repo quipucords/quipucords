@@ -131,7 +131,7 @@ class ScanJob(BaseModel):
             f"Job {self.id:d} ({self.scan_type}, elapsed_time: {elapsed_time:.0f}s) - "
         )
         actual_message += message
-        logger.log(log_level, actual_message)
+        logger.log(log_level, actual_message, extra={"task_id": self.id, "task_type": self.scan_type})
 
     def calculate_counts(self):
         """Calculate scan counts from tasks.
