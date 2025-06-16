@@ -98,17 +98,19 @@ class SourceSerializerBase(ModelSerializer):
         )  # TODO Include these datetime fields in a future API version.
 
     @classmethod
-    def validate_opts(cls, options, source_type):
+    def validate_opts(cls, options, source_type, *, apply_defaults=True):
         """Raise an error if options are invalid for the source type.
 
         :param options: dictionary of source options
         :param source_type: string denoting source type
+        :param apply_defaults: set defaults (e.g., ssl_cert_verify) in V1 create only
         """
         valid_ssh_options = ["use_paramiko"]
         valid_http_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
         if source_type in cls.HTTP_SOURCE_TYPES:
-            options.setdefault("ssl_cert_verify", True)
+            if apply_defaults:
+                options.setdefault("ssl_cert_verify", True)
             cls._check_for_disallowed_fields(
                 options,
                 messages.INVALID_OPTIONS,
@@ -565,11 +567,20 @@ class SourceSerializerV2(SourceSerializerBase):
         if not parsed.port or not (MIN_PORT < parsed.port < MAX_PORT):
             raise ValidationError(_(messages.SOURCE_INVALID_PORT_PROXY_URL))
 
+    def _apply_ssl_cert_verify_default(self, validated_data):
+        """Apply default True to ssl_cert_verify if omitted and source is HTTP."""
+        source_type = validated_data.get("source_type")
+        if (
+            source_type in self.HTTP_SOURCE_TYPES
+            and "ssl_cert_verify" not in self.initial_data
+        ):
+            validated_data["ssl_cert_verify"] = True
+
     @transaction.atomic
     def create(self, validated_data):
         """Create a V2 source."""
-        instance = super().create_base(validated_data)
-        return instance
+        self._apply_ssl_cert_verify_default(validated_data)
+        return super().create_base(validated_data)
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -582,7 +593,7 @@ class SourceSerializerV2(SourceSerializerBase):
         instance = super().update_base(instance, validated_data)
         if ssl_options:
             source_type = instance.source_type
-            self.validate_opts(ssl_options, source_type)
+            self.validate_opts(ssl_options, source_type, apply_defaults=False)
             self.update_options(ssl_options, instance)
             instance.save()
         return instance
