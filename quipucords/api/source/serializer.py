@@ -98,17 +98,22 @@ class SourceSerializerBase(ModelSerializer):
         )  # TODO Include these datetime fields in a future API version.
 
     @classmethod
-    def validate_opts(cls, options, source_type):
+    def validate_opts(cls, options, source_type, *, apply_defaults=True):
         """Raise an error if options are invalid for the source type.
 
         :param options: dictionary of source options
         :param source_type: string denoting source type
+        :param apply_defaults: set defaults (e.g., ssl_cert_verify) in V1 create only
         """
+        # TODO: Remove `apply_defaults` logic once V1 is fully deprecated.
+        # V1 sets defaults here (e.g., ssl_cert_verify=True).
+        # V2 handles this in validate_http_source() to follow DRF style.
         valid_ssh_options = ["use_paramiko"]
         valid_http_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
         if source_type in cls.HTTP_SOURCE_TYPES:
-            options.setdefault("ssl_cert_verify", True)
+            if apply_defaults:
+                options.setdefault("ssl_cert_verify", True)
             cls._check_for_disallowed_fields(
                 options,
                 messages.INVALID_OPTIONS,
@@ -442,15 +447,23 @@ class SourceSerializerBase(ModelSerializer):
         return attrs
 
     def validate_http_source(self, attrs, source_type):
-        """Validate the attributes for vcenter source."""
+        """Validate the attributes for HTTP-based sources."""
         credentials = attrs.get("credentials")
         hosts_list = attrs.get("hosts")
         exclude_hosts_list = attrs.get("exclude_hosts")
+
         if source_type == DataSources.OPENSHIFT:
             default_port = 6443
         else:
             default_port = 443
         self._set_default_port(attrs, default_port)
+
+        # Only apply ssl_cert_verify default if:
+        # - we're creating
+        # - and the field was not passed explicitly
+        if not self.instance and "ssl_cert_verify" not in self.initial_data:
+            attrs["ssl_cert_verify"] = True
+
         self._validate_number_hosts_and_credentials(
             hosts_list,
             source_type,
@@ -568,8 +581,7 @@ class SourceSerializerV2(SourceSerializerBase):
     @transaction.atomic
     def create(self, validated_data):
         """Create a V2 source."""
-        instance = super().create_base(validated_data)
-        return instance
+        return super().create_base(validated_data)
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -582,7 +594,7 @@ class SourceSerializerV2(SourceSerializerBase):
         instance = super().update_base(instance, validated_data)
         if ssl_options:
             source_type = instance.source_type
-            self.validate_opts(ssl_options, source_type)
+            self.validate_opts(ssl_options, source_type, apply_defaults=False)
             self.update_options(ssl_options, instance)
             instance.save()
         return instance
