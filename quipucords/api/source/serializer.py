@@ -105,6 +105,9 @@ class SourceSerializerBase(ModelSerializer):
         :param source_type: string denoting source type
         :param apply_defaults: set defaults (e.g., ssl_cert_verify) in V1 create only
         """
+        # TODO: Remove `apply_defaults` logic once V1 is fully deprecated.
+        # V1 sets defaults here (e.g., ssl_cert_verify=True).
+        # V2 handles this in validate_http_source() to follow DRF style.
         valid_ssh_options = ["use_paramiko"]
         valid_http_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
@@ -444,15 +447,23 @@ class SourceSerializerBase(ModelSerializer):
         return attrs
 
     def validate_http_source(self, attrs, source_type):
-        """Validate the attributes for vcenter source."""
+        """Validate the attributes for HTTP-based sources."""
         credentials = attrs.get("credentials")
         hosts_list = attrs.get("hosts")
         exclude_hosts_list = attrs.get("exclude_hosts")
+
         if source_type == DataSources.OPENSHIFT:
             default_port = 6443
         else:
             default_port = 443
         self._set_default_port(attrs, default_port)
+
+        # Only apply ssl_cert_verify default if:
+        # - we're creating
+        # - and the field was not passed explicitly
+        if not self.instance and "ssl_cert_verify" not in self.initial_data:
+            attrs["ssl_cert_verify"] = True
+
         self._validate_number_hosts_and_credentials(
             hosts_list,
             source_type,
@@ -567,19 +578,9 @@ class SourceSerializerV2(SourceSerializerBase):
         if not parsed.port or not (MIN_PORT < parsed.port < MAX_PORT):
             raise ValidationError(_(messages.SOURCE_INVALID_PORT_PROXY_URL))
 
-    def _apply_ssl_cert_verify_default(self, validated_data):
-        """Apply default True to ssl_cert_verify if omitted and source is HTTP."""
-        source_type = validated_data.get("source_type")
-        if (
-            source_type in self.HTTP_SOURCE_TYPES
-            and "ssl_cert_verify" not in self.initial_data
-        ):
-            validated_data["ssl_cert_verify"] = True
-
     @transaction.atomic
     def create(self, validated_data):
         """Create a V2 source."""
-        self._apply_ssl_cert_verify_default(validated_data)
         return super().create_base(validated_data)
 
     @transaction.atomic
