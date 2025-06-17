@@ -63,6 +63,21 @@ def openshift_source(openshift_cred_id):
     return source
 
 
+@pytest.fixture
+def openshift_source_with_false_ssl(openshift_cred_id):
+    """Openshift source with ssl_cert_verify=False."""
+    source = Source.objects.create(
+        name="source_saved_false_ssl",
+        source_type=DataSources.OPENSHIFT,
+        port=222,
+        hosts=["1.2.3.4"],
+        ssl_cert_verify=False,
+    )
+    source.credentials.add(openshift_cred_id)
+    source.save()
+    return source
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "hosts_input,expected_hosts",
@@ -456,3 +471,243 @@ def test_validate_port_invalid_values(port, expected_msg):
         SourceSerializer.validate_port(port)
 
     assert str(exc_info.value.detail[0]) == expected_msg
+
+
+@pytest.mark.django_db
+def test_ssl_cert_verify_defaults_true_when_ssl_fields_absent(openshift_cred_id):
+    """Ensure ssl_cert_verify defaults to True when all SSL fields are omitted."""
+    data = {
+        "name": "ssl-default-no-fields",
+        "source_type": DataSources.OPENSHIFT,
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+    }
+
+    serializer = SourceSerializerV2(data=data)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is True
+    assert instance.ssl_protocol is None
+    assert instance.disable_ssl is None
+    assert instance.use_paramiko is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "ssl_field, value",
+    [
+        ("ssl_protocol", "TLSv1_2"),
+        ("disable_ssl", True),
+        ("disable_ssl", False),
+    ],
+)
+def test_ssl_cert_verify_defaults_true_with_other_ssl_field(
+    openshift_cred_id, ssl_field, value
+):
+    """Ensure ssl_cert_verify defaults to True when other SSL field is provided."""
+    data = {
+        "name": f"ssl-default-{ssl_field}-{value}",
+        "source_type": DataSources.OPENSHIFT,
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        ssl_field: value,
+    }
+
+    serializer = SourceSerializerV2(data=data)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is True, (
+        "ssl_cert_verify should default to True for HTTP sources "
+        "when not explicitly provided, even if other SSL fields are set."
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("ssl_cert_verify_value", [True, False])
+def test_explicit_ssl_cert_verify_sets_only_itself(
+    openshift_cred_id, ssl_cert_verify_value
+):
+    """Ensure only ssl_cert_verify is set when provided; SSL fields remain None."""
+    data = {
+        "name": f"ssl-cert-only-{ssl_cert_verify_value}",
+        "source_type": DataSources.OPENSHIFT,
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "ssl_cert_verify": ssl_cert_verify_value,
+        # No other SSL fields
+    }
+
+    serializer = SourceSerializerV2(data=data)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify == ssl_cert_verify_value
+    assert instance.ssl_protocol is None
+    assert instance.disable_ssl is None
+    assert instance.use_paramiko is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("ssl_cert_verify_value", [True, False])
+@pytest.mark.parametrize(
+    "other_ssl_field, other_value",
+    [
+        ("disable_ssl", True),
+        ("ssl_protocol", "TLSv1_2"),
+    ],
+)
+def test_ssl_cert_verify_respected_when_combined_with_other_ssl_fields(
+    openshift_cred_id, ssl_cert_verify_value, other_ssl_field, other_value
+):
+    """Test that ssl_cert_verify is preserved when combined with other SSL fields."""
+    data = {
+        "name": f"ssl-combo-{ssl_cert_verify_value}-{other_ssl_field}-{other_value}",
+        "source_type": DataSources.OPENSHIFT,
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "ssl_cert_verify": ssl_cert_verify_value,
+        other_ssl_field: other_value,
+    }
+
+    serializer = SourceSerializerV2(data=data)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    # Assert ssl_cert_verify is preserved
+    assert instance.ssl_cert_verify == ssl_cert_verify_value
+
+    # Assert the other SSL field is set
+    assert getattr(instance, other_ssl_field) == other_value
+
+    # Assert all remaining SSL fields are None
+    for field in {"ssl_protocol", "disable_ssl", "use_paramiko"} - {other_ssl_field}:
+        assert getattr(instance, field) is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("use_paramiko_value", [True, False])
+def test_network_source_ssl_fields(network_cred_id, use_paramiko_value):
+    """Ensure only use_paramiko is populated for network sources; others remain None."""
+    data = {
+        "name": f"network-paramiko-{use_paramiko_value}",
+        "source_type": DataSources.NETWORK,
+        "hosts": ["10.0.0.1"],
+        "credentials": [network_cred_id],
+        "use_paramiko": use_paramiko_value,
+    }
+
+    serializer = SourceSerializerV2(data=data)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.use_paramiko == use_paramiko_value
+    assert instance.ssl_cert_verify is None
+    assert instance.ssl_protocol is None
+    assert instance.disable_ssl is None
+
+
+@pytest.mark.django_db
+def test_ssl_cert_verify_defaults_to_true_on_update(
+    openshift_source, openshift_cred_id
+):
+    """If ssl_cert_verify was True and is omitted in update, it remains True."""
+    assert openshift_source.ssl_cert_verify is True
+
+    update_data = {
+        "name": "ssl-update-test",
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "ssl_protocol": "TLSv1_1",  # Changing an SSL field
+        # Intentionally omitting ssl_cert_verify
+    }
+
+    serializer = SourceSerializerV2(data=update_data, instance=openshift_source)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is True, (
+        "ssl_cert_verify should remain True when not explicitly updated, "
+        "even if other SSL fields are provided."
+    )
+
+
+@pytest.mark.django_db
+def test_update_explicitly_sets_ssl_cert_verify_false_from_true(
+    openshift_source, openshift_cred_id
+):
+    """Update explicitly sets ssl_cert_verify from True to False."""
+    update_data = {
+        "name": "ssl-update-to-false",
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "ssl_cert_verify": False,
+    }
+
+    serializer = SourceSerializerV2(data=update_data, instance=openshift_source)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is False
+
+
+@pytest.mark.django_db
+def test_ssl_cert_verify_false_is_preserved_on_update(
+    openshift_source_with_false_ssl, openshift_cred_id
+):
+    """Ensure ssl_cert_verify=False is preserved on update when not explicitly set."""
+    update_data = {
+        "name": "ssl-update-false-preserved",
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "ssl_protocol": "TLSv1_2",
+    }
+
+    serializer = SourceSerializerV2(
+        data=update_data, instance=openshift_source_with_false_ssl
+    )
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is False
+
+
+@pytest.mark.django_db
+def test_ssl_cert_verify_false_to_true(
+    openshift_source_with_false_ssl, openshift_cred_id
+):
+    """Update explicitly sets ssl_cert_verify from False to True."""
+    update_data = {
+        "name": "ssl-update-to-true",
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "ssl_cert_verify": True,
+    }
+
+    serializer = SourceSerializerV2(
+        data=update_data, instance=openshift_source_with_false_ssl
+    )
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is True
+
+
+@pytest.mark.django_db
+def test_ssl_cert_verify_true_is_preserved_on_update(
+    openshift_source, openshift_cred_id
+):
+    """Ensure ssl_cert_verify=True is preserved when not explicitly set."""
+    update_data = {
+        "name": "ssl-update-true-preserved",
+        "hosts": ["1.2.3.4"],
+        "credentials": [openshift_cred_id],
+        "disable_ssl": False,
+    }
+
+    serializer = SourceSerializerV2(data=update_data, instance=openshift_source)
+    assert serializer.is_valid(), serializer.errors
+    instance = serializer.save()
+
+    assert instance.ssl_cert_verify is True
