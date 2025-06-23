@@ -36,6 +36,7 @@ Building and running quipucords locally from source requires modern versions of:
 - make
 - oras
 - rename
+- shellcheck
 - yq ([the go version](https://github.com/mikefarah/yq), not the one on pypi)
 - [Konflux Pipeline Patcher](https://github.com/simonbaird/konflux-pipeline-patcher)
 
@@ -59,7 +60,7 @@ export PATH="$HOME/bin:$PATH"
 The default versions in macOS of some programs like `make` and `sed` are too old or incompatible with our build commands. Install modern versions plus additional required programs using Homebrew:
 
 ```sh
-brew install make coreutils gnu-sed skopeo oras rename yq
+brew install make coreutils gnu-sed skopeo oras rename yq shellcheck
 ```
 
 After installing some programs like `make`, update your `PATH` to override the system defaults. For example:
