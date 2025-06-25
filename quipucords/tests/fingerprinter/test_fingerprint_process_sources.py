@@ -145,7 +145,7 @@ def test_merge_fingerprints(
     """Test FingerprintTaskRunner._process_sources counting mechanism."""
     caplog.set_level(logging.INFO)
 
-    fingerprints = task_runner._process_sources(report)  # noqa: W0212
+    fingerprints = task_runner._process_sources(report)
     non_merged_fingerprints = [1, 2, 2]
     # ocp/ansible/rhacs fingerprints wont be part of deduplication/merging process
     assert fingerprints == [1, 2] + 3 * non_merged_fingerprints
