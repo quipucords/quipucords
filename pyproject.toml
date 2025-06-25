@@ -97,6 +97,7 @@ lint.ignore = [
     "D107",
     "D203", 
     "D403",
+    "PLC0415", # import-outside-top-level
 ]
 src = ["quipucords"]
 target-version = "py311"
