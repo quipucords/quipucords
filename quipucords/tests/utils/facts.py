@@ -47,6 +47,10 @@ class RawFactComparator:
             return other._vals == self
         self._raise_unsupported_object(other)
 
+    def __hash__(self):
+        """Raise error because hash is not implemented."""
+        raise NotImplementedError
+
     def __contains__(self, other):
         """Operator for 'in'."""
         if isinstance(other, str):
