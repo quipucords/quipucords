@@ -66,9 +66,9 @@ def create_report_for_scan_job(scan_job: ScanJob):
     if not inspect_query["successful_connections"]:
         return None, "No facts gathered from scan."
 
-    report = Report.objects.create(
-        report_version=create_report_version(), scanjob=scan_job
-    )
+    report = Report.objects.create(report_version=create_report_version())
+    scan_job.report = report
+    scan_job.save()
     inspect_groups = InspectGroup.objects.filter(tasks__job_id=scan_job.id)
     report.inspect_groups.set(inspect_groups)
     return report, None
