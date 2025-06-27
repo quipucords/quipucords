@@ -1,0 +1,37 @@
+name: Forbid 'fixup!' commits
+
+on:
+  pull_request:
+
+jobs:
+  forbid-fixup-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Required for git history
+        fetch-depth: 0
+
+    - name: Get base and head commits
+      run: |
+        echo "BASE_REF=${{ github.base_ref }}" >> "$GITHUB_ENV"
+        echo "BASE_SHA=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
+        echo "HEAD_SHA=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_ENV"
+
+    - name: Check for fixup commits
+      run: |
+        echo "Checking for 'fixup!' commits between $BASE_SHA and $HEAD_SHA..."
+        FIXUP_COMMITS=$(git log --format="%H %s" $BASE_SHA..$HEAD_SHA | grep "^[^ ]*[ ]*fixup!" || true)
+        if [ -n "$FIXUP_COMMITS" ]; then
+          echo "Error: Found 'fixup!' commits:"
+          echo
+          echo "$FIXUP_COMMITS"
+          echo
+          echo "Please rebase your branch and squash 'fixup!' commits before merging."
+          echo "Consider using: git rebase -i $BASE_REF --autosquash"
+          exit 1
+        else
+          echo "No 'fixup!' commit messages found."
+        fi
