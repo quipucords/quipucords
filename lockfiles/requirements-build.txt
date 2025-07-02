@@ -64,7 +64,7 @@ maturin==1.9.0
     #   rpds-py
 mypy-extensions==1.1.0
     # via mypy
-mypy==1.15.0
+mypy==1.16.1
     # via charset-normalizer
 packaging==25.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
