@@ -524,15 +524,15 @@ wheels = [
 
 [[package]]
 name = "django-axes"
-version = "6.5.2"
+version = "8.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "django", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/cc/383f9c247f65e5e2e90df4a2be0c982053684364349b51c1d1509d6e7a75/django_axes-6.5.2.tar.gz", hash = "sha256:c2c007d61a3de018ef97649350dc15e5663cd9def1a05de8eeb0fe6adc1ed2ab", size = 246681, upload-time = "2024-09-21T10:11:07.68Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/bf/ce259e79cf66cdd1aa7b1968af04a036cf39737c3ff69ced3a39808cd40d/django_axes-8.0.0.tar.gz", hash = "sha256:f95b6ae67fd77d44cc688818cef174914c4ad98c48daf65020b6f03f37220e45", size = 249419, upload-time = "2025-05-10T11:17:43.657Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/89/340932f7ef3adeab4aa4a1824a7f094bd24be86025c62bd26c0183e0ff0c/django_axes-6.5.2-py3-none-any.whl", hash = "sha256:fab92b98032fff55d7d2e0fdfade2be189949b6590b9e0c90e6fd213dd70bb67", size = 68447, upload-time = "2024-09-21T10:10:49.695Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/4b/8862d6d326411fe18854db98305dc292b694d84b2b91398c33a792b7e772/django_axes-8.0.0-py3-none-any.whl", hash = "sha256:7ddc55f21b704b7e9b3e793a75deac01ff16cb67f561649b04336e1e96980035", size = 68884, upload-time = "2025-05-10T11:17:41.351Z" },
 ]
 
 [[package]]
@@ -1935,7 +1935,7 @@ requires-dist = [
     { name = "ansible-runner", specifier = ">=2.4.0,<3.0.0" },
     { name = "celery", extras = ["redis"], specifier = ">=5.3.0,<6" },
     { name = "django", specifier = ">=4.2.17,<5.0.0" },
-    { name = "django-axes", specifier = ">=6.3.0,<7.0.0" },
+    { name = "django-axes", specifier = ">=8.0.0,<8.1.0" },
     { name = "django-cors-headers", specifier = ">=4.3.1,<5.0.0" },
     { name = "django-environ", specifier = ">=0.10.0,<1.0.0" },
     { name = "django-filter", specifier = ">=22.1" },
