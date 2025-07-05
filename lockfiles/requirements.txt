@@ -191,7 +191,7 @@ six==1.17.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     #   pyvmomi
 sqlparse==0.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via django
-typing-extensions==4.14.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+typing-extensions==4.14.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   psycopg
     #   pydantic

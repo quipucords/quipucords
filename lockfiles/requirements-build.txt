@@ -108,7 +108,7 @@ types-psutil==7.0.0.20250601
     # via mypy
 types-setuptools==80.9.0.20250529
     # via mypy
-typing-extensions==4.14.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+typing-extensions==4.14.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   mypy
     #   setuptools-scm
