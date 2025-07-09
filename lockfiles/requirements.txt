@@ -8,7 +8,7 @@ ansible-core==2.17.12 ; (implementation_name == 'cpython' and sys_platform == 'd
     # via ansible
 ansible-runner==2.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-asgiref==3.8.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+asgiref==3.9.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django
     #   django-axes
@@ -25,7 +25,7 @@ cachetools==5.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwi
     # via google-auth
 celery==5.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-certifi==2025.6.15 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+certifi==2025.7.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   kubernetes
     #   requests
@@ -191,7 +191,7 @@ six==1.17.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     #   pyvmomi
 sqlparse==0.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via django
-typing-extensions==4.14.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+typing-extensions==4.14.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   psycopg
     #   pydantic
