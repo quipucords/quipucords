@@ -21,7 +21,7 @@ function get_django_config() {
 
     PYTHON=$(poetry run command -v python 2>/dev/null || command -v python)
     echo "from django.conf import settings;print(settings.${CONFIG_NAME})" |
-        "${PYTHON}" quipucords/manage.py shell --settings quipucords.settings
+        "${PYTHON}" quipucords/manage.py shell --no-imports --settings quipucords.settings
 }
 
 function check_db_liveness() {
