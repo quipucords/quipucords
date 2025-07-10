@@ -60,7 +60,7 @@ export PATH="$HOME/bin:$PATH"
 The default versions in macOS of some programs like `make` and `sed` are too old or incompatible with our build commands. Install modern versions plus additional required programs using Homebrew:
 
 ```sh
-brew install make coreutils gnu-sed skopeo oras rename yq shellcheck
+brew install make coreutils gnu-sed skopeo oras rename yq shellcheck nmap
 ```
 
 After installing some programs like `make`, update your `PATH` to override the system defaults. For example:
