@@ -22,7 +22,6 @@ from api.views import (
     jobs,
     ping,
     reports,
-    source_bulk_delete,
     status,
     upload_raw_facts,
 )
@@ -46,7 +45,6 @@ v1_urls = [
         credential_bulk_delete,
         name="credentials-bulk-delete",
     ),
-    path("sources/bulk_delete/", source_bulk_delete, name="sources-bulk-delete"),
     path("scans/bulk_delete/", scan_bulk_delete, name="scans-bulk-delete"),
     path("reports/", upload_raw_facts, name="reports-upload"),
     path(
