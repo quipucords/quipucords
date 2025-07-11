@@ -27,54 +27,50 @@ from tests.factories import (
 class TestSourceBulkDelete:
     """Tests the Source bulk_delete function."""
 
-    def test_bulk_delete_specific_ids(self, client_logged_in):
+    @pytest.mark.parametrize("version", ["v1", "v2"])
+    def test_bulk_delete_specific_ids(self, client_logged_in, version):
         """Test that bulk delete deletes all requested sources."""
         source1 = SourceFactory()
         source2 = SourceFactory()
         delete_request = {"ids": [source1.id, source2.id]}
-        response = client_logged_in.post(
-            reverse("v1:sources-bulk-delete"),
-            data=delete_request,
-        )
+        url = reverse(f"{version}:source-bulk-delete")
+        response = client_logged_in.post(url, data=delete_request)
         assert response.ok
         assert len(Source.objects.filter(id__in=[source1.id, source2.id])) == 0
 
-    def test_bulk_delete_all_ids(self, client_logged_in):
+    @pytest.mark.parametrize("version", ["v1", "v2"])
+    def test_bulk_delete_all_ids(self, client_logged_in, version):
         """Test that bulk delete deletes all sources."""
         source1 = SourceFactory()
         source2 = SourceFactory()
         delete_request = {"ids": ALL_IDS_MAGIC_STRING}
-        response = client_logged_in.post(
-            reverse("v1:sources-bulk-delete"),
-            data=delete_request,
-        )
+        url = reverse(f"{version}:source-bulk-delete")
+        response = client_logged_in.post(url, data=delete_request)
         assert response.ok
         assert len(Source.objects.filter(id__in=[source1.id, source2.id])) == 0
         assert Source.objects.count() == 0
 
-    def test_bulk_delete_rejects_invalid_inputs(self, client_logged_in):
+    @pytest.mark.parametrize("version", ["v1", "v2"])
+    def test_bulk_delete_rejects_invalid_inputs(self, client_logged_in, version):
         """
         Test that bulk delete rejects unexpected value types in "ids".
 
         Note: test_set_of_ids_or_all_str covers bad inputs more exhaustively.
         """
         invalid_delete_params = {"ids": []}
-        response = client_logged_in.post(
-            reverse("v1:sources-bulk-delete"),
-            data=invalid_delete_params,
-        )
+        url = reverse(f"{version}:source-bulk-delete")
+        response = client_logged_in.post(url, data=invalid_delete_params)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_bulk_delete_ignores_missing_ids(self, client_logged_in, faker):
+    @pytest.mark.parametrize("version", ["v1", "v2"])
+    def test_bulk_delete_ignores_missing_ids(self, client_logged_in, faker, version):
         """Test bulk delete succeeds and reports missing IDs."""
         source1 = SourceFactory()
         source2 = SourceFactory()
         non_existent_id = generate_invalid_id(faker)
         delete_request = {"ids": [non_existent_id, source1.id, source2.id]}
-        response = client_logged_in.post(
-            reverse("v1:sources-bulk-delete"),
-            data=delete_request,
-        )
+        url = reverse(f"{version}:source-bulk-delete")
+        response = client_logged_in.post(url, data=delete_request)
         assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == set([source1.id, source2.id])
@@ -82,17 +78,16 @@ class TestSourceBulkDelete:
         assert response_json["skipped"] == []
         assert not Source.objects.filter(pk__in=[source1.id, source2.id]).exists()
 
-    def test_bulk_delete_ignores_errors(self, client_logged_in):
+    @pytest.mark.parametrize("version", ["v1", "v2"])
+    def test_bulk_delete_ignores_errors(self, client_logged_in, version):
         """Test bulk delete succeeds and reports skipped IDs."""
         source = SourceFactory()
         source_in_use = SourceFactory()
         scan1 = ScanFactory(sources=[source_in_use])
         scan2 = ScanFactory(sources=[source_in_use])
         delete_request = {"ids": [source_in_use.id, source.id]}
-        response = client_logged_in.post(
-            reverse("v1:sources-bulk-delete"),
-            data=delete_request,
-        )
+        url = reverse(f"{version}:source-bulk-delete")
+        response = client_logged_in.post(url, data=delete_request)
         assert response.ok
         response_json = response.json()
         assert response_json["deleted"] == [source.id]
@@ -103,7 +98,8 @@ class TestSourceBulkDelete:
         assert not Source.objects.filter(pk=source.id).exists()
         assert Source.objects.filter(pk=source_in_use.id).exists()
 
-    def test_bulk_delete_all(self, client_logged_in, celery_worker):
+    @pytest.mark.parametrize("version", ["v1", "v2"])
+    def test_bulk_delete_all(self, client_logged_in, celery_worker, version):
         """Test bulk delete succeeds with magic "all" token."""
         source1 = SourceFactory()
         source1_in_use = SourceFactory()
@@ -128,10 +124,8 @@ class TestSourceBulkDelete:
         assert scan3task.job.scan is None
 
         delete_request = {"ids": ALL_IDS_MAGIC_STRING}
-        response = client_logged_in.post(
-            reverse("v1:sources-bulk-delete"),
-            data=delete_request,
-        )
+        url = reverse(f"{version}:source-bulk-delete")
+        response = client_logged_in.post(url, data=delete_request)
         assert response.ok
         response_json = response.json()
         assert set(response_json["deleted"]) == {
