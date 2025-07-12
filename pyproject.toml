@@ -37,7 +37,7 @@ dependencies = [
     "pexpect<5.0.0,>=4.8.0",
     "psycopg[c]<4.0.0,>=3.2.3",
     "pydantic<2.0.0,>=1.10.4",
-    "rpds-py==0.24.0",  # pinning because konflux/hermeto/cargo is failing on newer 0.25.1 version
+    "rpds-py==0.26.0",  # pinning because konflux/hermeto/cargo is failing on newer 0.25.1 version
     "pyvmomi<9.0.0,>=8.0.2",
     "pyyaml<7.0.0,>=6.0.1",
     "requests<3.0.0,>=2.32.2",
