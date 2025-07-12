@@ -174,7 +174,7 @@ requests==2.32.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     #   requests-oauthlib
 requests-oauthlib==2.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
-resolvelib==1.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+resolvelib==1.2.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible-core
 rpds-py==0.24.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
