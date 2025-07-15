@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
   # unnoficial RHEL images
-  (6..9).each do |n|
+  (7..9).each do |n|
     config.vm.define "rhel%d" % n do |vmconfig|
       vmconfig.vm.box = "generic/rhel%d" % n
     end
