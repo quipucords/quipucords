@@ -4,6 +4,7 @@ These models are used in the REST definitions
 """
 
 import ssl
+import uuid
 from functools import cached_property
 
 from django.db import models
@@ -34,6 +35,7 @@ class Source(BaseModel):
         SSL_PROTOCOL_TLSv1_2: ssl.PROTOCOL_TLSv1_2,
     }
 
+    global_id = models.UUIDField(default=uuid.uuid4, unique=True)
     name = models.CharField(max_length=64, unique=True)
     source_type = models.CharField(
         max_length=12, choices=DataSources.choices, null=False
