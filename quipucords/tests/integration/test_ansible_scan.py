@@ -20,6 +20,19 @@ def mocked_requests(requests_mock, live_server):
     for method in ("GET", "POST"):
         requests_mock.register_uri(method, django_url_matcher, real_http=True)
     ansible_host = "https://ansible-controller.host:443"
+    # we simulate an AAP Controller type API (<=2.4)
+    requests_mock.get(
+        f"{ansible_host}/api/", json={"available_versions": {"v2": "/api/v2/"}}
+    )
+    requests_mock.get(
+        f"{ansible_host}/api/v2/",
+        json={
+            "me": "/api/v2/me/",
+            "ping": "/api/v2/ping/",
+            "hosts": "/api/v2/hosts/",
+            "jobs": "/api/v2/jobs/",
+        },
+    )
     # only thing we care "me" is if it has a valid status code.
     requests_mock.get(f"{ansible_host}/api/v2/me/")
     requests_mock.get(
