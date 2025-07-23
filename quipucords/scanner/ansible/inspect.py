@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import namedtuple
 from logging import getLogger
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.db import transaction
@@ -38,6 +39,8 @@ class InspectTaskRunner(AnsibleTaskRunner):
         "raise_for_status": True,
         "timeout": settings.QUIPUCORDS_INSPECT_TASK_TIMEOUT,
     }
+
+    AAP_ENDPOINTS = namedtuple("AapEndpoints", ["me", "ping", "hosts", "jobs"])
 
     def __init__(self, *args, **kwargs):
         """Initialize class."""
@@ -122,11 +125,12 @@ class InspectTaskRunner(AnsibleTaskRunner):
         v2_ctrl_url = ctrl_ep.get("available_versions")["v2"]
         v2_ctrl_ep = self.client.get(v2_ctrl_url, **self.REQUEST_KWARGS).json()
 
-        self.endpoints = namedtuple("Endpoints", ["me", "ping", "hosts", "jobs"])
-        self.endpoints.me = v2_ctrl_ep["me"]
-        self.endpoints.ping = v2_ctrl_ep["ping"]
-        self.endpoints.hosts = v2_ctrl_ep["hosts"]
-        self.endpoints.jobs = v2_ctrl_ep["jobs"]
+        self.endpoints = self.AAP_ENDPOINTS(
+            me=v2_ctrl_ep.get("me"),
+            ping=v2_ctrl_ep.get("ping"),
+            hosts=v2_ctrl_ep.get("hosts"),
+            jobs=v2_ctrl_ep.get("jobs"),
+        )
 
     @transaction.atomic
     def _save_initial_connection_results(self, conn_result):
@@ -227,7 +231,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
     def get_hosts_from_job_events(self, job_id) -> set:
         """Get unique hosts found in job events."""
         events_generator = self.client.get_paginated_results(
-            f"{self.endpoints.jobs}{job_id}/job_events/?event=runner_on_start",
+            urljoin(self.endpoints.jobs, f"{job_id}/job_events/?event=runner_on_start"),
             **self.REQUEST_KWARGS,
         )
         unique_hosts = set()
