@@ -8,7 +8,7 @@ from tests.integration.test_smoker import Smoker
 
 
 @pytest.fixture
-def mocked_requests(requests_mock, live_server):
+def mocked_requests(request, requests_mock, live_server):
     """
     Mock all requests ansible controller scanner will make.
 
@@ -20,30 +20,45 @@ def mocked_requests(requests_mock, live_server):
     for method in ("GET", "POST"):
         requests_mock.register_uri(method, django_url_matcher, real_http=True)
     ansible_host = "https://ansible-controller.host:443"
-    # we simulate an AAP Controller type API (<=2.4)
+    if request.param == "AAP2.4":
+        # AAP Controller type API endpoint (<=2.4)
+        aap_controller = "/api/v2"
+        requests_mock.get(
+            f"{ansible_host}/api/",
+            json={"available_versions": {"v2": f"{aap_controller}/"}},
+        )
+    else:
+        # AAP Web/Gateway type API endpoint (>=2.5)
+        aap_controller = "/api/controller/v2"
+        requests_mock.get(
+            f"{ansible_host}/api/", json={"apis": {"controller": "/api/controller/"}}
+        )
+        requests_mock.get(
+            f"{ansible_host}/api/controller/",
+            json={"available_versions": {"v2": f"{aap_controller}/"}},
+        )
+
     requests_mock.get(
-        f"{ansible_host}/api/", json={"available_versions": {"v2": "/api/v2/"}}
-    )
-    requests_mock.get(
-        f"{ansible_host}/api/v2/",
+        f"{ansible_host}{aap_controller}/",
         json={
-            "me": "/api/v2/me/",
-            "ping": "/api/v2/ping/",
-            "hosts": "/api/v2/hosts/",
-            "jobs": "/api/v2/jobs/",
+            "me": f"{aap_controller}/me/",
+            "ping": f"{aap_controller}/ping/",
+            "hosts": f"{aap_controller}/hosts/",
+            "jobs": f"{aap_controller}/jobs/",
         },
     )
-    # only thing we care "me" is if it has a valid status code.
-    requests_mock.get(f"{ansible_host}/api/v2/me/")
+    # For the "me" API, we only care that it is accessible and has a valid status code.
+    requests_mock.get(f"{ansible_host}{aap_controller}/me/")
+
     requests_mock.get(
-        f"{ansible_host}/api/v2/ping/",
+        f"{ansible_host}{aap_controller}/ping/",
         json={
             "version": "<ANSIBLE_CONTROLLER_VERSION>",
             "active_node": "<NODE_IP>",
         },
     )
     requests_mock.get(
-        f"{ansible_host}/api/v2/hosts/",
+        f"{ansible_host}{aap_controller}/hosts/",
         json={
             "count": 1,
             "next": None,
@@ -61,7 +76,7 @@ def mocked_requests(requests_mock, live_server):
     )
 
     requests_mock.get(
-        f"{ansible_host}/api/v2/jobs/",
+        f"{ansible_host}{aap_controller}/jobs/",
         json={
             "count": 1,
             "next": None,
@@ -70,7 +85,7 @@ def mocked_requests(requests_mock, live_server):
         },
     )
     requests_mock.get(
-        f"{ansible_host}/api/v2/jobs/1/job_events/?event=runner_on_start",
+        f"{ansible_host}{aap_controller}/jobs/1/job_events/?event=runner_on_start",
         json={
             "count": 1,
             "next": None,
@@ -79,7 +94,7 @@ def mocked_requests(requests_mock, live_server):
         },
     )
     requests_mock.get(
-        f"{ansible_host}/api/v2/jobs/2/job_events/?event=runner_on_start",
+        f"{ansible_host}{aap_controller}/jobs/2/job_events/?event=runner_on_start",
         json={
             "count": 1,
             "next": None,
@@ -143,6 +158,7 @@ def expected_fingerprints():
 @pytest.mark.integration
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.usefixtures("mocked_requests")
+@pytest.mark.parametrize("mocked_requests", ("AAP2.4", "AAP2.5"), indirect=True)
 class TestAnsibleScan(Smoker):
     """Smoke test Ansible automation controller scanner."""
 
