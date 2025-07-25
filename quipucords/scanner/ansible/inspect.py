@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections import namedtuple
 from logging import getLogger
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.db import transaction
@@ -38,6 +40,13 @@ class InspectTaskRunner(AnsibleTaskRunner):
         "timeout": settings.QUIPUCORDS_INSPECT_TASK_TIMEOUT,
     }
 
+    AAP_ENDPOINTS = namedtuple("AapEndpoints", ["me", "ping", "hosts", "jobs"])
+
+    def __init__(self, *args, **kwargs):
+        """Initialize class."""
+        super().__init__(*args, **kwargs)
+        self.endpoints = None
+
     def execute_task(self):
         """
         Execute the task and save the results.
@@ -65,8 +74,9 @@ class InspectTaskRunner(AnsibleTaskRunner):
         """
         self._init_connection_stats()
         try:
+            self._detect_ansible_endpoints()
             self.client.get(
-                "/api/v2/me/",
+                self.endpoints.me,
                 timeout=settings.QUIPUCORDS_CONNECT_TASK_TIMEOUT,
                 raise_for_status=True,
             )
@@ -94,6 +104,32 @@ class InspectTaskRunner(AnsibleTaskRunner):
             sys_scanned=0,
             sys_failed=0,
             sys_unreachable=0,
+        )
+
+    def _detect_ansible_endpoints(self):
+        """
+        Detect the Ansible endpoints.
+
+        This is called to determine the Ansible endpoints we need for the Ansible
+        Automation Platform controller we are connected to. Handles both types:
+        - Controller type endpoint (Ansible <=2.4 - i.e., port 8443)
+        - Gateway type endpoint (Ansible >=2.5 - i.e., port 443) which results
+        in /api/controller/v# type endpoints.
+        """
+        if self.endpoints:
+            return
+        ctrl_ep = self.client.get("/api/", **self.REQUEST_KWARGS).json()
+        if ctrl_ep.get("apis"):
+            ctrl_url = ctrl_ep.get("apis")["controller"]
+            ctrl_ep = self.client.get(ctrl_url, **self.REQUEST_KWARGS).json()
+        v2_ctrl_url = ctrl_ep.get("available_versions")["v2"]
+        v2_ctrl_ep = self.client.get(v2_ctrl_url, **self.REQUEST_KWARGS).json()
+
+        self.endpoints = self.AAP_ENDPOINTS(
+            me=v2_ctrl_ep.get("me"),
+            ping=v2_ctrl_ep.get("ping"),
+            hosts=v2_ctrl_ep.get("hosts"),
+            jobs=v2_ctrl_ep.get("jobs"),
         )
 
     @transaction.atomic
@@ -147,7 +183,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
     def get_hosts(self) -> list[dict]:
         """Retrieve ansible managed hosts/nodes."""
         hosts_generator = self.client.get_paginated_results(
-            "/api/v2/hosts/",
+            self.endpoints.hosts,
             max_concurrency=self.max_concurrency,
             **self.REQUEST_KWARGS,
         )
@@ -165,7 +201,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
         :param client: AnsibleControllerApi to use for API calls
         :returns: A list of dicts containing information about each host in.
         """
-        response = self.client.get("/api/v2/ping/", **self.REQUEST_KWARGS)
+        response = self.client.get(self.endpoints.ping, **self.REQUEST_KWARGS)
         data = response.json()
         # set "system_name" (aka connection host) for use on fingerprint phase
         data["system_name"] = data.get("active_node") or self.system_name
@@ -179,7 +215,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
         :returns: a dictionary with job ids and unique hosts.
         """
         jobs_generator = self.client.get_paginated_results(
-            "/api/v2/jobs/",
+            self.endpoints.jobs,
             max_concurrency=self.max_concurrency,
             **self.REQUEST_KWARGS,
         )
@@ -195,7 +231,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
     def get_hosts_from_job_events(self, job_id) -> set:
         """Get unique hosts found in job events."""
         events_generator = self.client.get_paginated_results(
-            f"api/v2/jobs/{job_id}/job_events/?event=runner_on_start",
+            urljoin(self.endpoints.jobs, f"{job_id}/job_events/?event=runner_on_start"),
             **self.REQUEST_KWARGS,
         )
         unique_hosts = set()
