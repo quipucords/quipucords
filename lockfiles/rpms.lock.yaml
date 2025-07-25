@@ -32,27 +32,27 @@ arches:
     name: gcc
     evr: 11.5.0-5.el9_5
     sourcerpm: gcc-11.5.0-5.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/git-2.47.1-2.el9_6.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/git-2.47.3-1.el9_6.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 55457
-    checksum: sha256:6fe253ad5859c4d2b617dca0f658e87eef9369b0c2240c1e3129dd2aecc02cdd
+    size: 51846
+    checksum: sha256:6d80ba0961c5ddebd612a86790023e8086e5c0ed10bc282b088362b98df2c0a9
     name: git
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/git-core-2.47.1-2.el9_6.aarch64.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/git-core-2.47.3-1.el9_6.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 5042227
-    checksum: sha256:99e42a9a19e5eac7f1480b33dfb660d66e81e314b731eee6c8354b0146254b4a
+    size: 5036453
+    checksum: sha256:8f5f3f6fa402ecf4215c36807284dd447c990ff747b1a1150e7d638c37bfbf1e
     name: git-core
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/git-core-doc-2.47.1-2.el9_6.noarch.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/git-core-doc-2.47.3-1.el9_6.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 3194257
-    checksum: sha256:172dd65142fcd6548658a47e46d06a9a80251ab7a2cd6da6a0a99bb92e83cb56
+    size: 3195826
+    checksum: sha256:0008ecada894ff2a51c43f868b7727baae3836911b541a613769d2e93d501442
     name: git-core-doc
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/g/glibc-devel-2.34-168.el9_6.20.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 564077
@@ -60,13 +60,13 @@ arches:
     name: glibc-devel
     evr: 2.34-168.el9_6.20
     sourcerpm: glibc-2.34-168.el9_6.20.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-570.26.1.el9_6.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-570.28.1.el9_6.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 3653445
-    checksum: sha256:e2c706831d0e8a8e8f811989f1d41ce0fd4eea895e30909ba265c70ba2f0a66b
+    size: 3655593
+    checksum: sha256:2aa3e7cecd0409f1854046e447bdf8e0e12e7c5c26155f588cecbf45204315dd
     name: kernel-headers
-    evr: 5.14.0-570.26.1.el9_6
-    sourcerpm: kernel-5.14.0-570.26.1.el9_6.src.rpm
+    evr: 5.14.0-570.28.1.el9_6
+    sourcerpm: kernel-5.14.0-570.28.1.el9_6.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libasan-11.5.0-5.el9_5.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 413819
@@ -298,13 +298,13 @@ arches:
     name: perl-Getopt-Std
     evr: 1.12-481.el9
     sourcerpm: perl-5.32.1-481.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-Git-2.47.1-2.el9_6.noarch.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-Git-2.47.3-1.el9_6.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 40089
-    checksum: sha256:3bb2b9b3f197bb548455a5ed7304ef25510f4ae6f4ee92dd4db74946a869442e
+    size: 38720
+    checksum: sha256:d0b4a24233ba8a6eb0966b3b6d8d52dfc5c33577fc8033e693f9aa181f3e2330
     name: perl-Git
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-HTTP-Tiny-0.076-462.el9.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 58720
@@ -1086,27 +1086,27 @@ arches:
     name: gcc
     evr: 11.5.0-5.el9_5
     sourcerpm: gcc-11.5.0-5.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/git-2.47.1-2.el9_6.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/git-2.47.3-1.el9_6.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 55489
-    checksum: sha256:35c844a31e6877ad10dcd4c695f3f159ab88dc6978bc98b45b8ee47e94b5536b
+    size: 51883
+    checksum: sha256:5097b6a0540e33dd02d581109cf1b10fcc736975c330208fae148efacb13b649
     name: git
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/git-core-2.47.1-2.el9_6.x86_64.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/git-core-2.47.3-1.el9_6.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 4947862
-    checksum: sha256:ae898605cf906ea73181921224143895e20a6eca5df56e8b092bc78e634cb09f
+    size: 4926340
+    checksum: sha256:4056d5f982607b0c8106ad1467b396be4abf150d8532fe018c9dc469cf149411
     name: git-core
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/git-core-doc-2.47.1-2.el9_6.noarch.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/git-core-doc-2.47.3-1.el9_6.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 3194257
-    checksum: sha256:172dd65142fcd6548658a47e46d06a9a80251ab7a2cd6da6a0a99bb92e83cb56
+    size: 3195826
+    checksum: sha256:0008ecada894ff2a51c43f868b7727baae3836911b541a613769d2e93d501442
     name: git-core-doc
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/g/glibc-devel-2.34-168.el9_6.20.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 35427
@@ -1121,13 +1121,13 @@ arches:
     name: glibc-headers
     evr: 2.34-168.el9_6.20
     sourcerpm: glibc-2.34-168.el9_6.20.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-570.26.1.el9_6.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-570.28.1.el9_6.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 3691765
-    checksum: sha256:305938d573e007c082bca30108282ef2f2b287e938dfcd0cb5f6dd6e7472375d
+    size: 3693985
+    checksum: sha256:37205edddcd0914c54aaf2fb2c520facd55905331b9571e3e0f6799758fdcb3a
     name: kernel-headers
-    evr: 5.14.0-570.26.1.el9_6
-    sourcerpm: kernel-5.14.0-570.26.1.el9_6.src.rpm
+    evr: 5.14.0-570.28.1.el9_6
+    sourcerpm: kernel-5.14.0-570.28.1.el9_6.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libffi-devel-3.4.2-8.el9.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 32520
@@ -1352,13 +1352,13 @@ arches:
     name: perl-Getopt-Std
     evr: 1.12-481.el9
     sourcerpm: perl-5.32.1-481.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-Git-2.47.1-2.el9_6.noarch.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-Git-2.47.3-1.el9_6.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 40089
-    checksum: sha256:3bb2b9b3f197bb548455a5ed7304ef25510f4ae6f4ee92dd4db74946a869442e
+    size: 38720
+    checksum: sha256:d0b4a24233ba8a6eb0966b3b6d8d52dfc5c33577fc8033e693f9aa181f3e2330
     name: perl-Git
-    evr: 2.47.1-2.el9_6
-    sourcerpm: git-2.47.1-2.el9_6.src.rpm
+    evr: 2.47.3-1.el9_6
+    sourcerpm: git-2.47.3-1.el9_6.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-HTTP-Tiny-0.076-462.el9.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 58720

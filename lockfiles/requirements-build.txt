@@ -12,8 +12,6 @@ cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") o
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-coherent-licensed==0.5.2
-    # via setuptools
 cython==3.1.2
     # via
     #   pydantic
@@ -25,7 +23,6 @@ docutils==0.21.2
 flit-core==3.12.0
     # via
     #   click
-    #   coherent-licensed
     #   django-filter
     #   docutils
     #   idna
@@ -135,11 +132,10 @@ setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==80.7.1
-    # via ansible-core
 setuptools==80.9.0
     # via
     #   ansible
+    #   ansible-core
     #   bcrypt
     #   cachetools
     #   calver
