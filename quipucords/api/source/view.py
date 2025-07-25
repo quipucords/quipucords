@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_filters.rest_framework import CharFilter, DjangoFilterBackend, FilterSet
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -55,75 +55,6 @@ def format_source(json_source):
 
         json_source["connection"] = json_scan_job
     return json_source
-
-
-@api_view(["post"])
-def source_bulk_delete(request):
-    """
-    Bulk delete sources.
-
-    Response payload contains IDs of sources deleted, skipped, and not found.
-    Example response:
-
-        {
-            "message": \
-                "Deleted 3 sources. "\
-                "Could not find 0 sources. "\
-                "Failed to delete 2 sources.",
-            "deleted": [1, 2, 3],
-            "missing": [],
-            "skipped": [
-                {"source": 6, "scans": [8]},
-                {"source": 7, "scans": [9, 10]},
-            ],
-        }
-
-    input:      "ids" : List of ids to delete, or string ALL_IDS_MAGIC_STRING
-    returns:    200 OK - upon successfully deleting any sources.
-                400 Bad Request - ids list is missing or empty.
-    """
-    ids = set_of_ids_or_all_str(request.data.get("ids"))
-
-    with transaction.atomic():
-        sources = Source.objects.all()
-        if ids != ALL_IDS_MAGIC_STRING:
-            sources = sources.filter(id__in=ids)
-        source_ids_requested = ids if isinstance(ids, set) else set()
-        source_ids_found = set(sources.values_list("id", flat=True))
-        source_ids_with_scans = (
-            sources.exclude(scan=None)
-            .prefetch_related("scan")
-            .values_list("id", "scan")
-            .order_by("id")  # later groupby needs sorted input
-        )
-        sources.filter(scan=None).delete()
-
-    source_ids_missing = source_ids_requested - source_ids_found
-
-    source_ids_skipped = []
-    for source_id, grouper in groupby(source_ids_with_scans, key=lambda c: c[0]):
-        source_ids_skipped.append(
-            {"source": source_id, "scans": [g[1] for g in grouper]}
-        )
-
-    source_ids_deleted = source_ids_found - set(c["source"] for c in source_ids_skipped)
-
-    message = _(
-        "Deleted {count_deleted} sources. "
-        "Could not find {count_missing} sources. "
-        "Failed to delete {count_failed} sources."
-    ).format(
-        count_deleted=len(source_ids_deleted),
-        count_missing=len(source_ids_missing),
-        count_failed=len(source_ids_skipped),
-    )
-    response_data = {
-        "message": message,
-        "deleted": source_ids_deleted,
-        "missing": source_ids_missing,
-        "skipped": source_ids_skipped,
-    }
-    return Response(data=response_data, status=status.HTTP_200_OK)
 
 
 class SourceFilter(FilterSet):
@@ -246,3 +177,53 @@ class SourceViewSet(ModelViewSet):
 
         except Source.DoesNotExist as exception:
             raise Http404 from exception
+
+    @action(detail=False, methods=["post"])
+    def bulk_delete(self, request):
+        """Bulk delete sources."""
+        ids = set_of_ids_or_all_str(request.data.get("ids"))
+
+        with transaction.atomic():
+            sources = Source.objects.all()
+            if ids != ALL_IDS_MAGIC_STRING:
+                sources = sources.filter(id__in=ids)
+            source_ids_requested = ids if isinstance(ids, set) else set()
+            source_ids_found = set(sources.values_list("id", flat=True))
+            source_ids_with_scans = (
+                sources.exclude(scan=None)
+                .prefetch_related("scan")
+                .values_list("id", "scan")
+                .order_by("id")
+            )
+            sources.filter(scan=None).delete()
+
+        source_ids_missing = source_ids_requested - source_ids_found
+
+        source_ids_skipped = []
+        for source_id, grouper in groupby(source_ids_with_scans, key=lambda c: c[0]):
+            source_ids_skipped.append(
+                {"source": source_id, "scans": [g[1] for g in grouper]}
+            )
+
+        source_ids_deleted = source_ids_found - set(
+            c["source"] for c in source_ids_skipped
+        )
+
+        message = _(
+            "Deleted {count_deleted} sources. "
+            "Could not find {count_missing} sources. "
+            "Failed to delete {count_failed} sources."
+        ).format(
+            count_deleted=len(source_ids_deleted),
+            count_missing=len(source_ids_missing),
+            count_failed=len(source_ids_skipped),
+        )
+
+        response_data = {
+            "message": message,
+            "deleted": source_ids_deleted,
+            "missing": source_ids_missing,
+            "skipped": source_ids_skipped,
+        }
+
+        return Response(data=response_data, status=status.HTTP_200_OK)

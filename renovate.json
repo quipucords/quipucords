@@ -1,0 +1,6 @@
+{
+  "extends": ["group:all"],
+  "python": {
+    "enabled": false
+  }
+}

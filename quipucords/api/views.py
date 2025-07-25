@@ -14,7 +14,7 @@ from api.report.view_v1 import reports, upload_raw_facts
 from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSet
 from api.scanjob.view_v1 import ScanJobViewSet as ScanJobViewSetV1
-from api.source.view import SourceViewSet, source_bulk_delete
+from api.source.view import SourceViewSet
 from api.status.view import ping, status
 from api.user.token_view import QuipucordsExpiringAuthTokenView
 from api.user.view import UserViewSet
