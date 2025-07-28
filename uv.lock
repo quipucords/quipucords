@@ -1842,12 +1842,8 @@ wheels = [
 
 [[package]]
 name = "pyvmomi"
-version = "8.0.3.0.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/6d/78/4a3847c0487283e57679364b5797ee8f7a2c40a13bccdb430864e9190782/pyvmomi-8.0.3.0.1.tar.gz", hash = "sha256:db795c960159cfa3c81e6af4cf1f46618e61cf0349db1666de75df98a4f29c69", size = 1191984, upload-time = "2024-06-26T19:29:36.985Z" }
+version = "9.0.0.0"
+source = { git = "https://github.com/vmware/pyvmomi.git?tag=v9.0.0.0#e6cc09f32593d263b9ea0b611596a2c505786c6b" }
 
 [[package]]
 name = "pyyaml"
@@ -1971,7 +1967,7 @@ requires-dist = [
     { name = "pexpect", specifier = ">=4.8.0,<5.0.0" },
     { name = "psycopg", extras = ["c"], specifier = ">=3.2.3,<4.0.0" },
     { name = "pydantic", specifier = ">=1.10.4,<2.0.0" },
-    { name = "pyvmomi", specifier = ">=8.0.2,<9.0.0" },
+    { name = "pyvmomi", git = "https://github.com/vmware/pyvmomi.git?tag=v9.0.0.0" },
     { name = "pyyaml", specifier = ">=6.0.1,<7.0.0" },
     { name = "requests", specifier = ">=2.32.2,<3.0.0" },
     { name = "rpds-py", specifier = "==0.24.0" },

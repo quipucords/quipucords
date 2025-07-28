@@ -155,7 +155,7 @@ python-dateutil==2.9.0.post0 ; (implementation_name == 'cpython' and sys_platfor
     #   kubernetes
 python-string-utils==1.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via openshift
-pyvmomi==8.0.3.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+pyvmomi @ git+https://github.com/vmware/pyvmomi.git@e6cc09f32593d263b9ea0b611596a2c505786c6b ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 pyyaml==6.0.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
@@ -191,7 +191,6 @@ six==1.17.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     #   kubernetes
     #   openshift
     #   python-dateutil
-    #   pyvmomi
 sqlparse==0.5.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via django
 typing-extensions==4.14.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
