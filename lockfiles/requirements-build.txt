@@ -55,7 +55,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.9.1
+maturin==1.9.2
     # via
     #   cryptography
     #   rpds-py
@@ -164,6 +164,7 @@ setuptools==80.9.0
     #   pynacl
     #   python-daemon
     #   python-dateutil
+    #   pyvmomi
     #   pyyaml
     #   resolvelib
     #   semver
