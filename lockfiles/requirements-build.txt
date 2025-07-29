@@ -132,7 +132,7 @@ setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==80.9.0
+setuptools==78.1.1
     # via
     #   ansible
     #   ansible-core
