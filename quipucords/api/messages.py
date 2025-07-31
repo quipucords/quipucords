@@ -37,7 +37,7 @@ HC_NO_KEY_W_PASS = (
 HC_NAME_ALREADY_EXISTS = "Host credential with name=%s already exists"
 CRED_TYPE_NOT_ALLOWED_UPDATE = "cred_type is invalid for credential update"
 CRED_DELETE_NOT_VALID_W_SOURCES = (
-    "Credential cannot be deleted because it is used by 1 or more sources."
+    "Credential cannot be deleted because it is used by one or more sources."
 )
 
 # source messages
@@ -53,7 +53,7 @@ SOURCE_TYPE_INV = "A source_type must not be provided when updating a source."
 SOURCE_CRED_IDS_INV = "Credential identifiers must be integer values."
 SOURCE_MIN_CREDS = "Source must have at least one set of credentials."
 SOURCE_DELETE_NOT_VALID_W_SCANS = (
-    "Source cannot be deleted because it is used by 1 or more scans."
+    "Source cannot be deleted because it is used by one or more scans."
 )
 SOURCE_INVALID_SCHEMA_PROXY_URL = (
     "Enter a valid proxy URL including the protocol, such as 'http://host:port'."
