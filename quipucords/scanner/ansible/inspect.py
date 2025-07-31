@@ -230,9 +230,12 @@ class InspectTaskRunner(AnsibleTaskRunner):
 
     def get_hosts_from_job_events(self, job_id) -> set:
         """Get unique hosts found in job events."""
+        jobs_ep = self.endpoints.jobs
+        if not jobs_ep.endswith("/"):
+            jobs_ep += "/"
+        jobs_url = urljoin(jobs_ep, f"{job_id}/job_events/?event=runner_on_start")
         events_generator = self.client.get_paginated_results(
-            urljoin(self.endpoints.jobs, f"{job_id}/job_events/?event=runner_on_start"),
-            **self.REQUEST_KWARGS,
+            jobs_url, **self.REQUEST_KWARGS
         )
         unique_hosts = set()
         for event in events_generator:
