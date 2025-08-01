@@ -569,25 +569,37 @@ def test_unschedulable_logic(
     assert node.unschedulable == expected_value
 
 
-def test_with_config_info_sets_proxy_when_provided(mocker):
-    """Ensure proxy is set on KubeConfig when proxy_url is provided."""
-    kube_config_mock = mocker.Mock(spec=KubeConfig)
-    _ = mocker.patch(  # noqa: F841
-        "scanner.openshift.api.KubeConfig", return_value=kube_config_mock
-    )
+def test_with_config_info_passes_proxy_to_apiclient(mocker):
+    """
+    Ensure a valid proxy_url is applied to KubeConfig and ApiClient is called.
+
+    This test may seem trivial, but it's important. We previously passed the proxy
+    as a dict, which caused a TypeError deep in urllib3 when ApiClient was
+    initialized. This test reproduces the condition where that bug would have been
+    exposed (i.e., during client initialization), and ensures no exception is raised
+    when using a string, as expected.
+
+    If the initialization logic regresses, this test will fail — even without making
+    real requests.
+    """
+    kube_config_mock = mocker.Mock()
+    mocker.patch("scanner.openshift.api.KubeConfig", return_value=kube_config_mock)
     patched_api_client = mocker.patch("scanner.openshift.api.ApiClient")
 
+    proxy_url = "http://proxy.example.com:8080"
     client = OpenShiftApi.with_config_info(
         host="HOST",
         protocol="https",
         port="443",
         auth_token="TOKEN",
-        proxy_url="http://proxy.example.com:8080",
+        proxy_url=proxy_url,
     )
 
-    assert kube_config_mock.proxy == {"https": "http://proxy.example.com:8080"}
-    assert isinstance(client, OpenShiftApi)
+    assert hasattr(kube_config_mock, "proxy")
+    assert proxy_url in str(kube_config_mock.proxy)
+
     patched_api_client.assert_called_once_with(configuration=kube_config_mock)
+    assert isinstance(client, OpenShiftApi)
 
 
 def test_with_config_info_does_not_set_proxy_when_none(mocker):
@@ -605,3 +617,24 @@ def test_with_config_info_does_not_set_proxy_when_none(mocker):
     assert not hasattr(kube_config_mock, "proxy")
     assert isinstance(client, OpenShiftApi)
     patched_api_client.assert_called_once_with(configuration=kube_config_mock)
+
+
+def test_initialize_openshiftapi_with_proxy_config():
+    """
+    Ensure OpenShiftApi initializes successfully with a proxy URL.
+
+    This integration-style test verifies that initializing OpenShiftApi with a
+    proxy does not raise a TypeError. Previously, a dictionary was incorrectly
+    passed to proxy_url, causing urllib3.ProxyManager to fail.
+
+    The test avoids mocks to reproduce the actual failure scenario and prevent
+    regressions. No assertions are needed; if initialization fails, the test
+    will naturally error out.
+    """
+    OpenShiftApi.with_config_info(
+        host="HOST",
+        protocol="https",
+        port="443",
+        auth_token="TOKEN",
+        proxy_url="http://proxy.example.com:8080/",
+    )

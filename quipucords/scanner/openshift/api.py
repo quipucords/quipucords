@@ -127,7 +127,7 @@ class OpenShiftApi:
                 host_uri, ssl_verify=ssl_verify, **kwargs
             )
         if proxy_url:
-            kube_config.proxy = {protocol: proxy_url}
+            kube_config.proxy = proxy_url
         return cls(configuration=kube_config)
 
     @classmethod
