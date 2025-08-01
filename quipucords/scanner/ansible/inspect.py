@@ -138,6 +138,11 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 hosts=v2_ctrl_ep["hosts"],
                 jobs=v2_ctrl_ep["jobs"],
             )
+
+            logger.info(
+                f"Ansible Controller Endpoints for {self.scan_task.source.name}"
+                f" are {self.endpoints}"
+            )
         except KeyError as exception:
             self.endpoints = None
             raise AnsibleApiDetectionError(
