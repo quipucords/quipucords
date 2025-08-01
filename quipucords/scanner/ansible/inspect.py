@@ -15,6 +15,7 @@ from api.connresult.model import SystemConnectionResult
 from api.models import InspectGroup, InspectResult, RawFact, Scan, ScanTask
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
+from scanner.ansible.exceptions import AnsibleApiDetectionError
 from scanner.ansible.runner import AnsibleTaskRunner
 
 logger = getLogger(__name__)
@@ -87,6 +88,10 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 conn_result = SystemConnectionResult.UNREACHABLE
             else:
                 conn_result = SystemConnectionResult.FAILED
+        except AnsibleApiDetectionError as exception:
+            logger.exception(exception)
+            conn_result = SystemConnectionResult.FAILED
+
         self._save_initial_connection_results(conn_result)
         if conn_result == SystemConnectionResult.SUCCESS:
             return self.success_message, ScanTask.COMPLETED
@@ -118,19 +123,27 @@ class InspectTaskRunner(AnsibleTaskRunner):
         """
         if self.endpoints:
             return
-        ctrl_ep = self.client.get("/api/", **self.REQUEST_KWARGS).json()
-        if ctrl_ep.get("apis"):
-            ctrl_url = ctrl_ep.get("apis")["controller"]
-            ctrl_ep = self.client.get(ctrl_url, **self.REQUEST_KWARGS).json()
-        v2_ctrl_url = ctrl_ep.get("available_versions")["v2"]
-        v2_ctrl_ep = self.client.get(v2_ctrl_url, **self.REQUEST_KWARGS).json()
 
-        self.endpoints = self.AAP_ENDPOINTS(
-            me=v2_ctrl_ep.get("me"),
-            ping=v2_ctrl_ep.get("ping"),
-            hosts=v2_ctrl_ep.get("hosts"),
-            jobs=v2_ctrl_ep.get("jobs"),
-        )
+        try:
+            ctrl_ep = self.client.get("/api/", **self.REQUEST_KWARGS).json()
+            if ctrl_apis := ctrl_ep.get("apis"):
+                ctrl_url = ctrl_apis["controller"]
+                ctrl_ep = self.client.get(ctrl_url, **self.REQUEST_KWARGS).json()
+            v2_ctrl_url = ctrl_ep["available_versions"]["v2"]
+            v2_ctrl_ep = self.client.get(v2_ctrl_url, **self.REQUEST_KWARGS).json()
+
+            self.endpoints = self.AAP_ENDPOINTS(
+                me=v2_ctrl_ep["me"],
+                ping=v2_ctrl_ep["ping"],
+                hosts=v2_ctrl_ep["hosts"],
+                jobs=v2_ctrl_ep["jobs"],
+            )
+        except KeyError as exception:
+            self.endpoints = None
+            raise AnsibleApiDetectionError(
+                f"Unable to detect the Ansible API endpoints for {self.system_name},"
+                f" invalid key '{exception}'."
+            )
 
     @transaction.atomic
     def _save_initial_connection_results(self, conn_result):
