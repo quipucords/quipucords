@@ -628,7 +628,7 @@ def test_initialize_openshiftapi_with_proxy_config():
     passed to proxy_url, causing urllib3.ProxyManager to fail.
 
     The test avoids mocks to reproduce the actual failure scenario and prevent
-    regressions. No assertions are needed—if initialization fails, the test
+    regressions. No assertions are needed; if initialization fails, the test
     will naturally error out.
     """
     OpenShiftApi.with_config_info(
