@@ -63,7 +63,7 @@ class ProcessIdUJboss(process.Processor):
         # marks around the username it doesn't recognize.
         if plain_output in [
             "id: jboss: no such user",  # BusyBox id tends to use no quotes
-            "id: ‘jboss’: no such user",  # GNU id tends to use these "smart" quotes
+            "id: ‘jboss’: no such user",  # noqa: RUF001 E501, GNU id tends to use these "smart" quotes
             "id: 'jboss': no such user",  # Unknown build of id seen using plain quotes
         ]:
             return False

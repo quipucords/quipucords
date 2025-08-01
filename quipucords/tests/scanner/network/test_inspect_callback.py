@@ -177,13 +177,13 @@ def fact_with_bad_bytes():
             "rc": 0,
             "stdout": (
                 "root:x:0:0:root:/root:/bin/bash\r\n"
-                "ß´˜µ∫∑´®˙∆˚©ƒ∑´®¨˚˙∆ß∂ƒ∫≤“‘æ…≤≤µ˜e\udcc0\udcc0\udcf4\udcff:x:"
+                "ß´˜µ∫∑´®˙∆˚©ƒ∑´®¨˚˙∆ß∂ƒ∫≤“‘æ…≤≤µ˜e\udcc0\udcc0\udcf4\udcff:x:"  # noqa: RUF001 E501
                 "69420:69420:i am a potato:/home/potato:/bin/bash\r\n"
             ),
             "stdout_lines": [
                 "root:x:0:0:root:/root:/bin/bash",
                 (
-                    "ß´˜µ∫∑´®˙∆˚©ƒ∑´®¨˚˙∆ß∂ƒ∫≤“‘æ…≤≤µ˜e\udcc0\udcc0\udcf4\udcff:x:"
+                    "ß´˜µ∫∑´®˙∆˚©ƒ∑´®¨˚˙∆ß∂ƒ∫≤“‘æ…≤≤µ˜e\udcc0\udcc0\udcf4\udcff:x:"  # noqa: RUF001 E501
                     "69420:69420:i am a potato:/home/potato:/bin/bash"
                 ),
             ],
