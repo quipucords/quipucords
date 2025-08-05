@@ -23,7 +23,7 @@ Before installing quipucords, please review the following general design princip
   * The SSH user account on the target systems should have sufficient permissions to run commands and read system files, including (optionally) allowing `sudo` privilege escalation for commands like `systemctl`.
   * The SSH user account must use the default `bash` shell. The shell *cannot* be `/sbin/nologin`, `/bin/false`, or other non-interactive programs.
 
-# Prerequisites
+# Prerequisites and others
 
 quipucords is intended and supported only to run on Linux systems, specifically modern distributions of RHEL and Fedora. If you intend to run from source on other systems, you may encounter compatibility problems with other tools and frameworks.
 
