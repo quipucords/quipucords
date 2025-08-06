@@ -89,7 +89,7 @@ make update-lockfiles
 ```
 
 Besides python dependencies required for development, this command also requires `podman`, `skopeo`, `yq` (the go version, not the one on pypi),
-[`konflux-pipeline-patcher`](https://github.com/simonbaird/konflux-pipeline-patcher) and, if you are on macOS, `gsed`. You should already have these installed if you followed the instructions in `README.md`.
+and, if you are on macOS, `gsed`. You should already have these installed if you followed the instructions in `README.md`.
 
 -----
 
