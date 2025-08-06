@@ -34,33 +34,18 @@ Building and running quipucords locally from source requires modern versions of:
 - podman (https://podman.io/getting-started/installation)
 - skopeo
 - make
-- oras
 - rename
 - shellcheck
 - yq ([the go version](https://github.com/mikefarah/yq), not the one on pypi)
-- [Konflux Pipeline Patcher](https://github.com/simonbaird/konflux-pipeline-patcher)
 
 Use your system's package manager to install or upgrade as necessary.
-
-Note that [Konflux Pipeline Patcher](https://github.com/simonbaird/konflux-pipeline-patcher) is simply a shell script you must download like this:
-
-```sh
-# Replace $HOME/bin with wherever you keep custom scripts or programs.
-mkdir -p "$HOME/bin"
-curl -sL -o "$HOME/bin/pipeline-patcher" https://github.com/simonbaird/konflux-pipeline-patcher/raw/main/pipeline-patcher
-chmod a+x "$HOME/bin/pipeline-patcher"
-
-# You must include that bin dir in your PATH.
-# We strongly recommend you add this to your shell's rc/profile.
-export PATH="$HOME/bin:$PATH"
-```
 
 ## macOS prereqs
 
 The default versions in macOS of some programs like `make` and `sed` are too old or incompatible with our build commands. Install modern versions plus additional required programs using Homebrew:
 
 ```sh
-brew install make coreutils gnu-sed skopeo oras rename yq shellcheck nmap
+brew install make coreutils gnu-sed skopeo rename yq shellcheck nmap
 ```
 
 After installing some programs like `make`, update your `PATH` to override the system defaults. For example:
