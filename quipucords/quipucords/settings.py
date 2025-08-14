@@ -118,6 +118,7 @@ if PRODUCTION:
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
+ENCRYPTION_SECRET_KEY = SECRET_KEY  # Reuse SECRET_KEY until we have a new env var.
 
 DEBUG = False if PRODUCTION else env.bool("DJANGO_DEBUG", False)
 
