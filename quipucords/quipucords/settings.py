@@ -68,29 +68,90 @@ def create_random_key():
     )
 
 
-def app_secret_key_and_path():
-    """Return the SECRET_KEY and related DJANGO_SECRET_PATH to use."""
-    # We need to support DJANGO_SECRET_KEY from the Environment.
-    # This is necessary when the application keys are coming from
-    # OpenShift project secrets through the environment.
-    #
-    # We also update the DJANGO_SECRET_PATH file accordingly
-    # as it is also used as the Ansible password vault.
+def get_secret_settings() -> tuple[str, str, Path]:
+    """
+    Return various secrets-related settings.
+
+    This function is somewhat (needlessly?) complex. We expect secret values to exist in
+    some environment variables, but if they are absent, we have fallbacks to read files
+    on disk that we expect to contain secrets, but we will generate new random values
+    if we had neither env vars nor file contents to read. We always write the secret
+    values back into their respective files and ensure appropriate file permissions.
+
+    While we transition from quipucords-installer to quipucordsctl as the "official"
+    installation tool, we have additional complexity of looking for different env vars
+    because the newer quipucordsctl distinguishes the Django secret as separate from the
+    encryption secret but the older quipucords-installer treats them as the same value.
+
+    This has a side effect of modifying files located at the configured key paths.
+
+    This function returns a tuple containing values to assign to project settings:
+    * settings.SECRET_KEY: the Django secret
+    * settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY: an encryption secret key we use as an
+      encryption secret key
+    * settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH: path to a file that also contains
+      the value of the encryption secret key, required to invoke Ansible externally
+
+    Yes, this function writes secret key values to disk. This is unavoidable in the
+    current design. **This is a known security risk.**
+
+    TODO Stop handling DJANGO_SECRET_KEY. Prefer QUIPUCORDS_SESSION_SECRET_KEY.
+    TODO Stop handling DJANGO_SECRET_PATH. Prefer QUIPUCORDS_SESSION_SECRET_KEY_PATH.
+    TODO Stop assigning django_secret_key's value with encryption_secret_key.
+    """
+    # QUIPUCORDS_SESSION_SECRET_KEY is the "new" name for this variable.
+    # DJANGO_SECRET_KEY is the "old" name for this variable.
+    # While we support quipucords-installer, the old name is the fallback default.
+    django_secret_key = env.str(
+        "QUIPUCORDS_SESSION_SECRET_KEY", default=env("DJANGO_SECRET_KEY", default="")
+    )
+    # QUIPUCORDS_SESSION_SECRET_KEY_PATH is the "new" name for this variable.
+    # DJANGO_SECRET_PATH is the "old" name for this variable.
+    # While we support quipucords-installer, the old name is the fallback default.
     django_secret_path = Path(
-        env.str("DJANGO_SECRET_PATH", str(DEFAULT_DATA_DIR / "secret.txt"))
+        env.str(
+            "QUIPUCORDS_SESSION_SECRET_KEY_PATH",
+            default=env.str(
+                "DJANGO_SECRET_PATH", default=str(DEFAULT_DATA_DIR / "secret.txt")
+            ),
+        )
     )
 
-    django_secret_key = env("DJANGO_SECRET_KEY", default=None)
-
-    if django_secret_key:
-        django_secret_path.write_text(django_secret_key, encoding="utf-8")
-    elif not django_secret_path.exists():
+    if not django_secret_key and django_secret_path.exists():
+        django_secret_key = django_secret_path.read_text(encoding="utf-8")
+    if not django_secret_key:
         django_secret_key = create_random_key()
-        django_secret_path.write_text(django_secret_key, encoding="utf-8")
-        django_secret_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
-    else:
-        django_secret_key = django_secret_path.read_text(encoding="utf-8").strip()
-    return django_secret_key, django_secret_path
+    django_secret_path.write_text(django_secret_key, encoding="utf-8")
+    django_secret_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+    encryption_secret_key = env.str("QUIPUCORDS_ENCRYPTION_SECRET_KEY", default="")
+    encryption_secret_path = Path(
+        env.str(
+            "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH",
+            default=str(DEFAULT_DATA_DIR / "secret-encryption.txt"),
+        )
+    )
+
+    if encryption_secret_path.resolve() == django_secret_path.resolve():
+        error_message = (
+            "QUIPUCORDS_ENCRYPTION_SECRET_KEY and QUIPUCORDS_ENCRYPTION_SECRET_KEY "
+            "must not share the same file path."
+        )
+        logger.error(error_message)
+        raise ImproperlyConfigured(error_message)
+
+    if not encryption_secret_key and encryption_secret_path.exists():
+        encryption_secret_key = encryption_secret_path.read_text(encoding="utf-8")
+    if not encryption_secret_key:
+        # Until we move from quipucords-installer to quipucordsctl, we default to
+        # reusing django_secret_key if encryption_secret_key is not explicitly set
+        # or a file does not exist at encryption_secret_path.
+        # TODO Stop reusing django_secret_key here.
+        encryption_secret_key = django_secret_key
+    encryption_secret_path.write_text(encryption_secret_key, encoding="utf-8")
+    encryption_secret_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+    return django_secret_key, encryption_secret_key, encryption_secret_path
 
 
 QUIPUCORDS_SSH_CONNECT_TIMEOUT = env.int("QUIPUCORDS_SSH_CONNECT_TIMEOUT", 10)
@@ -117,8 +178,9 @@ if PRODUCTION:
     SESSION_COOKIE_SECURE = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-SECRET_KEY, DJANGO_SECRET_PATH = app_secret_key_and_path()
-ENCRYPTION_SECRET_KEY = SECRET_KEY  # Reuse SECRET_KEY until we have a new env var.
+SECRET_KEY, QUIPUCORDS_ENCRYPTION_SECRET_KEY, QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH = (
+    get_secret_settings()
+)
 
 DEBUG = False if PRODUCTION else env.bool("DJANGO_DEBUG", False)
 

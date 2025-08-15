@@ -1,91 +1,190 @@
 """Test settings module."""
 
+import os
+import stat
 from pathlib import Path
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
-from django.conf import settings as django_settings
+from django.core.exceptions import ImproperlyConfigured
 
 from quipucords import settings
-from quipucords.settings import app_secret_key_and_path
 
 
-def read_secret_key(secret_file):
-    """Return the secret stored in the secret file specified."""
-    return secret_file.read_text(encoding="utf-8").strip()
+def assert_secret_file_content(secret_path, expected_content):
+    """Assert that the secret file modes are correct."""
+    secret_path = Path(secret_path)
+    # We cast to Path because tmpdir produces PosixPath objects,
+    # but PosixPath.stat() does not return all mode data.
+    assert secret_path.exists()
+    secret_path_stats = secret_path.stat()
+    assert secret_path_stats.st_mode & stat.S_IRUSR  # owner has access
+    assert not secret_path_stats.st_mode & stat.S_IRWXG  # group no access
+    assert not secret_path_stats.st_mode & stat.S_IRWXO  # others no access
+    assert expected_content == secret_path.read_text(encoding="utf-8")
 
 
-@pytest.fixture
-def secret_key(faker):
-    """Return a random secret key for testing."""
-    return faker.password(length=64)
+def test_get_secret_settings_with_all_env_vars(faker, tmpdir, mocker):
+    """
+    Test get_secret_settings works when all related env vars are set.
+
+    This is an unusual use case but may be present during a transition period
+    for some users as we migrate from quipucords-installer to quipucordsctl.
+    """
+    expected_django_secret = faker.password()
+    expected_encryption_secret = faker.password()
+    expected_django_secret_path = tmpdir / faker.slug()
+    expected_encryption_secret_path = tmpdir / faker.slug()
+
+    new_environ = {
+        "DJANGO_SECRET_KEY": expected_django_secret,
+        "DJANGO_SECRET_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_SESSION_SECRET_KEY": expected_django_secret,
+        "QUIPUCORDS_SESSION_SECRET_KEY_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY": expected_encryption_secret,
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH": str(expected_encryption_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
+
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
 
 
-class TestSecretKey:
-    """Tests to verify SECRET_KEY and DJANGO_SECRET_PATH are properly defined."""
+def test_get_secret_settings_reads_from_files(faker, tmpdir, mocker):
+    """Test get_secret_settings reads from files when secrets are not in env vars."""
+    expected_django_secret = faker.password()
+    expected_encryption_secret = faker.password()
+    expected_django_secret_path = tmpdir / faker.slug()
+    expected_encryption_secret_path = tmpdir / faker.slug()
 
-    def test_django_secret_key(self, secret_key, tmp_path, mocker):
-        """Test DJANGO_SECRET_KEY is honored."""
-        secret_file = tmp_path / "secret"
-        mocker.patch.dict(
-            settings.os.environ,
-            {
-                "DJANGO_SECRET_PATH": str(secret_file),
-                "DJANGO_SECRET_KEY": secret_key,
-            },
-            clear=True,
-        )
+    new_environ = {
+        "DJANGO_SECRET_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH": str(expected_encryption_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
 
-        django_secret, django_secret_path = app_secret_key_and_path()
-        assert django_secret == secret_key
-        assert django_secret_path == secret_file
-        assert read_secret_key(django_secret_path) == secret_key
+    expected_django_secret_path.write_text(expected_django_secret, encoding="utf-8")
+    expected_encryption_secret_path.write_text(
+        expected_encryption_secret, encoding="utf-8"
+    )
 
-    def test_django_secret_path(self, tmp_path, secret_key, mocker):
-        """Test DJANGO_SECRET_PATH is honored."""
-        secret_file = tmp_path / "secret"
-        secret_file.write_text(secret_key)
-        mocker.patch.dict(
-            settings.os.environ,
-            {
-                "DJANGO_SECRET_PATH": str(secret_file),
-                "DJANGO_SECRET_KEY": secret_key,
-            },
-            clear=True,
-        )
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
 
-        django_secret, django_secret_path = app_secret_key_and_path()
-        assert django_secret == secret_key
-        assert django_secret_path == secret_file
-        assert read_secret_key(django_secret_path) == secret_key
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
 
-    def test_base_secret_key(self, mocker):
-        """Test base secret file is read and honored."""
-        base_secret_path = Path(str(django_settings.DEFAULT_DATA_DIR / "secret.txt"))
-        mocker.patch.dict(settings.os.environ, {}, clear=True)
-        if base_secret_path.exists():
-            base_secret_key = read_secret_key(base_secret_path)
-            django_secret, django_secret_path = app_secret_key_and_path()
-            assert django_secret == base_secret_key
-            assert base_secret_path == django_secret_path
-            assert read_secret_key(base_secret_path) == base_secret_key
 
-    @patch("quipucords.settings.create_random_key")
-    @patch("quipucords.settings.Path.exists")
-    def test_default_random_key(  # noqa: PLR0913
-        self, mock_path_exists, mock_create_random_key, tmp_path, mocker, secret_key
-    ):
-        """Test default random key generated if no secrets are specified."""
-        mock_path_exists.return_value = False
-        mock_create_random_key.return_value = secret_key
-        secret_file = tmp_path / "secret"
-        mocker.patch.dict(
-            settings.os.environ,
-            {"DJANGO_SECRET_PATH": str(secret_file)},
-            clear=True,
-        )
-        django_secret, django_secret_path = app_secret_key_and_path()
-        assert django_secret == secret_key
-        assert django_secret_path == secret_file
-        assert read_secret_key(django_secret_path) == secret_key
-        mock_create_random_key.assert_called()
+def test_get_secret_settings_only_legacy_env_vars(faker, tmpdir, mocker):
+    """Test get_secret_settings when configured by quipucords-installer."""
+    expected_django_secret = faker.password()
+    # TODO This should have a new value when we stop reusing django_secret_key.
+    expected_encryption_secret = expected_django_secret
+    expected_django_secret_path = tmpdir / faker.slug()
+    expected_encryption_secret_path = tmpdir / "secret-encryption.txt"
+
+    new_environ = {
+        "DJANGO_SECRET_KEY": expected_django_secret,
+        "DJANGO_SECRET_PATH": str(expected_django_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+    # Mock DEFAULT_DATA_DIR to force new files with default paths into tmpdir.
+    mocker.patch.object(settings, "DEFAULT_DATA_DIR", tmpdir)
+
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
+
+    # Note that because we did not set ENCRYPTION_* env vars, we assume this represents
+    # quipucords being installed via the older quipucords-installer, not quipucordsctl.
+    # Therefore, Django's secret and the Ansible encryption key should be the same.
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert django_secret == encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
+
+
+def test_get_secret_settings_only_modern_env_vars(faker, tmpdir, mocker):
+    """Test get_secret_settings when configured by quipucordsctl."""
+    expected_django_secret = faker.password()
+    expected_encryption_secret = faker.password()
+    expected_django_secret_path = tmpdir / faker.slug()
+    expected_encryption_secret_path = tmpdir / faker.slug()
+
+    new_environ = {
+        "QUIPUCORDS_SESSION_SECRET_KEY": expected_django_secret,
+        "QUIPUCORDS_SESSION_SECRET_KEY_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY": expected_encryption_secret,
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH": str(expected_encryption_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
+
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
+
+
+def test_get_secret_settings_no_env_vars(faker, tmpdir, mocker):
+    """
+    Test get_secret_settings generates random values when env vars are absent.
+
+    This should never happen under normal deployed circumstances, but it may
+    be common when developing, running from source, or running unit tests.
+    """
+    expected_django_secret = faker.password()
+    # Expect same value due to "Until we move..." comment in settings.py
+    # TODO This should have a new value when we stop reusing django_secret_key.
+    expected_encryption_secret = expected_django_secret
+
+    # Expect default construction of paths using DEFAULT_DATA_DIR if no env vars.
+    expected_django_secret_path = tmpdir / "secret.txt"
+    expected_encryption_secret_path = tmpdir / "secret-encryption.txt"
+    mocker.patch.dict(os.environ, {}, clear=True)
+    # Mock DEFAULT_DATA_DIR to force new files with default paths into tmpdir.
+    mocker.patch.object(settings, "DEFAULT_DATA_DIR", tmpdir)
+    # Expect random generation of new secrets if no env vars and no files exist.
+    mock_create_random_key = mock.Mock()
+    mock_create_random_key.return_value = expected_django_secret
+    mocker.patch.object(settings, "create_random_key", mock_create_random_key)
+
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
+
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
+
+
+def test_get_secret_settings_forbids_same_file_for_two_secrets(faker, tmpdir, mocker):
+    """Test get_secret_settings forbids secrets sharing the same file path."""
+    expected_django_secret_path = tmpdir / faker.slug()
+    expected_encryption_secret_path = expected_django_secret_path
+
+    new_environ = {
+        "QUIPUCORDS_SESSION_SECRET_KEY_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH": str(expected_encryption_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+    with pytest.raises(ImproperlyConfigured):
+        settings.get_secret_settings()
