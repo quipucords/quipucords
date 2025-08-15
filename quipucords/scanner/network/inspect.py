@@ -251,7 +251,10 @@ class InspectTaskRunner(ScanTaskRunner):
             )
             extra_vars["variable_host"] = group_name
             cmdline_list = []
-            vault_file_path = f"--vault-password-file={settings.DJANGO_SECRET_PATH}"
+            vault_file_path = (
+                "--vault-password-file="
+                f"{settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH}"
+            )
             cmdline_list.append(vault_file_path)
             forks_cmd = f"--forks={forks}"
             cmdline_list.append(forks_cmd)
@@ -631,7 +634,9 @@ def _connect(  # noqa: PLR0913, PLR0915
         }
         playbook_path = str(settings.BASE_DIR / "scanner/network/runner/connect.yml")
         cmdline_list = []
-        vault_file_path = f"--vault-password-file={settings.DJANGO_SECRET_PATH}"
+        vault_file_path = (
+            f"--vault-password-file={settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH}"
+        )
         cmdline_list.append(vault_file_path)
         forks_cmd = f"--forks={forks}"
         cmdline_list.append(forks_cmd)

@@ -30,6 +30,7 @@ ENV DJANGO_LOG_FILE=/var/log/app.log
 ENV DJANGO_LOG_FORMATTER=verbose
 ENV DJANGO_LOG_HANDLERS=console,file
 ENV DJANGO_LOG_LEVEL=INFO
+# TODO Remove DJANGO_SECRET_PATH when we migrate to quipucordsctl
 ENV DJANGO_SECRET_PATH=/var/data/secret.txt
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
