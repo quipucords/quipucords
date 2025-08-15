@@ -25,7 +25,7 @@ def encrypt_data(data):
     :param data: string data to be encrypted
     :returns: vault encrypted data as binary
     """
-    vault = Vault(settings.ENCRYPTION_SECRET_KEY)
+    vault = Vault(settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY)
     return vault.dump(data)
 
 
@@ -35,7 +35,7 @@ def decrypt_data(data):
     :param data: string data to be decrypted
     :returns: vault decrypted data as string
     """
-    vault = Vault(settings.ENCRYPTION_SECRET_KEY)
+    vault = Vault(settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY)
     return vault.load(data)
 
 
@@ -59,7 +59,7 @@ def decrypt_data_as_unicode(data):
 
 def write_to_yaml(data):
     """Write data to temp yaml file and return the file."""
-    vault = Vault(settings.ENCRYPTION_SECRET_KEY)
+    vault = Vault(settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY)
     return vault.dump_as_yaml_to_tempfile(data)
 
 
