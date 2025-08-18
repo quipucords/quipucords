@@ -85,6 +85,49 @@ def test_get_secret_settings_reads_from_files(faker, tmpdir, mocker):
     assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
 
 
+def test_get_secret_settings_file_not_present_at_path(faker, tmpdir, mocker):
+    """
+    Test get_secret_settings handles when env var defined path does not actually exist.
+
+    This means that the env vars define paths for the session and encryption secret key
+    files, but nothing actually exists at those paths on the filesystem yet. Invoking
+    the get_secret_settings() call should create files and write secret keys into them.
+
+    If the `*_SECRET_KEY` is not set and its related `*_PATH` is either empty or does
+    not exist, then we fall back again to generating a new random secret key value.
+    In this specific test, because no secret value was found in either the paths or the
+    related `*_SECRET_KEY` env var, this means we also reuse the Django session secret
+    key value as the encryption secret key value, preserving legacy behavior.
+    """
+    expected_django_secret = faker.password()
+    expected_encryption_secret = expected_django_secret  # expect same value
+    expected_django_secret_path = tmpdir / faker.slug()
+    expected_encryption_secret_path = tmpdir / faker.slug()
+
+    new_environ = {
+        "DJANGO_SECRET_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH": str(expected_encryption_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+    # Expect random generation of new secrets if no env vars and no files exist.
+    mock_create_random_key = mock.Mock()
+    mock_create_random_key.side_effect = [
+        expected_django_secret,
+        expected_encryption_secret,
+    ]
+    mocker.patch.object(settings, "create_random_key", mock_create_random_key)
+
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
+
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
+
+
 def test_get_secret_settings_only_legacy_env_vars(faker, tmpdir, mocker):
     """Test get_secret_settings when configured by quipucords-installer."""
     expected_django_secret = faker.password()
