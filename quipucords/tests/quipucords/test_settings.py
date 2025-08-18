@@ -185,6 +185,36 @@ def test_get_secret_settings_only_modern_env_vars(faker, tmpdir, mocker):
     assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
 
 
+def test_get_secret_settings_only_key_env_vars_no_paths(faker, tmpdir, mocker):
+    """
+    Test get_secret_settings when the key env vars are set but not path env vars.
+
+    We expect the keys defined in the env vars will be written to the default paths.
+    """
+    expected_django_secret = faker.password()
+    expected_encryption_secret = faker.password()
+    expected_django_secret_path = tmpdir / "secret.txt"
+    expected_encryption_secret_path = tmpdir / "secret-encryption.txt"
+
+    new_environ = {
+        "QUIPUCORDS_SESSION_SECRET_KEY": expected_django_secret,
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY": expected_encryption_secret,
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+    # Mock DEFAULT_DATA_DIR to force new files with default paths into tmpdir.
+    mocker.patch.object(settings, "DEFAULT_DATA_DIR", tmpdir)
+
+    django_secret, encryption_secret, encryption_secret_path = (
+        settings.get_secret_settings()
+    )
+
+    assert django_secret == expected_django_secret
+    assert encryption_secret == expected_encryption_secret
+    assert str(encryption_secret_path) == str(expected_encryption_secret_path)
+    assert_secret_file_content(expected_django_secret_path, django_secret)
+    assert_secret_file_content(expected_encryption_secret_path, encryption_secret)
+
+
 def test_get_secret_settings_no_env_vars(faker, tmpdir, mocker):
     """
     Test get_secret_settings generates random values when env vars are absent.
