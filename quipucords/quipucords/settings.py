@@ -140,6 +140,18 @@ def get_secret_settings() -> tuple[str, str, Path]:
         logger.error(error_message)
         raise ImproperlyConfigured(error_message)
 
+    if (
+        encryption_secret_path.exists()
+        and django_secret_path.exists()
+        and encryption_secret_path.stat().st_ino == django_secret_path.stat().st_ino
+    ):
+        error_message = (
+            "QUIPUCORDS_ENCRYPTION_SECRET_KEY and QUIPUCORDS_ENCRYPTION_SECRET_KEY "
+            "must not be the same inode."
+        )
+        logger.error(error_message)
+        raise ImproperlyConfigured(error_message)
+
     if not encryption_secret_key and encryption_secret_path.exists():
         encryption_secret_key = encryption_secret_path.read_text(encoding="utf-8")
     if not encryption_secret_key:
