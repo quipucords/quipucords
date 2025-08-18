@@ -95,7 +95,7 @@ jinja2==3.1.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     # via ansible-core
 jmespath==1.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-jsonschema==4.25.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+jsonschema==4.25.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 jsonschema-specifications==2025.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via jsonschema
@@ -170,7 +170,7 @@ referencing==0.36.2 ; (implementation_name == 'cpython' and sys_platform == 'dar
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+requests==2.32.5 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   kubernetes
     #   quipucords
