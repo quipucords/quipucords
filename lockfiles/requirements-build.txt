@@ -12,11 +12,11 @@ cffi==1.17.1 ; (implementation_name == "cpython" and sys_platform == "darwin") o
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.1.2
+cython==3.1.3
     # via
     #   pydantic
     #   pyyaml
-docutils==0.21.2
+docutils==0.22
     # via
     #   changelog-chug
     #   python-daemon
@@ -28,7 +28,6 @@ flit-core==3.12.0
     #   idna
     #   jinja2
     #   more-itertools
-    #   mypy-extensions
     #   packaging
     #   pathspec
     #   ptyprocess
@@ -55,21 +54,17 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.9.2
+maturin==1.9.3
     # via
     #   cryptography
     #   rpds-py
-mypy-extensions==1.1.0
-    # via mypy
-mypy==1.15.0
-    # via charset-normalizer
 packaging==25.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   hatchling
     #   setuptools-scm
 pathspec==0.12.1
     # via hatchling
-pbr==6.1.1
+pbr==7.0.0
     # via lockfile
 pluggy==1.6.0
     # via hatchling
@@ -94,22 +89,19 @@ setuptools-scm==8.1.0
     # via ansible-runner
 setuptools-scm==8.3.1
     # via
+    #   hatch-vcs
+    #   urllib3
+setuptools-scm==9.2.0
+    # via
     #   charset-normalizer
     #   django-axes
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-    #   urllib3
-trove-classifiers==2025.5.9.12
+trove-classifiers==2025.8.6.13
     # via hatchling
-types-psutil==7.0.0.20250601
-    # via mypy
-types-setuptools==80.9.0.20250529
-    # via mypy
 typing-extensions==4.14.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
-    # via
-    #   mypy
-    #   setuptools-scm
+    # via setuptools-scm
 wheel==0.45.1
     # via
     #   ansible-core
@@ -151,7 +143,6 @@ setuptools==80.9.0
     #   gunicorn
     #   markupsafe
     #   maturin
-    #   mypy
     #   pathspec
     #   pbr
     #   pluggy
@@ -171,7 +162,5 @@ setuptools==80.9.0
     #   setuptools-rust
     #   setuptools-scm
     #   trove-classifiers
-    #   types-psutil
-    #   types-setuptools
     #   tzdata
     #   whitenoise
