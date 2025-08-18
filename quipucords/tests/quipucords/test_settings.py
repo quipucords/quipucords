@@ -188,3 +188,20 @@ def test_get_secret_settings_forbids_same_file_for_two_secrets(faker, tmpdir, mo
     mocker.patch.dict(os.environ, new_environ, clear=True)
     with pytest.raises(ImproperlyConfigured):
         settings.get_secret_settings()
+
+
+def test_get_secret_settings_forbids_same_inode_for_two_secrets(faker, tmpdir, mocker):
+    """Test get_secret_settings forbids secrets sharing the same file inode."""
+    expected_django_secret_path = Path(tmpdir / faker.slug())
+    expected_encryption_secret_path = Path(tmpdir / faker.slug())
+
+    expected_django_secret_path.touch()
+    expected_encryption_secret_path.hardlink_to(expected_django_secret_path)
+
+    new_environ = {
+        "QUIPUCORDS_SESSION_SECRET_KEY_PATH": str(expected_django_secret_path),
+        "QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH": str(expected_encryption_secret_path),
+    }
+    mocker.patch.dict(os.environ, new_environ, clear=True)
+    with pytest.raises(ImproperlyConfigured):
+        settings.get_secret_settings()
