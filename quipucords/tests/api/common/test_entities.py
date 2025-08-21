@@ -1,6 +1,5 @@
 """Test common entities."""
 
-import logging
 from datetime import datetime
 from itertools import chain
 
@@ -119,26 +118,6 @@ class TestReportEntity:
         )
         with django_assert_num_queries(2):
             assert isinstance(report.last_discovered, datetime)
-
-    def test_canonical_facts_skipping(self, caplog):
-        """Test the mechanism for skipping hosts w/o canonical facts."""
-        caplog.set_level(logging.WARNING)
-        deployment_report = DeploymentReportFactory.create(number_of_fingerprints=1)
-        non_canonical_fp = SystemFingerprint.objects.create(
-            deployment_report=deployment_report
-        )
-        assert deployment_report.system_fingerprints.count() == 2
-        report_filtered = ReportEntity.from_report_id(deployment_report.report.id)
-        assert len(report_filtered.hosts) == 1
-        report_unfiltered = ReportEntity.from_report_id(
-            deployment_report.report.id, skip_non_canonical=False
-        )
-        assert len(report_unfiltered.hosts) == 2
-        assert (
-            caplog.messages[-1]
-            == f"Host (fingerprint={non_canonical_fp.id}, name=None) "
-            "ignored due to lack of canonical facts."
-        )
 
 
 @pytest.mark.django_db
@@ -374,3 +353,32 @@ class TestHostEntity:
         host = HostEntity(mocked_fingerprint, None)
         assert host.ipv4_addresses == expected_result
         assert not host.ipv6_addresses
+
+
+@pytest.mark.parametrize(
+    "fingerprint, expected_provider_id",
+    [
+        (
+            SystemFingerprint(etc_machine_id="123456789"),
+            "123456789",  # simply expect etc_machine_id if it is not falsy
+        ),
+        (
+            SystemFingerprint(ip_addresses=["127.0.0.1"], etc_machine_id="123456789"),
+            "123456789",  # simply expect etc_machine_id if it is not falsy
+        ),
+        (
+            SystemFingerprint(ip_addresses=["127.0.0.1"], etc_machine_id=""),
+            "0155fbcd237bb1b7bdcb5b8e7999ed6f482d2d779b189a9fa03ec305f6640eb08a532f6bddae2458d7f26171b939d1143a2b1d8e8b2bdebb63d44829809c8252",
+            # lack of etc_machine_id means we generate a hash
+        ),
+        (
+            SystemFingerprint(ip_addresses=["127.0.0.1"], etc_machine_id=None),
+            "c17e15f607c334a618a445014c7f027ff39f06dbbaa4cc1a2b22a7639c297d8aa7509838f011466bc0c572d5127a6bfd56791014d4b633a23570c0a2a56a7c2c",
+            # different from previous hash because None != ""
+        ),
+    ],
+)
+def test_provider_id(fingerprint, expected_provider_id):
+    """Test provider_id returns either etc_machine_id or a hash string."""
+    host_entity = HostEntity(fingerprint, None)
+    assert host_entity.provider_id == expected_provider_id

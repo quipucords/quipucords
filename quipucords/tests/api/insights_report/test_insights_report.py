@@ -7,7 +7,7 @@ from rest_framework.reverse import reverse
 
 from api.common.common_report import create_filename
 from api.models import DeploymentsReport
-from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
+from tests.factories import DeploymentReportFactory
 from tests.report_utils import extract_files_from_tarball
 
 
@@ -142,33 +142,6 @@ def test_get_insights_report_as_tarball_sliced(client_logged_in):
         response.content, strip_dirs=False, decode_json=True
     )
     validate_data(data, deployments_report)
-
-
-@pytest.mark.django_db
-def test_get_insights_report_not_found_because_no_fingerprints(client_logged_in):
-    """Retrieve Insights report, but it does not exist due to lack of fingerprints."""
-    deployment_report = DeploymentReportFactory.create(
-        number_of_fingerprints=0,
-        status=DeploymentsReport.STATUS_COMPLETE,
-    )
-    report_id = deployment_report.report.id
-    # fingerprint without canonical facts
-    SystemFingerprintFactory.create(
-        deployment_report_id=deployment_report.id,
-        name=None,
-        bios_uuid=None,
-        insights_client_id=None,
-        ip_addresses=None,
-        mac_addresses=None,
-        subscription_manager_id=None,
-        cloud_provider=None,
-    )
-    fingerprint_count = deployment_report.system_fingerprints.count()
-    assert fingerprint_count == 1, (
-        f"unexpected fingerprint count {fingerprint_count} != 1"
-    )
-    response = client_logged_in.get(reverse("v1:reports-insights", args=(report_id,)))
-    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 @pytest.mark.django_db
