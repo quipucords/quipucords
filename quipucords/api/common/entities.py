@@ -168,15 +168,12 @@ class HostEntity:
     @property
     def provider_type(self):
         """Retrieve provider_type."""
-        # provider_type (cloud_provider here) don't necessarily match what HBI expects.
+        # As of 2025-08-01, provider_type from quipucords should always be "discovery"
+        # instead of a dynamically determined a value based on the cloud provider.
         # References:
-        # - https://github.com/quipucords/quipucords/blob/8c89dfa6f3a4577d32b9c4314149d1ffcff38e79/quipucords/scanner/network/processing/cloud_provider.py#L14-L17  # noqa: E501
-        # - https://github.com/RedHatInsights/insights-host-inventory/blob/813a290f3a1c702312d8e02d1e59ba328c6f8143/swagger/api.spec.yaml#L611-L619  # noqa: E501
-        valid_providers = {"alibaba", "aws", "azure", "gcp", "ibm"}
-        value = self._fingerprints.cloud_provider
-        if value and value.lower() in valid_providers:
-            return value
-        return None
+        # - https://github.com/RedHatInsights/insights-host-inventory/pull/2833
+        # - https://github.com/RedHatInsights/insights-host-inventory/commit/c842b2bd193cf9ec8adabc2d4fc59b962573d3a5  # noqa: E501
+        return "discovery"
 
     @property
     def system_purpose(self):
