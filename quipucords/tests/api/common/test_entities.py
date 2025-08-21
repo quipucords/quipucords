@@ -194,6 +194,18 @@ class TestHostEntity:
         )
         return report.hosts[0]
 
+    @pytest.mark.parametrize(
+        "fingerprint",
+        [
+            (pytest.lazy_fixture("fingerprint_wo_products"),),
+            (pytest.lazy_fixture("fingerprint_with_products"),),
+        ],
+    )
+    def test_provider_type(self, fingerprint):
+        """Ensure provider_type is always "discovery"."""
+        host = HostEntity(fingerprint, last_discovered=None)
+        assert host.provider_type == "discovery"
+
     def test_products_not_implemented(self, fingerprint):
         """Ensure only properly initialized host have products."""
         host = HostEntity(fingerprint, last_discovered=None)
