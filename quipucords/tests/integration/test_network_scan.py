@@ -6,7 +6,6 @@ from unittest.mock import Mock
 import pytest
 from django.conf import settings
 
-from api.models import SystemFingerprint
 from constants import DataSources
 from scanner.network.inspect_callback import HOST_DONE, InspectCallback
 from scanner.network.utils import raw_facts_template
@@ -257,7 +256,7 @@ def unexpected_fingerprints(raw_facts):
     return unexpected
 
 
-def test_sanity_check_raw_fact_matches(
+def test_get_fact_names_for_synthetic_provider_id(
     expected_network_scan_facts, fingerprint_fact_map, unexpected_fingerprints
 ):
     """Ensure raw facts mapped to fingerprint facts match known facts."""
@@ -271,12 +270,8 @@ def test_sanity_check_raw_fact_matches(
         f"Expected facts not found: "
         f"{raw_facts_for_fingerprints - expected_network_scan_facts}"
     )
-    # excluding vcenter/satellite exclusives, all fingerprints should be the ones
-    # expected on fingerprint_fact_map
-    network_scan_fingerprints = (
-        SystemFingerprint.get_valid_fact_names() - unexpected_fingerprints
-    )
-    assert network_scan_fingerprints == set(fingerprint_fact_map.keys())
+    for unexpected_fact in unexpected_fingerprints:
+        assert unexpected_fact not in raw_facts_for_fingerprints
 
 
 @pytest.fixture

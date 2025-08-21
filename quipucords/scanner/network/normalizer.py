@@ -102,5 +102,4 @@ class Normalizer(BaseNormalizer):
     network_interfaces = FactMapper(
         None, network_interfaces, dependencies=["ip_addresses"]
     )
-    # ----- non canonical/system profile facts ---
     etc_machine_id = FactMapper("etc_machine_id", formatters.str_or_none)
