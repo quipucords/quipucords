@@ -1,6 +1,8 @@
 """Common entities."""
 
+import hashlib
 import ipaddress
+import json
 import uuid
 from contextlib import suppress
 from dataclasses import dataclass, field
@@ -11,6 +13,7 @@ from typing import Dict, List
 
 from django.conf import settings
 from django.db.models import F, Q, Value
+from django.forms import model_to_dict
 
 from api.common.enumerators import (
     SystemPurposeRole,
@@ -21,18 +24,46 @@ from api.models import DeploymentsReport, Product, SystemFingerprint
 from compat.db import StringAgg
 from constants import DataSources
 
-CANONICAL_FACTS = (
-    "fqdn",
-    "bios_uuid",
-    "insights_id",
-    "ip_addresses",
-    "mac_addresses",
-    "satellite_id",
-    "subscription_manager_id",
-    ("provider_id", "provider_type"),
-)
-
 logger = getLogger(__name__)
+
+
+"""
+List of fact names for synthesizing an alternate provider_id value.
+
+These facts should be generally unique enough to differentiate two hosts but
+also be static enough *not* to cause the same real-world host to appear as
+different hosts when running two scans over a short period of time.
+"""
+FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID = {
+    "name",
+    "os_name",
+    "infrastructure_type",
+    "cloud_provider",
+    "mac_addresses",
+    "ip_addresses",
+    "cpu_count",
+    "architecture",
+    "system_memory_bytes",
+    "bios_uuid",
+    "subscription_manager_id",
+    "cpu_socket_count",
+    "cpu_core_count",
+    "cpu_core_per_socket",
+    "cpu_hyperthreading",
+    "system_creation_date",
+    "insights_client_id",
+    "virtualized_type",
+    "virtual_host_name",
+    "virtual_host_uuid",
+    "vm_uuid",
+    "vm_dns_name",
+    "vm_host_socket_count",
+    "vm_host_core_count",
+    "vm_cluster",
+    "vm_datacenter",
+    "is_redhat",
+    "etc_machine_id",
+}
 
 
 @dataclass
@@ -158,12 +189,21 @@ class HostEntity:
 
     @property
     def provider_id(self):
-        """Retrieve provider_id.
-
-        On AWS EC2 vms, this should be the content of /var/lib/cloud/data/instance-id
-        (which would be aa new fact). We need to map this for other providers as well.
         """
-        return None
+        Retrieve provider_id.
+
+        Directly use /etc/machine_id if available, else hash specific fingerprints to
+        produce a value that we expect to be unique enough to identify a system in HBI.
+        """
+        if self._fingerprints.etc_machine_id:
+            return self._fingerprints.etc_machine_id
+        fingerprints = model_to_dict(
+            self._fingerprints,
+            fields=FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID,
+        )
+        # use sorted json string to improve output consistency
+        fingerprints = json.dumps(fingerprints, sort_keys=True)
+        return hashlib.sha512(fingerprints.encode()).hexdigest()
 
     @property
     def provider_type(self):
@@ -220,18 +260,6 @@ class HostEntity:
         # installed_products ref: https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L374-L377  # noqa: E501
         return self._fingerprints.installed_products or []
 
-    def has_canonical_facts(self):
-        """Return True if host contains at least one canonical fact."""
-        for canonical_fact in CANONICAL_FACTS:
-            if isinstance(canonical_fact, tuple):
-                # special case for facts that should be present together
-                if all(getattr(self, fact, None) for fact in canonical_fact):
-                    return True
-                continue
-            if getattr(self, canonical_fact, None):
-                return True
-        return False
-
 
 @dataclass
 class ReportEntity:
@@ -267,12 +295,10 @@ class ReportEntity:
             return self._deployment_report.report.scanjob.end_time
 
     @classmethod
-    def from_report_id(cls, report_id, skip_non_canonical=True):
+    def from_report_id(cls, report_id):
         """Create a Report from a report_id."""
         deployment_report, fingerprints = cls._get_deployment_report(report_id)
         hosts = [HostEntity(f, deployment_report.last_discovered) for f in fingerprints]
-        if skip_non_canonical:
-            hosts = list(filter(cls._has_canonical_facts, hosts))
         cls._validate_hosts_qty(report_id, hosts)
         return ReportEntity(deployment_report, hosts=hosts)
 
@@ -317,17 +343,6 @@ class ReportEntity:
         If the report_slices don't exist yet, it'll be generated on the spot.
         """
         return self._initialize_report_slices()
-
-    @classmethod
-    def _has_canonical_facts(cls, host: HostEntity):
-        if host.has_canonical_facts():
-            return True
-        logger.warning(
-            "Host (fingerprint=%d, name=%s) ignored due to lack of canonical facts.",
-            host.id,
-            host.name,
-        )
-        return False
 
     @staticmethod
     def _validate_hosts_qty(report_id, hosts):

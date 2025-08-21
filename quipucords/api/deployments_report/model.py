@@ -14,12 +14,6 @@ from django.dispatch import receiver
 from api.common.common_report import REPORT_TYPE_CHOICES, REPORT_TYPE_DEPLOYMENT
 from api.common.models import BaseModel
 from api.deployments_report import tasks
-from fingerprinter.constants import (
-    ENTITLEMENTS_KEY,
-    META_DATA_KEY,
-    PRODUCTS_KEY,
-    SOURCES_KEY,
-)
 from utils.misc import is_valid_cache_file
 
 logger = logging.getLogger(__name__)
@@ -280,21 +274,6 @@ class SystemFingerprint(BaseModel):
     etc_machine_id = models.CharField(
         max_length=48, unique=False, blank=True, null=True
     )
-
-    @classmethod
-    def get_valid_fact_names(cls):
-        """All expected fact names."""
-        non_fact_fields = {
-            "id",
-            "deployment_report",
-            "created_at",
-            "updated_at",
-            META_DATA_KEY,
-            SOURCES_KEY,
-            ENTITLEMENTS_KEY,
-            PRODUCTS_KEY,
-        }
-        return {field.name for field in cls._meta.get_fields()} - non_fact_fields
 
 
 class Product(BaseModel):
