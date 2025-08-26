@@ -23,6 +23,7 @@ from api.common.enumerators import (
 from api.models import DeploymentsReport, Product, SystemFingerprint
 from compat.db import StringAgg
 from constants import DataSources
+from utils.misc import deep_sort
 
 logger = getLogger(__name__)
 
@@ -64,6 +65,14 @@ FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID = {
     "is_redhat",
     "etc_machine_id",
 }
+
+
+def hash_system_fingerprint(fingerprint: SystemFingerprint, *, fields: set[str]) -> str:
+    """Hash a SystemFingerprint to a single hopefully-unique identifier string."""
+    fingerprints_dict = model_to_dict(fingerprint, fields=fields)
+    fingerprints_dict = deep_sort(fingerprints_dict)
+    fingerprints_str = json.dumps(fingerprints_dict, sort_keys=True)
+    return hashlib.sha512(fingerprints_str.encode()).hexdigest()
 
 
 @dataclass
@@ -195,15 +204,11 @@ class HostEntity:
         Directly use /etc/machine_id if available, else hash specific fingerprints to
         produce a value that we expect to be unique enough to identify a system in HBI.
         """
-        if self._fingerprints.etc_machine_id:
-            return self._fingerprints.etc_machine_id
-        fingerprints = model_to_dict(
-            self._fingerprints,
-            fields=FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID,
+        if machine_id := self._fingerprints.etc_machine_id:
+            return machine_id
+        return hash_system_fingerprint(
+            self._fingerprints, fields=FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID
         )
-        # use sorted json string to improve output consistency
-        fingerprints = json.dumps(fingerprints, sort_keys=True)
-        return hashlib.sha512(fingerprints.encode()).hexdigest()
 
     @property
     def provider_type(self):

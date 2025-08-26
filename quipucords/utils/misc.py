@@ -5,6 +5,24 @@ import os
 from pathlib import Path
 
 
+def deep_sort(value):
+    """
+    Recursively sort a potentially nested object.
+
+    This function only attempts to sort types dict, list, set, and tuple. It does not
+    attempt to sort just any Iterable because some also-Iterable types like str should
+    never be sorted.
+
+    This function MAY change the types of values to ensure ordered results. For example,
+    this function will return a list object when given a set object.
+    """
+    if isinstance(value, (list, set, tuple)):
+        return [deep_sort(item) for item in sorted(value)]
+    if not isinstance(value, dict):
+        return value
+    return {key: deep_sort(value[key]) for key in sorted(value.keys())}
+
+
 def load_json_from_tarball(json_filename, tarball):
     """Extract a json as dict from given TarFile interface."""
     return json.loads(tarball.extractfile(json_filename).read())
