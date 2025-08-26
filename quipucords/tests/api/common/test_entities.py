@@ -1,12 +1,19 @@
 """Test common entities."""
 
+import hashlib
+import json
 from datetime import datetime
 from itertools import chain
 
 import pytest
 from django.conf import settings
 
-from api.common.entities import HostEntity, ReportEntity, ReportSlice
+from api.common.entities import (
+    HostEntity,
+    ReportEntity,
+    ReportSlice,
+    hash_system_fingerprint,
+)
 from api.deployments_report.model import DeploymentsReport
 from api.models import Product, SystemFingerprint
 from tests.factories import DeploymentReportFactory, SystemFingerprintFactory
@@ -382,3 +389,30 @@ def test_provider_id(fingerprint, expected_provider_id):
     """Test provider_id returns either etc_machine_id or a hash string."""
     host_entity = HostEntity(fingerprint, None)
     assert host_entity.provider_id == expected_provider_id
+
+
+@pytest.mark.parametrize(
+    "fingerprint, expected_dict",
+    [
+        (
+            SystemFingerprint(etc_machine_id="zyx123"),
+            {"etc_machine_id": "zyx123", "ip_addresses": None},
+        ),
+        (
+            SystemFingerprint(
+                ip_addresses=["127.0.0.2", "127.0.0.1"], etc_machine_id="zyx123"
+            ),
+            {"etc_machine_id": "zyx123", "ip_addresses": ["127.0.0.1", "127.0.0.2"]},
+        ),
+    ],
+)
+def test_hash_system_fingerprint_sorts_iterable_facts(fingerprint, expected_dict):
+    """Test iterable facts are sorted before hashing to provider_id."""
+    expected_result = hashlib.sha512(
+        json.dumps(expected_dict, sort_keys=True).encode()
+    ).hexdigest()
+    actual_result = hash_system_fingerprint(
+        fingerprint,
+        fields=set(expected_dict.keys()),  # only include keys in parametrized data
+    )
+    assert actual_result == expected_result
