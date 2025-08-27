@@ -68,6 +68,7 @@ dev = [
     "watchdog[watchmedo]<3.0.0,>=2.2.1",
     # temporarily lock pip behind 25.1 (pybuild-deps will require a change)
     "pip<25.1",
+    "django-types>=0.22.0",
 ]
 
 
