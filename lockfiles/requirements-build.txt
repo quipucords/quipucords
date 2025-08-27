@@ -54,7 +54,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.9.3
+maturin==1.9.4
     # via
     #   cryptography
     #   rpds-py
@@ -64,7 +64,7 @@ packaging==25.0 ; (implementation_name == "cpython" and sys_platform == "darwin"
     #   setuptools-scm
 pathspec==0.12.1
     # via hatchling
-pbr==7.0.0
+pbr==7.0.1
     # via lockfile
 pluggy==1.6.0
     # via hatchling
@@ -98,9 +98,9 @@ setuptools-scm==9.2.0
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.8.6.13
+trove-classifiers==2025.8.26.11
     # via hatchling
-typing-extensions==4.14.1 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
 wheel==0.45.1
     # via
