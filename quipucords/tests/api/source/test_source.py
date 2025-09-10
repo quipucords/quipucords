@@ -241,6 +241,8 @@ class TestSource:
         scan_job.end_time = end
         scan_job.status = ScanTask.COMPLETED
         scan_job.save()
+        source_task = scan_job.tasks.filter(source=source.id).first()
+
         source.most_recent_connect_scan = scan_job
         source.save()
 
@@ -270,6 +272,8 @@ class TestSource:
                 "source_systems_scanned": 9,
                 "source_systems_failed": 1,
                 "source_systems_unreachable": 0,
+                "source_task_id": source_task.id,
+                "source_task_status": source_task.status,
             },
         }
         assert out == expected
@@ -1802,6 +1806,7 @@ class TestSourceV2:
         scan_job.save()
         source.most_recent_connect_scan = scan_job
         source.save()
+        source_task = scan_job.tasks.filter(source=source.id).first()
 
         serializer = SourceSerializer(source)
         json_source = serializer.data
@@ -1829,6 +1834,8 @@ class TestSourceV2:
                 "source_systems_scanned": 9,
                 "source_systems_failed": 1,
                 "source_systems_unreachable": 0,
+                "source_task_id": source_task.id,
+                "source_task_status": source_task.status,
             },
         }
         assert out == expected
