@@ -16,7 +16,7 @@ cython==3.1.4
     # via
     #   pydantic
     #   pyyaml
-docutils==0.22
+docutils==0.22.2
     # via
     #   changelog-chug
     #   python-daemon
@@ -68,7 +68,7 @@ pbr==7.0.1
     # via lockfile
 pluggy==1.6.0
     # via hatchling
-poetry-core==2.2.0
+poetry-core==2.2.1
     # via
     #   click-didyoumean
     #   django-json-agg
