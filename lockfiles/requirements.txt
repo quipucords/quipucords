@@ -19,7 +19,7 @@ attrs==25.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     #   referencing
 bcrypt==4.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via paramiko
-billiard==4.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+billiard==4.2.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
 cachetools==5.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via google-auth
@@ -35,7 +35,7 @@ cffi==2.0.0 ; (implementation_name == 'cpython' and platform_python_implementati
     #   pynacl
 charset-normalizer==3.4.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
-click==8.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+click==8.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   celery
     #   click-didyoumean
@@ -47,7 +47,7 @@ click-plugins==1.1.1.2 ; (implementation_name == 'cpython' and sys_platform == '
     # via celery
 click-repl==0.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
-cryptography==45.0.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+cryptography==46.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   ansible-core
     #   paramiko
@@ -63,7 +63,7 @@ django==5.2.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     #   quipucords
 django-axes==6.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-django-cors-headers==4.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django-cors-headers==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 django-environ==0.12.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -215,5 +215,5 @@ wcwidth==0.2.13 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via prompt-toolkit
 websocket-client==1.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
-whitenoise==6.10.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+whitenoise==6.11.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
