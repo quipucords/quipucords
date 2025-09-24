@@ -1,6 +1,13 @@
 {
-  "extends": ["group:all"],
-  "python": {
-    "enabled": false
-  }
+  "extends": [
+    "group:all"
+  ],
+  "packageRules": [
+    {
+      "matchCategories": [
+        "python"
+      ],
+      "enabled": false
+    }
+  ]
 }
