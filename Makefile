@@ -245,11 +245,8 @@ lock-baseimages:
 	for image in $${baseimages[@]}; do \
 		echo "$${separator}"; \
 		echo "updating $${image}..."; \
-		# escape "/" for use in $(SED) later \
 		escaped_img=$$(echo $${image} | $(SED) 's/\//\\\//g') ;\
-		# extract the image digest \
 		updated_sha=$$(skopeo inspect --raw "docker://$${image}:latest" | sha256sum | cut -d ' ' -f1); \
-		# update Containerfile with the new digest \
 		$(SED) -i "s/^\(FROM $${escaped_img}@sha256:\)[[:alnum:]]*/\1$${updated_sha}/g" Containerfile; \
 	done; \
 	echo "$${separator}"
