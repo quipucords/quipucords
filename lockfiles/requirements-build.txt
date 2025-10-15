@@ -37,13 +37,14 @@ hatch-fancy-pypi-readme==25.1.0
     # via
     #   attrs
     #   jsonschema
+hatch-vcs==0.4.0
+    # via urllib3
 hatch-vcs==0.5.0
     # via
     #   attrs
     #   jsonschema
     #   jsonschema-specifications
     #   referencing
-    #   urllib3
 hatchling==1.27.0
     # via
     #   attrs
@@ -54,7 +55,7 @@ hatchling==1.27.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.9.4
+maturin==1.9.6
     # via
     #   cryptography
     #   rpds-py
@@ -87,13 +88,8 @@ setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.1.0
     # via ansible-runner
-setuptools-scm==8.3.1
+setuptools-scm==9.2.1
     # via
-    #   hatch-vcs
-    #   urllib3
-setuptools-scm==9.2.0
-    # via
-    #   charset-normalizer
     #   django-axes
     #   hatch-vcs
     #   pluggy
@@ -115,7 +111,6 @@ wheel==0.45.1
     #   python-daemon
     #   python-dateutil
     #   python-string-utils
-    #   pyyaml
     #   resolvelib
     #   tzdata
 
