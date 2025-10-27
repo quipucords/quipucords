@@ -178,10 +178,16 @@ class HostEntity:
     @property
     def ipv6_addresses(self):
         """Retrieve only ipv6 addresses."""
-        # "Currently, we do not collect this information, but since it is
-        # mandatory for Yuptoo, we have agreed to send a default value."
-        # https://github.com/RedHatInsights/yuptoo/blob/265e9033ab66dce26d2a7bb5a909d7ec0b38a7da/yuptoo/modifiers/transform_network_interfaces.py#L8  # noqa: E501
-        return []
+        ip_addresses = self.ip_addresses
+        ipv6_addresses = []
+        if ip_addresses:
+            for ip_address in ip_addresses:
+                try:
+                    if ipaddress.ip_address(ip_address).version == 6:  # noqa: PLR2004
+                        ipv6_addresses.append(ip_address)
+                except ValueError:
+                    continue
+        return ipv6_addresses
 
     @property
     def mac_addresses(self):

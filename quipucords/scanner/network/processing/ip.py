@@ -19,23 +19,15 @@ Here is an example output (from a RHEL9 VM) that this processor can handle:
        valid_lft forever preferred_lft forever
 """  # noqa: E501
 
-import ipaddress
 import re
 
 from scanner.network.processing import process
+from scanner.network.utils import is_valid_ipv4_address, is_valid_ipv6_address
 
 EXCLUDE_IPV4_ADDRESSES = {"127.0.0.1", "0.0.0.0"}  # noqa: S104
+EXCLUDE_IPV6_ADDRESSES = {"::1"}
 EXCLUDE_MAC_ADDRESSES = {"00:00:00:00:00:00", "ff:ff:ff:ff:ff:ff"}
 MATCH_MAC_ADDRESS = re.compile("^[0-9a-f]{2}(?::[0-9a-f]{2}){5}$")
-
-
-def is_valid_ipv4_address(address: str):
-    """Return True if the provided string is a valid IPv4 address."""
-    try:
-        ipaddress.IPv4Address(address)
-        return True
-    except ipaddress.AddressValueError:
-        return False
 
 
 def is_valid_mac_address(address: str):
@@ -44,9 +36,9 @@ def is_valid_mac_address(address: str):
 
 
 class ProcessIpAddressesIPv4(process.Processor):
-    """Process the IP addresses from `ip address show`."""
+    """Process the IPv4 addresses from `ip address show`."""
 
-    KEY = "ip_address_show_ipv4"
+    KEY = "ip_address_show_ips"
 
     @staticmethod
     def process(output: dict, dependencies=None) -> list[str]:
@@ -69,6 +61,34 @@ class ProcessIpAddressesIPv4(process.Processor):
             - EXCLUDE_IPV4_ADDRESSES
         )
         return list(filter(is_valid_ipv4_address, ipv4_addresses))
+
+
+class ProcessIpAddressesIPv6(process.Processor):
+    """Process the IPv6 addresses from `ip address show`."""
+
+    KEY = "ip_address_show_ips"
+
+    @staticmethod
+    def process(output: dict, dependencies=None) -> list[str]:
+        """
+        Extract IPv4 addresses from the raw `ip address show` output.
+
+        This handles output lines that look like this:
+
+            inet6 fe80::20c:29ff:feac:4355/64 scope link noprefixroute
+
+        to extract and return ["fe80::20c:29ff:feac:4355"]
+        """
+        lines = [line.lstrip() for line in output["stdout_lines"]]
+        ipv6_addresses = (
+            set(
+                line.strip().split(" ")[1].split("/")[0]
+                for line in lines
+                if line.startswith("inet6 ")
+            )
+            - EXCLUDE_IPV6_ADDRESSES
+        )
+        return list(filter(is_valid_ipv6_address, ipv6_addresses))
 
 
 class ProcessIpAddressesMAC(process.Processor):
