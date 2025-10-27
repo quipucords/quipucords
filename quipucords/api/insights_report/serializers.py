@@ -49,9 +49,6 @@ class SystemPurposeSerializer(NotEmptyMixin, Serializer):
 class NetworkInterfaceSerializer(NotEmptyMixin, Serializer):
     """Serializer for the field network_interfaces of HBI system profile."""
 
-    # currently we only collect info about ipv4_addresses and mac_address
-    # yuptoo however also requires the fields name and ipv6_addresses
-    # https://github.com/RedHatInsights/yuptoo/blob/265e9033ab66dce26d2a7bb5a909d7ec0b38a7da/yuptoo/modifiers/transform_network_interfaces.py#L8  # noqa: E501
     ipv4_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
     ipv6_addresses = fields.ListField(child=fields.CharField(), **default_kwargs)
     name = fields.CharField(source="name_of_interface", max_length=50, **default_kwargs)

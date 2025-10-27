@@ -3,6 +3,7 @@
 from scanner.network.processing import process
 
 INET_PREFIXES = ["inet addr:", "inet "]
+INET6_PREFIXES = ["inet6 "]
 
 
 class ProcessIPAddresses(process.Processor):
@@ -21,6 +22,12 @@ class ProcessIPAddresses(process.Processor):
                     ip_line = line[len(prefix) :].split()[0]
                     if ip_line != "127.0.0.1":
                         result.append(ip_line)
+                    break
+            for prefix in INET6_PREFIXES:
+                if line.startswith(prefix):
+                    ipv6_line = line[len(prefix) :].split()[0]
+                    if ipv6_line != "::1":
+                        result.append(ipv6_line)
                     break
         return list(set(result))
 

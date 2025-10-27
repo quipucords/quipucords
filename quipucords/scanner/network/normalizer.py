@@ -5,6 +5,7 @@ import ipaddress
 from api.deployments_report.model import SystemFingerprint
 from constants import DataSources
 from fingerprinter import formatters
+from scanner.network.utils import is_valid_ipv4_address, is_valid_ipv6_address
 from scanner.normalizer import BaseNormalizer, FactMapper, NormalizedResult
 from utils import deepget
 
@@ -56,18 +57,26 @@ def ip_address_normalizer(ifconfig_ip_addresses: list[str]):
     addresses = []
     for raw_ip in ifconfig_ip_addresses:
         ip_addr = ipaddress.ip_address(raw_ip)
-        # raw fact is only collecting ipv4 addresses
-        if isinstance(ip_addr, ipaddress.IPv4Address):
+        # raw fact collects ipv4 and ipv6 addresses
+        if isinstance(ip_addr, ipaddress.IPv4Address) or isinstance(
+            ip_addr, ipaddress.IPv6Address
+        ):
             addresses.append(str(ip_addr))
     return addresses
 
 
 def network_interfaces(ip_addresses: list[str]):
     """Normalize network interfaces."""
+    ipv4_addresses = ipv6_addresses = []
+    for ip_address in ip_addresses:
+        if is_valid_ipv4_address(ip_address):
+            ipv4_addresses.append(ip_address)
+        elif is_valid_ipv6_address(ip_address):
+            ipv6_addresses.append(ip_address)
     interface = {
         "name": "unknown",  # required by yuptoo
-        "ipv4_addresses": ip_addresses or [],
-        "ipv6_addresses": [],  # required by yuptoo
+        "ipv4_addresses": ipv4_addresses,
+        "ipv6_addresses": ipv6_addresses,
     }
     return [interface]
 

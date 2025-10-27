@@ -21,7 +21,7 @@
   set_fact:
     # NOTE: We want to process the related output in two different ways, but the current
     # quipucords Processor class behavior requires us to include it in two facts.
-    ip_address_show_ipv4: "{{ internal_ip_address_show_cmd | default(None) }}"
+    ip_address_show_ips: "{{ internal_ip_address_show_cmd | default(None) }}"
     ip_address_show_mac: "{{ internal_ip_address_show_cmd | default(None) }}"
   ignore_errors: yes
   when: '(not user_has_sudo) and "stdout_lines" in internal_ip_address_show_cmd'
@@ -30,7 +30,7 @@
   set_fact:
     # NOTE: We want to process the related output in two different ways, but the current
     # quipucords Processor class behavior requires us to include it in two facts.
-    ip_address_show_ipv4: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
+    ip_address_show_ips: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
     ip_address_show_mac: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
   ignore_errors: yes
   when: 'user_has_sudo and "stdout_lines" in internal_sudo_ip_address_show_cmd'
