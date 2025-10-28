@@ -106,7 +106,7 @@ def _network_raw_facts():
         "etc_machine_id": _faker.uuid4(),
         "etc_release_release": fake_rhel(),
         "hostnamectl": fake_hostnamectl(),
-        "ifconfig_ip_addresses": [_faker.ipv4()],
+        "ifconfig_ip_addresses": [_faker.ipv4(), _faker.ipv6()],
         "ifconfig_mac_addresses": [_faker.mac_address()],
         "insights_client_id": _faker.uuid4(),
         "installed_products": fake_installed_products(),

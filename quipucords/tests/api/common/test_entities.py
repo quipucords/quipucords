@@ -347,19 +347,31 @@ class TestHostEntity:
         assert host.system_purpose == expected_result
 
     @pytest.mark.parametrize(
-        "ip_addresses, expected_result",
+        "ip_addresses, expected_ipv4_result, expected_ipv6_result",
         (
-            (["127.0.0.1", "2001:0db8:85a3:0000:0000:8a2e:0370:733"], ["127.0.0.1"]),
-            (["random_word", "192.168.1.1"], ["192.168.1.1"]),
-            (None, []),
+            (
+                ["127.0.0.1", "2001:0db8:85a3:0000:0000:8a2e:0370:733"],
+                ["127.0.0.1"],
+                ["2001:0db8:85a3:0000:0000:8a2e:0370:733"],
+            ),
+            (["random_word", "192.168.1.1"], ["192.168.1.1"], []),
+            (
+                ["127.0.0.1", "::1", "random_word", "192.168.1.1"],
+                ["127.0.0.1", "192.168.1.1"],
+                ["::1"],
+            ),
+            (["::1", "random_word"], [], ["::1"]),
+            (None, [], []),
         ),
     )
-    def test_ipv4_addresses(self, mocker, ip_addresses, expected_result):
+    def test_ip_addresses(
+        self, mocker, ip_addresses, expected_ipv4_result, expected_ipv6_result
+    ):
         """Test ipv4_addresses logic."""
         mocked_fingerprint = mocker.Mock(ip_addresses=ip_addresses)
         host = HostEntity(mocked_fingerprint, None)
-        assert host.ipv4_addresses == expected_result
-        assert not host.ipv6_addresses
+        assert host.ipv4_addresses == expected_ipv4_result
+        assert host.ipv6_addresses == expected_ipv6_result
 
 
 @pytest.mark.parametrize(
