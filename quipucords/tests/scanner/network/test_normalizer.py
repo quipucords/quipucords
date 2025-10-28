@@ -8,6 +8,7 @@ from scanner.network.normalizer import (
     infrastructure_type_normalizer,
     ip_address_normalizer,
 )
+from scanner.network.utils import get_ipv4_ipv6_addresses
 from tests.utils import raw_facts_generator
 from tests.utils.raw_facts_generator import fake_virt_what
 
@@ -25,6 +26,9 @@ def raw_facts():
 @pytest.fixture
 def expected_normalized_facts(raw_facts):
     """Return normalized facts."""
+    ipv4_addresses, ipv6_addresses = get_ipv4_ipv6_addresses(
+        raw_facts["ifconfig_ip_addresses"]
+    )
     return {
         "mac_addresses": raw_facts["ifconfig_mac_addresses"],
         "ip_addresses": raw_facts["ifconfig_ip_addresses"],
@@ -43,8 +47,8 @@ def expected_normalized_facts(raw_facts):
         "infrastructure_vendor": "some-vendor",
         "network_interfaces": [
             {
-                "ipv4_addresses": raw_facts["ifconfig_ip_addresses"],
-                "ipv6_addresses": [],
+                "ipv4_addresses": ipv4_addresses,
+                "ipv6_addresses": ipv6_addresses,
                 "name": "unknown",
             }
         ],
@@ -137,7 +141,7 @@ class TestIPAddressNormalizer:
         ipv4 = faker.ipv4()
         ipv6 = faker.ipv6()
         result = ip_address_normalizer([ipv4, ipv6])
-        assert result == [ipv4]
+        assert result == [ipv4, ipv6]
 
     def test_error(self, faker):
         """Test ip_address_normalizer error."""
