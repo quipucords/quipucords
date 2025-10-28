@@ -1370,7 +1370,7 @@ def test_all_facts_with_null_value_in_process_network_scan(
     # ip_address_show_ipv4 as the raw fact source for ip_addresses. The same logic
     # applies for mac_addresses. Other tests that set not-None values in these raw
     # facts continue to expect the default ifconfig-related raw fact names.
-    expected_metadata["ip_addresses"]["raw_fact_key"] = "ip_address_show_ipv4"
+    expected_metadata["ip_addresses"]["raw_fact_key"] = "ip_address_show_ips"
     expected_metadata["mac_addresses"]["raw_fact_key"] = "ip_address_show_mac"
 
     assert set(metadata_dict.keys()) == set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
