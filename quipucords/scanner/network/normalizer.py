@@ -58,9 +58,7 @@ def ip_address_normalizer(ifconfig_ip_addresses: list[str]):
     for raw_ip in ifconfig_ip_addresses:
         ip_addr = ipaddress.ip_address(raw_ip)
         # raw fact collects ipv4 and ipv6 addresses
-        if isinstance(ip_addr, ipaddress.IPv4Address) or isinstance(
-            ip_addr, ipaddress.IPv6Address
-        ):
+        if isinstance(ip_addr, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             addresses.append(str(ip_addr))
     return addresses
 
