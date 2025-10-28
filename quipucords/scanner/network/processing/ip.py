@@ -52,14 +52,11 @@ class ProcessIpAddressesIPv4(process.Processor):
         to extract and return ["172.31.64.28"].
         """
         lines = [line.lstrip() for line in output["stdout_lines"]]
-        ipv4_addresses = (
-            set(
-                line.strip().split(" ")[1].split("/")[0]
-                for line in lines
-                if line.startswith("inet ")
-            )
-            - EXCLUDE_IPV4_ADDRESSES
-        )
+        ipv4_addresses = {
+            line.strip().split(" ")[1].split("/")[0]
+            for line in lines
+            if line.startswith("inet ")
+        } - EXCLUDE_IPV4_ADDRESSES
         return list(filter(is_valid_ipv4_address, ipv4_addresses))
 
 
@@ -80,14 +77,11 @@ class ProcessIpAddressesIPv6(process.Processor):
         to extract and return ["fe80::20c:29ff:feac:4355"]
         """
         lines = [line.lstrip() for line in output["stdout_lines"]]
-        ipv6_addresses = (
-            set(
-                line.strip().split(" ")[1].split("/")[0]
-                for line in lines
-                if line.startswith("inet6 ")
-            )
-            - EXCLUDE_IPV6_ADDRESSES
-        )
+        ipv6_addresses = {
+            line.strip().split(" ")[1].split("/")[0]
+            for line in lines
+            if line.startswith("inet6 ")
+        } - EXCLUDE_IPV6_ADDRESSES
         return list(filter(is_valid_ipv6_address, ipv6_addresses))
 
 

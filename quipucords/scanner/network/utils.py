@@ -178,7 +178,8 @@ def is_valid_ipv6_address(address: str):
 
 def get_ipv4_ipv6_addresses(ip_addresses: list[str]):
     """Given a list of IPv4 and IPv6 addresses, return them as separate lists."""
-    ipv4_addresses = ipv6_addresses = []
+    ipv4_addresses = []
+    ipv6_addresses = []
     for ip_address in ip_addresses:
         if is_valid_ipv4_address(ip_address):
             ipv4_addresses.append(ip_address)
