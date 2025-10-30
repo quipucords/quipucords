@@ -1051,7 +1051,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 (
                     "ifconfig_ip_addresses"
                     if deepget(fact, "ifconfig_ip_addresses") is not None
-                    else "ip_address_show_ips"
+                    else "ip_address_show_ipv4"
                 ),
                 "ip_addresses",
                 formatters.list_or_none,
