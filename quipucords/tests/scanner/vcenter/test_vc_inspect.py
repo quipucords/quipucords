@@ -5,11 +5,14 @@ from socket import gaierror
 from unittest.mock import ANY, Mock, patch
 
 import pytest
+from faker import Faker
 from pyVmomi import vim
 
 from api.models import Credential, ScanTask, Source
 from scanner.vcenter.inspect import InspectTaskRunner, get_nics, get_vm_names
 from tests.scanner.test_util import create_scan_job
+
+_faker = Faker()
 
 
 def invalid_login():
@@ -49,22 +52,24 @@ def test_get_nics():
     """Test the get_nics function."""
     guest = Mock()
     nics = []
+    expected_mac_addresses = [_faker.mac_address() for i in range(0, 2)]
+    expected_ip_addresses = [_faker.ipv4(), _faker.ipv6()]
     for k in range(0, 2):
         nic = Mock()
         network = Mock()
         nic.network = network
-        nic.macAddress = "mac" + str(k)
+        nic.macAddress = expected_mac_addresses[k]
         ip_config = Mock()
         ip_addr = Mock()
-        ip_addr.ipAddress = "ip" + str(k)
+        ip_addr.ipAddress = expected_ip_addresses[k]
         addresses = [ip_addr]
         ip_config.ipAddress = addresses
         nic.ipConfig = ip_config
         nics.append(nic)
     guest.net = nics
     mac_addresses, ip_addresses = get_nics(guest.net)
-    assert mac_addresses == ["mac0", "mac1"]
-    assert ip_addresses == ["ip0", "ip1"]
+    assert mac_addresses == expected_mac_addresses
+    assert ip_addresses == expected_ip_addresses
 
 
 @pytest.mark.django_db
