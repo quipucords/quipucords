@@ -73,6 +73,7 @@ def expected_network_scan_facts():
         "insights_client_id",
         "installed_products",
         "ip_address_show_ipv4",
+        "ip_address_show_ipv6",
         "ip_address_show_mac",
         "jboss_activemq_ver",
         "jboss_camel_ver",

@@ -5,13 +5,13 @@
     internal_host_started_processing_role: "ip address show"
 
 - name: gather 'ip address show' fact (no sudo)
-  raw: export LANG=C LC_ALL=C; ip address show
+  raw: export LANG=C LC_ALL=C; ip --color=never address show
   register: internal_ip_address_show_cmd
   ignore_errors: yes
   when: '(not user_has_sudo) and internal_have_ip_user'
 
 - name: gather 'ip address show' fact (sudo)
-  raw: export LANG=C LC_ALL=C; ip address show
+  raw: export LANG=C LC_ALL=C; ip --color=never address show
   register: internal_sudo_ip_address_show_cmd
   ignore_errors: yes
   become: yes
@@ -21,7 +21,8 @@
   set_fact:
     # NOTE: We want to process the related output in two different ways, but the current
     # quipucords Processor class behavior requires us to include it in two facts.
-    ip_address_show_ips: "{{ internal_ip_address_show_cmd | default(None) }}"
+    ip_address_show_ipv4: "{{ internal_ip_address_show_cmd | default(None) }}"
+    ip_address_show_ipv6: "{{ internal_ip_address_show_cmd | default(None) }}"
     ip_address_show_mac: "{{ internal_ip_address_show_cmd | default(None) }}"
   ignore_errors: yes
   when: '(not user_has_sudo) and "stdout_lines" in internal_ip_address_show_cmd'
@@ -30,7 +31,8 @@
   set_fact:
     # NOTE: We want to process the related output in two different ways, but the current
     # quipucords Processor class behavior requires us to include it in two facts.
-    ip_address_show_ips: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
+    ip_address_show_ipv4: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
+    ip_address_show_ipv6: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
     ip_address_show_mac: "{{ internal_sudo_ip_address_show_cmd | default(None) }}"
   ignore_errors: yes
   when: 'user_has_sudo and "stdout_lines" in internal_sudo_ip_address_show_cmd'
