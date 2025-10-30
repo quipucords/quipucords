@@ -38,7 +38,7 @@ def is_valid_mac_address(address: str):
 class ProcessIpAddressesIPv4(process.Processor):
     """Process the IPv4 addresses from `ip address show`."""
 
-    KEY = "ip_address_show_ips"
+    KEY = "ip_address_show_ipv4"
 
     @staticmethod
     def process(output: dict, dependencies=None) -> list[str]:
@@ -63,12 +63,12 @@ class ProcessIpAddressesIPv4(process.Processor):
 class ProcessIpAddressesIPv6(process.Processor):
     """Process the IPv6 addresses from `ip address show`."""
 
-    KEY = "ip_address_show_ips"
+    KEY = "ip_address_show_ipv6"
 
     @staticmethod
     def process(output: dict, dependencies=None) -> list[str]:
         """
-        Extract IPv4 addresses from the raw `ip address show` output.
+        Extract IPv6 addresses from the raw `ip address show` output.
 
         This handles output lines that look like this:
 
