@@ -1045,7 +1045,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("etc_release_release", "os_release", formatters.str_or_none),
             # Installed products (name + product/eng ID pairs)
             ("installed_products", "installed_products", formatters.list_of_dicts),
-            # Get IPv4 addresses from ifconfig's fact if present, else from ip's fact.
+            # Get IPv4 and IPv6 addresses from ifconfig's fact if present,
+            # else from ip's fact.
             (
                 (
                     "ifconfig_ip_addresses"

@@ -1,5 +1,6 @@
 """Scanner used for host connection discovery."""
 
+import ipaddress
 from functools import cache
 
 import yaml
@@ -155,3 +156,33 @@ def get_fact_names():
 def raw_facts_template():
     """Results template for fact collection on network scans."""
     return {fact_name: None for fact_name in get_fact_names()}
+
+
+def is_valid_ipv4_address(address: str):
+    """Return True if the provided string is a valid IPv4 address."""
+    try:
+        ipaddress.IPv4Address(address)
+        return True
+    except ipaddress.AddressValueError:
+        return False
+
+
+def is_valid_ipv6_address(address: str):
+    """Return True if the provided string is a valid IPv6 address."""
+    try:
+        ipaddress.IPv6Address(address)
+        return True
+    except ipaddress.AddressValueError:
+        return False
+
+
+def get_ipv4_ipv6_addresses(ip_addresses: list[str]):
+    """Given a list of IPv4 and IPv6 addresses, return them as separate lists."""
+    ipv4_addresses = []
+    ipv6_addresses = []
+    for ip_address in ip_addresses:
+        if is_valid_ipv4_address(ip_address):
+            ipv4_addresses.append(ip_address)
+        elif is_valid_ipv6_address(ip_address):
+            ipv6_addresses.append(ip_address)
+    return ipv4_addresses, ipv6_addresses

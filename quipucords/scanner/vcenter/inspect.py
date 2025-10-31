@@ -12,6 +12,7 @@ from api.inspectresult.model import InspectGroup
 from api.models import InspectResult, RawFact, ScanTask, SystemConnectionResult
 from api.status.misc import get_server_id
 from quipucords.environment import server_version
+from scanner.network.utils import is_valid_ipv4_address, is_valid_ipv6_address
 from scanner.runner import ScanTaskRunner
 from scanner.vcenter.utils import (
     ClusterRawFacts,
@@ -37,10 +38,10 @@ def get_nics(guest_net):
         if nic.network:  # Only return adapter backed interfaces
             if nic.ipConfig is not None and nic.ipConfig.ipAddress is not None:
                 mac_addresses.append(nic.macAddress)
-                ipconf = nic.ipConfig.ipAddress
-                for ip_addr in ipconf:
-                    if ":" not in ip_addr.ipAddress:  # Only grab ipv4 addrs
-                        ip_addresses.append(ip_addr.ipAddress)
+                for ip_addr in nic.ipConfig.ipAddress:
+                    addr = ip_addr.ipAddress
+                    if is_valid_ipv4_address(addr) or is_valid_ipv6_address(addr):
+                        ip_addresses.append(addr)
     return mac_addresses, ip_addresses
 
 
