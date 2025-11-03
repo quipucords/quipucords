@@ -51,6 +51,14 @@ def create_filename(file_name, file_ext, report_id, detailed_filename=False):
 def encode_content(content, file_format):
     """Encode content as bytes based on its file format."""
 
+    def _lightspeed_encoder(content):
+        # insights_gzip_renderer imports create_tar_buffer, defined below.
+        # Import class here to avoid circular imports.
+        from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
+
+        rendered_content = InsightsGzipRenderer().render(content)
+        return rendered_content.read()
+
     def _textfile_encoder(content):
         return content.encode("utf-8")
 
@@ -58,6 +66,7 @@ def encode_content(content, file_format):
         "json": JSONRenderer().render,
         "csv": _textfile_encoder,
         "plaintext": _textfile_encoder,
+        "lightspeed+tgz": _lightspeed_encoder,
     }
     return renderer[file_format](content)
 

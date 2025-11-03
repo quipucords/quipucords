@@ -18,10 +18,12 @@ searching for "ReportsGzipRenderer" in our repo.)
 
 import csv
 import hashlib
+import io
 import json
 import logging
 import tarfile
 from io import BytesIO
+from pathlib import Path
 
 import pytest
 from django.test import override_settings
@@ -44,6 +46,7 @@ from tests.constants import (
     FILENAME_DEPLOYMENTS_JSON,
     FILENAME_DETAILS_CSV,
     FILENAME_DETAILS_JSON,
+    FILENAME_LIGHTSPEED_TGZ,
     FILENAME_SHA256SUM,
 )
 from tests.factories import DeploymentReportFactory, ReportFactory
@@ -57,6 +60,7 @@ TARBALL_ALWAYS_EXPECTED_FILENAMES = {
     FILENAME_DEPLOYMENTS_JSON,
     FILENAME_DETAILS_CSV,
     FILENAME_DETAILS_JSON,
+    FILENAME_LIGHTSPEED_TGZ,
 }
 
 
@@ -322,6 +326,81 @@ def test_report_deployments_csv(
     # Why 7? We expect two separate table headers in the file, one section marker,
     # three blank lines, and at least one line per table. Yes, this CSV is a mess. >:(
     assert len(tarball_deployments_csv_lines) >= 7
+
+
+def consistent_lightspeed_report(tarbytes):
+    """Transform lightspeed report into something that can be asserted."""
+    output = {}
+    tmp_output = {}
+    slice_map = {}
+    with io.BytesIO(tarbytes) as file_obj:
+        with tarfile.open(fileobj=file_obj, mode="r") as tar:
+            for member in tar.getmembers():
+                if not member.name.endswith(".json"):
+                    continue
+                content = tar.extractfile(member)
+                data = json.load(content)
+                tmp_output[member.name] = data
+
+    metadata_key = [
+        name for name in tmp_output.keys() if name.endswith("metadata.json")
+    ][-1]
+    slice_map = {
+        slice_id: new_slice_id
+        for new_slice_id, slice_id in enumerate(
+            tmp_output[metadata_key].get("report_slices", {}).keys(), start=1
+        )
+    }
+
+    for slice_id, new_slice_id in slice_map.items():
+        report_slices = tmp_output[metadata_key].get("report_slices", {})
+        report_slices[new_slice_id] = report_slices.pop(slice_id)
+
+    for name, content in tmp_output.items():
+        pname = Path(name)
+        if new_slice_id := slice_map.get(pname.stem):
+            new_pname = str(pname.with_name(f"{new_slice_id}.json"))
+            content["report_slice_id"] = str(new_slice_id)
+            output[new_pname] = content
+        else:
+            output[name] = content
+
+    return output
+
+
+@pytest.mark.django_db
+def test_report_tarball_lightspeed_tgz(
+    client_logged_in, deployment_with_logs: DeploymentsReport
+):
+    """Test report tarball contains expected lightspeed.tar.gz."""
+    deployments_report = deployment_with_logs
+    report_id = deployments_report.report.id
+    tarball_response = client_logged_in.get(
+        reverse("v1:reports-detail", args=(report_id,))
+    )
+    assert tarball_response.ok, tarball_response.text
+
+    files_contents = extract_files_from_tarball(tarball_response.content)
+    expected_lightspeed_tgz_filename = FILENAME_LIGHTSPEED_TGZ.format(
+        report_id=report_id
+    )
+    assert expected_lightspeed_tgz_filename in files_contents
+    tarball_lightspeed_tgz = files_contents[expected_lightspeed_tgz_filename]
+
+    # tgz header alone takes 45 bytes. 100 is arbitrary, but good enough threshold to
+    # mean "file is not empty and has some content inside"
+    assert len(tarball_lightspeed_tgz) > 100
+
+    # Compare tarball lightspeed.tar.gz contents with the standalone API's response.
+    api_lightspeed_response = client_logged_in.get(
+        reverse("v1:reports-insights", args=(report_id,)),
+        headers={"Accept": "application/gzip"},
+    )
+    assert api_lightspeed_response.ok, api_lightspeed_response.text
+    api_lightspeed_tgz = api_lightspeed_response.content
+    api_lightspeed_report = consistent_lightspeed_report(api_lightspeed_tgz)
+    tarball_lightspeed_report = consistent_lightspeed_report(tarball_lightspeed_tgz)
+    assert api_lightspeed_report == tarball_lightspeed_report
 
 
 @pytest.mark.dbcompat

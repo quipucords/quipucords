@@ -24,13 +24,14 @@ def insights(request, report_id=None):
     deployment_report = get_object_or_404(
         DeploymentsReport.objects.only("id", "status"), report__id=report_id
     )
-    _validate_deployment_report_status(deployment_report)
-    report = _get_report(deployment_report)
+    validate_deployment_report_status(deployment_report)
+    report = get_report(deployment_report)
     serializer = YupanaPayloadSerializer(report)
     return Response(serializer.data)
 
 
-def _validate_deployment_report_status(deployment_report):
+def validate_deployment_report_status(deployment_report):
+    """Check if deployment report did complete."""
     if deployment_report.status != DeploymentsReport.STATUS_COMPLETE:
         raise FailedDependencyError(
             {
@@ -40,7 +41,8 @@ def _validate_deployment_report_status(deployment_report):
         )
 
 
-def _get_report(deployment_report):
+def get_report(deployment_report):
+    """Get ReportEntity for deployment_report."""
     try:
         report = ReportEntity.from_report_id(deployment_report.report.id)
     except SystemFingerprint.DoesNotExist as err:

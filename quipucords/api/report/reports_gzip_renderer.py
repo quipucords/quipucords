@@ -74,6 +74,14 @@ class ReportsGzipRenderer(renderers.BaseRenderer):
             file_name = create_filename(basename, extension, report_id, True)
             files_data[file_name] = encode_content(log.read_text(), "plaintext")
 
+        if lightspeed_data := reports_dict.get("lightspeed_report"):
+            lightspeed_tgz_name = create_filename(
+                "lightspeed", "tar.gz", report_id, True
+            )
+            files_data[lightspeed_tgz_name] = encode_content(
+                lightspeed_data, "lightspeed+tgz"
+            )
+
         # generate hashes
         sha256sum_content = ""
         for full_file_name, content in files_data.items():
