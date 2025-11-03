@@ -50,6 +50,8 @@ NET_INTER_LO_PERIOD = "net.interface.lo."
 NET_INTER_LO_COLON = "net::interface::lo::"
 IPV4_PERIOD = ".ipv4_address"
 IPV4_COLON = "::ipv4_address"
+IPV6_PERIOD = ".ipv6_address"
+IPV6_COLON = "::ipv6_address"
 MAC_PERIOD = ".mac_address"
 MAC_COLON = "::mac_address"
 IP_ADDRESSES = "ip_addresses"
@@ -224,6 +226,7 @@ def host_fields(api_version, response):  # noqa: PLR0912, PLR0915, C901
     host_info[LOCATION] = fields.get(LOCATION_NAME)
 
     ipv4s = []
+    ipv6s = []
     macs = []
     for key in facts:
         net_interface = key.startswith(NET_INTER_PERIOD) or key.startswith(
@@ -234,16 +237,19 @@ def host_fields(api_version, response):  # noqa: PLR0912, PLR0915, C901
         )
         if net_interface and not net_interface_lo:
             ipv4_addr = key.endswith(IPV4_PERIOD) or key.endswith(IPV4_COLON)
+            ipv6_addr = key.endswith(IPV6_PERIOD) or key.endswith(IPV6_COLON)
             mac_addr = key.endswith(MAC_PERIOD) or key.endswith(MAC_COLON)
             if ipv4_addr and facts[key]:
                 ipv4s.append(facts[key].lower())
+            if ipv6_addr and facts[key]:
+                ipv6s.append(facts[key].lower())
             if mac_addr and facts[key]:
                 macs.append(facts[key].lower())
 
     macs = list(set(macs))
-    ipv4s = list(set(ipv4s))
+    ip_addresses = list(set(ipv4s + ipv6s))
 
-    host_info[IP_ADDRESSES] = ipv4s
+    host_info[IP_ADDRESSES] = ip_addresses
     host_info[MAC_ADDRESSES] = macs
 
     os_release = host_info.get(OS_RELEASE)
