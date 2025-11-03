@@ -6,10 +6,15 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from api.aggregate_report.view import get_serialized_aggregate_report
 from api.deployments_report.view import build_cached_json_report
+from api.exceptions import FailedDependencyError
+from api.insights_report.serializers import YupanaPayloadSerializer
+from api.insights_report.view import get_report as get_lightspeed_report
+from api.insights_report.view import validate_deployment_report_status
 from api.models import DeploymentsReport, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import (
@@ -53,6 +58,20 @@ def reports(request, report_id):
     reports_dict["deployments_json"] = deployments_json
     aggregate_json = get_serialized_aggregate_report(report_id)
     reports_dict["aggregate_json"] = aggregate_json
+    try:
+        validate_deployment_report_status(deployments_report)
+        lightspeed_report = get_lightspeed_report(deployments_report)
+        lightspeed_serializer = YupanaPayloadSerializer(lightspeed_report)
+        reports_dict["lightspeed_report"] = lightspeed_serializer.data
+    except (FailedDependencyError, NotFound):
+        logger.info(
+            (
+                "Could not generate Lightspeed report for deployment report %s; "
+                "skipping\nException that generated this message:"
+            ),
+            report_id,
+            exc_info=True,
+        )
     return Response(reports_dict)
 
 
