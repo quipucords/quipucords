@@ -70,6 +70,11 @@ FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID = {
 def hash_system_fingerprint(fingerprint: SystemFingerprint, *, fields: set[str]) -> str:
     """Hash a SystemFingerprint to a single hopefully-unique identifier string."""
     fingerprints_dict = model_to_dict(fingerprint, fields=fields)
+    # Note we cannot hash date object so let's get the string representation
+    for key in fingerprints_dict.keys():
+        value = fingerprints_dict[key]
+        if isinstance(type(value), datetime):
+            fingerprints_dict[key] = str(field)
     fingerprints_dict = deep_sort(fingerprints_dict)
     fingerprints_str = json.dumps(fingerprints_dict, sort_keys=True)
     return hashlib.sha512(fingerprints_str.encode()).hexdigest()
