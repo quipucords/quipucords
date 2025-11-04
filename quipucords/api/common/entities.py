@@ -6,7 +6,7 @@ import json
 import uuid
 from contextlib import suppress
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from functools import cached_property
 from logging import getLogger
 from typing import Dict, List
@@ -73,8 +73,8 @@ def hash_system_fingerprint(fingerprint: SystemFingerprint, *, fields: set[str])
     # Note we cannot hash date object so let's get the string representation
     for key in fingerprints_dict.keys():
         value = fingerprints_dict[key]
-        if isinstance(type(value), datetime):
-            fingerprints_dict[key] = str(field)
+        if isinstance(value, (datetime, date)):
+            fingerprints_dict[key] = str(value)
     fingerprints_dict = deep_sort(fingerprints_dict)
     fingerprints_str = json.dumps(fingerprints_dict, sort_keys=True)
     return hashlib.sha512(fingerprints_str.encode()).hexdigest()

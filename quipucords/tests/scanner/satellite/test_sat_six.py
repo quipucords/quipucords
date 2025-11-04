@@ -224,6 +224,9 @@ class TestSatelliteSixV1:
                     "is_virtual": "true",
                     "virtual": "kvm",
                     "net.interface.ipv4_address": "192.168.99.123",
+                    "net.interface.ipv6_address": (
+                        "ff4d:f0ad:8a48:e26a:76b6:d1ea:6258:d74f"
+                    ),
                     "net.interface.mac_address": "fe80::5054:ff:fe24:946e",
                 },
             }
@@ -249,11 +252,16 @@ class TestSatelliteSixV1:
                 "num_virtual_guests": 1,
                 "virtual": "hypervisor",
                 "location": "Raleigh",
-                "ip_addresses": ["192.168.99.123"],
+                "ip_addresses": [
+                    "192.168.99.123",
+                    "ff4d:f0ad:8a48:e26a:76b6:d1ea:6258:d74f",
+                ],
                 "mac_addresses": ["fe80::5054:ff:fe24:946e"],
                 "os_name": "RedHat",
                 "os_version": "7.4",
             }
+            host_info["ip_addresses"] = sorted(host_info["ip_addresses"])
+            expected["ip_addresses"] = sorted(expected["ip_addresses"])
             assert host_info == expected
 
     @pytest.mark.django_db
@@ -779,6 +787,9 @@ class TestSatelliteSixV2:
                     "is_virtual": "true",
                     "virtual": "kvm",
                     "net::interface::ipv4_address": "192.168.99.123",
+                    "net::interface::ipv6_address": (
+                        "ff4d:f0ad:8a48:e26a:76b6:d1ea:6258:d74f"
+                    ),
                     "net::interface::mac_address": "fe80::5054:ff:fe24:946e",
                 },
             }
@@ -804,11 +815,16 @@ class TestSatelliteSixV2:
                 "num_virtual_guests": 1,
                 "virtual": "hypervisor",
                 "location": "Raleigh",
-                "ip_addresses": ["192.168.99.123"],
+                "ip_addresses": [
+                    "192.168.99.123",
+                    "ff4d:f0ad:8a48:e26a:76b6:d1ea:6258:d74f",
+                ],
                 "mac_addresses": ["fe80::5054:ff:fe24:946e"],
                 "os_name": "RedHat",
                 "os_version": "7.4",
             }
+            host_info["ip_addresses"] = sorted(host_info["ip_addresses"])
+            expected["ip_addresses"] = sorted(expected["ip_addresses"])
             assert host_info == expected
 
     @pytest.mark.django_db

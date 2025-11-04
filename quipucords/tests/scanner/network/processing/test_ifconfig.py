@@ -16,6 +16,15 @@ class TestProcessIPAddresses(unittest.TestCase):
             ["1.2.3.4"],
         )
 
+    def test_success_ipv6_case(self):
+        """Found IPv6."""
+        self.assertEqual(
+            ifconfig.ProcessIPAddresses.process(
+                ansible_result("inet6 117f:8ca5:e82a:a697:cf9:871d:a826:f109")
+            ),
+            ["117f:8ca5:e82a:a697:cf9:871d:a826:f109"],
+        )
+
     def test_not_found(self):
         """Did not find IP."""
         self.assertEqual(ifconfig.ProcessIPAddresses.process(ansible_result("")), [])

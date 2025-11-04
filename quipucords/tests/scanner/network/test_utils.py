@@ -162,3 +162,33 @@ def test_raw_facts_template():
     assert template[fact] is None
     template[fact] = 1
     assert utils.raw_facts_template()[fact] is None
+
+
+def test_is_valid_ipv4_address():
+    """Test is_valid_ipv4_address."""
+    assert utils.is_valid_ipv4_address("1.2.3.4")
+    assert utils.is_valid_ipv4_address("127.0.0.1")
+    assert not utils.is_valid_ipv4_address("bad.one")
+
+
+def test_is_valid_ipv6_address():
+    """Test is_valid_ipv6_address."""
+    assert utils.is_valid_ipv6_address("1aee:69c2:717c:93c2:402:7f62:863:1b6a")
+    assert utils.is_valid_ipv6_address("::1")
+    assert not utils.is_valid_ipv6_address("bad::one")
+
+
+def test_get_ipv4_ipv6_addresses():
+    """Test get_ipv4_ipv6_addresses."""
+    ipv4_addresses, ipv6_addresses = utils.get_ipv4_ipv6_addresses(
+        [
+            "127.0.0.1",
+            "bad.one",
+            "4f5f:dd5:cfde:3d41:578d:63dc:9101:a928",
+            "::1",
+            "192.168.99.99",
+            "bad:one:",
+        ]
+    )
+    assert set(ipv4_addresses) == {"127.0.0.1", "192.168.99.99"}
+    assert set(ipv6_addresses) == {"4f5f:dd5:cfde:3d41:578d:63dc:9101:a928", "::1"}
