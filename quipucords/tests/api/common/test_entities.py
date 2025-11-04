@@ -417,6 +417,13 @@ def test_provider_id(fingerprint, expected_provider_id):
             ),
             {"etc_machine_id": "zyx123", "ip_addresses": ["127.0.0.1", "127.0.0.2"]},
         ),
+        (
+            SystemFingerprint(
+                ip_addresses=["127.0.0.1"],
+                system_creation_date=datetime(2025, 11, 4).date(),
+            ),
+            {"ip_addresses": ["127.0.0.1"], "system_creation_date": "2025-11-04"},
+        ),
     ],
 )
 def test_hash_system_fingerprint_sorts_iterable_facts(fingerprint, expected_dict):

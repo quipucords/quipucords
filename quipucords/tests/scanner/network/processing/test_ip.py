@@ -23,21 +23,23 @@ IP_ETHERNET_OUTPUT_TEMPLATE = """\
 """  # noqa: E501
 
 
-def synthesize_eth_output(
+def synthesize_eth_output(  # noqa: PLR0913
     faker,
     sequence_number=2,
     interface_number=0,
     ipv4_address=None,
+    ipv6_address=None,
     mac_address=None,
 ):
     """Synthesize a single eth# interface's output from `ip address show`."""
     if not ipv4_address:
         ipv4_address = faker.ipv4_private()
+    if not ipv6_address:
+        ipv6_address = faker.ipv6()
     if not mac_address:
         mac_address = faker.mac_address()
     ipv4_broadcast = faker.ipv4_private()
     mac_broadcast = faker.mac_address()
-    ipv6_address = faker.ipv6()
     return IP_ETHERNET_OUTPUT_TEMPLATE.format(
         sequence_number=sequence_number,
         interface_number=interface_number,
@@ -58,6 +60,15 @@ def test_single_ipv4_address(faker):
     assert result == [ipv4_address]
 
 
+def test_single_ipv6_address(faker):
+    """Test extracting a single IPv6 address."""
+    ipv6_address = faker.ipv6()
+    ip_command_output = IP_LOOPBACK_OUTPUT_TEMPLATE
+    ip_command_output += synthesize_eth_output(faker, ipv6_address=ipv6_address)
+    result = ip.ProcessIpAddressesIPv6.process(ansible_result(ip_command_output))
+    assert result == [ipv6_address]
+
+
 def test_multiple_ipv4_addresses(faker):
     """Test extracting multiple IPv4 addresses."""
     ipv4_addresses = [
@@ -75,6 +86,24 @@ def test_multiple_ipv4_addresses(faker):
         )
     result = ip.ProcessIpAddressesIPv4.process(ansible_result(ip_command_output))
     assert set(result) == set(ipv4_addresses)
+
+
+def test_multiple_ipv6_addresses(faker):
+    """Test extracting multiple IPv6 addresses."""
+    ipv6_addresses = [
+        faker.ipv6(),
+        faker.ipv6(),
+    ]
+    ip_command_output = IP_LOOPBACK_OUTPUT_TEMPLATE
+    for offset, ipv6_address in enumerate(ipv6_addresses):
+        ip_command_output += synthesize_eth_output(
+            faker,
+            sequence_number=2 + offset,
+            interface_number=offset,
+            ipv6_address=ipv6_address,
+        )
+    result = ip.ProcessIpAddressesIPv6.process(ansible_result(ip_command_output))
+    assert set(result) == set(ipv6_addresses)
 
 
 def test_invalid_ipv4_address(faker):
