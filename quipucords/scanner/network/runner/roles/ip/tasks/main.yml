@@ -5,13 +5,13 @@
     internal_host_started_processing_role: "ip address show"
 
 - name: gather 'ip address show' fact (no sudo)
-  raw: export LANG=C LC_ALL=C; ip --color=never address show
+  raw: export LANG=C LC_ALL=C; ip address show | cat -
   register: internal_ip_address_show_cmd
   ignore_errors: yes
   when: '(not user_has_sudo) and internal_have_ip_user'
 
 - name: gather 'ip address show' fact (sudo)
-  raw: export LANG=C LC_ALL=C; ip --color=never address show
+  raw: export LANG=C LC_ALL=C; ip address show | cat -
   register: internal_sudo_ip_address_show_cmd
   ignore_errors: yes
   become: yes

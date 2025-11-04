@@ -39,7 +39,7 @@ export LANG=C LC_ALL=C; find {{search_directories}} -xdev -type f -name karaf.ja
 export LANG=C LC_ALL=C; for proc_pid in $(find /proc -maxdepth 1 -xdev -name "[0-9]*" 2>/dev/null); do ls -l ${proc_pid}/fd 2>/dev/null | grep "java"; done | grep -e "/modules/system/layers/base\|/opt/rh/eap[0-9]/root/usr/share/wildfly" | sed -n "s/.*\-> //p" | sed -n 's/\/modules\/system\/layers\/base.*//p;s/\(.*wildfly\).*/\1/p' | sort -u
 export LANG=C LC_ALL=C; if command -v ifconfig >/dev/null ; then ifconfig -a; else hostname -I 2>/dev/null; fi
 export LANG=C LC_ALL=C; ifconfig -a |  grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'
-export LANG=C LC_ALL=C; ip --color=never address show
+export LANG=C LC_ALL=C; ip address show | cat -
 export LANG=C LC_ALL=C; java -jar "{{ item }}"/jboss-modules.jar -version 2>/dev/null
 export LANG=C LC_ALL=C; java -jar '{{ item }}/jboss-as/bin/run.jar' --version
 export LANG=C LC_ALL=C; locate JBossEULA.txt | sed -n -e "s/\(.*\)\/jboss-as\/\(.*\)/\1/gp" | uniq
