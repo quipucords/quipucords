@@ -459,35 +459,7 @@ LOGGING = {
             "level": CELERY_LOGGING_LEVEL,
             "propagate": False,
         },
-        "api.details_report": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "api.deployments_report": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "api.scan": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "api.scantask": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "api.scanjob": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "api.status": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
         "fingerprinter": {
-            "handlers": LOGGING_HANDLERS,
-            "level": QUIPUCORDS_LOGGING_LEVEL,
-        },
-        "api.signal.scanjob_signal": {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
@@ -495,11 +467,11 @@ LOGGING = {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        "quipucords.environment": {
+        "api": {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
-        "quipucords.warnings": {
+        "quipucords": {
             "handlers": LOGGING_HANDLERS,
             "level": QUIPUCORDS_LOGGING_LEVEL,
         },
