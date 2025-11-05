@@ -52,7 +52,7 @@ def test_get_nics():
     """Test the get_nics function."""
     guest = Mock()
     nics = []
-    expected_mac_addresses = [_faker.mac_address() for i in range(0, 2)]
+    expected_mac_addresses = [_faker.mac_address() for _ in range(2)]
     expected_ip_addresses = [_faker.ipv4(), _faker.ipv6()]
     for k in range(0, 2):
         nic = Mock()
