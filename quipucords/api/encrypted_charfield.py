@@ -18,6 +18,13 @@ class EncryptedCharField(models.CharField):
         self.hashi_vault = HashiVault()
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def encrypt_ansible_vault_value(value):
+        """Encrypt a value for the Ansible vault if not already encrypted."""
+        if "$ANSIBLE_VAULT" in value:
+            return value
+        return encrypt_data_as_unicode(value)
+
     def from_db_value(self, value, expression, connection):
         """Decrypt data when retrieved  from the database."""
         if value is None:
@@ -42,4 +49,4 @@ class EncryptedCharField(models.CharField):
             return value
         if self.hashi_vault.client:
             return self.hashi_vault.client.encrypt(value)
-        return encrypt_data_as_unicode(value)
+        return self.encrypt_ansible_vault_value(value)
