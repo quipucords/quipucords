@@ -15,6 +15,7 @@ from api import messages
 from api.common.models import BaseModel
 from api.common.util import ALL_IDS_MAGIC_STRING
 from api.vault import decrypt_data_as_unicode, encrypt_data_as_unicode
+from api.encrypted_charfield import EncryptedCharField
 from constants import DataSources
 
 
@@ -49,16 +50,16 @@ class Credential(BaseModel):
     # exists elsewhere to enforce not-blank values in specific fields when applicable.
     # Future refactoring idea: implement different credential types in separate models.
     username = models.CharField(max_length=64, null=True, blank=True)
-    password = models.CharField(max_length=1024, null=True, blank=True)
-    auth_token = models.CharField(max_length=6000, null=True, blank=True)
+    password = models.EncryptedCharField(max_length=1024, null=True, blank=True)
+    auth_token = models.EncryptedCharField(max_length=6000, null=True, blank=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True, blank=True)
-    ssh_key = models.CharField(max_length=65536, null=True, blank=True)
-    ssh_passphrase = models.CharField(max_length=1024, null=True, blank=True)
+    ssh_key = models.EncryptedCharField(max_length=65536, null=True, blank=True)
+    ssh_passphrase = models.EncryptedCharField(max_length=1024, null=True, blank=True)
     become_method = models.CharField(
         max_length=6, choices=BECOME_METHOD_CHOICES, null=True, blank=True
     )
     become_user = models.CharField(max_length=64, null=True, blank=True)
-    become_password = models.CharField(max_length=1024, null=True, blank=True)
+    become_password = models.EncryptedCharField(max_length=1024, null=True, blank=True)
 
     ENCRYPTED_FIELDS = [
         "password",
