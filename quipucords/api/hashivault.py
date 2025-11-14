@@ -19,7 +19,7 @@ class VaultClient:
         else:
             self.vault_client = None
 
-    def encrypt(self, key, plaintext):
+    def encrypt(self, plaintext):
         """Encrypt plain text using Vault."""
         plaintext_bytes = (
             plaintext.encode("utf8") if isinstance(plaintext, str) else plaintext
@@ -27,28 +27,17 @@ class VaultClient:
         plaintext_b64 = base64.urlsafe_b64encode(plaintext_bytes).decode("ascii")
         encrypted_response = self.vault_client.secrets.transit.encrypt_data(
             mount_point=settings.QUIPUCORDS_VAULT_MOUNT_POINT,
-            name=key,
+            name=settings.QUIPUCORDS_VAULT_ENCRYPTION_KEY,
             plaintext=plaintext_b64,
-        )
-        self.vault_client.secrets.transit.update_key_configuration(
-            mount_point=settings.QUIPUCORDS_VAULT_MOUNT_POINT,
-            name=key,
-            deletion_allowed=True,
         )
         return encrypted_response["data"]["ciphertext"]
 
     def decrypt(self, key, ciphertext):
-        """Decrypt encrypted key using Vault."""
+        """Decrypt encrypted data using Vault."""
         decrypted_response = self.vault_client.secrets.transit.decrypt_data(
             mount_point=settings.QUIPUCORDS_VAULT_MOUNT_POINT,
-            name=key,
+            name=settings.QUIPUCORDS_VAULT_ENCRYPTION_KEY,
             ciphertext=ciphertext,
         )
         decrypted_response_b64 = decrypted_response["data"]["plaintext"]
         return base64.urlsafe_b64decode(decrypted_response_b64).decode("utf-8")
-
-    def delete(self, key):
-        """Delete key from vault."""
-        self.vault_client.secrets.transit.delete_key(
-            mount_point=settings.QUIPUCORDS_VAULT_MOUNT_POINT, name=key
-        )
