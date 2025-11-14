@@ -15,7 +15,6 @@ from api import messages
 from api.common.models import BaseModel
 from api.common.util import ALL_IDS_MAGIC_STRING
 from api.vault import decrypt_data_as_unicode, encrypt_data_as_unicode
-from api.encrypted_charfield import EncryptedCharField
 from constants import DataSources
 
 
