@@ -32,7 +32,7 @@ class HashiVault:
         )
         return encrypted_response["data"]["ciphertext"]
 
-    def decrypt(self, key, ciphertext):
+    def decrypt(self, ciphertext):
         """Decrypt encrypted data using Vault."""
         decrypted_response = self.client.secrets.transit.decrypt_data(
             mount_point=settings.QUIPUCORDS_VAULT_MOUNT_POINT,

@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from api.hashivault import HashiVault
+from api.hashi_vault import HashiVault
 from api.vault import decrypt_data_as_unicode, encrypt_data_as_unicode
 
 
@@ -25,13 +25,19 @@ class EncryptedCharField(models.CharField):
             return value
         return encrypt_data_as_unicode(value)
 
+    def decrypt_value(self, value):
+        """Decrypt a value."""
+        if "$ANSIBLE_VAULT" in value:
+            return decrypt_data_as_unicode(value)
+        if self.hashi_vault.client:
+            return self.hashi_vault.decrypt(value)
+        return decrypt_data_as_unicode(value)
+
     def from_db_value(self, value, expression, connection):
         """Decrypt data when retrieved  from the database."""
         if value is None:
             return value
-        if self.hashi_vault.client:
-            return self.hashi_vault.client.decrypt(value)
-        return decrypt_data_as_unicode(value)
+        return self.decrypt_value(value)
 
     def to_python(self, value):
         """Assure that data is properly decrypted when stored in a Python string."""
@@ -39,14 +45,16 @@ class EncryptedCharField(models.CharField):
             return value
         if value is None:
             return value
-        if self.hashi_vault.client:
-            return self.hashi_vault.client.decrypt(value)
-        return decrypt_data_as_unicode(value)
+        return self.decrypt_value(value)
 
     def get_prep_value(self, value):
         """Assure that data is properly encrypted before storing in the database."""
         if value is None:
             return value
+        # Initially decrypting the value via Ansible, allows for dynamic
+        # conversion to Hashicorp Vault if enabled.
+        if "$ANSIBLE_VAULT" in value:
+            value = decrypt_data_as_unicode(value)
         if self.hashi_vault.client:
-            return self.hashi_vault.client.encrypt(value)
+            return self.hashi_vault.encrypt(value)
         return self.encrypt_ansible_vault_value(value)
