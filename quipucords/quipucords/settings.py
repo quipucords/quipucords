@@ -578,6 +578,13 @@ if QUIPUCORDS_VAULT_ENABLED:
         )
         logger.error(error_message)
         raise ImproperlyConfigured(error_message)
+    if not QUIPUCORDS_VAULT_SSL_VERIFY:
+        warning_message = (
+            "When enabling encryptions with HashiCorp Vault, it is highly"
+            " recommended to keep the QUIPUCORDS_VAULT_SSL_VERIFY option"
+            " set to True. This is especially true for production environments."
+        )
+        logger.warning(warning_message)
 
 # Load Feature Flags
 QUIPUCORDS_FEATURE_FLAGS = FeatureFlag()

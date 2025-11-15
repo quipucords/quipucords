@@ -3,7 +3,9 @@
 import base64
 
 import hvac
+import requests
 from django.conf import settings
+from urllib3.exceptions import InsecureRequestWarning
 
 
 class HashiVault:
@@ -16,6 +18,8 @@ class HashiVault:
                 token=settings.QUIPUCORDS_VAULT_TOKEN,
                 verify=settings.QUIPUCORDS_VAULT_SSL_VERIFY,
             )
+            if not settings.QUIPUCORDS_VAULT_SSL_VERIFY:
+                requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         else:
             self.client = None
 
