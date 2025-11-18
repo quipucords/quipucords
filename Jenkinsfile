@@ -3,7 +3,7 @@
 def agents = [:]
 agents["failFast"] = false
 
-["fedora", "rhel8", "rhel9"].each { distro_label ->
+["fedora", "rhel8", "rhel9", "rhel10"].each { distro_label ->
     agents[distro_label] = {
         node("discovery_ci && ${distro_label}") {
             timestamps {
