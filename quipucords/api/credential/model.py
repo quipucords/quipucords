@@ -60,6 +60,24 @@ class Credential(BaseModel):
     become_user = models.CharField(max_length=64, null=True, blank=True)
     become_password = EncryptedCharField(max_length=1024, null=True, blank=True)
 
+    # Only needed for pytests, not for run-time.
+    ENCRYPTED_FIELDS = [
+        "password",
+        "auth_token",
+        "ssh_key",
+        "ssh_passphrase",
+        "become_password"
+    ]
+
+    # Only used by pytests (Ansible Vault), not for run-time.
+    @staticmethod
+    def is_encrypted(field):
+        """Check to see if the password is already Ansible Vault encrypted."""
+        if "$ANSIBLE_VAULT" in field:
+            return True
+        return False
+
+
     class Meta:
         """Metadata for the model."""
 
