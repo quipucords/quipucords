@@ -31,7 +31,7 @@ class EncryptedCharField(models.CharField):
             return decrypt_data_as_unicode(value)
         if self.hashi_vault.client:
             return self.hashi_vault.decrypt(value)
-        return decrypt_data_as_unicode(value)
+        return value
 
     def from_db_value(self, value, expression, connection):
         """Decrypt data when retrieved  from the database."""

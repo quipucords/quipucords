@@ -15,6 +15,7 @@ from api import messages
 from api.common.models import BaseModel
 from api.common.util import ALL_IDS_MAGIC_STRING
 from api.encrypted_charfield import EncryptedCharField
+from api.vault import decrypt_data_as_unicode
 from constants import DataSources
 
 
@@ -60,13 +61,12 @@ class Credential(BaseModel):
     become_user = models.CharField(max_length=64, null=True, blank=True)
     become_password = EncryptedCharField(max_length=1024, null=True, blank=True)
 
-    # Only needed for pytests, not for run-time.
     ENCRYPTED_FIELDS = [
         "password",
-        "auth_token",
-        "ssh_key",
         "ssh_passphrase",
-        "become_password"
+        "ssh_key",
+        "become_password",
+        "auth_token",
     ]
 
     # Only used by pytests (Ansible Vault), not for run-time.
@@ -90,8 +90,9 @@ class Credential(BaseModel):
             tmp_path = tempfile.NamedTemporaryFile(
                 prefix=f"private_key_credential_{self.id}_"
             )
+            ssh_key = decrypt_data_as_unicode(self.ssh_key)
             private_keyfile_path = Path(tmp_path.name)
-            private_keyfile_path.write_text(f"{self.ssh_key}\n")
+            private_keyfile_path.write_text(f"{ssh_key}\n")
             private_keyfile_path.chmod(0o600)
             yield str(private_keyfile_path)
             # after the context manager is closed, cleanup the file
