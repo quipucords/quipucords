@@ -135,3 +135,6 @@ var/
 
 # test profiling results
 prof/
+
+# direnv configuration
+.envrc
