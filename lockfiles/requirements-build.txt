@@ -73,6 +73,7 @@ poetry-core==2.2.1
     # via
     #   click-didyoumean
     #   django-json-agg
+    #   hvac
     #   rsa
 pycparser==2.23 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via cffi
