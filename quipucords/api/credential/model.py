@@ -77,7 +77,6 @@ class Credential(BaseModel):
             return True
         return False
 
-
     class Meta:
         """Metadata for the model."""
 
