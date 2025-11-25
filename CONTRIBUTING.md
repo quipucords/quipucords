@@ -44,6 +44,8 @@ To check coverage of unit tests, run:
 make test-coverage
 ```
 
+**Note**: If you use AI tools to generate code, please review our [Policy for AI-Generated Code](AI_POLICY.md) for disclosure and quality requirements.
+
 ### Debugging
 
 You can easily attach a debugger to a container running quipucords server or celery worker.
