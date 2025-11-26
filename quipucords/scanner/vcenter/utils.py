@@ -47,9 +47,10 @@ def vcenter_connect(scan_task):
         smart_connect_kwargs["disableSslCertValidation"] = True
     elif not (ssl_protocol is None and ssl_cert_verify is None):
         ssl_context = ssl.SSLContext(
-            protocol=ssl_protocol if ssl_protocol else ssl.PROTOCOL_SSLv23
+            protocol=ssl_protocol if ssl_protocol else ssl.PROTOCOL_TLS_CLIENT
         )
         if ssl_cert_verify is False:
+            ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
         smart_connect_kwargs["sslContext"] = ssl_context
 
