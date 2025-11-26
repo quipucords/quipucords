@@ -45,6 +45,8 @@ def encrypt_data_as_unicode(data):
     :param data: string data to be encrypted
     :returns: unicode string of encrypted data using vault
     """
+    if "$ANSIBLE_VAULT" in data:
+        return data
     return encrypt_data(data).decode("utf-8")
 
 
@@ -54,6 +56,8 @@ def decrypt_data_as_unicode(data):
     :param data: string data to be decrypted
     :returns: unicode string of decrypted data using vault
     """
+    if "$ANSIBLE_VAULT" not in data:
+        return data
     return decrypt_data(data).decode("utf-8")
 
 

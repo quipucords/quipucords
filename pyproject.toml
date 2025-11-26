@@ -43,6 +43,7 @@ dependencies = [
     "whitenoise<7.0.0,>=6.3.0",
     "django-json-agg>=0.0.1",
     "pyvmomi",
+    "hvac>=2.4.0",
 ]
 
 [dependency-groups]

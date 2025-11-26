@@ -698,8 +698,8 @@ class TestCredentialSerializerV1:
     def test_with_many(self):
         """Test to serialize instances and many=True."""
 
-        def _value_formatter(value):
-            if isinstance(value, str) and Credential.is_encrypted(value):
+        def _value_formatter(value, k=None):
+            if k in Credential.ENCRYPTED_FIELDS:
                 return ENCRYPTED_DATA_MASK
             elif isinstance(value, datetime.datetime):
                 return value.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -721,7 +721,7 @@ class TestCredentialSerializerV1:
         # prep a list of credentials dict as the serializer would return
         for cred in credentials:
             cred_dict = {
-                k: _value_formatter(v)
+                k: _value_formatter(v, k)
                 for k, v in model_to_dict(cred).items()
                 if v is not None
             }
