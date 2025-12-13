@@ -1,7 +1,7 @@
-FROM quay.io/konflux-ci/yq@sha256:0a1bc508385e4f0b2bc65e815cb4ed741dbd2f728b35ee121030472007eb7004 as yq
+FROM quay.io/konflux-ci/yq@sha256:d007048d29fc22f9a81524173eeb9131b5b78253a4ab18f6331400c88d78ea47 as yq
 # builder and the "final" stages (and any stage that install rpms) MUST be compatible and derived from
 # the same ubi base (for instance, don't use a ubi8 "builder" stage with a "final" ubi9)
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:61d5ad475048c2e655cd46d0a55dfeaec182cc3faa6348cb85989a7c9e196483 as builder
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:6fc28bcb6776e387d7a35a2056d9d2b985dc4e26031e98a2bd35a7137cd6fd71 as builder
 # Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
 ARG CRATES_PATH="/tmp/output/deps/generic"
 ENV PATH="/opt/venv/bin:${PATH}"
@@ -16,7 +16,7 @@ RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
 COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:61d5ad475048c2e655cd46d0a55dfeaec182cc3faa6348cb85989a7c9e196483
+FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:6fc28bcb6776e387d7a35a2056d9d2b985dc4e26031e98a2bd35a7137cd6fd71
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
