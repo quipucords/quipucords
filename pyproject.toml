@@ -43,6 +43,7 @@ dependencies = [
     "whitenoise<7.0.0,>=6.3.0",
     "django-json-agg>=0.0.1",
     "pyvmomi",
+    "urllib3>=2.6.0", # pinning to force a newer version; TODO drop this after kubernetes >34.1.0 releases
 ]
 
 [dependency-groups]
