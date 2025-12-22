@@ -12,11 +12,11 @@ cffi==2.0.0 ; (implementation_name == "cpython" and platform_python_implementati
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.1
+cython==3.2.3
     # via
     #   pydantic
     #   pyyaml
-docutils==0.22.3
+docutils==0.22.4
     # via
     #   changelog-chug
     #   python-daemon
@@ -25,6 +25,7 @@ flit-core==3.12.0
     #   click
     #   django-filter
     #   docutils
+    #   flit-scm
     #   idna
     #   jinja2
     #   more-itertools
@@ -33,6 +34,8 @@ flit-core==3.12.0
     #   ptyprocess
     #   typing-extensions
     #   wheel
+flit-scm==1.7.0
+    # via exceptiongroup
 hatch-fancy-pypi-readme==25.1.0
     # via
     #   attrs
@@ -45,13 +48,14 @@ hatch-vcs==0.5.0
     #   jsonschema
     #   jsonschema-specifications
     #   referencing
-hatchling==1.27.0
+hatchling==1.28.0
     # via
     #   attrs
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
     #   jsonschema
     #   jsonschema-specifications
+    #   redis
     #   referencing
     #   sqlparse
     #   urllib3
@@ -91,10 +95,11 @@ setuptools-scm==8.1.0
 setuptools-scm==9.2.2
     # via
     #   django-axes
+    #   flit-scm
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
-trove-classifiers==2025.11.14.15
+trove-classifiers==2025.12.1.14
     # via hatchling
 typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
@@ -120,6 +125,8 @@ setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
+setuptools==80.3.1
+    # via psycopg-c
 setuptools==80.9.0
     # via
     #   ansible
@@ -145,7 +152,6 @@ setuptools==80.9.0
     #   pluggy
     #   prompt-toolkit
     #   psycopg
-    #   psycopg-c
     #   pyasn1
     #   pyasn1-modules
     #   pydantic
@@ -160,4 +166,5 @@ setuptools==80.9.0
     #   setuptools-scm
     #   trove-classifiers
     #   tzdata
+    #   tzlocal
     #   whitenoise
