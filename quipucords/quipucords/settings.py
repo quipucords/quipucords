@@ -552,6 +552,40 @@ if not AXES_ENABLED or not AXES_LOCK_OUT_AT_FAILURE:
         },
     )
 
+# Hashicorp Vault configuration
+QUIPUCORDS_VAULT_ENABLED = env.bool("QUIPUCORDS_VAULT_ENABLED", False)
+QUIPUCORDS_VAULT_ADDR = env.str("QUIPUCORDS_VAULT_ADDR", "https://localhost:8200")
+QUIPUCORDS_VAULT_SSL_VERIFY = env.bool("QUIPUCORDS_VAULT_SSL_VERIFY", True)
+QUIPUCORDS_VAULT_TOKEN = env.str("QUIPUCORDS_VAULT_TOKEN", "")
+QUIPUCORDS_VAULT_MOUNT_POINT = env.str(
+    "QUIPUCORDS_VAULT_MOUNT_POINT", "discovery-transit"
+)
+QUIPUCORDS_VAULT_ENCRYPTION_KEY = "discovery_encryption_key"
+
+if QUIPUCORDS_VAULT_ENABLED:
+    if not QUIPUCORDS_VAULT_TOKEN:
+        error_message = (
+            "When enabling encryptions with HashiCorp Vault,"
+            " QUIPUCORDS_VAULT_TOKEN must be specified for authenticating to the Vault"
+        )
+        logger.error(error_message)
+        raise ImproperlyConfigured(error_message)
+    if not QUIPUCORDS_VAULT_MOUNT_POINT:
+        error_message = (
+            "When enabling encryptions with HashiCorp Vault,"
+            " QUIPUCORDS_VAULT_MOUNT_POINT where the Transient secret engine instance"
+            " for Quipucords is mounted and accessed from must be defined."
+        )
+        logger.error(error_message)
+        raise ImproperlyConfigured(error_message)
+    if not QUIPUCORDS_VAULT_SSL_VERIFY:
+        warning_message = (
+            "When enabling encryptions with HashiCorp Vault, it is highly"
+            " recommended to keep the QUIPUCORDS_VAULT_SSL_VERIFY option"
+            " set to True. This is especially true for production environments."
+        )
+        logger.warning(warning_message)
+
 # Load Feature Flags
 QUIPUCORDS_FEATURE_FLAGS = FeatureFlag()
 

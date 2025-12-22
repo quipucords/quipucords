@@ -14,7 +14,8 @@ from django.utils.translation import gettext as _
 from api import messages
 from api.common.models import BaseModel
 from api.common.util import ALL_IDS_MAGIC_STRING
-from api.vault import decrypt_data_as_unicode, encrypt_data_as_unicode
+from api.encrypted_charfield import EncryptedCharField
+from api.vault import decrypt_data_as_unicode
 from constants import DataSources
 
 
@@ -49,16 +50,16 @@ class Credential(BaseModel):
     # exists elsewhere to enforce not-blank values in specific fields when applicable.
     # Future refactoring idea: implement different credential types in separate models.
     username = models.CharField(max_length=64, null=True, blank=True)
-    password = models.CharField(max_length=1024, null=True, blank=True)
-    auth_token = models.CharField(max_length=6000, null=True, blank=True)
+    password = EncryptedCharField(max_length=1024, null=True, blank=True)
+    auth_token = EncryptedCharField(max_length=6000, null=True, blank=True)
     ssh_keyfile = models.CharField(max_length=1024, null=True, blank=True)
-    ssh_key = models.CharField(max_length=65536, null=True, blank=True)
-    ssh_passphrase = models.CharField(max_length=1024, null=True, blank=True)
+    ssh_key = EncryptedCharField(max_length=65536, null=True, blank=True)
+    ssh_passphrase = EncryptedCharField(max_length=1024, null=True, blank=True)
     become_method = models.CharField(
         max_length=6, choices=BECOME_METHOD_CHOICES, null=True, blank=True
     )
     become_user = models.CharField(max_length=64, null=True, blank=True)
-    become_password = models.CharField(max_length=1024, null=True, blank=True)
+    become_password = EncryptedCharField(max_length=1024, null=True, blank=True)
 
     ENCRYPTED_FIELDS = [
         "password",
@@ -68,39 +69,13 @@ class Credential(BaseModel):
         "auth_token",
     ]
 
+    # Only used by pytests (Ansible Vault), not for run-time.
     @staticmethod
     def is_encrypted(field):
-        """Check to see if the password is already encrypted."""
+        """Check to see if the password is already Ansible Vault encrypted."""
         if "$ANSIBLE_VAULT" in field:
             return True
         return False
-
-    def encrypt_fields(self):
-        """Encrypt the sensitive fields of the object."""
-        # Uses is_encrypted() to make sure the password/become_password/
-        # passphrase is not already encrypted, which would be the case
-        # in partial_updates that do not update the password
-        # (as it grabs the old, encrypted one)
-        for field_name in self.ENCRYPTED_FIELDS:
-            field_value = getattr(self, field_name, None)
-            if field_value and not self.is_encrypted(field_value):
-                encrypted_value = encrypt_data_as_unicode(field_value)
-                setattr(self, field_name, encrypted_value)
-
-    def save(self, *args, **kwargs):
-        """Save the model object."""
-        self.encrypt_fields()
-        super().save(*args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        """Update the model object."""
-        self.encrypt_fields()
-        super().update(request, *args, **kwargs)
-
-    def partial_update(self, request, *args, **kwargs):
-        """Update the model object."""
-        self.encrypt_fields()
-        super().partial_update(request, *args, **kwargs)
 
     class Meta:
         """Metadata for the model."""
