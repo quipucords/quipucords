@@ -117,7 +117,6 @@ wheel==0.45.1
     #   python-daemon
     #   python-dateutil
     #   python-string-utils
-    #   resolvelib
     #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
