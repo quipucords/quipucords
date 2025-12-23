@@ -40,14 +40,13 @@ hatch-fancy-pypi-readme==25.1.0
     # via
     #   attrs
     #   jsonschema
-hatch-vcs==0.4.0
-    # via urllib3
 hatch-vcs==0.5.0
     # via
     #   attrs
     #   jsonschema
     #   jsonschema-specifications
     #   referencing
+    #   urllib3
 hatchling==1.28.0
     # via
     #   attrs
@@ -99,6 +98,7 @@ setuptools-scm==9.2.2
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
+    #   urllib3
 trove-classifiers==2025.12.1.14
     # via hatchling
 typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")

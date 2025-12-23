@@ -103,7 +103,7 @@ jsonschema-specifications==2025.9.1 ; (implementation_name == 'cpython' and sys_
     # via jsonschema
 kombu==5.6.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
-kubernetes==34.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+kubernetes==33.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via openshift
 lockfile==0.12.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via python-daemon
@@ -112,7 +112,9 @@ markupsafe==3.0.3 ; (implementation_name == 'cpython' and sys_platform == 'darwi
 more-itertools==9.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 oauthlib==3.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via requests-oauthlib
+    # via
+    #   kubernetes
+    #   requests-oauthlib
 openshift==0.13.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 packaging==25.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -205,9 +207,10 @@ tzlocal==5.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     # via celery
 uritemplate==4.2.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
-urllib3==2.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+urllib3==2.6.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   kubernetes
+    #   quipucords
     #   requests
 vine==5.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
