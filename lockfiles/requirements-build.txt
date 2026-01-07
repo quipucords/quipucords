@@ -55,7 +55,7 @@ hatchling==1.28.0
     #   referencing
     #   sqlparse
     #   urllib3
-maturin==1.10.2
+maturin==1.11.2
     # via
     #   cryptography
     #   rpds-py
@@ -63,7 +63,7 @@ packaging==25.0 ; (implementation_name == "cpython" and sys_platform == "darwin"
     # via
     #   hatchling
     #   setuptools-scm
-pathspec==0.12.1
+pathspec==1.0.1
     # via hatchling
 pbr==7.0.3
     # via lockfile
@@ -103,7 +103,6 @@ wheel==0.45.1
     # via
     #   ansible-core
     #   bcrypt
-    #   cachetools
     #   click-repl
     #   django-axes
     #   drf-spectacular
@@ -128,7 +127,6 @@ setuptools==80.9.0
     #   ansible
     #   ansible-core
     #   bcrypt
-    #   cachetools
     #   calver
     #   certifi
     #   cffi
