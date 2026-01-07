@@ -21,8 +21,6 @@ bcrypt==5.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     # via paramiko
 billiard==4.2.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
-cachetools==6.2.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via google-auth
 celery==5.6.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 certifi==2026.1.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -51,7 +49,7 @@ cryptography==46.0.3 ; (implementation_name == 'cpython' and sys_platform == 'da
     # via
     #   ansible-core
     #   paramiko
-django==5.2.9 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django==5.2.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
     #   django-cors-headers
@@ -83,7 +81,7 @@ durationpy==0.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     # via kubernetes
 fqdn==1.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-google-auth==2.45.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+google-auth==2.47.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
 gunicorn==23.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -204,7 +202,7 @@ tzlocal==5.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     # via celery
 uritemplate==4.2.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
-urllib3==2.6.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+urllib3==2.6.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   kubernetes
     #   quipucords
