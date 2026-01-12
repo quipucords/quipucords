@@ -25,6 +25,7 @@ from scanner.openshift.entities import (
     OCPPod,
     OCPWorkload,
 )
+from scanner.utils import format_host_for_url
 
 logger = getLogger(__name__)
 
@@ -116,7 +117,8 @@ class OpenShiftApi:
         **kwargs,
     ):
         """Initialize OpenShiftApi without providing a KubeConfig object."""
-        host_uri = f"{protocol}://{host}:{port}"
+        formatted_host = cls._format_host_for_url(host)
+        host_uri = f"{protocol}://{formatted_host}:{port}"
 
         if kwargs.get("auth_token"):
             kube_config = cls._init_kube_config(
@@ -129,6 +131,11 @@ class OpenShiftApi:
         if proxy_url:
             kube_config.proxy = proxy_url
         return cls(configuration=kube_config)
+
+    @staticmethod
+    def _format_host_for_url(host: str) -> str:
+        """Wrap IPv6 addresses in brackets for proper URL formatting."""
+        return format_host_for_url(host)
 
     @classmethod
     def _init_kube_config(cls, host, *, ssl_verify, auth_token):

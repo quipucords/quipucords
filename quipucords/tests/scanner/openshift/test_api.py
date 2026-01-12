@@ -8,9 +8,11 @@ from uuid import UUID
 
 import httpretty
 import pytest
+import requests
 from kubernetes.client import Configuration as KubeConfig
 from kubernetes.dynamic.exceptions import ResourceNotFoundError
 from kubernetes.dynamic.resource import ResourceInstance
+from requests.exceptions import InvalidURL
 
 from scanner.openshift.api import OpenShiftApi, optional_openshift_resource
 from scanner.openshift.entities import (
@@ -638,3 +640,30 @@ def test_initialize_openshiftapi_with_proxy_config():
         auth_token="TOKEN",
         proxy_url="http://proxy.example.com:8080/",
     )
+
+
+def test_with_config_info_with_ipv6_host(mocker):
+    """Test that IPv6 hosts are properly formatted in the URL."""
+    patched_kube_config = mocker.patch("scanner.openshift.api.KubeConfig")
+    mocker.patch("scanner.openshift.api.ApiClient")
+
+    OpenShiftApi.with_config_info(
+        host="fd00:dead:beef::126",
+        protocol="https",
+        port="6443",
+        auth_token="TOKEN",
+    )
+
+    patched_kube_config.assert_called_once_with(
+        host="https://[fd00:dead:beef::126]:6443",
+        api_key={"authorization": "bearer TOKEN"},
+    )
+
+
+def test_ipv6_url_without_brackets_fails():
+    """Document that requests fails to parse IPv6 URLs without brackets.
+
+    This test demonstrates the issue that _format_host_for_url solves.
+    """
+    with pytest.raises(InvalidURL, match="Failed to parse"):
+        requests.get("http://fd00:dead:beef::126:6443/", timeout=0.1)
