@@ -108,3 +108,23 @@ def test_create_or_update_user_update_with_bad_password(qpc_user_simple: User):
     expected_message = f"Updated user '{username}' with random password:"
     assert expected_message in out.getvalue()
     assert password_failed_requirements_message in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_create_or_update_user_enforces_single_user(qpc_user_simple: User, faker):
+    """Test that creating a user with a different username deletes the old user."""
+    old_username = qpc_user_simple.username
+    new_username = f"{old_username}_new"
+    password = faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)
+
+    assert User.objects.filter(username=old_username).exists()
+    assert User.objects.count() == 1
+
+    out = StringIO()
+    with patch_environ(new_username, password):
+        call_command("create_or_update_user", stdout=out)
+
+    assert not User.objects.filter(username=old_username).exists()
+    assert User.objects.filter(username=new_username).exists()
+    assert User.objects.count() == 1
+    assert f"Created user '{new_username}'" in out.getvalue()
