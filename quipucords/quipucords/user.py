@@ -1,11 +1,16 @@
 """Utilities for User management."""
 
+import logging
 import secrets
 
 from django.conf import settings
 from django.contrib.auth import get_user_model, password_validation
 from django.core.exceptions import ValidationError
 from django.db import transaction
+
+from log_messages import USER_SINGLE_USER_ENFORCED
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -42,6 +47,9 @@ def create_or_update_user(
     """
     Create or update a User, optionally with a random password.
 
+    This function enforces single-user mode: any existing users with a different
+    username are deleted before creating or updating the target user.
+
     If a User does not exist, create a new User.
     If a User does not exist and no password is given, use a random password.
     If a User already exists and a password is given, update the User.
@@ -63,6 +71,11 @@ def create_or_update_user(
             validate_password(password)
         except InvalidPasswordError:
             generate_password = True
+
+    deleted_count, _ = User.objects.exclude(username=username).delete()
+    if deleted_count:
+        logger.info(USER_SINGLE_USER_ENFORCED, username)
+
     user, created = User.objects.get_or_create(
         username=username, defaults={"email": email}
     )
