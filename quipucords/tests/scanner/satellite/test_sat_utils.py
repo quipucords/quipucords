@@ -75,6 +75,14 @@ class TestSatelliteUtils:
         assert url == expected
 
     @pytest.mark.django_db
+    def test_construct_url_with_ipv6(self):
+        """Test method to construct satellite url with IPv6 address."""
+        expected = "https://[fd00:dead:beef::126]:443/api/status"
+        status_url = "https://{sat_host}:{port}/api/status"
+        url = construct_url(status_url, "fd00:dead:beef::126")
+        assert url == expected
+
+    @pytest.mark.django_db
     def test_execute_request(self):
         """Test the method to execute a request against a satellite server."""
         status_url = "https://{sat_host}:{port}/api/status"

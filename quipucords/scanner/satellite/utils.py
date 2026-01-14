@@ -8,6 +8,7 @@ from rest_framework import status as codes
 
 from api.vault import decrypt_data_as_unicode
 from scanner.satellite.exceptions import SatelliteAuthError, SatelliteError
+from scanner.utils import format_host_for_url
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,11 @@ def get_connect_data(scan_task):
     return (host, port, user, password, proxy_url)
 
 
+def _format_host_for_url(host: str) -> str:
+    """Wrap IPv6 addresses in brackets for proper URL formatting."""
+    return format_host_for_url(host)
+
+
 def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
     """Create a formatted url with the given parameters.
 
@@ -51,7 +57,10 @@ def construct_url(url, sat_host, port="443", org_id=None, host_id=None):
     :param host_id: The identifier of a satellite host
     :returns: A formatted url strings
     """
-    return url.format(sat_host=sat_host, port=port, org_id=org_id, host_id=host_id)
+    formatted_host = _format_host_for_url(sat_host)
+    return url.format(
+        sat_host=formatted_host, port=port, org_id=org_id, host_id=host_id
+    )
 
 
 def execute_request(  # noqa: PLR0913
