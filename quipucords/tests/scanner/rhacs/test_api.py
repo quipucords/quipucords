@@ -62,3 +62,15 @@ def test_rhacsapi_api_call_uses_proxy(mock_send):
     prepared_request = mock_send.call_args[0][0]
     assert prepared_request.url == "https://localhost:8080/test"
     assert prepared_request.headers["Authorization"] == "Bearer test_token"
+
+
+def test_rhacsapi_instantiation_with_ipv6_host():
+    """Assert IPv6 hosts are properly formatted in the URL."""
+    api = RHACSApi.from_connection_info(
+        host="fd00:dead:beef::126",
+        protocol="https",
+        port=6443,
+        auth_token="test_token",
+    )
+
+    assert api.base_url == "https://[fd00:dead:beef::126]:6443"
