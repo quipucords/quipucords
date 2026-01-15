@@ -36,6 +36,7 @@ TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT) --du
 QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY ?= 10
 QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
+QUIPUCORDS_POSTGRES_WAIT_TIME ?= 10
 
 UBI_VERSION=9
 UBI_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)
@@ -166,7 +167,7 @@ setup-postgres:
       	-e POSTGRESQL_DATABASE=qpc \
 		-v quipucords-dev-db:/var/lib/pgsql/data \
 		-itd registry.redhat.io/rhel9/postgresql-15:latest
-	sleep 3
+	sleep $(QUIPUCORDS_POSTGRES_WAIT_TIME)
 	podman exec quipucords-dev-db psql -c 'alter role qpc with CREATEDB'
 
 setup-redis:
