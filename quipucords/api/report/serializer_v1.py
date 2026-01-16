@@ -61,7 +61,7 @@ class ReportUploadSerializer(Serializer):
     @transaction.atomic
     def create(self, validated_data):
         """Create a report filled with raw data and a fingerprint-type ScanJob."""
-        report = Report.objects.create()
+        report = Report.objects.create(origin=Report.UPLOADED)
         # ScanJob is required in order to trigger the "async task"
         # TODO: should we keep relying on "ScanJob" to trigger async tasks?
         # we could simply trigger a celery task without this infra

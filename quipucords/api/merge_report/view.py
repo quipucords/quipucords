@@ -26,7 +26,7 @@ def async_merge_reports(request):
     with transaction.atomic():
         merge_job = ScanJob.objects.create(
             scan_type=ScanTask.SCAN_TYPE_FINGERPRINT,
-            report=Report.objects.create(),
+            report=Report.objects.create(origin=Report.MERGED),
         )
         merge_job.copy_raw_facts_from_reports(report_ids)
     start_scan.send(sender=__name__, instance=merge_job)

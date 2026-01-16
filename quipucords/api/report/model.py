@@ -13,12 +13,26 @@ from api.common.models import BaseModel
 class Report(BaseModel):
     """A reported set of facts."""
 
+    LOCAL = "local"
+    UPLOADED = "uploaded"
+    MERGED = "merged"
+    ORIGIN_CHOICES = (
+        (LOCAL, LOCAL),
+        (UPLOADED, UPLOADED),
+        (MERGED, MERGED),
+    )
+
     report_version = models.CharField(
         max_length=64, null=False, default=create_report_version
     )
     # report_platform_id is a unique identifier required by yupana/insights
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
     inspect_groups = models.ManyToManyField("InspectGroup", related_name="reports")
+    origin = models.CharField(
+        choices=ORIGIN_CHOICES,
+        default=LOCAL,
+        null=False,
+    )
     # ---------------------------- legacy fields ----------------------------
     # legacy data that should be (re)moved when we transition to the paradigm
     # of "normalization phase"

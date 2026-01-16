@@ -9,7 +9,11 @@ from api.report.pagination import ReportPagination
 
 
 class ReportViewMixin:
-    """Mixin for paginated report views."""
+    """Mixin for paginated report views.
+
+    Note that the main intent here is to paginate the data of **single**
+    report, not **a list of reports**.
+    """
 
     pagination_class = ReportPagination
     # lookup kwarg MUST be something that uniquely identifies a Report

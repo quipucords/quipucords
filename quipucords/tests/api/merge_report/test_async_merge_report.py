@@ -127,3 +127,4 @@ class TestAsyncMergeReports:
         # finally, make sure the deployments report was created
         report.refresh_from_db()
         assert report.deployment_report_id
+        assert report.origin == Report.MERGED
