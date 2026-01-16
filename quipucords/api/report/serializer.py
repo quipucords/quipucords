@@ -1,8 +1,8 @@
 """Report serializers."""
 
-from rest_framework.serializers import DictField, ModelSerializer
+from rest_framework.serializers import DictField, ModelSerializer, ReadOnlyField
 
-from api.models import InspectGroup, InspectResult
+from api.models import InspectGroup, InspectResult, Report
 
 
 class InspectGroupSerializer(ModelSerializer):
@@ -26,3 +26,23 @@ class InspectResultSerializer(ModelSerializer):
 
         model = InspectResult
         exclude = ["inspect_group"]
+
+
+class ReportSerializer(ModelSerializer):
+    """Report Serializer."""
+
+    scan_id = ReadOnlyField(source="scanjob.scan_id")
+
+    class Meta:
+        """Serializer config."""
+
+        model = Report
+        fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "report_version",
+            "report_platform_id",
+            "origin",
+            "scan_id",
+        ]

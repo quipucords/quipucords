@@ -90,6 +90,7 @@ def test_report_without_logs(client_logged_in, caplog):
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
         assert set(tarball.getnames()) == expected_files
+    assert deployment.report.origin == Report.LOCAL
 
 
 @pytest.fixture
@@ -121,6 +122,7 @@ def test_report_with_logs(client_logged_in, deployment_with_logs):
     }
     with tarfile.open(fileobj=BytesIO(response.content)) as tarball:
         assert set(tarball.getnames()) == expected_files
+    assert deployment_with_logs.report.origin == Report.LOCAL
 
 
 @pytest.mark.django_db
@@ -497,3 +499,4 @@ def test_upload_report(upload_report_payload, client_logged_in, mocker):
     # finally, check report is now bound to a deployment_report
     report.refresh_from_db()
     assert report.deployment_report_id
+    assert report.origin == Report.UPLOADED
