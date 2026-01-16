@@ -133,7 +133,7 @@ psycopg-c==3.3.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     # via psycopg
 ptyprocess==0.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via pexpect
-pyasn1==0.6.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+pyasn1==0.6.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   pyasn1-modules
     #   rsa
