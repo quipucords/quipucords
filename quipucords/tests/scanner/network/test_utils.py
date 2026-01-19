@@ -153,6 +153,86 @@ class TestExpandHostpattern(unittest.TestCase):
             utils.expand_hostpattern("1.2.3.[4:6]"), ["1.2.3.4", "1.2.3.5", "1.2.3.6"]
         )
 
+    def test_cidr_expansion(self):
+        """CIDR patterns are expanded to individual IPs."""
+        self.assertEqual(
+            utils.expand_hostpattern("192.168.1.0/30"),
+            ["192.168.1.1", "192.168.1.2"],
+        )
+
+    def test_cidr_ipv6_expansion(self):
+        """IPv6 CIDR patterns are expanded."""
+        result = utils.expand_hostpattern("fd00::/126")
+        self.assertEqual(len(result), 3)
+
+
+@pytest.mark.parametrize(
+    "pattern,expected",
+    [
+        ("10.0.0.0/30", ["10.0.0.1", "10.0.0.2"]),
+        ("192.168.1.5/32", ["192.168.1.5"]),
+    ],
+)
+def test_expand_cidr_valid(pattern, expected):
+    """Valid CIDR patterns return list of IPs."""
+    assert utils._expand_cidr(pattern) == expected
+
+
+def test_expand_cidr_ipv6():
+    """Valid IPv6 CIDR returns list of IPs."""
+    result = utils._expand_cidr("fd00::/127")
+    assert len(result) == 2
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "192.168.1.1",
+        "not-a-cidr/24",
+    ],
+)
+def test_expand_cidr_returns_none(pattern):
+    """Invalid or non-CIDR patterns return None."""
+    assert utils._expand_cidr(pattern) is None
+
+
+@pytest.mark.parametrize(
+    "pattern,expected",
+    [
+        ("host[1:3]", ["host1", "host2", "host3"]),
+        ("10.0.0.[1:3]", ["10.0.0.1", "10.0.0.2", "10.0.0.3"]),
+    ],
+)
+def test_expand_ansible_range_valid(pattern, expected):
+    """Valid Ansible ranges expand correctly."""
+    assert utils._expand_ansible_range(pattern) == expected
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "simple.host.com",
+        "192.168.1.1",
+    ],
+)
+def test_expand_ansible_range_returns_none(pattern):
+    """Non-range patterns return None."""
+    assert utils._expand_ansible_range(pattern) is None
+
+
+@pytest.mark.parametrize(
+    "hostpattern,expected",
+    [
+        ("example.com:22", "example.com"),
+        ("example.com", "example.com"),
+        ("192.168.1.1:8080", "192.168.1.1"),
+        ("host[1:3]:22", "host[1:3]"),
+    ],
+)
+def test_strip_port(hostpattern, expected):
+    """Port is stripped from hostpattern when present."""
+    assert utils._strip_port(hostpattern) == expected
+
 
 def test_raw_facts_template():
     """Ensure raw facts template only caches fact names, not values."""
