@@ -4,8 +4,6 @@ import ipaddress
 import re
 from urllib.parse import urlparse
 
-from ansible.errors import AnsibleError
-from ansible.plugins.inventory import expand_hostname_range
 from django.db import transaction
 from django.utils.translation import gettext as _
 from fqdn import FQDN
@@ -164,7 +162,7 @@ class SourceSerializerBase(ModelSerializer):
         if hosts_list and len(hosts_list) != 1:
             error = {"hosts": [_(messages.SOURCE_ONE_HOST)]}
             raise ValidationError(error)
-        if hosts_list and "[" in hosts_list[0]:
+        if hosts_list and ("[" in hosts_list[0] or "/" in hosts_list[0]):
             error = {"hosts": [_(messages.SOURCE_ONE_HOST)]}
             raise ValidationError(error)
         if exclude_hosts_list is not None:
@@ -332,13 +330,13 @@ class SourceSerializerBase(ModelSerializer):
             return [address]
 
         if SourceSerializer.is_valid_cidr(address):
-            return SourceSerializer.expand_cidr(address)
+            return [address]
 
         if SourceSerializer.is_valid_hostname(address):
             return [address]
 
         if SourceSerializer.is_valid_ansible_range(address):
-            return SourceSerializer.normalize_ansible_range(address)
+            return [address]
 
         raise ValidationError(_(messages.NET_INVALID_HOST % (address,)))
 
@@ -361,15 +359,6 @@ class SourceSerializerBase(ModelSerializer):
             return False
 
     @staticmethod
-    def expand_cidr(cidr: str) -> list:
-        """Expand a CIDR block into individual IP addresses."""
-        try:
-            network = ipaddress.ip_network(cidr, strict=False)
-            return [str(ip) for ip in network.hosts()]
-        except ValueError:
-            raise ValidationError(_(messages.NET_INVALID_RANGE_CIDR % (cidr,)))
-
-    @staticmethod
     def is_valid_hostname(address: str) -> bool:
         """Check if the input is a valid FQDN hostname."""
         try:
@@ -379,7 +368,7 @@ class SourceSerializerBase(ModelSerializer):
 
     @staticmethod
     def is_valid_ansible_range(address: str) -> bool:
-        """Check if the input is likely an Ansible range, ensure no CIDR is present."""
+        """Check if the input matches Ansible range syntax [x:y]."""
         if not isinstance(address, str):
             return False
 
@@ -391,14 +380,6 @@ class SourceSerializerBase(ModelSerializer):
             return False
 
         return True
-
-    @staticmethod
-    def normalize_ansible_range(range: str) -> list:
-        """Normalize an Ansible range into a list of hosts."""
-        try:
-            return expand_hostname_range(range)
-        except (ValueError, AnsibleError):
-            raise ValidationError(_(messages.NET_INVALID_RANGE_FORMAT % (range,)))
 
     @staticmethod
     def validate_hosts(hosts):

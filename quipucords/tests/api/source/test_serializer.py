@@ -1,7 +1,5 @@
 """Test source serializer."""
 
-import ipaddress
-
 import pytest
 from django.core.exceptions import ValidationError
 
@@ -48,6 +46,15 @@ def satellite_cred_id():
     return satellite_credential.id
 
 
+SINGLE_HOST_SOURCE_TYPES = [
+    DataSources.VCENTER,
+    DataSources.SATELLITE,
+    DataSources.OPENSHIFT,
+    DataSources.RHACS,
+    DataSources.ANSIBLE,
+]
+
+
 @pytest.fixture
 def openshift_source(openshift_cred_id):
     """Openshift Source."""
@@ -80,73 +87,125 @@ def openshift_source_with_false_ssl(openshift_cred_id):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "hosts_input,expected_hosts",
+    "hosts_input",
     [
-        ("192.0.2.0/30", ["192.0.2.1", "192.0.2.2"]),
-        ("192.0.2.5/32", ["192.0.2.5"]),
-        ("192.0.2.128/31", ["192.0.2.128", "192.0.2.129"]),
-        (
-            "192.168.1.8/29",
-            [
-                "192.168.1.9",
-                "192.168.1.10",
-                "192.168.1.11",
-                "192.168.1.12",
-                "192.168.1.13",
-                "192.168.1.14",
-            ],
-        ),
-        (
-            "10.0.0.0/24",
-            [str(ip) for ip in ipaddress.ip_network("10.0.0.0/24").hosts()],
-        ),
+        ["192.0.2.0/30"],
+        ["192.0.2.5/32"],
+        ["192.0.2.128/31"],
+        ["192.168.1.8/29"],
+        ["10.0.0.0/24"],
+        ["fd00:cafe:babe::/120"],
+        ["192.0.2.0/30", "10.0.0.0/24"],
+        ["192.0.2.0/30", "192.168.1.[1:3]"],
+        ["192.168.1.1", "10.0.0.0/24"],
     ],
 )
-def test_cidr_expansion(network_cred_id, hosts_input, expected_hosts):
-    """Test CIDR blocks are expanded into individual IP addresses."""
+def test_cidr_preserved(network_cred_id, hosts_input):
+    """Test CIDR blocks are preserved as-is (not expanded) in the serializer."""
     data = {
         "name": "source",
         "source_type": DataSources.NETWORK,
-        "hosts": [hosts_input],
+        "hosts": hosts_input,
         "credentials": [network_cred_id],
     }
 
     serializer = SourceSerializer(data=data)
     assert serializer.is_valid(), serializer.errors
-    assert set(serializer.validated_data.get("hosts")) == set(expected_hosts)
+    assert serializer.validated_data.get("hosts") == hosts_input
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "ansible_input,expected_hosts",
+    "hosts_input",
     [
-        ("192.168.1.[1:3]", ["192.168.1.1", "192.168.1.2", "192.168.1.3"]),
-        ("10.0.[5:6].1", ["10.0.5.1", "10.0.6.1"]),
-        (
-            "192.168.[0:1].[1:2]",
-            ["192.168.0.1", "192.168.0.2", "192.168.1.1", "192.168.1.2"],
-        ),
-        pytest.param("192.168.[1000:1002].1", [], marks=pytest.mark.xfail(strict=True)),
-        pytest.param("10.0.[5:3].1", [], marks=pytest.mark.xfail(strict=True)),
-        pytest.param("10.0.[1:99999].1", [], marks=pytest.mark.xfail(strict=True)),
+        ["192.168.1.[1:3]"],
+        ["10.0.[5:6].1"],
+        ["192.168.[0:1].[1:2]"],
+        ["host[1:5].example.com"],
+        ["192.168.1.[1:3]", "10.0.[5:6].1"],
+        ["192.168.1.1", "192.168.1.[1:3]"],
     ],
 )
-def test_ansible_range_normalization(network_cred_id, ansible_input, expected_hosts):
-    """Test Ansible-style ranges that resemble IP addresses."""
+def test_ansible_range_preserved(network_cred_id, hosts_input):
+    """Test Ansible-style ranges are preserved as-is in the serializer."""
     data = {
         "name": "source",
         "source_type": DataSources.NETWORK,
-        "hosts": [ansible_input],
+        "hosts": hosts_input,
         "credentials": [network_cred_id],
     }
 
     serializer = SourceSerializer(data=data)
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data.get("hosts") == hosts_input
 
-    if expected_hosts:
-        assert serializer.is_valid()
-        assert set(serializer.validated_data.get("hosts")) == set(expected_hosts)
+
+def _create_credential_for_source_type(source_type):
+    """Create a credential matching the given source type."""
+    if source_type in (DataSources.VCENTER, DataSources.SATELLITE):
+        return Credential.objects.create(
+            name=f"{source_type}_cred",
+            cred_type=source_type,
+            username=f"{source_type}_user",
+            password=f"{source_type}_password",
+        )
     else:
-        assert not serializer.is_valid()
+        return Credential.objects.create(
+            name=f"{source_type}_cred",
+            cred_type=source_type,
+            auth_token=f"{source_type}_token",
+        )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("source_type", SINGLE_HOST_SOURCE_TYPES)
+@pytest.mark.parametrize(
+    "hosts_input",
+    [
+        "192.0.2.0/30",
+        "10.0.0.0/24",
+        "fd00:cafe:babe::/120",
+    ],
+)
+def test_single_host_source_rejects_cidr(source_type, hosts_input):
+    """Single-host sources should reject CIDR notation and raise SOURCE_ONE_HOST."""
+    credential = _create_credential_for_source_type(source_type)
+    data = {
+        "name": "single-host source",
+        "source_type": source_type,
+        "hosts": [hosts_input],
+        "credentials": [credential.id],
+    }
+
+    serializer = SourceSerializer(data=data)
+    assert not serializer.is_valid()
+    assert "hosts" in serializer.errors
+    assert messages.SOURCE_ONE_HOST in serializer.errors["hosts"]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("source_type", SINGLE_HOST_SOURCE_TYPES)
+@pytest.mark.parametrize(
+    "hosts_input",
+    [
+        "192.0.2.[1:10]",
+        "10.0.0.[5:15]",
+    ],
+)
+def test_single_host_source_rejects_ansible_range(source_type, hosts_input):
+    """Single-host sources should reject Ansible-style ranges."""
+    credential = _create_credential_for_source_type(source_type)
+    data = {
+        "name": "single-host source",
+        "source_type": source_type,
+        "hosts": [hosts_input],
+        "credentials": [credential.id],
+    }
+
+    serializer = SourceSerializer(data=data)
+    assert not serializer.is_valid()
+    assert "hosts" in serializer.errors
+    assert messages.SOURCE_ONE_HOST in serializer.errors["hosts"]
 
 
 @pytest.mark.parametrize(
@@ -239,14 +298,11 @@ def test_is_valid_ansible_range(host, expected_result):
     [
         ("192.168.1.1", ["192.168.1.1"]),
         ("2001:db8::1", ["2001:db8::1"]),
-        ("192.168.1.0/30", ["192.168.1.1", "192.168.1.2"]),
-        (
-            "10.0.0.0/29",
-            ["10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5", "10.0.0.6"],
-        ),
+        ("192.168.1.0/30", ["192.168.1.0/30"]),
+        ("10.0.0.0/29", ["10.0.0.0/29"]),
         ("example.com", ["example.com"]),
         ("sub.example.org", ["sub.example.org"]),
-        ("10.0.[5:6].1", ["10.0.5.1", "10.0.6.1"]),
+        ("10.0.[5:6].1", ["10.0.[5:6].1"]),
         pytest.param("invalid_host$", [], marks=pytest.mark.xfail(strict=True)),
         pytest.param(
             "256.256.256.256", [], marks=pytest.mark.xfail(strict=True)

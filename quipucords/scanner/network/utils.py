@@ -4,6 +4,7 @@ import ipaddress
 from functools import cache
 
 import yaml
+from ansible.errors import AnsibleError
 from ansible.parsing.utils.addresses import parse_address
 from ansible.plugins.inventory import detect_range, expand_hostname_range
 from django.conf import settings
@@ -107,31 +108,54 @@ def _get_host_vars(host):
     return host, host_vars
 
 
-def expand_hostpattern(hostpattern):
-    """Expand pattern into list of hosts.
+def _expand_cidr(pattern: str) -> list[str] | None:
+    """Expand CIDR notation to list of IPs, or None if not a CIDR."""
+    if "/" not in pattern:
+        return None
+    try:
+        network = ipaddress.ip_network(pattern, strict=False)
+        return [str(ip) for ip in network.hosts()]
+    except ValueError:
+        return None
 
-    Takes a single host pattern and returns a list of hostnames.
+
+def _expand_ansible_range(pattern: str) -> list[str] | None:
+    """Expand Ansible [x:y] range to list of hosts, or None if not a range."""
+    if not detect_range(pattern):
+        return None
+    try:
+        return expand_hostname_range(pattern)
+    except AnsibleError:
+        return None
+
+
+def _strip_port(hostpattern: str) -> str:
+    """Remove port specification from host pattern if present."""
+    try:
+        pattern, _ = parse_address(hostpattern, allow_ranges=True)
+        return pattern
+    except AnsibleError:
+        return hostpattern
+
+
+def expand_hostpattern(hostpattern: str) -> list[str]:
+    """Expand a host pattern into list of hostnames.
+
+    Handles CIDR notation, Ansible [x:y] ranges, and plain hostnames.
+
     :param hostpattern: a single host pattern
     :returns: list of hostnames
     """
-    # Can the given hostpattern be parsed as a host with an optional port
-    # specification?
+    # CIDR takes priority (must check before stripping port)
+    if expanded := _expand_cidr(hostpattern):
+        return expanded
 
-    try:
-        (pattern, port) = parse_address(hostpattern, allow_ranges=True)
-    except:  # noqa
-        # not a recognizable host pattern
-        pattern = hostpattern
+    pattern = _strip_port(hostpattern)
 
-    # Once we have separated the pattern, we expand it into list of one or
-    # more hostnames, depending on whether it contains any [x:y] ranges.
+    if expanded := _expand_ansible_range(pattern):
+        return expanded
 
-    if detect_range(pattern):
-        hostnames = expand_hostname_range(pattern)
-    else:
-        hostnames = [pattern]
-
-    return hostnames
+    return [pattern]
 
 
 def _yaml_load(path_obj):
