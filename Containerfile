@@ -17,6 +17,7 @@ COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:6fc28bcb6776e387d7a35a2056d9d2b985dc4e26031e98a2bd35a7137cd6fd71
+ARG CPE_NAME="cpe:/a:redhat:discovery:2::el9"
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
@@ -96,6 +97,7 @@ EXPOSE 8000
 CMD ["/bin/bash", "/deploy/entrypoint_web.sh"]
 
 LABEL com.redhat.component=${REDHAT_COMPONENT} \
+    cpe=${CPE_NAME} \
     description=${K8S_DESCRIPTION} \
     io.k8s.description=${K8S_DESCRIPTION} \
     io.k8s.display-name=${K8S_DISPLAY_NAME} \
