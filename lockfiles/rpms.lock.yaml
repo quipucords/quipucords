@@ -60,13 +60,13 @@ arches:
     name: glibc-devel
     evr: 2.34-231.el9_7.2
     sourcerpm: glibc-2.34-231.el9_7.2.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-611.16.1.el9_7.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/k/kernel-headers-5.14.0-611.24.1.el9_7.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 2954321
-    checksum: sha256:5a84209a984621593b8efb51c6101af6f48bbc26192840a3baebf4fda1ecdc19
+    size: 2968477
+    checksum: sha256:a60380cbf908bc16b00e560146cda2f106b4eab1932ed2a3420921419897b0f4
     name: kernel-headers
-    evr: 5.14.0-611.16.1.el9_7
-    sourcerpm: kernel-5.14.0-611.16.1.el9_7.src.rpm
+    evr: 5.14.0-611.24.1.el9_7
+    sourcerpm: kernel-5.14.0-611.24.1.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libasan-11.5.0-11.el9.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 408716
@@ -95,20 +95,20 @@ arches:
     name: libnsl2
     evr: 2.0.0-1.el9
     sourcerpm: libnsl2-2.0.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-13.20-1.el9_5.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-13.23-1.el9_7.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 215513
-    checksum: sha256:6f0c91540499e5d653a55930cdbcbacba3dd2cf89a9f3cfc5647b999b02fa792
+    size: 210763
+    checksum: sha256:db5dd6b6f6885ff5c349486ae9320de46aecb61ce9648fc88806972317d72acf
     name: libpq
-    evr: 13.20-1.el9_5
-    sourcerpm: libpq-13.20-1.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-devel-13.20-1.el9_5.aarch64.rpm
+    evr: 13.23-1.el9_7
+    sourcerpm: libpq-13.23-1.el9_7.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libpq-devel-13.23-1.el9_7.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 103686
-    checksum: sha256:aafd573aa951e8fd3d20f8b25f118ca017489249ddabefb43265fa7de23ccbe4
+    size: 99048
+    checksum: sha256:a31fa7a1bea0e864a1e070a9257e9aa75b1b6f42b8cdc300de269177e7d07b80
     name: libpq-devel
-    evr: 13.20-1.el9_5
-    sourcerpm: libpq-13.20-1.el9_5.src.rpm
+    evr: 13.23-1.el9_7
+    sourcerpm: libpq-13.23-1.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/l/libubsan-11.5.0-11.el9.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 178723
@@ -151,13 +151,13 @@ arches:
     name: nmap-ncat
     evr: 3:7.92-3.el9
     sourcerpm: nmap-7.92-3.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/o/openssl-devel-3.5.1-4.el9_7.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/o/openssl-devel-3.5.1-5.el9_7.aarch64.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
-    size: 4996902
-    checksum: sha256:a250fae31cced54a51c0c4aacdd44855044652eb39f4141e23fe197d2528ff0b
+    size: 5000924
+    checksum: sha256:c6553fe19d99cd08f29e394142b9c7f76116afa1bc0d49eeb84367be4f569853
     name: openssl-devel
-    evr: 1:3.5.1-4.el9_7
-    sourcerpm: openssl-3.5.1-4.el9_7.src.rpm
+    evr: 1:3.5.1-5.el9_7
+    sourcerpm: openssl-3.5.1-5.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/appstream/os/Packages/p/perl-AutoLoader-5.74-481.1.el9_6.noarch.rpm
     repoid: ubi-9-for-aarch64-appstream-rpms
     size: 21344
@@ -942,13 +942,13 @@ arches:
     name: openssh-clients
     evr: 8.7p1-47.el9_7
     sourcerpm: openssh-8.7p1-47.el9_7.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/os/Packages/o/openssl-3.5.1-4.el9_7.aarch64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/os/Packages/o/openssl-3.5.1-5.el9_7.aarch64.rpm
     repoid: ubi-9-for-aarch64-baseos-rpms
-    size: 1531255
-    checksum: sha256:f7ff8eb3fd8b75ae1745af2270998fa662fcd5f81b892e94afd87e6954e2ffef
+    size: 1531711
+    checksum: sha256:27aca19bfdd511421cc2d561ec7280f8d37deab5ec3c0a1080de565044621e8e
     name: openssl
-    evr: 1:3.5.1-4.el9_7
-    sourcerpm: openssl-3.5.1-4.el9_7.src.rpm
+    evr: 1:3.5.1-5.el9_7
+    sourcerpm: openssl-3.5.1-5.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/aarch64/baseos/os/Packages/p/pam-1.5.1-26.el9_6.aarch64.rpm
     repoid: ubi-9-for-aarch64-baseos-rpms
     size: 636107
@@ -1128,13 +1128,13 @@ arches:
     name: glibc-headers
     evr: 2.34-231.el9_7.2
     sourcerpm: glibc-2.34-231.el9_7.2.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-611.16.1.el9_7.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/k/kernel-headers-5.14.0-611.24.1.el9_7.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 2993337
-    checksum: sha256:3b3c3dd0e7e442f8d44d33e9c8c5d2989045626b53977de2c28ff174b3b26c5b
+    size: 3007525
+    checksum: sha256:45e0c38ff72eae65683887a45ffcf11e44444c9f4732c808b13e4e0c2ccd9006
     name: kernel-headers
-    evr: 5.14.0-611.16.1.el9_7
-    sourcerpm: kernel-5.14.0-611.16.1.el9_7.src.rpm
+    evr: 5.14.0-611.24.1.el9_7
+    sourcerpm: kernel-5.14.0-611.24.1.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libffi-devel-3.4.2-8.el9.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 32520
@@ -1156,20 +1156,20 @@ arches:
     name: libnsl2
     evr: 2.0.0-1.el9
     sourcerpm: libnsl2-2.0.0-1.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-13.20-1.el9_5.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-13.23-1.el9_7.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 218118
-    checksum: sha256:49223c484013c214fe1b785d92232a9eff0f0329c5c0cdda8705d992b3ef51f7
+    size: 213691
+    checksum: sha256:36674e762f7e3d5f8e3c0c4b607c8b03eaaa5a830729dd8c8a9c8f8be93f6d60
     name: libpq
-    evr: 13.20-1.el9_5
-    sourcerpm: libpq-13.20-1.el9_5.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-devel-13.20-1.el9_5.x86_64.rpm
+    evr: 13.23-1.el9_7
+    sourcerpm: libpq-13.23-1.el9_7.src.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libpq-devel-13.23-1.el9_7.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 104767
-    checksum: sha256:5ada557e3b9570b8d475647140cb380bdc5096103fa9cfba2b692563c49afa85
+    size: 100153
+    checksum: sha256:cee41c19f18f9bc97c41da9abb06741db322d5fc8e634d6acd3fe7f251610f83
     name: libpq-devel
-    evr: 13.20-1.el9_5
-    sourcerpm: libpq-13.20-1.el9_5.src.rpm
+    evr: 13.23-1.el9_7
+    sourcerpm: libpq-13.23-1.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/l/libxcrypt-compat-4.4.18-3.el9.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 93189
@@ -1212,13 +1212,13 @@ arches:
     name: nmap-ncat
     evr: 3:7.92-3.el9
     sourcerpm: nmap-7.92-3.el9.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/o/openssl-devel-3.5.1-4.el9_7.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/o/openssl-devel-3.5.1-5.el9_7.x86_64.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
-    size: 4997984
-    checksum: sha256:3aeba34c9a9c3313b16166111a1dfe61a29ffaff671bb8f0be95eb0e2dede860
+    size: 5002144
+    checksum: sha256:222304fa50c4cf6d78e6a2c48c06ea3febec2ff34d7df2521b9da3b24012d40a
     name: openssl-devel
-    evr: 1:3.5.1-4.el9_7
-    sourcerpm: openssl-3.5.1-4.el9_7.src.rpm
+    evr: 1:3.5.1-5.el9_7
+    sourcerpm: openssl-3.5.1-5.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/appstream/os/Packages/p/perl-AutoLoader-5.74-481.1.el9_6.noarch.rpm
     repoid: ubi-9-for-x86_64-appstream-rpms
     size: 21344
@@ -2003,13 +2003,13 @@ arches:
     name: openssh-clients
     evr: 8.7p1-47.el9_7
     sourcerpm: openssh-8.7p1-47.el9_7.src.rpm
-  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/baseos/os/Packages/o/openssl-3.5.1-4.el9_7.x86_64.rpm
+  - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/baseos/os/Packages/o/openssl-3.5.1-5.el9_7.x86_64.rpm
     repoid: ubi-9-for-x86_64-baseos-rpms
-    size: 1554784
-    checksum: sha256:e9c30e80d09e2ef402f5380ce0fa52f9e169d638a0c1c8c7485f7a8ff2d27da0
+    size: 1555474
+    checksum: sha256:3bfd7ceb59a554e40cb417e2b5b2d046be671ce49abc058328807049baf1134f
     name: openssl
-    evr: 1:3.5.1-4.el9_7
-    sourcerpm: openssl-3.5.1-4.el9_7.src.rpm
+    evr: 1:3.5.1-5.el9_7
+    sourcerpm: openssl-3.5.1-5.el9_7.src.rpm
   - url: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/x86_64/baseos/os/Packages/p/pam-1.5.1-26.el9_6.x86_64.rpm
     repoid: ubi-9-for-x86_64-baseos-rpms
     size: 636788
