@@ -98,7 +98,7 @@ trove-classifiers==2026.1.14.14
     # via hatchling
 typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
-wheel==0.45.1
+wheel==0.46.2
     # via
     #   ansible-core
     #   bcrypt
