@@ -63,3 +63,15 @@ class Report(BaseModel):
                 "facts",
             )
         )
+
+    @cached_property
+    def cannot_publish_reason(self):
+        """Explanation why report can't be published to Lightspeed, or None."""
+        from api.common.lightspeed import get_cannot_publish_reason
+
+        return get_cannot_publish_reason(self)
+
+    @property
+    def can_publish(self) -> bool:
+        """Whether report can be published to Lightspeed."""
+        return self.cannot_publish_reason is None

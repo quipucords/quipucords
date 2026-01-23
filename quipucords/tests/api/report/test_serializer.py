@@ -2,9 +2,13 @@
 
 import pytest
 
+from api.common.enumerators import LightspeedCannotPublishReason
+from api.deployments_report.model import DeploymentsReport
+from api.report.serializer import ReportSerializer
 from api.report.serializer_v1 import SourceSerializer
 from api.serializers import ReportUploadSerializer
 from constants import DataSources
+from tests.factories import DeploymentReportFactory
 
 
 @pytest.fixture
@@ -185,3 +189,37 @@ def test_invalid_input_for_source_serializer(request, data, expected_errors):
     serializer = SourceSerializer(data=data)
     assert not serializer.is_valid()
     assert expected_errors == serializer.errors.keys()
+
+
+@pytest.mark.django_db
+def test_report_serializer_can_publish_field_true():
+    """Test can_publish and cannot_publish_reason fields for publishable report."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_COMPLETE,
+        number_of_fingerprints=2,
+    )
+    report = deployment_report.report
+
+    serializer = ReportSerializer(report)
+    data = serializer.data
+
+    assert data["can_publish"] is True
+    assert data["cannot_publish_reason"] is None
+
+
+@pytest.mark.django_db
+def test_report_serializer_can_publish_field_false_not_complete():
+    """Test can_publish and cannot_publish_reason fields for non-publishable report."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report = deployment_report.report
+
+    serializer = ReportSerializer(report)
+    data = serializer.data
+
+    assert data["can_publish"] is False
+    assert (
+        data["cannot_publish_reason"]
+        == LightspeedCannotPublishReason.NOT_COMPLETE.value
+    )
