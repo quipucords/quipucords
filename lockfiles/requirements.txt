@@ -49,7 +49,7 @@ cryptography==46.0.3 ; (implementation_name == 'cpython' and sys_platform == 'da
     # via
     #   ansible-core
     #   paramiko
-django==5.2.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django==5.2.11 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
     #   django-cors-headers
