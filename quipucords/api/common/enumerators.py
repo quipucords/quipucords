@@ -36,3 +36,11 @@ class LightspeedCannotPublishReason(Enum):
     # TOKEN_EXPIRED = "token_expired"  # TODO: TBD if we check token periodically
     NOT_COMPLETE = "not_complete"
     NO_HOSTS = "no_hosts"
+
+
+class ReportCannotDownloadReason(Enum):
+    """Reason why report can't be downloaded."""
+
+    NO_DEPLOYMENT = "no_deployment"
+    STATUS_PENDING = "status_pending"
+    STATUS_FAILED = "status_failed"
