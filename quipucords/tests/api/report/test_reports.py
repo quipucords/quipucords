@@ -31,6 +31,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
 
 from api.common.common_report import REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DETAILS
+from api.common.enumerators import ReportCannotDownloadReason
 from api.deployments_report.model import DeploymentsReport
 from api.deployments_report.util import create_deployments_csv
 from api.deployments_report.view import build_cached_json_report
@@ -500,3 +501,31 @@ def test_upload_report(upload_report_payload, client_logged_in, mocker):
     report.refresh_from_db()
     assert report.deployment_report_id
     assert report.origin == Report.UPLOADED
+
+
+# note that ReportCannotDownloadReason.STATUS_PENDING and
+# cannot_download_reason == None are tested as a by-product of serializer testing
+
+
+@pytest.mark.django_db(transaction=True)
+def test_cannot_download_no_deployments():
+    """Test cannot_download_reason field for Report without DeploymentsReport.
+
+    Report object is created at the end of inspection phase, right before
+    fingerprinting task is created. DeploymentsReport object will be added
+    to Report right at the beginning of fingerprinting. So unless Celery is
+    swamped with tasks, there's probably sub-second time span when Report
+    exists without DeploymentsReport. But technically it is possible.
+    """
+    report = ReportFactory()
+    assert report.cannot_download_reason == ReportCannotDownloadReason.NO_DEPLOYMENT
+
+
+@pytest.mark.django_db(transaction=True)
+def test_cannot_download_deployments_failed():
+    """Test cannot_download_reason field for Report with failed DeploymentsReport."""
+    deployment = DeploymentReportFactory.create(status=DeploymentsReport.STATUS_FAILED)
+    assert (
+        deployment.report.cannot_download_reason
+        == ReportCannotDownloadReason.STATUS_FAILED
+    )
