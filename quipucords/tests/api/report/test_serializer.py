@@ -2,7 +2,10 @@
 
 import pytest
 
-from api.common.enumerators import LightspeedCannotPublishReason
+from api.common.enumerators import (
+    LightspeedCannotPublishReason,
+    ReportCannotDownloadReason,
+)
 from api.deployments_report.model import DeploymentsReport
 from api.report.serializer import ReportSerializer
 from api.report.serializer_v1 import SourceSerializer
@@ -222,4 +225,38 @@ def test_report_serializer_can_publish_field_false_not_complete():
     assert (
         data["cannot_publish_reason"]
         == LightspeedCannotPublishReason.NOT_COMPLETE.value
+    )
+
+
+@pytest.mark.django_db
+def test_report_serializer_can_download_field_true():
+    """Test can_download and cannot_download_reason fields for downloadable report."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_COMPLETE,
+        number_of_fingerprints=2,
+    )
+    report = deployment_report.report
+
+    serializer = ReportSerializer(report)
+    data = serializer.data
+
+    assert data["can_download"] is True
+    assert data["cannot_download_reason"] is None
+
+
+@pytest.mark.django_db
+def test_report_serializer_can_download_field_false_not_complete():
+    """Test can_download and cannot_download_reason fields for non-downloadable one."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report = deployment_report.report
+
+    serializer = ReportSerializer(report)
+    data = serializer.data
+
+    assert data["can_download"] is False
+    assert (
+        data["cannot_download_reason"]
+        == ReportCannotDownloadReason.STATUS_PENDING.value
     )

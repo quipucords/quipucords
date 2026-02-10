@@ -7,7 +7,9 @@ from functools import cached_property
 from django.db import models
 
 from api.common.common_report import create_report_version
+from api.common.enumerators import ReportCannotDownloadReason
 from api.common.models import BaseModel
+from api.deployments_report.model import DeploymentsReport
 
 
 class Report(BaseModel):
@@ -75,3 +77,19 @@ class Report(BaseModel):
     def can_publish(self) -> bool:
         """Whether report can be published to Lightspeed."""
         return self.cannot_publish_reason is None
+
+    @cached_property
+    def cannot_download_reason(self):
+        """Explanation why report can't be downloaded, or None."""
+        if not self.deployment_report:
+            return ReportCannotDownloadReason.NO_DEPLOYMENT
+        if self.deployment_report.status == DeploymentsReport.STATUS_PENDING:
+            return ReportCannotDownloadReason.STATUS_PENDING
+        if self.deployment_report.status == DeploymentsReport.STATUS_FAILED:
+            return ReportCannotDownloadReason.STATUS_FAILED
+        return None
+
+    @property
+    def can_download(self) -> bool:
+        """Whether report can be downloaded."""
+        return self.cannot_download_reason is None
