@@ -55,25 +55,27 @@ hatchling==1.28.0
     #   referencing
     #   sqlparse
     #   urllib3
+    #   wcwidth
 maturin==1.11.5
     # via
     #   cryptography
     #   rpds-py
-packaging==25.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+packaging==26.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   hatchling
     #   setuptools-scm
-pathspec==1.0.3
+    #   wheel
+pathspec==1.0.4
     # via hatchling
 pbr==7.0.3
     # via lockfile
 pluggy==1.6.0
     # via hatchling
-poetry-core==2.3.0
+poetry-core==2.3.1
     # via
     #   click-didyoumean
     #   django-json-agg
-pycparser==2.23 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
+pycparser==3.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
@@ -99,14 +101,16 @@ trove-classifiers==2026.1.14.14
 typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
 wheel==0.45.1
+    # via ansible-core
+wheel==0.46.3
     # via
-    #   ansible-core
     #   bcrypt
     #   click-repl
     #   django-axes
     #   drf-spectacular
     #   psycopg
     #   psycopg-c
+    #   pycparser
     #   pynacl
     #   python-daemon
     #   python-dateutil
@@ -119,7 +123,13 @@ setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==80.10.1
+setuptools==80.3.1
+    # via psycopg-c
+setuptools==80.9.0
+    # via ansible-core
+setuptools==81.0.0
+    # via charset-normalizer
+setuptools==82.0.0
     # via
     #   ansible
     #   bcrypt
@@ -127,7 +137,6 @@ setuptools==80.10.1
     #   certifi
     #   cffi
     #   changelog-chug
-    #   charset-normalizer
     #   click-repl
     #   cryptography
     #   django
@@ -142,6 +151,7 @@ setuptools==80.10.1
     #   pluggy
     #   prompt-toolkit
     #   psycopg
+    #   pycparser
     #   pydantic
     #   pynacl
     #   python-daemon
@@ -156,7 +166,3 @@ setuptools==80.10.1
     #   tzdata
     #   tzlocal
     #   whitenoise
-setuptools==80.3.1
-    # via psycopg-c
-setuptools==80.9.0
-    # via ansible-core
