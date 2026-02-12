@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 70"]
+requires = ["setuptools >= 77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -13,9 +13,7 @@ requires-python = "<3.14,>=3.12"
 authors = [
     {name = "Quipucords Dev Team", email = "quipucords@redhat.com"},
 ]
-# license should preferably follow identifiers listed at the SPDX Open Source License Registry.
-# https://spdx.org/licenses/
-license = {text = "GPL-3.0-or-later"}
+license = "GPL-3.0-or-later"
 readme = "README.md"
 dependencies = [
     "ansible-runner<3.0.0,>=2.4.0",
