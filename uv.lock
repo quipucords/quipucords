@@ -1747,7 +1747,7 @@ wheels = [
 
 [[package]]
 name = "quipucords"
-version = "2.4.3"
+version = "2.4.4"
 source = { editable = "." }
 dependencies = [
     { name = "ansible", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
