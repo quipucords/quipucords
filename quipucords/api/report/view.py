@@ -83,7 +83,7 @@ def download_report(request, report_id):
                 request.accepted_media_type = renderer.media_type
         case "aggregate":  # same as /api/v1/reports/<report_id>/aggregate
             response_report = get_serialized_aggregate_report(report_id)
-            if not response_report:
+            if response_report is None:
                 response_report = dict()
         case "deployments":  # same as /api/v1/reports/<report_id>/deployments
             response_report, response_status = get_deployments_report(report_id)
