@@ -4,6 +4,7 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from api.aggregate_report.view import aggregate_report
+from api.download_report.view import download_report
 from api.scan.view import scan_bulk_delete
 from api.views import (
     CredentialViewSetV1,
@@ -72,6 +73,7 @@ v2_urls = [
     path(
         "reports/<int:report_id>/raw/", RawFactsReportView.as_view(), name="report-raw"
     ),
+    path("reports/<int:report_id>/download/", download_report, name="download-report"),
 ]
 
 urlpatterns = [
