@@ -31,7 +31,13 @@ logger = logging.getLogger(__name__)
 @renderer_classes((ReportsGzipRenderer,))
 def reports(request, report_id):
     """Lookup and return reports."""
-    reports_dict = {}
+    reports_report, response_status = get_reports_report(report_id)
+    return Response(reports_report, status=response_status)
+
+
+def get_reports_report(report_id) -> tuple[dict, int]:
+    """Get the reports for a report id and related status."""
+    reports_dict = dict()
     reports_dict["report_id"] = report_id
     report = get_object_or_404(Report, id=report_id)
     # add scan job id to allow detection of related logs on GzipRenderer
@@ -42,14 +48,14 @@ def reports(request, report_id):
     reports_dict["details_json"] = json_details
     deployments_report = get_object_or_404(DeploymentsReport, report__id=report_id)
     if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
-        return Response(
+        return (
             {
                 "detail": _(
                     f"Deployment report {report_id} could not be created."
                     " See server logs."
                 )
             },
-            status=status.HTTP_424_FAILED_DEPENDENCY,
+            status.HTTP_424_FAILED_DEPENDENCY,
         )
     deployments_json = build_cached_json_report(deployments_report)
     reports_dict["deployments_json"] = deployments_json
@@ -69,7 +75,7 @@ def reports(request, report_id):
             report_id,
             exc_info=True,
         )
-    return Response(reports_dict)
+    return reports_dict, status.HTTP_200_OK
 
 
 @api_view(["POST"])
