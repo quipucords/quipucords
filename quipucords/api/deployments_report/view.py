@@ -28,29 +28,30 @@ def deployments(request, report_id=None):
     if not is_int(report_id):
         error = {"report_id": [_(messages.COMMON_ID_INV)]}
         raise ValidationError(error)
+    deployments_report, response_status = get_deployments_report(report_id)
+    return Response(deployments_report, status=response_status)
+
+
+def get_deployments_report(report_id: int) -> tuple[dict, int]:
+    """Retrieve a deployment report and related status."""
     deployments_report = get_object_or_404(
         DeploymentsReport.objects.all(), report__id=report_id
     )
     if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
-        return Response(
-            {
-                "detail": f"Deployment report {deployments_report.report.id}"
-                " could not be created. See server logs."
-            },
-            status=status.HTTP_424_FAILED_DEPENDENCY,
-        )
+        return {
+            "detail": f"Deployment report {deployments_report.report.id}"
+            " could not be created. See server logs."
+        }, status.HTTP_424_FAILED_DEPENDENCY
 
     try:
         deployments_json = build_cached_json_report(deployments_report)
     except FileNotFoundError:
-        return Response(
-            {
-                "detail": f"Deployment report {deployments_report.report.id}"
-                " could not be created. See server logs."
-            },
-            status=status.HTTP_424_FAILED_DEPENDENCY,
-        )
-    return Response(deployments_json)
+        return {
+            "detail": f"Deployment report {deployments_report.report.id}"
+            " could not be created. See server logs."
+        }, status.HTTP_424_FAILED_DEPENDENCY
+
+    return deployments_json, status.HTTP_200_OK
 
 
 def build_cached_json_report(deployments_report: DeploymentsReport) -> dict:
