@@ -9,7 +9,7 @@ from api.deployments_report.view import deployments
 from api.details_report.view import details
 from api.insights_report.view import insights
 from api.merge_report.view import async_merge_reports
-from api.report.view import RawFactsReportView, ReportViewSet
+from api.report.view import RawFactsReportView, ReportViewSet, download_report
 from api.report.view_v1 import reports, upload_raw_facts
 from api.scan.view import ScanViewSet, jobs
 from api.scanjob.view import ScanJobViewSet
