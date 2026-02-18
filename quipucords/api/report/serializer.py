@@ -8,7 +8,10 @@ from rest_framework.serializers import (
     SerializerMethodField,
 )
 
-from api.common.enumerators import LightspeedCannotPublishReason
+from api.common.enumerators import (
+    LightspeedCannotPublishReason,
+    ReportCannotDownloadReason,
+)
 from api.models import InspectGroup, InspectResult, Report
 
 
@@ -40,6 +43,7 @@ class ReportSerializer(ModelSerializer):
 
     scan_id = ReadOnlyField(source="scanjob.scan_id")
     cannot_publish_reason = SerializerMethodField()
+    cannot_download_reason = SerializerMethodField()
 
     class Meta:
         """Serializer config."""
@@ -55,6 +59,8 @@ class ReportSerializer(ModelSerializer):
             "scan_id",
             "can_publish",
             "cannot_publish_reason",
+            "can_download",
+            "cannot_download_reason",
         ]
 
     @extend_schema_field(LightspeedCannotPublishReason)
@@ -65,5 +71,12 @@ class ReportSerializer(ModelSerializer):
         must be JSON-serializable.
         """
         if reason := obj.cannot_publish_reason:
+            return reason.value
+        return None
+
+    @extend_schema_field(ReportCannotDownloadReason)
+    def get_cannot_download_reason(self, obj):
+        """Calculate `cannot_download_reason` value."""
+        if reason := obj.cannot_download_reason:
             return reason.value
         return None
