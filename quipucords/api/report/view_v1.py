@@ -31,11 +31,11 @@ logger = logging.getLogger(__name__)
 @renderer_classes((ReportsGzipRenderer,))
 def reports(request, report_id):
     """Lookup and return reports."""
-    reports_report, response_status = get_reports_report(report_id)
+    reports_report, response_status = reports_report_and_status(report_id)
     return Response(reports_report, status=response_status)
 
 
-def get_reports_report(report_id) -> tuple[dict, int]:
+def reports_report_and_status(report_id) -> tuple[dict, int]:
     """Get the reports for a report id and related status."""
     reports_dict = dict()
     reports_dict["report_id"] = report_id
