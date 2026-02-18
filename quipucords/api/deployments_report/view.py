@@ -28,11 +28,11 @@ def deployments(request, report_id=None):
     if not is_int(report_id):
         error = {"report_id": [_(messages.COMMON_ID_INV)]}
         raise ValidationError(error)
-    deployments_report, response_status = get_deployments_report(report_id)
+    deployments_report, response_status = deployments_report_and_status(report_id)
     return Response(deployments_report, status=response_status)
 
 
-def get_deployments_report(report_id: int) -> tuple[dict, int]:
+def deployments_report_and_status(report_id: int) -> tuple[dict, int]:
     """Retrieve a deployment report and related status."""
     deployments_report = get_object_or_404(
         DeploymentsReport.objects.all(), report__id=report_id

@@ -12,13 +12,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from api.aggregate_report.view import get_serialized_aggregate_report
-from api.deployments_report.view import get_deployments_report
+from api.deployments_report.view import deployments_report_and_status
 from api.insights_report.serializers import YupanaPayloadSerializer
 from api.insights_report.view import get_report, validate_deployment_report_status
 from api.models import DeploymentsReport, InspectResult, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.report.serializer import InspectResultSerializer, ReportSerializer
-from api.report.view_v1 import get_reports_report
+from api.report.view_v1 import reports_report_and_status
 from api.serializers import DetailsReportSerializer
 
 from .mixins import ReportViewMixin
@@ -75,24 +75,36 @@ def download_report(request, report_id):
     response_status = status.HTTP_200_OK
 
     match report_type:
-        case "default":  # Default tar.gz, same as /api/v1/reports/<report_id>/
-            response_report, response_status = get_reports_report(report_id)
-            if response_status == status.HTTP_200_OK:
+        case "default":  # v2 of /api/v1/reports/<report_id>/, defaults to tar.gz
+            response_report, response_status = reports_report_and_status(report_id)
+            # Since DRF Views use the first renderer if selectable via content
+            # negotiation, and we want to render the tar.gz by default, we need to
+            # check for the default Accept (anything) header and select the
+            # Gzip renderer in that case.
+            accept_all = "*/*"
+            accept_header = request.headers.get("Accept", accept_all)
+            if response_status == status.HTTP_200_OK and accept_all in accept_header:
                 renderer = ReportsGzipRenderer()
                 request.accepted_renderer = renderer
                 request.accepted_media_type = renderer.media_type
-        case "aggregate":  # same as /api/v1/reports/<report_id>/aggregate
+        case "aggregate":  # v2 of /api/v1/reports/<report_id>/aggregate
             response_report = get_serialized_aggregate_report(report_id)
             if response_report is None:
-                response_report = dict()
-        case "deployments":  # same as /api/v1/reports/<report_id>/deployments
-            response_report, response_status = get_deployments_report(report_id)
-        case "details":  # same as /api/v1/reports/<report_id>/details
+                return Response(
+                    {
+                        "detail": f"Aggregate report for Report {report_id}"
+                        " is not available"
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+        case "deployments":  # v2 of /api/v1/reports/<report_id>/deployments
+            response_report, response_status = deployments_report_and_status(report_id)
+        case "details":  # v2 of /api/v1/reports/<report_id>/details
             detail_data = get_object_or_404(Report.objects.all(), id=report_id)
             serializer = DetailsReportSerializer(detail_data)
             response_report = serializer.data
             response_report.pop("cached_csv", None)
-        case "insights":  # same as /api/v1/reports/<report_id>/insights
+        case "insights":  # v2 of /api/v1/reports/<report_id>/insights
             deployment_report = get_object_or_404(
                 DeploymentsReport.objects.only("id", "status"), report__id=report_id
             )
