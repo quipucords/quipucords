@@ -2,6 +2,12 @@
 
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    OpenApiTypes,
+    extend_schema,
+)
 from json_agg import JSONObjectAgg
 from rest_framework import status
 from rest_framework.decorators import api_view, renderer_classes
@@ -11,15 +17,21 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from api.aggregate_report.view import get_serialized_aggregate_report
+from api.aggregate_report.view import (
+    AggregateReportSerializer,
+    get_serialized_aggregate_report,
+)
 from api.deployments_report.view import deployments_report_and_status
-from api.insights_report.serializers import YupanaPayloadSerializer
 from api.insights_report.view import get_report, validate_deployment_report_status
 from api.models import DeploymentsReport, InspectResult, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.report.serializer import InspectResultSerializer, ReportSerializer
 from api.report.view_v1 import reports_report_and_status
-from api.serializers import DetailsReportSerializer
+from api.serializers import (
+    DeploymentReportSerializer,
+    DetailsReportSerializer,
+    YupanaPayloadSerializer,
+)
 
 from .mixins import ReportViewMixin
 
@@ -60,6 +72,44 @@ class ReportViewSet(ReadOnlyModelViewSet):
     ordering = ("-created_at",)
 
 
+# Report type choices for the report download API endpoint
+REPORT_TYPE_CHOICES = ["aggregate", "deployments", "details", "insights"]
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="report_type",
+            type=OpenApiTypes.STR,
+            enum=REPORT_TYPE_CHOICES,
+            description="The optional JSON report type to download",
+            required=False,
+            location=OpenApiParameter.QUERY,
+        ),
+    ],
+    responses={
+        (200, "application/gzip"): OpenApiResponse(
+            description="Gzipped Reports archive for the Report specified",
+            response=OpenApiTypes.BINARY,
+        ),
+        ("200_aggregate", "application/json"): OpenApiResponse(
+            description="Aggregate Report JSON for the Report specified",
+            response=AggregateReportSerializer,
+        ),
+        ("200_deployments", "application/json"): OpenApiResponse(
+            description="Deployments Report JSON for the Report specified",
+            response=DeploymentReportSerializer,
+        ),
+        ("200_details", "application/json"): OpenApiResponse(
+            description="Details Reports JSON for the Report specified",
+            response=DetailsReportSerializer,
+        ),
+        ("200_insights", "application/json"): OpenApiResponse(
+            description="Insights Reports JSON for the Report specified",
+            response=YupanaPayloadSerializer,
+        ),
+    },
+)
 @api_view(["get"])
 @renderer_classes(
     (
