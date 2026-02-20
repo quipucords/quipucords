@@ -10,10 +10,13 @@ from rest_framework.serializers import (
     JSONField,
     ModelSerializer,
     PrimaryKeyRelatedField,
+    UUIDField,
 )
 
+from api.common.common_report import REPORT_TYPE_DEPLOYMENT
 from api.common.serializer import NotEmptySerializer
 from api.models import (
+    DeploymentsReport,
     Entitlement,
     Product,
     SystemFingerprint,
@@ -149,3 +152,27 @@ class FingerprintField(PrimaryKeyRelatedField):
         """Create output representation."""
         serializer = SystemFingerprintSerializer(value)
         return serializer.data
+
+
+class DeploymentReportSerializer(ModelSerializer):
+    """Serializer for the DeploymentReport."""
+
+    report_id = IntegerField(read_only=True)
+    status = CharField(max_length=16)
+    report_type = CharField(read_only=True, default=REPORT_TYPE_DEPLOYMENT)
+    report_version = CharField(max_length=64, read_only=True)
+    report_platform_id = UUIDField(format="hex_verbose", read_only=True)
+    system_fingerprints = SystemFingerprintSerializer(read_only=True)
+
+    class Meta:
+        """Metaclass for DeploymentReportSerializer."""
+
+        model = DeploymentsReport
+        fields = (
+            "report_id",
+            "status",
+            "report_type",
+            "report_version",
+            "report_platform_id",
+            "system_fingerprints",
+        )
