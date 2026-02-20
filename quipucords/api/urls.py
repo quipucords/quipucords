@@ -20,6 +20,7 @@ from api.views import (
     credential_bulk_delete,
     deployments,
     details,
+    download_report,
     insights,
     jobs,
     ping,
@@ -72,6 +73,7 @@ v2_urls = [
     path(
         "reports/<int:report_id>/raw/", RawFactsReportView.as_view(), name="report-raw"
     ),
+    path("reports/<int:report_id>/download/", download_report, name="download-report"),
 ]
 
 urlpatterns = [

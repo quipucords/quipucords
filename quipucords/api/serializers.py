@@ -10,9 +10,11 @@ from api.connresult.serializer import (
 from api.credential.serializer import CredentialSerializerV2
 from api.credential.serializer_v1 import CredentialSerializerV1
 from api.deployments_report.serializer import (
+    DeploymentReportSerializer,
     SystemFingerprintSerializer,
 )
 from api.details_report.serializer import DetailsReportSerializer
+from api.insights_report.serializers import YupanaPayloadSerializer
 from api.inspectresult.serializer import (
     RawFactSerializer,
     SystemInspectionResultSerializer,
