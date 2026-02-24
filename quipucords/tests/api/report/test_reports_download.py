@@ -138,7 +138,7 @@ class TestReportDownload:
                 reverse("v2:download-report", args=(report_id,)),
                 data={"report_type": "aggregate"},
             )
-            assert response.status_code == status.HTTP_404_NOT_FOUND
+            assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
             assert response["Content-Type"] == "application/json"
             response_json = response.json()
             assert (
