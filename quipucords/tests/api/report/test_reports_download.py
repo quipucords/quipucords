@@ -1,6 +1,7 @@
 """Test the v2 reports download API."""
 
 import pytest
+from rest_framework import status
 from rest_framework.reverse import reverse
 
 from constants import DataSources
@@ -124,6 +125,26 @@ class TestReportDownload:
         assert response["Content-Type"] == "application/json"
         report_json = response.json()
         assert report_json["results"]
+
+    def test_retrieve_aggregate_unavailable(
+        self, client_logged_in, sources, deployments_report, mocker
+    ):
+        """Test that the error message if the aggregate report is not available."""
+        with mocker.patch(
+            "api.report.view.get_serialized_aggregate_report", return_value=None
+        ):
+            report_id = deployments_report.report.id
+            response = client_logged_in.get(
+                reverse("v2:download-report", args=(report_id,)),
+                data={"report_type": "aggregate"},
+            )
+            assert response.status_code == status.HTTP_404_NOT_FOUND
+            assert response["Content-Type"] == "application/json"
+            response_json = response.json()
+            assert (
+                f"Aggregate report for Report {report_id} is not available"
+                in response_json["detail"]
+            )
 
     def test_retrieve_deployments_json(
         self, client_logged_in, sources, deployments_report
