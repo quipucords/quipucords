@@ -145,7 +145,7 @@ def download_report(request, report_id):
                         "detail": f"Aggregate report for Report {report_id}"
                         " is not available"
                     },
-                    status=status.HTTP_404_NOT_FOUND,
+                    status=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 )
         case "deployments":  # v2 of /api/v1/reports/<report_id>/deployments
             response_report, response_status = deployments_report_and_status(report_id)
