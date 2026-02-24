@@ -2,6 +2,15 @@
   "extends": [
     "group:all"
   ],
+  "tekton": {
+      "fileMatch": [
+          "\\.yaml$",
+          "\\.yml$"
+      ],
+      "includePaths": [
+          ".tekton/**"
+      ]
+  },
   "packageRules": [
     {
       "matchCategories": [
