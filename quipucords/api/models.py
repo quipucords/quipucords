@@ -19,5 +19,6 @@ from api.report.model import Report
 from api.scan.model import Scan
 from api.scanjob.model import ScanJob
 from api.scantask.model import ScanTask
+from api.secure_token.model import SecureToken
 from api.source.model import Source
 from api.status.model import ServerInformation
