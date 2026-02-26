@@ -1,52 +1,104 @@
 """Test ansible controller api client."""
 
+import json
+import logging
+import math
 from unittest import mock
 
 import httpretty
 import pytest
+from django.test import override_settings
 from requests.auth import HTTPBasicAuth
 
 from scanner.ansible.api import AnsibleControllerApi
 
 
 @pytest.fixture
-def paginated_results():
+def paginated_results(request):
     """Simulate a paginated result."""
+    count, page_size, failures = request.param
+    if failures is None:
+        # By default, produce a failure on page 2's 0th (first) attempt
+        failures = {2: [0]}
+
     httpretty.enable()
 
-    httpretty.register_uri(
-        httpretty.GET,
-        "https://some.url/paginated/",
-        match_querystring=True,
-        body='{"count": 11, "next": true, "results": [1, 2, 3, 4, 5]}',
-    )
-    httpretty.register_uri(
-        httpretty.GET,
-        "https://some.url/paginated/?&page=2&page_size=5",
-        match_querystring=True,
-        responses=[
-            httpretty.Response("Service temporarily unavailable", status=503),
-            httpretty.Response(
-                '{"count": 11, "next": true, "results": [6, 7, 8, 9, 10]}', status=200
-            ),
-        ],
-    )
+    max_page = math.ceil(count / page_size) if page_size > 0 else 0
+    for page in range(1, max_page + 1):
+        failure_on_attempts = failures.get(page, [])
+        success_response_body = json.dumps(
+            {
+                "count": count,
+                "next": count > (page * page_size),
+                "results": list(
+                    range((page - 1) * page_size + 1, min(count, page * page_size) + 1)
+                ),  # generate simple list of numbers to represent result objects
+            }
+        )
 
-    httpretty.register_uri(
-        httpretty.GET,
-        "https://some.url/paginated/?&page=3&page_size=5",
-        body='{"count": 11, "next": false, "results": [11]}',
-        match_querystring=True,
-    )
+        responses = []
+        for attempt in range(len(failure_on_attempts) + 1):
+            # +1 allows the client to call again to get a success after the failure
+            if attempt in failure_on_attempts:
+                responses.append(
+                    httpretty.Response("Service temporarily unavailable", status=503)
+                )
+            else:
+                responses.append(httpretty.Response(success_response_body, status=200))
+
+        httpretty.register_uri(
+            httpretty.GET,
+            f"https://some.url/paginated/?&page={page}&page_size={page_size}",
+            match_querystring=True,
+            responses=responses,
+        )
+
+        if page == 1:
+            # Special case "no args" handling for only the first page.
+            httpretty.register_uri(
+                httpretty.GET,
+                "https://some.url/paginated/",
+                match_querystring=True,
+                body=success_response_body,
+            )
     yield
     httpretty.disable()
 
 
-def test_get_paginated_results(paginated_results):
+@pytest.mark.parametrize("paginated_results", [[11, 5, None]], indirect=True)
+def test_get_paginated_results(paginated_results, caplog):
     """Test get_paginated_results method."""
+    caplog.set_level(logging.WARNING)
     client = AnsibleControllerApi(base_url="https://some.url/")
     results = client.get_paginated_results("/paginated/", max_concurrency=4)
     assert set(results) == set(range(1, 12))
+    assert len(caplog.messages) == 0
+
+
+@override_settings(QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_FIRST_WARNING=10)
+@override_settings(QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_PERIODIC_WARNING=3)
+@pytest.mark.parametrize("paginated_results", [[100, 5, dict()]], indirect=True)
+def test_get_paginated_results_logs_warnings(paginated_results, caplog):
+    """
+    Test get_paginated_results logs warnings at large page counts.
+
+    With the given parameters, we expect:
+    * fake API has 100 results over 20 pages (page size 5).
+    * fake API will never return an error.
+    * request for first page will emit a general warning about expecting many pages.
+    * request for page 10 will emit a page-specific "large" warning.
+    * request for pages 13, 16, and 19 will also emit "large" warnings.
+    """
+    caplog.set_level(logging.WARNING)
+    client = AnsibleControllerApi(base_url="https://some.url/")
+    results = client.get_paginated_results("/paginated/", max_concurrency=4)
+    assert set(results) == set(range(1, 101))
+    assert len(caplog.messages) == 5
+    assert "20 pages for 100 results" in caplog.records[0].message
+    messages = sorted(caplog.messages[1:])  # in case concurrency generated out of order
+    expected_periodic_count_warnings = [10, 13, 16, 19]
+    for message, expected_count in zip(messages, expected_periodic_count_warnings):
+        assert f"Current count is {expected_count}" in message
 
 
 def test_ansible_api_instantiation_with_connection_info():

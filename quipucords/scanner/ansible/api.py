@@ -5,6 +5,7 @@ from copy import deepcopy
 from logging import getLogger
 from math import ceil
 
+from django.conf import settings
 from requests.auth import HTTPBasicAuth
 
 from compat.requests import Session
@@ -71,7 +72,16 @@ class AnsibleControllerApi(Session):
 
     def _get_page_params(self, kwargs, first_page):
         page_size = len(first_page["results"])
-        total_pages = ceil(first_page["count"] / page_size)
+        total_count = first_page.get("count", 0)
+        total_pages = ceil(total_count / page_size) if total_count > 0 else 0
+        if total_pages >= settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_FIRST_WARNING:
+            logger.warning(
+                "AAP server has a large number of result pages (%(total_pages)s "
+                "pages for %(total_results)s results). Our client will attempt to "
+                "pull all pages, but this may take a while and may add load to the "
+                "AAP server.",
+                {"total_pages": total_pages, "total_results": total_count},
+            )
         for page in range(2, total_pages + 1):
             yield self._format_page_kwargs(kwargs, page_size, page)
 
@@ -83,10 +93,30 @@ class AnsibleControllerApi(Session):
         return kwargs
 
     def _get_pages_in_parallel(self, url, max_concurrency, page_kwargs):
+        logger.info(
+            "Fetching %(url)s pages with up to %(max_concurrency)s workers",
+            {"url": url, "max_concurrency": max_concurrency},
+        )
+        # copy settings to local vars simply to improve readability
+        _warn_first = settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_FIRST_WARNING
+        _warn_periodic = settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_PERIODIC_WARNING
         with futures.ThreadPoolExecutor(max_workers=max_concurrency) as executor:
             future_to_page = {
                 executor.submit(self.get, url, **kwargs) for kwargs in page_kwargs
             }
-            for future_page in futures.as_completed(future_to_page):
+            for count, future_page in enumerate(
+                futures.as_completed(future_to_page), start=1
+            ):
+                if (
+                    count >= _warn_first
+                    and ((count - _warn_first) % _warn_periodic) == 0
+                ):
+                    # Warn once at `_warn_first` and then again every `_warn_periodic`.
+                    logger.warning(
+                        "Processing large number of paginated results from AAP "
+                        "server at %(host)s. Current count is %(count)s from %(url)s",
+                        {"host": self.base_url, "count": count, "url": url},
+                    )
+
                 data = future_page.result()
                 yield from data.json()["results"]
