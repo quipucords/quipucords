@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from api import messages
 from api.aggregate_report.view import get_serialized_aggregate_report
 from api.deployments_report.view import build_cached_json_report
 from api.exceptions import FailedDependencyError
@@ -50,10 +51,8 @@ def reports_report_and_status(report_id) -> tuple[dict, int]:
     if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
         return (
             {
-                "detail": _(
-                    f"Deployment report {report_id} could not be created."
-                    " See server logs."
-                )
+                "detail": _(messages.REPORT_DEPLOYMENTS_NOT_CREATED)
+                % {"report_id": report_id}
             },
             status.HTTP_424_FAILED_DEPENDENCY,
         )

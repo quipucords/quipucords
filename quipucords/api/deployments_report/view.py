@@ -39,16 +39,16 @@ def deployments_report_and_status(report_id: int) -> tuple[dict, int]:
     )
     if deployments_report.status != DeploymentsReport.STATUS_COMPLETE:
         return {
-            "detail": f"Deployment report {deployments_report.report.id}"
-            " could not be created. See server logs."
+            "detail": _(messages.REPORT_DEPLOYMENTS_NOT_CREATED)
+            % {"report_id": deployments_report.report.id}
         }, status.HTTP_424_FAILED_DEPENDENCY
 
     try:
         deployments_json = build_cached_json_report(deployments_report)
     except FileNotFoundError:
         return {
-            "detail": f"Deployment report {deployments_report.report.id}"
-            " could not be created. See server logs."
+            "detail": _(messages.REPORT_DEPLOYMENTS_NOT_CREATED)
+            % {"report_id": deployments_report.report.id}
         }, status.HTTP_424_FAILED_DEPENDENCY
 
     return deployments_json, status.HTTP_200_OK

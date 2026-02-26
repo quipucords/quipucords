@@ -3,11 +3,13 @@
 import logging
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 
+from api import messages
 from api.common.entities import ReportEntity
 from api.exceptions import FailedDependencyError
 from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
@@ -35,8 +37,8 @@ def validate_deployment_report_status(deployment_report):
     if deployment_report.status != DeploymentsReport.STATUS_COMPLETE:
         raise FailedDependencyError(
             {
-                "detail": f"Insights report {deployment_report.report.id} could not be "
-                "created. See server logs."
+                "detail": _(messages.REPORT_INSIGHTS_NOT_CREATED)
+                % {"report_id": deployment_report.report.id}
             },
         )
 
@@ -47,8 +49,8 @@ def get_report(deployment_report):
         report = ReportEntity.from_report_id(deployment_report.report.id)
     except SystemFingerprint.DoesNotExist as err:
         raise NotFound(
-            f"Insights report {deployment_report.report.id} was not generated because "
-            "there were 0 valid hosts. See server logs."
+            _(messages.REPORT_INSIGHTS_NOT_GENERATED)
+            % {"report_id": deployment_report.report.id}
         ) from err
 
     return report

@@ -1,6 +1,7 @@
 """Report view."""
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -17,6 +18,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from api import messages
 from api.aggregate_report.view import (
     AggregateReportSerializer,
     get_serialized_aggregate_report,
@@ -142,8 +144,8 @@ def download_report(request, report_id):
             if response_report is None:
                 return Response(
                     {
-                        "detail": f"Aggregate report for Report {report_id}"
-                        " is not available"
+                        "detail": _(messages.REPORT_AGGREGATE_NOT_AVAILABLE)
+                        % {"report_id": report_id},
                     },
                     status=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 )
@@ -164,7 +166,10 @@ def download_report(request, report_id):
             response_report = serializer.data
         case _:
             return Response(
-                {"detail": f"Unsupported report_type {report_type} specified"},
+                {
+                    "detail": _(messages.REPORT_UNSUPPORTED_REPORT_TYPE)
+                    % {"report_type": report_type}
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

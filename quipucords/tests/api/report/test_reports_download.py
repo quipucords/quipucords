@@ -4,6 +4,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from api import messages
 from constants import DataSources
 from tests.constants import (
     FILENAME_AGGREGATE_JSON,
@@ -77,7 +78,7 @@ class TestReportDownload:
         assert not response.ok
         response_json = response.json()
         assert (
-            f"Unsupported report_type {bad_report_type} specified"
+            messages.REPORT_UNSUPPORTED_REPORT_TYPE % {"report_type": bad_report_type}
             in response_json["detail"]
         )
 
