@@ -33,7 +33,7 @@ spec:
         - use
         - $(params.SOURCE_ARTIFACT)=/var/workdir/source
     - name: generate-version-labels
-      image: quay.io/konflux-ci/yq@sha256:d007048d29fc22f9a81524173eeb9131b5b78253a4ab18f6331400c88d78ea47
+      image: quay.io/konflux-ci/yq@sha256:466005c667e6e9ea19fd4738275f71a13f89382f6233c581d5e952a41ccb3b42
       workingDir: /var/workdir/source
       script: |
         echo "Extracting full version (X.Y.Z) from pyproject.toml"
