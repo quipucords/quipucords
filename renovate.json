@@ -3,13 +3,13 @@
     "group:all"
   ],
   "tekton": {
-      "fileMatch": [
-          "\\.yaml$",
-          "\\.yml$"
-      ],
-      "includePaths": [
-          ".tekton/**"
-      ]
+    "managerFilePatterns": [
+      "/\\.yaml$/",
+      "/\\.yml$/"
+    ],
+    "includePaths": [
+      ".tekton/**"
+    ]
   },
   "packageRules": [
     {
