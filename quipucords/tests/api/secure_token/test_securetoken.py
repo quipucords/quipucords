@@ -1,5 +1,7 @@
 """Test SecureToken model."""
 
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -191,3 +193,56 @@ class TestUserSecureToken:
         assert secure_token.name == token_name
         assert secure_token.token_type == token_type
         assert secure_token.user.username == test_user.username
+
+
+@pytest.mark.django_db
+class TestUserSecureTokenExpiration:
+    """Test user SecureToken expiration."""
+
+    def test_create_default_expiration(self, faker, test_user):
+        """Test create a user SecureToken - Happy Path."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        secure_token.refresh_from_db()
+        assert not secure_token.is_expired()
+
+    def test_create_set_expiration_future(self, faker, test_user):
+        """Test future expiration date."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        secure_token.refresh_from_db()
+        secure_token.set_expiration(expires_at=datetime.now(UTC) + timedelta(hours=4))
+        assert not secure_token.is_expired()
+
+    def test_create_set_expiration_past(self, faker, test_user):
+        """Test past expiration date."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        secure_token.refresh_from_db()
+        assert not secure_token.is_expired()
+        secure_token.set_expiration(expires_at=datetime.now(UTC) - timedelta(hours=4))
+        assert secure_token.is_expired()
+
+    def test_clear_expiration(self, faker, test_user):
+        """Test clear expiration of SecureToken."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name,
+            token_type=token_type,
+            user=test_user,
+            expires_at=datetime.now(UTC) - timedelta(hours=4),
+        )
+        secure_token.refresh_from_db()
+        assert secure_token.is_expired()
+        secure_token.clear_expiration()
+        assert not secure_token.is_expired()

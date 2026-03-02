@@ -1,5 +1,7 @@
 """Defines the SecureToken Models used with the API application."""
 
+from datetime import UTC, datetime
+
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext as _
@@ -58,3 +60,21 @@ class SecureToken(BaseModel):
         """Save the SecureToken object."""
         self.full_clean()  # Enforce model-level integrity
         super().save(*args, **kwargs)
+
+    def clear_expiration(self):
+        """Clear the expiration of the SecureToken object so it won't expire."""
+        self.expires_at = None
+        self.save()
+
+    def set_expiration(self, expires_at: datetime):
+        """Set the expiration of the SecureToken object."""
+        self.expires_at = expires_at
+        self.save()
+
+    def is_expired(self) -> bool:
+        """Return True if the SecureToken is expired."""
+        if not self.expires_at:  # default is no expiration
+            return False
+        if datetime.now(UTC) >= self.expires_at:
+            return True
+        return False
