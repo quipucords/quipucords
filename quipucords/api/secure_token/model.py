@@ -2,13 +2,13 @@
 
 from datetime import UTC, datetime
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from api.common.models import BaseModel
 from api.encrypted_fields import EncryptedCharField, EncryptedDictField
-from quipucords.user import User
 
 
 class SecureToken(BaseModel):
@@ -24,7 +24,9 @@ class SecureToken(BaseModel):
     )
 
     # SecureToken can be optionally user bound
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
 
     # Note: rh_jwt tokens can easily reach 3K, with Ansible encryption possibly
     #       quadrupling the size, we'll size up the token on the safe side, the
