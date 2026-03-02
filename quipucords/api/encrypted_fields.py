@@ -38,8 +38,6 @@ class EncryptedCharField(models.CharField):
 
     def to_python(self, value):
         """Assure that data is properly decrypted when stored in a Python string."""
-        if isinstance(value, str):
-            return value
         if value is None:
             return value
         return self.decrypt_value(value)
