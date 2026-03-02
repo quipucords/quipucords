@@ -61,6 +61,48 @@ class TestSecureToken:
         error_messages = ", ".join(validation_error.value.message_dict["__all__"])
         assert "unique_secure_token_name" in error_messages
 
+    def test_create_with_empty_token(self, faker):
+        """Test create succeeds with empty token."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token=None, token_type=token_type
+        )
+        secure_token.refresh_from_db()
+        assert secure_token.token is None
+
+    def test_create_with_empty_metadata(self, faker):
+        """Test create succeeds with empty metadata."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, metadata=None, token_type=token_type
+        )
+        secure_token.refresh_from_db()
+        assert secure_token.metadata is None
+
+    def test_create_with_empty_token_and_metadata(self, faker):
+        """Test create succeeds with empty token and metadata."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token=None, metadata=None, token_type=token_type
+        )
+        secure_token.refresh_from_db()
+        assert secure_token.token is None
+        assert secure_token.metadata is None
+
+    def test_create(self, faker):
+        """Test create a SecureToken - Happy Path."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type
+        )
+        secure_token.refresh_from_db()
+        assert secure_token.name == token_name
+        assert secure_token.token_type == token_type
+
 
 @pytest.mark.django_db
 class TestUserSecureToken:
@@ -137,3 +179,15 @@ class TestUserSecureToken:
         secure_token.refresh_from_db()
         assert secure_token.token == test_jwt
         assert secure_token.metadata == token_metadata
+
+    def test_create(self, faker, test_user):
+        """Test create a user SecureToken - Happy Path."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        secure_token.refresh_from_db()
+        assert secure_token.name == token_name
+        assert secure_token.token_type == token_type
+        assert secure_token.user.username == test_user.username
