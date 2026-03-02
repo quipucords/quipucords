@@ -1,21 +1,28 @@
 {
-  "extends": [
-    "group:all"
-  ],
-  "tekton": {
-    "managerFilePatterns": [
-      "/\\.yaml$/",
-      "/\\.yml$/"
-    ],
-    "includePaths": [
-      ".tekton/**"
-    ]
-  },
   "packageRules": [
     {
-      "matchCategories": [
-        "python"
-      ],
+      "description": "Tekton pipelines and tasks",
+      "matchManagers": ["tekton"],
+      "groupName": "tekton",
+      "schedule": ["* 5-23 * * 5"]
+    },
+    {
+      "description": "Containerfile base image updates",
+      "matchManagers": ["dockerfile"],
+      "groupName": "containerfile",
+      "schedule": ["* 5-23 * * 5"]
+    },
+    {
+      "description": "Language dependencies non-major updates",
+      "matchManagers": ["npm", "pip_requirements", "pep723"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "language dependencies",
+      "schedule": ["* 5-23 * * 1-5"]
+    },
+    {
+      "description": "Disable major updates for language dependencies",
+      "matchManagers": ["npm", "pip_requirements", "pep723"],
+      "matchUpdateTypes": ["major", "pin", "pinDigest", "digest"],
       "enabled": false
     }
   ]
