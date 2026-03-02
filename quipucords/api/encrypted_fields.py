@@ -58,6 +58,8 @@ class EncryptedDictField(EncryptedCharField):
     def from_db_value(self, value, expression, connection):
         """Assure that decrypted data are JSON loaded to return the Dictionary."""
         decrypted_value = super().from_db_value(value, expression, connection)
+        if decrypted_value is None:
+            return None
         try:
             return json.loads(decrypted_value)
         except ValueError:
