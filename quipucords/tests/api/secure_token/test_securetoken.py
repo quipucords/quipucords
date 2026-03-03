@@ -28,7 +28,6 @@ def test_user(faker):
 def test_jwt(faker):
     """Fixture to create a test JWT token."""
     jwt = f"{faker.lexify('?' * 32)}.{faker.lexify('?' * 32)}.{faker.lexify('?' * 32)}"
-    print(f"\nJWT = {jwt}")
     return jwt
 
 
