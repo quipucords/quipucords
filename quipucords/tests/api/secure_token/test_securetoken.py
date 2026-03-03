@@ -193,6 +193,44 @@ class TestUserSecureToken:
         assert secure_token.token_type == token_type
         assert secure_token.user.username == test_user.username
 
+    def test_create_system_and_user_tokens_with_same_name(self, faker, test_user):
+        """Test user and system can have same-named SecureToken."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        user_secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        system_secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type
+        )
+        user_secure_token.refresh_from_db()
+        system_secure_token.refresh_from_db()
+        assert user_secure_token.name == system_secure_token.name
+
+    def test_name_uniqueness_with_both_user_and_system(self, faker, test_user):
+        """Test name uniqueness when user and system have same-named SecureToken."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        user_secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        system_secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type
+        )
+        user_secure_token.refresh_from_db()
+        system_secure_token.refresh_from_db()
+        assert user_secure_token.name == system_secure_token.name
+        with pytest.raises(ValidationError) as validation_error:
+            SecureToken.objects.create(
+                name=token_name, token_type=token_type, user=test_user
+            )
+        error_messages = ", ".join(validation_error.value.message_dict["__all__"])
+        assert "Secure Token with this User and Name already exists" in error_messages
+        with pytest.raises(ValidationError) as validation_error:
+            SecureToken.objects.create(name=token_name, token_type=token_type)
+        error_messages = ", ".join(validation_error.value.message_dict["__all__"])
+        assert "unique_secure_token_name" in error_messages
+
 
 @pytest.mark.django_db
 class TestUserSecureTokenExpiration:
