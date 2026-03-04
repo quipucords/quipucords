@@ -283,3 +283,75 @@ class TestUserSecureTokenExpiration:
         assert secure_token.is_expired()
         secure_token.clear_expiration()
         assert not secure_token.is_expired()
+
+
+@pytest.mark.django_db
+class TestSecureTokenRepresentation:
+    """Test SecureToken representation."""
+
+    def test_string_representation(self, faker):
+        """Test string representation for a system SecureToken."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type
+        )
+        secure_token.refresh_from_db()
+        token_str = str(secure_token)
+        assert token_str == (
+            f"SecureToken(id={secure_token.id}, "
+            f"name={secure_token.name}, "
+            f"token_type={token_type}, "
+            "user_id=None, expires_at=Never)"
+        )
+
+    def test_user_token_string_representation(self, faker, test_user):
+        """Test string representation for a user SecureToken."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        secure_token.refresh_from_db()
+        token_str = str(secure_token)
+        assert token_str == (
+            f"SecureToken(id={secure_token.id}, "
+            f"name={secure_token.name}, "
+            f"token_type={token_type}, "
+            f"user_id={test_user.id}, "
+            "expires_at=Never)"
+        )
+
+    def test_user_token_string_representation_with_expiration(self, faker, test_user):
+        """Test string representation for a user SecureToken with expiration."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        expires_at = datetime.now(UTC) + timedelta(hours=4)
+        secure_token = SecureToken.objects.create(
+            name=token_name,
+            token_type=token_type,
+            user=test_user,
+            expires_at=expires_at,
+        )
+        secure_token.refresh_from_db()
+        expected_expiration = expires_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        token_str = str(secure_token)
+        assert token_str == (
+            f"SecureToken(id={secure_token.id}, "
+            f"name={secure_token.name}, "
+            f"token_type={token_type}, "
+            f"user_id={test_user.id}, "
+            f"expires_at={expected_expiration})"
+        )
+
+    def test_user_token_safe_dict(self, faker, test_user):
+        """Test user token safe dictionary does not include encrypted attributes."""
+        token_name = faker.slug()
+        token_type = TOKEN_TYPE_INSIGHTS
+        secure_token = SecureToken.objects.create(
+            name=token_name, token_type=token_type, user=test_user
+        )
+        secure_token.refresh_from_db()
+        assert not set(list(secure_token.safe_dict())).intersection(
+            set(secure_token.encrypted_attributes())
+        )

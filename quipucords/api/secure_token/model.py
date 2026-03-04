@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.utils.translation import gettext as _
 
 from api.common.models import BaseModel
@@ -57,6 +58,38 @@ class SecureToken(BaseModel):
                 fields=["user", "name"], name="unique_user_secure_token_name"
             ),
         ]
+
+    def encrypted_attributes(self):
+        """Return the encrypted attributes of the SecureToken object."""
+        encrypted_fields = [
+            field.name
+            for field in self._meta.get_fields()
+            if isinstance(field, EncryptedCharField)
+        ]
+        return encrypted_fields
+
+    def safe_dict(self):
+        """Return the safe dict representation of the SecureToken object."""
+        return model_to_dict(self, None, exclude=self.encrypted_attributes())
+
+    def __str__(self):
+        """Return the safe string representation of the SecureToken object."""
+        user_id = self.user.id if self.user else "None"
+        expires_at = (
+            self.expires_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            if self.expires_at
+            else "Never"
+        )
+        safe_str = (
+            f"{self.__class__.__name__}("
+            f"id={self.id}, "
+            f"name={self.name}, "
+            f"token_type={self.token_type}, "
+            f"user_id={user_id}, "
+            f"expires_at={expires_at}"
+            ")"
+        )
+        return safe_str
 
     def save(self, *args, **kwargs):
         """Save the SecureToken object."""
