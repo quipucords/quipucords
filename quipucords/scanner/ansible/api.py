@@ -60,7 +60,7 @@ class AnsibleControllerApi(Session):
 
     def get_paginated_results(self, url, max_concurrency=1, **kwargs):
         """Get a generator with results from a paginated endpoint."""
-        # paginated responses on ansible controller api always are always like this
+        # paginated responses on ansible controller api are always like this
         # { "count": 99, "next": null, "previous": null, "results": [ ... ] }
         kwargs.setdefault("raise_for_status", True)
         first_response = self.get(url, **kwargs)
