@@ -6,6 +6,7 @@ from logging import getLogger
 from math import ceil
 
 from django.conf import settings
+from requests import HTTPError
 from requests.auth import HTTPBasicAuth
 
 from compat.requests import Session
@@ -118,5 +119,23 @@ class AnsibleControllerApi(Session):
                         {"host": self.base_url, "count": count, "url": url},
                     )
 
-                data = future_page.result()
-                yield from data.json()["results"]
+                try:
+                    response = future_page.result()
+                    if not response.ok:
+                        logger.error(
+                            "HTTP error %(status)s from %(url)s",
+                            {"status": response.status_code, "url": url},
+                        )
+                        raise response.raise_for_status()
+                    yield from response.json().get("results", [])
+                except HTTPError:
+                    for f in future_to_page:
+                        f.cancel()  # try to stop the remaining threads
+                    raise
+                except Exception:
+                    logger.exception(
+                        "An unexpected error occurred during parallel fetch of %s", url
+                    )
+                    for f in future_to_page:
+                        f.cancel()  # try to stop the remaining threads
+                    raise
