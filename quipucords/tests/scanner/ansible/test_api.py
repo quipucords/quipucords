@@ -9,6 +9,8 @@ import httpretty
 import pytest
 from django.test import override_settings
 from requests.auth import HTTPBasicAuth
+from requests.exceptions import RetryError
+from urllib3.exceptions import MaxRetryError, ResponseError
 
 from scanner.ansible.api import AnsibleControllerApi
 
@@ -99,6 +101,33 @@ def test_get_paginated_results_logs_warnings(paginated_results, caplog):
     expected_periodic_count_warnings = [10, 13, 16, 19]
     for message, expected_count in zip(messages, expected_periodic_count_warnings):
         assert f"Current count is {expected_count}" in message
+
+
+@pytest.mark.parametrize("paginated_results", [[200, 5, dict()]], indirect=True)
+def test_get_paginated_results_big_max_concurrency(paginated_results, caplog):
+    """Test get_paginated_results works with large max_concurrency."""
+    caplog.set_level(logging.ERROR)
+    client = AnsibleControllerApi(base_url="https://some.url/")
+    results = client.get_paginated_results("/paginated/", max_concurrency=30)
+    assert set(results) == set(range(1, 201))
+    assert len(caplog.messages) == 0
+
+
+@pytest.mark.parametrize(
+    "paginated_results",
+    [[200, 5, dict({2: range(10), 3: range(10), 4: range(10)})]],
+    indirect=True,
+)
+def test_get_paginated_results_many_errors(paginated_results, caplog):
+    """Test get_paginated_results raises exception after too many HTTP errors."""
+    caplog.set_level(logging.ERROR)
+    client = AnsibleControllerApi(base_url="https://some.url/")
+    results = []
+    with pytest.raises((MaxRetryError, ResponseError, RetryError)):
+        for result in client.get_paginated_results("/paginated/", max_concurrency=2):
+            results.append(result)
+    # Some results MAY have been generated, but it should be less than total expected.
+    assert len(results) < 200
 
 
 def test_ansible_api_instantiation_with_connection_info():
