@@ -14,15 +14,27 @@
     },
     {
       "description": "Language dependencies non-major updates",
-      "matchManagers": ["npm", "pip_requirements", "pep723"],
+      "matchManagers": ["npm", "pep621"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "language dependencies",
       "schedule": ["* 5-23 * * 1-5"]
     },
     {
+      "description": "Language dependencies lockfile updates",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "groupName": "lockfiles update",
+      "schedule": ["* 9-13 * * 1-5"]
+    },
+    {
       "description": "Disable major updates for language dependencies",
-      "matchManagers": ["npm", "pip_requirements", "pep723"],
-      "matchUpdateTypes": ["major", "pin", "pinDigest", "digest"],
+      "matchCategories": ["js", "python"],
+      "matchUpdateTypes": ["major", "pin", "pinDigest", "digest", "rollback", "bump", "replacement"],
+      "enabled": false
+    },
+    {
+      "description": "Disable updates for Python - our dependency pipeline does not fit MintMaker model",
+      "matchCategories": ["python"],
       "enabled": false
     }
   ]
