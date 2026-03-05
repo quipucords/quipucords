@@ -44,22 +44,45 @@ class Session(requests.Session):
         self.verify = verify
         self.base_url = base_url
         self.auth = auth
-        if max_retries is None:
-            max_retries = settings.QUIPUCORDS_HTTP_RETRY_MAX_NUMBER
-        if max_retries > 0:
-            backoff_factor = backoff_factor or settings.QUIPUCORDS_HTTP_RETRY_BACKOFF
-            retry_on_status_code_list = (
+        self._max_retries = (
+            settings.QUIPUCORDS_HTTP_RETRY_MAX_NUMBER
+            if max_retries is None
+            else max_retries
+        )
+        if self._max_retries > 0:
+            self._backoff_factor = (
+                backoff_factor or settings.QUIPUCORDS_HTTP_RETRY_BACKOFF
+            )
+            self._retry_on_status_code_list = (
                 retry_on_status_code_list or self.DEFAULT_STATUS_CODE_LIST_FOR_RETRY
             )
-            adapter = requests.adapters.HTTPAdapter(
-                max_retries=Retry(
-                    max_retries,
-                    status_forcelist=retry_on_status_code_list,
-                    backoff_factor=backoff_factor,
-                )
-            )
-            self.mount("http://", adapter)
-            self.mount("https://", adapter)
+            self.reset_adapters()
+        else:
+            self._backoff_factor = None
+            self._retry_on_status_code_list = []
+
+    def reset_adapters(
+        self,
+        *,
+        custom_retry_kwargs: dict | None = None,
+        custom_adapter_kwargs: dict | None = None,
+    ):
+        """Mount new HTTPAdapter with optionally overridden kwargs."""
+        retry_kwargs = {
+            "total": self._max_retries,
+            "status_forcelist": self._retry_on_status_code_list,
+            "backoff_factor": self._backoff_factor,
+        }
+        if custom_retry_kwargs:
+            retry_kwargs.update(custom_retry_kwargs)
+
+        adapter_kwargs = {"max_retries": Retry(**retry_kwargs)}
+        if custom_adapter_kwargs:
+            adapter_kwargs.update(custom_adapter_kwargs)
+
+        adapter = requests.adapters.HTTPAdapter(**adapter_kwargs)
+        self.mount("http://", adapter)
+        self.mount("https://", adapter)
 
     def request(
         self, method, url, *, raise_for_status=False, **kwargs
