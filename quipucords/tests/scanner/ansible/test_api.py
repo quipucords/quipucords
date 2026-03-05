@@ -75,6 +75,9 @@ def test_get_paginated_results(paginated_results, caplog):
     results = client.get_paginated_results("/paginated/", max_concurrency=4)
     assert set(results) == set(range(1, 12))
     assert len(caplog.messages) == 0
+    # WARNING: the next two lines are potentially brittle and may need to be removed.
+    assert client.adapters["http://"]._pool_connections == 10  # default value
+    assert client.adapters["http://"]._pool_maxsize == 10  # default value
 
 
 @override_settings(QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_FIRST_WARNING=10)
@@ -111,6 +114,9 @@ def test_get_paginated_results_big_max_concurrency(paginated_results, caplog):
     results = client.get_paginated_results("/paginated/", max_concurrency=30)
     assert set(results) == set(range(1, 201))
     assert len(caplog.messages) == 0
+    # WARNING: the next two lines are potentially brittle and may need to be removed.
+    assert client.adapters["http://"]._pool_connections == 30
+    assert client.adapters["http://"]._pool_maxsize == 30
 
 
 @pytest.mark.parametrize(
