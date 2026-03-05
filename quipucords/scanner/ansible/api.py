@@ -117,7 +117,8 @@ class AnsibleControllerApi(Session):
         # copy settings to local vars simply to improve readability
         _warn_first = settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_FIRST_WARNING
         _warn_periodic = settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_PERIODIC_WARNING
-        with futures.ThreadPoolExecutor(max_workers=max_concurrency) as executor:
+        executor = futures.ThreadPoolExecutor(max_workers=max_concurrency)
+        try:
             future_to_page = {
                 executor.submit(self.get, url, **kwargs) for kwargs in page_kwargs
             }
@@ -135,23 +136,21 @@ class AnsibleControllerApi(Session):
                         {"host": self.base_url, "count": count, "url": url},
                     )
 
-                try:
-                    response = future_page.result()
-                    if not response.ok:
-                        logger.error(
-                            "HTTP error %(status)s from %(url)s",
-                            {"status": response.status_code, "url": url},
-                        )
-                        raise response.raise_for_status()
-                    yield from response.json().get("results", [])
-                except HTTPError:
-                    for f in future_to_page:
-                        f.cancel()  # try to stop the remaining threads
-                    raise
-                except Exception:
-                    logger.exception(
-                        "An unexpected error occurred during parallel fetch of %s", url
+                response = future_page.result()
+                if not response.ok:
+                    logger.error(
+                        "HTTP error %(status)s from %(url)s",
+                        {"status": response.status_code, "url": url},
                     )
-                    for f in future_to_page:
-                        f.cancel()  # try to stop the remaining threads
-                    raise
+                    raise response.raise_for_status()
+                yield from response.json().get("results", [])
+            executor.shutdown(wait=True)
+        except HTTPError:
+            executor.shutdown(wait=False, cancel_futures=True)
+            raise
+        except Exception:
+            logger.exception(
+                "An unexpected error occurred during parallel fetch of %s", url
+            )
+            executor.shutdown(wait=False, cancel_futures=True)
+            raise
