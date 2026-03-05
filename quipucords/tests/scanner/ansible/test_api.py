@@ -128,6 +128,8 @@ def test_get_paginated_results_many_errors(paginated_results, caplog):
     """Test get_paginated_results raises exception after too many HTTP errors."""
     caplog.set_level(logging.ERROR)
     client = AnsibleControllerApi(base_url="https://some.url/")
+    client._backoff_factor = 0.001  # massively speed up retries after failures
+    client.reset_adapters()  # force client to use that custom backoff
     results = []
     with pytest.raises((MaxRetryError, ResponseError, RetryError)):
         for result in client.get_paginated_results("/paginated/", max_concurrency=2):
