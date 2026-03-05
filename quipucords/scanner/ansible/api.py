@@ -98,6 +98,22 @@ class AnsibleControllerApi(Session):
             "Fetching %(url)s pages with up to %(max_concurrency)s workers",
             {"url": url, "max_concurrency": max_concurrency},
         )
+        if max_concurrency > 10:  # noqa: PLR2004
+            # 10 is the default pool size in HTTPAdapter.
+            # One might think we could dig through self.adapters["http://"],
+            # but the relevant internal configs we need are protected.
+            # At this point in execution, we can assume it has the default 10.
+            custom_adapter_kwargs = {
+                "pool_connections": max_concurrency,
+                "pool_maxsize": max_concurrency,
+            }
+            # It's possible to exhaust the default HTTPAdapter's pool size
+            # and hang and pile up connections when we have more threads.
+            # So, a "large" max_concurrency means we need to create and mount
+            # a new HTTPAdapter that can handle the load.
+            # TODO Remove this if we refactor to use Celery tasks instead of threads.
+            self.reset_adapters(custom_adapter_kwargs=custom_adapter_kwargs)
+
         # copy settings to local vars simply to improve readability
         _warn_first = settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_FIRST_WARNING
         _warn_periodic = settings.QUIPUCORDS_AAP_INSPECT_PAGE_COUNT_PERIODIC_WARNING
