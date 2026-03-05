@@ -23,7 +23,7 @@ billiard==4.2.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via celery
 celery==5.6.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-certifi==2026.1.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+certifi==2026.2.25 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   kubernetes
     #   requests
@@ -49,7 +49,7 @@ cryptography==46.0.5 ; (implementation_name == 'cpython' and sys_platform == 'da
     # via
     #   ansible-core
     #   paramiko
-django==5.2.11 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django==5.2.12 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
     #   django-cors-headers
@@ -63,7 +63,7 @@ django-axes==6.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darw
     # via quipucords
 django-cors-headers==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-django-environ==0.12.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django-environ==0.13.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 django-filter==25.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -75,7 +75,7 @@ djangorestframework==3.16.1 ; (implementation_name == 'cpython' and sys_platform
     #   quipucords
 drf-spectacular==0.29.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-drf-spectacular-sidecar==2026.1.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+drf-spectacular-sidecar==2026.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 durationpy==0.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
@@ -123,9 +123,9 @@ pexpect==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     #   quipucords
 prompt-toolkit==3.0.52 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via click-repl
-psycopg==3.3.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+psycopg==3.3.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-psycopg-c==3.3.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+psycopg-c==3.3.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via psycopg
 ptyprocess==0.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via pexpect
@@ -204,5 +204,5 @@ wcwidth==0.6.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     # via prompt-toolkit
 websocket-client==1.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
-whitenoise==6.11.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+whitenoise==6.12.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
