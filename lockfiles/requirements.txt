@@ -4,7 +4,7 @@ amqp==5.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     # via kombu
 ansible==10.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-ansible-core==2.17.14 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+ansible-core==2.20.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible
 ansible-runner==2.4.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -31,7 +31,7 @@ cffi==2.0.0 ; (implementation_name == 'cpython' and platform_python_implementati
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+charset-normalizer==3.4.5 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
 click==8.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
@@ -91,7 +91,7 @@ jinja2==3.1.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     # via ansible-core
 jmespath==1.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-jsonschema==4.25.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+jsonschema==4.26.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 jsonschema-specifications==2025.9.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via jsonschema
@@ -143,7 +143,7 @@ python-dateutil==2.9.0.post0 ; (implementation_name == 'cpython' and sys_platfor
     #   kubernetes
 python-string-utils==1.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via openshift
-pyvmomi @ git+https://github.com/vmware/pyvmomi.git@e6cc09f32593d263b9ea0b611596a2c505786c6b ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+pyvmomi @ git+https://github.com/vmware/pyvmomi.git@6.7.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 pyyaml==6.0.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
@@ -165,9 +165,9 @@ requests==2.32.5 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     #   requests-oauthlib
 requests-oauthlib==2.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
-resolvelib==1.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+resolvelib==1.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible-core
-rpds-py==0.24.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+rpds-py==0.30.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   jsonschema
     #   quipucords
