@@ -31,7 +31,7 @@ cffi==2.0.0 ; (implementation_name == 'cpython' and platform_python_implementati
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+charset-normalizer==3.4.5 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
 click==8.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
@@ -59,7 +59,7 @@ django==5.2.12 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     #   drf-spectacular
     #   drf-spectacular-sidecar
     #   quipucords
-django-axes==6.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django-axes==8.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 django-cors-headers==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -81,7 +81,7 @@ durationpy==0.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     # via kubernetes
 fqdn==1.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-gunicorn==23.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+gunicorn==25.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 idna==3.11 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
@@ -103,7 +103,7 @@ lockfile==0.12.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     # via python-daemon
 markupsafe==3.0.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via jinja2
-more-itertools==9.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+more-itertools==10.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 oauthlib==3.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests-oauthlib
