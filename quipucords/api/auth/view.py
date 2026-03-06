@@ -9,6 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from api.auth.auth_insights import insights_login
+from api.auth.utils import AuthError
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,14 @@ def auth_login(request):
         )
 
     if user := request.user:
-        print(f"AHA!!!! doing an /auth/login for user {user.username}")
+        logger.info(
+            f"Doing an {auth_type} Authentication login for user {user.username}"
+        )
 
-    data = insights_login(user)
+    try:
+        data = insights_login(user)
+    except AuthError as err:
+        return Response(
+            {"detail": err.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
     return Response(data, status=status.HTTP_200_OK)
