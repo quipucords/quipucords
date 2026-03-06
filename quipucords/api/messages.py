@@ -145,6 +145,21 @@ COMMON_CHOICE_BLANK = "This field may not be blank. Valid values are %s."
 COMMON_CHOICE_INV = "%s, is an invalid choice. Valid values are %s."
 COMMON_ID_INV = "The id must be an integer."
 
+# Insights Authorization messages
+INSIGHTS_NOT_LOGGED_IN = "Must first login to authenticate"
+INSIGHTS_TOKEN_EXPIRED = "Authorization token expired, please re-login to Insights"
+INSIGHTS_TOKEN_CORRUPT = "Corrupt Authorization token, please re-login to Insights"
+INSIGHTS_TOKEN_INVALID = "Invalid Authorization token, please re-login to Insights"
+INSIGHTS_SSO_CONFIG_QUERY = "Querying Insights SSO configuration at %s for %s"
+INSIGHTS_SSO_QUERY_FAILED = "Failed to query the Insights SSO configuration: missing %s"
+INSIGHTS_AUTH_ERROR = "Authorization failed, please re-login to Insights"
+INSIGHTS_LOGIN_REQUEST = "Requesting Login authorization from %s"
+INSIGHTS_LOGIN_REQUEST_FAILED = "Failed to request login authorization: %s"
+INSIGHTS_LOGIN_VERIFYING = "Verifying Login authorization at %s"
+INSIGHTS_LOGIN_VERIFICATION_FAILED = "Failed to verify Login authorization: %s"
+INSIGHTS_LOGIN_VERIFICATION_TIMEOUT = "Time-out while waiting for Login authorization"
+INSIGHTS_RESPONSE = "Response from %s: %s"
+
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."
 REPORT_DEPLOYMENTS_NOT_CREATED = (
