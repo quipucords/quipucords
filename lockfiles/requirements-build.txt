@@ -102,7 +102,7 @@ typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform =
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
-wheel==0.46.3
+wheel==0.46.2
     # via
     #   bcrypt
     #   click-repl
