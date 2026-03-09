@@ -4,8 +4,11 @@ import http
 import time
 from logging import getLogger
 
+import celery
 import requests
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.utils.translation import gettext as _
 from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
@@ -61,51 +64,82 @@ class InsightsAuthError(Exception):
         self.message = message
 
 
-def insights_login(user):
-    """Login the Discovery user to the Insights server and get a token."""
-    insights_jwt = request_insights_jwt(user)
-    decoded_insights_jwt = decode_jwt(insights_jwt)
-    if not decoded_insights_jwt:
-        raise AuthError(_("Invalid Insights JWT Token received."))
-    insights_secure_token = get_insights_secure_token(user)
-    insights_secure_token.token = insights_jwt
+def update_secure_token_status(secure_token, status, status_reason=""):
+    """Update the SecureToken status and status_reason."""
+    metadata = secure_token.metadata or {}
+    metadata["status"] = status
+    metadata["status_reason"] = status_reason
+    secure_token.metadata = metadata
+    secure_token.save()
+
+
+def update_secure_token_metadata(secure_token, decoded_insights_jwt):
+    """Update the SecureToken metadata based on the Insights Auth Token."""
     payload = decoded_insights_jwt["payload"]
-    insights_secure_token.metadata = {
-        "org_id": payload["organization"]["id"],
-        "account_number": payload["organization"]["account_number"],
-        "username": payload["preferred_username"],
-        "first_name": payload["given_name"],
-        "last_name": payload["family_name"],
-        "email": payload["email"],
-    }
-    insights_secure_token.expires_at = decoded_insights_jwt["expires_at"]
-    insights_secure_token.save()
-    data = {
-        "token_id": insights_secure_token.id,
-        "token_name": insights_secure_token.name,
-        "token_type": insights_secure_token.token_type,
-        "expires_at": insights_secure_token.expires_at,
-        "token_size": len(insights_secure_token.token),
-        "metadata": insights_secure_token.metadata,
-    }
-    return data
+    metadata = secure_token.metadata or {}
+    metadata.update(
+        {
+            "org_id": payload["organization"]["id"],
+            "account_number": payload["organization"]["account_number"],
+            "username": payload["preferred_username"],
+            "first_name": payload["given_name"],
+            "last_name": payload["family_name"],
+            "email": payload["email"],
+        }
+    )
+    secure_token.metadata = metadata
+    secure_token.expires_at = decoded_insights_jwt["expires_at"]
+    secure_token.save()
 
 
-def request_insights_jwt(user):
-    """Request Insights login authorization."""
+def insights_login_request(user):
+    """Request an Insights login authorization for the user."""
+    # we send the request for device authorization here, however, we can't block
+    # the API on waiting for the user to authorize it, so we kick off the
+    # insights_wait_for_authorization task asynchronously via celery.
     try:
-        insights_auth = InsightsAuth()
-        auth_request = insights_auth.request_auth()
+        auth_request = insights_request_auth()
         logger.info("Insights login authorization requested")
         logger.info(f"User Code: {auth_request['user_code']}")
         logger.info(f"Authorization URL: {auth_request['verification_uri_complete']}")
-        logger.info("Waiting for login authorization ...")
-        insights_jwt = insights_auth.wait_for_authorization()
-        logger.info("Login authorization successful.")
-        return insights_jwt
+        insights_secure_token = get_insights_secure_token(user)
+        clear_insights_auth_token(insights_secure_token)
+        update_secure_token_status(insights_secure_token, "PENDING")
+
+        data = {
+            "status": insights_secure_token.metadata["status"],
+            "user_code": auth_request["user_code"],
+            "verification_uri": auth_request["verification_uri"],
+            "verification_uri_complete": auth_request["verification_uri_complete"],
+        }
+
+        insights_wait_for_authorization.delay(
+            insights_secure_token.id,
+            auth_request["device_code"],
+            auth_request["interval"],
+            auth_request["expires_in"],
+        )
+
+        return data
     except InsightsAuthError as err:
         logger.error(_(err.message))
-        raise err
+        raise AuthError(err.message)
+
+
+def insights_auth_status(user):
+    """Return the Insights Authentication status for the user."""
+    insights_secure_token = get_insights_secure_token(user)
+    metadata = insights_secure_token.metadata
+    if metadata:
+        data = {
+            "status": metadata["status"],
+            "metadata": metadata,
+        }
+    else:
+        data = {
+            "status": "INVALID",
+        }
+    return data
 
 
 def get_insights_secure_token(user):
@@ -123,7 +157,6 @@ def get_insights_secure_token(user):
             f"Using {secure_token.token_type} Token {secure_token.name}"
             f" for user {user.username}, Token id: {secure_token.id}"
         )
-    clear_insights_auth_token(secure_token)
     return secure_token
 
 
@@ -154,145 +187,158 @@ def get_sso_endpoint(endpoint):
     return config[endpoint]
 
 
-class InsightsAuth:
-    """Implement the Insights Device Authorization workflow."""
+def insights_request_auth():
+    """Initialize an Insights a device authorization workflow request.
 
-    def __init__(self):
-        self.auth_request = None
-        self.token_response = None
-        self.auth_token = None
+    :returns: authorization request object
+    """
+    auth_request = None
 
-    def request_auth(self):
-        """Initialize a device authorization workflow request.
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    params = {
+        "grant_type": GRANT_TYPE,
+        "scope": INSIGHTS_SCOPE,
+        "client_id": DISCOVERY_CLIENT_ID,
+    }
+    try:
+        device_auth_endpoint = get_sso_endpoint(DEVICE_AUTH_ENDPOINT_KEY)
+        logger.info(_(messages.INSIGHTS_LOGIN_REQUEST), device_auth_endpoint)
+        response = requests.post(
+            device_auth_endpoint,
+            headers=headers,
+            data=params,
+            timeout=settings.QUIPUCORDS_AUTH_INSIGHTS_TIMEOUT,
+        )
+    except ConnectionError as err:
+        raise InsightsAuthError(_(messages.INSIGHTS_LOGIN_REQUEST_FAILED % err))
+    except BaseHTTPError as err:
+        raise InsightsAuthError(_(messages.INSIGHTS_LOGIN_REQUEST_FAILED % err))
 
-        :returns: authorization request object
-        """
-        self.auth_request = None
+    if response.status_code == http.HTTPStatus.OK:
+        auth_request = response.json()
+        logger.debug(_(messages.INSIGHTS_RESPONSE), device_auth_endpoint, auth_request)
+    else:
+        logger.debug(_(messages.INSIGHTS_RESPONSE), device_auth_endpoint, response.text)
+        raise InsightsAuthError(
+            _(messages.INSIGHTS_LOGIN_REQUEST_FAILED % response.reason)
+        )
 
+    return auth_request
+
+
+@celery.shared_task()
+@transaction.atomic
+def insights_wait_for_authorization(secure_token_id, device_code, interval, expires_in):  # noqa: C901 PLR0911 PLR0912
+    """Wait for the user to log in and authorize the Insights authorization request.
+
+    Updates the Insights Authentication SecureToken.
+    """
+    try:
+        insights_auth_token = SecureToken.objects.get(id=secure_token_id)
+    except ObjectDoesNotExist:
+        logger.error(
+            _(
+                "Invalid Insights SecureToken id %s specified,"
+                " cannot wait for authorization."
+            )
+            % secure_token_id
+        )
+        return
+
+    elapsed_time = 0
+    auth_token = None
+
+    insights_auth_token.status = "PENDING"
+
+    token_endpoint = None
+    while not auth_token:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         params = {
             "grant_type": GRANT_TYPE,
-            "scope": INSIGHTS_SCOPE,
             "client_id": DISCOVERY_CLIENT_ID,
+            "device_code": device_code,
         }
         try:
-            device_auth_endpoint = get_sso_endpoint(DEVICE_AUTH_ENDPOINT_KEY)
-            logger.info(_(messages.INSIGHTS_LOGIN_REQUEST), device_auth_endpoint)
+            if not token_endpoint:
+                token_endpoint = get_sso_endpoint(ENDPOINT_KEY)
+            logger.debug(_(messages.INSIGHTS_LOGIN_VERIFYING), token_endpoint)
             response = requests.post(
-                device_auth_endpoint,
+                token_endpoint,
                 headers=headers,
                 data=params,
                 timeout=settings.QUIPUCORDS_AUTH_INSIGHTS_TIMEOUT,
             )
         except ConnectionError as err:
-            raise InsightsAuthError(_(messages.INSIGHTS_LOGIN_REQUEST_FAILED % err))
+            update_secure_token_status(
+                insights_auth_token,
+                "FAILED",
+                _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % err),
+            )
+            return
         except BaseHTTPError as err:
-            raise InsightsAuthError(_(messages.INSIGHTS_LOGIN_REQUEST_FAILED % err))
+            update_secure_token_status(
+                insights_auth_token,
+                "FAILED",
+                _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % err),
+            )
+            return
 
         if response.status_code == http.HTTPStatus.OK:
-            self.auth_request = response.json()
-            logger.debug(
-                _(messages.INSIGHTS_RESPONSE), device_auth_endpoint, self.auth_request
-            )
+            token_response = response.json()
+            insights_jwt = token_response["access_token"]
+            decoded_insights_jwt = decode_jwt(insights_jwt)
+            if not decoded_insights_jwt:
+                update_secure_token_status(
+                    insights_auth_token, "FAILED", _(messages.INSIGHTS_INVALID_TOKEN)
+                )
+                return
+            insights_auth_token.token = insights_jwt
+            update_secure_token_metadata(insights_auth_token, decoded_insights_jwt)
+            update_secure_token_status(insights_auth_token, "VALID")
+            return
+        if response.status_code == http.HTTPStatus.BAD_REQUEST:
+            token_response = response.json()
+            response_error = token_response.get("error")
+            if response_error == "expired_token":
+                logger.debug(
+                    _(messages.INSIGHTS_RESPONSE), token_endpoint, response.text
+                )
+                update_secure_token_status(
+                    insights_auth_token,
+                    "FAILED",
+                    _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT),
+                )
+                return
+            if response_error != "authorization_pending":
+                logger.debug(
+                    _(messages.INSIGHTS_RESPONSE), token_endpoint, response.text
+                )
+                update_secure_token_status(
+                    insights_auth_token,
+                    "FAILED",
+                    _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % response.reason),
+                )
+                return
+            logger.debug(_(messages.INSIGHTS_RESPONSE), token_endpoint, token_response)
         else:
-            logger.debug(
-                _(messages.INSIGHTS_RESPONSE), device_auth_endpoint, response.text
+            logger.info(_(messages.INSIGHTS_RESPONSE), token_endpoint, response.text)
+            logger.debug(_(messages.INSIGHTS_RESPONSE), token_endpoint, response.text)
+            update_secure_token_status(
+                insights_auth_token,
+                "FAILED",
+                _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % response.reason),
             )
-            raise InsightsAuthError(
-                _(messages.INSIGHTS_LOGIN_REQUEST_FAILED % response.reason)
+            return
+
+        time.sleep(interval)
+        elapsed_time += interval
+        if elapsed_time > expires_in:
+            update_secure_token_status(
+                insights_auth_token,
+                "FAILED",
+                _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT),
             )
+            return
 
-        return self.auth_request
-
-    def wait_for_authorization(self):  # noqa: C901 PLR0912
-        """Wait for the user to log in and authorize the request.
-
-        :returns: user JWT token
-        """
-        if self.auth_request:
-            device_code = self.auth_request["device_code"]
-            interval = self.auth_request.get("interval", 5)  # SSO default
-            expires_in = self.auth_request.get("expires_in", 600)  # SSO default
-
-            elapsed_time = 0
-            self.auth_token = None
-
-            token_endpoint = None
-            while not self.auth_token:
-                headers = {"Content-Type": "application/x-www-form-urlencoded"}
-                params = {
-                    "grant_type": GRANT_TYPE,
-                    "client_id": DISCOVERY_CLIENT_ID,
-                    "device_code": device_code,
-                }
-                try:
-                    if not token_endpoint:
-                        token_endpoint = get_sso_endpoint(ENDPOINT_KEY)
-                    logger.debug(_(messages.INSIGHTS_LOGIN_VERIFYING), token_endpoint)
-                    response = requests.post(
-                        token_endpoint,
-                        headers=headers,
-                        data=params,
-                        timeout=settings.QUIPUCORDS_AUTH_INSIGHTS_TIMEOUT,
-                    )
-                except ConnectionError as err:
-                    raise InsightsAuthError(
-                        _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % err)
-                    )
-                except BaseHTTPError as err:
-                    raise InsightsAuthError(
-                        _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % err)
-                    )
-
-                if response.status_code == http.HTTPStatus.OK:
-                    self.token_response = response.json()
-                    self.auth_token = self.token_response["access_token"]
-                    break
-                if response.status_code == http.HTTPStatus.BAD_REQUEST:
-                    self.token_response = response.json()
-                    response_error = self.token_response.get("error")
-                    if response_error == "expired_token":
-                        logger.debug(
-                            _(messages.INSIGHTS_RESPONSE),
-                            token_endpoint,
-                            response.text,
-                        )
-                        raise InsightsAuthError(
-                            _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT)
-                        )
-                    if response_error != "authorization_pending":
-                        logger.debug(
-                            _(messages.INSIGHTS_RESPONSE),
-                            token_endpoint,
-                            response.text,
-                        )
-                        raise InsightsAuthError(
-                            _(
-                                messages.INSIGHTS_LOGIN_VERIFICATION_FAILED
-                                % response.reason
-                            )
-                        )
-                    else:
-                        logger.debug(
-                            _(messages.INSIGHTS_RESPONSE),
-                            token_endpoint,
-                            self.token_response,
-                        )
-                else:
-                    logger.debug(
-                        _(messages.INSIGHTS_RESPONSE),
-                        token_endpoint,
-                        response.text,
-                    )
-                    raise InsightsAuthError(
-                        _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % response.reason)
-                    )
-
-                time.sleep(interval)
-                elapsed_time += interval
-                if elapsed_time > expires_in:
-                    raise InsightsAuthError(
-                        _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT)
-                    )
-
-        return self.auth_token
+    update_secure_token_status(insights_auth_token, "VALID")
+    return

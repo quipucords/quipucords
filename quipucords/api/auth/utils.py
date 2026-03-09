@@ -4,7 +4,7 @@ import base64
 import datetime
 import json
 
-# Number of dot seperated parts in a valid JWT token.
+# Number of dot separated parts in a valid JWT token.
 JWT_PARTS = 3
 
 
