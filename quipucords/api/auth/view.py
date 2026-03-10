@@ -8,12 +8,14 @@ from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
+from api import messages
 from api.auth.auth_insights import insights_auth_status, insights_login_request
 from api.auth.utils import AuthError
 
 logger = logging.getLogger(__name__)
 
 SUPPORTED_AUTH_TYPES = ["insights"]
+SUPPORTED_AUTH_TYPES_STR = ", ".join(SUPPORTED_AUTH_TYPES)
 
 
 @api_view(["post"])
@@ -24,18 +26,18 @@ def auth_login(request):
 
     if not auth_type:
         return Response(
-            _("Must specify an auth_type"), status=status.HTTP_400_BAD_REQUEST
+            {"detail": _(messages.AUTH_MUST_SPECIFY_TYPE)},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     if auth_type not in SUPPORTED_AUTH_TYPES:
         return Response(
-            _(
-                "Invalid auth_type %(auth_type)s specified,"
-                " must be one of %(supported_auth_types)s."
-            )
-            % {
-                "auth_type": auth_type,
-                "supported_auth_types": ", ".join(SUPPORTED_AUTH_TYPES),
+            {
+                "detail": _(messages.AUTH_INVALID_AUTH_TYPE)
+                % {
+                    "auth_type": auth_type,
+                    "supported_auth_types": SUPPORTED_AUTH_TYPES_STR,
+                }
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -57,18 +59,18 @@ def auth_status(request):
 
     if not auth_type:
         return Response(
-            _("Must specify an auth_type"), status=status.HTTP_400_BAD_REQUEST
+            {"detail": _(messages.AUTH_MUST_SPECIFY_TYPE)},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     if auth_type not in SUPPORTED_AUTH_TYPES:
         return Response(
-            _(
-                "Invalid auth_type %(auth_type)s specified,"
-                " must be one of %(supported_auth_types)s."
-            )
-            % {
-                "auth_type": auth_type,
-                "supported_auth_types": ", ".join(SUPPORTED_AUTH_TYPES),
+            {
+                "details": _(messages.AUTH_INVALID_AUTH_TYPE)
+                % {
+                    "auth_type": auth_type,
+                    "supported_auth_types": SUPPORTED_AUTH_TYPES_STR,
+                }
             },
             status=status.HTTP_400_BAD_REQUEST,
         )

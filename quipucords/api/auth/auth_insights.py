@@ -324,7 +324,6 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
                 return
             logger.debug(_(messages.INSIGHTS_RESPONSE), token_endpoint, token_response)
         else:
-            logger.info(_(messages.INSIGHTS_RESPONSE), token_endpoint, response.text)
             logger.debug(_(messages.INSIGHTS_RESPONSE), token_endpoint, response.text)
             update_secure_token_status(
                 insights_auth_token,
