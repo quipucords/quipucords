@@ -9,7 +9,7 @@ JWT_PARTS = 3
 
 
 class AuthError(Exception):
-    """Class for Insights device authorization errors."""
+    """Class for /auth authentication errors."""
 
     def __init__(self, message, *args):
         """Take message as mandatory attribute."""

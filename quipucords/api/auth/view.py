@@ -9,12 +9,12 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from api import messages
-from api.auth.auth_insights import insights_auth_status, insights_login_request
+from api.auth.auth_lightspeed import lightspeed_auth_status, lightspeed_login_request
 from api.auth.utils import AuthError
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_AUTH_TYPES = ["insights"]
+SUPPORTED_AUTH_TYPES = ["lightspeed"]
 SUPPORTED_AUTH_TYPES_STR = ", ".join(SUPPORTED_AUTH_TYPES)
 
 
@@ -43,7 +43,7 @@ def auth_login(request):
         )
 
     try:
-        data = insights_login_request(request.user)
+        data = lightspeed_login_request(request.user)
     except AuthError as err:
         return Response(
             {"detail": err.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -76,7 +76,7 @@ def auth_status(request):
         )
 
     try:
-        data = insights_auth_status(request.user)
+        data = lightspeed_auth_status(request.user)
     except AuthError as err:
         return Response(
             {"detail": err.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
