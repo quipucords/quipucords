@@ -247,12 +247,12 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
         return
 
     elapsed_time = 0
-    auth_token = None
+    insights_jwt = None
 
     update_secure_token_status(insights_auth_token, AuthStatus.PENDING)
 
     token_endpoint = None
-    while not auth_token:
+    while not insights_jwt:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         params = {
             "grant_type": GRANT_TYPE,
@@ -296,6 +296,7 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
                 )
                 return
             insights_auth_token.token = insights_jwt
+            insights_auth_token.save()
             update_secure_token_metadata(insights_auth_token, decoded_insights_jwt)
             update_secure_token_status(insights_auth_token, AuthStatus.VALID)
             return
@@ -341,6 +342,3 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
                 _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT),
             )
             return
-
-    update_secure_token_status(insights_auth_token, AuthStatus.VALID)
-    return
