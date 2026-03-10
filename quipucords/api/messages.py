@@ -156,6 +156,7 @@ AUTH_INVALID_AUTH_TYPE = (
 INSIGHTS_NOT_LOGGED_IN = "Must first login to authenticate"
 INSIGHTS_INVALID_TOKEN = "Invalid Insights Token received"
 INSIGHTS_TOKEN_EXPIRED = "Authorization token expired, please re-login to Insights"
+INSIGHTS_TOKEN_EXPIRED_FOR_USER = "Insights Authorization token expired for user %s"
 INSIGHTS_TOKEN_CORRUPT = "Corrupt Authorization token, please re-login to Insights"
 INSIGHTS_TOKEN_INVALID = "Invalid Authorization token, please re-login to Insights"
 INSIGHTS_SSO_CONFIG_QUERY = "Querying Insights SSO configuration at %s for %s"

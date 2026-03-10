@@ -127,9 +127,31 @@ def insights_login_request(user):
         raise AuthError(err.message)
 
 
+def insights_token_check_expiration(insights_secure_token):
+    """Check and Update the Insights SecureToken status if expired."""
+    if insights_secure_token.metadata:
+        metadata = insights_secure_token.metadata
+        status = metadata["status"]
+        if status == AuthStatus.VALID.value:
+            if insights_secure_token.is_expired():
+                if insights_secure_token.user:
+                    logger.info(
+                        _(
+                            messages.INSIGHTS_TOKEN_EXPIRED_FOR_USER
+                            % insights_secure_token.user.username
+                        )
+                    )
+                update_secure_token_status(
+                    insights_secure_token,
+                    AuthStatus.EXPIRED,
+                    _(messages.INSIGHTS_TOKEN_EXPIRED),
+                )
+
+
 def insights_auth_status(user):
     """Return the Insights Authentication status for the user."""
     insights_secure_token = get_insights_secure_token(user)
+    insights_token_check_expiration(insights_secure_token)
     metadata = insights_secure_token.metadata
     if metadata:
         data = {
