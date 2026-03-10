@@ -15,6 +15,7 @@ from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
 from api.auth.utils import AuthError, decode_jwt
+from api.common.enumerators import AuthStatus
 from api.secure_token.model import SecureToken
 from quipucords.settings import QUIPUCORDS_AUTH_INSIGHTS_TIMEOUT
 
@@ -67,7 +68,7 @@ class InsightsAuthError(Exception):
 def update_secure_token_status(secure_token, status, status_reason=""):
     """Update the SecureToken status and status_reason."""
     metadata = secure_token.metadata or {}
-    metadata["status"] = status
+    metadata["status"] = status.value
     metadata["status_reason"] = status_reason
     secure_token.metadata = metadata
     secure_token.save()
@@ -104,7 +105,7 @@ def insights_login_request(user):
         logger.info(f"Authorization URL: {auth_request['verification_uri_complete']}")
         insights_secure_token = get_insights_secure_token(user)
         clear_insights_auth_token(insights_secure_token)
-        update_secure_token_status(insights_secure_token, "PENDING")
+        update_secure_token_status(insights_secure_token, AuthStatus.PENDING)
 
         data = {
             "status": insights_secure_token.metadata["status"],
@@ -137,7 +138,7 @@ def insights_auth_status(user):
         }
     else:
         data = {
-            "status": "INVALID",
+            "status": AuthStatus.MISSING.value,
         }
     return data
 
@@ -248,7 +249,7 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
     elapsed_time = 0
     auth_token = None
 
-    insights_auth_token.status = "PENDING"
+    update_secure_token_status(insights_auth_token, AuthStatus.PENDING)
 
     token_endpoint = None
     while not auth_token:
@@ -271,14 +272,14 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
         except ConnectionError as err:
             update_secure_token_status(
                 insights_auth_token,
-                "FAILED",
+                AuthStatus.FAILED,
                 _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % err),
             )
             return
         except BaseHTTPError as err:
             update_secure_token_status(
                 insights_auth_token,
-                "FAILED",
+                AuthStatus.FAILED,
                 _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % err),
             )
             return
@@ -289,12 +290,14 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
             decoded_insights_jwt = decode_jwt(insights_jwt)
             if not decoded_insights_jwt:
                 update_secure_token_status(
-                    insights_auth_token, "FAILED", _(messages.INSIGHTS_INVALID_TOKEN)
+                    insights_auth_token,
+                    AuthStatus.FAILED,
+                    _(messages.INSIGHTS_INVALID_TOKEN),
                 )
                 return
             insights_auth_token.token = insights_jwt
             update_secure_token_metadata(insights_auth_token, decoded_insights_jwt)
-            update_secure_token_status(insights_auth_token, "VALID")
+            update_secure_token_status(insights_auth_token, AuthStatus.VALID)
             return
         if response.status_code == http.HTTPStatus.BAD_REQUEST:
             token_response = response.json()
@@ -305,7 +308,7 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
                 )
                 update_secure_token_status(
                     insights_auth_token,
-                    "FAILED",
+                    AuthStatus.FAILED,
                     _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT),
                 )
                 return
@@ -315,7 +318,7 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
                 )
                 update_secure_token_status(
                     insights_auth_token,
-                    "FAILED",
+                    AuthStatus.FAILED,
                     _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % response.reason),
                 )
                 return
@@ -325,7 +328,7 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
             logger.debug(_(messages.INSIGHTS_RESPONSE), token_endpoint, response.text)
             update_secure_token_status(
                 insights_auth_token,
-                "FAILED",
+                AuthStatus.FAILED,
                 _(messages.INSIGHTS_LOGIN_VERIFICATION_FAILED % response.reason),
             )
             return
@@ -335,10 +338,10 @@ def insights_wait_for_authorization(secure_token_id, device_code, interval, expi
         if elapsed_time > expires_in:
             update_secure_token_status(
                 insights_auth_token,
-                "FAILED",
+                AuthStatus.FAILED,
                 _(messages.INSIGHTS_LOGIN_VERIFICATION_TIMEOUT),
             )
             return
 
-    update_secure_token_status(insights_auth_token, "VALID")
+    update_secure_token_status(insights_auth_token, AuthStatus.VALID)
     return
