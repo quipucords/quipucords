@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from api.secure_token.model import SecureToken
 from quipucords.user import make_random_password
 
-TOKEN_TYPE_INSIGHTS = "insights-jwt"
+TOKEN_TYPE_LIGHTSPEED = "lightspeed-jwt"
 
 User = get_user_model()
 
@@ -55,7 +55,7 @@ class TestSecureToken:
     def test_create_with_duplicate_name(self, faker):
         """Test create fails with duplicate token name."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         SecureToken.objects.create(name=token_name, token_type=token_type)
         with pytest.raises(ValidationError) as validation_error:
             SecureToken.objects.create(name=token_name, token_type=token_type)
@@ -65,7 +65,7 @@ class TestSecureToken:
     def test_create_with_empty_token(self, faker):
         """Test create succeeds with empty token."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token=None, token_type=token_type
         )
@@ -75,7 +75,7 @@ class TestSecureToken:
     def test_create_with_empty_metadata(self, faker):
         """Test create succeeds with empty metadata."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, metadata=None, token_type=token_type
         )
@@ -85,7 +85,7 @@ class TestSecureToken:
     def test_create_with_empty_token_and_metadata(self, faker):
         """Test create succeeds with empty token and metadata."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token=None, metadata=None, token_type=token_type
         )
@@ -96,7 +96,7 @@ class TestSecureToken:
     def test_create(self, faker):
         """Test create a SecureToken - Happy Path."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type
         )
@@ -133,7 +133,7 @@ class TestUserSecureToken:
     def test_create_with_duplicate_name(self, faker, test_user):
         """Test create fails with duplicate token name."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -146,7 +146,7 @@ class TestUserSecureToken:
 
     def test_delete_user_deletes_secure_tokens(self, faker, test_user):
         """Test that deleting a user also deletes the user's secure tokens."""
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         token1_name = faker.slug()
         token2_name = faker.slug()
         SecureToken.objects.create(
@@ -164,11 +164,11 @@ class TestUserSecureToken:
     ):
         """Test that makes sure encrypted fields are returned unencrypted."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         token = test_jwt
         token_metadata = {
-            "insights_user": faker.pyint(min_value=101),
-            "insights_group": faker.pyint(min_value=101),
+            "lightspeed_user": faker.pyint(min_value=101),
+            "lightspeed_group": faker.pyint(min_value=101),
         }
         secure_token = SecureToken.objects.create(
             name=token_name,
@@ -184,7 +184,7 @@ class TestUserSecureToken:
     def test_create(self, faker, test_user):
         """Test create a user SecureToken - Happy Path."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -196,7 +196,7 @@ class TestUserSecureToken:
     def test_create_system_and_user_tokens_with_same_name(self, faker, test_user):
         """Test user and system can have same-named SecureToken."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         user_secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -210,7 +210,7 @@ class TestUserSecureToken:
     def test_name_uniqueness_with_both_user_and_system(self, faker, test_user):
         """Test name uniqueness when user and system have same-named SecureToken."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         user_secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -239,7 +239,7 @@ class TestUserSecureTokenExpiration:
     def test_create_default_expiration(self, faker, test_user):
         """Test create a user SecureToken - Happy Path."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -249,7 +249,7 @@ class TestUserSecureTokenExpiration:
     def test_create_set_expiration_future(self, faker, test_user):
         """Test future expiration date."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -260,7 +260,7 @@ class TestUserSecureTokenExpiration:
     def test_create_set_expiration_past(self, faker, test_user):
         """Test past expiration date."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -272,7 +272,7 @@ class TestUserSecureTokenExpiration:
     def test_clear_expiration(self, faker, test_user):
         """Test clear expiration of SecureToken."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name,
             token_type=token_type,
@@ -292,7 +292,7 @@ class TestSecureTokenRepresentation:
     def test_string_representation(self, faker):
         """Test string representation for a system SecureToken."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type
         )
@@ -308,7 +308,7 @@ class TestSecureTokenRepresentation:
     def test_user_token_string_representation(self, faker, test_user):
         """Test string representation for a user SecureToken."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
@@ -325,7 +325,7 @@ class TestSecureTokenRepresentation:
     def test_user_token_string_representation_with_expiration(self, faker, test_user):
         """Test string representation for a user SecureToken with expiration."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         expires_at = datetime.now(UTC) + timedelta(hours=4)
         secure_token = SecureToken.objects.create(
             name=token_name,
@@ -347,7 +347,7 @@ class TestSecureTokenRepresentation:
     def test_user_token_safe_dict(self, faker, test_user):
         """Test user token safe dictionary does not include encrypted attributes."""
         token_name = faker.slug()
-        token_type = TOKEN_TYPE_INSIGHTS
+        token_type = TOKEN_TYPE_LIGHTSPEED
         secure_token = SecureToken.objects.create(
             name=token_name, token_type=token_type, user=test_user
         )
