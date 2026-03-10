@@ -44,3 +44,13 @@ class ReportCannotDownloadReason(Enum):
     NO_DEPLOYMENT = "no_deployment"
     STATUS_PENDING = "status_pending"
     STATUS_FAILED = "status_failed"
+
+
+class AuthStatus(Enum):
+    """Supported Auth API statuses."""
+
+    PENDING = "pending"
+    VALID = "valid"
+    FAILED = "failed"
+    EXPIRED = "expired"
+    MISSING = "missing"
