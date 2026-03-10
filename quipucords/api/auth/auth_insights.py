@@ -34,24 +34,6 @@ OPENID_CONFIG_ENDPOINT = (
 DEVICE_AUTH_ENDPOINT_KEY = "device_authorization_endpoint"
 ENDPOINT_KEY = "token_endpoint"
 
-CONFIG_HOST_KEY = "host"
-CONFIG_PORT_KEY = "port"
-CONFIG_USE_HTTP = "use_http"
-CONFIG_SSL_VERIFY = "ssl_verify"
-CONFIG_SSO_HOST_KEY = "sso_host"
-
-DEFAULT_HOST_INSIGHTS_CONFIG = "console.redhat.com"
-DEFAULT_PORT_INSIGHTS_CONFIG = 443
-DEFAULT_USE_HTTP_INSIGHTS_CONFIG = False
-DEFAULT_SSO_HOST_INSIGHTS_CONFIG = "sso.redhat.com"
-
-DEFAULT_INSIGHTS_CONFIG = {
-    CONFIG_HOST_KEY: DEFAULT_HOST_INSIGHTS_CONFIG,
-    CONFIG_PORT_KEY: DEFAULT_PORT_INSIGHTS_CONFIG,
-    CONFIG_USE_HTTP: DEFAULT_USE_HTTP_INSIGHTS_CONFIG,
-    CONFIG_SSO_HOST_KEY: DEFAULT_SSO_HOST_INSIGHTS_CONFIG,
-}
-
 INSIGHTS_NAME = "insights-jwt-token"
 INSIGHTS_TYPE = "insights-jwt"
 
@@ -100,9 +82,11 @@ def insights_login_request(user):
     # insights_wait_for_authorization task asynchronously via celery.
     try:
         auth_request = insights_request_auth()
-        logger.info("Insights login authorization requested")
-        logger.info(f"User Code: {auth_request['user_code']}")
-        logger.info(f"Authorization URL: {auth_request['verification_uri_complete']}")
+        logger.info(f"Insights login authorization requested for {user.username}")
+        logger.debug(
+            f"Insights authorization URL for user {user.username}:"
+            f" {auth_request['verification_uri_complete']}"
+        )
         insights_secure_token = get_or_create_insights_secure_token(user)
         clear_insights_auth_token(insights_secure_token)
         update_secure_token_status(insights_secure_token, AuthStatus.PENDING)
@@ -172,6 +156,7 @@ def get_insights_secure_token(user) -> SecureToken | None:
         return user_secure_token.first()
     return None
 
+
 def get_or_create_insights_secure_token(user) -> SecureToken:
     """Get a SecureToken for the user."""
     secure_token, created = SecureToken.objects.get_or_create(
@@ -196,7 +181,7 @@ def clear_insights_auth_token(insights_auth_token: SecureToken):
 
 def get_sso_endpoint(endpoint):
     """Get the SSO OpenID Configuration endpoint."""
-    insights_sso_server = DEFAULT_INSIGHTS_CONFIG[CONFIG_SSO_HOST_KEY]
+    insights_sso_server = settings.QUIPUCORDS_INSIGHTS_SSO_HOST
     url = f"https://{insights_sso_server}{OPENID_CONFIG_ENDPOINT}"  # Always SSL
     try:
         logger.info(_(messages.INSIGHTS_SSO_CONFIG_QUERY), url, endpoint)
