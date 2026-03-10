@@ -103,7 +103,7 @@ def insights_login_request(user):
         logger.info("Insights login authorization requested")
         logger.info(f"User Code: {auth_request['user_code']}")
         logger.info(f"Authorization URL: {auth_request['verification_uri_complete']}")
-        insights_secure_token = get_insights_secure_token(user)
+        insights_secure_token = get_or_create_insights_secure_token(user)
         clear_insights_auth_token(insights_secure_token)
         update_secure_token_status(insights_secure_token, AuthStatus.PENDING)
 
@@ -151,34 +151,36 @@ def insights_token_check_expiration(insights_secure_token):
 def insights_auth_status(user):
     """Return the Insights Authentication status for the user."""
     insights_secure_token = get_insights_secure_token(user)
-    insights_token_check_expiration(insights_secure_token)
-    metadata = insights_secure_token.metadata
-    if metadata:
-        data = {
-            "status": metadata["status"],
-            "metadata": metadata,
-        }
-    else:
-        data = {
-            "status": AuthStatus.MISSING.value,
-        }
-    return data
+    auth_token_missing = {
+        "status": AuthStatus.MISSING.value,
+    }
+    if insights_secure_token:
+        insights_token_check_expiration(insights_secure_token)
+        metadata = insights_secure_token.metadata
+        if metadata:
+            return {
+                "status": metadata["status"],
+                "metadata": metadata,
+            }
+    return auth_token_missing
 
 
-def get_insights_secure_token(user):
+def get_insights_secure_token(user) -> SecureToken | None:
+    """Get the SecureToken for the user, None if it does not exist."""
+    user_secure_token = SecureToken.objects.filter(user=user)
+    if user_secure_token.exists():
+        return user_secure_token.first()
+    return None
+
+def get_or_create_insights_secure_token(user) -> SecureToken:
     """Get a SecureToken for the user."""
     secure_token, created = SecureToken.objects.get_or_create(
         name=INSIGHTS_NAME, token_type=INSIGHTS_TYPE, user=user
     )
     if created:
-        logger.info(
+        logger.debug(
             f"New {secure_token.token_type} Token {secure_token.name}"
             f" created for user {user.username}, Token id: {secure_token.id}"
-        )
-    else:
-        logger.info(
-            f"Using {secure_token.token_type} Token {secure_token.name}"
-            f" for user {user.username}, Token id: {secure_token.id}"
         )
     return secure_token
 
