@@ -21,8 +21,9 @@ from quipucords.settings import QUIPUCORDS_AUTH_LIGHTSPEED_TIMEOUT
 
 logger = getLogger(__name__)
 
-# At this time, we support a single Lightspeed JWT token for the logged in Discovery user.
-# So we use the single "lightspeed-jwt-token" SecureToken token for the user.
+# At this time, we support a single Lightspeed JWT token for the logged in
+# Discovery user. So we use the single "lightspeed-jwt-token" SecureToken
+# token for the user.
 
 DISCOVERY_CLIENT_ID = "discovery-client-id"
 LIGHTSPEED_REALM = "redhat-external"
@@ -226,9 +227,13 @@ def lightspeed_request_auth():
 
     if response.status_code == http.HTTPStatus.OK:
         auth_request = response.json()
-        logger.debug(_(messages.LIGHTSPEED_RESPONSE), device_auth_endpoint, auth_request)
+        logger.debug(
+            _(messages.LIGHTSPEED_RESPONSE), device_auth_endpoint, auth_request
+        )
     else:
-        logger.debug(_(messages.LIGHTSPEED_RESPONSE), device_auth_endpoint, response.text)
+        logger.debug(
+            _(messages.LIGHTSPEED_RESPONSE), device_auth_endpoint, response.text
+        )
         raise LightspeedAuthError(
             _(messages.LIGHTSPEED_LOGIN_REQUEST_FAILED % response.reason)
         )
@@ -238,7 +243,9 @@ def lightspeed_request_auth():
 
 @celery.shared_task()
 @transaction.atomic
-def lightspeed_wait_for_authorization(secure_token_id, device_code, interval, expires_in):  # noqa: C901 PLR0911 PLR0912
+def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
+    secure_token_id, device_code, interval, expires_in
+):
     """Wait for the user to log in and authorize the Lightspeed authorization request.
 
     Updates the Lightspeed Authentication SecureToken.
@@ -332,7 +339,9 @@ def lightspeed_wait_for_authorization(secure_token_id, device_code, interval, ex
                     _(messages.LIGHTSPEED_LOGIN_VERIFICATION_FAILED % response.reason),
                 )
                 return
-            logger.debug(_(messages.LIGHTSPEED_RESPONSE), token_endpoint, token_response)
+            logger.debug(
+                _(messages.LIGHTSPEED_RESPONSE), token_endpoint, token_response
+            )
         else:
             logger.debug(_(messages.LIGHTSPEED_RESPONSE), token_endpoint, response.text)
             update_secure_token_status(
