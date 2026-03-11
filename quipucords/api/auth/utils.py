@@ -36,9 +36,10 @@ def decode_jwt(jwt_token) -> dict | None:
     if len(jwt_token_parts) == JWT_PARTS:
         header = decode_jwt_part(jwt_token_parts[0])
         payload = decode_jwt_part(jwt_token_parts[1])
+        exp = payload.get("exp")
         expires_at = (
-            datetime.datetime.fromtimestamp(int(payload["exp"]), datetime.UTC)
-            if payload["exp"]
+            datetime.datetime.fromtimestamp(int(exp), datetime.UTC)
+            if exp is not None
             else None
         )
 
