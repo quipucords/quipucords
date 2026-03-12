@@ -146,7 +146,6 @@ COMMON_CHOICE_INV = "%s, is an invalid choice. Valid values are %s."
 COMMON_ID_INV = "The id must be an integer."
 
 # Authorization messages
-AUTH_MUST_BE_AUTHENTICATED = "Must be authenticated to access the Auth API."
 AUTH_MUST_SPECIFY_TYPE = "Must specify an auth_type"
 AUTH_INVALID_AUTH_TYPE = (
     "Invalid auth_type %(auth_type)s specified,"

@@ -151,11 +151,10 @@ def lightspeed_auth_status(user):
 
 
 def get_lightspeed_secure_token(user) -> SecureToken | None:
-    """Get the SecureToken for the user, None if it does not exist."""
-    user_secure_token = SecureToken.objects.filter(user=user)
-    if user_secure_token.exists():
-        return user_secure_token.first()
-    return None
+    """Get the Lightspeed SecureToken for the user, None if it does not exist."""
+    return SecureToken.objects.filter(
+        name=LIGHTSPEED_NAME, token_type=LIGHTSPEED_TYPE, user=user
+    ).first()
 
 
 def get_or_create_lightspeed_secure_token(user) -> SecureToken:
@@ -326,7 +325,7 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
                 update_secure_token_status(
                     lightspeed_auth_token,
                     AuthStatus.FAILED,
-                    _(messages.LIGHTSPEED_LOGIN_VERIFICATION_TIMEOUT),
+                    _(messages.LIGHTSPEED_TOKEN_EXPIRED),
                 )
                 return
             if response_error != "authorization_pending":
