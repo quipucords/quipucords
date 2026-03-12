@@ -52,13 +52,6 @@ def auth_valid_request(request, auth_type) -> tuple[bool, dict, int]:
             status.HTTP_400_BAD_REQUEST,
         )
 
-    if not request.user or not request.user.is_authenticated:
-        return (
-            False,
-            {"detail": _(messages.AUTH_MUST_BE_AUTHENTICATED)},
-            status.HTTP_401_UNAUTHORIZED,
-        )
-
     return True, {}, status.HTTP_200_OK
 
 
@@ -86,7 +79,7 @@ def unauthorized_auth_response() -> OpenApiResponse:
             OpenApiExample(
                 "Unauthorized Auth request",
                 description="Unauthorized Auth request response",
-                value={"detail": _(messages.AUTH_MUST_BE_AUTHENTICATED)},
+                value={"detail": "Authentication credentials were not provided."},
             )
         ],
     )
