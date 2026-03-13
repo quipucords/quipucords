@@ -1,4 +1,5 @@
 {
+  "prHourlyLimit": 20,
   "packageRules": [
     {
       "description": "Tekton pipelines and tasks",
