@@ -12,6 +12,13 @@ class AuthLoginResponseSerializer(serializers.Serializer):
     verification_uri_complete = serializers.CharField(required=False)
 
 
+class AuthLogoutResponseSerializer(serializers.Serializer):
+    """Define a serializer for auth logout response."""
+
+    status = serializers.CharField(required=True)
+    status_reason = serializers.CharField(required=False)
+
+
 class AuthStatusResponseSerializer(serializers.Serializer):
     """Define a Serializer for successful auth status response."""
 

@@ -112,6 +112,18 @@ def lightspeed_login_request(user):
         raise AuthError(err.message)
 
 
+def lightspeed_logout_request(user):
+    """Request a Lightspeed logout for the user."""
+    lightspeed_secure_token = get_lightspeed_secure_token(user)
+    data = dict(status="successful")
+    if lightspeed_secure_token:
+        lightspeed_secure_token.delete()
+        data["status_reason"] = _(messages.LIGHTSPEED_LOGOUT_SUCCESSFUL)
+    else:
+        data["status_reason"] = _(messages.LIGHTSPEED_ALREADY_LOGGED_OUT)
+    return data
+
+
 def lightspeed_token_check_expiration(lightspeed_secure_token):
     """Check and Update the Lightspeed SecureToken status if expired."""
     if lightspeed_secure_token.metadata:

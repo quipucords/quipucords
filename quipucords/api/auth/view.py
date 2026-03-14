@@ -16,9 +16,14 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
 from api import messages
-from api.auth.auth_lightspeed import lightspeed_auth_status, lightspeed_login_request
+from api.auth.auth_lightspeed import (
+    lightspeed_auth_status,
+    lightspeed_login_request,
+    lightspeed_logout_request,
+)
 from api.auth.serializer import (
     AuthLoginResponseSerializer,
+    AuthLogoutResponseSerializer,
     AuthStatusResponseSerializer,
     FailedAuthRequestResponse,
 )
@@ -128,6 +133,54 @@ def auth_login(request):
 
     try:
         data = lightspeed_login_request(request.user)
+    except AuthError as err:
+        return Response(
+            {"detail": err.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    return Response(data, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="auth_type",
+            type=OpenApiTypes.STR,
+            enum=SUPPORTED_AUTH_TYPES,
+            description="The type of auth provider to logout from (required)",
+            required=True,
+            location=OpenApiParameter.QUERY,
+        ),
+    ],
+    responses={
+        (200, "application/json"): OpenApiResponse(
+            description="Successful logout response",
+            response=AuthLogoutResponseSerializer(),
+            examples=[
+                OpenApiExample(
+                    "Lightspeed Auth logout response",
+                    value={
+                        "status": "successful",
+                        "status_reason": "Already logged out",
+                    },
+                )
+            ],
+        ),
+        (400, "application/json"): bad_auth_response(),
+        (401, "application/json"): unauthorized_auth_response(),
+    },
+)
+@api_view(["post"])
+@renderer_classes([JSONRenderer])
+def auth_logout(request):
+    """Do an Authentication Logout for the current user."""
+    auth_type = request.GET.get("auth_type", None)
+
+    is_valid, response_data, response_status = auth_valid_request(request, auth_type)
+    if not is_valid:
+        return Response(response_data, status=response_status)
+
+    try:
+        data = lightspeed_logout_request(request.user)
     except AuthError as err:
         return Response(
             {"detail": err.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
