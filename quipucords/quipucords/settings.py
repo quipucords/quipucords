@@ -608,3 +608,24 @@ QUIPUCORDS_CACHED_REPORTS_DATA_DIR = Path(
         "QUIPUCORDS_CACHED_REPORTS_DATA_DIR", str(DEFAULT_DATA_DIR / "cached_reports")
     )
 )
+
+# Let define settings relevant to the /auth endpoint.
+QUIPUCORDS_AUTH_TIMEOUT = env.int("QUIPUCORDS_AUTH_TIMEOUT", default=30)
+QUIPUCORDS_AUTH_LIGHTSPEED_TIMEOUT = env.int(
+    "QUIPUCORDS_AUTH_LIGHTSPEED_TIMEOUT", default=QUIPUCORDS_AUTH_TIMEOUT
+)
+
+# Settings for authenticating to and accessing console.redhat.com
+QUIPUCORDS_LIGHTSPEED_HOST = env.str(
+    "QUIPUCORDS_LIGHTSPEED_HOST", default="console.redhat.com"
+)
+QUIPUCORDS_LIGHTSPEED_PORT = env.int("QUIPUCORDS_LIGHTSPEED_PORT", default=443)
+QUIPUCORDS_LIGHTSPEED_USE_HTTP = env.bool(
+    "QUIPUCORDS_LIGHTSPEED_USE_HTTP", default=False
+)
+QUIPUCORDS_LIGHTSPEED_SSL_VERIFY = env.bool(
+    "QUIPUCORDS_LIGHTSPEED_SSL_VERIFY", default=True
+)
+QUIPUCORDS_LIGHTSPEED_SSO_HOST = env.str(
+    "QUIPUCORDS_LIGHTSPEED_SSO_HOST", default="sso.redhat.com"
+)

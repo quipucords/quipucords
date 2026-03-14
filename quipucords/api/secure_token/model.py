@@ -15,9 +15,9 @@ from api.encrypted_fields import EncryptedCharField, EncryptedDictField
 class SecureToken(BaseModel):
     """Model for storing secure tokens."""
 
-    INSIGHTS = "insights-jwt"
+    LIGHTSPEED = "lightspeed-jwt"
 
-    TOKEN_TYPES = ((INSIGHTS, INSIGHTS),)
+    TOKEN_TYPES = ((LIGHTSPEED, LIGHTSPEED),)
 
     name = models.CharField(max_length=64, null=False, blank=False)
     token_type = models.CharField(
