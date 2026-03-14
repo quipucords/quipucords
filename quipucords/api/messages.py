@@ -145,6 +145,34 @@ COMMON_CHOICE_BLANK = "This field may not be blank. Valid values are %s."
 COMMON_CHOICE_INV = "%s, is an invalid choice. Valid values are %s."
 COMMON_ID_INV = "The id must be an integer."
 
+# Authorization messages
+AUTH_MUST_SPECIFY_TYPE = "Must specify an auth_type"
+AUTH_INVALID_AUTH_TYPE = (
+    "Invalid auth_type %(auth_type)s specified,"
+    " must be one of %(supported_auth_types)s."
+)
+
+# Lightspeed Authorization messages
+LIGHTSPEED_NOT_LOGGED_IN = "Must first login to authenticate"
+LIGHTSPEED_INVALID_TOKEN = "Invalid Lightspeed Token received"
+LIGHTSPEED_TOKEN_EXPIRED = "Authorization token expired, please re-login to Lightspeed"
+LIGHTSPEED_TOKEN_EXPIRED_FOR_USER = "Lightspeed Authorization token expired for user %s"
+LIGHTSPEED_TOKEN_CORRUPT = "Corrupt Authorization token, please re-login to Lightspeed"
+LIGHTSPEED_TOKEN_INVALID = "Invalid Authorization token, please re-login to Lightspeed"
+LIGHTSPEED_SSO_CONFIG_QUERY = "Querying Lightspeed SSO configuration at %s for %s"
+LIGHTSPEED_SSO_QUERY_FAILED = (
+    "Failed to query the Lightspeed SSO configuration: missing %s"
+)
+LIGHTSPEED_AUTH_ERROR = "Authorization failed, please re-login to Lightspeed"
+LIGHTSPEED_LOGIN_REQUEST = "Requesting Login authorization from %s"
+LIGHTSPEED_LOGIN_REQUEST_FAILED = "Failed to request login authorization: %s"
+LIGHTSPEED_LOGIN_VERIFYING = "Verifying Login authorization at %s"
+LIGHTSPEED_LOGIN_VERIFICATION_FAILED = "Failed to verify Login authorization: %s"
+LIGHTSPEED_LOGIN_VERIFICATION_TIMEOUT = "Time-out while waiting for Login authorization"
+LIGHTSPEED_RESPONSE = "Response from %s: %s"
+LIGHTSPEED_LOGOUT_SUCCESSFUL = "Logged out successfully"
+LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
+
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."
 REPORT_DEPLOYMENTS_NOT_CREATED = (
