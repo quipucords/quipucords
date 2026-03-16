@@ -20,7 +20,12 @@ app = Celery("quipucords")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Load task modules from all registered Django apps.
-task_packages = ["scanner", "scanner.satellite.six", "api.deployments_report.tasks"]
+task_packages = [
+    "scanner",
+    "scanner.satellite.six",
+    "api.deployments_report.tasks",
+    "api.publish.tasks",
+]
 app.autodiscover_tasks(task_packages)
 
 
