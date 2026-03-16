@@ -180,3 +180,15 @@ REPORT_INSIGHTS_NOT_GENERATED = (
     " there were 0 valid hosts. See server logs."
 )
 REPORT_UNSUPPORTED_REPORT_TYPE = "Unsupported report_type %(report_type)s specified."
+
+# Publish messages
+PUBLISH_NO_AUTH_TOKEN = "No authentication token found. Please log in first."
+PUBLISH_TOKEN_EXPIRED = "Authentication token has expired. Please log in again."
+PUBLISH_PAYLOAD_FAILED = "Failed to generate report payload: %s"
+PUBLISH_CONNECTION_ERROR = "Connection error: %s"
+PUBLISH_AUTH_REJECTED = "Authentication rejected by server: %s"
+PUBLISH_CLIENT_ERROR = (
+    "Request rejected by ingress (%s): %s. This might be a bug in Discovery."
+)
+PUBLISH_SERVER_ERROR = "Ingress server error (%s): %s. Please try again later."
+PUBLISH_UNEXPECTED_RESPONSE = "Unexpected response (%s): %s"
