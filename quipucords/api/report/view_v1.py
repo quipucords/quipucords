@@ -13,9 +13,9 @@ from api import messages
 from api.aggregate_report.view import get_serialized_aggregate_report
 from api.deployments_report.view import build_cached_json_report
 from api.exceptions import FailedDependencyError
+from api.insights_report.payload import get_report as get_lightspeed_report
+from api.insights_report.payload import validate_deployment_report_status
 from api.insights_report.serializers import YupanaPayloadSerializer
-from api.insights_report.view import get_report as get_lightspeed_report
-from api.insights_report.view import validate_deployment_report_status
 from api.models import DeploymentsReport, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.serializers import (

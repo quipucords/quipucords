@@ -3,7 +3,7 @@
 from api.common.entities import ReportEntity
 from api.common.enumerators import LightspeedCannotPublishReason
 from api.exceptions import FailedDependencyError
-from api.insights_report.view import validate_deployment_report_status
+from api.insights_report.payload import validate_deployment_report_status
 from api.models import Report, SystemFingerprint
 
 
