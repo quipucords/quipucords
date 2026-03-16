@@ -24,7 +24,7 @@ from api.aggregate_report.view import (
     get_serialized_aggregate_report,
 )
 from api.deployments_report.view import deployments_report_and_status
-from api.insights_report.view import get_report, validate_deployment_report_status
+from api.insights_report.payload import get_report, validate_deployment_report_status
 from api.models import DeploymentsReport, InspectResult, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.report.serializer import InspectResultSerializer, ReportSerializer
