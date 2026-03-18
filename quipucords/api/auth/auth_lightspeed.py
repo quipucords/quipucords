@@ -14,7 +14,7 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
-from api.auth.utils import AuthError, decode_jwt
+from api.auth.utils import decode_jwt
 from api.common.enumerators import AuthStatus
 from api.secure_token.model import SecureToken
 from quipucords.settings import QUIPUCORDS_AUTH_LIGHTSPEED_TIMEOUT
@@ -108,8 +108,8 @@ def lightspeed_login_request(user):
 
         return data
     except LightspeedAuthError as err:
-        logger.error(_(err.message))
-        raise AuthError(err.message)
+        logger.error(err.message)
+        raise err
 
 
 def lightspeed_token_check_expiration(lightspeed_secure_token):
@@ -121,10 +121,8 @@ def lightspeed_token_check_expiration(lightspeed_secure_token):
             if lightspeed_secure_token.is_expired():
                 if lightspeed_secure_token.user:
                     logger.info(
-                        _(
-                            messages.LIGHTSPEED_TOKEN_EXPIRED_FOR_USER
-                            % lightspeed_secure_token.user.username
-                        )
+                        messages.LIGHTSPEED_TOKEN_EXPIRED_FOR_USER,
+                        lightspeed_secure_token.user.username,
                     )
                 update_secure_token_status(
                     lightspeed_secure_token,
@@ -133,7 +131,7 @@ def lightspeed_token_check_expiration(lightspeed_secure_token):
                 )
 
 
-def lightspeed_auth_status(user):
+def user_lightspeed_auth_status(user):
     """Return the Lightspeed Authentication status for the user."""
     lightspeed_secure_token = get_lightspeed_secure_token(user)
     auth_token_missing = {
@@ -184,7 +182,7 @@ def get_sso_endpoint(endpoint):
     lightspeed_sso_server = settings.QUIPUCORDS_LIGHTSPEED_SSO_HOST
     url = f"https://{lightspeed_sso_server}{OPENID_CONFIG_ENDPOINT}"  # Always SSL
     try:
-        logger.info(_(messages.LIGHTSPEED_SSO_CONFIG_QUERY), url, endpoint)
+        logger.info(messages.LIGHTSPEED_SSO_CONFIG_QUERY, url, endpoint)
         response = requests.get(url, timeout=QUIPUCORDS_AUTH_LIGHTSPEED_TIMEOUT)
     except ConnectionError as err:
         raise err
@@ -212,7 +210,7 @@ def lightspeed_request_auth():
     }
     try:
         device_auth_endpoint = get_sso_endpoint(DEVICE_AUTH_ENDPOINT_KEY)
-        logger.info(_(messages.LIGHTSPEED_LOGIN_REQUEST), device_auth_endpoint)
+        logger.info(messages.LIGHTSPEED_LOGIN_REQUEST, device_auth_endpoint)
         response = requests.post(
             device_auth_endpoint,
             headers=headers,
@@ -226,13 +224,9 @@ def lightspeed_request_auth():
 
     if response.status_code == http.HTTPStatus.OK:
         auth_request = response.json()
-        logger.debug(
-            _(messages.LIGHTSPEED_RESPONSE), device_auth_endpoint, auth_request
-        )
+        logger.debug(messages.LIGHTSPEED_RESPONSE, device_auth_endpoint, auth_request)
     else:
-        logger.debug(
-            _(messages.LIGHTSPEED_RESPONSE), device_auth_endpoint, response.text
-        )
+        logger.debug(messages.LIGHTSPEED_RESPONSE, device_auth_endpoint, response.text)
         raise LightspeedAuthError(
             _(messages.LIGHTSPEED_LOGIN_REQUEST_FAILED % response.reason)
         )
@@ -253,11 +247,9 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
         lightspeed_auth_token = SecureToken.objects.get(id=secure_token_id)
     except ObjectDoesNotExist:
         logger.error(
-            _(
-                "Invalid Lightspeed SecureToken id %s specified,"
-                " cannot wait for authorization."
-            )
-            % secure_token_id
+            "Invalid Lightspeed SecureToken id %s specified,"
+            " cannot wait for authorization.",
+            secure_token_id,
         )
         return
 
@@ -277,7 +269,7 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
         try:
             if not token_endpoint:
                 token_endpoint = get_sso_endpoint(ENDPOINT_KEY)
-            logger.debug(_(messages.LIGHTSPEED_LOGIN_VERIFYING), token_endpoint)
+            logger.debug(messages.LIGHTSPEED_LOGIN_VERIFYING, token_endpoint)
             response = requests.post(
                 token_endpoint,
                 headers=headers,
@@ -320,7 +312,7 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
             response_error = token_response.get("error")
             if response_error == "expired_token":
                 logger.debug(
-                    _(messages.LIGHTSPEED_RESPONSE), token_endpoint, response.text
+                    messages.LIGHTSPEED_RESPONSE, token_endpoint, response.text
                 )
                 update_secure_token_status(
                     lightspeed_auth_token,
@@ -330,7 +322,7 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
                 return
             if response_error != "authorization_pending":
                 logger.debug(
-                    _(messages.LIGHTSPEED_RESPONSE), token_endpoint, response.text
+                    messages.LIGHTSPEED_RESPONSE, token_endpoint, response.text
                 )
                 update_secure_token_status(
                     lightspeed_auth_token,
@@ -338,11 +330,9 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
                     _(messages.LIGHTSPEED_LOGIN_VERIFICATION_FAILED % response.reason),
                 )
                 return
-            logger.debug(
-                _(messages.LIGHTSPEED_RESPONSE), token_endpoint, token_response
-            )
+            logger.debug(messages.LIGHTSPEED_RESPONSE, token_endpoint, token_response)
         else:
-            logger.debug(_(messages.LIGHTSPEED_RESPONSE), token_endpoint, response.text)
+            logger.debug(messages.LIGHTSPEED_RESPONSE, token_endpoint, response.text)
             update_secure_token_status(
                 lightspeed_auth_token,
                 AuthStatus.FAILED,

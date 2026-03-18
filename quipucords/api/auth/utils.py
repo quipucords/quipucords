@@ -8,15 +8,6 @@ import json
 JWT_PARTS = 3
 
 
-class AuthError(Exception):
-    """Class for /auth authentication errors."""
-
-    def __init__(self, message, *args):
-        """Take message as mandatory attribute."""
-        super().__init__(message, *args)
-        self.message = message
-
-
 # Methods that add support for decoding JWT tokens.
 def decode_jwt_part(jwt_part):
     """Decode the URL-safe base64 encoded JWT part, handling padding issues."""

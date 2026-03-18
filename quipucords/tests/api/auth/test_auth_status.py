@@ -7,13 +7,13 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
-from api.auth.auth_lightspeed import LIGHTSPEED_NAME, LIGHTSPEED_TYPE
-from api.auth.utils import AuthError
-from api.auth.view import SUPPORTED_AUTH_TYPES_STR
+from api.auth.auth_lightspeed import (
+    LIGHTSPEED_NAME,
+    LIGHTSPEED_TYPE,
+    LightspeedAuthError,
+)
 from api.common.enumerators import AuthStatus
 from api.secure_token.model import SecureToken
-
-LIGHTSPEED_AUTH_TYPE = "lightspeed"
 
 
 def create_lightspeed_secure_token(user, user_metadata):
@@ -35,44 +35,19 @@ def create_lightspeed_secure_token(user, user_metadata):
 
 
 @pytest.mark.django_db
-class TestAuthStatus:
-    """Test the status functionality of the auth module."""
+class TestLightspeedAuthStatus:
+    """Test the Lightspeed status functionality of the auth module."""
 
     def test_unauthenticated_user(self, client_logged_out):
         """Test unauthenticated users cannot get status without authentication."""
-        response = client_logged_out.get(reverse("v2:auth-status"))
+        response = client_logged_out.get(reverse("v2:lightspeed-auth-status"))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         response_json = response.json()
         assert "Authentication credentials were not provided" in response_json["detail"]
 
-    def test_missing_auth_type(self, client_logged_in):
-        """Test users cannot get status without specifying an auth_type."""
-        response = client_logged_in.get(reverse("v2:auth-status"))
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        response_json = response.json()
-        assert messages.AUTH_MUST_SPECIFY_TYPE in response_json["detail"]
-
-    def test_invalid_auth_type(self, client_logged_in, faker):
-        """Test users cannot get status with an invalid auth_type."""
-        invalid_auth_type = faker.slug()
-        query_params = {"auth_type": invalid_auth_type}
-        response = client_logged_in.get(
-            reverse("v2:auth-status", query=query_params),
-        )
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-        response_json = response.json()
-        expected_error = messages.AUTH_INVALID_AUTH_TYPE % {
-            "auth_type": invalid_auth_type,
-            "supported_auth_types": SUPPORTED_AUTH_TYPES_STR,
-        }
-        assert expected_error in response_json["detail"]
-
     def test_with_missing_auth(self, client_logged_in, faker):
         """Test users get a missing status if not authorized with Lightspeed."""
-        query_params = {"auth_type": LIGHTSPEED_AUTH_TYPE}
-        response = client_logged_in.get(
-            reverse("v2:auth-status", query=query_params),
-        )
+        response = client_logged_in.get(reverse("v2:lightspeed-auth-status"))
         assert response.ok
         response_json = response.json()
         assert response_json["status"] == AuthStatus.MISSING.value
@@ -85,10 +60,7 @@ class TestAuthStatus:
             qpc_user_simple, lightspeed_user_metadata
         )
 
-        query_params = {"auth_type": LIGHTSPEED_AUTH_TYPE}
-        response = client_logged_in.get(
-            reverse("v2:auth-status", query=query_params),
-        )
+        response = client_logged_in.get(reverse("v2:lightspeed-auth-status"))
         assert response.ok
         response_json = response.json()
         assert response_json["status"] == AuthStatus.VALID.value
@@ -109,10 +81,7 @@ class TestAuthStatus:
         expected_metadata["status"] = AuthStatus.EXPIRED.value
         expected_metadata["status_reason"] = messages.LIGHTSPEED_TOKEN_EXPIRED
 
-        query_params = {"auth_type": LIGHTSPEED_AUTH_TYPE}
-        response = client_logged_in.get(
-            reverse("v2:auth-status", query=query_params),
-        )
+        response = client_logged_in.get(reverse("v2:lightspeed-auth-status"))
         assert response.ok
         response_json = response.json()
         assert response_json["status"] == AuthStatus.EXPIRED.value
@@ -126,14 +95,11 @@ class TestAuthStatus:
         """Test a failed Lightspeed status returns error in the Error detail."""
         raised_exception = "Lightspeed Auth status test exception"
         mock_auth_status = mocker.patch(
-            "api.auth.view.lightspeed_auth_status",
+            "api.auth.view.user_lightspeed_auth_status",
         )
-        mock_auth_status.side_effect = AuthError(raised_exception)
+        mock_auth_status.side_effect = LightspeedAuthError(raised_exception)
 
-        query_params = {"auth_type": LIGHTSPEED_AUTH_TYPE}
-        response = client_logged_in.get(
-            reverse("v2:auth-status", query=query_params),
-        )
+        response = client_logged_in.get(reverse("v2:lightspeed-auth-status"))
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         response_json = response.json()
         assert response_json["detail"] == raised_exception

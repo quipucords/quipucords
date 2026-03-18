@@ -616,16 +616,6 @@ QUIPUCORDS_AUTH_LIGHTSPEED_TIMEOUT = env.int(
 )
 
 # Settings for authenticating to and accessing console.redhat.com
-QUIPUCORDS_LIGHTSPEED_HOST = env.str(
-    "QUIPUCORDS_LIGHTSPEED_HOST", default="console.redhat.com"
-)
-QUIPUCORDS_LIGHTSPEED_PORT = env.int("QUIPUCORDS_LIGHTSPEED_PORT", default=443)
-QUIPUCORDS_LIGHTSPEED_USE_HTTP = env.bool(
-    "QUIPUCORDS_LIGHTSPEED_USE_HTTP", default=False
-)
-QUIPUCORDS_LIGHTSPEED_SSL_VERIFY = env.bool(
-    "QUIPUCORDS_LIGHTSPEED_SSL_VERIFY", default=True
-)
 QUIPUCORDS_LIGHTSPEED_SSO_HOST = env.str(
     "QUIPUCORDS_LIGHTSPEED_SSO_HOST", default="sso.redhat.com"
 )
