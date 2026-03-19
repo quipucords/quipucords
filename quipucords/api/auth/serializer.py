@@ -3,7 +3,7 @@
 from rest_framework import serializers
 
 
-class AuthLoginResponseSerializer(serializers.Serializer):
+class LightspeedAuthLoginResponseSerializer(serializers.Serializer):
     """Define a serializer for successful auth login response."""
 
     status = serializers.CharField(required=True)
@@ -12,14 +12,14 @@ class AuthLoginResponseSerializer(serializers.Serializer):
     verification_uri_complete = serializers.CharField(required=False)
 
 
-class AuthStatusResponseSerializer(serializers.Serializer):
+class LightspeedAuthStatusResponseSerializer(serializers.Serializer):
     """Define a Serializer for successful auth status response."""
 
     status = serializers.CharField(required=True)
     metadata = serializers.DictField(required=False)
 
 
-class FailedAuthRequestResponse(serializers.Serializer):
+class FailedAuthRequestResponseSerializer(serializers.Serializer):
     """Define a Serializer for a failed auth request response."""
 
     detail = serializers.CharField(required=True)

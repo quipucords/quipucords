@@ -19,9 +19,9 @@ from api.auth.auth_lightspeed import (
     user_lightspeed_auth_status,
 )
 from api.auth.serializer import (
-    AuthLoginResponseSerializer,
-    AuthStatusResponseSerializer,
-    FailedAuthRequestResponse,
+    FailedAuthRequestResponseSerializer,
+    LightspeedAuthLoginResponseSerializer,
+    LightspeedAuthStatusResponseSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def unauthorized_auth_response() -> OpenApiResponse:
     """Return an OpenApiResponse for an unauthorized auth request."""
     return OpenApiResponse(
         description="Unauthorized auth request response",
-        response=FailedAuthRequestResponse(),
+        response=FailedAuthRequestResponseSerializer(),
         examples=[
             OpenApiExample(
                 "Unauthorized auth request response",
@@ -46,7 +46,7 @@ def unauthorized_auth_response() -> OpenApiResponse:
     responses={
         (200, "application/json"): OpenApiResponse(
             description="Successful Lightspeed login request response",
-            response=AuthLoginResponseSerializer(),
+            response=LightspeedAuthLoginResponseSerializer(),
             examples=[
                 OpenApiExample(
                     "Lightspeed login request response",
@@ -67,19 +67,19 @@ def unauthorized_auth_response() -> OpenApiResponse:
 def lightspeed_auth_login(request):
     """Do an Authentication Login for the current user."""
     try:
-        data = lightspeed_login_request(request.user)
+        serializer = lightspeed_login_request(request.user)
     except LightspeedAuthError as err:
         return Response(
             {"detail": _(err.message)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    return Response(data, status=status.HTTP_200_OK)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @extend_schema(
     responses={
         (200, "application/json"): OpenApiResponse(
-            description="Successful authorization status request responses",
-            response=AuthStatusResponseSerializer(),
+            description="Successful Lightspeed authorization status request responses",
+            response=LightspeedAuthStatusResponseSerializer(),
             examples=[
                 OpenApiExample(
                     "Missing Lightspeed auth status response",
@@ -130,9 +130,9 @@ def lightspeed_auth_login(request):
 def lightspeed_auth_status(request):
     """Request the status about a Lightspeed Authentication for the current user."""
     try:
-        data = user_lightspeed_auth_status(request.user)
+        serializer = user_lightspeed_auth_status(request.user)
     except LightspeedAuthError as err:
         return Response(
-            {"detail": err.message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"detail": _(err.message)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    return Response(data, status=status.HTTP_200_OK)
+    return Response(serializer.data, status=status.HTTP_200_OK)
