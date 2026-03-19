@@ -14,6 +14,10 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
+from api.auth.serializer import (
+    LightspeedAuthLoginResponseSerializer,
+    LightspeedAuthStatusResponseSerializer,
+)
 from api.auth.utils import decode_jwt
 from api.common.enumerators import AuthStatus
 from api.secure_token.model import SecureToken
@@ -76,7 +80,7 @@ def update_secure_token_metadata(secure_token, decoded_lightspeed_jwt):
     secure_token.save()
 
 
-def lightspeed_login_request(user):
+def lightspeed_login_request(user) -> LightspeedAuthLoginResponseSerializer:
     """Request a Lightspeed login authorization for the user."""
     # we send the request for device authorization here, however, we can't block
     # the API on waiting for the user to authorize it, so we kick off the
@@ -92,12 +96,14 @@ def lightspeed_login_request(user):
         clear_lightspeed_auth_token(lightspeed_secure_token)
         update_secure_token_status(lightspeed_secure_token, AuthStatus.PENDING)
 
-        data = {
-            "status": lightspeed_secure_token.metadata["status"],
-            "user_code": auth_request["user_code"],
-            "verification_uri": auth_request["verification_uri"],
-            "verification_uri_complete": auth_request["verification_uri_complete"],
-        }
+        serializer = LightspeedAuthLoginResponseSerializer(
+            {
+                "status": lightspeed_secure_token.metadata["status"],
+                "user_code": auth_request["user_code"],
+                "verification_uri": auth_request["verification_uri"],
+                "verification_uri_complete": auth_request["verification_uri_complete"],
+            }
+        )
 
         lightspeed_wait_for_authorization.delay(
             lightspeed_secure_token.id,
@@ -106,7 +112,7 @@ def lightspeed_login_request(user):
             auth_request["expires_in"],
         )
 
-        return data
+        return serializer
     except LightspeedAuthError as err:
         logger.error(err.message)
         raise err
@@ -131,21 +137,20 @@ def lightspeed_token_check_expiration(lightspeed_secure_token):
                 )
 
 
-def user_lightspeed_auth_status(user):
+def user_lightspeed_auth_status(user) -> LightspeedAuthStatusResponseSerializer:
     """Return the Lightspeed Authentication status for the user."""
     lightspeed_secure_token = get_lightspeed_secure_token(user)
-    auth_token_missing = {
-        "status": AuthStatus.MISSING.value,
-    }
     if lightspeed_secure_token:
         lightspeed_token_check_expiration(lightspeed_secure_token)
         metadata = lightspeed_secure_token.metadata
         if metadata:
-            return {
-                "status": metadata["status"],
-                "metadata": metadata,
-            }
-    return auth_token_missing
+            return LightspeedAuthStatusResponseSerializer(
+                {
+                    "status": metadata["status"],
+                    "metadata": metadata,
+                }
+            )
+    return LightspeedAuthStatusResponseSerializer({"status": AuthStatus.MISSING.value})
 
 
 def get_lightspeed_secure_token(user) -> SecureToken | None:
