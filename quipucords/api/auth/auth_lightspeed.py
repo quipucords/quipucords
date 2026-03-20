@@ -253,7 +253,6 @@ def lightspeed_request_auth():
 
 
 @celery.shared_task()
-@transaction.atomic
 def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
     secure_token_id, device_code, interval, expires_in
 ):
@@ -320,10 +319,13 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
                     _(messages.LIGHTSPEED_INVALID_TOKEN),
                 )
                 return
-            lightspeed_auth_token.token = lightspeed_jwt
-            lightspeed_auth_token.save()
-            update_secure_token_metadata(lightspeed_auth_token, decoded_lightspeed_jwt)
-            update_secure_token_status(lightspeed_auth_token, AuthStatus.VALID)
+            with transaction.atomic():
+                lightspeed_auth_token.token = lightspeed_jwt
+                lightspeed_auth_token.save()
+                update_secure_token_metadata(
+                    lightspeed_auth_token, decoded_lightspeed_jwt
+                )
+                update_secure_token_status(lightspeed_auth_token, AuthStatus.VALID)
             return
         if response.status_code == http.HTTPStatus.BAD_REQUEST:
             token_response = response.json()
