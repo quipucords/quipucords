@@ -168,6 +168,8 @@ LIGHTSPEED_LOGIN_VERIFYING = "Verifying Login authorization at %s"
 LIGHTSPEED_LOGIN_VERIFICATION_FAILED = "Failed to verify Login authorization: %s"
 LIGHTSPEED_LOGIN_VERIFICATION_TIMEOUT = "Time-out while waiting for Login authorization"
 LIGHTSPEED_RESPONSE = "Response from %s: %s"
+LIGHTSPEED_LOGOUT_SUCCESSFUL = "Logged out successfully"
+LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
 
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."

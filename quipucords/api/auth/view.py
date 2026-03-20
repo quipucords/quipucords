@@ -16,11 +16,13 @@ from rest_framework.response import Response
 from api.auth.auth_lightspeed import (
     LightspeedAuthError,
     lightspeed_login_request,
+    lightspeed_logout_request,
     user_lightspeed_auth_status,
 )
 from api.auth.serializer import (
     FailedAuthRequestResponseSerializer,
     LightspeedAuthLoginResponseSerializer,
+    LightspeedAuthLogoutResponseSerializer,
     LightspeedAuthStatusResponseSerializer,
 )
 
@@ -68,6 +70,37 @@ def lightspeed_auth_login(request):
     """Do an Authentication Login for the current user."""
     try:
         serializer = lightspeed_login_request(request.user)
+    except LightspeedAuthError as err:
+        return Response(
+            {"detail": _(err.message)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    responses={
+        (200, "application/json"): OpenApiResponse(
+            description="Successful logout response",
+            response=LightspeedAuthLogoutResponseSerializer(),
+            examples=[
+                OpenApiExample(
+                    "Lightspeed logout response",
+                    value={
+                        "status": "successful",
+                        "status_reason": "Already logged out",
+                    },
+                )
+            ],
+        ),
+        (401, "application/json"): unauthorized_auth_response(),
+    },
+)
+@api_view(["post"])
+@renderer_classes([JSONRenderer])
+def lightspeed_auth_logout(request):
+    """Do an Authentication Logout for the current user."""
+    try:
+        serializer = lightspeed_logout_request(request.user)
     except LightspeedAuthError as err:
         return Response(
             {"detail": _(err.message)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

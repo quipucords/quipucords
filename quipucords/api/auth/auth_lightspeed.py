@@ -16,6 +16,7 @@ from urllib3.exceptions import HTTPError as BaseHTTPError
 from api import messages
 from api.auth.serializer import (
     LightspeedAuthLoginResponseSerializer,
+    LightspeedAuthLogoutResponseSerializer,
     LightspeedAuthStatusResponseSerializer,
 )
 from api.auth.utils import decode_jwt
@@ -116,6 +117,18 @@ def lightspeed_login_request(user) -> LightspeedAuthLoginResponseSerializer:
     except LightspeedAuthError as err:
         logger.error(err.message)
         raise err
+
+
+def lightspeed_logout_request(user) -> LightspeedAuthLogoutResponseSerializer:
+    """Request a Lightspeed logout for the user."""
+    lightspeed_secure_token = get_lightspeed_secure_token(user)
+    data = dict(status="successful")
+    if lightspeed_secure_token:
+        lightspeed_secure_token.delete()
+        data["status_reason"] = _(messages.LIGHTSPEED_LOGOUT_SUCCESSFUL)
+    else:
+        data["status_reason"] = _(messages.LIGHTSPEED_ALREADY_LOGGED_OUT)
+    return LightspeedAuthLogoutResponseSerializer(data)
 
 
 def lightspeed_token_check_expiration(lightspeed_secure_token):

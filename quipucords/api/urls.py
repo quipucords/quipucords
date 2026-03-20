@@ -24,6 +24,7 @@ from api.views import (
     insights,
     jobs,
     lightspeed_auth_login,
+    lightspeed_auth_logout,
     lightspeed_auth_status,
     ping,
     reports,
@@ -73,6 +74,9 @@ v1_urls = [
 v2_urls = [
     *ROUTER_V2.urls,
     path("auth/lightspeed/login/", lightspeed_auth_login, name="lightspeed-auth-login"),
+    path(
+        "auth/lightspeed/logout/", lightspeed_auth_logout, name="lightspeed-auth-logout"
+    ),
     path(
         "auth/lightspeed/status/", lightspeed_auth_status, name="lightspeed-auth-status"
     ),
