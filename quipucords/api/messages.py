@@ -145,13 +145,6 @@ COMMON_CHOICE_BLANK = "This field may not be blank. Valid values are %s."
 COMMON_CHOICE_INV = "%s, is an invalid choice. Valid values are %s."
 COMMON_ID_INV = "The id must be an integer."
 
-# Authorization messages
-AUTH_MUST_SPECIFY_TYPE = "Must specify an auth_type"
-AUTH_INVALID_AUTH_TYPE = (
-    "Invalid auth_type %(auth_type)s specified,"
-    " must be one of %(supported_auth_types)s."
-)
-
 # Lightspeed Authorization messages
 LIGHTSPEED_INVALID_TOKEN = "Invalid Lightspeed Token received"
 LIGHTSPEED_TOKEN_EXPIRED = (
@@ -168,6 +161,8 @@ LIGHTSPEED_LOGIN_VERIFYING = "Verifying Login authorization at %s"
 LIGHTSPEED_LOGIN_VERIFICATION_FAILED = "Failed to verify Login authorization: %s"
 LIGHTSPEED_LOGIN_VERIFICATION_TIMEOUT = "Time-out while waiting for Login authorization"
 LIGHTSPEED_RESPONSE = "Response from %s: %s"
+LIGHTSPEED_LOGOUT_SUCCESSFUL = "Logged out successfully"
+LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
 
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."

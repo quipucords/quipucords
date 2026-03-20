@@ -53,8 +53,8 @@ def lightspeed_auth_response(
 def lightspeed_user_metadata(faker):
     """Fixture to create metadata for a lightspeed user."""
     return {
-        "org_id": faker.pyint(min_value=3000001, max_value=9999999),
-        "account_number": faker.pyint(min_value=1000001, max_value=2999999),
+        "org_id": faker.numerify(text="#######"),
+        "account_number": faker.numerify(text="#######"),
         "username": faker.user_name(),
         "first_name": faker.first_name(),
         "last_name": faker.last_name(),

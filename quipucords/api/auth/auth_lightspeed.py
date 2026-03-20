@@ -16,6 +16,7 @@ from urllib3.exceptions import HTTPError as BaseHTTPError
 from api import messages
 from api.auth.serializer import (
     LightspeedAuthLoginResponseSerializer,
+    LightspeedAuthLogoutResponseSerializer,
     LightspeedAuthStatusResponseSerializer,
 )
 from api.auth.utils import decode_jwt
@@ -116,6 +117,18 @@ def lightspeed_login_request(user) -> LightspeedAuthLoginResponseSerializer:
     except LightspeedAuthError as err:
         logger.error(err.message)
         raise err
+
+
+def lightspeed_logout_request(user) -> LightspeedAuthLogoutResponseSerializer:
+    """Request a Lightspeed logout for the user."""
+    lightspeed_secure_token = get_lightspeed_secure_token(user)
+    data = dict(status="successful")
+    if lightspeed_secure_token:
+        lightspeed_secure_token.delete()
+        data["status_reason"] = _(messages.LIGHTSPEED_LOGOUT_SUCCESSFUL)
+    else:
+        data["status_reason"] = _(messages.LIGHTSPEED_ALREADY_LOGGED_OUT)
+    return LightspeedAuthLogoutResponseSerializer(data)
 
 
 def lightspeed_token_check_expiration(lightspeed_secure_token):
@@ -240,7 +253,6 @@ def lightspeed_request_auth():
 
 
 @celery.shared_task()
-@transaction.atomic
 def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
     secure_token_id, device_code, interval, expires_in
 ):
@@ -307,10 +319,13 @@ def lightspeed_wait_for_authorization(  # noqa: C901 PLR0911 PLR0912
                     _(messages.LIGHTSPEED_INVALID_TOKEN),
                 )
                 return
-            lightspeed_auth_token.token = lightspeed_jwt
-            lightspeed_auth_token.save()
-            update_secure_token_metadata(lightspeed_auth_token, decoded_lightspeed_jwt)
-            update_secure_token_status(lightspeed_auth_token, AuthStatus.VALID)
+            with transaction.atomic():
+                lightspeed_auth_token.token = lightspeed_jwt
+                lightspeed_auth_token.save()
+                update_secure_token_metadata(
+                    lightspeed_auth_token, decoded_lightspeed_jwt
+                )
+                update_secure_token_status(lightspeed_auth_token, AuthStatus.VALID)
             return
         if response.status_code == http.HTTPStatus.BAD_REQUEST:
             token_response = response.json()
