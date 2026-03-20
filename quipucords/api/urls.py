@@ -17,6 +17,8 @@ from api.views import (
     SourceViewSet,
     UserViewSet,
     async_merge_reports,
+    auth_login,
+    auth_status,
     credential_bulk_delete,
     deployments,
     details,
@@ -70,6 +72,8 @@ v1_urls = [
 
 v2_urls = [
     *ROUTER_V2.urls,
+    path("auth/login/", auth_login, name="auth-login"),
+    path("auth/status/", auth_status, name="auth-status"),
     path(
         "reports/<int:report_id>/raw/", RawFactsReportView.as_view(), name="report-raw"
     ),
