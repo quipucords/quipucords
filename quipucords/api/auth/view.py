@@ -2,17 +2,24 @@
 
 import logging
 
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiResponse,
     extend_schema,
 )
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
+from api import messages
+from api.auth.auth_hashicorp_vault import (
+    delete_hashicorp_vault_token,
+    get_hashicorp_vault_token,
+)
 from api.auth.auth_lightspeed import (
     LightspeedAuthError,
     lightspeed_login_request,
@@ -21,6 +28,7 @@ from api.auth.auth_lightspeed import (
 )
 from api.auth.serializer import (
     FailedAuthRequestResponseSerializer,
+    HashiCorpVaultSerializer,
     LightspeedAuthLoginResponseSerializer,
     LightspeedAuthLogoutResponseSerializer,
     LightspeedAuthStatusResponseSerializer,
@@ -159,3 +167,78 @@ def lightspeed_auth_status(request):
     """Request the status about a Lightspeed Authentication for the current user."""
     serializer = user_lightspeed_auth_status(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class HashiCorpVaultViewSet(viewsets.GenericViewSet):
+    """A view set for the hashicorp-vault auth endpoint.
+
+    This is a singleton resource, so it doesn't use standard pk-based routing.
+    All operations work on the single HashiCorp Vault configuration.
+    """
+
+    serializer_class = HashiCorpVaultSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        """Get the HashiCorp Vault server definition."""
+        hashicorp_vault_token = get_hashicorp_vault_token()
+        if hashicorp_vault_token is None:
+            return Response(
+                {"detail": _(messages.HASHICORP_VAULT_NOT_DEFINED)},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = self.serializer_class(data=hashicorp_vault_token.metadata)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs) -> Response:
+        """Create a HashiCorp Vault server definition."""
+        if get_hashicorp_vault_token():
+            return Response(
+                {"detail": _(messages.HASHICORP_VAULT_ALREADY_EXISTS)},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        serializer = self.serializer_class(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as err:
+            return Response({"detail": err.message}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs) -> Response:
+        """Update a HashiCorp Vault server definition."""
+        partial = kwargs.pop("partial", False)
+
+        hashicorp_vault_token = get_hashicorp_vault_token()
+        if hashicorp_vault_token is None:
+            return Response(
+                {"detail": _(messages.HASHICORP_VAULT_NOT_DEFINED)},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if partial:
+            metadata = hashicorp_vault_token.metadata | request.data
+        else:
+            metadata = request.data
+
+        serializer = self.serializer_class(
+            instance=hashicorp_vault_token, data=metadata, partial=partial
+        )
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as err:
+            return Response({"detail": err.message}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs) -> Response:
+        """Do a partial update (PATCH) of the HashiCorp Vault server definition."""
+        return self.update(request, partial=True)
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        """Delete the HashiCorp Vault Singleton server definition."""
+        delete_hashicorp_vault_token()
+        return Response(status=status.HTTP_204_NO_CONTENT)
