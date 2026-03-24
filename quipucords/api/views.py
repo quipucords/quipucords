@@ -4,6 +4,7 @@
 
 from api.aggregate_report.view import aggregate_report
 from api.auth.view import (
+    HashiCorpVaultViewSet,
     lightspeed_auth_login,
     lightspeed_auth_logout,
     lightspeed_auth_status,
