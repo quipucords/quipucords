@@ -164,6 +164,11 @@ LIGHTSPEED_RESPONSE = "Response from %s: %s"
 LIGHTSPEED_LOGOUT_SUCCESSFUL = "Logged out successfully"
 LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
 
+# HashiCorp Vault messages
+HASHICORP_VAULT_SINGLETON = "Only a single HashiCorp Vault server can be defined"
+HASHICORP_VAULT_NOT_DEFINED = "HashiCorp Vault server is not yet defined"
+HASHICORP_VAULT_ALREADY_EXISTS = "HashiCorp Vault server definition already exists"
+
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."
 REPORT_DEPLOYMENTS_NOT_CREATED = (

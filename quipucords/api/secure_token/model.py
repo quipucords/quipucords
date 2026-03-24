@@ -16,8 +16,9 @@ class SecureToken(BaseModel):
     """Model for storing secure tokens."""
 
     LIGHTSPEED = "lightspeed-jwt"
+    HASHICORP_VAULT = "hashicorp-vault"
 
-    TOKEN_TYPES = ((LIGHTSPEED, LIGHTSPEED),)
+    TOKEN_TYPES = ((LIGHTSPEED, LIGHTSPEED), (HASHICORP_VAULT, HASHICORP_VAULT))
 
     name = models.CharField(max_length=64, null=False, blank=False)
     token_type = models.CharField(
@@ -36,7 +37,10 @@ class SecureToken(BaseModel):
     #       is for all headers).
     token = EncryptedCharField(max_length=32768, null=True, blank=True)
 
-    metadata = EncryptedDictField(max_length=4096, null=True, blank=True)
+    # Note: no longer specifying a max_length as some data in a Dict field represents
+    #       a ca_cert which can reach 200-300KB in some cases, so skipping the
+    #       max_length (i.e. None) makes it unlimited.
+    metadata = EncryptedDictField(null=True, blank=True)
 
     expires_at = models.DateTimeField(null=True, blank=True)
 
