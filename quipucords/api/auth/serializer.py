@@ -1,6 +1,65 @@
 """Serializers for auth API endpoints."""
 
+from django.db import transaction
 from rest_framework import serializers
+
+from api.auth.auth_hashicorp_vault import get_or_create_hashicorp_vault_token
+
+
+class HashiCorpVaultSerializer(serializers.Serializer):
+    """Define a serializer for the HashiCorp Vault API."""
+
+    address = serializers.CharField(required=True)
+    port = serializers.IntegerField(required=False, default=8200)
+    ssl_verify = serializers.BooleanField(required=False, default=True)
+    client_key = serializers.CharField(required=True)
+    client_cert = serializers.CharField(required=True)
+    ca_cert = serializers.CharField(required=False)
+
+    class Meta:
+        """Metadata for the serializer."""
+
+        # Note: exclude only works with Model serializers, removing them manually
+        #       in the to_representation method.
+        exclude = ["client_key", "client_cert", "ca_cert"]
+
+    def is_valid(self, raise_exception=False):
+        """Ensure that HashiCorp Vault is valid."""
+        return super().is_valid(raise_exception=raise_exception)
+
+    @transaction.atomic
+    def create(self, validated_data):
+        """Create and return a HashiCorp Vault object."""
+        secure_token = get_or_create_hashicorp_vault_token()
+        secure_token.token = None
+        secure_token.metadata = validated_data
+        secure_token.save()
+        return secure_token
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        """Update and return a HashiCorp Vault object."""
+        instance.metadata = validated_data
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        """Generate HashiCorp Vault server definition based on SecureToken object."""
+        if isinstance(instance, dict):
+            data = super().to_representation(instance)
+        else:
+            data = super().to_representation(instance.metadata)
+        for sensitive_attr in self.Meta.exclude:
+            data.pop(sensitive_attr, None)
+        return data
+
+    def validate(self, data):
+        """Validate the data is valid and we can communicate with HashiCorp Vault."""
+        attrs = super().validate(data)
+        # TODO: Make sure the files (certs, etc) are properly decoded
+        #       (base64 decoded) and the HashiCorp server can be reached
+        #       and cert authenticated.
+        return attrs
 
 
 class LightspeedAuthLoginResponseSerializer(serializers.Serializer):
