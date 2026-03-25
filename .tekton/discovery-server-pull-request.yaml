@@ -200,10 +200,6 @@ spec:
         value: $(params.output-image).prefetch
       - name: ociArtifactExpiresAfter
         value: $(params.image-expires-after)
-          # enabling dev-package-managers is required for rpm support
-          # TODO: disable once it rpm support becomes official
-      - name: dev-package-managers
-        value: "true"
       runAfter:
       - clone-repository
       taskRef:
