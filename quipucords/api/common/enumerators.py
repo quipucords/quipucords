@@ -31,9 +31,10 @@ class LightspeedCannotPublishReason(Enum):
     """Reason why report can't be published to Lightspeed."""
 
     NO_CONNECTION = "no_connection"
-    NO_CREDENTIALS = "no_credentials"
+    AUTH_PENDING = "auth_pending"
     AUTH_FAILED = "auth_failed"
-    # TOKEN_EXPIRED = "token_expired"  # TODO: TBD if we check token periodically
+    AUTH_EXPIRED = "auth_expired"
+    AUTH_MISSING = "auth_missing"
     NOT_COMPLETE = "not_complete"
     NO_HOSTS = "no_hosts"
 
@@ -48,6 +49,8 @@ class ReportCannotDownloadReason(Enum):
 
 class AuthStatus(Enum):
     """Supported Auth API statuses."""
+
+    # Note that non-valid states are duplicated in LightspeedCannotPublishReason
 
     PENDING = "pending"
     VALID = "valid"

@@ -64,6 +64,19 @@ def default_data_dir(settings, tmp_path: Path) -> Path:
 
 
 @pytest.fixture
+def lightspeed_user_metadata(faker):
+    """Fixture to create metadata for a lightspeed user."""
+    return {
+        "org_id": faker.numerify(text="#######"),
+        "account_number": faker.numerify(text="#######"),
+        "username": faker.user_name(),
+        "first_name": faker.first_name(),
+        "last_name": faker.last_name(),
+        "email": faker.email(),
+    }
+
+
+@pytest.fixture
 def qpc_user_simple(faker):
     """
     Create simpler qpc test user with no password.

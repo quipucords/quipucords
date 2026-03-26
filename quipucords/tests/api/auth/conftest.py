@@ -48,20 +48,6 @@ def lightspeed_auth_response(
     return auth_response
 
 
-# Fixtures for testing the Auth status endpoint.
-@pytest.fixture
-def lightspeed_user_metadata(faker):
-    """Fixture to create metadata for a lightspeed user."""
-    return {
-        "org_id": faker.numerify(text="#######"),
-        "account_number": faker.numerify(text="#######"),
-        "username": faker.user_name(),
-        "first_name": faker.first_name(),
-        "last_name": faker.last_name(),
-        "email": faker.email(),
-    }
-
-
 # Fixtures for testing and decoding JWTs
 @pytest.fixture()
 def jwt_header_dict(faker):

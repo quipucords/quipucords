@@ -12,6 +12,7 @@ from api.common.enumerators import (
     LightspeedCannotPublishReason,
     ReportCannotDownloadReason,
 )
+from api.common.lightspeed import get_can_publish, get_cannot_publish_reason
 from api.models import InspectGroup, InspectResult, Report
 
 
@@ -42,6 +43,7 @@ class ReportSerializer(ModelSerializer):
     """Report Serializer."""
 
     scan_id = ReadOnlyField(source="scanjob.scan_id")
+    can_publish = SerializerMethodField()
     cannot_publish_reason = SerializerMethodField()
     cannot_download_reason = SerializerMethodField()
 
@@ -63,14 +65,26 @@ class ReportSerializer(ModelSerializer):
             "cannot_download_reason",
         ]
 
-    @extend_schema_field(LightspeedCannotPublishReason)
-    def get_cannot_publish_reason(self, obj):
-        """Calculate `cannot_publish_reason` value.
+    def get_can_publish(self, obj) -> bool:
+        """Calculate `can_publish` value.
 
         Note argument is entire instance (not field value), and return value
         must be JSON-serializable.
         """
-        if reason := obj.cannot_publish_reason:
+        try:
+            user = self.context.get("request").user
+        except AttributeError:
+            return False
+        return get_can_publish(obj, user)
+
+    @extend_schema_field(LightspeedCannotPublishReason)
+    def get_cannot_publish_reason(self, obj):
+        """Calculate `cannot_publish_reason` value."""
+        try:
+            user = self.context.get("request").user
+        except AttributeError:
+            return LightspeedCannotPublishReason.AUTH_MISSING
+        if reason := get_cannot_publish_reason(obj, user):
             return reason.value
         return None
 
