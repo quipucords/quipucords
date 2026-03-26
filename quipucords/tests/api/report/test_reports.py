@@ -31,7 +31,10 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
 
 from api.common.common_report import REPORT_TYPE_DEPLOYMENT, REPORT_TYPE_DETAILS
-from api.common.enumerators import ReportCannotDownloadReason
+from api.common.enumerators import (
+    LightspeedCannotPublishReason,
+    ReportCannotDownloadReason,
+)
 from api.deployments_report.model import DeploymentsReport
 from api.deployments_report.util import create_deployments_csv
 from api.deployments_report.view import build_cached_json_report
@@ -53,6 +56,7 @@ from tests.constants import (
 from tests.factories import DeploymentReportFactory, ReportFactory
 from tests.report_utils import extract_files_from_tarball
 from tests.utils import raw_facts_generator
+from tests.utils.auth import create_lightspeed_secure_token
 
 TARBALL_ALWAYS_EXPECTED_FILENAMES = {
     FILENAME_AGGREGATE_JSON,
@@ -503,8 +507,94 @@ def test_upload_report(upload_report_payload, client_logged_in, mocker):
     assert report.origin == Report.UPLOADED
 
 
-# note that ReportCannotDownloadReason.STATUS_PENDING and
-# cannot_download_reason == None are tested as a by-product of serializer testing
+@pytest.mark.django_db(transaction=True)
+def test_can_publish(qpc_user_simple, client_logged_in, lightspeed_user_metadata):
+    """Test can_publish and cannot_publish_reason fields for publishable report."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_COMPLETE,
+        number_of_fingerprints=2,
+    )
+    report_id = deployment_report.report.id
+    create_lightspeed_secure_token(qpc_user_simple, lightspeed_user_metadata)
+    response = client_logged_in.get(reverse("v2:reports-detail", args=(report_id,)))
+    assert response.ok, response.text
+    data = response.json()
+
+    assert data["can_publish"] is True
+    assert data["cannot_publish_reason"] is None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_can_publish_false_no_token(client_logged_in):
+    """Test can_publish and cannot_publish_reason fields when user has no token."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(reverse("v2:reports-detail", args=(report_id,)))
+    assert response.ok, response.text
+    data = response.json()
+
+    assert data["can_publish"] is False
+    assert (
+        data["cannot_publish_reason"]
+        == LightspeedCannotPublishReason.AUTH_MISSING.value
+    )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_can_publish_false_not_complete(
+    qpc_user_simple, client_logged_in, lightspeed_user_metadata
+):
+    """Test can_publish and cannot_publish_reason fields for non-publishable report."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report_id = deployment_report.report.id
+    create_lightspeed_secure_token(qpc_user_simple, lightspeed_user_metadata)
+    response = client_logged_in.get(reverse("v2:reports-detail", args=(report_id,)))
+    assert response.ok, response.text
+    data = response.json()
+
+    assert data["can_publish"] is False
+    assert (
+        data["cannot_publish_reason"]
+        == LightspeedCannotPublishReason.NOT_COMPLETE.value
+    )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_can_download(client_logged_in):
+    """Test can_download and cannot_download_reason fields for downloadable report."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_COMPLETE,
+        number_of_fingerprints=2,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(reverse("v2:reports-detail", args=(report_id,)))
+    assert response.ok, response.text
+    data = response.json()
+
+    assert data["can_download"] is True
+    assert data["cannot_download_reason"] is None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_can_download_not_complete(client_logged_in):
+    """Test can_download and cannot_download_reason fields for non-downloadable one."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(reverse("v2:reports-detail", args=(report_id,)))
+    assert response.ok, response.text
+    data = response.json()
+
+    assert data["can_download"] is False
+    assert (
+        data["cannot_download_reason"]
+        == ReportCannotDownloadReason.STATUS_PENDING.value
+    )
 
 
 @pytest.mark.django_db(transaction=True)
