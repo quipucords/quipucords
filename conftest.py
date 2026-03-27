@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from django.contrib.auth import get_user_model
 from django.core import management
-from django.test import Client as DjangoClient
+from rest_framework.test import APIClient as DRFAPIClient
 
 pytest_plugins = ("celery.contrib.pytest",)
 
@@ -100,12 +100,17 @@ class ResponseMixin:
         return self.content.decode()
 
 
-class Client(DjangoClient):
-    """Django client for tests with some QoL changes."""
+class Client(DRFAPIClient):
+    """DRF client for tests with some QoL changes."""
 
-    def request(self, **request):
+    # this is set in APIRequestFactory, which DRF APIClient inherits from
+    # `format` is DRF helper that both ensures data is serializable and sets the correct
+    # Content-Type header
+    default_format = "json"
+
+    def request(self, **kwargs):
         """Patched request method for juicy DX/QoL changes."""
-        response = super().request(**request)
+        response = super().request(**kwargs)
 
         # we can't simply replace django's HttpResponse because
         # error responses are specialized classes, with attributes
@@ -116,28 +121,10 @@ class Client(DjangoClient):
         response.__class__ = CustomResponse
         return response
 
-    def post(self, *args, **kwargs):
-        """POST request."""
-        # set application/json as default for improved ergonomics
-        kwargs.setdefault("content_type", "application/json")
-        return super().post(*args, **kwargs)
-
-    def put(self, *args, **kwargs):
-        """PUT request."""
-        # set application/json as default for improved ergonomics
-        kwargs.setdefault("content_type", "application/json")
-        return super().put(*args, **kwargs)
-
-    def patch(self, *args, **kwargs):
-        """PATCH request."""
-        # set application/json as default for improved ergonomics
-        kwargs.setdefault("content_type", "application/json")
-        return super().patch(*args, **kwargs)
-
 
 @pytest.fixture
 def client_logged_in(qpc_user_simple, settings) -> Client:
-    """Create a simpler Django test client with logged-in user."""
+    """Create a simpler DRF test client with logged-in user."""
     # Why this override_settings? See:
     # https://whitenoise.readthedocs.io/en/stable/django.html#whitenoise-makes-my-tests-run-slow
     settings.WHITENOISE_AUTOREFRESH = True
@@ -146,13 +133,13 @@ def client_logged_in(qpc_user_simple, settings) -> Client:
     # limited.
     settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]["user"] = "9000/second"
     client = Client()
-    client.force_login(user=qpc_user_simple)
+    client.force_authenticate(user=qpc_user_simple)
     yield client
 
 
 @pytest.fixture
 def client_logged_out(settings) -> Client:
-    """Create a simpler Django test client without a logged-in user."""
+    """Create a simpler DRF test client without a logged-in user."""
     settings.WHITENOISE_AUTOREFRESH = True
     settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]["user"] = "9000/second"
     client = Client()
