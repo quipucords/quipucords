@@ -2,8 +2,15 @@
 
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework.serializers import ValidationError
 
-from api.auth.auth_hashicorp_vault import get_or_create_hashicorp_vault_token
+from api.auth.auth_hashicorp_vault import (
+    HashiCorpVaultAuthError,
+    decode_cert_from_content,
+    get_or_create_hashicorp_vault_token,
+    hashicorp_vault_authenticate,
+    hashicorp_vault_url,
+)
 
 
 class HashiCorpVaultSerializer(serializers.Serializer):
@@ -53,12 +60,48 @@ class HashiCorpVaultSerializer(serializers.Serializer):
             data.pop(sensitive_attr, None)
         return data
 
+    @staticmethod
+    def verify_client_cert_is_base64encoded(cert_file_name, value):
+        """Verify the cert specific is properly base64 encoded."""
+        try:
+            decode_cert_from_content(cert_file_name, value)
+        except ValueError as err:
+            raise ValidationError(err)
+        return value
+
+    def validate_client_cert(self, value):
+        """Validate the client certificate is valid."""
+        return self.verify_client_cert_is_base64encoded("client_cert", value)
+
+    def validate_client_key(self, value):
+        """Validate the client key is valid."""
+        return self.verify_client_cert_is_base64encoded("client_key", value)
+
+    def validate_ca_cert(self, value):
+        """Validate the CA certificate is valid."""
+        return self.verify_client_cert_is_base64encoded("ca_cert", value)
+
     def validate(self, data):
         """Validate the data is valid and we can communicate with HashiCorp Vault."""
         attrs = super().validate(data)
-        # TODO: Make sure the files (certs, etc) are properly decoded
-        #       (base64 decoded) and the HashiCorp server can be reached
-        #       and cert authenticated.
+
+        errors = {}
+        ssl_verify = attrs.get("ssl_verify", True)
+        if ssl_verify and attrs.get("ca_cert", None) is None:
+            errors["ca_cert"] = "Must specify a ca_cert with ssl_verify is True"
+
+        if errors:
+            raise ValidationError(errors)
+
+        try:
+            if not hashicorp_vault_authenticate(metadata=attrs):
+                vault_url = hashicorp_vault_url(attrs)
+                raise ValidationError(
+                    f"Failed to authenticate with HashiCorp Vault {vault_url}"
+                )
+        except HashiCorpVaultAuthError as err:
+            raise ValidationError(err.message)
+
         return attrs
 
 
