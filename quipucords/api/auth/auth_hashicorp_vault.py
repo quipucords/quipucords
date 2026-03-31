@@ -8,9 +8,11 @@ from logging import getLogger
 
 import hvac
 from django.conf import settings
+from django.utils.translation import gettext as _
 from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
+import api.messages
 from api.secure_token.model import SecureToken
 
 logger = getLogger(__name__)
@@ -68,11 +70,16 @@ def get_or_create_hashicorp_vault_token() -> SecureToken:
     return secure_token
 
 
-def hashicorp_vault_url(metadata) -> str | None:
-    """Return the HashiCorp Vault URL."""
+def hashicorp_vault_address(metadata) -> str:
+    """Return the HashiCorp Vault Address."""
     address = metadata.get("address")
-    port = metadata.get("port", 8200)
-    return f"https://{address}:{port}"
+    port = metadata.get("port", settings.QUIPUCORDS_HASHICORP_VAULT_DEFAULT_PORT)
+    return f"{address}:{port}"
+
+
+def hashicorp_vault_url(metadata) -> str:
+    """Return the HashiCorp Vault URL."""
+    return f"https://{hashicorp_vault_address(metadata)}"
 
 
 def decode_cert_from_content(cert_file_name, cert_file_content_b64) -> str | None:
@@ -86,23 +93,16 @@ def decode_cert_from_content(cert_file_name, cert_file_content_b64) -> str | Non
         return cert_file_content
     except binascii.Error as err:
         raise ValueError(
-            "Failed to base64 decode the HashiCorp Vault"
-            f" cert {cert_file_name}, error: {err}"
+            _(api.messages.HASHICORP_VAULT_FAILED_B64_DECODE_CERT % (cert_file_name, str(err)))
         )
     except UnicodeDecodeError as err:
         raise ValueError(
-            f"Failed to decode the HashiCorp Vault {cert_file_name}, error: {err}"
+            _(api.messages.HASHICORP_VAULT_FAILED_DECODE_CERT % (cert_file_name, str(err)))
         )
 
 
 def hashicorp_cert_file(cert_file_name, cert_file_content_b64) -> str | None:
     """Get the HashiCorp Vault decoded Cert file content."""
-    if cert_file_name not in HASHICORP_VAULT_SUPPORTED_CERT_FILES:
-        logger.error(
-            f"Invalid HashiCorp Vault cert file name {cert_file_name} specified"
-        )
-        return None
-
     if cert_file_content_b64:
         try:
             cert_file_content = decode_cert_from_content(
@@ -111,17 +111,13 @@ def hashicorp_cert_file(cert_file_name, cert_file_content_b64) -> str | None:
             return cert_file_content
         except ValueError as err:
             logger.error(err)
-
     return None
 
 
 @contextmanager
 def hashicorp_vault_client(vault_token=None, metadata=None):
     """Create a Context for communicating with a HashiCorp Vault server."""
-    # with this context manager, communicating with the HashiCorp vault uses
-    # the following structure without having to deal with certificate files.
-    #
-    # example for a HashiCorp Vault query:
+    # Example using this context manager for a HashiCorp Vault query:
     #
     #    with hashicorp_vault_client(vault_secure_token) as vault_client:
     #        aap_creds = vault_client.secrets.kv.v2.read_secret_version(
@@ -176,25 +172,17 @@ def hashicorp_vault_authenticate(vault_token=None, metadata=None) -> bool:
     with hashicorp_vault_client(
         vault_token=vault_token, metadata=metadata
     ) as vault_client:
-        vault_url = hashicorp_vault_url(metadata)
+        vault_address = hashicorp_vault_address(metadata)
         try:
             if vault_client.is_authenticated():
-                logger.debug(f"Authenticated with HashiCorp Vault {vault_url}")
+                logger.debug(api.messages.HASHICORP_VAULT_AUTHENTICATED, vault_address)
                 return True
             else:
-                logger.error(f"Failed to authenticate with HashiCorp Vault {vault_url}")
+                logger.error(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION, vault_address)
                 return False
         except ConnectionError as err:
-            errmsg = (
-                f"Failed to authenticate with HashiCorp Vault {vault_url}"
-                f" - ConnectionError {err}"
-            )
-            logger.error(errmsg)
-            raise HashiCorpVaultAuthError(errmsg)
+            logger.error(api.messages.HASHICORP_VAULT_CONNECTION_ERROR, vault_address, str(err))
+            raise HashiCorpVaultAuthError(_(api.messages.HASHICORP_VAULT_CONNECTION_ERROR % (vault_address, str(err))))
         except BaseHTTPError as err:
-            errmsg = (
-                f"Failed to authenticate with HashiCorp Vault {vault_url}"
-                f" - BaseHTTPError {err}"
-            )
-            logger.error(errmsg)
-            raise HashiCorpVaultAuthError(errmsg)
+            logger.error(api.messages.HASHICORP_VAULT_HTTP_ERROR, vault_address, str(err))
+            raise HashiCorpVaultAuthError(_(api.messages.HASHICORP_VAULT_HTTP_ERROR % (vault_address, str(err))))

@@ -165,9 +165,15 @@ LIGHTSPEED_LOGOUT_SUCCESSFUL = "Logged out successfully"
 LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
 
 # HashiCorp Vault messages
-HASHICORP_VAULT_SINGLETON = "Only a single HashiCorp Vault server can be defined"
 HASHICORP_VAULT_NOT_DEFINED = "HashiCorp Vault server is not yet defined"
 HASHICORP_VAULT_ALREADY_EXISTS = "HashiCorp Vault server definition already exists"
+HASHICORP_VAULT_MUST_SPECIFY_CA_CERT = "Must specify a ca_cert when ssl_verify is True"
+HASHICORP_VAULT_FAILED_B64_DECODE_CERT = "Failed to base64 decode the HashiCorp Vault %s, error: %s"
+HASHICORP_VAULT_FAILED_DECODE_CERT = "Failed to decode the HashiCorp Vault %s, error: %s"
+HASHICORP_VAULT_AUTHENTICATED = "Authenticated with HashiCorp Vault %s"
+HASHICORP_VAULT_FAILED_AUTHENTICATION = "Failed to authenticate with HashiCorp Vault %s"
+HASHICORP_VAULT_CONNECTION_ERROR = "Failed to authenticate with HashiCorp Vault %s - ConnectionError %s"
+HASHICORP_VAULT_HTTP_ERROR = "Failed to authenticate with HashiCorp Vault %s - BaseHTTPError %s"
 
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."
