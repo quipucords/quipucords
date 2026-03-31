@@ -629,3 +629,8 @@ QUIPUCORDS_LIGHTSPEED_PORT = env.int("QUIPUCORDS_LIGHTSPEED_PORT", default=443)
 QUIPUCORDS_LIGHTSPEED_SSL_VERIFY = env.bool(
     "QUIPUCORDS_LIGHTSPEED_SSL_VERIFY", default=True
 )
+
+# Default timeout to connect to and query a HashiCorp Vault Server
+QUIPUCORDS_HASHICORP_VAULT_TIMEOUT = env.int(
+    "QUIPUCORDS_HASHICORP_VAULT_TIMEOUT", default=10
+)
