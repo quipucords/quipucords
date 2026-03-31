@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from logging import getLogger
 
 import hvac
+from django.conf import settings
 from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
@@ -154,11 +155,17 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
         if ssl_verify:
             ca_file.write(ca_file_content) and ca_file.flush()
             yield hvac.Client(
-                url=vault_url, cert=(cert_file.name, key_file.name), verify=ca_file.name
+                url=vault_url,
+                cert=(cert_file.name, key_file.name),
+                verify=ca_file.name,
+                timeout=settings.QUIPUCORDS_HASHICORP_VAULT_TIMEOUT,
             )
         else:
             yield hvac.Client(
-                url=vault_url, cert=(cert_file.name, key_file.name), verify=False
+                url=vault_url,
+                cert=(cert_file.name, key_file.name),
+                verify=False,
+                timeout=settings.QUIPUCORDS_HASHICORP_VAULT_TIMEOUT,
             )
 
 
