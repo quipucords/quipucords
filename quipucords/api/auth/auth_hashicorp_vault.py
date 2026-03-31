@@ -93,11 +93,17 @@ def decode_cert_from_content(cert_file_name, cert_file_content_b64) -> str | Non
         return cert_file_content
     except binascii.Error as err:
         raise ValueError(
-            _(api.messages.HASHICORP_VAULT_FAILED_B64_DECODE_CERT % (cert_file_name, str(err)))
+            _(
+                api.messages.HASHICORP_VAULT_FAILED_B64_DECODE_CERT
+                % (cert_file_name, str(err))
+            )
         )
     except UnicodeDecodeError as err:
         raise ValueError(
-            _(api.messages.HASHICORP_VAULT_FAILED_DECODE_CERT % (cert_file_name, str(err)))
+            _(
+                api.messages.HASHICORP_VAULT_FAILED_DECODE_CERT
+                % (cert_file_name, str(err))
+            )
         )
 
 
@@ -178,11 +184,24 @@ def hashicorp_vault_authenticate(vault_token=None, metadata=None) -> bool:
                 logger.debug(api.messages.HASHICORP_VAULT_AUTHENTICATED, vault_address)
                 return True
             else:
-                logger.error(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION, vault_address)
+                logger.error(
+                    api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION, vault_address
+                )
                 return False
         except ConnectionError as err:
-            logger.error(api.messages.HASHICORP_VAULT_CONNECTION_ERROR, vault_address, str(err))
-            raise HashiCorpVaultAuthError(_(api.messages.HASHICORP_VAULT_CONNECTION_ERROR % (vault_address, str(err))))
+            logger.error(
+                api.messages.HASHICORP_VAULT_CONNECTION_ERROR, vault_address, str(err)
+            )
+            raise HashiCorpVaultAuthError(
+                _(
+                    api.messages.HASHICORP_VAULT_CONNECTION_ERROR
+                    % (vault_address, str(err))
+                )
+            )
         except BaseHTTPError as err:
-            logger.error(api.messages.HASHICORP_VAULT_HTTP_ERROR, vault_address, str(err))
-            raise HashiCorpVaultAuthError(_(api.messages.HASHICORP_VAULT_HTTP_ERROR % (vault_address, str(err))))
+            logger.error(
+                api.messages.HASHICORP_VAULT_HTTP_ERROR, vault_address, str(err)
+            )
+            raise HashiCorpVaultAuthError(
+                _(api.messages.HASHICORP_VAULT_HTTP_ERROR % (vault_address, str(err)))
+            )

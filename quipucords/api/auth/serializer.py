@@ -8,6 +8,9 @@ from rest_framework.serializers import ValidationError
 
 import api.messages
 from api.auth.auth_hashicorp_vault import (
+    HASHICORP_VAULT_CA_CERT,
+    HASHICORP_VAULT_CLIENT_CERT,
+    HASHICORP_VAULT_CLIENT_KEY,
     HashiCorpVaultAuthError,
     decode_cert_from_content,
     get_or_create_hashicorp_vault_token,
@@ -33,7 +36,11 @@ class HashiCorpVaultSerializer(serializers.Serializer):
 
         # Note: exclude only works with Model serializers, removing them manually
         #       in the to_representation method.
-        exclude = ["client_key", "client_cert", "ca_cert"]
+        exclude = [
+            HASHICORP_VAULT_CLIENT_CERT,
+            HASHICORP_VAULT_CLIENT_KEY,
+            HASHICORP_VAULT_CA_CERT,
+        ]
 
     def is_valid(self, raise_exception=False):
         """Ensure that HashiCorp Vault is valid."""
@@ -76,15 +83,19 @@ class HashiCorpVaultSerializer(serializers.Serializer):
 
     def validate_client_cert(self, value):
         """Validate the client certificate is valid."""
-        return self.verify_client_cert_is_base64encoded("client_cert", value)
+        return self.verify_client_cert_is_base64encoded(
+            HASHICORP_VAULT_CLIENT_CERT, value
+        )
 
     def validate_client_key(self, value):
         """Validate the client key is valid."""
-        return self.verify_client_cert_is_base64encoded("client_key", value)
+        return self.verify_client_cert_is_base64encoded(
+            HASHICORP_VAULT_CLIENT_KEY, value
+        )
 
     def validate_ca_cert(self, value):
         """Validate the CA certificate is valid."""
-        return self.verify_client_cert_is_base64encoded("ca_cert", value)
+        return self.verify_client_cert_is_base64encoded(HASHICORP_VAULT_CA_CERT, value)
 
     def validate(self, data):
         """Validate the data is valid and we can communicate with HashiCorp Vault."""
@@ -92,8 +103,10 @@ class HashiCorpVaultSerializer(serializers.Serializer):
 
         errors = {}
         ssl_verify = attrs.get("ssl_verify", True)
-        if ssl_verify and attrs.get("ca_cert", None) is None:
-            errors["ca_cert"] = _(api.messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT)
+        if ssl_verify and attrs.get(HASHICORP_VAULT_CA_CERT, None) is None:
+            errors[HASHICORP_VAULT_CA_CERT] = _(
+                api.messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT
+            )
 
         if errors:
             raise ValidationError(errors)
@@ -101,7 +114,12 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         try:
             if not hashicorp_vault_authenticate(metadata=attrs):
                 vault_address = hashicorp_vault_address(attrs)
-                raise ValidationError(_(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address))
+                raise ValidationError(
+                    _(
+                        api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION
+                        % vault_address
+                    )
+                )
         except HashiCorpVaultAuthError as err:
             raise ValidationError(err.message)
 
