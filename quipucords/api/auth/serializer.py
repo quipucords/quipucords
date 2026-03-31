@@ -1,15 +1,18 @@
 """Serializers for auth API endpoints."""
 
+from django.conf import settings
 from django.db import transaction
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
+import api.messages
 from api.auth.auth_hashicorp_vault import (
     HashiCorpVaultAuthError,
     decode_cert_from_content,
     get_or_create_hashicorp_vault_token,
+    hashicorp_vault_address,
     hashicorp_vault_authenticate,
-    hashicorp_vault_url,
 )
 
 
@@ -17,7 +20,9 @@ class HashiCorpVaultSerializer(serializers.Serializer):
     """Define a serializer for the HashiCorp Vault API."""
 
     address = serializers.CharField(required=True)
-    port = serializers.IntegerField(required=False, default=8200)
+    port = serializers.IntegerField(
+        required=False, default=settings.QUIPUCORDS_HASHICORP_VAULT_DEFAULT_PORT
+    )
     ssl_verify = serializers.BooleanField(required=False, default=True)
     client_key = serializers.CharField(required=True)
     client_cert = serializers.CharField(required=True)
@@ -88,17 +93,15 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         errors = {}
         ssl_verify = attrs.get("ssl_verify", True)
         if ssl_verify and attrs.get("ca_cert", None) is None:
-            errors["ca_cert"] = "Must specify a ca_cert with ssl_verify is True"
+            errors["ca_cert"] = _(api.messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT)
 
         if errors:
             raise ValidationError(errors)
 
         try:
             if not hashicorp_vault_authenticate(metadata=attrs):
-                vault_url = hashicorp_vault_url(attrs)
-                raise ValidationError(
-                    f"Failed to authenticate with HashiCorp Vault {vault_url}"
-                )
+                vault_address = hashicorp_vault_address(attrs)
+                raise ValidationError(_(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address))
         except HashiCorpVaultAuthError as err:
             raise ValidationError(err.message)
 
