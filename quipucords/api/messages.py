@@ -148,7 +148,7 @@ LIGHTSPEED_LOGOUT_SUCCESSFUL = "Logged out successfully"
 LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
 
 # HashiCorp Vault messages
-HASHICORP_VAULT_NOT_DEFINED = "HashiCorp Vault server is not yet defined"
+HASHICORP_VAULT_NOT_DEFINED = "HashiCorp Vault server is not defined"
 HASHICORP_VAULT_ALREADY_EXISTS = "HashiCorp Vault server definition already exists"
 HASHICORP_VAULT_MUST_SPECIFY_CA_CERT = "Must specify a ca_cert when ssl_verify is True"
 HASHICORP_VAULT_FAILED_B64_DECODE_CERT = (
