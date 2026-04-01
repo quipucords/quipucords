@@ -69,6 +69,25 @@ class TestLightspeedAuthStatus:
 
     def test_failed_lightspeed_login(
         self,
+        client_logged_in,
+        qpc_user_simple,
+        lightspeed_user_metadata,
+    ):
+        """Test a failed Lightspeed status returns error in the Error detail."""
+        token_metadata = lightspeed_user_metadata | {
+            "status": AuthStatus.FAILED.value,
+            "status_reason": messages.LIGHTSPEED_INVALID_TOKEN,
+        }
+        create_lightspeed_secure_token(qpc_user_simple, token_metadata)
+
+        response = client_logged_in.get(reverse("v2:lightspeed-auth-status"))
+        assert response.ok
+        response_json = response.json()
+        assert response_json["status"] == AuthStatus.FAILED.value
+        assert response_json["metadata"] == token_metadata
+
+    def test_lightspeed_login_exception(
+        self,
         mocker,
         client_logged_in,
     ):
