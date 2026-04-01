@@ -278,7 +278,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
             ],
         ),
         responses={
-            (200, "application/json"): OpenApiResponse(
+            (201, "application/json"): OpenApiResponse(
                 description="Successful HashiCorp Vault server created",
                 response=HashiCorpVaultResponseSerializer(),
                 examples=[

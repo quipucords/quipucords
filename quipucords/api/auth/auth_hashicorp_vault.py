@@ -144,6 +144,16 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
         HASHICORP_VAULT_CA_CERT, metadata.get(HASHICORP_VAULT_CA_CERT, None)
     )
 
+    if client_cert_content is None:
+        raise HashiCorpVaultAuthError(
+            _(api.messages.HASHICORP_VAULT_VALID_CLIENT_CERT_REQUIRED)
+        )
+
+    if client_key_content is None:
+        raise HashiCorpVaultAuthError(
+            _(api.messages.HASHICORP_VAULT_VALID_CLIENT_KEY_REQUIRED)
+        )
+
     with (
         tempfile.NamedTemporaryFile(delete=True) as cert_file,
         tempfile.NamedTemporaryFile(delete=True) as key_file,
@@ -155,7 +165,12 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
         key_file.flush()
 
         if ssl_verify:
-            ca_file.write(ca_file_content) and ca_file.flush()
+            if ca_file_content is None:
+                raise HashiCorpVaultAuthError(
+                    _(api.messages.HASHICORP_VAULT_VALID_CA_CERT_REQUIRED)
+                )
+            ca_file.write(ca_file_content.encode("utf-8"))
+            ca_file.flush()
             yield hvac.Client(
                 url=vault_url,
                 cert=(cert_file.name, key_file.name),
