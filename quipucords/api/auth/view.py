@@ -99,12 +99,7 @@ def lightspeed_auth_login(request):
 @renderer_classes([JSONRenderer])
 def lightspeed_auth_logout(request):
     """Do an Authentication Logout for the current user."""
-    try:
-        serializer = lightspeed_logout_request(request.user)
-    except LightspeedAuthError as err:
-        return Response(
-            {"detail": _(err.message)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+    serializer = lightspeed_logout_request(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -162,10 +157,5 @@ def lightspeed_auth_logout(request):
 @renderer_classes([JSONRenderer])
 def lightspeed_auth_status(request):
     """Request the status about a Lightspeed Authentication for the current user."""
-    try:
-        serializer = user_lightspeed_auth_status(request.user)
-    except LightspeedAuthError as err:
-        return Response(
-            {"detail": _(err.message)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+    serializer = user_lightspeed_auth_status(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
