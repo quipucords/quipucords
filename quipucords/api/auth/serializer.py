@@ -126,6 +126,14 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         return attrs
 
 
+class HashiCorpVaultResponseSerializer(serializers.Serializer):
+    """Define a serializer for the HashiCorp Vault API Response."""
+
+    address = serializers.CharField(required=True)
+    port = serializers.IntegerField(required=True)
+    ssl_verify = serializers.BooleanField(required=True)
+
+
 class LightspeedAuthLoginResponseSerializer(serializers.Serializer):
     """Define a serializer for successful auth login response."""
 
