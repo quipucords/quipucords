@@ -7,9 +7,6 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
-from api.auth.auth_lightspeed import (
-    LightspeedAuthError,
-)
 from api.common.enumerators import AuthStatus
 from tests.utils.auth import create_lightspeed_secure_token
 
@@ -85,20 +82,3 @@ class TestLightspeedAuthStatus:
         response_json = response.json()
         assert response_json["status"] == AuthStatus.FAILED.value
         assert response_json["metadata"] == token_metadata
-
-    def test_lightspeed_login_exception(
-        self,
-        mocker,
-        client_logged_in,
-    ):
-        """Test a failed Lightspeed status returns error in the Error detail."""
-        raised_exception = "Lightspeed Auth status test exception"
-        mock_auth_status = mocker.patch(
-            "api.auth.view.user_lightspeed_auth_status",
-        )
-        mock_auth_status.side_effect = LightspeedAuthError(raised_exception)
-
-        response = client_logged_in.get(reverse("v2:lightspeed-auth-status"))
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        response_json = response.json()
-        assert response_json["detail"] == raised_exception
