@@ -15,6 +15,7 @@ class PublishRequestSerializer(ModelSerializer):
         fields = [
             "report_id",
             "status",
+            "error_code",
             "error_message",
             "created_at",
             "updated_at",

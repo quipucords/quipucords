@@ -17,6 +17,7 @@ from api.publish.tasks import request_publish
 _PUBLISH_RESPONSE_EXAMPLE = {
     "report_id": 1,
     "status": "pending",
+    "error_code": "",
     "error_message": "",
     "created_at": "2026-03-26T18:00:00.000000Z",
     "updated_at": "2026-03-26T18:00:00.000000Z",
@@ -39,6 +40,7 @@ _PUBLISH_RESPONSE_EXAMPLE = {
                     value={
                         **_PUBLISH_RESPONSE_EXAMPLE,
                         "status": "failed",
+                        "error_code": "network_unreachable",
                         "error_message": "Connection error: Connection refused",
                     },
                 ),
@@ -74,7 +76,10 @@ _PUBLISH_RESPONSE_EXAMPLE = {
             examples=[
                 OpenApiExample(
                     "Not publishable",
-                    value={"detail": "Report cannot be published: not_complete"},
+                    value={
+                        "code": "invalid_report",
+                        "message": "Report cannot be published: not_complete",
+                    },
                 ),
             ],
         ),
@@ -86,7 +91,10 @@ _PUBLISH_RESPONSE_EXAMPLE = {
             examples=[
                 OpenApiExample(
                     "Already pending",
-                    value={"detail": messages.PUBLISH_ALREADY_PENDING},
+                    value={
+                        "code": "already_pending",
+                        "message": messages.PUBLISH_ALREADY_PENDING,
+                    },
                 ),
             ],
         ),
@@ -121,14 +129,21 @@ def _create_publish(report, user):
     cannot_publish_reason = get_cannot_publish_reason(report, user)
     if cannot_publish_reason is not None:
         return Response(
-            {"detail": messages.PUBLISH_NOT_PUBLISHABLE % cannot_publish_reason.value},
+            {
+                "code": PublishRequest.ErrorCode.INVALID_REPORT,
+                "message": messages.PUBLISH_NOT_PUBLISHABLE
+                % cannot_publish_reason.value,
+            },
             status=http.HTTPStatus.BAD_REQUEST,
         )
 
     existing = _get_latest_publish_request(report)
     if existing and existing.status == PublishRequest.Status.PENDING:
         return Response(
-            {"detail": messages.PUBLISH_ALREADY_PENDING},
+            {
+                "code": "already_pending",
+                "message": messages.PUBLISH_ALREADY_PENDING,
+            },
             status=http.HTTPStatus.CONFLICT,
         )
 
