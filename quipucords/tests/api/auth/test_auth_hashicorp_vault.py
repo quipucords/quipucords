@@ -435,11 +435,11 @@ class TestHashiCorpVaultCreate:
         )
 
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
-        err_message = response.data["non_field_errors"][0]
+        response_json = response.json()
         vault_address = hashicorp_vault_address(hashicorp_vault_data)
-        assert (messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address) in str(
-            err_message
-        )
+        assert (
+            messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address
+        ) in response_json["detail"]
 
     def test_create_hashicorp_vault_connection_error(
         self, client_logged_in, hashicorp_vault_data, mocker
@@ -458,13 +458,12 @@ class TestHashiCorpVaultCreate:
         )
 
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
-        err_message = response.data["non_field_errors"][0]
+        response_json = response.json()
         vault_address = hashicorp_vault_address(hashicorp_vault_data)
-        vault_err_message = (
+        assert (
             messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address
-        )
-        assert vault_err_message in str(err_message)
-        assert "ConnectionError: Connection refused" in str(err_message)
+        ) in response_json["detail"]
+        assert "ConnectionError: Connection refused" in response_json["detail"]
 
     def test_create_hashicorp_vault_invalid_port(
         self, client_logged_in, hashicorp_vault_data
@@ -597,7 +596,8 @@ class TestHashiCorpVaultUpdate:
         )
 
         assert response.status_code == http.HTTPStatus.NOT_FOUND
-        assert messages.HASHICORP_VAULT_NOT_DEFINED in response.data["detail"]
+        response_json = response.json()
+        assert messages.HASHICORP_VAULT_NOT_DEFINED in response_json["detail"]
 
     def test_update_hashicorp_vault_missing_required_field(
         self, client_logged_in, hashicorp_vault_data, mocker
@@ -656,11 +656,11 @@ class TestHashiCorpVaultUpdate:
         )
 
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        response_json = response.json()
         vault_address = hashicorp_vault_address(updated_data)
-        err_message = response.data["non_field_errors"][0]
-        assert (messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address) in str(
-            err_message
-        )
+        assert (
+            messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address
+        ) in response_json["detail"]
 
 
 @pytest.mark.django_db
@@ -752,7 +752,8 @@ class TestHashiCorpVaultPartialUpdate:
         )
 
         assert response.status_code == http.HTTPStatus.NOT_FOUND
-        assert messages.HASHICORP_VAULT_NOT_DEFINED in response.data["detail"]
+        response_json = response.json()
+        assert messages.HASHICORP_VAULT_NOT_DEFINED in response_json["detail"]
 
     def test_partial_update_hashicorp_vault_invalid_port(
         self, client_logged_in, hashicorp_vault_data, mocker

@@ -18,6 +18,7 @@ from rest_framework.response import Response
 
 from api import messages
 from api.auth.auth_hashicorp_vault import (
+    HashiCorpVaultAuthError,
     delete_hashicorp_vault_token,
     get_hashicorp_vault_token,
 )
@@ -321,8 +322,12 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
+        except HashiCorpVaultAuthError as err:
+            return Response(
+                {"detail": _(err.message)}, status=status.HTTP_400_BAD_REQUEST
+            )
         except ValidationError as err:
-            return Response({"detail": err.message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(err.message, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -389,8 +394,12 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
         )
         try:
             serializer.is_valid(raise_exception=True)
+        except HashiCorpVaultAuthError as err:
+            return Response(
+                {"detail": _(err.message)}, status=status.HTTP_400_BAD_REQUEST
+            )
         except ValidationError as err:
-            return Response({"detail": err.message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(err.message, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data)
 
