@@ -141,6 +141,7 @@ def test_publish_to_ingress_success(publish_request, secure_token_valid, mocker)
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.SENT
+    assert publish_request.error_code == ""
     assert publish_request.error_message == ""
     assert publish_request.updated_at > original_updated_at
 
@@ -181,6 +182,7 @@ def test_publish_to_ingress_payload_generation_failure(
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.SERVER_ERROR
     assert "serializer exploded" in publish_request.error_message
 
 
@@ -210,6 +212,7 @@ def test_publish_to_ingress_missing_auth_token(publish_request):
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.EXPIRED_TOKEN
     assert publish_request.error_message == messages.PUBLISH_NO_AUTH_TOKEN
 
 
@@ -219,6 +222,7 @@ def test_publish_to_ingress_expired_auth_token(publish_request, secure_token_exp
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.EXPIRED_TOKEN
     assert publish_request.error_message == messages.PUBLISH_TOKEN_EXPIRED
 
 
@@ -237,6 +241,7 @@ def test_publish_to_ingress_auth_rejected(publish_request, secure_token_valid, m
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.EXPIRED_TOKEN
     assert messages.PUBLISH_AUTH_REJECTED % "Invalid credentials" in (
         publish_request.error_message
     )
@@ -260,6 +265,7 @@ def test_publish_to_ingress_connection_error(
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.NETWORK_UNREACHABLE
     assert err_message in publish_request.error_message
 
 
@@ -281,6 +287,7 @@ def test_publish_to_ingress_base_http_error(
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.NETWORK_UNREACHABLE
     assert err_message in publish_request.error_message
 
 
@@ -299,6 +306,7 @@ def test_publish_to_ingress_client_error(publish_request, secure_token_valid, mo
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.SERVER_ERROR
     assert "404" in publish_request.error_message
     assert "Not Found" in publish_request.error_message
     assert "bug in Discovery" in publish_request.error_message
@@ -319,6 +327,7 @@ def test_publish_to_ingress_server_error(publish_request, secure_token_valid, mo
 
     publish_request.refresh_from_db()
     assert publish_request.status == PublishRequest.Status.FAILED
+    assert publish_request.error_code == PublishRequest.ErrorCode.SERVER_ERROR
     assert "500" in publish_request.error_message
     assert "Internal Server Error" in publish_request.error_message
     assert "try again later" in publish_request.error_message

@@ -16,6 +16,14 @@ class PublishRequest(BaseModel):
         SENT = "sent"
         FAILED = "failed"
 
+    class ErrorCode(models.TextChoices):
+        """Machine-readable error reason for failed publish requests."""
+
+        EXPIRED_TOKEN = "expired_token"  # noqa: S105
+        NETWORK_UNREACHABLE = "network_unreachable"
+        INVALID_REPORT = "invalid_report"
+        SERVER_ERROR = "server_error"
+
     report = models.ForeignKey(
         "Report", on_delete=models.CASCADE, related_name="publish_requests"
     )
@@ -24,5 +32,8 @@ class PublishRequest(BaseModel):
     )
     status = models.CharField(
         max_length=16, choices=Status.choices, default=Status.PENDING
+    )
+    error_code = models.CharField(
+        max_length=32, choices=ErrorCode.choices, blank=True, default=""
     )
     error_message = models.TextField(blank=True, default="")

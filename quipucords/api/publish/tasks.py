@@ -33,10 +33,16 @@ def _get_auth_token(user):
     """Retrieve and validate the user's auth token."""
     secure_token = get_lightspeed_secure_token(user)
     if not secure_token or not secure_token.token:
-        raise PublishError(messages.PUBLISH_NO_AUTH_TOKEN)
+        raise PublishError(
+            messages.PUBLISH_NO_AUTH_TOKEN,
+            error_code=PublishRequest.ErrorCode.EXPIRED_TOKEN,
+        )
 
     if secure_token.is_expired():
-        raise PublishError(messages.PUBLISH_TOKEN_EXPIRED)
+        raise PublishError(
+            messages.PUBLISH_TOKEN_EXPIRED,
+            error_code=PublishRequest.ErrorCode.EXPIRED_TOKEN,
+        )
 
     return secure_token.token
 
@@ -58,7 +64,10 @@ def _post_to_ingress(report_id, tarball, auth_token):
             verify=settings.QUIPUCORDS_LIGHTSPEED_SSL_VERIFY,
         )
     except (ConnectionError, BaseHTTPError) as err:
-        raise PublishError(messages.PUBLISH_CONNECTION_ERROR % err) from err
+        raise PublishError(
+            messages.PUBLISH_CONNECTION_ERROR % err,
+            error_code=PublishRequest.ErrorCode.NETWORK_UNREACHABLE,
+        ) from err
 
     if response.ok:
         logger.info(
@@ -70,14 +79,24 @@ def _post_to_ingress(report_id, tarball, auth_token):
 
     status = response.status_code
     if status == http.HTTPStatus.UNAUTHORIZED:
-        raise PublishError(messages.PUBLISH_AUTH_REJECTED % response.text)
+        raise PublishError(
+            messages.PUBLISH_AUTH_REJECTED % response.text,
+            error_code=PublishRequest.ErrorCode.EXPIRED_TOKEN,
+        )
     elif http.HTTPStatus.BAD_REQUEST <= status < http.HTTPStatus.INTERNAL_SERVER_ERROR:
-        raise PublishError(messages.PUBLISH_CLIENT_ERROR % (status, response.text))
+        raise PublishError(
+            messages.PUBLISH_CLIENT_ERROR % (status, response.text),
+            error_code=PublishRequest.ErrorCode.SERVER_ERROR,
+        )
     elif status >= http.HTTPStatus.INTERNAL_SERVER_ERROR:
-        raise PublishError(messages.PUBLISH_SERVER_ERROR % (status, response.text))
+        raise PublishError(
+            messages.PUBLISH_SERVER_ERROR % (status, response.text),
+            error_code=PublishRequest.ErrorCode.SERVER_ERROR,
+        )
     else:
         raise PublishError(
-            messages.PUBLISH_UNEXPECTED_RESPONSE % (status, response.text)
+            messages.PUBLISH_UNEXPECTED_RESPONSE % (status, response.text),
+            error_code=PublishRequest.ErrorCode.SERVER_ERROR,
         )
 
 
@@ -112,7 +131,12 @@ def publish_to_ingress(*, publish_request_id):
             report_id,
             err,
         )
-        _save_result(publish_request, PublishRequest.Status.FAILED, str(err))
+        _save_result(
+            publish_request,
+            PublishRequest.Status.FAILED,
+            error_message=str(err),
+            error_code=err.error_code,
+        )
         return
     except Exception as err:
         logger.exception(
@@ -124,14 +148,15 @@ def publish_to_ingress(*, publish_request_id):
         _save_result(
             publish_request,
             PublishRequest.Status.FAILED,
-            messages.PUBLISH_PAYLOAD_FAILED % err,
+            error_message=messages.PUBLISH_PAYLOAD_FAILED % err,
+            error_code=PublishRequest.ErrorCode.SERVER_ERROR,
         )
         return
 
     _save_result(publish_request, PublishRequest.Status.SENT)
 
 
-def _save_result(publish_request, status, error_message=""):
+def _save_result(publish_request, status, error_message="", error_code=""):
     """Save task result, skipping if a newer publish has taken over."""
     publish_request.refresh_from_db()
     if publish_request.status != PublishRequest.Status.PENDING:
@@ -142,6 +167,7 @@ def _save_result(publish_request, status, error_message=""):
         )
         return
     publish_request.status = status
+    publish_request.error_code = error_code
     publish_request.error_message = error_message
     publish_request.save()
 
