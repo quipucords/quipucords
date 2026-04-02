@@ -45,6 +45,7 @@ def test_post_publish_success(
     data = response.json()
     assert data["report_id"] == publishable_report.id
     assert data["status"] == "pending"
+    assert data["error_code"] == ""
     assert data["error_message"] == ""
     assert "created_at" in data
     assert "updated_at" in data
@@ -62,7 +63,9 @@ def test_post_publish_not_publishable(client_logged_in, unpublishable_report):
     response = client_logged_in.post(_url(unpublishable_report.id))
 
     assert response.status_code == 400
-    assert "cannot be published" in response.json()["detail"]
+    data = response.json()
+    assert data["code"] == PublishRequest.ErrorCode.INVALID_REPORT
+    assert "cannot be published" in data["message"]
 
 
 def test_post_publish_already_pending(
@@ -75,7 +78,9 @@ def test_post_publish_already_pending(
     response = client_logged_in.post(_url(publishable_report.id))
 
     assert response.status_code == 409
-    assert response.json()["detail"] == messages.PUBLISH_ALREADY_PENDING
+    data = response.json()
+    assert data["code"] == "already_pending"
+    assert data["message"] == messages.PUBLISH_ALREADY_PENDING
 
 
 def test_post_publish_after_failed(
@@ -93,6 +98,7 @@ def test_post_publish_after_failed(
 
     assert response.status_code == 201
     assert response.json()["status"] == "pending"
+    assert response.json()["error_code"] == ""
     assert response.json()["error_message"] == ""
 
 
@@ -133,6 +139,7 @@ def test_get_publish_status(client_logged_in, publishable_report, qpc_user_simpl
     data = response.json()
     assert data["report_id"] == publishable_report.id
     assert data["status"] == "sent"
+    assert data["error_code"] == ""
 
 
 def test_get_publish_status_returns_latest(
@@ -156,6 +163,7 @@ def test_get_publish_status_returns_latest(
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "pending"
+    assert data["error_code"] == ""
     assert data["error_message"] == ""
     assert data["created_at"] == latest.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
