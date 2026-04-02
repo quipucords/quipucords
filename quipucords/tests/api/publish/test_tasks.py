@@ -98,6 +98,24 @@ def test_request_publish_creates_and_dispatches(report, qpc_user_simple, mocker)
     mock_delay.assert_called_once_with(publish_request_id=result.id)
 
 
+def test_request_publish_after_failed_creates_new(report, qpc_user_simple, mocker):
+    """Test that request_publish creates a new PublishRequest after a failure."""
+    mock_delay = mocker.patch("api.publish.tasks.publish_to_ingress.delay")
+    PublishRequest.objects.create(
+        report=report,
+        user=qpc_user_simple,
+        status=PublishRequest.Status.FAILED,
+        error_message="previous error",
+    )
+
+    result = request_publish(report, qpc_user_simple)
+
+    assert result.status == PublishRequest.Status.PENDING
+    assert result.error_message == ""
+    assert PublishRequest.objects.filter(report=report).count() == 2
+    mock_delay.assert_called_once_with(publish_request_id=result.id)
+
+
 def test_publish_to_ingress_nonexistent_request(faker, caplog):
     """Test that a missing PublishRequest logs an error and returns."""
     nonexistent_id = faker.pyint(min_value=990000, max_value=999999)
@@ -125,6 +143,29 @@ def test_publish_to_ingress_success(publish_request, secure_token_valid, mocker)
     assert publish_request.status == PublishRequest.Status.SENT
     assert publish_request.error_message == ""
     assert publish_request.updated_at > original_updated_at
+
+
+def test_publish_to_ingress_skips_save_when_no_longer_pending(
+    publish_request, secure_token_valid, mocker, caplog
+):
+    """Test that a stale task does not overwrite a newer publish attempt."""
+    mocker.patch(
+        "api.publish.tasks.generate_insights_tarball",
+        return_value=BytesIO(b"data"),
+    )
+    mock_post = mocker.patch("api.publish.tasks.requests.post")
+    mock_post.return_value.ok = True
+    mock_post.return_value.text = "OK"
+
+    publish_request.status = PublishRequest.Status.SENT
+    publish_request.save()
+
+    with caplog.at_level(logging.WARNING, logger="api.publish.tasks"):
+        publish_to_ingress(publish_request_id=publish_request.id)
+
+    publish_request.refresh_from_db()
+    assert publish_request.status == PublishRequest.Status.SENT
+    assert "no longer pending" in caplog.text
 
 
 def test_publish_to_ingress_payload_generation_failure(

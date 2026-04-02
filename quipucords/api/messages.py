@@ -192,3 +192,7 @@ PUBLISH_CLIENT_ERROR = (
 )
 PUBLISH_SERVER_ERROR = "Ingress server error (%s): %s. Please try again later."
 PUBLISH_UNEXPECTED_RESPONSE = "Unexpected response (%s): %s"
+
+# Publish API messages
+PUBLISH_NOT_PUBLISHABLE = "Report cannot be published: %s"
+PUBLISH_ALREADY_PENDING = "A publish is already in progress for this report."

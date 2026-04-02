@@ -112,9 +112,7 @@ def publish_to_ingress(*, publish_request_id):
             report_id,
             err,
         )
-        publish_request.status = PublishRequest.Status.FAILED
-        publish_request.error_message = str(err)
-        publish_request.save()
+        _save_result(publish_request, PublishRequest.Status.FAILED, str(err))
         return
     except Exception as err:
         logger.exception(
@@ -123,18 +121,37 @@ def publish_to_ingress(*, publish_request_id):
             report_id,
             err,
         )
-        publish_request.status = PublishRequest.Status.FAILED
-        publish_request.error_message = messages.PUBLISH_PAYLOAD_FAILED % err
-        publish_request.save()
+        _save_result(
+            publish_request,
+            PublishRequest.Status.FAILED,
+            messages.PUBLISH_PAYLOAD_FAILED % err,
+        )
         return
 
-    publish_request.status = PublishRequest.Status.SENT
+    _save_result(publish_request, PublishRequest.Status.SENT)
+
+
+def _save_result(publish_request, status, error_message=""):
+    """Save task result, skipping if a newer publish has taken over."""
+    publish_request.refresh_from_db()
+    if publish_request.status != PublishRequest.Status.PENDING:
+        logger.warning(
+            "PublishRequest %d is no longer pending (status=%s), skipping update.",
+            publish_request.id,
+            publish_request.status,
+        )
+        return
+    publish_request.status = status
+    publish_request.error_message = error_message
     publish_request.save()
 
 
 def request_publish(report, user):
-    """Create a PublishRequest and dispatch the Celery task."""
-    publish_request = PublishRequest.objects.create(report=report, user=user)
+    """Create a new PublishRequest and dispatch the Celery task."""
+    publish_request = PublishRequest.objects.create(
+        report=report,
+        user=user,
+    )
     publish_to_ingress.delay(publish_request_id=publish_request.id)
     logger.info(
         "PublishRequest %d created for report %d by user %s.",
