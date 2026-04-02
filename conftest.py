@@ -86,6 +86,15 @@ def qpc_user_simple(faker):
     return get_user_model().objects.create(username=faker.user_name())
 
 
+@pytest.fixture
+def user_with_lightspeed_token(qpc_user_simple, lightspeed_user_metadata):
+    """Ensure user has valid Lightspeed token."""
+    from tests.utils.auth import create_lightspeed_secure_token
+
+    create_lightspeed_secure_token(qpc_user_simple, lightspeed_user_metadata)
+    return qpc_user_simple
+
+
 class ResponseMixin:
     """Mixin intended to expand Django's Response with QoL features from requests."""
 
