@@ -35,7 +35,6 @@ dependencies = [
     "pexpect<5.0.0,>=4.8.0",
     "psycopg[c]<4.0.0,>=3.2.3",
     "pydantic<2.0.0,>=1.10.4",
-    "rpds-py<1.0.0,>=0.30.0",
     "pyyaml<7.0.0,>=6.0.1",
     "requests<3.0.0,>=2.32.2",
     "whitenoise<7.0.0,>=6.3.0",
