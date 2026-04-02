@@ -2,7 +2,6 @@
 
 import logging
 
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import (
@@ -13,6 +12,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
@@ -337,7 +337,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                 {"detail": _(err.message)}, status=status.HTTP_400_BAD_REQUEST
             )
         except ValidationError as err:
-            return Response(err.message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -409,7 +409,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                 {"detail": _(err.message)}, status=status.HTTP_400_BAD_REQUEST
             )
         except ValidationError as err:
-            return Response(err.message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data)
 
