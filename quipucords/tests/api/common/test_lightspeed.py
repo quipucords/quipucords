@@ -10,13 +10,6 @@ from tests.factories import DeploymentReportFactory, ReportFactory
 from tests.utils.auth import create_lightspeed_secure_token
 
 
-@pytest.fixture
-def user_with_lightspeed_token(qpc_user_simple, lightspeed_user_metadata):
-    """Ensure user has valid Lightspeed token."""
-    create_lightspeed_secure_token(qpc_user_simple, lightspeed_user_metadata)
-    return qpc_user_simple
-
-
 @pytest.mark.django_db
 def test_get_can_publish_and_reason_report_can_publish(user_with_lightspeed_token):
     """Test report with complete deployment and hosts can be published."""

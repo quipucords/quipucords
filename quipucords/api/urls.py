@@ -27,6 +27,7 @@ from api.views import (
     lightspeed_auth_logout,
     lightspeed_auth_status,
     ping,
+    publish_report,
     reports,
     status,
     upload_raw_facts,
@@ -84,6 +85,7 @@ v2_urls = [
         "reports/<int:report_id>/raw/", RawFactsReportView.as_view(), name="report-raw"
     ),
     path("reports/<int:report_id>/download/", download_report, name="download-report"),
+    path("reports/<int:report_id>/publish/", publish_report, name="report-publish"),
 ]
 
 urlpatterns = [
