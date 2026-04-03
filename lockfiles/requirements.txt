@@ -83,6 +83,8 @@ fqdn==1.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     # via quipucords
 gunicorn==25.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
+hvac==2.4.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+    # via quipucords
 idna==3.11 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
 inflection==0.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -160,6 +162,7 @@ referencing==0.37.0 ; (implementation_name == 'cpython' and sys_platform == 'dar
     #   jsonschema-specifications
 requests==2.33.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
+    #   hvac
     #   kubernetes
     #   quipucords
     #   requests-oauthlib

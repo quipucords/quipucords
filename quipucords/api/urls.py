@@ -8,6 +8,7 @@ from api.scan.view import scan_bulk_delete
 from api.views import (
     CredentialViewSetV1,
     CredentialViewSetV2,
+    HashiCorpVaultViewSet,
     QuipucordsExpiringAuthTokenView,
     RawFactsReportView,
     ReportViewSet,
@@ -73,6 +74,20 @@ v1_urls = [
 
 v2_urls = [
     *ROUTER_V2.urls,
+    # HashiCorp Vault singleton endpoint - maps all HTTP methods to base endpoint
+    path(
+        "auth/hashicorp-vault/",
+        HashiCorpVaultViewSet.as_view(
+            {
+                "get": "retrieve",
+                "post": "create",
+                "put": "update",
+                "patch": "partial_update",
+                "delete": "destroy",
+            }
+        ),
+        name="hashicorp-vault",
+    ),
     path("auth/lightspeed/login/", lightspeed_auth_login, name="lightspeed-auth-login"),
     path(
         "auth/lightspeed/logout/", lightspeed_auth_logout, name="lightspeed-auth-logout"
