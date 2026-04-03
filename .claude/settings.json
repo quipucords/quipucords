@@ -1,0 +1,31 @@
+{
+  "additionalDirectories": [
+    "../qpc",
+    "../quipucords-ui",
+    "../quipucordsctl"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(make lint)",
+      "Bash(make serve)",
+      "Bash(make celery-worker)",
+      "Bash(rpm run start:using-server)"
+    ],
+    "deny": [
+      "Bash(rm:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "make lint"
+          }
+        ]
+      }
+    ]
+  }
+}
