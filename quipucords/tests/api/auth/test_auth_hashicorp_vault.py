@@ -350,6 +350,57 @@ class TestHashiCorpVaultCreate:
         err_message = response.data["address"][0]
         assert "This field is required" in str(err_message)
 
+    def test_create_hashicorp_vault_empty_address(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an empty address."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data["address"] = ""
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["address"][0]
+        assert "This field may not be blank" in str(err_message)
+
+    def test_create_hashicorp_vault_invalid_ssl_verify(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an invalid ssl_verify."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data["ssl_verify"] = "Not-Boolean"
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["ssl_verify"][0]
+        assert "Must be a valid boolean" in str(err_message)
+
+    def test_create_hashicorp_vault_empty_ssl_verify(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an empty ssl_verify."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data["ssl_verify"] = ""
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["ssl_verify"][0]
+        assert "Must be a valid boolean" in str(err_message)
+
     def test_create_hashicorp_vault_missing_client_cert(
         self, client_logged_in, hashicorp_vault_data
     ):
@@ -367,6 +418,23 @@ class TestHashiCorpVaultCreate:
         err_message = response.data[HASHICORP_VAULT_CLIENT_CERT][0]
         assert "This field is required" in str(err_message)
 
+    def test_create_hashicorp_vault_empty_client_cert(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an empty client_cert field."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data[HASHICORP_VAULT_CLIENT_CERT] = ""
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data[HASHICORP_VAULT_CLIENT_CERT][0]
+        assert "This field may not be blank" in str(err_message)
+
     def test_create_hashicorp_vault_missing_client_key(
         self, client_logged_in, hashicorp_vault_data
     ):
@@ -383,6 +451,23 @@ class TestHashiCorpVaultCreate:
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data[HASHICORP_VAULT_CLIENT_KEY][0]
         assert "This field is required" in str(err_message)
+
+    def test_create_hashicorp_vault_empty_client_key(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an empty client_key field."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data[HASHICORP_VAULT_CLIENT_KEY] = ""
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data[HASHICORP_VAULT_CLIENT_KEY][0]
+        assert "This field may not be blank" in str(err_message)
 
     def test_create_hashicorp_vault_invalid_base64_cert(
         self, client_logged_in, hashicorp_vault_data
@@ -421,6 +506,23 @@ class TestHashiCorpVaultCreate:
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data[HASHICORP_VAULT_CA_CERT][0]
         assert messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT in str(err_message)
+
+    def test_create_hashicorp_vault_ssl_verify_with_an_empty_ca_cert(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with ssl_verify=True but no ca_cert."""
+        invalid_data = {**hashicorp_vault_data, "ssl_verify": True}
+        invalid_data[HASHICORP_VAULT_CA_CERT] = ""
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data[HASHICORP_VAULT_CA_CERT][0]
+        assert "This field may not be blank" in str(err_message)
 
     def test_create_hashicorp_vault_authentication_failure(
         self, client_logged_in, hashicorp_vault_data, mocker
@@ -474,6 +576,22 @@ class TestHashiCorpVaultCreate:
     ):
         """Test creating a HashiCorp Vault with invalid port."""
         invalid_data = {**hashicorp_vault_data, "port": "not-an-integer"}
+
+        response = client_logged_in.post(
+            reverse("v2:hashicorp-vault"),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["port"][0]
+        assert "A valid integer is required" in str(err_message)
+
+    def test_create_hashicorp_vault_empty_port(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with invalid port."""
+        invalid_data = {**hashicorp_vault_data, "port": ""}
 
         response = client_logged_in.post(
             reverse("v2:hashicorp-vault"),
