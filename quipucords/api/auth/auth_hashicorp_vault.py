@@ -122,16 +122,23 @@ def hashicorp_cert_file(cert_file_name, cert_file_content_b64) -> str | None:
 
 @contextmanager
 def hashicorp_vault_client(vault_token=None, metadata=None):
-    """Create a Context for communicating with a HashiCorp Vault server."""
-    # Example using this context manager for a HashiCorp Vault query:
-    #
-    #    with hashicorp_vault_client(vault_secure_token) as vault_client:
-    #        aap_creds = vault_client.secrets.kv.v2.read_secret_version(
-    #            path="aap/aap25server", mount_point="secret"
-    #        )
-    #     ...
+    """
+    Create a Context for communicating with a HashiCorp Vault server.
+
+    Example using this context manager for a HashiCorp Vault query:
+
+        vault_secure_token = get_hashicorp_vault_token()
+
+        with hashicorp_vault_client(vault_secure_token) as vault_client:
+            aap_creds = vault_client.secrets.kv.v2.read_secret_version(
+                path="aap/aap25server", mount_point="secret"
+            )
+            ...
+    """
     if vault_token:
         metadata = vault_token.metadata
+    if metadata is None:
+        metadata = {}
     ssl_verify = metadata.get("ssl_verify", True)
     vault_url = hashicorp_vault_url(metadata)
     client_cert_content = hashicorp_cert_file(
@@ -171,19 +178,15 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
                 )
             ca_file.write(ca_file_content.encode("utf-8"))
             ca_file.flush()
-            yield hvac.Client(
-                url=vault_url,
-                cert=(cert_file.name, key_file.name),
-                verify=ca_file.name,
-                timeout=settings.QUIPUCORDS_HASHICORP_VAULT_TIMEOUT,
-            )
-        else:
-            yield hvac.Client(
-                url=vault_url,
-                cert=(cert_file.name, key_file.name),
-                verify=False,
-                timeout=settings.QUIPUCORDS_HASHICORP_VAULT_TIMEOUT,
-            )
+
+        hvac_client_args = {
+            "url": vault_url,
+            "cert": (cert_file.name, key_file.name),
+            "verify": False if not ssl_verify else ca_file.name,
+            "timeout": settings.QUIPUCORDS_HASHICORP_VAULT_TIMEOUT,
+        }
+
+        yield hvac.Client(**hvac_client_args)
 
 
 def hashicorp_vault_authenticate(vault_token=None, metadata=None) -> bool:

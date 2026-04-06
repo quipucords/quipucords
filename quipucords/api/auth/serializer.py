@@ -111,17 +111,11 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         if errors:
             raise ValidationError(errors)
 
-        try:
-            if not hashicorp_vault_authenticate(metadata=attrs):
-                vault_address = hashicorp_vault_address(attrs)
-                raise HashiCorpVaultAuthError(
-                    _(
-                        api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION
-                        % vault_address
-                    )
-                )
-        except HashiCorpVaultAuthError as err:
-            raise err
+        if not hashicorp_vault_authenticate(metadata=attrs):
+            vault_address = hashicorp_vault_address(attrs)
+            raise HashiCorpVaultAuthError(
+                _(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address)
+            )
 
         return attrs
 
