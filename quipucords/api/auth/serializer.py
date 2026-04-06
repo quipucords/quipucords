@@ -11,10 +11,8 @@ from api.auth.auth_hashicorp_vault import (
     HASHICORP_VAULT_CA_CERT,
     HASHICORP_VAULT_CLIENT_CERT,
     HASHICORP_VAULT_CLIENT_KEY,
-    HashiCorpVaultAuthError,
     decode_cert_from_content,
     get_or_create_hashicorp_vault_token,
-    hashicorp_vault_address,
     hashicorp_vault_authenticate,
 )
 
@@ -111,12 +109,7 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         if errors:
             raise ValidationError(errors)
 
-        if not hashicorp_vault_authenticate(metadata=attrs):
-            vault_address = hashicorp_vault_address(attrs)
-            raise HashiCorpVaultAuthError(
-                _(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address)
-            )
-
+        hashicorp_vault_authenticate(metadata=attrs)
         return attrs
 
 
