@@ -326,8 +326,6 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
             return Response(
                 {"detail": _(err.message)}, status=status.HTTP_400_BAD_REQUEST
             )
-        except ValidationError as err:
-            return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
