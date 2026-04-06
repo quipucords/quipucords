@@ -189,7 +189,7 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
         yield hvac.Client(**hvac_client_args)
 
 
-def hashicorp_vault_authenticate(vault_token=None, metadata=None) -> bool:
+def hashicorp_vault_authenticate(vault_token=None, metadata=None):
     """Authenticate to a HashiCorp Vault."""
     if vault_token:
         metadata = vault_token.metadata
@@ -200,12 +200,13 @@ def hashicorp_vault_authenticate(vault_token=None, metadata=None) -> bool:
         try:
             if vault_client.is_authenticated():
                 logger.debug(api.messages.HASHICORP_VAULT_AUTHENTICATED, vault_address)
-                return True
-            else:
-                logger.error(
-                    api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION, vault_address
-                )
-                return False
+                return
+            logger.error(
+                api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION, vault_address
+            )
+            raise HashiCorpVaultAuthError(
+                _(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address)
+            )
         except ConnectionError as err:
             logger.error(
                 api.messages.HASHICORP_VAULT_CONNECTION_ERROR, vault_address, str(err)

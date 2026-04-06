@@ -193,8 +193,7 @@ class TestHashiCorpVaultAuthenticate:
             "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
         )
 
-        result = hashicorp_vault_authenticate(vault_token=vault_token)
-        assert result is True
+        hashicorp_vault_authenticate(vault_token=vault_token)
         mock_client.is_authenticated.assert_called_once()
 
     def test_hashicorp_vault_authenticate_failure(
@@ -211,8 +210,13 @@ class TestHashiCorpVaultAuthenticate:
             "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
         )
 
-        result = hashicorp_vault_authenticate(vault_token=vault_token)
-        assert result is False
+        with pytest.raises(HashiCorpVaultAuthError) as exc_info:
+            hashicorp_vault_authenticate(vault_token=vault_token)
+        vault_address = hashicorp_vault_address(hashicorp_vault_data)
+        vault_err_message = (
+            messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address
+        )
+        assert vault_err_message in str(exc_info.value)
 
     def test_hashicorp_vault_authenticate_connection_error(
         self, mocker, hashicorp_vault_data
