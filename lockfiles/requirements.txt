@@ -31,9 +31,9 @@ cffi==2.0.0 ; (implementation_name == 'cpython' and platform_python_implementati
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+charset-normalizer==3.4.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
-click==8.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+click==8.3.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   celery
     #   click-didyoumean
@@ -45,11 +45,11 @@ click-plugins==1.1.1.2 ; (implementation_name == 'cpython' and sys_platform == '
     # via celery
 click-repl==0.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
-cryptography==46.0.6 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+cryptography==46.0.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   ansible-core
     #   paramiko
-django==5.2.12 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django==5.2.13 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
     #   django-cors-headers
@@ -183,7 +183,7 @@ typing-extensions==4.15.0 ; (implementation_name == 'cpython' and sys_platform =
     #   psycopg
     #   pydantic
     #   referencing
-tzdata==2025.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+tzdata==2026.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kombu
 tzlocal==5.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
