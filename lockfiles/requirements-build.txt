@@ -133,8 +133,6 @@ setuptools==80.3.1
     # via psycopg-c
 setuptools==80.9.0
     # via ansible-core
-setuptools==82.0.0
-    # via charset-normalizer
 setuptools==82.0.1
     # via
     #   ansible
@@ -143,6 +141,7 @@ setuptools==82.0.1
     #   certifi
     #   cffi
     #   changelog-chug
+    #   charset-normalizer
     #   click-repl
     #   cryptography
     #   django
