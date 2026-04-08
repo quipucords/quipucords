@@ -246,7 +246,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
             (404, "application/json"): hashicorp_vault_not_defined(),
         },
     )
-    def retrieve(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs) -> Response:
         """Get the HashiCorp Vault server definition."""
         hashicorp_vault_token = get_hashicorp_vault_token()
         if hashicorp_vault_token is None:
@@ -310,7 +310,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
             ),
         },
     )
-    def create(self, request, *args, **kwargs) -> Response:
+    def post(self, request, *args, **kwargs) -> Response:
         """Create a HashiCorp Vault server definition."""
         if get_hashicorp_vault_token():
             return Response(
@@ -371,7 +371,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
             (404, "application/json"): hashicorp_vault_not_defined(),
         },
     )
-    def update(self, request, *args, **kwargs) -> Response:
+    def put(self, request, *args, **kwargs) -> Response:
         """Update a HashiCorp Vault server definition."""
         partial = kwargs.pop("partial", False)
 
@@ -435,12 +435,12 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
             (404, "application/json"): hashicorp_vault_not_defined(),
         },
     )
-    def partial_update(self, request, *args, **kwargs) -> Response:
+    def patch(self, request, *args, **kwargs) -> Response:
         """Do a partial update (PATCH) of the HashiCorp Vault server definition."""
-        return self.update(request, partial=True)
+        return self.put(request, partial=True)
 
     @transaction.atomic
-    def destroy(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs) -> Response:
         """Delete the HashiCorp Vault Singleton server definition."""
         delete_hashicorp_vault_token()
         return Response(status=status.HTTP_204_NO_CONTENT)
