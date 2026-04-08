@@ -26,6 +26,8 @@ from api.auth.auth_hashicorp_vault import (
     hashicorp_vault_url,
 )
 
+HASHICORP_VAULT_VIEW = "v2:hashicorp-vault-list"
+
 
 @pytest.mark.django_db
 class TestHashiCorpVaultHelpers:
@@ -276,7 +278,7 @@ class TestHashiCorpVaultCreate:
     ):
         """Test failing to create a HashiCorp Vault definition if unauthenticated."""
         response = client_logged_out.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -296,7 +298,7 @@ class TestHashiCorpVaultCreate:
         )
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -319,13 +321,13 @@ class TestHashiCorpVaultCreate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -341,7 +343,7 @@ class TestHashiCorpVaultCreate:
         del invalid_data["address"]
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -358,7 +360,7 @@ class TestHashiCorpVaultCreate:
         invalid_data["address"] = ""
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -375,7 +377,7 @@ class TestHashiCorpVaultCreate:
         invalid_data["ssl_verify"] = "Not-Boolean"
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -392,7 +394,7 @@ class TestHashiCorpVaultCreate:
         invalid_data["ssl_verify"] = ""
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -409,7 +411,7 @@ class TestHashiCorpVaultCreate:
         del invalid_data[HASHICORP_VAULT_CLIENT_CERT]
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -426,7 +428,7 @@ class TestHashiCorpVaultCreate:
         invalid_data[HASHICORP_VAULT_CLIENT_CERT] = ""
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -443,7 +445,7 @@ class TestHashiCorpVaultCreate:
         del invalid_data[HASHICORP_VAULT_CLIENT_KEY]
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -460,7 +462,7 @@ class TestHashiCorpVaultCreate:
         invalid_data[HASHICORP_VAULT_CLIENT_KEY] = ""
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -479,7 +481,7 @@ class TestHashiCorpVaultCreate:
         }
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -498,7 +500,7 @@ class TestHashiCorpVaultCreate:
         del invalid_data[HASHICORP_VAULT_CA_CERT]
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -515,7 +517,7 @@ class TestHashiCorpVaultCreate:
         invalid_data[HASHICORP_VAULT_CA_CERT] = ""
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -535,7 +537,7 @@ class TestHashiCorpVaultCreate:
         )
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -558,7 +560,7 @@ class TestHashiCorpVaultCreate:
         )
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -578,7 +580,7 @@ class TestHashiCorpVaultCreate:
         invalid_data = {**hashicorp_vault_data, "port": "not-an-integer"}
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -594,7 +596,7 @@ class TestHashiCorpVaultCreate:
         invalid_data = {**hashicorp_vault_data, "port": ""}
 
         response = client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -612,7 +614,7 @@ class TestHashiCorpVaultRetrieve:
         self, client_logged_out, hashicorp_vault_data
     ):
         """Test failing to retrieve a HashiCorp Vault definition if unauthenticated."""
-        response = client_logged_out.get(reverse("v2:hashicorp-vault"))
+        response = client_logged_out.get(reverse(HASHICORP_VAULT_VIEW))
         assert response.status_code == http.HTTPStatus.UNAUTHORIZED
         response_json = response.json()
         assert "Authentication credentials were not provided" in response_json["detail"]
@@ -628,12 +630,12 @@ class TestHashiCorpVaultRetrieve:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
 
-        response = client_logged_in.get(reverse("v2:hashicorp-vault"))
+        response = client_logged_in.get(reverse(HASHICORP_VAULT_VIEW))
 
         assert response.status_code == http.HTTPStatus.OK
         assert response.data == {
@@ -644,7 +646,7 @@ class TestHashiCorpVaultRetrieve:
 
     def test_retrieve_hashicorp_vault_not_found(self, client_logged_in):
         """Test retrieving a HashiCorp Vault when it doesn't exist."""
-        response = client_logged_in.get(reverse("v2:hashicorp-vault"))
+        response = client_logged_in.get(reverse(HASHICORP_VAULT_VIEW))
 
         assert response.status_code == http.HTTPStatus.NOT_FOUND
         assert messages.HASHICORP_VAULT_NOT_DEFINED in response.data["detail"]
@@ -659,7 +661,7 @@ class TestHashiCorpVaultUpdate:
     ):
         """Test failing to update a HashiCorp Vault definition if unauthenticated."""
         response = client_logged_out.put(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -683,7 +685,7 @@ class TestHashiCorpVaultUpdate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -695,7 +697,7 @@ class TestHashiCorpVaultUpdate:
             "port": 8210,
         }
         response = client_logged_in.put(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=updated_data,
             content_type="application/json",
         )
@@ -712,7 +714,7 @@ class TestHashiCorpVaultUpdate:
     ):
         """Test updating a HashiCorp Vault when it doesn't exist."""
         response = client_logged_in.put(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -732,7 +734,7 @@ class TestHashiCorpVaultUpdate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -741,7 +743,7 @@ class TestHashiCorpVaultUpdate:
         del invalid_data[HASHICORP_VAULT_CLIENT_KEY]
 
         response = client_logged_in.put(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=invalid_data,
             content_type="application/json",
         )
@@ -761,7 +763,7 @@ class TestHashiCorpVaultUpdate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -772,7 +774,7 @@ class TestHashiCorpVaultUpdate:
             "address": "newvault.example.com",
         }
         response = client_logged_in.put(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=updated_data,
             content_type="application/json",
         )
@@ -793,7 +795,7 @@ class TestHashiCorpVaultPartialUpdate:
         """Test failing to patch a HashiCorp Vault definition if unauthenticated."""
         partial_data = {"port": 8210}
         response = client_logged_out.patch(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=partial_data,
             content_type="application/json",
         )
@@ -813,14 +815,14 @@ class TestHashiCorpVaultPartialUpdate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
 
         partial_data = {"port": 8230}
         response = client_logged_in.patch(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=partial_data,
             content_type="application/json",
         )
@@ -843,7 +845,7 @@ class TestHashiCorpVaultPartialUpdate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
@@ -852,7 +854,7 @@ class TestHashiCorpVaultPartialUpdate:
 
         partial_data = {"address": "updated-vault.example.com"}
         response = client_logged_in.patch(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=partial_data,
             content_type="application/json",
         )
@@ -868,7 +870,7 @@ class TestHashiCorpVaultPartialUpdate:
         """Test partially updating a HashiCorp Vault when it doesn't exist."""
         partial_data = {"port": 8230}
         response = client_logged_in.patch(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=partial_data,
             content_type="application/json",
         )
@@ -888,14 +890,14 @@ class TestHashiCorpVaultPartialUpdate:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
 
         partial_data = {"port": "not-an-integer"}
         response = client_logged_in.patch(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=partial_data,
             content_type="application/json",
         )
@@ -918,14 +920,14 @@ class TestHashiCorpVaultPartialUpdate:
         del hashicorp_vault_data_no_ca[HASHICORP_VAULT_CA_CERT]
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data_no_ca,
             content_type="application/json",
         )
 
         partial_data = {"ssl_verify": True}
         response = client_logged_in.patch(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=partial_data,
             content_type="application/json",
         )
@@ -941,7 +943,7 @@ class TestHashiCorpVaultDelete:
 
     def test_delete_hashicorp_vault_unauthenticated(self, client_logged_out):
         """Test failing to delete a HashiCorp Vault definition if unauthenticated."""
-        response = client_logged_out.delete(reverse("v2:hashicorp-vault"))
+        response = client_logged_out.delete(reverse(HASHICORP_VAULT_VIEW))
 
         assert response.status_code == http.HTTPStatus.UNAUTHORIZED
         response_json = response.json()
@@ -958,19 +960,19 @@ class TestHashiCorpVaultDelete:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
 
-        response = client_logged_in.delete(reverse("v2:hashicorp-vault"))
+        response = client_logged_in.delete(reverse(HASHICORP_VAULT_VIEW))
 
         assert response.status_code == http.HTTPStatus.NO_CONTENT
         assert get_hashicorp_vault_token() is None
 
     def test_delete_hashicorp_vault_already_deleted(self, client_logged_in):
         """Test deleting a HashiCorp Vault when it's already deleted."""
-        response = client_logged_in.delete(reverse("v2:hashicorp-vault"))
+        response = client_logged_in.delete(reverse(HASHICORP_VAULT_VIEW))
 
         assert response.status_code == http.HTTPStatus.NO_CONTENT
 
@@ -985,13 +987,13 @@ class TestHashiCorpVaultDelete:
         )
 
         client_logged_in.post(
-            reverse("v2:hashicorp-vault"),
+            reverse(HASHICORP_VAULT_VIEW),
             data=hashicorp_vault_data,
             content_type="application/json",
         )
 
-        response1 = client_logged_in.delete(reverse("v2:hashicorp-vault"))
-        response2 = client_logged_in.delete(reverse("v2:hashicorp-vault"))
+        response1 = client_logged_in.delete(reverse(HASHICORP_VAULT_VIEW))
+        response2 = client_logged_in.delete(reverse(HASHICORP_VAULT_VIEW))
 
         assert response1.status_code == http.HTTPStatus.NO_CONTENT
         assert response2.status_code == http.HTTPStatus.NO_CONTENT

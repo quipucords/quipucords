@@ -42,6 +42,9 @@ ROUTER_V1.register(r"jobs", ScanJobViewSetV1, basename="scanjob")
 ROUTER_V1.register(r"users", UserViewSet, basename="users")
 
 ROUTER_V2 = SimpleRouter()
+ROUTER_V2.register(
+    r"auth/hashicorp-vault", HashiCorpVaultViewSet, basename="hashicorp-vault"
+)
 ROUTER_V2.register(r"credentials", CredentialViewSetV2, basename="credentials")
 ROUTER_V2.register(r"sources", SourceViewSet, basename="source")
 ROUTER_V2.register(r"jobs", ScanJobViewSet, basename="job")
@@ -76,19 +79,6 @@ v1_urls = [
 v2_urls = [
     *ROUTER_V2.urls,
     # HashiCorp Vault singleton endpoint - maps all HTTP methods to base endpoint
-    path(
-        "auth/hashicorp-vault/",
-        HashiCorpVaultViewSet.as_view(
-            {
-                "get": "retrieve",
-                "post": "create",
-                "put": "update",
-                "patch": "partial_update",
-                "delete": "destroy",
-            }
-        ),
-        name="hashicorp-vault",
-    ),
     path("auth/lightspeed/login/", lightspeed_auth_login, name="lightspeed-auth-login"),
     path(
         "auth/lightspeed/logout/", lightspeed_auth_logout, name="lightspeed-auth-logout"
