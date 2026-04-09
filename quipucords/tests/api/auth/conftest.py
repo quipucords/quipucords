@@ -6,6 +6,8 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from tests.factories import generate_ca_cert_bundle, generate_cert, generate_pkey
+
 
 # Fixtures for testing the Auth login endpoint.
 @pytest.fixture()
@@ -116,3 +118,50 @@ def token_endpoint_response(test_jwt):
     return {
         "access_token": test_jwt,
     }
+
+
+# Fixtures for testing HashiCorp Vault
+@pytest.fixture()
+def hashicorp_vault_cert_content():
+    """Return a sample HashiCorp Vault certificate."""
+    return generate_cert()
+
+
+@pytest.fixture()
+def hashicorp_vault_key_content():
+    """Return a sample hashiCorp Vault key."""
+    return generate_pkey()
+
+
+@pytest.fixture()
+def hashicorp_vault_ca_bundle_content():
+    """Return a sample CA Cert bundle."""
+    return generate_ca_cert_bundle(num_certs=4)
+
+
+@pytest.fixture()
+def hashicorp_vault_data(hashicorp_vault_cert_content, hashicorp_vault_key_content):
+    """Return a valid HashiCorp Vault server definition."""
+    client_cert_b64 = base64.b64encode(
+        hashicorp_vault_cert_content.encode("utf-8")
+    ).decode("utf-8")
+    client_key_b64 = base64.b64encode(
+        hashicorp_vault_key_content.encode("utf-8")
+    ).decode("utf-8")
+    ca_cert_b64 = base64.b64encode(hashicorp_vault_cert_content.encode("utf-8")).decode(
+        "utf-8"
+    )
+    return {
+        "address": "vault.example.com",
+        "port": 8200,
+        "ssl_verify": False,
+        "client_cert": client_cert_b64,
+        "client_key": client_key_b64,
+        "ca_cert": ca_cert_b64,
+    }
+
+
+@pytest.fixture()
+def hashicorp_vault_data_with_ssl(hashicorp_vault_data):
+    """Return a valid HashiCorp Vault server definition with SSL verification."""
+    return {**hashicorp_vault_data, "ssl_verify": True}

@@ -477,3 +477,29 @@ def generate_openssh_pkey() -> str:
         pkey += f"{_faker.lexify('?' * 70)}\n"
     pkey += "-----END OPENSSH EXAMPLE KEY-----\n"
     return pkey
+
+
+def generate_cert() -> str:
+    """Generate a random certificate file."""
+    pkey = "-----BEGIN EXAMPLE CERTIFICATE-----\n"
+    for __ in range(5):
+        pkey += f"{_faker.lexify('?' * 70)}\n"
+    pkey += "-----END EXAMPLE CERTIFICATE-----\n"
+    return pkey
+
+
+def generate_pkey() -> str:
+    """Generate a random private key file."""
+    pkey = "-----BEGIN EXAMPLE KEY-----\n"
+    for __ in range(5):
+        pkey += f"{_faker.lexify('?' * 70)}\n"
+    pkey += "-----END EXAMPLE KEY-----\n"
+    return pkey
+
+
+def generate_ca_cert_bundle(num_certs=2) -> str:
+    """Generate a random CA Cert bundle with multiple certificates."""
+    pkey = ""
+    for _ in range(num_certs):
+        pkey += generate_cert()
+    return pkey
