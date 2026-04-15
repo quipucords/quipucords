@@ -1,12 +1,13 @@
 """Static checks for network ymls."""
 
 import pytest
+from django.conf import settings
 
 from scanner.network.utils import _yaml_load
 
 
 @pytest.fixture
-def path_to_playbooks(settings):
+def path_to_playbooks():
     """Path to network scan playbooks."""
     return settings.BASE_DIR / "scanner/network/runner"
 

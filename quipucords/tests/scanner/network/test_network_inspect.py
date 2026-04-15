@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from ansible_runner.exceptions import AnsibleRunnerException
+from django.conf import settings
 from django.forms import model_to_dict
 from django.test import override_settings
 
@@ -334,7 +335,7 @@ class TestNetworkInspectScanner:
         assert run_call.kwargs["verbosity"] == 1
 
 
-def test_inspect_scan_with_multiple_inspection_groups_stdout_logs(mocker, settings):
+def test_inspect_scan_with_multiple_inspection_groups_stdout_logs(mocker):
     """Ensure all logs are collected when inspection have multiple groups."""
     # mock functions with side effects writing to files or db - we don't need those
     # for this test purpose because they generate input for the main functions we

@@ -26,6 +26,7 @@ from io import BytesIO
 from pathlib import Path
 
 import pytest
+from django.conf import settings
 from django.test import override_settings
 from rest_framework.renderers import JSONRenderer
 from rest_framework.reverse import reverse
@@ -99,7 +100,7 @@ def test_report_without_logs(client_logged_in, caplog):
 
 
 @pytest.fixture
-def deployment_with_logs(settings, faker):
+def deployment_with_logs(faker):
     """Return a completed DeploymentReport instance that has associate scan job logs."""
     deployments_report: DeploymentsReport = DeploymentReportFactory(report=None)
     ReportFactory(generate_raw_facts=True, deployment_report=deployments_report)

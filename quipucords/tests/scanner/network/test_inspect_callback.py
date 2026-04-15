@@ -7,6 +7,7 @@ import ansible_runner
 import pytest
 import yaml
 from ansible.parsing.yaml.dumper import AnsibleDumper
+from django.conf import settings
 
 from api.models import InspectResult, Scan
 from log_messages import TASK_UNEXPECTED_FAILURE
@@ -329,7 +330,7 @@ def local_inventory(tmp_path):
 
 @pytest.mark.slow
 @pytest.mark.integration
-def test_inspect_callback_with_inspect_playbook(settings, local_inventory):
+def test_inspect_callback_with_inspect_playbook(local_inventory):
     """Smoketest InspectCallback integration with ansible_runner."""
     playbook_path = str(settings.BASE_DIR / "scanner/network/runner/inspect.yml")
     callback = InspectCallback()
