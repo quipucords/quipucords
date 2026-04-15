@@ -78,7 +78,6 @@ v1_urls = [
 
 v2_urls = [
     *ROUTER_V2.urls,
-    # HashiCorp Vault singleton endpoint - maps all HTTP methods to base endpoint
     path("auth/lightspeed/login/", lightspeed_auth_login, name="lightspeed-auth-login"),
     path(
         "auth/lightspeed/logout/", lightspeed_auth_logout, name="lightspeed-auth-logout"
