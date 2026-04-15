@@ -225,6 +225,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
     """
 
     serializer_class = HashiCorpVaultSerializer
+    response_serializer_class = HashiCorpVaultResponseSerializer
 
     @extend_schema(
         responses={
@@ -254,7 +255,7 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                 {"detail": _(messages.HASHICORP_VAULT_NOT_DEFINED)},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        serializer = self.serializer_class(data=hashicorp_vault_token.metadata)
+        serializer = self.response_serializer_class(data=hashicorp_vault_token.metadata)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -327,7 +328,8 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                 {"detail": _(err.message)}, status=status.HTTP_400_BAD_REQUEST
             )
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response_serializer = self.response_serializer_class(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         request=OpenApiRequest(
@@ -399,7 +401,8 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
         except ValidationError as err:
             return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-        return Response(serializer.data)
+        response_serializer = self.response_serializer_class(serializer.data)
+        return Response(response_serializer.data)
 
     @extend_schema(
         request=OpenApiRequest(

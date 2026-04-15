@@ -644,6 +644,30 @@ class TestHashiCorpVaultRetrieve:
             "ssl_verify": False,
         }
 
+    def test_retrieve_hashicorp_vault_success_does_not_access_vault(
+        self, client_logged_in, hashicorp_vault_data, mocker
+    ):
+        """Test successfully retrieving a Vault definition does not access vault."""
+        mock_authenticate = mocker.MagicMock()
+        mocker.patch(
+            "api.auth.auth_hashicorp_vault.hashicorp_vault_authenticate",
+            return_value=mock_authenticate,
+        )
+
+        vault_token = get_or_create_hashicorp_vault_token()
+        vault_token.metadata = hashicorp_vault_data
+        vault_token.save()
+
+        response = client_logged_in.get(reverse(HASHICORP_VAULT_VIEW))
+
+        assert response.status_code == http.HTTPStatus.OK
+        assert response.data == {
+            "address": hashicorp_vault_data["address"],
+            "port": hashicorp_vault_data["port"],
+            "ssl_verify": hashicorp_vault_data["ssl_verify"],
+        }
+        mock_authenticate.assert_not_called()
+
     def test_retrieve_hashicorp_vault_not_found(self, client_logged_in):
         """Test retrieving a HashiCorp Vault when it doesn't exist."""
         response = client_logged_in.get(reverse(HASHICORP_VAULT_VIEW))
