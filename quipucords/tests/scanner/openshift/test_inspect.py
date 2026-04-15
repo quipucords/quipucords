@@ -4,6 +4,7 @@ import os
 from unittest import mock
 
 import pytest
+from django.test import override_settings
 from kubernetes.client import ApiException
 
 from api.models import ScanTask
@@ -164,11 +165,12 @@ def cluster_err(error):
 
 
 @pytest.fixture
-def workloads_enabled(settings):
+def workloads_enabled():
     """Set QUIPUCORDS_FEATURE_FLAGS with enabled workloads."""
     with mock.patch.dict(os.environ, {"QUIPUCORDS_FEATURE_OCP_WORKLOADS": "1"}):
         feature_flag = FeatureFlag()
-    settings.QUIPUCORDS_FEATURE_FLAGS = feature_flag
+    with override_settings(QUIPUCORDS_FEATURE_FLAGS=feature_flag):
+        yield
 
 
 @pytest.mark.django_db
