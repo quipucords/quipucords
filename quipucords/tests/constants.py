@@ -8,7 +8,6 @@ from tests.env import BaseURI, EnvVar, as_bool
 
 PROJECT_ROOT_DIR = Path(__file__).absolute().parent.parent.parent
 
-CLEANUP_DOCKER_LAYERS = False
 FILENAME_AGGREGATE_JSON = "aggregate-{report_id}.json"
 FILENAME_DEPLOYMENTS_CSV = "deployments-{report_id}.csv"
 FILENAME_DEPLOYMENTS_JSON = "deployments-{report_id}.json"
@@ -16,14 +15,7 @@ FILENAME_DETAILS_CSV = "details-{report_id}.csv"
 FILENAME_DETAILS_JSON = "details-{report_id}.json"
 FILENAME_LIGHTSPEED_TGZ = "lightspeed-{report_id}.tar.gz"
 FILENAME_SHA256SUM = "SHA256SUM"
-POSTGRES_DB = "qpc-db"
-POSTGRES_PASSWORD = "qpc"
-POSTGRES_USER = "qpc"
 QUIPUCORDS_LOG_LEVEL = "INFO"
-READINESS_TIMEOUT_SECONDS = 60
-SCAN_TARGET_PASSWORD = "super-secret-password"
-SCAN_TARGET_SSH_PORT = "2222"
-SCAN_TARGET_USERNAME = "non-root-user"
 VCR_CASSETTES_DIR = PROJECT_ROOT_DIR / "quipucords/tests/cassettes"
 # For URI's standard ports 80 and 443, we do not specify those in the VCR
 # Request URI's, i.e. accessing external routes, the 443 is not specified,

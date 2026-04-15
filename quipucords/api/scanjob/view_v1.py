@@ -27,8 +27,6 @@ from api.signal.scanjob_signal import cancel_scan
 
 logger = logging.getLogger(__name__)
 
-RESULTS_KEY = "task_results"
-
 
 def expand_source(system):
     """Expand the json source."""
