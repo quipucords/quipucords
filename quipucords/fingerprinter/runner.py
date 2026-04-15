@@ -68,9 +68,6 @@ RAW_DATE_KEYS = dict(
     ]
 )
 
-MAC_AND_IP_FACTS = ["ip_addresses", "mac_addresses"]
-NAME_RELATED_FACTS = ["name", "vm_dns_name", "virtual_host_name"]
-
 # Fingerprint keys
 COMBINED_KEY = "combined_fingerprints"
 

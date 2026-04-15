@@ -48,7 +48,6 @@ SOURCE_HOST_MUST_BE_JSON_ARRAY = "Must be a JSON array of strings"
 SOURCE_CRED_DISPLAY = "Credential: %s"
 SOURCE_CRED_WRONG_TYPE = "Credentials must have the same type as source."
 SOURCE_TYPE_REQ = "A value for source_type must be provided to create a source."
-SOURCE_CONNECTION_SCAN = "The query parameter scan must be a boolean."
 SOURCE_TYPE_INV = "A source_type must not be provided when updating a source."
 SOURCE_CRED_IDS_INV = "Credential identifiers must be integer values."
 SOURCE_MIN_CREDS = "Source must have at least one set of credentials."
@@ -60,21 +59,7 @@ SOURCE_INVALID_SCHEMA_PROXY_URL = (
 )
 SOURCE_INVALID_HOST_PROXY_URL = "Enter a valid proxy URL with a valid host."
 SOURCE_INVALID_PORT_PROXY_URL = "Port must be in range [1, 65535]."
-NET_INVALID_RANGE_FORMAT = "%s is not a valid IP range format."
-NET_INVALID_RANGE_CIDR = "%s is not a valid IP or CIDR pattern"
 NET_INVALID_HOST = "%s is invalid host"
-NET_NO_CIDR_MATCH = "%s does not match CIDR %s"
-NET_CIDR_INVALID = "%s has invalid format."
-NET_CIDR_BIT_MASK = (
-    "%(ip_range)s has bit mask length %(prefix_bits)s. "
-    "%(prefix_bits)s is not in the valid range [0,32]."
-)
-NET_FOUR_OCTETS = "%s does not have exactly 4 octets."
-NET_EMPTY_OCTET = "%s has an empty octet."
-NET_CIDR_RANGE = (
-    "%(ip_range)s has invalid octet value of %(octet)s."
-    " %(octet)s is not in the range [0,255]"
-)
 NET_INVALID_PORT = "Source of type network must have ssh port in range [0, 65535]"
 INVALID_PORT = "Port must be an integer."
 NET_HC_DO_NOT_EXIST = "Host credential with id=%d could not be found in database."
@@ -115,8 +100,6 @@ REPORT_MERGE_NOT_FOUND = "Not all scan report ids exist. Scan reports not found:
 
 # Scan Manager/Signal
 SIGNAL_STATE_CHANGE = "SIGNAL %s received for scan job."
-SIGNAL_SCAN_MANAGER_CRASH = "Process unexpectedly crashed.  See logs."
-SIGNAL_SCAN_MANAGER_RESTART = "Recovering manager."
 
 # scan task messages
 PLURAL_SCAN_TASKS_MSG = "Scan tasks"
