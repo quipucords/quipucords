@@ -8,6 +8,9 @@ from rest_framework.serializers import ValidationError
 
 import api.messages
 from api.auth.auth_hashicorp_vault import (
+    CA_CERT_MAX_SIZE,
+    CLIENT_CERT_MAX_SIZE,
+    CLIENT_KEY_MAX_SIZE,
     HASHICORP_VAULT_CA_CERT,
     HASHICORP_VAULT_CLIENT_CERT,
     HASHICORP_VAULT_CLIENT_KEY,
@@ -25,9 +28,9 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         required=False, default=settings.QUIPUCORDS_HASHICORP_VAULT_DEFAULT_PORT
     )
     ssl_verify = serializers.BooleanField(required=False, default=True)
-    client_key = serializers.CharField(required=True)
-    client_cert = serializers.CharField(required=True)
-    ca_cert = serializers.CharField(required=False)
+    client_key = serializers.CharField(required=True, max_length=CLIENT_KEY_MAX_SIZE)
+    client_cert = serializers.CharField(required=True, max_length=CLIENT_CERT_MAX_SIZE)
+    ca_cert = serializers.CharField(required=False, max_length=CA_CERT_MAX_SIZE)
 
     class Meta:
         """Metadata for the serializer."""

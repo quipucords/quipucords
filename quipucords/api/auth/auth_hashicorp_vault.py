@@ -33,6 +33,13 @@ HASHICORP_VAULT_SUPPORTED_CERT_FILES = [
     HASHICORP_VAULT_CA_CERT,
 ]
 
+# Note: While not strictly defined by any single standard, let's set up a
+#       sane upper limit on how big of a cert, key or CA Cert bundle we
+#       should accept to protect against DoS attacks.
+CLIENT_CERT_MAX_SIZE = 140 * 1024  # OpenSSL 100K (+~40% for base64)
+CLIENT_KEY_MAX_SIZE = 56 * 1024  # 40K for 64kbit RSA Keys (+~40% for base64)
+CA_CERT_MAX_SIZE = 2 * 1024 * 1024  # AWS-Private Certificate Authority
+
 
 class HashiCorpVaultAuthError(Exception):
     """Class for HashiCorp Vault authentication."""
