@@ -12,6 +12,9 @@ from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
 from api.auth.auth_hashicorp_vault import (
+    CA_CERT_MAX_SIZE,
+    CLIENT_CERT_MAX_SIZE,
+    CLIENT_KEY_MAX_SIZE,
     HASHICORP_VAULT_CA_CERT,
     HASHICORP_VAULT_CLIENT_CERT,
     HASHICORP_VAULT_CLIENT_KEY,
@@ -27,6 +30,13 @@ from api.auth.auth_hashicorp_vault import (
 )
 
 HASHICORP_VAULT_VIEW = "v2:hashicorp-vault-list"
+
+
+def create_large_b64_content(min_size):
+    """Create a large Base64 content that is at least min_size."""
+    return base64.b64encode(
+        ("a01b23c45d67e89f" * (int(min_size / 16) + 1)).encode("utf-8")
+    ).decode("utf-8")
 
 
 @pytest.mark.django_db
@@ -437,6 +447,28 @@ class TestHashiCorpVaultCreate:
         err_message = response.data[HASHICORP_VAULT_CLIENT_CERT][0]
         assert "This field may not be blank" in str(err_message)
 
+    def test_create_hashicorp_vault_large_client_cert(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with a large Client cert."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data[HASHICORP_VAULT_CLIENT_CERT] = create_large_b64_content(
+            CLIENT_CERT_MAX_SIZE
+        )
+
+        response = client_logged_in.post(
+            reverse(HASHICORP_VAULT_VIEW),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data[HASHICORP_VAULT_CLIENT_CERT][0]
+        assert (
+            f"Ensure this field has no more than {CLIENT_CERT_MAX_SIZE} characters"
+            in str(err_message)
+        )
+
     def test_create_hashicorp_vault_missing_client_key(
         self, client_logged_in, hashicorp_vault_data
     ):
@@ -470,6 +502,28 @@ class TestHashiCorpVaultCreate:
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data[HASHICORP_VAULT_CLIENT_KEY][0]
         assert "This field may not be blank" in str(err_message)
+
+    def test_create_hashicorp_vault_large_client_key(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with a large Client key."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data[HASHICORP_VAULT_CLIENT_KEY] = create_large_b64_content(
+            CLIENT_KEY_MAX_SIZE
+        )
+
+        response = client_logged_in.post(
+            reverse(HASHICORP_VAULT_VIEW),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data[HASHICORP_VAULT_CLIENT_KEY][0]
+        assert (
+            f"Ensure this field has no more than {CLIENT_KEY_MAX_SIZE} characters"
+            in str(err_message)
+        )
 
     def test_create_hashicorp_vault_invalid_base64_cert(
         self, client_logged_in, hashicorp_vault_data
@@ -525,6 +579,28 @@ class TestHashiCorpVaultCreate:
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data[HASHICORP_VAULT_CA_CERT][0]
         assert "This field may not be blank" in str(err_message)
+
+    def test_create_hashicorp_vault_large_ca_bundle(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with a large CA Cert Bundle."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data[HASHICORP_VAULT_CA_CERT] = create_large_b64_content(
+            CA_CERT_MAX_SIZE
+        )
+
+        response = client_logged_in.post(
+            reverse(HASHICORP_VAULT_VIEW),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data[HASHICORP_VAULT_CA_CERT][0]
+        assert (
+            f"Ensure this field has no more than {CA_CERT_MAX_SIZE} characters"
+            in str(err_message)
+        )
 
     def test_create_hashicorp_vault_authentication_failure(
         self, client_logged_in, hashicorp_vault_data, mocker
