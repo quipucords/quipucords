@@ -151,6 +151,7 @@ LIGHTSPEED_ALREADY_LOGGED_OUT = "Already logged out"
 HASHICORP_VAULT_NOT_DEFINED = "HashiCorp Vault server is not defined"
 HASHICORP_VAULT_ALREADY_EXISTS = "HashiCorp Vault server definition already exists"
 HASHICORP_VAULT_MUST_SPECIFY_CA_CERT = "Must specify a ca_cert when ssl_verify is True"
+HASHICORP_VAULT_INVALID_ADDRESS = "Address must be a valid FQDN, IPv4 or IPv6 address"
 HASHICORP_VAULT_VALID_CLIENT_CERT_REQUIRED = (
     "Valid client certificate is required for HashiCorp Vault authentication"
 )

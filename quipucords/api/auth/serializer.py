@@ -1,8 +1,11 @@
 """Serializers for auth API endpoints."""
 
+import ipaddress
+
 from django.conf import settings
 from django.db import transaction
 from django.utils.translation import gettext as _
+from fqdn import FQDN
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 
@@ -81,6 +84,16 @@ class HashiCorpVaultSerializer(serializers.Serializer):
         except ValueError as err:
             raise ValidationError(err)
         return value
+
+    def validate_address(self, value):
+        """Validate that we have a FQDN, IPv4 or IPv6 address."""
+        try:
+            if ipaddress.ip_address(value):
+                return value
+        except ValueError:
+            if FQDN(value).is_valid:
+                return value
+        raise ValidationError(_(api.messages.HASHICORP_VAULT_INVALID_ADDRESS))
 
     def validate_client_cert(self, value):
         """Validate the client certificate is valid."""

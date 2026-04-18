@@ -379,6 +379,57 @@ class TestHashiCorpVaultCreate:
         err_message = response.data["address"][0]
         assert "This field may not be blank" in str(err_message)
 
+    def test_create_hashicorp_vault_invalid_address_not_ipv4(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an invalid IPv4 address."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data["address"] = "192.168..1"
+
+        response = client_logged_in.post(
+            reverse(HASHICORP_VAULT_VIEW),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["address"][0]
+        assert messages.HASHICORP_VAULT_INVALID_ADDRESS in str(err_message)
+
+    def test_create_hashicorp_vault_invalid_address_not_ipv6(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an invalid IPv6 address."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data["address"] = "gggg::hhhh::zzzz"
+
+        response = client_logged_in.post(
+            reverse(HASHICORP_VAULT_VIEW),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["address"][0]
+        assert messages.HASHICORP_VAULT_INVALID_ADDRESS in str(err_message)
+
+    def test_create_hashicorp_vault_invalid_address_not_fqdn(
+        self, client_logged_in, hashicorp_vault_data
+    ):
+        """Test creating a HashiCorp Vault with an invalid FQDN."""
+        invalid_data = {**hashicorp_vault_data}
+        invalid_data["address"] = "not a valid fqdn!@#"
+
+        response = client_logged_in.post(
+            reverse(HASHICORP_VAULT_VIEW),
+            data=invalid_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == http.HTTPStatus.BAD_REQUEST
+        err_message = response.data["address"][0]
+        assert messages.HASHICORP_VAULT_INVALID_ADDRESS in str(err_message)
+
     def test_create_hashicorp_vault_invalid_ssl_verify(
         self, client_logged_in, hashicorp_vault_data
     ):
