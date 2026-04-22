@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
-from api.auth.auth_lightspeed import (
+from api.auth.lightspeed.auth import (
     get_lightspeed_secure_token,
     get_or_create_lightspeed_secure_token,
 )

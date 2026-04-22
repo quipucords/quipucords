@@ -8,7 +8,7 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
-from api.auth.auth_lightspeed import (
+from api.auth.lightspeed.auth import (
     DEVICE_AUTH_ENDPOINT_KEY,
     OPENID_CONFIG_ENDPOINT,
     AuthStatus,
@@ -73,7 +73,7 @@ class TestAuthSSO:
     def test_get_sso_endpoint_connection_error(self, mocker):
         """Test the get_sso_endpoint method handles Connection Errors."""
         err_message = "Error connecting to the SSO server"
-        mock_get_sso_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.get")
+        mock_get_sso_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.get")
         mock_get_sso_endpoint.side_effect = ConnectionError(err_message)
         with pytest.raises(ConnectionError) as exception_error:
             _ = get_sso_endpoint(DEVICE_AUTH_ENDPOINT_KEY)
@@ -82,7 +82,7 @@ class TestAuthSSO:
     def test_get_sso_endpoint_http_error(self, mocker):
         """Test the get_sso_endpoint method handles BaseHTTP Errors."""
         err_message = "BaseHTTPError connecting to the SSO server"
-        mock_get_sso_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.get")
+        mock_get_sso_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.get")
         mock_get_sso_endpoint.side_effect = BaseHTTPError(err_message)
         with pytest.raises(BaseHTTPError) as exception_error:
             _ = get_sso_endpoint(DEVICE_AUTH_ENDPOINT_KEY)
@@ -109,12 +109,12 @@ class TestLightspeedRequestAuth:
         """Test the successful initialization of the workflow."""
         device_auth_endpoint = faker.url()
         mock_get_sso_endpoint = mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint"
+            "api.auth.lightspeed.auth.get_sso_endpoint"
         )
         mock_get_sso_endpoint.return_value = device_auth_endpoint
 
         mock_device_auth_endpoint = mocker.patch(
-            "api.auth.auth_lightspeed.requests.post"
+            "api.auth.lightspeed.auth.requests.post"
         )
         mock_device_auth_endpoint.return_value.status_code = http.HTTPStatus.OK
         mock_device_auth_endpoint.return_value.json.return_value = (
@@ -127,13 +127,13 @@ class TestLightspeedRequestAuth:
         """Test the workflow request resulting in a Not success response."""
         device_auth_endpoint = faker.url()
         mock_get_sso_endpoint = mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint"
+            "api.auth.lightspeed.auth.get_sso_endpoint"
         )
         mock_get_sso_endpoint.return_value = device_auth_endpoint
 
         error_reason = "Endpoint is not implemented."
         mock_device_auth_endpoint = mocker.patch(
-            "api.auth.auth_lightspeed.requests.post"
+            "api.auth.lightspeed.auth.requests.post"
         )
         mock_device_auth_endpoint.return_value.status_code = (
             http.HTTPStatus.NOT_IMPLEMENTED
@@ -152,13 +152,13 @@ class TestLightspeedRequestAuth:
         """Test for connection error from the device auth endpoint."""
         device_auth_endpoint = faker.url()
         mock_get_sso_endpoint = mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint"
+            "api.auth.lightspeed.auth.get_sso_endpoint"
         )
         mock_get_sso_endpoint.return_value = device_auth_endpoint
 
         err_message = "Cannot connect to the device auth endpoint."
         with mocker.patch(
-            "api.auth.auth_lightspeed.requests.post",
+            "api.auth.lightspeed.auth.requests.post",
             side_effect=ConnectionError(err_message),
         ):
             with pytest.raises(LightspeedAuthError) as exception_info:
@@ -171,13 +171,13 @@ class TestLightspeedRequestAuth:
         """Test for a BaseHTTPError from the device auth endpoint."""
         device_auth_endpoint = faker.url()
         mock_get_sso_endpoint = mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint"
+            "api.auth.lightspeed.auth.get_sso_endpoint"
         )
         mock_get_sso_endpoint.return_value = device_auth_endpoint
 
         err_message = "BaseHTTPError to the device auth endpoint."
         with mocker.patch(
-            "api.auth.auth_lightspeed.requests.post",
+            "api.auth.lightspeed.auth.requests.post",
             side_effect=BaseHTTPError(err_message),
         ):
             with pytest.raises(LightspeedAuthError) as exception_info:
@@ -210,12 +210,12 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
         err_message = "Cannot connect to the token endpoint."
         mocker.patch(
-            "api.auth.auth_lightspeed.requests.post",
+            "api.auth.lightspeed.auth.requests.post",
             side_effect=ConnectionError(err_message),
         )
         secure_token = get_or_create_lightspeed_secure_token(qpc_user_simple)
@@ -239,12 +239,12 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
         err_message = "HTTPError while connecting to the token endpoint."
         mocker.patch(
-            "api.auth.auth_lightspeed.requests.post",
+            "api.auth.lightspeed.auth.requests.post",
             side_effect=BaseHTTPError(err_message),
         )
         secure_token = get_or_create_lightspeed_secure_token(qpc_user_simple)
@@ -273,10 +273,10 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
-        mock_token_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.post")
+        mock_token_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.post")
         mock_token_endpoint.return_value.status_code = http.HTTPStatus.OK
         mock_token_endpoint.return_value.json.return_value = token_endpoint_response
         secure_token = get_or_create_lightspeed_secure_token(qpc_user_simple)
@@ -298,10 +298,10 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
-        mock_token_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.post")
+        mock_token_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.post")
         mock_token_endpoint.return_value.status_code = http.HTTPStatus.OK
         mock_token_endpoint.return_value.json.return_value = {
             "access_token": "abcdef.ghijkl"
@@ -324,10 +324,10 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
-        mock_token_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.post")
+        mock_token_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.post")
         mock_token_endpoint.return_value.status_code = http.HTTPStatus.BAD_REQUEST
         mock_token_endpoint.return_value.json.return_value = {"error": "expired_token"}
         secure_token = get_or_create_lightspeed_secure_token(qpc_user_simple)
@@ -348,11 +348,11 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
         unknown_error = "Unknown error from SSO"
-        mock_token_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.post")
+        mock_token_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.post")
         mock_token_endpoint.return_value.status_code = http.HTTPStatus.BAD_REQUEST
         mock_token_endpoint.return_value.reason = unknown_error
         mock_token_endpoint.return_value.json.return_value = {"error": unknown_error}
@@ -377,11 +377,11 @@ class TestWaitForAuthorization:
         expires_in = lightspeed_auth_response["expires_in"]
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
         unprocessable_error = "Unprocessable Entity"
-        mock_token_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.post")
+        mock_token_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.post")
         mock_token_endpoint.return_value.status_code = (
             http.HTTPStatus.UNPROCESSABLE_ENTITY
         )
@@ -410,10 +410,10 @@ class TestWaitForAuthorization:
         expires_in = 0
 
         mocker.patch(
-            "api.auth.auth_lightspeed.get_sso_endpoint", return_value=faker.url()
+            "api.auth.lightspeed.auth.get_sso_endpoint", return_value=faker.url()
         )
 
-        mock_token_endpoint = mocker.patch("api.auth.auth_lightspeed.requests.post")
+        mock_token_endpoint = mocker.patch("api.auth.lightspeed.auth.requests.post")
         mock_token_endpoint.return_value.status_code = http.HTTPStatus.BAD_REQUEST
         mock_token_endpoint.return_value.json.return_value = {
             "error": "authorization_pending"

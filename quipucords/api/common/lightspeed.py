@@ -1,6 +1,6 @@
 """Lightspeed integration."""
 
-from api.auth.auth_lightspeed import get_lightspeed_secure_token
+from api.auth.lightspeed.auth import get_lightspeed_secure_token
 from api.common.entities import ReportEntity
 from api.common.enumerators import AuthStatus, LightspeedCannotPublishReason
 from api.exceptions import FailedDependencyError

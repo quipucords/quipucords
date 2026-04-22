@@ -2,7 +2,7 @@
 
 import pytest
 
-from api.auth.auth_lightspeed import update_secure_token_status
+from api.auth.lightspeed.auth import update_secure_token_status
 from api.common.enumerators import AuthStatus, LightspeedCannotPublishReason
 from api.common.lightspeed import get_cannot_publish_reason
 from api.deployments_report.model import DeploymentsReport

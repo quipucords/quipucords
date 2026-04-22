@@ -1,4 +1,4 @@
-"""Supporting methods for handling JWT tokens."""
+"""Common utilities for the auth API endpoints."""
 
 import base64
 import datetime

@@ -4,7 +4,7 @@ import pytest
 from rest_framework import status
 from rest_framework.reverse import reverse
 
-from api.auth.auth_lightspeed import LightspeedAuthError
+from api.auth.lightspeed.auth import LightspeedAuthError
 from api.common.enumerators import AuthStatus
 
 
@@ -27,11 +27,11 @@ class TestAuthLightspeedLogin:
     ):
         """Test users can request a Lightspeed login."""
         mocker.patch(
-            "api.auth.auth_lightspeed.lightspeed_request_auth",
+            "api.auth.lightspeed.auth.lightspeed_request_auth",
             return_value=lightspeed_auth_response,
         )
         mock_wait_for_authorization = mocker.patch(
-            "api.auth.auth_lightspeed.lightspeed_wait_for_authorization"
+            "api.auth.lightspeed.auth.lightspeed_wait_for_authorization"
         )
         response = client_logged_in.post(reverse("v2:lightspeed-auth-login"))
         assert response.ok
@@ -60,7 +60,7 @@ class TestAuthLightspeedLogin:
         """Test a failed Lightspeed request returns error in the Error detail."""
         raised_exception = "Lightspeed Auth request test exception"
         mock_request_auth = mocker.patch(
-            "api.auth.auth_lightspeed.lightspeed_request_auth",
+            "api.auth.lightspeed.auth.lightspeed_request_auth",
         )
         mock_request_auth.side_effect = LightspeedAuthError(raised_exception)
 
