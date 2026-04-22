@@ -11,7 +11,7 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
-from api.auth.auth_lightspeed import LIGHTSPEED_NAME, LIGHTSPEED_TYPE
+from api.auth.lightspeed.auth import LIGHTSPEED_NAME, LIGHTSPEED_TYPE
 from api.models import DeploymentsReport
 from api.publish.model import PublishRequest
 from api.publish.tasks import _get_ingress_url, publish_to_ingress, request_publish

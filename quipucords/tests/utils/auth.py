@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime, timedelta
 
-from api.auth.auth_lightspeed import (
+from api.auth.lightspeed.auth import (
     LIGHTSPEED_NAME,
     LIGHTSPEED_TYPE,
 )

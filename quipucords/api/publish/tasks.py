@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
-from api.auth.auth_lightspeed import get_lightspeed_secure_token
+from api.auth.lightspeed.auth import get_lightspeed_secure_token
 from api.insights_report.payload import generate_insights_tarball
 from api.publish.exceptions import PublishError
 from api.publish.model import PublishRequest

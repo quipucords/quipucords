@@ -14,7 +14,7 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
-from api.auth.serializer import (
+from api.auth.lightspeed.serializer import (
     LightspeedAuthLoginResponseSerializer,
     LightspeedAuthLogoutResponseSerializer,
     LightspeedAuthStatusResponseSerializer,

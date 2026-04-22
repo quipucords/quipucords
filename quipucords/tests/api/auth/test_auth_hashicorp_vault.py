@@ -11,7 +11,7 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
-from api.auth.auth_hashicorp_vault import (
+from api.auth.hashicorp_vault.auth import (
     CA_CERT_MAX_SIZE,
     CLIENT_CERT_MAX_SIZE,
     CLIENT_KEY_MAX_SIZE,
@@ -202,7 +202,7 @@ class TestHashiCorpVaultAuthenticate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         hashicorp_vault_authenticate(vault_token=vault_token)
@@ -219,7 +219,7 @@ class TestHashiCorpVaultAuthenticate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = False
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         with pytest.raises(HashiCorpVaultAuthError) as exc_info:
@@ -242,7 +242,7 @@ class TestHashiCorpVaultAuthenticate:
         error_message = "Connection refused"
         mock_client.is_authenticated.side_effect = ConnectionError(error_message)
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         with pytest.raises(HashiCorpVaultAuthError) as exc_info:
@@ -266,7 +266,7 @@ class TestHashiCorpVaultAuthenticate:
         error_message = "HTTP Error"
         mock_client.is_authenticated.side_effect = BaseHTTPError(error_message)
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         with pytest.raises(HashiCorpVaultAuthError) as exc_info:
@@ -304,7 +304,7 @@ class TestHashiCorpVaultCreate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         response = client_logged_in.post(
@@ -327,7 +327,7 @@ class TestHashiCorpVaultCreate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -660,7 +660,7 @@ class TestHashiCorpVaultCreate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = False
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         response = client_logged_in.post(
@@ -683,7 +683,7 @@ class TestHashiCorpVaultCreate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.side_effect = ConnectionError("Connection refused")
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         response = client_logged_in.post(
@@ -753,7 +753,7 @@ class TestHashiCorpVaultRetrieve:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -777,7 +777,7 @@ class TestHashiCorpVaultRetrieve:
         """Test successfully retrieving a Vault definition does not access vault."""
         mock_authenticate = mocker.MagicMock()
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hashicorp_vault_authenticate",
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_authenticate",
             return_value=mock_authenticate,
         )
 
@@ -832,7 +832,7 @@ class TestHashiCorpVaultUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -881,7 +881,7 @@ class TestHashiCorpVaultUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -910,7 +910,7 @@ class TestHashiCorpVaultUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -962,7 +962,7 @@ class TestHashiCorpVaultPartialUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -992,7 +992,7 @@ class TestHashiCorpVaultPartialUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -1037,7 +1037,7 @@ class TestHashiCorpVaultPartialUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -1064,7 +1064,7 @@ class TestHashiCorpVaultPartialUpdate:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         hashicorp_vault_data_no_ca = {**hashicorp_vault_data}
@@ -1107,7 +1107,7 @@ class TestHashiCorpVaultDelete:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
@@ -1134,7 +1134,7 @@ class TestHashiCorpVaultDelete:
         mock_client = mocker.MagicMock()
         mock_client.is_authenticated.return_value = True
         mocker.patch(
-            "api.auth.auth_hashicorp_vault.hvac.Client", return_value=mock_client
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
         )
 
         client_logged_in.post(
