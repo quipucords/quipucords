@@ -59,6 +59,8 @@ class Credential(BaseModel):
     )
     become_user = models.CharField(max_length=64, null=True, blank=True)
     become_password = models.CharField(max_length=1024, null=True, blank=True)
+    vault_secret_path = models.CharField(max_length=1024, null=True, blank=True)
+    vault_mount_point = models.CharField(max_length=256, null=True, blank=True)
 
     ENCRYPTED_FIELDS = [
         "password",

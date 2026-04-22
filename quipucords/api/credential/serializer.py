@@ -8,6 +8,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.settings import api_settings as drf_settings
 
 from api import messages
+from api.auth.hashicorp_vault.auth import get_hashicorp_vault_token
 from api.common.serializer import NotEmptySerializer
 from api.credential.model import Credential
 from api.source.model import Source
@@ -65,11 +66,15 @@ class CredentialSerializerV2(ModelSerializer):
             "ssh_keyfile",
             "ssh_passphrase",
             "username",
+            "vault_mount_point",
+            "vault_secret_path",
         }
 
     def get_auth_type(self, credential: Credential) -> str:
         """Determine a credential's authentication type."""
-        if credential.auth_token:
+        if credential.vault_secret_path:
+            return "vault_secret_path"
+        elif credential.auth_token:
             return "auth_token"
         elif credential.password:
             return "password"
@@ -199,6 +204,31 @@ class UsernamePasswordSerializerV2(CredentialSerializerV2):
         }
 
 
+class VaultSecretPathSerializerV2(CredentialSerializerV2):
+    """
+    Credential serializer for vault secret path auth type.
+
+    This serializer should be used only for Credential write operations.
+    The Meta class defines only the fields required for writing to the model.
+    """
+
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = ["cred_type", "name", "vault_secret_path", "vault_mount_point"]
+        extra_kwargs = {
+            "vault_secret_path": {"required": True, "allow_blank": False},
+        }
+
+    def validate(self, attrs):
+        """Validate that a global HashiCorp Vault configuration exists."""
+        attrs = super().validate(attrs)
+        if get_hashicorp_vault_token() is None:
+            raise ValidationError(messages.VAULT_SECRET_PATH_REQUIRES_CONFIG)
+        return attrs
+
+
 class SshCredentialSerializerV2(CredentialSerializerV2):
     """
     Credential serializer that requires fields for an SSH connection.
@@ -283,7 +313,75 @@ class SshCredentialSerializerV2(CredentialSerializerV2):
 
 class AuthTokenOrUserPassSerializerV2(CredentialSerializerV2):
     """
-    Credential serializer that requires either username and password or auth_token.
+    Credential serializer that requires auth_token, username+password, or vault.
+
+    This serializer should be used only for Credential write operations.
+    The Meta class defines only the fields required for writing to the model.
+    """
+
+    class Meta:
+        """Serializer configuration."""
+
+        model = Credential
+        fields = [
+            "auth_token",
+            "cred_type",
+            "name",
+            "password",
+            "username",
+            "vault_mount_point",
+            "vault_secret_path",
+        ]
+        extra_kwargs = {
+            "password": ENCRYPTED_FIELD_KWARGS,
+            "auth_token": ENCRYPTED_FIELD_KWARGS,
+        }
+
+    def validate(self, attrs: dict):
+        """Run validations that require more than one field."""
+        attrs = super().validate(attrs)
+        has_user_or_pass, has_auth_token, has_vault = self._detect_provided_auth(attrs)
+
+        if not has_auth_token and not has_user_or_pass and not has_vault:
+            raise ValidationError(messages.TOKEN_OR_USER_PASS_OR_VAULT)
+
+        if sum((has_user_or_pass, has_auth_token, has_vault)) > 1:
+            raise ValidationError(messages.TOKEN_OR_USER_PASS_OR_VAULT_EXCLUSIVE)
+
+        if has_vault:
+            validator_class = VaultSecretPathSerializerV2
+        elif has_auth_token:
+            validator_class = AuthTokenSerializerV2
+        else:
+            validator_class = UsernamePasswordSerializerV2
+        validator = validator_class(self.instance, data=attrs, partial=self.partial)
+        validator.is_valid(raise_exception=True)
+        data = validator.validated_data
+        return data
+
+    def _detect_provided_auth(self, attrs: dict) -> tuple[bool, bool, bool]:
+        """
+        Detect which auth mode is present in the input data.
+
+        Returns a tuple: has_user_or_pass, has_auth_token, has_vault.
+        On PATCH, falls back to the instance only when nothing is found in attrs.
+        """
+        has_user_or_pass = bool(attrs.get("password") or attrs.get("username"))
+        has_auth_token = bool(attrs.get("auth_token"))
+        has_vault = bool(attrs.get("vault_secret_path"))
+        nothing_in_attrs = not has_user_or_pass and not has_auth_token and not has_vault
+        if self.partial and nothing_in_attrs:
+            has_user_or_pass = bool(
+                getattr(self.instance, "password") or getattr(self.instance, "username")
+            )
+            has_auth_token = bool(getattr(self.instance, "auth_token"))
+            has_vault = bool(getattr(self.instance, "vault_secret_path", None))
+        return has_user_or_pass, has_auth_token, has_vault
+
+
+class UsernamePasswordOrVaultSerializerV2(CredentialSerializerV2):
+    """
+    Credential serializer that requires username+password or vault secret path.
 
     This serializer should be used only for Credential write operations.
     The Meta class defines only the fields required for writing to the model.
@@ -298,45 +396,42 @@ class AuthTokenOrUserPassSerializerV2(CredentialSerializerV2):
             "name",
             "password",
             "username",
-            "auth_token",
+            "vault_mount_point",
+            "vault_secret_path",
         ]
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,
-            "auth_token": ENCRYPTED_FIELD_KWARGS,
         }
 
     def validate(self, attrs: dict):
         """Run validations that require more than one field."""
         attrs = super().validate(attrs)
-        has_user_or_pass, has_auth_token = self._get_user_pass_or_auth_token(attrs)
+        has_user_or_pass, has_vault = self._detect_provided_auth(attrs)
 
-        if not has_auth_token and not has_user_or_pass:
-            raise ValidationError(messages.TOKEN_OR_USER_PASS)
+        if not has_user_or_pass and not has_vault:
+            raise ValidationError(messages.USER_PASS_OR_VAULT)
+        if has_user_or_pass and has_vault:
+            raise ValidationError(messages.USER_PASS_OR_VAULT_NOT_BOTH)
 
-        if has_auth_token and has_user_or_pass:
-            raise ValidationError(messages.TOKEN_OR_USER_PASS_NOT_BOTH)
-
-        # defer the rest of the validation to specialized serializers
         validator_class = (
-            AuthTokenSerializerV2 if has_auth_token else UsernamePasswordSerializerV2
+            VaultSecretPathSerializerV2 if has_vault else UsernamePasswordSerializerV2
         )
         validator = validator_class(self.instance, data=attrs, partial=self.partial)
         validator.is_valid(raise_exception=True)
-        data = validator.validated_data
-        return data
+        return validator.validated_data
 
-    def _get_user_pass_or_auth_token(self, attrs: dict) -> tuple[bool, bool]:
+    def _detect_provided_auth(self, attrs: dict) -> tuple[bool, bool]:
         """
-        Detect if input data has username/password and/or auth token.
+        Detect which auth mode is present in the input data.
 
-        Returns a tuple of booleans: has_user_or_pass and has_auth_token in this order.
+        Returns a tuple: has_user_or_pass, has_vault.
+        On PATCH, falls back to the instance only when nothing is found in attrs.
         """
         has_user_or_pass = bool(attrs.get("password") or attrs.get("username"))
-        has_auth_token = bool(attrs.get("auth_token"))
-        # self.partial means PATCH, so it's OK to infer from instance
-        if self.partial and not has_auth_token and not has_user_or_pass:
+        has_vault = bool(attrs.get("vault_secret_path"))
+        if self.partial and not has_user_or_pass and not has_vault:
             has_user_or_pass = bool(
                 getattr(self.instance, "password") or getattr(self.instance, "username")
             )
-            has_auth_token = bool(getattr(self.instance, "auth_token"))
-        return has_user_or_pass, has_auth_token
+            has_vault = bool(getattr(self.instance, "vault_secret_path", None))
+        return has_user_or_pass, has_vault

@@ -14,11 +14,14 @@ from django.forms.models import model_to_dict
 from rest_framework.serializers import ListSerializer
 
 from api import messages
+from api.auth.hashicorp_vault.auth import HASHICORP_VAULT_NAME, HASHICORP_VAULT_TYPE
 from api.credential.serializer import (
     AuthTokenOrUserPassSerializerV2,
     CredentialSerializerV2,
     SshCredentialSerializerV2,
+    UsernamePasswordOrVaultSerializerV2,
     UsernamePasswordSerializerV2,
+    VaultSecretPathSerializerV2,
 )
 from api.credential.serializer_v1 import (
     AuthTokenOrUserPassSerializerV1,
@@ -28,6 +31,7 @@ from api.credential.serializer_v1 import (
     UsernamePasswordSerializerV1,
 )
 from api.models import Credential
+from api.secure_token.model import SecureToken
 from api.vault import decrypt_data_as_unicode
 from constants import ENCRYPTED_DATA_MASK, DataSources
 from tests.factories import CredentialFactory
@@ -51,6 +55,14 @@ def ocp_credential():
     )
     cred.save()
     return cred
+
+
+@pytest.fixture
+def _hashicorp_vault_config():
+    """Create a global HashiCorp Vault configuration in the database."""
+    return SecureToken.objects.create(
+        name=HASHICORP_VAULT_NAME, token_type=HASHICORP_VAULT_TYPE
+    )
 
 
 @pytest.mark.django_db
@@ -107,6 +119,8 @@ def test_unknown_cred_type(serializer_class):
                 "ssh_keyfile": None,
                 "ssh_passphrase": None,
                 "username": None,
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -129,6 +143,8 @@ def test_unknown_cred_type(serializer_class):
                 "ssh_keyfile": None,
                 "ssh_passphrase": None,
                 "username": "test_username",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -152,6 +168,8 @@ def test_unknown_cred_type(serializer_class):
                 "ssh_keyfile": None,
                 "ssh_passphrase": "test_ssh_passphrase",
                 "username": "test_username",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
     ),
@@ -172,9 +190,13 @@ def test_credential_serializer_is_valid_happy_path(
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "serializer_class", [CredentialSerializerV1, AuthTokenOrUserPassSerializerV2]
+    "serializer_class,expected_error",
+    [
+        (CredentialSerializerV1, messages.TOKEN_OR_USER_PASS),
+        (AuthTokenOrUserPassSerializerV2, messages.TOKEN_OR_USER_PASS_OR_VAULT),
+    ],
 )
-def test_openshift_cred_empty_auth_token(serializer_class):
+def test_openshift_cred_empty_auth_token(serializer_class, expected_error):
     """Test if serializer is invalid when auth token is empty."""
     data = {
         "name": "cred1",
@@ -183,18 +205,18 @@ def test_openshift_cred_empty_auth_token(serializer_class):
     }
     serializer = serializer_class(data=data)
     assert not serializer.is_valid(), serializer.errors
-    assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
-    # The above assertion is technically correct but maybe misleading. We allow the
-    # `auth_token` field to be blank; so, technically there is no error on that field.
-    # Instead, we rely on the serializer's `validate` method to identify the problem
-    # and raise the non-field-error TOKEN_OR_USER_PASS.
+    assert serializer.errors["non_field_errors"] == [expected_error]
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "serializer_class", [CredentialSerializerV1, AuthTokenOrUserPassSerializerV2]
+    "serializer_class,expected_error",
+    [
+        (CredentialSerializerV1, messages.TOKEN_OR_USER_PASS),
+        (AuthTokenOrUserPassSerializerV2, messages.TOKEN_OR_USER_PASS_OR_VAULT),
+    ],
 )
-def test_openshift_cred_absent_auth_token(serializer_class):
+def test_openshift_cred_absent_auth_token(serializer_class, expected_error):
     """Test if serializer is invalid when auth token is absent."""
     data = {
         "name": "cred1",
@@ -202,7 +224,7 @@ def test_openshift_cred_absent_auth_token(serializer_class):
     }
     serializer = serializer_class(data=data)
     assert not serializer.is_valid(), serializer.errors
-    assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
+    assert serializer.errors["non_field_errors"] == [expected_error]
 
 
 @pytest.mark.django_db
@@ -782,24 +804,29 @@ class TestOCPSerializer:
         assert decrypt_data_as_unicode(credential.auth_token) == "<TOKEN>"
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize(
-        "serializer_class", (CredentialSerializerV1, AuthTokenOrUserPassSerializerV2)
-    )
-    def test_no_auth(self, serializer_class, faker):
-        """Test error when no auth is provided."""
-        serializer = serializer_class(
+    def test_no_auth_v1(self, faker):
+        """Test error when no auth is provided (V1)."""
+        serializer = CredentialSerializerV1(
             data={"cred_type": DataSources.OPENSHIFT, "name": faker.slug()}
         )
         assert not serializer.is_valid()
         assert serializer.errors["non_field_errors"] == [messages.TOKEN_OR_USER_PASS]
 
     @pytest.mark.django_db
-    @pytest.mark.parametrize(
-        "serializer_class", (CredentialSerializerV1, AuthTokenOrUserPassSerializerV2)
-    )
-    def test_all_auth(self, serializer_class, faker):
-        """Test error when both auth methods are provided."""
-        serializer = serializer_class(
+    def test_no_auth_v2(self, faker):
+        """Test error when no auth is provided (V2)."""
+        serializer = AuthTokenOrUserPassSerializerV2(
+            data={"cred_type": DataSources.OPENSHIFT, "name": faker.slug()}
+        )
+        assert not serializer.is_valid()
+        assert serializer.errors["non_field_errors"] == [
+            messages.TOKEN_OR_USER_PASS_OR_VAULT
+        ]
+
+    @pytest.mark.django_db
+    def test_all_auth_v1(self, faker):
+        """Test error when both auth methods are provided (V1)."""
+        serializer = CredentialSerializerV1(
             data={
                 "cred_type": DataSources.OPENSHIFT,
                 "name": faker.slug(),
@@ -811,6 +838,23 @@ class TestOCPSerializer:
         assert not serializer.is_valid()
         assert serializer.errors["non_field_errors"] == [
             messages.TOKEN_OR_USER_PASS_NOT_BOTH
+        ]
+
+    @pytest.mark.django_db
+    def test_all_auth_v2(self, faker):
+        """Test error when both auth methods are provided (V2)."""
+        serializer = AuthTokenOrUserPassSerializerV2(
+            data={
+                "cred_type": DataSources.OPENSHIFT,
+                "name": faker.slug(),
+                "auth_token": faker.md5(),
+                "username": faker.user_name(),
+                "password": faker.password(),
+            }
+        )
+        assert not serializer.is_valid()
+        assert serializer.errors["non_field_errors"] == [
+            messages.TOKEN_OR_USER_PASS_OR_VAULT_EXCLUSIVE
         ]
 
 
@@ -943,3 +987,196 @@ def test_credential_set_password_to_empty(faker, credential_type, serializer_cla
     )
     assert not serializer.is_valid(), serializer.errors
     assert serializer.errors["password"]
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_vault_serializer_valid(faker):
+    """Test VaultSecretPathSerializerV2 accepts valid data."""
+    serializer = VaultSecretPathSerializerV2(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+            "vault_mount_point": "custom-mount",
+        }
+    )
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["vault_secret_path"] == "my/secret/path"
+    assert serializer.validated_data["vault_mount_point"] == "custom-mount"
+
+
+@pytest.mark.django_db
+def test_vault_serializer_no_config(faker):
+    """Test VaultSecretPathSerializerV2 rejects when no Vault config exists."""
+    serializer = VaultSecretPathSerializerV2(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+        }
+    )
+    assert not serializer.is_valid()
+    assert messages.VAULT_SECRET_PATH_REQUIRES_CONFIG in str(
+        serializer.errors["non_field_errors"]
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_vault_serializer_blank_path(faker):
+    """Test VaultSecretPathSerializerV2 rejects blank vault_secret_path."""
+    serializer = VaultSecretPathSerializerV2(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+            "name": faker.slug(),
+            "vault_secret_path": "",
+        }
+    )
+    assert not serializer.is_valid()
+    assert serializer.errors["vault_secret_path"]
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_vault_serializer_clears_other_fields(faker):
+    """Test VaultSecretPathSerializerV2 nulls out non-vault fields."""
+    serializer = VaultSecretPathSerializerV2(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+        }
+    )
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["auth_token"] is None
+    assert serializer.validated_data["username"] is None
+    assert serializer.validated_data["password"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_vault_serializer_get_auth_type(faker):
+    """Test that auth_type is vault_secret_path for vault credentials."""
+    serializer = VaultSecretPathSerializerV2(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+        }
+    )
+    assert serializer.is_valid(), serializer.errors
+    serializer.save()
+    credential = Credential.objects.get(name=serializer.validated_data["name"])
+    output = CredentialSerializerV2(credential)
+    assert output.data["auth_type"] == "vault_secret_path"
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+@pytest.mark.parametrize(
+    "serializer_class,cred_type",
+    (
+        (AuthTokenOrUserPassSerializerV2, DataSources.OPENSHIFT),
+        (UsernamePasswordOrVaultSerializerV2, DataSources.ANSIBLE),
+    ),
+)
+def test_vault_via_composite_serializer(faker, serializer_class, cred_type):
+    """Test vault_secret_path flows through the composite serializers."""
+    serializer = serializer_class(
+        data={
+            "cred_type": cred_type,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+        }
+    )
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["vault_secret_path"] == "my/secret/path"
+    assert serializer.validated_data["auth_token"] is None
+    assert serializer.validated_data["username"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_ansible_vault_and_password_exclusive(faker):
+    """Test ansible serializer rejects vault + password."""
+    serializer = UsernamePasswordOrVaultSerializerV2(
+        data={
+            "cred_type": DataSources.ANSIBLE,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+            "username": faker.user_name(),
+            "password": faker.password(),
+        }
+    )
+    assert not serializer.is_valid()
+    assert messages.USER_PASS_OR_VAULT_NOT_BOTH in str(
+        serializer.errors["non_field_errors"]
+    )
+
+
+@pytest.mark.django_db
+def test_ansible_no_auth(faker):
+    """Test ansible serializer rejects when no auth is provided."""
+    serializer = UsernamePasswordOrVaultSerializerV2(
+        data={
+            "cred_type": DataSources.ANSIBLE,
+            "name": faker.slug(),
+        }
+    )
+    assert not serializer.is_valid()
+    assert messages.USER_PASS_OR_VAULT in str(serializer.errors["non_field_errors"])
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_openshift_vault_and_token_exclusive(faker):
+    """Test openshift serializer rejects vault + auth_token."""
+    serializer = AuthTokenOrUserPassSerializerV2(
+        data={
+            "cred_type": DataSources.OPENSHIFT,
+            "name": faker.slug(),
+            "vault_secret_path": "my/secret/path",
+            "auth_token": faker.md5(),
+        }
+    )
+    assert not serializer.is_valid()
+    assert messages.TOKEN_OR_USER_PASS_OR_VAULT_EXCLUSIVE in str(
+        serializer.errors["non_field_errors"]
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_patch_openshift_from_token_to_vault(faker):
+    """Test PATCH switching an OpenShift credential from token to vault."""
+    credential = CredentialFactory(
+        cred_type=DataSources.OPENSHIFT,
+        name=faker.name(),
+        auth_token=faker.password(),
+    )
+    serializer = AuthTokenOrUserPassSerializerV2(
+        credential, data={"vault_secret_path": "ocp/creds"}, partial=True
+    )
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["vault_secret_path"] == "ocp/creds"
+    assert serializer.validated_data["auth_token"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_hashicorp_vault_config")
+def test_patch_ansible_from_password_to_vault(faker):
+    """Test PATCH switching an Ansible credential from password to vault."""
+    credential = CredentialFactory(
+        cred_type=DataSources.ANSIBLE,
+        name=faker.name(),
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+    serializer = UsernamePasswordOrVaultSerializerV2(
+        credential, data={"vault_secret_path": "ansible/creds"}, partial=True
+    )
+    assert serializer.is_valid(), serializer.errors
+    assert serializer.validated_data["vault_secret_path"] == "ansible/creds"
+    assert serializer.validated_data["username"] is None
+    assert serializer.validated_data["password"] is None
