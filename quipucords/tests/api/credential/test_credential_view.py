@@ -4,9 +4,31 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
+from api import messages
+from api.auth.hashicorp_vault.auth import HASHICORP_VAULT_NAME, HASHICORP_VAULT_TYPE
+from api.secure_token.model import SecureToken
 from api.vault import decrypt_data_as_unicode
 from constants import DataSources
 from tests.factories import CredentialFactory, SourceFactory
+
+
+@pytest.fixture
+def network_credential(faker):
+    """Generate a network credential with fake data for tests."""
+    return CredentialFactory(
+        cred_type=DataSources.NETWORK,
+        name=faker.name(),
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+
+
+@pytest.fixture
+def hashicorp_vault_config():
+    """Create a global HashiCorp Vault configuration in the database."""
+    return SecureToken.objects.create(
+        name=HASHICORP_VAULT_NAME, token_type=HASHICORP_VAULT_TYPE
+    )
 
 
 @pytest.mark.django_db
@@ -34,6 +56,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-01",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -59,6 +83,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-02",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -82,6 +108,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-03",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -106,6 +134,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-04",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -128,6 +158,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": None,
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -151,6 +183,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-06",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -174,6 +208,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-07",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -197,6 +233,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": "username-08",
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
         (
@@ -219,6 +257,8 @@ from tests.factories import CredentialFactory, SourceFactory
                 "sources": [],
                 "ssh_keyfile": None,
                 "username": None,
+                "vault_mount_point": None,
+                "vault_secret_path": None,
             },
         ),
     ),
@@ -331,17 +371,6 @@ def test_update_rhacs_credentials(client_logged_in, faker):
     assert decrypt_data_as_unicode(credential.auth_token) == patch_data["auth_token"]
 
 
-@pytest.fixture
-def network_credential(faker):
-    """Generate a network credential with fake data for tests."""
-    return CredentialFactory(
-        cred_type=DataSources.NETWORK,
-        name=faker.name(),
-        username=faker.user_name(),
-        password=faker.password(),
-    )
-
-
 @pytest.mark.django_db
 def test_delete_unused_credential_success(network_credential, client_logged_in):
     """Test deleting an unused credential is allowed."""
@@ -366,3 +395,184 @@ def test_delete_unknown_credential_error(faker, client_logged_in):
     url = reverse("v2:credentials-detail", args=[credential_id])
     response = client_logged_in.delete(url)
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("cred_type", (DataSources.OPENSHIFT, DataSources.ANSIBLE))
+def test_create_credential_with_vault(
+    client_logged_in, hashicorp_vault_config, cred_type
+):
+    """Test creating a credential with vault_secret_path for allowed types."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": f"vault-cred-{cred_type}",
+        "cred_type": cred_type,
+        "vault_secret_path": "my/secret/path",
+        "vault_mount_point": "custom-mount",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_201_CREATED
+    response_json = response.json()
+    assert response_json["auth_type"] == "vault_secret_path"
+    assert response_json["vault_secret_path"] == "my/secret/path"
+    assert response_json["vault_mount_point"] == "custom-mount"
+    assert response_json["has_password"] is False
+    assert response_json["has_auth_token"] is False
+    assert response_json["username"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("cred_type", (DataSources.OPENSHIFT, DataSources.ANSIBLE))
+def test_create_credential_with_vault_no_mount_point(
+    client_logged_in, hashicorp_vault_config, cred_type
+):
+    """Test creating a vault credential without mount_point defaults to null."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": f"vault-cred-no-mount-{cred_type}",
+        "cred_type": cred_type,
+        "vault_secret_path": "my/secret/path",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["vault_mount_point"] is None
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("cred_type", (DataSources.OPENSHIFT, DataSources.ANSIBLE))
+def test_create_credential_with_vault_no_config(client_logged_in, cred_type):
+    """Test creating a vault credential fails when no Vault config exists."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": f"vault-cred-no-config-{cred_type}",
+        "cred_type": cred_type,
+        "vault_secret_path": "my/secret/path",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert messages.VAULT_SECRET_PATH_REQUIRES_CONFIG in str(response.json())
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "cred_type",
+    (
+        DataSources.NETWORK,
+        DataSources.VCENTER,
+        DataSources.SATELLITE,
+        DataSources.RHACS,
+    ),
+)
+def test_create_credential_with_vault_invalid_type(
+    client_logged_in, hashicorp_vault_config, cred_type
+):
+    """Test creating a vault credential fails for unsupported cred types."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": f"vault-cred-invalid-{cred_type}",
+        "cred_type": cred_type,
+        "vault_secret_path": "my/secret/path",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_create_openshift_credential_with_vault_and_token(
+    client_logged_in, hashicorp_vault_config
+):
+    """Test vault_secret_path and auth_token are mutually exclusive."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": "vault-and-token",
+        "cred_type": DataSources.OPENSHIFT,
+        "vault_secret_path": "my/secret/path",
+        "auth_token": "some-token",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert messages.TOKEN_OR_USER_PASS_OR_VAULT_EXCLUSIVE in str(response.json())
+
+
+@pytest.mark.django_db
+def test_create_openshift_credential_with_vault_and_password(
+    client_logged_in, hashicorp_vault_config
+):
+    """Test vault_secret_path and username+password are mutually exclusive."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": "vault-and-password",
+        "cred_type": DataSources.OPENSHIFT,
+        "vault_secret_path": "my/secret/path",
+        "username": "user",
+        "password": "pass",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert messages.TOKEN_OR_USER_PASS_OR_VAULT_EXCLUSIVE in str(response.json())
+
+
+@pytest.mark.django_db
+def test_create_ansible_credential_with_vault_and_password(
+    client_logged_in, hashicorp_vault_config
+):
+    """Test vault + password are mutually exclusive for ansible."""
+    url = reverse("v2:credentials-list")
+    post_data = {
+        "name": "vault-and-password-ansible",
+        "cred_type": DataSources.ANSIBLE,
+        "vault_secret_path": "my/secret/path",
+        "username": "user",
+        "password": "pass",
+    }
+    response = client_logged_in.post(url, data=post_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert messages.USER_PASS_OR_VAULT_NOT_BOTH in str(response.json())
+
+
+@pytest.mark.django_db
+def test_update_openshift_credential_to_vault(
+    client_logged_in, hashicorp_vault_config, faker
+):
+    """Test PATCH switching an OpenShift credential from token to vault."""
+    credential = CredentialFactory(
+        cred_type=DataSources.OPENSHIFT,
+        name=faker.name(),
+        auth_token=faker.password(),
+    )
+    url = reverse("v2:credentials-detail", args=[credential.id])
+    response = client_logged_in.patch(url, data={"vault_secret_path": "ocp/creds"})
+    assert response.status_code == status.HTTP_200_OK
+    response_json = response.json()
+    assert response_json["auth_type"] == "vault_secret_path"
+    assert response_json["vault_secret_path"] == "ocp/creds"
+    assert response_json["has_auth_token"] is False
+    assert response_json["has_password"] is False
+    assert response_json["username"] is None
+
+
+@pytest.mark.django_db
+def test_update_openshift_credential_from_vault(
+    client_logged_in, hashicorp_vault_config, faker
+):
+    """Test PATCH switching an OpenShift credential from vault to token."""
+    credential = CredentialFactory(
+        cred_type=DataSources.OPENSHIFT,
+        name=faker.name(),
+        auth_token=None,
+        username=None,
+        password=None,
+        vault_secret_path="ocp/creds",
+        vault_mount_point="secret",
+    )
+    url = reverse("v2:credentials-detail", args=[credential.id])
+    new_token = faker.password()
+    response = client_logged_in.patch(url, data={"auth_token": new_token})
+    assert response.status_code == status.HTTP_200_OK
+    response_json = response.json()
+    assert response_json["auth_type"] == "auth_token"
+    assert response_json["vault_secret_path"] is None
+    assert response_json["vault_mount_point"] is None
+    assert response_json["has_auth_token"] is True
+    credential.refresh_from_db()
+    assert decrypt_data_as_unicode(credential.auth_token) == new_token

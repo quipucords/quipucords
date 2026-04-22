@@ -176,6 +176,22 @@ HASHICORP_VAULT_HTTP_ERROR = (
     "Failed to authenticate to HashiCorp Vault %s, BaseHTTPError: %s"
 )
 
+# Credential Vault messages
+VAULT_SECRET_PATH_REQUIRES_CONFIG = (
+    "HashiCorp Vault configuration is required to use vault credentials."
+)
+TOKEN_OR_USER_PASS_OR_VAULT = (
+    "A credential must have a username+password, auth_token, or vault_secret_path."
+)
+TOKEN_OR_USER_PASS_OR_VAULT_EXCLUSIVE = (
+    "A credential must have only one of username+password, auth_token,"
+    " or vault_secret_path."
+)
+USER_PASS_OR_VAULT = "A credential must have a username+password or vault_secret_path."
+USER_PASS_OR_VAULT_NOT_BOTH = (
+    "A credential must have either a username+password or vault_secret_path, not both."
+)
+
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."
 REPORT_DEPLOYMENTS_NOT_CREATED = (

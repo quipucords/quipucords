@@ -19,6 +19,7 @@ from api.credential.serializer import (
     AuthTokenSerializerV2,
     CredentialSerializerV2,
     SshCredentialSerializerV2,
+    UsernamePasswordOrVaultSerializerV2,
     UsernamePasswordSerializerV2,
 )
 from api.filters import ListFilter
@@ -59,7 +60,7 @@ class CredentialViewSetV2(ModelViewSet):
         DataSources.OPENSHIFT: AuthTokenOrUserPassSerializerV2,
         DataSources.VCENTER: UsernamePasswordSerializerV2,
         DataSources.SATELLITE: UsernamePasswordSerializerV2,
-        DataSources.ANSIBLE: UsernamePasswordSerializerV2,
+        DataSources.ANSIBLE: UsernamePasswordOrVaultSerializerV2,
         DataSources.RHACS: AuthTokenSerializerV2,
     }
 
