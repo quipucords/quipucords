@@ -181,7 +181,7 @@ class ProcessEapHomeVersionTxt(util.PerItemProcessor):
 
     KEY = "eap_home_version_txt"
     VERSION_RE = re.compile(
-        r"Red Hat JBoss Enterprise Application Platform - Version (.*)\.GA"
+        r"Red Hat JBoss Enterprise Application Platform - Version ([^\s]+)"
     )
 
     @staticmethod
@@ -191,7 +191,7 @@ class ProcessEapHomeVersionTxt(util.PerItemProcessor):
             return False
         match = ProcessEapHomeVersionTxt.VERSION_RE.match(item["stdout"].strip())
         if match:
-            return match.group(1)
+            return match.group(1).removesuffix(".GA")
 
         # If we found a version.txt file, this likely *is* JBoss EAP,
         # it's just a version file format that we don't recognize. If
