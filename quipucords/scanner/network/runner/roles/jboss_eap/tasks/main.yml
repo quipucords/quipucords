@@ -210,7 +210,7 @@
   ignore_errors: yes
 
 - name: check for jboss packages
-  raw: export LANG=C LC_ALL=C; rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}\n" | grep -E '(eap7)|(jbossas)' | sort
+  raw: export LANG=C LC_ALL=C; rpm -qa --qf "%{NAME}|%{VERSION}|%{RELEASE}|%{INSTALLTIME}|%{VENDOR}|%{BUILDTIME}|%{BUILDHOST}|%{SOURCERPM}|%{LICENSE}|%{PACKAGER}|%{INSTALLTIME:date}|%{BUILDTIME:date}\n" | grep -E '(eap[0-9]+)|(jbossas)' | sort
   register: internal_jboss_eap_packages
   ignore_errors: yes
   when: 'jboss_eap'

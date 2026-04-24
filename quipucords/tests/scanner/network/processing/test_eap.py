@@ -181,6 +181,11 @@ class TestProcessEapHomeVersionTxt(unittest.TestCase):
     """Test scanning the contents of $EAP_HOME/version.txt."""
 
     cat_result = "Red Hat JBoss Enterprise Application Platform - Version 6.4.0.GA"
+    cat_result_no_ga = "Red Hat JBoss Enterprise Application Platform - Version 8.0"
+    cat_result_post_version = (
+        "Red Hat JBoss Enterprise Application Platform - Version"
+        " 8.1.0 General Availability"
+    )
 
     def test_three_dirs(self):
         """A directory can have three outcomes."""
@@ -194,10 +199,21 @@ class TestProcessEapHomeVersionTxt(unittest.TestCase):
                         {"item": "dir2", "rc": 1, "stdout": self.cat_result},
                         # dir3: cat was successful, output does not have 'Red Hat'.
                         {"item": "dir3", "stdout": "foo"},
+                        # dir4: cat was successful, stdout has 'Red Hat' but no .GA
+                        {"item": "dir4", "stdout": self.cat_result_no_ga},
+                        # dir5: cat was successful, stdout has 'Red Hat' and some
+                        # extra content after version
+                        {"item": "dir5", "stdout": self.cat_result_post_version},
                     ]
                 )
             ),
-            {"dir1": "6.4.0", "dir2": False, "dir3": "foo"},
+            {
+                "dir1": "6.4.0",
+                "dir2": False,
+                "dir3": "foo",
+                "dir4": "8.0",
+                "dir5": "8.1.0",
+            },
         )
 
 
