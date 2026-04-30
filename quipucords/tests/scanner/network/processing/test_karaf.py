@@ -88,6 +88,38 @@ class TestProcessKarafInitFiles(unittest.TestCase):
                 ["fuse bar"],
             )
 
+    def test_mount_only(self):
+        r"""'run-vmblock\x2dfuse.mount' is a false positive."""
+        for processor in self.processors:
+            expected = [r"run-vmblock\x2dfuse.mount  enabled enabled"]
+            if processor.IGNORE_WORDS is not None:
+                expected = []
+            self.assertEqual(
+                processor.process(
+                    ansible_result(r"run-vmblock\x2dfuse.mount  enabled enabled")
+                ),
+                expected,
+            )
+
+    def test_mount_and_custom_service(self):
+        r"""'run-vmblock\x2dfuse.mount' is a false positive."""
+        for processor in self.processors:
+            expected = [
+                r"run-vmblock\x2dfuse.mount  enabled enabled",
+                "fuse-server.service disabled disabled",
+            ]
+            if processor.IGNORE_WORDS is not None:
+                expected = ["fuse-server.service disabled disabled"]
+            self.assertEqual(
+                processor.process(
+                    ansible_result(
+                        r"run-vmblock\x2dfuse.mount  enabled enabled"
+                        "\nfuse-server.service disabled disabled"
+                    )
+                ),
+                expected,
+            )
+
 
 class TestProcessKarafHomeBinFuse(unittest.TestCase):
     """Test using locate to find karaf home bin fuse."""

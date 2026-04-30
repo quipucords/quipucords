@@ -158,6 +158,7 @@ class ProcessJbossEapChkconfig(util.InitLineFinder):
     DEPS = ["internal_have_chkconfig"]
     KEY = "jboss_eap_chkconfig"
     KEYWORDS = ["jboss", "eap"]
+    IGNORE_WORDS = ["e2scrub_reap"]
 
 
 class ProcessJbossEapSystemctl(util.InitLineFinder):
@@ -166,6 +167,7 @@ class ProcessJbossEapSystemctl(util.InitLineFinder):
     DEPS = ["internal_have_systemctl"]
     KEY = "jboss_eap_systemctl_unit_files"
     KEYWORDS = ["jboss", "eap"]
+    IGNORE_WORDS = ["e2scrub_reap"]
 
 
 class ProcessEapHomeLs(util.IndicatorFileFinder):
