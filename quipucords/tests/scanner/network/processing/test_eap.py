@@ -234,6 +234,29 @@ class TestProcessJbossEapInitFiles(unittest.TestCase):
                 ["eap bar"],
             )
 
+    def test_e2scrub_only(self):
+        """'e2scrub_reap' is a false positive."""
+        for processor in self.processors:
+            self.assertEqual(
+                processor.process(
+                    ansible_result("e2scrub_reap.service enabled enabled")
+                ),
+                [],
+            )
+
+    def test_e2scrub_and_jboss(self):
+        """'e2scrub_reap' is a false positive."""
+        for processor in self.processors:
+            self.assertEqual(
+                processor.process(
+                    ansible_result(
+                        "e2scrub_reap.service enabled enabled\n"
+                        "eap8-domain.service disabled disabled"
+                    )
+                ),
+                ["eap8-domain.service disabled disabled"],
+            )
+
 
 class TestProcessEapHomeBinForFuse(unittest.TestCase):
     """Test looking for fuse scripts."""
