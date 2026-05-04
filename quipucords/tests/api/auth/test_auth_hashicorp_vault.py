@@ -2,6 +2,7 @@
 
 import base64
 import http
+from unittest.mock import MagicMock, patch
 
 import hvac
 import pytest
@@ -27,7 +28,9 @@ from api.auth.hashicorp_vault.auth import (
     hashicorp_vault_authenticate,
     hashicorp_vault_client,
     hashicorp_vault_url,
+    read_vault_secret,
 )
+from scanner.exceptions import ScanFailureError
 
 HASHICORP_VAULT_VIEW = "v2:hashicorp-vault-list"
 
@@ -1148,3 +1151,222 @@ class TestHashiCorpVaultDelete:
 
         assert response1.status_code == http.HTTPStatus.NO_CONTENT
         assert response2.status_code == http.HTTPStatus.NO_CONTENT
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_happy_path():
+    """Test read_vault_secret returns the value for vault_secret_key on success."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+    credential.vault_mount_point = "discovery"
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.secrets.kv.v2.read_secret_version.return_value = {
+        "data": {"data": {"auth_token": "tok"}}
+    }
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        result = read_vault_secret(credential)
+
+    assert result == "tok"
+    mock_client.is_authenticated.assert_called_once()
+    mock_client.secrets.kv.v2.read_secret_version.assert_called_once_with(
+        path="my/secret/path", mount_point="discovery"
+    )
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_no_mount_point():
+    """Test read_vault_secret omits mount_point when not set."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+    credential.vault_mount_point = ""
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.secrets.kv.v2.read_secret_version.return_value = {
+        "data": {"data": {"auth_token": "tok"}}
+    }
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        result = read_vault_secret(credential)
+
+    assert result == "tok"
+    mock_client.secrets.kv.v2.read_secret_version.assert_called_once_with(
+        path="my/secret/path"
+    )
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_vault_not_configured():
+    """Test read_vault_secret raises ScanFailureError when Vault is not configured."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+
+    with patch(
+        "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token", return_value=None
+    ):
+        with pytest.raises(ScanFailureError, match="not configured"):
+            read_vault_secret(credential)
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_missing_key():
+    """Test read_vault_secret raises ScanFailureError when key is missing."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+    credential.vault_mount_point = ""
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.secrets.kv.v2.read_secret_version.return_value = {
+        "data": {"data": {"username": "admin"}}
+    }
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        with pytest.raises(ScanFailureError, match="auth_token"):
+            read_vault_secret(credential)
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_no_data():
+    """Test read_vault_secret raises ScanFailureError when secret has no data."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+    credential.vault_mount_point = "discovery"
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.secrets.kv.v2.read_secret_version.return_value = {"data": {"data": {}}}
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        with pytest.raises(ScanFailureError, match="returned no data"):
+            read_vault_secret(credential)
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_authentication_failed():
+    """Test read_vault_secret raises ScanFailureError when not authenticated."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+    credential.vault_mount_point = "discovery"
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.is_authenticated.return_value = False
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        with pytest.raises(ScanFailureError, match="Failed to authenticate"):
+            read_vault_secret(credential)
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_invalid_path():
+    """Test read_vault_secret raises ScanFailureError on invalid Vault path."""
+    credential = MagicMock()
+    credential.vault_secret_path = "bad/path"
+    credential.vault_mount_point = "discovery"
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.secrets.kv.v2.read_secret_version.side_effect = (
+        hvac.exceptions.InvalidPath("not found")
+    )
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        with pytest.raises(ScanFailureError, match="Failed to retrieve"):
+            read_vault_secret(credential)
+
+
+@pytest.mark.django_db
+def test_read_vault_secret_connection_error():
+    """Test read_vault_secret raises ScanFailureError on ConnectionError."""
+    credential = MagicMock()
+    credential.vault_secret_path = "my/secret/path"
+    credential.vault_mount_point = "discovery"
+    credential.vault_secret_key = "auth_token"
+
+    mock_client = MagicMock()
+    mock_client.is_authenticated.side_effect = ConnectionError("unreachable")
+
+    with (
+        patch(
+            "api.auth.hashicorp_vault.auth.get_hashicorp_vault_token"
+        ) as mock_get_token,
+        patch(
+            "api.auth.hashicorp_vault.auth.hashicorp_vault_client"
+        ) as mock_vault_client,
+    ):
+        mock_get_token.return_value = MagicMock()
+        mock_vault_client.return_value.__enter__ = MagicMock(return_value=mock_client)
+        mock_vault_client.return_value.__exit__ = MagicMock(return_value=False)
+
+        with pytest.raises(ScanFailureError, match="Failed to retrieve"):
+            read_vault_secret(credential)
