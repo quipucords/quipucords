@@ -196,3 +196,32 @@ def test_ansible_api_instantiation_with_ipv6_host():
     )
 
     assert api.base_url == "https://[fd00:dead:beef::126]:6443"
+
+
+def test_ansible_api_instantiation_with_auth_token():
+    """Assert bearer token auth sets Authorization header without HTTPBasicAuth."""
+    api = AnsibleControllerApi.from_connection_info(
+        host="localhost",
+        protocol="https",
+        port=8443,
+        auth_token="my-bearer-token",
+        ssl_verify=True,
+    )
+
+    assert api.base_url == "https://localhost:8443"
+    assert api.headers["Authorization"] == "Bearer my-bearer-token"
+    assert api.auth is None
+
+
+def test_ansible_api_instantiation_with_user_pass_no_bearer():
+    """Assert username/password uses HTTPBasicAuth and no bearer header."""
+    api = AnsibleControllerApi.from_connection_info(
+        host="localhost",
+        protocol="https",
+        port=8443,
+        username="admin",
+        password="secret",
+    )
+
+    assert isinstance(api.auth, HTTPBasicAuth)
+    assert "Authorization" not in api.headers
