@@ -14,6 +14,7 @@ from urllib3.exceptions import HTTPError as BaseHTTPError
 
 import api.messages
 from api.secure_token.model import SecureToken
+from scanner.exceptions import ScanFailureError
 
 logger = getLogger(__name__)
 
@@ -231,3 +232,42 @@ def hashicorp_vault_authenticate(vault_token=None, metadata=None):
             raise HashiCorpVaultAuthError(
                 _(api.messages.HASHICORP_VAULT_HTTP_ERROR % (vault_address, str(err)))
             )
+
+
+def read_vault_secret(credential) -> str:
+    """Fetch a secret value from HashiCorp Vault using credential configuration."""
+    vault_token = get_hashicorp_vault_token()
+    if vault_token is None:
+        raise ScanFailureError(api.messages.VAULT_SECRET_NOT_CONFIGURED)
+
+    path = credential.vault_secret_path
+    mount_point = credential.vault_mount_point
+    secret_key = credential.vault_secret_key
+
+    try:
+        with hashicorp_vault_client(vault_token=vault_token) as client:
+            if not client.is_authenticated():
+                raise ScanFailureError(api.messages.VAULT_SECRET_AUTH_FAILED)
+            read_kwargs = {"path": path}
+            if mount_point:
+                read_kwargs["mount_point"] = mount_point
+            response = client.secrets.kv.v2.read_secret_version(**read_kwargs)
+    except (
+        hvac.exceptions.VaultError,
+        ConnectionError,
+        BaseHTTPError,
+        HashiCorpVaultAuthError,
+    ) as err:
+        raise ScanFailureError(
+            api.messages.VAULT_SECRET_FETCH_FAILED % (path, mount_point, err)
+        ) from err
+
+    secret_data = response.get("data", {}).get("data", {})
+    if not secret_data:
+        raise ScanFailureError(api.messages.VAULT_SECRET_NO_DATA % (path, mount_point))
+    value = secret_data.get(secret_key)
+    if not value:
+        raise ScanFailureError(
+            api.messages.VAULT_SECRET_MISSING_KEY % (secret_key, path)
+        )
+    return value

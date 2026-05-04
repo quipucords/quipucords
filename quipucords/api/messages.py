@@ -192,6 +192,19 @@ USER_PASS_OR_VAULT = "A credential must have a username+password or vault_secret
 USER_PASS_OR_VAULT_NOT_BOTH = (
     "A credential must have either a username+password or vault_secret_path, not both."
 )
+VAULT_SECRET_AUTH_FAILED = (
+    "Failed to authenticate with HashiCorp Vault when reading credential secret."
+)
+VAULT_SECRET_FETCH_FAILED = (
+    "Failed to retrieve secret from HashiCorp Vault (path=%s, mount_point=%s): %s"
+)
+VAULT_SECRET_NOT_CONFIGURED = (
+    "Credential uses vault_secret_path but HashiCorp Vault is not configured."
+)
+VAULT_SECRET_NO_DATA = "Vault secret at path '%s' (mount_point='%s') returned no data."
+VAULT_SECRET_MISSING_KEY = (
+    "Vault secret does not contain the expected '%s' key (path='%s')."
+)
 
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."
