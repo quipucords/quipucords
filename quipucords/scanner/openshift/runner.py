@@ -2,6 +2,7 @@
 
 from abc import ABCMeta
 
+from api.auth.hashicorp_vault.auth import read_vault_secret
 from api.models import ScanTask
 from api.vault import decrypt_data_as_unicode
 from scanner.openshift.api import OpenShiftApi
@@ -25,8 +26,10 @@ class OpenShiftTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
             "ssl_verify": ssl_verify,
             "proxy_url": proxy_url,
         }
-        if credential.auth_token:
-            conn_info.update(auth_token=decrypt_data_as_unicode(credential.auth_token))
+        if credential.vault_secret_path:
+            conn_info["auth_token"] = read_vault_secret(credential)
+        elif credential.auth_token:
+            conn_info["auth_token"] = decrypt_data_as_unicode(credential.auth_token)
         else:
             conn_info.update(
                 username=credential.username,
