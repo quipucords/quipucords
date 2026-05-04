@@ -3,6 +3,7 @@
 from abc import ABCMeta
 from functools import cached_property
 
+from api.auth.hashicorp_vault.auth import read_vault_secret
 from api.models import ScanJob, ScanTask
 from api.vault import decrypt_data_as_unicode
 from scanner.ansible.api import AnsibleControllerApi
@@ -47,15 +48,19 @@ class AnsibleTaskRunner(ScanTaskRunner, metaclass=ABCMeta):
         ssl_enabled, ssl_verify = scan_task.source.get_ssl_options()
         credential = scan_task.source.single_credential
         proxy_url = scan_task.source.proxy_url
-        return {
+        conn = {
             "host": host,
-            "password": decrypt_data_as_unicode(credential.password),
             "port": port,
             "protocol": "https" if ssl_enabled else "http",
             "ssl_verify": ssl_verify,
-            "username": credential.username,
             "proxy_url": proxy_url,
         }
+        if credential.vault_secret_path:
+            conn["auth_token"] = read_vault_secret(credential)
+        else:
+            conn["username"] = credential.username
+            conn["password"] = decrypt_data_as_unicode(credential.password)
+        return conn
 
     @classmethod
     def get_client(cls, scan_task: ScanTask) -> AnsibleControllerApi:

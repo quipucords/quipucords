@@ -1,5 +1,7 @@
 """Test Ansible InspectTaskRunner."""
 
+from unittest.mock import patch
+
 import pytest
 
 from api.models import ScanTask
@@ -7,7 +9,8 @@ from constants import DataSources
 from scanner.ansible.exceptions import AnsibleApiDetectionError
 from scanner.ansible.inspect import InspectTaskRunner
 from scanner.ansible.runner import AnsibleTaskRunner
-from tests.factories import ScanTaskFactory
+from scanner.exceptions import ScanFailureError
+from tests.factories import CredentialFactory, ScanTaskFactory
 
 
 @pytest.fixture
@@ -71,3 +74,55 @@ def test_check_connection_handles_api_detection_error(
     failure_message, status = runner.check_connection()
     assert not mock_client.assert_called_once()
     assert status == ScanTask.FAILED
+
+
+@pytest.mark.django_db
+def test_get_connection_info_with_vault_credential():
+    """Test _get_connection_info fetches auth_token from Vault."""
+    cred = CredentialFactory(
+        cred_type=DataSources.ANSIBLE,
+        vault_secret_path="vault/dev/aap-token",
+        vault_mount_point="discovery",
+        vault_secret_key="auth_token",
+    )
+    scan_task = ScanTaskFactory(
+        source__credentials=[cred],
+        source__source_type=DataSources.ANSIBLE,
+        source__hosts=["10.0.0.1"],
+        source__port=443,
+    )
+
+    with patch(
+        "scanner.ansible.runner.read_vault_secret",
+        return_value="vault-fetched-token",
+    ) as mock_read:
+        conn_info = AnsibleTaskRunner._get_connection_info(scan_task)
+
+    mock_read.assert_called_once_with(cred)
+    assert conn_info["auth_token"] == "vault-fetched-token"
+    assert "username" not in conn_info
+    assert "password" not in conn_info
+
+
+@pytest.mark.django_db
+def test_get_connection_info_vault_failure_propagates():
+    """Test _get_connection_info propagates ScanFailureError from Vault."""
+    cred = CredentialFactory(
+        cred_type=DataSources.ANSIBLE,
+        vault_secret_path="vault/dev/aap-token",
+        vault_mount_point="discovery",
+        vault_secret_key="auth_token",
+    )
+    scan_task = ScanTaskFactory(
+        source__credentials=[cred],
+        source__source_type=DataSources.ANSIBLE,
+        source__hosts=["10.0.0.1"],
+        source__port=443,
+    )
+
+    with patch(
+        "scanner.ansible.runner.read_vault_secret",
+        side_effect=ScanFailureError("Vault unreachable"),
+    ):
+        with pytest.raises(ScanFailureError, match="Vault unreachable"):
+            AnsibleTaskRunner._get_connection_info(scan_task)

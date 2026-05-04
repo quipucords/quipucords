@@ -30,8 +30,9 @@ class AnsibleControllerApi(Session):
         host,
         protocol,
         port,
-        username,
-        password,
+        username=None,
+        password=None,
+        auth_token=None,
         ssl_verify: bool = True,
         proxy_url: str = None,
     ):
@@ -43,13 +44,18 @@ class AnsibleControllerApi(Session):
         :param port: The port to use for connecting to the server.
         :param username: The username to use for connecting to the server.
         :param password: The password to use for connecting to the server.
+        :param auth_token: Bearer token for OAuth2 authentication.
         :param ssl_verify: Whether to verify the SSL certificate.
         :param proxy_url: proxy URL in the format 'http(s)://host:port'.
         """
         formatted_host = cls._format_host_for_url(host)
         base_uri = f"{protocol}://{formatted_host}:{port}"
-        auth = HTTPBasicAuth(username=username, password=password)
-        session = cls(base_url=base_uri, verify=ssl_verify, auth=auth)
+        if auth_token:
+            session = cls(base_url=base_uri, verify=ssl_verify)
+            session.headers["Authorization"] = f"Bearer {auth_token}"
+        else:
+            auth = HTTPBasicAuth(username=username, password=password)
+            session = cls(base_url=base_uri, verify=ssl_verify, auth=auth)
 
         proxies = {}
         if proxy_url:
