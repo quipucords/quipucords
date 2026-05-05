@@ -213,8 +213,8 @@ REPORT_UNSUPPORTED_REPORT_TYPE = "Unsupported report_type %(report_type)s specif
 PUBLISH_NO_AUTH_TOKEN = "No authentication token found. Please log in first."
 PUBLISH_TOKEN_EXPIRED = "Authentication token has expired. Please log in again."
 PUBLISH_PAYLOAD_FAILED = "Failed to generate report payload: %s"
-PUBLISH_CONNECTION_ERROR = "Connection error: %s"
-PUBLISH_AUTH_REJECTED = "Authentication rejected by server: %s"
+PUBLISH_CONNECTION_ERROR = "Connection error: %s. Please try again later."
+PUBLISH_AUTH_REJECTED = "Authentication rejected by server: %s. Please log in again."
 PUBLISH_CLIENT_ERROR = (
     "Request rejected by ingress (%s): %s. This might be a bug in Discovery."
 )
