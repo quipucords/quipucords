@@ -77,7 +77,7 @@
 
 - name: extract result value for subman.virt.is_guest
   set_fact:
-    subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout_lines'][-1] | string() | trim | default(None) }}"
+    subman_virt_is_guest: "{{  internal_subman_virt_is_guest_cmd['stdout_lines'][-1] | default(None) | bool }}"
   ignore_errors: yes
   when:
     - '"stdout_lines" in internal_subman_virt_is_guest_cmd'
