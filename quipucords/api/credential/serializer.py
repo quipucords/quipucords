@@ -68,6 +68,7 @@ class CredentialSerializerV2(ModelSerializer):
             "username",
             "vault_mount_point",
             "vault_secret_path",
+            "vault_key",
         }
 
     def get_auth_type(self, credential: Credential) -> str:
@@ -216,9 +217,16 @@ class VaultSecretPathSerializerV2(CredentialSerializerV2):
         """Serializer configuration."""
 
         model = Credential
-        fields = ["cred_type", "name", "vault_secret_path", "vault_mount_point"]
+        fields = [
+            "cred_type",
+            "name",
+            "vault_secret_path",
+            "vault_mount_point",
+            "vault_key",
+        ]
         extra_kwargs = {
             "vault_secret_path": {"required": True, "allow_blank": False},
+            "vault_key": {"required": True, "allow_blank": False},
         }
 
     def validate(self, attrs):
@@ -331,6 +339,7 @@ class AuthTokenOrUserPassSerializerV2(CredentialSerializerV2):
             "username",
             "vault_mount_point",
             "vault_secret_path",
+            "vault_key",
         ]
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,
@@ -398,6 +407,7 @@ class UsernamePasswordOrVaultSerializerV2(CredentialSerializerV2):
             "username",
             "vault_mount_point",
             "vault_secret_path",
+            "vault_key",
         ]
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,

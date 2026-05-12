@@ -58,6 +58,7 @@ def hashicorp_vault_config():
                 "username": "username-01",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -85,6 +86,7 @@ def hashicorp_vault_config():
                 "username": "username-02",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -110,6 +112,7 @@ def hashicorp_vault_config():
                 "username": "username-03",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -136,6 +139,7 @@ def hashicorp_vault_config():
                 "username": "username-04",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -160,6 +164,7 @@ def hashicorp_vault_config():
                 "username": None,
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -185,6 +190,7 @@ def hashicorp_vault_config():
                 "username": "username-06",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -210,6 +216,7 @@ def hashicorp_vault_config():
                 "username": "username-07",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -235,6 +242,7 @@ def hashicorp_vault_config():
                 "username": "username-08",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -259,6 +267,7 @@ def hashicorp_vault_config():
                 "username": None,
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
     ),
@@ -409,6 +418,7 @@ def test_create_credential_with_vault(
         "cred_type": cred_type,
         "vault_secret_path": "my/secret/path",
         "vault_mount_point": "custom-mount",
+        "vault_key": "auth_token",
     }
     response = client_logged_in.post(url, data=post_data)
     assert response.status_code == status.HTTP_201_CREATED
@@ -432,6 +442,7 @@ def test_create_credential_with_vault_no_mount_point(
         "name": f"vault-cred-no-mount-{cred_type}",
         "cred_type": cred_type,
         "vault_secret_path": "my/secret/path",
+        "vault_key": "auth_token",
     }
     response = client_logged_in.post(url, data=post_data)
     assert response.status_code == status.HTTP_201_CREATED
@@ -447,6 +458,7 @@ def test_create_credential_with_vault_no_config(client_logged_in, cred_type):
         "name": f"vault-cred-no-config-{cred_type}",
         "cred_type": cred_type,
         "vault_secret_path": "my/secret/path",
+        "vault_key": "auth_token",
     }
     response = client_logged_in.post(url, data=post_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
