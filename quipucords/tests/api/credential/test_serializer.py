@@ -121,6 +121,7 @@ def test_unknown_cred_type(serializer_class):
                 "username": None,
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -145,6 +146,7 @@ def test_unknown_cred_type(serializer_class):
                 "username": "test_username",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
         (
@@ -170,6 +172,7 @@ def test_unknown_cred_type(serializer_class):
                 "username": "test_username",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
+                "vault_key": None,
             },
         ),
     ),
@@ -999,6 +1002,7 @@ def test_vault_serializer_valid(faker):
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
             "vault_mount_point": "custom-mount",
+            "vault_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1014,6 +1018,7 @@ def test_vault_serializer_no_config(faker):
             "cred_type": DataSources.OPENSHIFT,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
+            "vault_key": "auth_token",
         }
     )
     assert not serializer.is_valid()
@@ -1046,6 +1051,7 @@ def test_vault_serializer_clears_other_fields(faker):
             "cred_type": DataSources.OPENSHIFT,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
+            "vault_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1063,6 +1069,7 @@ def test_vault_serializer_get_auth_type(faker):
             "cred_type": DataSources.OPENSHIFT,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
+            "vault_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1088,6 +1095,7 @@ def test_vault_via_composite_serializer(faker, serializer_class, cred_type):
             "cred_type": cred_type,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
+            "vault_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
