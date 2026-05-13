@@ -121,7 +121,7 @@ def test_unknown_cred_type(serializer_class):
                 "username": None,
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -146,7 +146,7 @@ def test_unknown_cred_type(serializer_class):
                 "username": "test_username",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -172,7 +172,7 @@ def test_unknown_cred_type(serializer_class):
                 "username": "test_username",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
     ),
@@ -1002,7 +1002,7 @@ def test_vault_serializer_valid(faker):
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
             "vault_mount_point": "custom-mount",
-            "vault_key": "auth_token",
+            "vault_secret_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1018,7 +1018,7 @@ def test_vault_serializer_no_config(faker):
             "cred_type": DataSources.OPENSHIFT,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
-            "vault_key": "auth_token",
+            "vault_secret_key": "auth_token",
         }
     )
     assert not serializer.is_valid()
@@ -1051,7 +1051,7 @@ def test_vault_serializer_clears_other_fields(faker):
             "cred_type": DataSources.OPENSHIFT,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
-            "vault_key": "auth_token",
+            "vault_secret_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1069,7 +1069,7 @@ def test_vault_serializer_get_auth_type(faker):
             "cred_type": DataSources.OPENSHIFT,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
-            "vault_key": "auth_token",
+            "vault_secret_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1095,7 +1095,7 @@ def test_vault_via_composite_serializer(faker, serializer_class, cred_type):
             "cred_type": cred_type,
             "name": faker.slug(),
             "vault_secret_path": "my/secret/path",
-            "vault_key": "auth_token",
+            "vault_secret_key": "auth_token",
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -1157,7 +1157,7 @@ def test_openshift_vault_and_token_exclusive(faker):
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_hashicorp_vault_config")
 def test_patch_openshift_from_token_to_vault(faker):
-    """Test PATCH switching OpenShift to vault requires vault_key."""
+    """Test PATCH switching OpenShift to vault requires vault_secret_key."""
     credential = CredentialFactory(
         cred_type=DataSources.OPENSHIFT,
         name=faker.name(),
@@ -1165,19 +1165,19 @@ def test_patch_openshift_from_token_to_vault(faker):
     )
     serializer = AuthTokenOrUserPassSerializerV2(
         credential,
-        data={"vault_secret_path": "ocp/creds", "vault_key": "auth_token"},
+        data={"vault_secret_path": "ocp/creds", "vault_secret_key": "auth_token"},
         partial=True,
     )
     assert serializer.is_valid(), serializer.errors
     assert serializer.validated_data["vault_secret_path"] == "ocp/creds"
-    assert serializer.validated_data["vault_key"] == "auth_token"
+    assert serializer.validated_data["vault_secret_key"] == "auth_token"
     assert serializer.validated_data["auth_token"] is None
 
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_hashicorp_vault_config")
-def test_patch_openshift_from_token_to_vault_without_vault_key_rejected(faker):
-    """Test PATCH switching OpenShift to vault without vault_key is rejected."""
+def test_patch_openshift_from_token_to_vault_without_vault_secret_key_rejected(faker):
+    """Test PATCH switching OpenShift to vault without vault_secret_key is rejected."""
     credential = CredentialFactory(
         cred_type=DataSources.OPENSHIFT,
         name=faker.name(),
@@ -1187,13 +1187,13 @@ def test_patch_openshift_from_token_to_vault_without_vault_key_rejected(faker):
         credential, data={"vault_secret_path": "ocp/creds"}, partial=True
     )
     assert not serializer.is_valid()
-    assert "vault_key" in serializer.errors
+    assert "vault_secret_key" in serializer.errors
 
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_hashicorp_vault_config")
 def test_patch_ansible_from_password_to_vault(faker):
-    """Test PATCH switching Ansible to vault requires vault_key."""
+    """Test PATCH switching Ansible to vault requires vault_secret_key."""
     credential = CredentialFactory(
         cred_type=DataSources.ANSIBLE,
         name=faker.name(),
@@ -1202,20 +1202,20 @@ def test_patch_ansible_from_password_to_vault(faker):
     )
     serializer = UsernamePasswordOrVaultSerializerV2(
         credential,
-        data={"vault_secret_path": "ansible/creds", "vault_key": "password"},
+        data={"vault_secret_path": "ansible/creds", "vault_secret_key": "password"},
         partial=True,
     )
     assert serializer.is_valid(), serializer.errors
     assert serializer.validated_data["vault_secret_path"] == "ansible/creds"
-    assert serializer.validated_data["vault_key"] == "password"
+    assert serializer.validated_data["vault_secret_key"] == "password"
     assert serializer.validated_data["username"] is None
     assert serializer.validated_data["password"] is None
 
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_hashicorp_vault_config")
-def test_patch_ansible_from_password_to_vault_without_vault_key_rejected(faker):
-    """Test PATCH switching Ansible to vault without vault_key is rejected."""
+def test_patch_ansible_from_password_to_vault_without_vault_secret_key_rejected(faker):
+    """Test PATCH switching Ansible to vault without vault_secret_key is rejected."""
     credential = CredentialFactory(
         cred_type=DataSources.ANSIBLE,
         name=faker.name(),
@@ -1226,4 +1226,4 @@ def test_patch_ansible_from_password_to_vault_without_vault_key_rejected(faker):
         credential, data={"vault_secret_path": "ansible/creds"}, partial=True
     )
     assert not serializer.is_valid()
-    assert "vault_key" in serializer.errors
+    assert "vault_secret_key" in serializer.errors
