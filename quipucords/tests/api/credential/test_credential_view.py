@@ -553,14 +553,48 @@ def test_update_openshift_credential_to_vault(
         auth_token=faker.password(),
     )
     url = reverse("v2:credentials-detail", args=[credential.id])
-    response = client_logged_in.patch(url, data={"vault_secret_path": "ocp/creds"})
+    response = client_logged_in.patch(
+        url, data={"vault_secret_path": "ocp/creds", "vault_key": "auth_token"}
+    )
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
     assert response_json["auth_type"] == "vault_secret_path"
     assert response_json["vault_secret_path"] == "ocp/creds"
+    assert response_json["vault_key"] == "auth_token"
     assert response_json["has_auth_token"] is False
     assert response_json["has_password"] is False
     assert response_json["username"] is None
+
+
+@pytest.mark.django_db
+def test_update_credential_to_vault_without_vault_key_rejected(
+    client_logged_in, hashicorp_vault_config, faker
+):
+    """Test PATCH switching to vault_secret_path without vault_key is rejected."""
+    credential = CredentialFactory(
+        cred_type=DataSources.OPENSHIFT,
+        name=faker.name(),
+        auth_token=faker.password(),
+    )
+    url = reverse("v2:credentials-detail", args=[credential.id])
+    response = client_logged_in.patch(url, data={"vault_secret_path": "ocp/creds"})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_update_ansible_credential_to_vault_without_vault_key_rejected(
+    client_logged_in, hashicorp_vault_config, faker
+):
+    """Test PATCH switching Ansible to vault without vault_key is rejected."""
+    credential = CredentialFactory(
+        cred_type=DataSources.ANSIBLE,
+        name=faker.name(),
+        username=faker.user_name(),
+        password=faker.password(),
+    )
+    url = reverse("v2:credentials-detail", args=[credential.id])
+    response = client_logged_in.patch(url, data={"vault_secret_path": "ansible/creds"})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db

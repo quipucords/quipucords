@@ -232,6 +232,8 @@ class VaultSecretPathSerializerV2(CredentialSerializerV2):
     def validate(self, attrs):
         """Validate that a global HashiCorp Vault configuration exists."""
         attrs = super().validate(attrs)
+        if not attrs.get("vault_key") and not getattr(self.instance, "vault_key", None):
+            raise ValidationError({"vault_key": [messages.VAULT_KEY_REQUIRED]})
         if get_hashicorp_vault_token() is None:
             raise ValidationError(messages.VAULT_SECRET_PATH_REQUIRES_CONFIG)
         return attrs
