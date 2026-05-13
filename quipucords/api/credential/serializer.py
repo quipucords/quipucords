@@ -68,7 +68,7 @@ class CredentialSerializerV2(ModelSerializer):
             "username",
             "vault_mount_point",
             "vault_secret_path",
-            "vault_key",
+            "vault_secret_key",
         }
 
     def get_auth_type(self, credential: Credential) -> str:
@@ -222,18 +222,19 @@ class VaultSecretPathSerializerV2(CredentialSerializerV2):
             "name",
             "vault_secret_path",
             "vault_mount_point",
-            "vault_key",
+            "vault_secret_key",
         ]
         extra_kwargs = {
             "vault_secret_path": {"required": True, "allow_blank": False},
-            "vault_key": {"required": True, "allow_blank": False},
+            "vault_secret_key": {"required": True, "allow_blank": False},
         }
 
     def validate(self, attrs):
         """Validate that a global HashiCorp Vault configuration exists."""
         attrs = super().validate(attrs)
-        if not attrs.get("vault_key") and not getattr(self.instance, "vault_key", None):
-            raise ValidationError({"vault_key": [messages.VAULT_KEY_REQUIRED]})
+        instance_key = getattr(self.instance, "vault_secret_key", None)
+        if not attrs.get("vault_secret_key") and not instance_key:
+            raise ValidationError({"vault_secret_key": [messages.VAULT_KEY_REQUIRED]})
         if get_hashicorp_vault_token() is None:
             raise ValidationError(messages.VAULT_SECRET_PATH_REQUIRES_CONFIG)
         return attrs
@@ -341,7 +342,7 @@ class AuthTokenOrUserPassSerializerV2(CredentialSerializerV2):
             "username",
             "vault_mount_point",
             "vault_secret_path",
-            "vault_key",
+            "vault_secret_key",
         ]
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,
@@ -409,7 +410,7 @@ class UsernamePasswordOrVaultSerializerV2(CredentialSerializerV2):
             "username",
             "vault_mount_point",
             "vault_secret_path",
-            "vault_key",
+            "vault_secret_key",
         ]
         extra_kwargs = {
             "password": ENCRYPTED_FIELD_KWARGS,

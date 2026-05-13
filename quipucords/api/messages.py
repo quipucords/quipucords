@@ -180,7 +180,7 @@ HASHICORP_VAULT_HTTP_ERROR = (
 VAULT_SECRET_PATH_REQUIRES_CONFIG = (
     "HashiCorp Vault configuration is required to use vault credentials."
 )
-VAULT_KEY_REQUIRED = "vault_key is required when using vault_secret_path."
+VAULT_KEY_REQUIRED = "vault_secret_key is required when using vault_secret_path."
 TOKEN_OR_USER_PASS_OR_VAULT = (
     "A credential must have a username+password, auth_token, or vault_secret_path."
 )

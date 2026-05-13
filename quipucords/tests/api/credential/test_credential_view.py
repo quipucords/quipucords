@@ -58,7 +58,7 @@ def hashicorp_vault_config():
                 "username": "username-01",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -86,7 +86,7 @@ def hashicorp_vault_config():
                 "username": "username-02",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -112,7 +112,7 @@ def hashicorp_vault_config():
                 "username": "username-03",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -139,7 +139,7 @@ def hashicorp_vault_config():
                 "username": "username-04",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -164,7 +164,7 @@ def hashicorp_vault_config():
                 "username": None,
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -190,7 +190,7 @@ def hashicorp_vault_config():
                 "username": "username-06",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -216,7 +216,7 @@ def hashicorp_vault_config():
                 "username": "username-07",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -242,7 +242,7 @@ def hashicorp_vault_config():
                 "username": "username-08",
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
         (
@@ -267,7 +267,7 @@ def hashicorp_vault_config():
                 "username": None,
                 "vault_mount_point": None,
                 "vault_secret_path": None,
-                "vault_key": None,
+                "vault_secret_key": None,
             },
         ),
     ),
@@ -418,7 +418,7 @@ def test_create_credential_with_vault(
         "cred_type": cred_type,
         "vault_secret_path": "my/secret/path",
         "vault_mount_point": "custom-mount",
-        "vault_key": "auth_token",
+        "vault_secret_key": "auth_token",
     }
     response = client_logged_in.post(url, data=post_data)
     assert response.status_code == status.HTTP_201_CREATED
@@ -442,7 +442,7 @@ def test_create_credential_with_vault_no_mount_point(
         "name": f"vault-cred-no-mount-{cred_type}",
         "cred_type": cred_type,
         "vault_secret_path": "my/secret/path",
-        "vault_key": "auth_token",
+        "vault_secret_key": "auth_token",
     }
     response = client_logged_in.post(url, data=post_data)
     assert response.status_code == status.HTTP_201_CREATED
@@ -458,7 +458,7 @@ def test_create_credential_with_vault_no_config(client_logged_in, cred_type):
         "name": f"vault-cred-no-config-{cred_type}",
         "cred_type": cred_type,
         "vault_secret_path": "my/secret/path",
-        "vault_key": "auth_token",
+        "vault_secret_key": "auth_token",
     }
     response = client_logged_in.post(url, data=post_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -554,23 +554,23 @@ def test_update_openshift_credential_to_vault(
     )
     url = reverse("v2:credentials-detail", args=[credential.id])
     response = client_logged_in.patch(
-        url, data={"vault_secret_path": "ocp/creds", "vault_key": "auth_token"}
+        url, data={"vault_secret_path": "ocp/creds", "vault_secret_key": "auth_token"}
     )
     assert response.status_code == status.HTTP_200_OK
     response_json = response.json()
     assert response_json["auth_type"] == "vault_secret_path"
     assert response_json["vault_secret_path"] == "ocp/creds"
-    assert response_json["vault_key"] == "auth_token"
+    assert response_json["vault_secret_key"] == "auth_token"
     assert response_json["has_auth_token"] is False
     assert response_json["has_password"] is False
     assert response_json["username"] is None
 
 
 @pytest.mark.django_db
-def test_update_credential_to_vault_without_vault_key_rejected(
+def test_update_credential_to_vault_without_vault_secret_key_rejected(
     client_logged_in, hashicorp_vault_config, faker
 ):
-    """Test PATCH switching to vault_secret_path without vault_key is rejected."""
+    """Test PATCH switch to vault_secret_path without vault_secret_key is rejected."""
     credential = CredentialFactory(
         cred_type=DataSources.OPENSHIFT,
         name=faker.name(),
@@ -582,10 +582,10 @@ def test_update_credential_to_vault_without_vault_key_rejected(
 
 
 @pytest.mark.django_db
-def test_update_ansible_credential_to_vault_without_vault_key_rejected(
+def test_update_ansible_credential_to_vault_without_vault_secret_key_rejected(
     client_logged_in, hashicorp_vault_config, faker
 ):
-    """Test PATCH switching Ansible to vault without vault_key is rejected."""
+    """Test PATCH switching Ansible to vault without vault_secret_key is rejected."""
     credential = CredentialFactory(
         cred_type=DataSources.ANSIBLE,
         name=faker.name(),
