@@ -18,7 +18,7 @@
 
 - name: Check collected memory
   debug:
-    msg: "collected memory_in_kb={{ memory_in_kb }} and its type is {{ memory_in_kb.__class__.__name__ }}"
+    msg: "collected memory_in_kb={{ memory_in_kb }}"
 
 - name: Convert memory to bytes
   set_fact:
