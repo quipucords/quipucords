@@ -10,9 +10,10 @@ from compat.requests import Session
 @pytest.mark.parametrize(
     "extra_kwargs,expected_kwargs",
     (
-        ({}, {"allow_redirects": True}),
-        ({"allow_redirects": False}, {"allow_redirects": False}),
-        ({"foo": "bar"}, {"allow_redirects": True, "foo": "bar"}),
+        # requests>=2.34.2 explicitly passes params=None from get() to request()
+        ({}, {"params": None, "allow_redirects": True}),
+        ({"allow_redirects": False}, {"params": None, "allow_redirects": False}),
+        ({"foo": "bar"}, {"params": None, "allow_redirects": True, "foo": "bar"}),
     ),
 )
 def test_base_url_injection(mocker, extra_kwargs, expected_kwargs):

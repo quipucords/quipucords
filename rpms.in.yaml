@@ -24,7 +24,6 @@ packages:
   - procps-ng
   - python3.12
   - python3.12-pip
-  - sshpass
   - tar
   - which
 
