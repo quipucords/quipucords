@@ -8,6 +8,12 @@
       "schedule": ["* 5-23 * * 5"]
     },
     {
+      "description": "GitHub Actions pipelines and tasks",
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "schedule": ["* 5-23 * * 1-5"]
+    },
+    {
       "description": "Containerfile base image updates",
       "matchManagers": ["dockerfile"],
       "groupName": "containerfile",
