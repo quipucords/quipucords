@@ -140,8 +140,9 @@ class TestNetworkInspectScanner:
                     "group_0": {
                         "hosts": {
                             "1.2.3.4": {
-                                "ansible_user": "username",
-                                "ansible_ssh_pass": "password",
+                                "ansible_user": "{{ vault_ansible_user }}",
+                                "ansible_ssh_pass": "{{ vault_ansible_password }}",
+                                "ansible_connection": "paramiko",
                                 "ansible_host": "1.2.3.4",
                             }
                         }
@@ -174,8 +175,9 @@ class TestNetworkInspectScanner:
                     "group_0": {
                         "hosts": {
                             "1.2.3.1": {
-                                "ansible_user": "username",
-                                "ansible_ssh_pass": "password",
+                                "ansible_user": "{{ vault_ansible_user }}",
+                                "ansible_ssh_pass": "{{ vault_ansible_password }}",
+                                "ansible_connection": "paramiko",
                                 "ansible_host": "1.2.3.1",
                             }
                         }
@@ -183,8 +185,9 @@ class TestNetworkInspectScanner:
                     "group_1": {
                         "hosts": {
                             "1.2.3.2": {
-                                "ansible_user": "username",
-                                "ansible_ssh_pass": "password",
+                                "ansible_user": "{{ vault_ansible_user }}",
+                                "ansible_ssh_pass": "{{ vault_ansible_password }}",
+                                "ansible_connection": "paramiko",
                                 "ansible_host": "1.2.3.2",
                             }
                         }
@@ -192,8 +195,9 @@ class TestNetworkInspectScanner:
                     "group_2": {
                         "hosts": {
                             "1.2.3.3": {
-                                "ansible_user": "username",
-                                "ansible_ssh_pass": "password",
+                                "ansible_user": "{{ vault_ansible_user }}",
+                                "ansible_ssh_pass": "{{ vault_ansible_password }}",
+                                "ansible_connection": "paramiko",
                                 "ansible_host": "1.2.3.3",
                             }
                         }
@@ -201,8 +205,9 @@ class TestNetworkInspectScanner:
                     "group_3": {
                         "hosts": {
                             "1.2.3.4": {
-                                "ansible_user": "username",
-                                "ansible_ssh_pass": "password",
+                                "ansible_user": "{{ vault_ansible_user }}",
+                                "ansible_ssh_pass": "{{ vault_ansible_password }}",
+                                "ansible_connection": "paramiko",
                                 "ansible_host": "1.2.3.4",
                             }
                         }
@@ -340,7 +345,7 @@ def test_inspect_scan_with_multiple_inspection_groups_stdout_logs(mocker):
     # mock functions with side effects writing to files or db - we don't need those
     # for this test purpose because they generate input for the main functions we
     # will patch later
-    mocker.patch("scanner.network.inspect.write_to_yaml")
+    mocker.patch("scanner.network.inspect.write_vault_file")
     mocker.patch("scanner.network.inspect.InspectCallback")
     # this is ESSENTIAL: "group1" and "group2" are the multiple inspection groups
     # this test requires
@@ -388,7 +393,7 @@ def test_inspect_scan_with_multiple_inspection_groups_stdout_logs(mocker):
     assert not stderr_log.exists()
     # finally, call the method that will "execute" the inspection scan
     # and persist logs
-    inspect_runner._inspect_scan(Mock())
+    inspect_runner._inspect_scan([])
     assert stdout_log.exists()
     assert stderr_log.exists()
     # rationale: since we have 2 inspection groups, content from ansible runner

@@ -2,12 +2,10 @@
 
 import unittest
 from pathlib import Path
-from unittest import mock
 
 import pytest
 from django.forms import model_to_dict
 
-from api import vault
 from api.serializers import SourceSerializer
 from constants import GENERATED_SSH_KEYFILE, DataSources
 from scanner.network import utils
@@ -72,11 +70,10 @@ def test_construct_inventory_from_source_and_credential_models(faker):
             },
             "vars": {
                 "ansible_port": source.port,
-                "ansible_user": credential.username,
-                "ansible_ssh_pass": vault.decrypt_data_as_unicode(credential.password),
-                "ansible_become_pass": vault.decrypt_data_as_unicode(
-                    credential.become_password
-                ),
+                "ansible_connection": "paramiko",
+                "ansible_user": "{{ vault_ansible_user }}",
+                "ansible_ssh_pass": "{{ vault_ansible_password }}",
+                "ansible_become_pass": "{{ vault_ansible_become_password }}",
                 "ansible_become_method": credential.become_method,
                 "ansible_become_user": credential.become_user,
             },
@@ -96,10 +93,8 @@ def test_construct_inventory_from_source_and_credential_models(faker):
 class TestConstructVars(unittest.TestCase):
     """Test _construct_vars."""
 
-    @mock.patch("scanner.network.utils.decrypt_data_as_unicode")
-    def test_construct_vars(self, decrypt_data):
+    def test_construct_vars(self):
         """Test constructing ansible vars dictionary."""
-        decrypt_data.side_effect = lambda x: x
         vars_dict = utils._construct_vars(
             22,
             {
@@ -113,11 +108,12 @@ class TestConstructVars(unittest.TestCase):
             },
         )
         expected = {
-            "ansible_become_pass": "sudo",
+            "ansible_become_pass": "{{ vault_ansible_become_password }}",
+            "ansible_connection": "paramiko",
             "ansible_port": 22,
-            "ansible_ssh_pass": "password",
+            "ansible_ssh_pass": "{{ vault_ansible_password }}",
             "ansible_ssh_private_key_file": "keyfile",
-            "ansible_user": "username",
+            "ansible_user": "{{ vault_ansible_user }}",
             "ansible_become_user": "root",
             "ansible_become_method": "sudo",
         }

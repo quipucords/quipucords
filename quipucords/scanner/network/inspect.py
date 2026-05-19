@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+import tempfile
 from contextlib import ExitStack
 from functools import cached_property
 from pathlib import Path
@@ -20,7 +22,7 @@ from api.inspectresult.model import InspectGroup, RawFact
 from api.models import InspectResult, Scan, ScanTask, SystemConnectionResult
 from api.source.serializer import SourceSerializer
 from api.status.misc import get_server_id
-from api.vault import decrypt_data_as_unicode, write_to_yaml
+from api.vault import decrypt_data_as_unicode, write_vault_file
 from constants import GENERATED_SSH_KEYFILE, SCAN_JOB_LOG
 from quipucords.environment import server_version
 from scanner.exceptions import ScanFailureError
@@ -30,6 +32,7 @@ from scanner.network.inspect_callback import AnsibleResults, InspectCallback
 from scanner.network.processing.process import NO_DATA, process
 from scanner.network.utils import (
     construct_inventory,
+    credential_vault_data,
     expand_hostpattern,
     raw_facts_template,
 )
@@ -213,7 +216,6 @@ class InspectTaskRunner(ScanTaskRunner):
             connection_port=connection_port,
             concurrency_count=forks,
         )
-        inventory_file = write_to_yaml(inventory)
 
         error_msg = None
         log_message = (
@@ -224,108 +226,135 @@ class InspectTaskRunner(ScanTaskRunner):
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
 
-        # Build Ansible Runner Dependencies
-        for idx, group_name in enumerate(group_names):
-            log_message = (
-                f"START INSPECT PROCESSING GROUP {(idx + 1):d} of {len(group_names):d}"
-            )
-            self.scan_task.log_message(log_message)
-            call = InspectCallback()
+        tmpdir = tempfile.mkdtemp(suffix="_quipucords_inspect")
+        try:
+            inventory_path = Path(tmpdir) / "hosts.yaml"
+            write_vault_file(inventory, str(inventory_path))
 
-            number_of_hosts = len(
-                inventory.get("all").get("children").get(group_name).get("hosts").keys()
-            )
+            # For each host with a password-based credential, write a vault-encrypted
+            # credentials.yml under host_vars/<hostname>/. Ansible picks up these files
+            # automatically because they sit adjacent to the inventory file, so each
+            # host gets its own vault_ansible_user / vault_ansible_password /
+            # vault_ansible_become_password without needing plaintext in the inventory.
+            for host_name, cred in connected:
+                if cred.get("password"):
+                    host_vars_dir = Path(tmpdir) / "host_vars" / host_name
+                    host_vars_dir.mkdir(parents=True, exist_ok=True)
+                    write_vault_file(
+                        credential_vault_data(cred),
+                        str(host_vars_dir / "credentials.yml"),
+                    )
 
-            # Build Ansible Runner Parameters
-            job_timeout = (
-                int(settings.QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT) * number_of_hosts
-            )
-
-            runner_settings = {
-                "idle_timeout": job_timeout,
-                "job_timeout": job_timeout,
-                "pexpect_timeout": 5,
-            }
-            playbook_path = str(
-                settings.BASE_DIR / "scanner/network/runner/inspect.yml"
-            )
-            extra_vars["variable_host"] = group_name
-            cmdline_list = []
-            vault_file_path = (
-                "--vault-password-file="
-                f"{settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH}"
-            )
-            cmdline_list.append(vault_file_path)
-            forks_cmd = f"--forks={forks}"
-            cmdline_list.append(forks_cmd)
-            if use_paramiko:
-                cmdline_list.append("--connection=paramiko")
-            all_commands = " ".join(cmdline_list)
-
-            if int(settings.ANSIBLE_LOG_LEVEL) == 0:
-                quiet_bool = True
-                verbosity_lvl = 0
-            else:
-                quiet_bool = False
-                verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
-
-            self.scan_task.log_message(
-                f"ansible_runner.run for {number_of_hosts} hosts "
-                f"has timeout settings: {runner_settings}"
-            )
-            try:
-                runner_obj = ansible_runner.run(
-                    quiet=quiet_bool,
-                    settings=runner_settings,
-                    inventory=inventory_file,
-                    extravars=extra_vars,
-                    event_handler=call.event_callback,
-                    cancel_callback=call.cancel_callback,
-                    playbook=playbook_path,
-                    cmdline=all_commands,
-                    verbosity=verbosity_lvl,
+            # Build Ansible Runner Dependencies
+            for idx, group_name in enumerate(group_names):
+                log_message = (
+                    f"START INSPECT PROCESSING GROUP"
+                    f" {(idx + 1):d} of {len(group_names):d}"
                 )
-            except Exception:
-                logger.exception("Uncaught exception during Ansible Runner execution")
-                continue
+                self.scan_task.log_message(log_message)
+                call = InspectCallback()
 
-            log_message = (
-                "INSPECT PROCESSING GROUP ANSIBLE RUNNER COMPLETED"
-                f" group {group_name}: {runner_obj.status=}"
-                f" {runner_obj.rc=} {runner_obj.stats=}"
-            )
-            self.scan_task.log_message(log_message, log_level=logging.INFO)
-
-            # persist facts
-            for result in call.iter_results():
-                self._persist_results(result)
-            # save stdout and stderr from ansible
-            self._persist_ansible_logs(runner_obj)
-            self._persist_skipped_tasks(call)
-
-            final_status = runner_obj.status
-            if final_status == "canceled":
-                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                    "INSPECT",
-                    "canceled",
+                number_of_hosts = len(
+                    inventory.get("all")
+                    .get("children")
+                    .get(group_name)
+                    .get("hosts")
+                    .keys()
                 )
-                self.scan_task.log_message(msg)
-            if final_status not in ["successful", "unreachable", "failed"]:
-                if final_status == "timeout":
-                    error_msg = log_messages.NETWORK_TIMEOUT_ERR
+
+                # Build Ansible Runner Parameters
+                inspect_timeout = int(settings.QUIPUCORDS_NETWORK_INSPECT_JOB_TIMEOUT)
+                job_timeout = inspect_timeout * number_of_hosts
+
+                runner_settings = {
+                    "idle_timeout": job_timeout,
+                    "job_timeout": job_timeout,
+                    "pexpect_timeout": 5,
+                }
+                playbook_path = str(
+                    settings.BASE_DIR / "scanner/network/runner/inspect.yml"
+                )
+                extra_vars["variable_host"] = group_name
+                cmdline_list = []
+                vault_file_path = (
+                    "--vault-password-file="
+                    f"{settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH}"
+                )
+                cmdline_list.append(vault_file_path)
+                forks_cmd = f"--forks={forks}"
+                cmdline_list.append(forks_cmd)
+                if use_paramiko:
+                    cmdline_list.append("--connection=paramiko")
+                all_commands = " ".join(cmdline_list)
+
+                if int(settings.ANSIBLE_LOG_LEVEL) == 0:
+                    quiet_bool = True
+                    verbosity_lvl = 0
                 else:
-                    error_msg = log_messages.NETWORK_UNKNOWN_ERR
-                # TODO: refactor this - this logic is incorrect. The result of
-                # the whole scan is only taking into consideration the last group.
-                scan_result = ScanTask.FAILED
+                    quiet_bool = False
+                    verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
 
-            log_message = (
-                "INSPECT PROCESSING GROUP COMPLETED"
-                f" group {group_name}: {scan_result=}"
-                f" {error_msg=}"
-            )
-            self.scan_task.log_message(log_message, log_level=logging.DEBUG)
-        return error_msg, scan_result
+                self.scan_task.log_message(
+                    f"ansible_runner.run for {number_of_hosts} hosts "
+                    f"has timeout settings: {runner_settings}"
+                )
+                try:
+                    runner_obj = ansible_runner.run(
+                        quiet=quiet_bool,
+                        settings=runner_settings,
+                        inventory=str(inventory_path),
+                        extravars=extra_vars,
+                        event_handler=call.event_callback,
+                        cancel_callback=call.cancel_callback,
+                        playbook=playbook_path,
+                        cmdline=all_commands,
+                        verbosity=verbosity_lvl,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Uncaught exception during Ansible Runner execution"
+                    )
+                    continue
+
+                log_message = (
+                    "INSPECT PROCESSING GROUP ANSIBLE RUNNER COMPLETED"
+                    f" group {group_name}: {runner_obj.status=}"
+                    f" {runner_obj.rc=} {runner_obj.stats=}"
+                )
+                self.scan_task.log_message(log_message, log_level=logging.INFO)
+
+                # persist facts
+                for result in call.iter_results():
+                    self._persist_results(result)
+                # save stdout and stderr from ansible
+                self._persist_ansible_logs(runner_obj)
+                self._persist_skipped_tasks(call)
+
+                final_status = runner_obj.status
+                if final_status == "canceled":
+                    msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                        "INSPECT",
+                        "canceled",
+                    )
+                    self.scan_task.log_message(msg)
+                if final_status not in ["successful", "unreachable", "failed"]:
+                    if final_status == "timeout":
+                        error_msg = log_messages.NETWORK_TIMEOUT_ERR
+                    else:
+                        error_msg = log_messages.NETWORK_UNKNOWN_ERR
+                    # TODO: refactor this - this logic is incorrect. The result of
+                    # the whole scan is only taking into consideration the last group.
+                    scan_result = ScanTask.FAILED
+
+                log_message = (
+                    "INSPECT PROCESSING GROUP COMPLETED"
+                    f" group {group_name}: {scan_result=}"
+                    f" {error_msg=}"
+                )
+                self.scan_task.log_message(log_message, log_level=logging.DEBUG)
+            return error_msg, scan_result
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
     @transaction.atomic
     def _persist_results(self, ansible_results: AnsibleResults):
@@ -561,7 +590,7 @@ class ConnectResultStore:
         return list(self._remaining_hosts)
 
 
-def _connect(  # noqa: PLR0913, PLR0915
+def _connect(  # noqa: PLR0913, PLR0915, C901, PLR0912
     *,
     scan_task: ScanTask,
     hosts,
@@ -596,7 +625,6 @@ def _connect(  # noqa: PLR0913, PLR0915
         concurrency_count=forks,
         exclude_hosts=exclude_hosts,
     )
-    inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)
 
     log_message = (
@@ -605,96 +633,118 @@ def _connect(  # noqa: PLR0913, PLR0915
     )
     scan_task.log_message(log_message)
     any_successful_connection = False
-    for idx, group_name in enumerate(group_names):
-        group_ips = (
-            inventory.get("all").get("children").get(group_name).get("hosts").keys()
-        )
-        group_ips = [f"'{ip}'" for ip in group_ips]
-        group_ip_string = ", ".join(group_ips)
-        log_message = (
-            f"START CONNECT PROCESSING GROUP {(idx + 1):d} of {len(group_names):d}. "
-            f"About to connect to hosts [{group_ip_string}]"
-        )
-        scan_task.log_message(log_message)
-        call = ConnectResultCallback(result_store, credential, scan_task.source)
 
-        number_of_hosts = len(group_ips)
-        # Create parameters for ansible runner. For more info, see:
-        # https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
-        job_timeout = (
-            int(settings.QUIPUCORDS_NETWORK_CONNECT_JOB_TIMEOUT) * number_of_hosts
-        )
-        runner_settings = {
-            "idle_timeout": job_timeout,  # Ansible default = 600 sec
-            "job_timeout": job_timeout,  # Ansible default = 3600 sec
-        }
-        extra_vars_dict = {
-            "variable_host": group_name,
-            "ansible_ssh_timeout": settings.QUIPUCORDS_SSH_CONNECT_TIMEOUT,
-        }
-        playbook_path = str(settings.BASE_DIR / "scanner/network/runner/connect.yml")
-        cmdline_list = []
-        vault_file_path = (
-            f"--vault-password-file={settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH}"
-        )
-        cmdline_list.append(vault_file_path)
-        forks_cmd = f"--forks={forks}"
-        cmdline_list.append(forks_cmd)
-        if use_paramiko:
-            cmdline_list.append("--connection=paramiko")  # paramiko conn
-        all_commands = " ".join(cmdline_list)
-        if int(settings.ANSIBLE_LOG_LEVEL) == 0:
-            quiet_bool = True
-            verbosity_lvl = 0
-        else:
-            quiet_bool = False
-            verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
-        try:
-            scan_task.log_message(
-                f"ansible_runner.run for {number_of_hosts} hosts "
-                f"has timeout settings: {runner_settings}"
-            )
-            runner_obj = ansible_runner.run(
-                quiet=quiet_bool,
-                settings=runner_settings,
-                inventory=inventory_file,
-                extravars=extra_vars_dict,
-                event_handler=call.event_callback,
-                cancel_callback=call.cancel_callback,
-                playbook=playbook_path,
-                cmdline=all_commands,
-                verbosity=verbosity_lvl,
-            )
-        except Exception as err_msg:  # noqa: BLE001
-            logger.exception("Uncaught exception during Ansible Runner execution")
-            raise AnsibleRunnerException(err_msg) from err_msg
+    tmpdir = tempfile.mkdtemp(suffix="_quipucords_connect")
+    try:
+        inventory_path = Path(tmpdir) / "hosts.yaml"
+        write_vault_file(inventory, str(inventory_path))
 
-        final_status = runner_obj.status
-        any_successful_connection |= scan_task.systems_scanned >= 1
-        if final_status == "canceled":
-            msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
-                "CONNECT",
-                "canceled",
+        # Write vault-encrypted credentials file for password-based authentication.
+        # The inventory references these via {{ vault_ansible_user }} etc., and Ansible
+        # decrypts this file using the same --vault-password-file passed to the run.
+        creds_file = None
+        if cred_data.get("password"):
+            creds_file = str(Path(tmpdir) / "credentials.yml")
+            write_vault_file(credential_vault_data(cred_data), creds_file)
+
+        for idx, group_name in enumerate(group_names):
+            group_ips = (
+                inventory.get("all").get("children").get(group_name).get("hosts").keys()
             )
-            return msg, scan_task.CANCELED
-        if final_status not in ["successful", "unreachable", "failed", "canceled"]:
-            if final_status == "timeout":
-                error = log_messages.NETWORK_TIMEOUT_ERR
+            group_ips = [f"'{ip}'" for ip in group_ips]
+            group_ip_string = ", ".join(group_ips)
+            log_message = (
+                f"START CONNECT PROCESSING GROUP"
+                f" {(idx + 1):d} of {len(group_names):d}. "
+                f"About to connect to hosts [{group_ip_string}]"
+            )
+            scan_task.log_message(log_message)
+            call = ConnectResultCallback(result_store, credential, scan_task.source)
+
+            number_of_hosts = len(group_ips)
+            # Create parameters for ansible runner. For more info, see:
+            # https://ansible.readthedocs.io/projects/runner/en/stable/intro/#env-settings-settings-for-runner-itself
+            job_timeout = (
+                int(settings.QUIPUCORDS_NETWORK_CONNECT_JOB_TIMEOUT) * number_of_hosts
+            )
+            runner_settings = {
+                "idle_timeout": job_timeout,  # Ansible default = 600 sec
+                "job_timeout": job_timeout,  # Ansible default = 3600 sec
+            }
+            extra_vars_dict = {
+                "variable_host": group_name,
+                "ansible_ssh_timeout": settings.QUIPUCORDS_SSH_CONNECT_TIMEOUT,
+            }
+            playbook_path = str(
+                settings.BASE_DIR / "scanner/network/runner/connect.yml"
+            )
+            cmdline_list = []
+            vault_file_path = (
+                "--vault-password-file="
+                f"{settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY_PATH}"
+            )
+            cmdline_list.append(vault_file_path)
+            if creds_file:
+                cmdline_list.append(f"--extra-vars=@{creds_file}")
+            forks_cmd = f"--forks={forks}"
+            cmdline_list.append(forks_cmd)
+            if use_paramiko:
+                cmdline_list.append("--connection=paramiko")  # paramiko conn
+            all_commands = " ".join(cmdline_list)
+            if int(settings.ANSIBLE_LOG_LEVEL) == 0:
+                quiet_bool = True
+                verbosity_lvl = 0
             else:
-                error = log_messages.NETWORK_UNKNOWN_ERR
-            if scan_task.systems_scanned:
-                msg = log_messages.NETWORK_CONNECT_CONTINUE % (
-                    final_status,
-                    str(scan_task.systems_scanned),
-                    error,
+                quiet_bool = False
+                verbosity_lvl = int(settings.ANSIBLE_LOG_LEVEL)
+            try:
+                scan_task.log_message(
+                    f"ansible_runner.run for {number_of_hosts} hosts "
+                    f"has timeout settings: {runner_settings}"
                 )
-                scan_task.log_message(msg, log_level=logging.ERROR)
-            else:
-                msg = log_messages.NETWORK_CONNECT_FAIL % (final_status, error)
-                return msg, scan_task.FAILED
-    if not any_successful_connection:
-        return "No successful connections", scan_task.FAILED
-    return None, scan_task.COMPLETED
+                runner_obj = ansible_runner.run(
+                    quiet=quiet_bool,
+                    settings=runner_settings,
+                    inventory=str(inventory_path),
+                    extravars=extra_vars_dict,
+                    event_handler=call.event_callback,
+                    cancel_callback=call.cancel_callback,
+                    playbook=playbook_path,
+                    cmdline=all_commands,
+                    verbosity=verbosity_lvl,
+                )
+            except Exception as err_msg:  # noqa: BLE001
+                logger.exception("Uncaught exception during Ansible Runner execution")
+                raise AnsibleRunnerException(err_msg) from err_msg
+
+            final_status = runner_obj.status
+            any_successful_connection |= scan_task.systems_scanned >= 1
+            if final_status == "canceled":
+                msg = log_messages.NETWORK_PLAYBOOK_STOPPED % (
+                    "CONNECT",
+                    "canceled",
+                )
+                return msg, scan_task.CANCELED
+            if final_status not in ["successful", "unreachable", "failed", "canceled"]:
+                if final_status == "timeout":
+                    error = log_messages.NETWORK_TIMEOUT_ERR
+                else:
+                    error = log_messages.NETWORK_UNKNOWN_ERR
+                if scan_task.systems_scanned:
+                    msg = log_messages.NETWORK_CONNECT_CONTINUE % (
+                        final_status,
+                        str(scan_task.systems_scanned),
+                        error,
+                    )
+                    scan_task.log_message(msg, log_level=logging.ERROR)
+                else:
+                    msg = log_messages.NETWORK_CONNECT_FAIL % (final_status, error)
+                    return msg, scan_task.FAILED
+        if not any_successful_connection:
+            return "No successful connections", scan_task.FAILED
+        return None, scan_task.COMPLETED
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 def _handle_ssh_passphrase(credential):

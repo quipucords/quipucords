@@ -251,7 +251,7 @@ class TestInspectCallback:
 
     def test_task_on_failed_with_ansible_facts(self, event_failed, caplog):
         """Test InspectCallback.event_callback in a failed event."""
-        caplog.set_level(logging.WARNING)
+        caplog.set_level(logging.ERROR)
         callback = InspectCallback()
         event_failed["event_data"]["res"]["ansible_facts"] = {"watermelon": "melancia"}
         callback.event_callback(event_failed)
