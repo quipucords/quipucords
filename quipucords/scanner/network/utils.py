@@ -24,18 +24,42 @@ def _credential_vars(credential: dict) -> dict:
     become_user = credential.get("become_user")
     become_password = credential.get("become_password")
 
-    ansible_dict["ansible_user"] = username
     if password:
-        ansible_dict["ansible_ssh_pass"] = decrypt_data_as_unicode(password)
+        # Credentials live in a vault-encrypted credentials.yml file; use vault
+        # variable references here and paramiko as the connection plugin so that
+        # Ansible never needs the sshpass binary (which is absent on UBI10+).
+        ansible_dict["ansible_user"] = "{{ vault_ansible_user }}"
+        ansible_dict["ansible_ssh_pass"] = "{{ vault_ansible_password }}"  # noqa: S105
+        ansible_dict["ansible_connection"] = "paramiko"
+    else:
+        ansible_dict["ansible_user"] = username
     if ssh_keyfile:
         ansible_dict["ansible_ssh_private_key_file"] = ssh_keyfile
     if become_password:
-        ansible_dict["ansible_become_pass"] = decrypt_data_as_unicode(become_password)
+        ansible_dict["ansible_become_pass"] = "{{ vault_ansible_become_password }}"  # noqa: S105
     if become_method:
         ansible_dict["ansible_become_method"] = become_method
     if become_user:
         ansible_dict["ansible_become_user"] = become_user
     return ansible_dict
+
+
+def credential_vault_data(credential: dict) -> dict:
+    """Build the vault variable dict for writing to a credentials.yml vault file."""
+    vault_data = {}
+    username = credential.get("username")
+    password = credential.get("password")
+    become_password = credential.get("become_password")
+
+    if username:
+        vault_data["vault_ansible_user"] = username
+    if password:
+        vault_data["vault_ansible_password"] = decrypt_data_as_unicode(password)
+    if become_password:
+        vault_data["vault_ansible_become_password"] = decrypt_data_as_unicode(
+            become_password
+        )
+    return vault_data
 
 
 def _construct_vars(connection_port, credential: dict = None) -> dict:

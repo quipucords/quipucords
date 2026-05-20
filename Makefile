@@ -38,7 +38,7 @@ QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_POSTGRES_WAIT_TIME ?= 10
 
-UBI_VERSION=9
+UBI_VERSION=10
 UBI_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)
 UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)/ubi-minimal
 RPM_LOCKFILE_IMAGE=localhost/rpm-lockfile-prototype

@@ -1,6 +1,7 @@
 """Vault is used to read and write data securely using the Ansible vault."""
 
 import tempfile
+from pathlib import Path
 
 import yaml
 
@@ -61,6 +62,13 @@ def write_to_yaml(data):
     """Write data to temp yaml file and return the file."""
     vault = Vault(settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY)
     return vault.dump_as_yaml_to_tempfile(data)
+
+
+def write_vault_file(data, file_path):
+    """Write data as vault-encrypted YAML to file_path."""
+    vault = Vault(settings.QUIPUCORDS_ENCRYPTION_SECRET_KEY)
+    with Path(file_path).open("wb") as f:
+        vault.dump_as_yaml(data, f)
 
 
 class Vault:
