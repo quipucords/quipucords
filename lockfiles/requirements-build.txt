@@ -20,6 +20,11 @@ docutils==0.22.4
     # via
     #   changelog-chug
     #   python-daemon
+expandvars==1.1.2
+    # via
+    #   frozenlist
+    #   propcache
+    #   yarl
 flit-core==3.12.0
     # via
     #   click
@@ -47,6 +52,7 @@ hatch-vcs==0.5.0
 hatchling==1.29.0
     # via
     #   attrs
+    #   expandvars
     #   hatch-fancy-pypi-readme
     #   hatch-vcs
     #   jsonschema
@@ -70,13 +76,17 @@ pathspec==1.1.1
     # via hatchling
 pbr==7.0.3
     # via lockfile
+pkgconfig==1.6.0
+    # via aiohttp
 pluggy==1.6.0
     # via hatchling
 poetry-core==2.4.0
     # via
+    #   aiohappyeyeballs
     #   click-didyoumean
     #   django-json-agg
     #   hvac
+    #   pkgconfig
 pycparser==3.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via cffi
 semantic-version==2.10.0
@@ -93,15 +103,12 @@ setuptools-scm==10.0.5
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
+    #   urllib3
 setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.1.0
     # via ansible-runner
-setuptools-scm==9.2.2
-    # via
-    #   hatch-vcs
-    #   urllib3
-trove-classifiers==2026.4.28.13
+trove-classifiers==2026.5.20.19
     # via hatchling
 typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
@@ -136,6 +143,8 @@ setuptools==80.9.0
     # via ansible-core
 setuptools==82.0.1
     # via
+    #   aiohttp
+    #   aiosignal
     #   ansible
     #   bcrypt
     #   calver
@@ -150,13 +159,16 @@ setuptools==82.0.1
     #   django-cors-headers
     #   djangorestframework
     #   drf-spectacular
+    #   frozenlist
     #   gunicorn
     #   markupsafe
     #   maturin
+    #   multidict
     #   pathspec
     #   pbr
     #   pluggy
     #   prompt-toolkit
+    #   propcache
     #   psycopg
     #   pycparser
     #   pydantic
@@ -175,3 +187,4 @@ setuptools==82.0.1
     #   tzlocal
     #   vcs-versioning
     #   whitenoise
+    #   yarl
