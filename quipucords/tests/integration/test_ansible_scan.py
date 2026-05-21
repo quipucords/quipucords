@@ -129,10 +129,7 @@ def expected_facts():
                 "system_name": "<NODE_IP>",
                 "version": "<ANSIBLE_CONTROLLER_VERSION>",
             },
-            "jobs": {
-                "job_ids": [1, 2],
-                "unique_hosts": ["<DELETED_HOST>", "<LISTED_HOST>"],
-            },
+            "unique_hosts": ["<DELETED_HOST>", "<LISTED_HOST>"],
         },
     ]
 

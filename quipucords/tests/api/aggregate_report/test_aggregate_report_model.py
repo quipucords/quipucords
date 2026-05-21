@@ -480,3 +480,121 @@ def test_report_deletes_delete_aggregate(
 def test_get_aggregate_report_by_report_id_not_found():
     """Test that if the Report does not exist, None report is generated."""
     assert get_aggregate_report_by_report_id(-1) is None
+
+
+@pytest.mark.django_db
+def test_aggregate_report_with_new_ansible_format(expected_aggregate):
+    """Test aggregate report with unique_hosts as top-level field (host_metrics API).
+
+    When using /api/v2/host_metrics/, unique_hosts is stored as a top-level field
+    instead of nested under jobs.unique_hosts.
+    """
+    results = expected_aggregate["results"]
+    diagnostics = expected_aggregate["diagnostics"]
+
+    deployments_report: DeploymentsReport = DeploymentReportFactory(
+        report=None,
+        number_of_fingerprints=0,
+    )
+    report: Report = ReportFactory(
+        deployment_report=deployments_report, generate_raw_facts=False
+    )
+    scan_task = ReportFactory.get_or_create_inspect_task(report)
+
+    inspect_group = InspectGroupFactory(source_type=DataSources.ANSIBLE)
+    inspect_group.tasks.add(scan_task)
+    report.inspect_groups.add(inspect_group)
+
+    InspectResultFactory(
+        inspect_group=inspect_group,
+        with_raw_facts={
+            "hosts": [{"name": "host1"}, {"name": "host2"}],
+            "unique_hosts": ["managed1", "managed2", "managed3"],
+        },
+        status=InspectResult.SUCCESS,
+    )
+    diagnostics["inspect_result_status_success"] += 1
+
+    InspectResultFactory(
+        inspect_group=inspect_group,
+        with_raw_facts={
+            "hosts": [{"name": "host2"}, {"name": "host3"}],
+            "unique_hosts": ["managed2", "managed4"],
+        },
+        status=InspectResult.SUCCESS,
+    )
+    diagnostics["inspect_result_status_success"] += 1
+
+    # All hosts from both inventory and automated hosts
+    results["ansible_hosts_all"] = 7
+    results["ansible_hosts_in_database"] = 3  # {"host1", "host2", "host3"}
+    # {"managed1", "managed2", "managed3", "managed4"}
+    results["ansible_hosts_in_jobs"] = 4
+
+    aggregated = build_aggregate_report(report.id)
+    assert aggregated is not None
+    aggregate_data = AggregateReportSerializer(instance=aggregated).data
+
+    assert aggregate_data["results"]["ansible_hosts_all"] == 7
+    assert aggregate_data["results"]["ansible_hosts_in_database"] == 3
+    assert aggregate_data["results"]["ansible_hosts_in_jobs"] == 4
+
+
+@pytest.mark.django_db
+def test_aggregate_report_with_mixed_ansible_formats(expected_aggregate):
+    """Test aggregate report handles both ansible data formats together.
+
+    Ensures backward compatibility when some scans used /api/v2/jobs/
+    (jobs.unique_hosts) and others used /api/v2/host_metrics/ (unique_hosts).
+    """
+    results = expected_aggregate["results"]
+    diagnostics = expected_aggregate["diagnostics"]
+
+    deployments_report: DeploymentsReport = DeploymentReportFactory(
+        report=None,
+        number_of_fingerprints=0,
+    )
+    report: Report = ReportFactory(
+        deployment_report=deployments_report, generate_raw_facts=False
+    )
+    scan_task = ReportFactory.get_or_create_inspect_task(report)
+
+    inspect_group = InspectGroupFactory(source_type=DataSources.ANSIBLE)
+    inspect_group.tasks.add(scan_task)
+    report.inspect_groups.add(inspect_group)
+
+    # Data from /api/v2/jobs/ endpoint
+    InspectResultFactory(
+        inspect_group=inspect_group,
+        with_raw_facts={
+            "hosts": [{"name": "host1"}],
+            "jobs": {"unique_hosts": ["managed1", "managed2"]},
+        },
+        status=InspectResult.SUCCESS,
+    )
+    diagnostics["inspect_result_status_success"] += 1
+
+    # Data from /api/v2/host_metrics/ endpoint
+    InspectResultFactory(
+        inspect_group=inspect_group,
+        with_raw_facts={
+            "hosts": [{"name": "host2"}],
+            "unique_hosts": ["managed3", "managed4"],
+        },
+        status=InspectResult.SUCCESS,
+    )
+    diagnostics["inspect_result_status_success"] += 1
+
+    # All hosts from both inventory and automated hosts
+    results["ansible_hosts_all"] = 6
+    results["ansible_hosts_in_database"] = 2  # {"host1", "host2"}
+    # {"managed1", "managed2", "managed3", "managed4"}
+    results["ansible_hosts_in_jobs"] = 4
+
+    aggregated = build_aggregate_report(report.id)
+    assert aggregated is not None
+    aggregate_data = AggregateReportSerializer(instance=aggregated).data
+
+    assert aggregate_data["results"]["ansible_hosts_all"] == 6
+    assert aggregate_data["results"]["ansible_hosts_in_database"] == 2
+    assert aggregate_data["results"]["ansible_hosts_in_jobs"] == 4
