@@ -41,7 +41,9 @@ class InspectTaskRunner(AnsibleTaskRunner):
         "timeout": settings.QUIPUCORDS_INSPECT_TASK_TIMEOUT,
     }
 
-    AAP_ENDPOINTS = namedtuple("AapEndpoints", ["me", "ping", "hosts", "jobs"])
+    AAP_ENDPOINTS = namedtuple(
+        "AapEndpoints", ["me", "ping", "hosts", "jobs", "host_metrics"]
+    )
 
     def __init__(self, *args, **kwargs):
         """Initialize class."""
@@ -137,12 +139,25 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 ping=v2_ctrl_ep["ping"],
                 hosts=v2_ctrl_ep["hosts"],
                 jobs=v2_ctrl_ep["jobs"],
+                host_metrics=v2_ctrl_ep.get("host_metrics"),  # old AAP may not have it
             )
 
             logger.info(
                 f"Ansible Controller Endpoints for {self.scan_task.source.name}"
                 f" are {self.endpoints}"
             )
+
+            if self.endpoints.host_metrics:
+                logger.info(
+                    "AAP host_metrics endpoint available for %(source_name)s",
+                    {"source_name": self.scan_task.source.name},
+                )
+            else:
+                logger.info(
+                    "AAP host_metrics endpoint not available for %(source_name)s, "
+                    "will fall back to jobs endpoint",
+                    {"source_name": self.scan_task.source.name},
+                )
         except KeyError as exception:
             self.endpoints = None
             raise AnsibleApiDetectionError(
@@ -169,7 +184,9 @@ class InspectTaskRunner(AnsibleTaskRunner):
         """Perform the actual inspect operations and progressively save results."""
         results = {}
         inspection_status = InspectResult.SUCCESS
-        collectable_facts = ("instance_details", "hosts", "jobs")
+
+        # Collect basic AAP instance details and current inventory
+        collectable_facts = ("instance_details", "hosts")
         for fact in collectable_facts:
             method = getattr(self, f"get_{fact}")
             try:
@@ -182,8 +199,42 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 )
                 inspection_status = InspectResult.FAILED
 
+        # Collect unique hosts that have run jobs
+        # Try host_metrics endpoint first (much faster), fall back to jobs if needed
+        try:
+            if settings.QUIPUCORDS_AAP_USE_HOST_METRICS and self.endpoints.host_metrics:
+                logger.info(
+                    "Using host_metrics endpoint for %(source_name)s",
+                    {"source_name": self.scan_task.source.name},
+                )
+                results["unique_hosts"] = sorted(self.get_unique_hosts_from_metrics())
+            else:
+                if not settings.QUIPUCORDS_AAP_USE_HOST_METRICS:
+                    logger.info(
+                        "host_metrics disabled by QUIPUCORDS_AAP_USE_HOST_METRICS "
+                        "setting, using jobs endpoint for %(source_name)s",
+                        {"source_name": self.scan_task.source.name},
+                    )
+                else:
+                    logger.info(
+                        "host_metrics endpoint not available, "
+                        "falling back to jobs endpoint for %(source_name)s",
+                        {"source_name": self.scan_task.source.name},
+                    )
+                # Use jobs endpoint (iterates through all jobs to extract unique hosts)
+                jobs_data = self.get_jobs()
+                results["unique_hosts"] = sorted(jobs_data["unique_hosts"])
+        except RequestException:
+            logger.exception(
+                "Error collecting unique hosts for ansible host '%(system_name)s'.",
+                {"system_name": self.system_name},
+            )
+            inspection_status = InspectResult.FAILED
+
+        # Generate comparison statistics if inspection succeeded
         if inspection_status == InspectResult.SUCCESS:
             results["comparison"] = self.compare_hosts(results)
+
         self.save_results(inspection_status, results)
 
         if self.scan_task.systems_scanned:
@@ -262,11 +313,58 @@ class InspectTaskRunner(AnsibleTaskRunner):
         unique_hosts -= {"", None}
         return unique_hosts
 
+    def get_unique_hosts_from_metrics(self) -> set:
+        """Get unique hosts using host_metrics endpoint (efficient).
+
+        Uses /api/v2/host_metrics/ which tracks all hosts that have been
+        "automated against" (run jobs), including deleted hosts.
+
+        This is significantly faster than iterating through all jobs
+        because it's a single paginated endpoint instead of O(n) calls
+        where n = total number of jobs.
+
+        Returns:
+            Set of unique hostnames that have run automation.
+        """
+        logger.info(
+            "Fetching host metrics for %(source_name)s using %(endpoint)s",
+            {
+                "source_name": self.scan_task.source.name,
+                "endpoint": self.endpoints.host_metrics,
+            },
+        )
+
+        metrics_generator = self.client.get_paginated_results(
+            self.endpoints.host_metrics,
+            max_concurrency=self.max_concurrency,
+            **self.REQUEST_KWARGS,
+        )
+
+        unique_hosts = set()
+        for metric in metrics_generator:
+            if hostname := metric.get("hostname"):
+                unique_hosts.add(hostname)
+
+        # ignore garbage hosts
+        unique_hosts -= {"", None}
+
+        logger.info(
+            "Found %(count)d unique hosts from host_metrics for %(source_name)s",
+            {
+                "count": len(unique_hosts),
+                "source_name": self.scan_task.source.name,
+            },
+        )
+
+        return unique_hosts
+
     def compare_hosts(self, data: dict) -> dict:
-        """Compare the hosts found in inventory and in jobs."""
+        """Compare the hosts found in inventory and in jobs/host_metrics."""
         hosts_in_inventory = {host["name"] for host in data["hosts"]}
-        hosts_in_jobs = data["jobs"]["unique_hosts"]
-        hosts_not_in_inventory = hosts_in_jobs - hosts_in_inventory
+        # unique_hosts comes from either /api/v2/host_metrics/ or /api/v2/jobs/
+        hosts_automated = set(data["unique_hosts"])
+        hosts_not_in_inventory = hosts_automated - hosts_in_inventory
+
         return {
             "hosts_in_inventory": hosts_in_inventory,
             "hosts_only_in_jobs": hosts_not_in_inventory,

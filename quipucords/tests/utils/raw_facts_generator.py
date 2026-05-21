@@ -271,10 +271,7 @@ def _ansible_raw_facts():
             "system_name": _faker.ipv4(),
             "version": fake_semver(),
         },
-        "jobs": {
-            "job_ids": [1, 2],
-            "unique_hosts": [deleted_host, listed_host],
-        },
+        "unique_hosts": [deleted_host, listed_host],
     }
 
 
