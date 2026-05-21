@@ -20,13 +20,11 @@ def test_base_url_injection(mocker, extra_kwargs, expected_kwargs):
     mocked_session_request = mocker.patch.object(RequestsSession, "request")
     session = Session(base_url="http://some.url")
     session.get("/api/endpoint/", **extra_kwargs)
-    assert mocked_session_request.mock_calls == [
-        mocker.call(
-            "GET",
-            "http://some.url/api/endpoint/",
-            **expected_kwargs,
-        )
-    ]
+    mocked_session_request.assert_called_once()
+    args, kwargs = mocked_session_request.call_args
+    assert args == ("GET", "http://some.url/api/endpoint/")
+    for key, value in expected_kwargs.items():
+        assert kwargs[key] == value
 
 
 @httpretty.activate
