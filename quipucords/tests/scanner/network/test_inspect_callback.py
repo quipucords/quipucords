@@ -254,6 +254,8 @@ class TestInspectCallback:
         caplog.set_level(logging.WARNING)
         callback = InspectCallback()
         event_failed["event_data"]["res"]["ansible_facts"] = {"watermelon": "melancia"}
+        # Clear any warnings that leaked from other parallel tests
+        caplog.clear()
         callback.event_callback(event_failed)
         assert callback._ansible_facts["127.0.0.1"] == {"watermelon": "melancia"}
         assert caplog.messages == [
