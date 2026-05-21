@@ -9,6 +9,7 @@ packages:
   - crypto-policies-scripts
   - findutils
   - gcc
+  - gcc-c++
   - libffi-devel
   - libpq-devel
   - openssl-devel
