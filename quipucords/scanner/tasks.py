@@ -2,6 +2,7 @@
 
 import functools
 import logging
+from collections import defaultdict
 
 import celery
 from django.conf import settings
@@ -246,14 +247,40 @@ def _finalize_scan(self: celery.Task, scan_job_id: int):
         scan_job.status_cancel()
         return
 
-    failed_tasks = (
+    tasks_status = (
         ScanTask.objects.filter(job_id=scan_job_id)
-        .exclude(status=ScanTask.COMPLETED)
-        .values("id")
+        .order_by("id")
+        .values("id", "status")
     )
-    if failed_tasks:
-        failed_tasks_ids = [task["id"] for task in failed_tasks]
-        error_message = f"The following tasks failed: {failed_tasks_ids}"
-        scan_job.status_fail(error_message)
-    else:
+    logger.info(
+        "Scan Job %s finalize_scan running based on %s tasks",
+        scan_job_id,
+        len(tasks_status),
+    )
+
+    if not tasks_status:
         scan_job.status_complete()
+        return
+
+    tasks_status_map = defaultdict(list)
+    for task in tasks_status:
+        tasks_status_map[task.get("status")].append(task.get("id"))
+    for status, task_ids in tasks_status_map.items():
+        logger.debug(
+            "Scan Job %s finalize_scan status %s tasks: %s",
+            scan_job_id,
+            status,
+            task_ids,
+        )
+
+    all_canceled = all(t["status"] == ScanTask.CANCELED for t in tasks_status)
+    if all_canceled:
+        scan_job.status_cancel()
+        return
+
+    any_complete = any(t["status"] == ScanTask.COMPLETED for t in tasks_status)
+    if any_complete:
+        scan_job.status_complete()
+        return
+
+    scan_job.status_fail("None of the tasks completed")
