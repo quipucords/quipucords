@@ -11,6 +11,7 @@ you update or add more tests.
 
 from unittest.mock import patch
 
+import factory
 import pytest
 from django.test import override_settings
 
@@ -25,7 +26,7 @@ from tests.utils import fake_semver, raw_facts_generator
 def inspect_scan_job():
     """Prepare an "inspect" type ScanJob.
 
-    This ScanJob includes 3 ScanTasks: connect, inspect, and fingerprint.
+    This ScanJob includes 2 ScanTasks: inspect, and fingerprint.
     """
     scan_job = ScanJobFactory(
         scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.PENDING
@@ -53,13 +54,27 @@ def inspect_scan_job():
 def inspect_scan_job_multiple_sources():
     """Prepare an "inspect" type ScanJob with multiple Sources.
 
-    This ScanJob includes six ScanTasks: 2 connect (one per Source), 2 inspect (one per
-    source), and 1 fingerprint.
+    This ScanJob includes three ScanTasks: 2 inspect (one per source),
+    and 1 fingerprint.
     """
     scan_job = ScanJobFactory(
         scan_type=ScanTask.SCAN_TYPE_INSPECT, status=ScanTask.PENDING
     )
-    source_a, source_b = SourceFactory.create_batch(size=2)
+    # SourceFactory will create a Source with hosts=[], because it does not understand
+    # there should be addresses inside.
+    # Unfortunately, Ansible and RHACS expect hosts to have exactly one element, and
+    # if they are chosen for test_finalize_scan_endtoend, the test will fail when
+    # constructing a ScanTaskRunner.
+    # Using a subset of DataSources in this fixture is the least intrusive solution.
+    valid_source_types = (
+        DataSources.NETWORK,
+        DataSources.SATELLITE,
+        DataSources.VCENTER,
+        DataSources.OPENSHIFT,
+    )
+    source_a, source_b = SourceFactory.create_batch(
+        size=2, source_type=factory.Faker("random_element", elements=valid_source_types)
+    )
     scan_tasks = [
         ScanTaskFactory(
             job=scan_job,
@@ -233,3 +248,34 @@ def test_fingerprint_job_canceled(fingerprint_only_scanjob, mocker):
 
     fingerprint_only_scanjob.refresh_from_db()
     assert fingerprint_only_scanjob.status == ScanTask.CANCELED
+
+
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+@pytest.mark.django_db(transaction=True)
+def test_finalize_scan_endtoend(
+    mock__fingerprint,
+    inspect_scan_job_multiple_sources,
+):
+    """Test finalize_scan flow end to end.
+
+    finalize_scan task is responsible for setting ScanJob status based on job.tasks
+    statuses. We have a coverage for this logic in test_finalize_scan.
+    The problem is, historically job status used to be set all over the place.
+    As a result, all test_finalize_scan tests passed, but Job was still presented
+    as failed instead of completed - because job status was set earlier.
+    This test exists to capture this situation.
+    """
+    job_runner = job.ScanJobRunner(inspect_scan_job_multiple_sources)
+    assert isinstance(job_runner, job.CeleryBasedScanJobRunner)
+
+    with patch.object(
+        job.ScanTaskRunner,
+        "run",
+        side_effect=(("Failure", ScanTask.FAILED), ("", ScanTask.COMPLETED)),
+    ) as mock_task_runner:
+        async_result = job_runner.run()
+        async_result.get()
+
+    assert mock_task_runner.call_count == 2
+    inspect_scan_job_multiple_sources.refresh_from_db()
+    assert inspect_scan_job_multiple_sources.status == ScanTask.COMPLETED

@@ -8,7 +8,10 @@ from scanner import job
 
 @pytest.mark.django_db
 def test_run_task_runner_task_fails(mocker, faker):
-    """Test run_task_runner sets task and job statuses when the run fails."""
+    """Test run_task_runner sets task status when the run fails.
+
+    Job status will be set by finalize_scan task.
+    """
     expected_message = faker.sentence()
     expected_status = ScanTask.FAILED
 
@@ -20,4 +23,4 @@ def test_run_task_runner_task_fails(mocker, faker):
     runner_status = job.run_task_runner(runner=mock_runner)
     assert runner_status == expected_status
     mock_scan_task.status_fail.assert_called_once_with(expected_message)
-    mock_scan_job.status_fail.assert_called_once_with(expected_message)
+    mock_scan_job.status_fail.assert_not_called()
