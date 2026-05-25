@@ -106,15 +106,12 @@ def run_task_runner(runner: ScanTaskRunner, *run_args):
     # Save Task status
     if task_status == ScanTask.CANCELED:
         runner.scan_task.status_cancel()
-        runner.scan_job.status_cancel()
     elif task_status == ScanTask.PAUSED:
         runner.scan_task.status_pause()
-        runner.scan_job.status_pause()
     elif task_status == ScanTask.COMPLETED:
         runner.scan_task.status_complete(status_message)
     elif task_status == ScanTask.FAILED:
         runner.scan_task.status_fail(status_message)
-        runner.scan_job.status_fail(status_message)
     else:
         error_message = (
             f"ScanTask {runner.scan_task.sequence_number:d} failed."
