@@ -209,12 +209,16 @@ def test_inspect_uses_host_metrics_when_available(mocker, mock_client, scan_task
     # Verify host_metrics was called
     runner.get_unique_hosts_from_metrics.assert_called_once()
 
-    # Verify results were saved with unique_hosts
+    # Verify results were saved with jobs structure (empty job_ids for host_metrics)
     call_args = runner.save_results.call_args
     assert call_args is not None
     results = call_args[0][1]  # Second argument to save_results
-    assert "unique_hosts" in results
-    assert set(results["unique_hosts"]) == {"host1.example.com", "host2.example.com"}
+    assert "jobs" in results
+    assert results["jobs"]["job_ids"] == []  # host_metrics doesn't provide job IDs
+    assert set(results["jobs"]["unique_hosts"]) == {
+        "host1.example.com",
+        "host2.example.com",
+    }
 
 
 @pytest.mark.django_db
@@ -253,11 +257,15 @@ def test_inspect_falls_back_to_jobs_when_host_metrics_unavailable(
     # Verify get_jobs was called as fallback
     runner.get_jobs.assert_called_once()
 
-    # Verify results were saved with unique_hosts
+    # Verify results were saved with jobs structure including job_ids
     call_args = runner.save_results.call_args
     assert call_args is not None
     results = call_args[0][1]
-    assert "unique_hosts" in results
+    assert "jobs" in results
+    assert results["jobs"]["job_ids"] == [1, 2, 3]
+    assert sorted(results["jobs"]["unique_hosts"]) == sorted(
+        ["host1.example.com", "host2.example.com"]
+    )
 
 
 @pytest.mark.django_db
@@ -293,6 +301,13 @@ def test_inspect_respects_feature_flag_disabled(mocker, mock_client, scan_task):
     # Verify get_jobs was called (not host_metrics)
     runner.get_jobs.assert_called_once()
     runner.get_unique_hosts_from_metrics.assert_not_called()
+
+    # Verify jobs structure is preserved when using jobs API
+    call_args = runner.save_results.call_args
+    assert call_args is not None
+    results = call_args[0][1]
+    assert "jobs" in results
+    assert results["jobs"]["job_ids"] == [1, 2]
 
 
 @pytest.mark.django_db

@@ -306,13 +306,9 @@ def _aggregate_from_raw_facts(
                         if host.get("name")
                     ]
                 )
-                # unique_hosts can be stored in two locations:
-                # - Top-level field: collected from /api/v2/host_metrics/
-                # - Nested under jobs: collected from /api/v2/jobs/ + job_events
-                unique_hosts = raw_fact.get("unique_hosts")
-                if unique_hosts is None:
-                    unique_hosts = raw_fact.get("jobs", {}).get("unique_hosts", [])
-                ansible_hosts_in_jobs.extend(unique_hosts or [])
+                ansible_hosts_in_jobs.extend(
+                    raw_fact.get("jobs", {}).get("unique_hosts", [])
+                )
             elif source_type == DataSources.OPENSHIFT:
                 if raw_fact.get("cluster", {}).get("kind") == "cluster":
                     aggregated.openshift_cluster_instances += 1
