@@ -483,11 +483,11 @@ def test_get_aggregate_report_by_report_id_not_found():
 
 
 @pytest.mark.django_db
-def test_aggregate_report_with_new_ansible_format(expected_aggregate):
-    """Test aggregate report with unique_hosts as top-level field (host_metrics API).
+def test_aggregate_report_with_host_metrics_format(expected_aggregate):
+    """Test aggregate report with host_metrics API format (empty job_ids).
 
-    When using /api/v2/host_metrics/, unique_hosts is stored as a top-level field
-    instead of nested under jobs.unique_hosts.
+    When using /api/v2/host_metrics/, the jobs structure has an empty job_ids list
+    since host_metrics doesn't provide job IDs.
     """
     results = expected_aggregate["results"]
     diagnostics = expected_aggregate["diagnostics"]
@@ -509,7 +509,10 @@ def test_aggregate_report_with_new_ansible_format(expected_aggregate):
         inspect_group=inspect_group,
         with_raw_facts={
             "hosts": [{"name": "host1"}, {"name": "host2"}],
-            "unique_hosts": ["managed1", "managed2", "managed3"],
+            "jobs": {
+                "job_ids": [],
+                "unique_hosts": ["managed1", "managed2", "managed3"],
+            },
         },
         status=InspectResult.SUCCESS,
     )
@@ -519,7 +522,10 @@ def test_aggregate_report_with_new_ansible_format(expected_aggregate):
         inspect_group=inspect_group,
         with_raw_facts={
             "hosts": [{"name": "host2"}, {"name": "host3"}],
-            "unique_hosts": ["managed2", "managed4"],
+            "jobs": {
+                "job_ids": [],
+                "unique_hosts": ["managed2", "managed4"],
+            },
         },
         status=InspectResult.SUCCESS,
     )
@@ -541,11 +547,11 @@ def test_aggregate_report_with_new_ansible_format(expected_aggregate):
 
 
 @pytest.mark.django_db
-def test_aggregate_report_with_mixed_ansible_formats(expected_aggregate):
-    """Test aggregate report handles both ansible data formats together.
+def test_aggregate_report_with_both_job_id_formats(expected_aggregate):
+    """Test aggregate report handles jobs structure with and without job_ids.
 
-    Ensures backward compatibility when some scans used /api/v2/jobs/
-    (jobs.unique_hosts) and others used /api/v2/host_metrics/ (unique_hosts).
+    Ensures backward compatibility when some scans have job_ids (jobs API)
+    and others have empty job_ids (host_metrics API).
     """
     results = expected_aggregate["results"]
     diagnostics = expected_aggregate["diagnostics"]
@@ -563,23 +569,29 @@ def test_aggregate_report_with_mixed_ansible_formats(expected_aggregate):
     inspect_group.tasks.add(scan_task)
     report.inspect_groups.add(inspect_group)
 
-    # Data from /api/v2/jobs/ endpoint
+    # Data from /api/v2/jobs/ endpoint (has job_ids)
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={
             "hosts": [{"name": "host1"}],
-            "jobs": {"unique_hosts": ["managed1", "managed2"]},
+            "jobs": {
+                "job_ids": [101, 102],
+                "unique_hosts": ["managed1", "managed2"],
+            },
         },
         status=InspectResult.SUCCESS,
     )
     diagnostics["inspect_result_status_success"] += 1
 
-    # Data from /api/v2/host_metrics/ endpoint
+    # Data from /api/v2/host_metrics/ endpoint (empty job_ids)
     InspectResultFactory(
         inspect_group=inspect_group,
         with_raw_facts={
             "hosts": [{"name": "host2"}],
-            "unique_hosts": ["managed3", "managed4"],
+            "jobs": {
+                "job_ids": [],
+                "unique_hosts": ["managed3", "managed4"],
+            },
         },
         status=InspectResult.SUCCESS,
     )
@@ -598,3 +610,53 @@ def test_aggregate_report_with_mixed_ansible_formats(expected_aggregate):
     assert aggregate_data["results"]["ansible_hosts_all"] == 6
     assert aggregate_data["results"]["ansible_hosts_in_database"] == 2
     assert aggregate_data["results"]["ansible_hosts_in_jobs"] == 4
+
+
+@pytest.mark.django_db
+def test_aggregate_report_with_jobs_api_includes_job_ids(expected_aggregate):
+    """Test that jobs API fallback preserves job_ids for backward compatibility.
+
+    When using the /api/v2/jobs/ endpoint (old AAP or feature flag disabled),
+    the raw facts should include jobs.job_ids for external consumers.
+    """
+    results = expected_aggregate["results"]
+    diagnostics = expected_aggregate["diagnostics"]
+
+    deployments_report: DeploymentsReport = DeploymentReportFactory(
+        report=None,
+        number_of_fingerprints=0,
+    )
+    report: Report = ReportFactory(
+        deployment_report=deployments_report, generate_raw_facts=False
+    )
+    scan_task = ReportFactory.get_or_create_inspect_task(report)
+
+    inspect_group = InspectGroupFactory(source_type=DataSources.ANSIBLE)
+    inspect_group.tasks.add(scan_task)
+    report.inspect_groups.add(inspect_group)
+
+    # Data from /api/v2/jobs/ endpoint with job_ids preserved
+    InspectResultFactory(
+        inspect_group=inspect_group,
+        with_raw_facts={
+            "hosts": [{"name": "host1"}],
+            "jobs": {
+                "job_ids": [101, 102, 103],
+                "unique_hosts": ["managed1", "managed2"],
+            },
+        },
+        status=InspectResult.SUCCESS,
+    )
+    diagnostics["inspect_result_status_success"] += 1
+
+    results["ansible_hosts_all"] = 3
+    results["ansible_hosts_in_database"] = 1
+    results["ansible_hosts_in_jobs"] = 2
+
+    aggregated = build_aggregate_report(report.id)
+    assert aggregated is not None
+    aggregate_data = AggregateReportSerializer(instance=aggregated).data
+
+    assert aggregate_data["results"]["ansible_hosts_all"] == 3
+    assert aggregate_data["results"]["ansible_hosts_in_database"] == 1
+    assert aggregate_data["results"]["ansible_hosts_in_jobs"] == 2

@@ -207,7 +207,16 @@ class InspectTaskRunner(AnsibleTaskRunner):
                     "Using host_metrics endpoint for %(source_name)s",
                     {"source_name": self.scan_task.source.name},
                 )
-                results["unique_hosts"] = sorted(self.get_unique_hosts_from_metrics())
+                # Store in legacy "jobs" structure for backward compatibility.
+                # job_ids is empty because host_metrics doesn't provide job IDs.
+                results["jobs"] = {
+                    "job_ids": [],
+                    "unique_hosts": sorted(self.get_unique_hosts_from_metrics()),
+                }
+                # TODO Drop fake "jobs" storage when we drop support for AAP < 2.4.
+                # We could replace that with a simpler higher-level item like:
+                # results["unique_hosts"] = sorted(self.get_unique_hosts_from_metrics())
+                # Update semver appropriately since details report output will change.
             else:
                 if not settings.QUIPUCORDS_AAP_USE_HOST_METRICS:
                     logger.info(
@@ -223,7 +232,10 @@ class InspectTaskRunner(AnsibleTaskRunner):
                     )
                 # Use jobs endpoint (iterates through all jobs to extract unique hosts)
                 jobs_data = self.get_jobs()
-                results["unique_hosts"] = sorted(jobs_data["unique_hosts"])
+                results["jobs"] = {
+                    "job_ids": jobs_data["job_ids"],
+                    "unique_hosts": sorted(jobs_data["unique_hosts"]),
+                }
         except RequestException:
             logger.exception(
                 "Error collecting unique hosts for ansible host '%(system_name)s'.",
@@ -361,10 +373,8 @@ class InspectTaskRunner(AnsibleTaskRunner):
     def compare_hosts(self, data: dict) -> dict:
         """Compare the hosts found in inventory and in jobs/host_metrics."""
         hosts_in_inventory = {host["name"] for host in data["hosts"]}
-        # unique_hosts comes from either /api/v2/host_metrics/ or /api/v2/jobs/
-        hosts_automated = set(data["unique_hosts"])
-        hosts_not_in_inventory = hosts_automated - hosts_in_inventory
-
+        hosts_in_jobs = set(data["jobs"]["unique_hosts"])
+        hosts_not_in_inventory = hosts_in_jobs - hosts_in_inventory
         return {
             "hosts_in_inventory": hosts_in_inventory,
             "hosts_only_in_jobs": hosts_not_in_inventory,
