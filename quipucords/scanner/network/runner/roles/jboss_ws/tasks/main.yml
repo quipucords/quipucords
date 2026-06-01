@@ -22,7 +22,7 @@
 
 # If client has not renamed default JWS_HOME folder and followed recommended zip file install instructions, JWS_HOME should be in /opt.
 - name: search for JWS_HOME in search directories
-  raw: export LANG=C LC_ALL=C; find {{search_directories}} -type d 2>/dev/null | egrep '(ews|jws).*[0-99]\.[0-99]$'
+  raw: export LANG=C LC_ALL=C; find {{search_directories}} -type d 2>/dev/null | egrep '(ews|jws).*[0-9]+\.[0-9]+$'
   register: internal_jws_find_home_from_search
   ignore_errors: yes
   when: 'jboss_ws_ext'
@@ -57,7 +57,7 @@
 
 # ------------------------------ DETECT JWS/EWS -------------------------------
 - name: check jws presence with yum
-  raw: "export LANG=C LC_ALL=C; yum -C grouplist {{item}} 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-99]'"
+  raw: "export LANG=C LC_ALL=C; yum -C grouplist {{item}} 2>/dev/null | grep -A1 'Installed Groups:' | grep 'Red Hat JBoss Web Server [0-9]\\+'"
   register: internal_jws_installed_with_rpm
   with_items:
     - jws3
