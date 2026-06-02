@@ -169,6 +169,9 @@ HASHICORP_VAULT_FAILED_DECODE_CERT = (
 )
 HASHICORP_VAULT_AUTHENTICATED = "Authenticated with HashiCorp Vault %s"
 HASHICORP_VAULT_FAILED_AUTHENTICATION = "Failed to authenticate to HashiCorp Vault %s"
+HASHICORP_VAULT_UPSTREAM_ERROR = (
+    "Failed to authenticate to HashiCorp Vault %s, VaultError: %s"
+)
 HASHICORP_VAULT_CONNECTION_ERROR = (
     "Failed to authenticate to HashiCorp Vault %s, ConnectionError: %s"
 )
