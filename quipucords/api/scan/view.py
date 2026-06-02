@@ -160,6 +160,15 @@ def _destroy_scan(scan: Scan, sender=None) -> None:
 
         for job in scan.jobs.all():
             logger.info("Deleting job %s and its results", job.id)
+            if job.tasks is not None:
+                logger.info(
+                    "Deleting inspect results associated with job %s",
+                    job.id,
+                )
+                job.delete_inspect_results()
+                logger.info("Deleting scan tasks associated with job %s", job.id)
+                job.tasks.all().delete()
+
             if job.connection_results is not None:
                 logger.info(
                     "Deleting connection results associated with job %s",
@@ -169,15 +178,7 @@ def _destroy_scan(scan: Scan, sender=None) -> None:
                     task_connection_result.systems.all().delete()
                     task_connection_result.delete()
 
-            if job.tasks is not None:
-                logger.info(
-                    "Deleting inspect results associated with job %s",
-                    job.id,
-                )
-                job.delete_inspect_results()
-                logger.info("Deleting scan tasks associated with job %s", job.id)
-                job.tasks.all().delete()
-                job.delete()
+            job.delete()
 
     logger.info("Deleting scan %s", scan.id)
     scan.delete()
