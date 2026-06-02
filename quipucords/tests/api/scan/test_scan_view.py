@@ -7,7 +7,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 from api import messages
+from api.connresult.model import TaskConnectionResult
 from api.models import InspectResult, RawFact, ScanTask, SystemConnectionResult
+from api.scan.view import _destroy_scan
 from tests.factories import (
     CredentialFactory,
     InspectGroupFactory,
@@ -58,6 +60,32 @@ def test_delete_scan_cascade(client_logged_in):
     assert response.status_code == status.HTTP_204_NO_CONTENT
     job_count = len(scan.jobs.all())
     assert job_count == 0
+
+
+def test_destroy_scan_deletes_tasks_before_connection_results(mocker):
+    """Tasks must be deleted before their connection_result FK targets."""
+    mocker.patch("api.scan.view.cancel_scan")
+    source = SourceFactory()
+    scan_job, _ = create_scan_job(source)
+
+    assert scan_job.tasks.exists()
+    assert scan_job.connection_results.task_results.exists()
+
+    orphaned = []
+    original_delete = TaskConnectionResult.delete
+
+    def spy_delete(self, *args, **kwargs):
+        """Check if any ScanTask still references this before deletion."""
+        orphaned.append(ScanTask.objects.filter(connection_result=self).exists())
+        return original_delete(self, *args, **kwargs)
+
+    mocker.patch.object(TaskConnectionResult, "delete", spy_delete)
+    _destroy_scan(scan_job.scan)
+
+    assert orphaned, "TaskConnectionResult was never deleted"
+    assert not any(orphaned), (
+        "TaskConnectionResult was deleted while a ScanTask still referenced it"
+    )
 
 
 def test_successful_create(client_logged_in, mocker):
