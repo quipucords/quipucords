@@ -166,3 +166,39 @@ def test_set_scan_job_failure_on_exception_exception_sets_failed_status(caplog):
     )
     scan_job.refresh_from_db()
     assert scan_job.status == ScanTask.FAILED
+
+
+@pytest.mark.django_db
+def test_set_scan_task_failure_on_exception_returns_failure_tuple_when_task_missing(
+    faker,
+):
+    """Wrapper must return a failure tuple even when ScanTask no longer exists."""
+    bogus_scan_task_id = faker.pyint()
+
+    @tasks.set_scan_task_failure_on_exception
+    def decorated_function(scan_task_id):
+        raise RuntimeError("task exploded")
+
+    result = decorated_function(scan_task_id=bogus_scan_task_id)
+    assert result is not None
+    success, returned_id, status = result
+    assert success is False
+    assert returned_id == bogus_scan_task_id
+    assert status == ScanTask.FAILED
+
+
+@pytest.mark.django_db
+def test_set_scan_task_failure_on_exception_returns_failure_tuple_on_exception():
+    """Wrapper must return a failure tuple after catching an exception."""
+    scan_task = ScanTaskFactory(status=ScanTask.PENDING)
+
+    @tasks.set_scan_task_failure_on_exception
+    def decorated_function(scan_task_id):
+        raise RuntimeError("task exploded")
+
+    result = decorated_function(scan_task_id=scan_task.id)
+    assert result is not None
+    success, returned_id, status = result
+    assert success is False
+    assert returned_id == scan_task.id
+    assert status == ScanTask.FAILED
