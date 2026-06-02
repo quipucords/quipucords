@@ -101,6 +101,7 @@ def set_scan_task_failure_on_exception(func):
                 )
             except Exception as e:  # noqa: BLE001
                 logger.exception(f"ScanTask({scan_task_id}).status_fail failed: {e}")
+            return False, scan_task_id, ScanTask.FAILED
 
     return wrapper
 
@@ -131,12 +132,13 @@ def set_scan_job_failure_on_exception(func):
                 f"with scan_job_id={scan_job_id}: {e}"
             )
             try:
-                scan_task = ScanJob.objects.get(id=scan_job_id)
-                scan_task.status_fail(
+                scan_job = ScanJob.objects.get(id=scan_job_id)
+                scan_job.status_fail(
                     f"Unexpected failure in {func.__name__}. Check logs for details."
                 )
             except Exception as e:  # noqa: BLE001
                 logger.exception(f"ScanJob({scan_job_id}).status_fail failed: {e}")
+            return None
 
     return wrapper
 
