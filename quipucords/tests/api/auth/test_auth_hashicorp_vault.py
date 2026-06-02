@@ -233,6 +233,32 @@ class TestHashiCorpVaultAuthenticate:
         )
         assert vault_err_message in str(exc_info.value)
 
+    def test_hashicorp_vault_authenticate_vault_error(
+        self, mocker, hashicorp_vault_data
+    ):
+        """Test authentication with vault error."""
+        vault_token = get_or_create_hashicorp_vault_token()
+        vault_token.metadata = hashicorp_vault_data
+        vault_token.save()
+
+        mock_client = mocker.MagicMock()
+        error_message = "failed to match all constraints for this login certificate"
+        mock_client.is_authenticated.side_effect = hvac.exceptions.InvalidRequest(
+            error_message
+        )
+        mocker.patch(
+            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
+        )
+
+        with pytest.raises(HashiCorpVaultAuthError) as exc_info:
+            hashicorp_vault_authenticate(vault_token=vault_token)
+        vault_address = hashicorp_vault_address(hashicorp_vault_data)
+        vault_err_message = (
+            messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address
+        )
+        assert vault_err_message in str(exc_info.value)
+        assert f"VaultError: {error_message}" in str(exc_info.value)
+
     def test_hashicorp_vault_authenticate_connection_error(
         self, mocker, hashicorp_vault_data
     ):

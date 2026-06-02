@@ -206,6 +206,7 @@ def hashicorp_vault_authenticate(vault_token=None, metadata=None):
     ) as vault_client:
         vault_address = hashicorp_vault_address(metadata)
         try:
+            vault_client.auth.cert.login()
             if vault_client.is_authenticated():
                 logger.debug(api.messages.HASHICORP_VAULT_AUTHENTICATED, vault_address)
                 return
@@ -214,6 +215,21 @@ def hashicorp_vault_authenticate(vault_token=None, metadata=None):
             )
             raise HashiCorpVaultAuthError(
                 _(api.messages.HASHICORP_VAULT_FAILED_AUTHENTICATION % vault_address)
+            )
+        except hvac.exceptions.VaultError as err:
+            # VaultError is a parent for all errors coming from hvac module.
+            # Some known cases are:
+            # - VaultDown when Vault is sealed
+            # - Forbidden when cert authentication is disabled
+            # - InvalidRequest when provided certs do not match any user
+            logger.error(
+                api.messages.HASHICORP_VAULT_UPSTREAM_ERROR, vault_address, str(err)
+            )
+            raise HashiCorpVaultAuthError(
+                _(
+                    api.messages.HASHICORP_VAULT_UPSTREAM_ERROR
+                    % (vault_address, str(err))
+                )
             )
         except ConnectionError as err:
             logger.error(
