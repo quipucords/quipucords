@@ -2,6 +2,7 @@
 
 from unittest.mock import Mock, patch
 
+from django.conf import settings
 from django.test import override_settings
 
 from scanner.tasks import (
@@ -11,6 +12,20 @@ from scanner.tasks import (
     scan_job_is_canceled,
     set_scan_job_celery_task_id,
 )
+
+
+def test_celery_result_expires_is_long_enough():
+    """CELERY_RESULT_EXPIRES must outlast any realistic scan duration."""
+    value = getattr(settings, "CELERY_RESULT_EXPIRES", "MISSING")
+    assert value != "MISSING", (
+        "CELERY_RESULT_EXPIRES is not configured; "
+        "Celery defaults to 24h which causes chord expiration for long scans."
+    )
+    min_ttl = 90 * 24 * 3600  # 90 days
+    assert value >= min_ttl, (
+        f"CELERY_RESULT_EXPIRES={value} is too short; "
+        f"scans can run for weeks, need at least {min_ttl}s (90 days)."
+    )
 
 
 class TestCeleryTaskCache:
