@@ -262,6 +262,7 @@ def read_vault_secret(credential) -> str:
 
     try:
         with hashicorp_vault_client(vault_token=vault_token) as client:
+            client.auth.cert.login()
             if not client.is_authenticated():
                 raise ScanFailureError(api.messages.VAULT_SECRET_AUTH_FAILED)
             read_kwargs = {"path": path}
