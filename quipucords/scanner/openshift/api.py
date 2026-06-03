@@ -141,7 +141,7 @@ class OpenShiftApi:
     def _init_kube_config(cls, host, *, ssl_verify, auth_token):
         kube_config = KubeConfig(
             host=host,
-            api_key={"authorization": f"bearer {auth_token}"},
+            api_key={"BearerToken": f"bearer {auth_token}"},
         )
         kube_config.verify_ssl = ssl_verify
         return kube_config
@@ -162,6 +162,9 @@ class OpenShiftApi:
         )
         config.verify_ssl = ssl_verify
         config.get_token()
+        # OCPLoginConfiguration.get_token() sets api_key["authorization"], but
+        # kubernetes >= 36 expects api_key["BearerToken"] (openapi-generator rename).
+        config.api_key["BearerToken"] = config.api_key.pop("authorization")
         return config
 
     def can_connect(self, raise_exception=False, **kwargs):

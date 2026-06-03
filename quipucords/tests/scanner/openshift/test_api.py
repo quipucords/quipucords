@@ -451,7 +451,7 @@ def test_with_config_info_using_auth_token(mocker):
     assert patched_kube_config.mock_calls == [
         mocker.call(
             host="PROT://HOST:PORT",
-            api_key={"authorization": "bearer TOKEN"},
+            api_key={"BearerToken": "bearer TOKEN"},
         )
     ]
     assert patched_api_client.mock_calls == [
@@ -656,7 +656,7 @@ def test_with_config_info_with_ipv6_host(mocker):
 
     patched_kube_config.assert_called_once_with(
         host="https://[fd00:dead:beef::126]:6443",
-        api_key={"authorization": "bearer TOKEN"},
+        api_key={"BearerToken": "bearer TOKEN"},
     )
 
 
