@@ -146,5 +146,10 @@ environments = [
     "implementation_name == 'cpython' and (sys_platform == 'linux' or sys_platform == 'darwin')",
 ]
 
+constraint-dependencies = [
+    # TODO: drop once kubernetes releases a version compatible with aiohttp 3.14+
+    "aiohttp<3.14.0",  # 3.14 removed AsyncStreamReaderMixin; kubernetes 36 still uses it
+]
+
 [tool.uv.sources]
 pyvmomi = { git = "https://github.com/vmware/pyvmomi.git", tag = "v9.0.0.0" }
