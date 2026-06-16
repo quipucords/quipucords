@@ -62,7 +62,7 @@ hatchling==1.30.1
     #   sqlparse
     #   urllib3
     #   wcwidth
-maturin==1.13.3
+maturin==1.14.0
     # via
     #   cryptography
     #   rpds-py
@@ -142,6 +142,7 @@ setuptools==82.0.1
     # via
     #   aiohttp
     #   aiosignal
+    #   ansible
     #   ansible-core
     #   bcrypt
     #   calver
