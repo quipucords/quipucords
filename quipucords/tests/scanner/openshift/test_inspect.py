@@ -373,10 +373,9 @@ def test_inspect_errors_on_extra_cluster_facts(  # noqa: PLR0913
     assert scan_task.systems_unreachable == 0
 
     raw_facts = scan_task.get_facts()
-    # sanity check cluster fact
-    cluster = raw_facts[-1]
-    assert isinstance(cluster, dict)
-    assert "cluster" in cluster.keys()
+    cluster_facts = [f for f in raw_facts if "cluster" in f]
+    assert len(cluster_facts) == 1
+    cluster = cluster_facts[0]
     # check errors
     assert cluster["cluster"]["errors"] == {
         extra_fact_with_error: {
@@ -414,7 +413,7 @@ def test_inspect_with_enabled_workloads(  # noqa: PLR0913
     runner.execute_task()
 
     raw_facts = scan_task.get_facts()
-    cluster = raw_facts[-1]
+    cluster = next(f for f in raw_facts if "cluster" in f)
     assert "workloads" in cluster.keys()
 
 
@@ -440,6 +439,6 @@ def test_inspect_with_disabled_workloads(  # noqa: PLR0913
 
     mock_retrieve_workloads.assert_not_called()
     raw_facts = scan_task.get_facts()
-    cluster = raw_facts[-1]
+    cluster = next(f for f in raw_facts if "cluster" in f)
     assert "workloads" not in cluster.keys()
     assert set(("cluster", "operators")).issubset(cluster.keys())
