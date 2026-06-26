@@ -12,7 +12,7 @@ cffi==2.0.0 ; (implementation_name == "cpython" and platform_python_implementati
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.5
+cython==3.2.6
     # via
     #   pydantic
     #   pyyaml
@@ -97,7 +97,7 @@ setuptools-rust==1.12.1
     # via
     #   bcrypt
     #   maturin
-setuptools-scm==10.1.1
+setuptools-scm==10.2.0
     # via
     #   django-axes
     #   hatch-vcs
@@ -112,7 +112,7 @@ trove-classifiers==2026.6.1.19
     # via hatchling
 typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
-vcs-versioning==2.0.1
+vcs-versioning==2.2.0
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
