@@ -5,6 +5,7 @@ from copy import deepcopy
 
 import pytest
 from pydantic import ValidationError
+from pytest_lazy_fixtures import lf
 
 from scanner.openshift.entities import (
     LifecycleOperator,
@@ -67,7 +68,7 @@ def test_load_nested(cluster_data):
 @pytest.mark.parametrize(
     "data,expected_class",
     [
-        (pytest.lazy_fixture("cluster_data"), OCPCluster),
+        (lf("cluster_data"), OCPCluster),
     ],
 )
 def test_load_entity(data, expected_class):

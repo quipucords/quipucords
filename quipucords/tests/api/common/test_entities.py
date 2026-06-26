@@ -7,6 +7,7 @@ from itertools import chain
 
 import pytest
 from django.conf import settings
+from pytest_lazy_fixtures import lf
 
 from api.common.entities import (
     HostEntity,
@@ -50,8 +51,8 @@ def fingerprint_with_products():
 
 @pytest.fixture(
     params=[
-        pytest.lazy_fixture("fingerprint_wo_products"),
-        pytest.lazy_fixture("fingerprint_with_products"),
+        lf("fingerprint_wo_products"),
+        lf("fingerprint_with_products"),
     ]
 )
 def fingerprint(request):
@@ -183,8 +184,8 @@ class TestHostEntity:
     @pytest.mark.parametrize(
         "fingerprint",
         [
-            (pytest.lazy_fixture("fingerprint_wo_products"),),
-            (pytest.lazy_fixture("fingerprint_with_products"),),
+            (lf("fingerprint_wo_products"),),
+            (lf("fingerprint_with_products"),),
         ],
     )
     def test_provider_type(self, fingerprint):
@@ -202,11 +203,11 @@ class TestHostEntity:
         "fingerprint,expected_product_names",
         [
             (
-                pytest.lazy_fixture("fingerprint_wo_products"),
+                lf("fingerprint_wo_products"),
                 set(),
             ),
             (
-                pytest.lazy_fixture("fingerprint_with_products"),
+                lf("fingerprint_with_products"),
                 {"JBoss EAP", "UNKOWN PRODUCT"},
             ),
         ],
