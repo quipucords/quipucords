@@ -40,7 +40,7 @@ cffi==2.0.0 ; (implementation_name == 'cpython' and platform_python_implementati
     #   pynacl
 charset-normalizer==3.4.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
-click==8.4.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+click==8.4.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   celery
     #   click-didyoumean
