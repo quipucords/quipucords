@@ -11,6 +11,7 @@ from unittest import mock
 
 import pytest
 from django.forms.models import model_to_dict
+from pytest_lazy_fixtures import lf
 from rest_framework.serializers import ListSerializer
 
 from api import messages
@@ -421,8 +422,8 @@ def ssh_key_expected_output(fake_ssh_key):
             id="network-user-pass",
         ),
         pytest.param(
-            pytest.lazy_fixture("ssh_key_payload"),
-            pytest.lazy_fixture("ssh_key_expected_output"),
+            lf("ssh_key_payload"),
+            lf("ssh_key_expected_output"),
             id="network-ssh-keyfile",
         ),
         pytest.param(
