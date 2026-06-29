@@ -46,6 +46,8 @@ def format_source(json_source):
         task_for_source = scan_job.tasks.filter(source=source_id).first()
 
         if task_for_source is not None:
+            json_scan_job["source_task_id"] = task_for_source.id
+            json_scan_job["source_task_status"] = task_for_source.status
             json_scan_job["source_systems_count"] = task_for_source.systems_count
             json_scan_job["source_systems_scanned"] = task_for_source.systems_scanned
             json_scan_job["source_systems_failed"] = task_for_source.systems_failed
