@@ -121,6 +121,26 @@ wheels = [
 ]
 
 [[package]]
+name = "ansible-pylibssh"
+version = "1.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/a9/1437294eb6e093c538262688d97979cc92407c033da92997d6e09348a248/ansible_pylibssh-1.4.0.tar.gz", hash = "sha256:a48b5e6db21062bc6258548e6a3e4363043d40128f0e6b796774a59b6a7dbe82", size = 167863, upload-time = "2026-03-16T11:32:02.192Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ae/80/b7a8c06529c5a365fa0a9857a0ecdad69f9172aee8530d13bb776ed5f8b1/ansible_pylibssh-1.4.0-cp312-cp312-macosx_15_0_x86_64.whl", hash = "sha256:860970e556604c22c58475d2f29d84669cc537dc331fcff06305cc6cab7aa5c6", size = 2571800, upload-time = "2026-03-16T11:31:18.609Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/d8/b879528ee307e61cdb6759cf4b1cbcc3476f7debbad3b0f9e57c524265ea/ansible_pylibssh-1.4.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a178e4e6f707f992f725b0bbd5f963b680595e6c7eaf6bbcebabc1f0a95ec1a6", size = 2432681, upload-time = "2026-03-16T11:31:20.554Z" },
+    { url = "https://files.pythonhosted.org/packages/26/bb/c6155b369657eb96a880c0ca686718942ae87f01181ab6c6173895246f01/ansible_pylibssh-1.4.0-cp312-cp312-manylinux_2_27_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:22b2929af72e5d0a0f1e982fd0eb8a55ffa938abd2b451b80e8affe4658b0f99", size = 2788626, upload-time = "2026-03-16T11:31:22.73Z" },
+    { url = "https://files.pythonhosted.org/packages/47/fc/5c3fee218b8351cfcad3f220ad6bd0670a868a742ba331c15fb4c7881b2f/ansible_pylibssh-1.4.0-cp312-cp312-manylinux_2_27_s390x.manylinux_2_28_s390x.whl", hash = "sha256:4581760d42816944448e0e2fe1bd27df475969cd1db41fb8a139c997f4d55b36", size = 2266242, upload-time = "2026-03-16T11:31:24.406Z" },
+    { url = "https://files.pythonhosted.org/packages/40/24/a43ac82977743a68979e8eac66b5dee5dad3fa27ebed9ee4731c5ef40945/ansible_pylibssh-1.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ab02f55c25229663ad146214c899a03d05e7cc55ecd1331bebc1f0f6a1c18b9d", size = 2653801, upload-time = "2026-03-16T11:31:26.582Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/62/9cf124599a053661093b1015c0d6b8ad296659ed8d489dea6d2942f4108a/ansible_pylibssh-1.4.0-cp312-cp312-manylinux_2_28_armv7l.manylinux_2_31_armv7l.whl", hash = "sha256:c2b5d6b0f0dccb90e4503f33b39d5c0ff27cd48bcbc484ffa7fc8308f70506ab", size = 2068083, upload-time = "2026-03-16T11:31:28.637Z" },
+    { url = "https://files.pythonhosted.org/packages/ea/61/d22a9dd1a3bfae24ed79cb0a2a3aa8c9fd4d1ff0ea38888b5e42b0e138d1/ansible_pylibssh-1.4.0-cp313-cp313-macosx_15_0_x86_64.whl", hash = "sha256:77a9fd00bb252096f4af72acedc0c0abe1a3d0657707d9930b8aa1c97bd7d69a", size = 2571603, upload-time = "2026-03-16T11:31:30.22Z" },
+    { url = "https://files.pythonhosted.org/packages/39/10/669d86b634c4e4b4d0378288441e800e1e8c99704326b37461502718829a/ansible_pylibssh-1.4.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5af9bec14acd3939acac14668b5acbd91e87f870379aa6f1eec5690045346306", size = 2439821, upload-time = "2026-03-16T11:31:31.852Z" },
+    { url = "https://files.pythonhosted.org/packages/17/92/9d1765c7c216aecaf58de56c5bc2fd92b427519274c66ff50eb04f7fcaee/ansible_pylibssh-1.4.0-cp313-cp313-manylinux_2_27_ppc64le.manylinux_2_28_ppc64le.whl", hash = "sha256:82f5c4199b94b1e2f6f2ae01809c88794ce01f221338b199d30d4f6178fb5bfd", size = 2794721, upload-time = "2026-03-16T11:31:33.563Z" },
+    { url = "https://files.pythonhosted.org/packages/24/52/54ac4301fec8b5dc405a11cc78fe2091c15032848b9d8b87d6ffa0dc8559/ansible_pylibssh-1.4.0-cp313-cp313-manylinux_2_27_s390x.manylinux_2_28_s390x.whl", hash = "sha256:60873764078fe7ebb6acedb1001ac7614142221f50f74c8463881f163661b61c", size = 2273877, upload-time = "2026-03-16T11:31:35.141Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/d2/702d776f1682cce55aacd9a14784f1fffc73e6c17a7530e22e5dd6312b79/ansible_pylibssh-1.4.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:736fb126b981085a45113cc5b4d864b533b9065c1248e3e87b1c19d9344b71ac", size = 2661217, upload-time = "2026-03-16T11:31:37.095Z" },
+    { url = "https://files.pythonhosted.org/packages/de/b1/256bb116e1d112cedea2d962dfcc4b322ef8e2e6438bc3cf5dc37bf539af/ansible_pylibssh-1.4.0-cp313-cp313-manylinux_2_28_armv7l.manylinux_2_31_armv7l.whl", hash = "sha256:f652e307691a2c5212eda1a19339834bf9adafbae7fbd61add8ebcb65c9d54c7", size = 2074576, upload-time = "2026-03-16T11:31:38.802Z" },
+]
+
+[[package]]
 name = "ansible-runner"
 version = "2.4.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1979,6 +1999,7 @@ version = "2.6.3"
 source = { editable = "." }
 dependencies = [
     { name = "ansible", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
+    { name = "ansible-pylibssh", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "ansible-runner", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "celery", extra = ["redis"], marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
     { name = "django", marker = "(implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')" },
@@ -2033,6 +2054,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "ansible", specifier = ">=13.6.0,<14" },
+    { name = "ansible-pylibssh", specifier = ">=1.4.0" },
     { name = "ansible-runner", specifier = ">=2.4.0,<3.0.0" },
     { name = "celery", extras = ["redis"], specifier = ">=5.3.0,<6" },
     { name = "django", specifier = ">=5.2.3,<5.3.0" },

@@ -88,7 +88,7 @@ lock-main-requirements:
 	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
-	uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
+	scripts/lock-build-requirements.sh
 
 update-requirements:
 	uv lock --upgrade

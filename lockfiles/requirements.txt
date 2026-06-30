@@ -12,6 +12,8 @@ ansible==13.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via quipucords
 ansible-core==2.20.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible
+ansible-pylibssh==1.4.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+    # via quipucords
 ansible-runner==2.4.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 asgiref==3.11.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')

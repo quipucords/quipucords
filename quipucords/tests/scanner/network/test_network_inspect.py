@@ -142,6 +142,7 @@ class TestNetworkInspectScanner:
                             "1.2.3.4": {
                                 "ansible_user": "username",
                                 "ansible_ssh_pass": "password",
+                                "ansible_connection": "ansible.netcommon.libssh",
                                 "ansible_host": "1.2.3.4",
                             }
                         }
@@ -176,6 +177,7 @@ class TestNetworkInspectScanner:
                             "1.2.3.1": {
                                 "ansible_user": "username",
                                 "ansible_ssh_pass": "password",
+                                "ansible_connection": "ansible.netcommon.libssh",
                                 "ansible_host": "1.2.3.1",
                             }
                         }
@@ -185,6 +187,7 @@ class TestNetworkInspectScanner:
                             "1.2.3.2": {
                                 "ansible_user": "username",
                                 "ansible_ssh_pass": "password",
+                                "ansible_connection": "ansible.netcommon.libssh",
                                 "ansible_host": "1.2.3.2",
                             }
                         }
@@ -194,6 +197,7 @@ class TestNetworkInspectScanner:
                             "1.2.3.3": {
                                 "ansible_user": "username",
                                 "ansible_ssh_pass": "password",
+                                "ansible_connection": "ansible.netcommon.libssh",
                                 "ansible_host": "1.2.3.3",
                             }
                         }
@@ -203,6 +207,7 @@ class TestNetworkInspectScanner:
                             "1.2.3.4": {
                                 "ansible_user": "username",
                                 "ansible_ssh_pass": "password",
+                                "ansible_connection": "ansible.netcommon.libssh",
                                 "ansible_host": "1.2.3.4",
                             }
                         }
