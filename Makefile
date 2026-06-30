@@ -7,12 +7,12 @@ ifeq ($(UNAME_S),Darwin)
   # that uv sync and pybuild-deps can build it. Run `brew install libssh` if unset.
   LIBSSH_PREFIX := $(shell brew --prefix libssh 2>/dev/null)
   ifneq ($(LIBSSH_PREFIX),)
-    UV_SYNC_ENV := CFLAGS="-I$(LIBSSH_PREFIX)/include" LDFLAGS="-L$(LIBSSH_PREFIX)/lib"
+    LIBSSH_BUILD_ENV := CFLAGS="-I$(LIBSSH_PREFIX)/include" LDFLAGS="-L$(LIBSSH_PREFIX)/lib"
   else
-    UV_SYNC_ENV :=
+    LIBSSH_BUILD_ENV :=
   endif
 else
-  UV_SYNC_ENV :=
+  LIBSSH_BUILD_ENV :=
 endif
 
 ifeq ($(UNAME_S),Darwin)
@@ -97,7 +97,7 @@ clean-db:
 	podman volume rm -f quipucords-dev-db
 
 sync:
-	$(UV_SYNC_ENV) uv sync
+	$(LIBSSH_BUILD_ENV) uv sync
 
 lock-requirements: lock-main-requirements lock-build-requirements
 
@@ -106,7 +106,7 @@ lock-main-requirements:
 	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
-	$(UV_SYNC_ENV) uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
+	$(LIBSSH_BUILD_ENV) uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
 
 update-requirements:
 	uv lock --upgrade
