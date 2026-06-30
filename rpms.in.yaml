@@ -25,7 +25,6 @@ packages:
   - openssh-clients
   - procps-ng
   - python3.12
-  - sshpass
   - tar
   - which
 

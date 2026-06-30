@@ -12,7 +12,7 @@ cffi==2.0.0 ; (implementation_name == "cpython" and platform_python_implementati
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.6
+cython==3.2.8
     # via
     #   pydantic
     #   pyyaml
