@@ -4,7 +4,7 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
   # ansible-pylibssh has no pre-built macOS wheel and must be compiled from
   # source. Set compiler flags pointing at the Homebrew libssh installation so
-  # that uv sync can build it. Run `brew install libssh` if this is unset.
+  # that uv sync and pybuild-deps can build it. Run `brew install libssh` if unset.
   LIBSSH_PREFIX := $(shell brew --prefix libssh 2>/dev/null)
   ifneq ($(LIBSSH_PREFIX),)
     UV_SYNC_ENV := CFLAGS="-I$(LIBSSH_PREFIX)/include" LDFLAGS="-L$(LIBSSH_PREFIX)/lib"
@@ -106,7 +106,7 @@ lock-main-requirements:
 	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
-	scripts/lock-build-requirements.sh
+	$(UV_SYNC_ENV) uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
 
 update-requirements:
 	uv lock --upgrade
