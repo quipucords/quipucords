@@ -2,6 +2,20 @@ PYTHON		= $(shell uv run which python 2>/dev/null || which python)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
+  # ansible-pylibssh has no pre-built macOS wheel and must be compiled from
+  # source. Set compiler flags pointing at the Homebrew libssh installation so
+  # that uv sync can build it. Run `brew install libssh` if this is unset.
+  LIBSSH_PREFIX := $(shell brew --prefix libssh 2>/dev/null)
+  ifneq ($(LIBSSH_PREFIX),)
+    UV_SYNC_ENV := CFLAGS="-I$(LIBSSH_PREFIX)/include" LDFLAGS="-L$(LIBSSH_PREFIX)/lib"
+  else
+    UV_SYNC_ENV :=
+  endif
+else
+  UV_SYNC_ENV :=
+endif
+
+ifeq ($(UNAME_S),Darwin)
   DEFAULT_CACHE_DIR := $(HOME)/Library/Caches
   # macOS/Darwin's built-in `sed` and `date` are BSD-style and incompatible with Linux/GNU-style arguments.
   # However, macOS users can install GNU sed as `gsed` and GNU date as `gdate` using Homebrew.
@@ -54,6 +68,7 @@ help:
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
 	@echo "  lint-shell                    to run the shellcheck linter"
+	@echo "  sync                          to sync the Python venv (use instead of 'uv sync' on macOS)"
 	@echo "  lock-requirements             to lock all python dependencies"
 	@echo "  lock-rpms  		           to lock all dnf dependencies"
 	@echo "  update-requirements           to update all python dependencies"
@@ -80,6 +95,9 @@ clean-db:
 	podman stop quipucords-dev-db || true
 	podman rm -f quipucords-dev-db || true
 	podman volume rm -f quipucords-dev-db
+
+sync:
+	$(UV_SYNC_ENV) uv sync
 
 lock-requirements: lock-main-requirements lock-build-requirements
 

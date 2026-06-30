@@ -45,7 +45,7 @@ Use your system's package manager to install or upgrade as necessary.
 The default versions in macOS of some programs like `make` and `sed` are too old or incompatible with our build commands. Install modern versions plus additional required programs using Homebrew:
 
 ```sh
-brew install make coreutils gnu-sed skopeo rename yq shellcheck nmap
+brew install make coreutils gnu-sed skopeo rename yq shellcheck nmap libssh
 ```
 
 After installing some programs like `make`, update your `PATH` to override the system defaults. For example:
@@ -60,7 +60,7 @@ export PATH="/usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/make/libexec
 If you are running quipucords locally on macOS to perform network scans, additionally you may need:
 
 - Increase the maxfile limit as described [here](https://github.com/ansible/ansible/issues/12259#issuecomment-173371493).
-- Install sshpass as described [here](https://github.com/ansible-tw/AMA/issues/21).
+- `libssh` is required to build the `ansible-pylibssh` Python package and is included in the `brew install` command above.
 - If you are running macOS 10.13 or later and you encounter unexpected crashes when running scans,
   set the environment variable `OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES` before starting the server.
   See the explanation for this step [here](https://github.com/ansible/ansible/issues/31869#issuecomment-337769174).
@@ -130,11 +130,13 @@ redis-server --port 6379
 
 ### Install Python dependencies
 
-quipucords uses uv to manage Python dependencies. To install or update them, simply run:
+quipucords uses uv to manage Python dependencies. To install or update them, run:
 
 ```
-uv sync
+make sync
 ```
+
+This wraps `uv sync` with the compiler flags needed to build `ansible-pylibssh` from source on macOS. On Linux, `make sync` is equivalent to `uv sync`.
 
 ### Initialize the database
 
