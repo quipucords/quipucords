@@ -12,7 +12,7 @@ cffi==2.0.0 ; (implementation_name == "cpython" and platform_python_implementati
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.6
+cython==3.2.8
     # via
     #   pydantic
     #   pyyaml
@@ -22,6 +22,7 @@ docutils==0.23
     #   python-daemon
 expandvars==1.1.2
     # via
+    #   ansible-pylibssh
     #   frozenlist
     #   propcache
     #   yarl
@@ -99,6 +100,7 @@ setuptools-rust==1.13.0
     #   maturin
 setuptools-scm==10.2.0
     # via
+    #   ansible-pylibssh
     #   django-axes
     #   hatch-vcs
     #   pluggy
@@ -144,6 +146,7 @@ setuptools==82.0.1
     #   aiosignal
     #   ansible
     #   ansible-core
+    #   ansible-pylibssh
     #   bcrypt
     #   calver
     #   certifi
