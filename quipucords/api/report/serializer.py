@@ -43,6 +43,7 @@ class ReportSerializer(ModelSerializer):
     """Report Serializer."""
 
     scan_id = ReadOnlyField(source="scanjob.scan_id")
+    scan_name = ReadOnlyField(source="scanjob.scan.name", default=None)
     can_publish = SerializerMethodField()
     cannot_publish_reason = SerializerMethodField()
     cannot_download_reason = SerializerMethodField()
@@ -59,6 +60,7 @@ class ReportSerializer(ModelSerializer):
             "report_platform_id",
             "origin",
             "scan_id",
+            "scan_name",
             "can_publish",
             "cannot_publish_reason",
             "can_download",

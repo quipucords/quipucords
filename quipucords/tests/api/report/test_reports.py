@@ -54,7 +54,12 @@ from tests.constants import (
     FILENAME_LIGHTSPEED_TGZ,
     FILENAME_SHA256SUM,
 )
-from tests.factories import DeploymentReportFactory, ReportFactory
+from tests.factories import (
+    DeploymentReportFactory,
+    ReportFactory,
+    ScanFactory,
+    ScanJobFactory,
+)
 from tests.report_utils import extract_files_from_tarball
 from tests.utils import raw_facts_generator
 from tests.utils.auth import create_lightspeed_secure_token
@@ -620,3 +625,48 @@ def test_cannot_download_deployments_failed():
         deployment.report.cannot_download_reason
         == ReportCannotDownloadReason.STATUS_FAILED
     )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_report_with_scan_includes_scan_name(client_logged_in):
+    """Test that v2 reports detail includes the originating scan's name."""
+    scan = ScanFactory()
+    scan_job = ScanJobFactory(scan=scan)
+    report = ReportFactory(scanjob=scan_job)
+
+    response = client_logged_in.get(reverse("v2:reports-detail", args=(report.id,)))
+    assert response.ok, response.text
+    assert response.json()["scan_name"] == scan.name
+
+
+@pytest.mark.django_db(transaction=True)
+def test_report_without_scan_has_null_scan_name(client_logged_in):
+    """Test that scan_name is None when no scan is linked (e.g. uploaded reports)."""
+    report = ReportFactory()
+
+    detail_response = client_logged_in.get(
+        reverse("v2:reports-detail", args=(report.id,))
+    )
+    assert detail_response.ok, detail_response.text
+    assert detail_response.json()["scan_name"] is None
+
+    list_response = client_logged_in.get(reverse("v2:reports-list"))
+    assert list_response.ok, list_response.text
+    results = list_response.json()["results"]
+    assert results[0]["scan_name"] is None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_reports_filter_by_scan_id(client_logged_in):
+    """Test that reports list can be filtered by scan_id."""
+    scan1 = ScanFactory()
+    scan2 = ScanFactory()
+    report1 = ReportFactory(scanjob=ScanJobFactory(scan=scan1))
+    ReportFactory(scanjob=ScanJobFactory(scan=scan2))
+
+    response = client_logged_in.get(reverse("v2:reports-list"), {"scan_id": scan1.id})
+    assert response.ok, response.text
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == report1.id
+    assert results[0]["scan_name"] == scan1.name
