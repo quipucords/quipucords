@@ -66,7 +66,7 @@ class ReportFilter(FilterSet):
 class ReportViewSet(ReadOnlyModelViewSet):
     """A view set for Reports."""
 
-    queryset = Report.objects.select_related("scanjob")
+    queryset = Report.objects.select_related("scanjob__scan")
     serializer_class = ReportSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = ReportFilter
