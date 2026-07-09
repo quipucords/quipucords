@@ -2,6 +2,7 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
+from django_filters import NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -51,6 +52,8 @@ class RawFactsReportView(ReportViewMixin, ListAPIView):
 
 class ReportFilter(FilterSet):
     """Filter for reports."""
+
+    scan_id = NumberFilter(field_name="scanjob__scan_id")
 
     class Meta:
         """Metadata for filterset."""
