@@ -1,5 +1,6 @@
 """Report view."""
 
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django_filters import CharFilter, NumberFilter
@@ -72,11 +73,14 @@ class ReportFilter(FilterSet):
 class ReportViewSet(ReadOnlyModelViewSet):
     """A view set for Reports."""
 
-    queryset = Report.objects.select_related("scanjob__scan")
+    queryset = Report.objects.select_related("scanjob__scan").annotate(
+        scan_id=F("scanjob__scan_id"),
+        scan_name=F("scanjob__scan__name"),
+    )
     serializer_class = ReportSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = ReportFilter
-    ordering_fields = ("id", "origin", "created_at")
+    ordering_fields = ("id", "origin", "created_at", "scan_id", "scan_name")
     ordering = ("-created_at",)
 
 

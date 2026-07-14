@@ -688,3 +688,39 @@ def test_reports_filter_by_scan_name(client_logged_in):
     assert len(results) == 1
     assert results[0]["id"] == report1.id
     assert results[0]["scan_name"] == scan1.name
+
+
+@pytest.mark.django_db(transaction=True)
+def test_reports_order_by_scan_id(client_logged_in):
+    """Test that reports list can be sorted by scan_id."""
+    scan1 = ScanFactory()
+    scan2 = ScanFactory()
+    report1 = ReportFactory(scanjob=ScanJobFactory(scan=scan1))
+    report2 = ReportFactory(scanjob=ScanJobFactory(scan=scan2))
+
+    response = client_logged_in.get(reverse("v2:reports-list"), {"ordering": "scan_id"})
+    assert response.ok, response.text
+    ids = [r["id"] for r in response.json()["results"]]
+    expected = sorted(
+        [report1.id, report2.id],
+        key=lambda rid: (
+            report1.scanjob.scan_id if rid == report1.id else report2.scanjob.scan_id
+        ),
+    )
+    assert ids == expected
+
+
+@pytest.mark.django_db(transaction=True)
+def test_reports_order_by_scan_name(client_logged_in):
+    """Test that reports list can be sorted by scan_name."""
+    scan1 = ScanFactory(name="Zeta-Scan")
+    scan2 = ScanFactory(name="Alpha-Scan")
+    report1 = ReportFactory(scanjob=ScanJobFactory(scan=scan1))
+    report2 = ReportFactory(scanjob=ScanJobFactory(scan=scan2))
+
+    response = client_logged_in.get(
+        reverse("v2:reports-list"), {"ordering": "scan_name"}
+    )
+    assert response.ok, response.text
+    ids = [r["id"] for r in response.json()["results"]]
+    assert ids == [report2.id, report1.id]  # Alpha before Zeta
