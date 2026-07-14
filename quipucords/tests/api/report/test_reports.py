@@ -670,3 +670,21 @@ def test_reports_filter_by_scan_id(client_logged_in):
     assert len(results) == 1
     assert results[0]["id"] == report1.id
     assert results[0]["scan_name"] == scan1.name
+
+
+@pytest.mark.django_db(transaction=True)
+def test_reports_filter_by_scan_name(client_logged_in):
+    """Test that reports list can be filtered by scan name."""
+    scan1 = ScanFactory(name="Alpha-Scan")
+    scan2 = ScanFactory(name="Beta-Scan")
+    report1 = ReportFactory(scanjob=ScanJobFactory(scan=scan1))
+    ReportFactory(scanjob=ScanJobFactory(scan=scan2))
+
+    response = client_logged_in.get(
+        reverse("v2:reports-list"), {"search_by_scan_name": "alpha"}
+    )
+    assert response.ok, response.text
+    results = response.json()["results"]
+    assert len(results) == 1
+    assert results[0]["id"] == report1.id
+    assert results[0]["scan_name"] == scan1.name
