@@ -98,7 +98,6 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                         value={
                             "address": "vault.example.com",
                             "port": 8200,
-                            "ssl_verify": False,
                         },
                     )
                 ],
@@ -131,9 +130,9 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                     value={
                         "address": "vault.example.com",
                         "port": 8200,
-                        "ssl_verify": False,
                         "client_cert": "....",
                         "client_key": "....",
+                        "ca_cert": "....",
                     },
                     request_only=True,
                 ),
@@ -149,7 +148,6 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                         value={
                             "address": "vault.example.com",
                             "port": 8200,
-                            "ssl_verify": False,
                         },
                     )
                 ],
@@ -204,7 +202,6 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                     value={
                         "address": "newvault.example.com",
                         "port": 8210,
-                        "ssl_verify": True,
                         "client_cert": "....",
                         "client_key": "....",
                         "ca_cert": "....",
@@ -223,7 +220,6 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                         value={
                             "address": "newvault.example.com",
                             "port": 8210,
-                            "ssl_verify": True,
                         },
                     )
                 ],
@@ -288,7 +284,6 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                         value={
                             "address": "newvault.example.com",
                             "port": 8230,
-                            "ssl_verify": True,
                         },
                     )
                 ],

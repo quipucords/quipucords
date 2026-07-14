@@ -167,7 +167,6 @@ class TestHashiCorpVaultHelpers:
         invalid_cert = "not-valid-base64!@#$"
         vault_token = get_or_create_hashicorp_vault_token()
         vault_token.metadata = hashicorp_vault_data | {
-            "ssl_verify": True,
             HASHICORP_VAULT_CA_CERT: invalid_cert,
         }
         vault_token.save()
@@ -346,7 +345,6 @@ class TestHashiCorpVaultCreate:
         assert response.data == {
             "address": "vault.example.com",
             "port": 8200,
-            "ssl_verify": False,
         }
 
     def test_create_hashicorp_vault_already_exists(
@@ -458,40 +456,6 @@ class TestHashiCorpVaultCreate:
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data["address"][0]
         assert messages.HASHICORP_VAULT_INVALID_ADDRESS in str(err_message)
-
-    def test_create_hashicorp_vault_invalid_ssl_verify(
-        self, client_logged_in, hashicorp_vault_data
-    ):
-        """Test creating a HashiCorp Vault with an invalid ssl_verify."""
-        invalid_data = {**hashicorp_vault_data}
-        invalid_data["ssl_verify"] = "Not-Boolean"
-
-        response = client_logged_in.post(
-            reverse(HASHICORP_VAULT_VIEW),
-            data=invalid_data,
-            content_type="application/json",
-        )
-
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
-        err_message = response.data["ssl_verify"][0]
-        assert "Must be a valid boolean" in str(err_message)
-
-    def test_create_hashicorp_vault_empty_ssl_verify(
-        self, client_logged_in, hashicorp_vault_data
-    ):
-        """Test creating a HashiCorp Vault with an empty ssl_verify."""
-        invalid_data = {**hashicorp_vault_data}
-        invalid_data["ssl_verify"] = ""
-
-        response = client_logged_in.post(
-            reverse(HASHICORP_VAULT_VIEW),
-            data=invalid_data,
-            content_type="application/json",
-        )
-
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
-        err_message = response.data["ssl_verify"][0]
-        assert "Must be a valid boolean" in str(err_message)
 
     def test_create_hashicorp_vault_missing_client_cert(
         self, client_logged_in, hashicorp_vault_data
@@ -626,11 +590,11 @@ class TestHashiCorpVaultCreate:
             f"Failed to base64 decode the HashiCorp Vault {HASHICORP_VAULT_CLIENT_CERT}"
         ) in str(err_message)
 
-    def test_create_hashicorp_vault_ssl_verify_without_ca_cert(
+    def test_create_hashicorp_vault_missing_ca_cert(
         self, client_logged_in, hashicorp_vault_data
     ):
-        """Test creating a HashiCorp Vault with ssl_verify=True but no ca_cert."""
-        invalid_data = {**hashicorp_vault_data, "ssl_verify": True}
+        """Test creating a HashiCorp Vault without ca_cert field."""
+        invalid_data = {**hashicorp_vault_data}
         del invalid_data[HASHICORP_VAULT_CA_CERT]
 
         response = client_logged_in.post(
@@ -641,13 +605,13 @@ class TestHashiCorpVaultCreate:
 
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data[HASHICORP_VAULT_CA_CERT][0]
-        assert messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT in str(err_message)
+        assert "This field is required" in str(err_message)
 
-    def test_create_hashicorp_vault_ssl_verify_with_an_empty_ca_cert(
+    def test_create_hashicorp_vault_empty_ca_cert(
         self, client_logged_in, hashicorp_vault_data
     ):
-        """Test creating a HashiCorp Vault with ssl_verify=True but no ca_cert."""
-        invalid_data = {**hashicorp_vault_data, "ssl_verify": True}
+        """Test creating a HashiCorp Vault with an empty ca_cert field."""
+        invalid_data = {**hashicorp_vault_data}
         invalid_data[HASHICORP_VAULT_CA_CERT] = ""
 
         response = client_logged_in.post(
@@ -797,7 +761,6 @@ class TestHashiCorpVaultRetrieve:
         assert response.data == {
             "address": "vault.example.com",
             "port": 8200,
-            "ssl_verify": False,
         }
 
     def test_retrieve_hashicorp_vault_success_does_not_access_vault(
@@ -820,7 +783,6 @@ class TestHashiCorpVaultRetrieve:
         assert response.data == {
             "address": hashicorp_vault_data["address"],
             "port": hashicorp_vault_data["port"],
-            "ssl_verify": hashicorp_vault_data["ssl_verify"],
         }
         mock_authenticate.assert_not_called()
 
@@ -869,7 +831,6 @@ class TestHashiCorpVaultUpdate:
             data=hashicorp_vault_data,
             content_type="application/json",
         )
-        ssl_verify = hashicorp_vault_data["ssl_verify"]
 
         updated_data = {
             **hashicorp_vault_data,
@@ -886,7 +847,6 @@ class TestHashiCorpVaultUpdate:
         assert response.data == {
             "address": "newvault.example.com",
             "port": 8210,
-            "ssl_verify": ssl_verify,
         }
 
     def test_update_hashicorp_vault_not_found(
@@ -1011,7 +971,6 @@ class TestHashiCorpVaultPartialUpdate:
         assert response.data == {
             "address": "vault.example.com",
             "port": 8230,
-            "ssl_verify": False,
         }
 
     def test_partial_update_hashicorp_vault_address(
@@ -1030,7 +989,6 @@ class TestHashiCorpVaultPartialUpdate:
             content_type="application/json",
         )
         port = hashicorp_vault_data["port"]
-        ssl_verify = hashicorp_vault_data["ssl_verify"]
 
         partial_data = {"address": "updated-vault.example.com"}
         response = client_logged_in.patch(
@@ -1043,7 +1001,6 @@ class TestHashiCorpVaultPartialUpdate:
         assert response.data == {
             "address": "updated-vault.example.com",
             "port": port,
-            "ssl_verify": ssl_verify,
         }
 
     def test_partial_update_hashicorp_vault_not_found(self, client_logged_in):
@@ -1085,36 +1042,6 @@ class TestHashiCorpVaultPartialUpdate:
         assert response.status_code == http.HTTPStatus.BAD_REQUEST
         err_message = response.data["port"][0]
         assert "A valid integer is required" in str(err_message)
-
-    def test_partial_update_hashicorp_vault_ssl_verify_requires_ca_cert(
-        self, client_logged_in, hashicorp_vault_data, mocker
-    ):
-        """Test partially updating ssl_verify to True requires ca_cert."""
-        mock_client = mocker.MagicMock()
-        mock_client.is_authenticated.return_value = True
-        mocker.patch(
-            "api.auth.hashicorp_vault.auth.hvac.Client", return_value=mock_client
-        )
-
-        hashicorp_vault_data_no_ca = {**hashicorp_vault_data}
-        del hashicorp_vault_data_no_ca[HASHICORP_VAULT_CA_CERT]
-
-        client_logged_in.post(
-            reverse(HASHICORP_VAULT_VIEW),
-            data=hashicorp_vault_data_no_ca,
-            content_type="application/json",
-        )
-
-        partial_data = {"ssl_verify": True}
-        response = client_logged_in.patch(
-            reverse(HASHICORP_VAULT_VIEW),
-            data=partial_data,
-            content_type="application/json",
-        )
-
-        assert response.status_code == http.HTTPStatus.BAD_REQUEST
-        err_message = response.data[HASHICORP_VAULT_CA_CERT][0]
-        assert messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT in str(err_message)
 
 
 @pytest.mark.django_db

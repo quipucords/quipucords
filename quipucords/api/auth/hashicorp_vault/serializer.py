@@ -30,10 +30,9 @@ class HashiCorpVaultSerializer(serializers.Serializer):
     port = serializers.IntegerField(
         required=False, default=settings.QUIPUCORDS_HASHICORP_VAULT_DEFAULT_PORT
     )
-    ssl_verify = serializers.BooleanField(required=False, default=True)
     client_key = serializers.CharField(required=True, max_length=CLIENT_KEY_MAX_SIZE)
     client_cert = serializers.CharField(required=True, max_length=CLIENT_CERT_MAX_SIZE)
-    ca_cert = serializers.CharField(required=False, max_length=CA_CERT_MAX_SIZE)
+    ca_cert = serializers.CharField(required=True, max_length=CA_CERT_MAX_SIZE)
 
     class Meta:
         """Metadata for the serializer."""
@@ -114,17 +113,6 @@ class HashiCorpVaultSerializer(serializers.Serializer):
     def validate(self, data):
         """Validate the data is valid and we can communicate with HashiCorp Vault."""
         attrs = super().validate(data)
-
-        errors = {}
-        ssl_verify = attrs.get("ssl_verify", True)
-        if ssl_verify and attrs.get(HASHICORP_VAULT_CA_CERT, None) is None:
-            errors[HASHICORP_VAULT_CA_CERT] = _(
-                api.messages.HASHICORP_VAULT_MUST_SPECIFY_CA_CERT
-            )
-
-        if errors:
-            raise ValidationError(errors)
-
         hashicorp_vault_authenticate(metadata=attrs)
         return attrs
 
@@ -134,4 +122,3 @@ class HashiCorpVaultResponseSerializer(serializers.Serializer):
 
     address = serializers.CharField(required=True)
     port = serializers.IntegerField(required=True)
-    ssl_verify = serializers.BooleanField(required=True)

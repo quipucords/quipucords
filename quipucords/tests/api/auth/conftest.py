@@ -154,14 +154,7 @@ def hashicorp_vault_data(hashicorp_vault_cert_content, hashicorp_vault_key_conte
     return {
         "address": "vault.example.com",
         "port": 8200,
-        "ssl_verify": False,
         "client_cert": client_cert_b64,
         "client_key": client_key_b64,
         "ca_cert": ca_cert_b64,
     }
-
-
-@pytest.fixture()
-def hashicorp_vault_data_with_ssl(hashicorp_vault_data):
-    """Return a valid HashiCorp Vault server definition with SSL verification."""
-    return {**hashicorp_vault_data, "ssl_verify": True}
