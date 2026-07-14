@@ -147,7 +147,6 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
         metadata = vault_token.metadata
     if metadata is None:
         metadata = {}
-    ssl_verify = metadata.get("ssl_verify", True)
     vault_url = hashicorp_vault_url(metadata)
     client_cert_content = hashicorp_cert_file(
         HASHICORP_VAULT_CLIENT_CERT, metadata.get(HASHICORP_VAULT_CLIENT_CERT, None)
@@ -169,6 +168,11 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
             _(api.messages.HASHICORP_VAULT_VALID_CLIENT_KEY_REQUIRED)
         )
 
+    if ca_file_content is None:
+        raise HashiCorpVaultAuthError(
+            _(api.messages.HASHICORP_VAULT_VALID_CA_CERT_REQUIRED)
+        )
+
     with (
         tempfile.NamedTemporaryFile(delete=True) as cert_file,
         tempfile.NamedTemporaryFile(delete=True) as key_file,
@@ -178,19 +182,13 @@ def hashicorp_vault_client(vault_token=None, metadata=None):
         cert_file.flush()
         key_file.write(client_key_content.encode("utf-8"))
         key_file.flush()
-
-        if ssl_verify:
-            if ca_file_content is None:
-                raise HashiCorpVaultAuthError(
-                    _(api.messages.HASHICORP_VAULT_VALID_CA_CERT_REQUIRED)
-                )
-            ca_file.write(ca_file_content.encode("utf-8"))
-            ca_file.flush()
+        ca_file.write(ca_file_content.encode("utf-8"))
+        ca_file.flush()
 
         hvac_client_args = {
             "url": vault_url,
             "cert": (cert_file.name, key_file.name),
-            "verify": False if not ssl_verify else ca_file.name,
+            "verify": ca_file.name,
             "timeout": settings.QUIPUCORDS_HASHICORP_VAULT_TIMEOUT,
         }
 
