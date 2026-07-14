@@ -2,7 +2,7 @@
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
-from django_filters import NumberFilter
+from django_filters import CharFilter, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -54,6 +54,9 @@ class ReportFilter(FilterSet):
     """Filter for reports."""
 
     scan_id = NumberFilter(field_name="scanjob__scan_id")
+    search_by_scan_name = CharFilter(
+        field_name="scanjob__scan__name", lookup_expr="icontains", distinct=True
+    )
 
     class Meta:
         """Metadata for filterset."""
