@@ -125,8 +125,9 @@ class HashiCorpVaultViewSet(viewsets.GenericViewSet):
                 OpenApiExample(
                     "Request to define a HashiCorp Vault server",
                     description="HashiCorp Vault server definition with a client"
-                    " certificate and key. client_cert and client_key are single line"
-                    " base64 encodings of the certificate pem files.",
+                    " certificate, key and CA cert. client_cert, client_key and"
+                    " ca_cert are single line base64 encodings of the certificate"
+                    " pem files.",
                     value={
                         "address": "vault.example.com",
                         "port": 8200,
