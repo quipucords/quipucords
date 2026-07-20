@@ -5,7 +5,7 @@ agents["failFast"] = false
 
 ["fedora", "rhel8", "rhel9", "rhel10"].each { distro_label ->
     agents[distro_label] = {
-        node("discovery_ci && ${distro_label}") {
+        node("openstack && discovery_ci && ${distro_label}") {
             timestamps {
                 stage("[${distro_label}] Setup test environment") {
                     echo "Setting up Quipucords PR tests"
