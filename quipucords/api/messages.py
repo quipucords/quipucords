@@ -207,6 +207,16 @@ VAULT_SECRET_NO_DATA = "Vault secret at path '%s' (mount_point='%s') returned no
 VAULT_SECRET_MISSING_KEY = (
     "Vault secret does not contain the expected '%s' key (path='%s')."
 )
+VAULT_SECRET_REQUESTING = (
+    "Requesting secret from HashiCorp Vault (path=%s, mount_point=%s)."
+)
+VAULT_SECRET_AUTHENTICATED = (
+    "Authenticated with HashiCorp Vault at %s for secret retrieval."
+)
+VAULT_SECRET_RETRIEVED = (
+    "Successfully retrieved secret key '%s' from HashiCorp Vault (path=%s,"
+    " mount_point=%s)."
+)
 
 # report messages
 REPORTS_TAR_ERROR = "An error occurred compressing files."

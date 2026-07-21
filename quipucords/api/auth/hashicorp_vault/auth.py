@@ -258,11 +258,15 @@ def read_vault_secret(credential) -> str:
     mount_point = credential.vault_mount_point
     secret_key = credential.vault_secret_key
 
+    logger.info(api.messages.VAULT_SECRET_REQUESTING, path, mount_point)
+
     try:
         with hashicorp_vault_client(vault_token=vault_token) as client:
             client.auth.cert.login()
             if not client.is_authenticated():
                 raise ScanFailureError(api.messages.VAULT_SECRET_AUTH_FAILED)
+            vault_address = hashicorp_vault_address(vault_token.metadata)
+            logger.info(api.messages.VAULT_SECRET_AUTHENTICATED, vault_address)
             read_kwargs = {"path": path}
             if mount_point:
                 read_kwargs["mount_point"] = mount_point
@@ -285,4 +289,5 @@ def read_vault_secret(credential) -> str:
         raise ScanFailureError(
             api.messages.VAULT_SECRET_MISSING_KEY % (secret_key, path)
         )
+    logger.info(api.messages.VAULT_SECRET_RETRIEVED, secret_key, path, mount_point)
     return value
