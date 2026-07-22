@@ -2,6 +2,20 @@ PYTHON		= $(shell uv run which python 2>/dev/null || which python)
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
+  # ansible-pylibssh has no pre-built macOS wheel and must be compiled from
+  # source. Set compiler flags pointing at the Homebrew libssh installation so
+  # that uv sync and pybuild-deps can build it. Run `brew install libssh` if unset.
+  LIBSSH_PREFIX := $(shell brew --prefix libssh 2>/dev/null)
+  ifneq ($(LIBSSH_PREFIX),)
+    LIBSSH_BUILD_ENV := CFLAGS="-I$(LIBSSH_PREFIX)/include" LDFLAGS="-L$(LIBSSH_PREFIX)/lib"
+  else
+    LIBSSH_BUILD_ENV :=
+  endif
+else
+  LIBSSH_BUILD_ENV :=
+endif
+
+ifeq ($(UNAME_S),Darwin)
   DEFAULT_CACHE_DIR := $(HOME)/Library/Caches
   # macOS/Darwin's built-in `sed` and `date` are BSD-style and incompatible with Linux/GNU-style arguments.
   # However, macOS users can install GNU sed as `gsed` and GNU date as `gdate` using Homebrew.
@@ -38,7 +52,7 @@ QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_POSTGRES_WAIT_TIME ?= 10
 
-UBI_VERSION=9
+UBI_VERSION=10
 UBI_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)
 UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)/ubi-minimal
 RPM_LOCKFILE_IMAGE=localhost/rpm-lockfile-prototype
@@ -54,6 +68,7 @@ help:
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
 	@echo "  lint-shell                    to run the shellcheck linter"
+	@echo "  sync                          to sync the Python venv (use instead of 'uv sync' on macOS)"
 	@echo "  lock-requirements             to lock all python dependencies"
 	@echo "  lock-rpms  		           to lock all dnf dependencies"
 	@echo "  update-requirements           to update all python dependencies"
@@ -81,6 +96,9 @@ clean-db:
 	podman rm -f quipucords-dev-db || true
 	podman volume rm -f quipucords-dev-db
 
+sync:
+	$(LIBSSH_BUILD_ENV) uv sync
+
 lock-requirements: lock-main-requirements lock-build-requirements
 
 lock-main-requirements:
@@ -88,7 +106,7 @@ lock-main-requirements:
 	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
 lock-build-requirements:
-	uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
+	$(LIBSSH_BUILD_ENV) uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
 
 update-requirements:
 	uv lock --upgrade

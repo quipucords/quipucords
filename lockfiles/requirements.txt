@@ -12,6 +12,8 @@ ansible==13.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via quipucords
 ansible-core==2.20.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible
+ansible-pylibssh==1.4.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+    # via quipucords
 ansible-runner==2.4.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
 asgiref==3.11.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -191,7 +193,7 @@ requests-oauthlib==2.0.0 ; (implementation_name == 'cpython' and sys_platform ==
     # via kubernetes
 resolvelib==1.2.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible-core
-rpds-py==2026.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+rpds-py==2026.6.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   jsonschema
     #   referencing
@@ -224,7 +226,7 @@ vine==5.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     #   amqp
     #   celery
     #   kombu
-wcwidth==0.8.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+wcwidth==0.8.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via prompt-toolkit
 websocket-client==1.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
