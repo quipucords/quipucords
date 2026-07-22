@@ -6,13 +6,13 @@
 #
 calver==2025.10.20
     # via trove-classifiers
-cffi==2.0.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
+cffi==2.1.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via
     #   cryptography
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.6
+cython==3.2.8
     # via
     #   pydantic
     #   pyyaml
@@ -49,7 +49,7 @@ hatch-vcs==0.5.0
     #   jsonschema-specifications
     #   referencing
     #   urllib3
-hatchling==1.30.1
+hatchling==1.31.0
     # via
     #   attrs
     #   expandvars
@@ -97,7 +97,7 @@ setuptools-rust==1.13.0
     # via
     #   bcrypt
     #   maturin
-setuptools-scm==10.2.0
+setuptools-scm==10.2.1
     # via
     #   django-axes
     #   hatch-vcs
@@ -110,7 +110,7 @@ setuptools-scm==8.1.0
     # via ansible-runner
 trove-classifiers==2026.6.1.19
     # via hatchling
-typing-extensions==4.15.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
 vcs-versioning==2.2.2
     # via setuptools-scm
@@ -139,11 +139,12 @@ setuptools==70.0.0
 setuptools==80.3.1
     # via psycopg-c
 setuptools==82.0.1
+    # via ansible-core
+setuptools==83.0.0
     # via
     #   aiohttp
     #   aiosignal
     #   ansible
-    #   ansible-core
     #   bcrypt
     #   calver
     #   certifi
