@@ -23,6 +23,14 @@ class ProductJWSTest(TestCase):
 
         self.assertEqual(versions, expected)
 
+    def test_get_version_none(self):
+        """Test the get_version function with None param."""
+        raw_versions = None
+        versions = get_version(raw_versions)
+        expected = []
+
+        self.assertEqual(versions, expected)
+
     def test_detect_ws_present(self):
         """Test the detect_jboss_ws method."""
         expected = {
