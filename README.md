@@ -95,23 +95,27 @@ make setup-postgres
 make setup-redis
 ```
 
-#### PostgreSQL and Redis elsewhere
+#### Configure environment variables
 
-If you choose to run PostgreSQL or Redis anywhere other than those containers, then you may need to customize environment variables for quipucords. That may include, but not be limited to, setting the following environment variables wherever quipucords will run:
+Regardless of how you run PostgreSQL and Redis, you must export environment variables so quipucords can connect to them. The following values match the containers created by `make setup-postgres` and `make setup-redis`:
 
-```
-QUIPUCORDS_DBMS=postgres
-QUIPUCORDS_DBMS_DATABASE=<name of the database>
-QUIPUCORDS_DBMS_HOST=<hostname or ip address of the database>
-QUIPUCORDS_DBMS_PASSWORD=<db password>
-QUIPUCORDS_DBMS_PORT=<db port>
-QUIPUCORDS_DBMS_USER=<db user>
+```bash
+export QUIPUCORDS_DBMS=postgres
+export QUIPUCORDS_DBMS_DATABASE=qpc
+export QUIPUCORDS_DBMS_HOST=127.0.0.1
+export QUIPUCORDS_DBMS_PASSWORD=qpc
+export QUIPUCORDS_DBMS_PORT=54321
+export QUIPUCORDS_DBMS_USER=qpc
 
 # Alternately, if no postgres, specify sqlite:
-# QUIPUCORDS_DBMS=sqlite
+# export QUIPUCORDS_DBMS=sqlite
 ```
 
-If running on macOS with Homebrew, you may install PostgreSQL and Redis with the following commands, and you may also need to set environment variables for quipucords as described above. Further troubleshooting of these services is beyond the scope of this document.
+If you run PostgreSQL or Redis elsewhere, adjust these values to match your setup.
+
+#### PostgreSQL and Redis elsewhere
+
+If running on macOS with Homebrew, you may install PostgreSQL and Redis with the following commands. Further troubleshooting of these services is beyond the scope of this document.
 
 ```
 brew update
@@ -192,9 +196,9 @@ Please see [quipucords-ui](https://github.com/quipucords/quipucords-ui) for more
 3. Start the UI via `npm run start:using-server`.
 4. Once started, access the UI from https://127.0.0.1:3000/.
 
-You may also need to edit the local `.env` file or set some environment variables to match your local quipucords server. This may include:
+You may also need to set some environment variables to match your local quipucords server. This may include:
 
-```
+```bash 
 export QUIPUCORDS_SERVER_PROTOCOL=http
 export QUIPUCORDS_SERVER_HOST=127.0.0.1
 export QUIPUCORDS_SERVER_PORT=8000
