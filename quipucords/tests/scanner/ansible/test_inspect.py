@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 from django.test import override_settings
-from requests import RequestException
+from requests import HTTPError, RequestException
 
 from api.inspectresult.model import InspectResult
 from api.models import ScanTask
@@ -266,6 +266,95 @@ def test_inspect_falls_back_to_jobs_when_host_metrics_unavailable(
     assert sorted(results["jobs"]["unique_hosts"]) == sorted(
         ["host1.example.com", "host2.example.com"]
     )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("status_code", (401, 403, 404))
+def test_inspect_falls_back_to_jobs_when_host_metrics_http_error(
+    mocker, mock_client, scan_task, status_code
+):
+    """Fall back to /jobs/ when host_metrics returns auth/not-found errors."""
+    runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
+    runner.client = mock_client
+
+    runner.endpoints = InspectTaskRunner.AAP_ENDPOINTS(
+        me="/api/v2/me",
+        ping="/api/v2/ping",
+        hosts="/api/v2/hosts",
+        jobs="/api/v2/jobs",
+        host_metrics="/api/v2/host_metrics",
+    )
+
+    http_error = HTTPError(f"{status_code} Client Error")
+    http_error.response = mocker.Mock(status_code=status_code)
+
+    mocker.patch.object(runner, "get_instance_details", return_value={"version": "2.4"})
+    mocker.patch.object(runner, "get_hosts", return_value=[{"name": "localhost"}])
+    mocker.patch.object(runner, "get_unique_hosts_from_metrics", side_effect=http_error)
+    mocker.patch.object(
+        runner,
+        "get_jobs",
+        return_value={
+            "job_ids": [1, 2],
+            "unique_hosts": {"host1.example.com"},
+        },
+    )
+    mocker.patch.object(runner, "save_results")
+
+    with override_settings(QUIPUCORDS_AAP_USE_HOST_METRICS=True):
+        runner.inspect()
+
+    runner.get_unique_hosts_from_metrics.assert_called_once()
+    runner.get_jobs.assert_called_once()
+
+    call_args = runner.save_results.call_args
+    assert call_args is not None
+    status = call_args[0][0]
+    results = call_args[0][1]
+    assert status == InspectResult.SUCCESS
+    assert results["jobs"]["job_ids"] == [1, 2]
+    assert results["jobs"]["unique_hosts"] == ["host1.example.com"]
+    assert "comparison" in results
+
+
+@pytest.mark.django_db
+def test_inspect_does_not_fallback_on_host_metrics_server_error(
+    mocker, mock_client, scan_task
+):
+    """Do not fall back to /jobs/ for unexpected host_metrics HTTP errors."""
+    runner = InspectTaskRunner(scan_task=scan_task, scan_job=scan_task.job)
+    runner.client = mock_client
+
+    runner.endpoints = InspectTaskRunner.AAP_ENDPOINTS(
+        me="/api/v2/me",
+        ping="/api/v2/ping",
+        hosts="/api/v2/hosts",
+        jobs="/api/v2/jobs",
+        host_metrics="/api/v2/host_metrics",
+    )
+
+    http_error = HTTPError("500 Server Error")
+    http_error.response = mocker.Mock(status_code=500)
+
+    mocker.patch.object(runner, "get_instance_details", return_value={"version": "2.4"})
+    mocker.patch.object(runner, "get_hosts", return_value=[{"name": "localhost"}])
+    mocker.patch.object(runner, "get_unique_hosts_from_metrics", side_effect=http_error)
+    mocker.patch.object(runner, "get_jobs")
+    mocker.patch.object(runner, "save_results")
+
+    with override_settings(QUIPUCORDS_AAP_USE_HOST_METRICS=True):
+        runner.inspect()
+
+    runner.get_unique_hosts_from_metrics.assert_called_once()
+    runner.get_jobs.assert_not_called()
+
+    call_args = runner.save_results.call_args
+    assert call_args is not None
+    status = call_args[0][0]
+    results = call_args[0][1]
+    assert status == InspectResult.FAILED
+    assert "jobs" not in results
+    assert "comparison" not in results
 
 
 @pytest.mark.django_db

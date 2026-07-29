@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.db import transaction
 from requests import ConnectionError as RequestConnError
-from requests import RequestException
+from requests import HTTPError, RequestException
 
 from api.connresult.model import SystemConnectionResult
 from api.models import InspectGroup, InspectResult, RawFact, Scan, ScanTask
@@ -202,40 +202,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
         # Collect unique hosts that have run jobs
         # Try host_metrics endpoint first (much faster), fall back to jobs if needed
         try:
-            if settings.QUIPUCORDS_AAP_USE_HOST_METRICS and self.endpoints.host_metrics:
-                logger.info(
-                    "Using host_metrics endpoint for %(source_name)s",
-                    {"source_name": self.scan_task.source.name},
-                )
-                # Store in legacy "jobs" structure for backward compatibility.
-                # job_ids is empty because host_metrics doesn't provide job IDs.
-                results["jobs"] = {
-                    "job_ids": [],
-                    "unique_hosts": sorted(self.get_unique_hosts_from_metrics()),
-                }
-                # TODO Drop fake "jobs" storage when we drop support for AAP < 2.4.
-                # We could replace that with a simpler higher-level item like:
-                # results["unique_hosts"] = sorted(self.get_unique_hosts_from_metrics())
-                # Update semver appropriately since details report output will change.
-            else:
-                if not settings.QUIPUCORDS_AAP_USE_HOST_METRICS:
-                    logger.info(
-                        "host_metrics disabled by QUIPUCORDS_AAP_USE_HOST_METRICS "
-                        "setting, using jobs endpoint for %(source_name)s",
-                        {"source_name": self.scan_task.source.name},
-                    )
-                else:
-                    logger.info(
-                        "host_metrics endpoint not available, "
-                        "falling back to jobs endpoint for %(source_name)s",
-                        {"source_name": self.scan_task.source.name},
-                    )
-                # Use jobs endpoint (iterates through all jobs to extract unique hosts)
-                jobs_data = self.get_jobs()
-                results["jobs"] = {
-                    "job_ids": jobs_data["job_ids"],
-                    "unique_hosts": sorted(jobs_data["unique_hosts"]),
-                }
+            results["jobs"] = self.get_jobs_fact()
         except RequestException:
             logger.exception(
                 "Error collecting unique hosts for ansible host '%(system_name)s'.",
@@ -252,6 +219,67 @@ class InspectTaskRunner(AnsibleTaskRunner):
         if self.scan_task.systems_scanned:
             return self.success_message, ScanTask.COMPLETED
         return self.failure_message, ScanTask.FAILED
+
+    # HTTP statuses that mean host_metrics is listed but not usable for this
+    # credential/server. Fall back to the slower /jobs/ path instead of failing.
+    HOST_METRICS_FALLBACK_HTTP_STATUSES = (401, 403, 404)
+
+    def get_jobs_fact(self) -> dict:
+        """
+        Collect unique hosts that have run automation.
+
+        Prefer /host_metrics/ when available (much faster). Fall back to /jobs/
+        when host_metrics is disabled, missing, or returns auth/not-found errors
+        (for example AAP RBAC denying host_metrics while /hosts/ still works).
+
+        Stored in legacy "jobs" structure for backward compatibility.
+        TODO Drop fake "jobs" storage when we drop support for AAP < 2.4.
+        """
+        use_host_metrics = (
+            settings.QUIPUCORDS_AAP_USE_HOST_METRICS and self.endpoints.host_metrics
+        )
+        if use_host_metrics:
+            try:
+                logger.info(
+                    "Using host_metrics endpoint for %(source_name)s",
+                    {"source_name": self.scan_task.source.name},
+                )
+                # job_ids is empty because host_metrics doesn't provide job IDs.
+                return {
+                    "job_ids": [],
+                    "unique_hosts": sorted(self.get_unique_hosts_from_metrics()),
+                }
+            except HTTPError as error:
+                status_code = getattr(error.response, "status_code", None)
+                if status_code not in self.HOST_METRICS_FALLBACK_HTTP_STATUSES:
+                    raise
+                logger.warning(
+                    "host_metrics returned HTTP %(status_code)s for %(source_name)s; "
+                    "falling back to jobs endpoint",
+                    {
+                        "status_code": status_code,
+                        "source_name": self.scan_task.source.name,
+                    },
+                )
+        elif not settings.QUIPUCORDS_AAP_USE_HOST_METRICS:
+            logger.info(
+                "host_metrics disabled by QUIPUCORDS_AAP_USE_HOST_METRICS "
+                "setting, using jobs endpoint for %(source_name)s",
+                {"source_name": self.scan_task.source.name},
+            )
+        else:
+            logger.info(
+                "host_metrics endpoint not available, "
+                "falling back to jobs endpoint for %(source_name)s",
+                {"source_name": self.scan_task.source.name},
+            )
+
+        # Use jobs endpoint (iterates through all jobs to extract unique hosts)
+        jobs_data = self.get_jobs()
+        return {
+            "job_ids": jobs_data["job_ids"],
+            "unique_hosts": sorted(jobs_data["unique_hosts"]),
+        }
 
     @property
     def max_concurrency(self):
