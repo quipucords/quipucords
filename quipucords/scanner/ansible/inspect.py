@@ -20,6 +20,10 @@ from scanner.ansible.runner import AnsibleTaskRunner
 
 logger = getLogger(__name__)
 
+# HTTP statuses that mean host_metrics is listed but not usable for this
+# credential/server. Fall back to the slower /jobs/ path instead of failing.
+HOST_METRICS_FALLBACK_HTTP_STATUSES = (401, 403, 404)
+
 
 class InspectTaskRunner(AnsibleTaskRunner):
     """Inspection phase task runner for ansible scanner."""
@@ -199,8 +203,6 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 )
                 inspection_status = InspectResult.FAILED
 
-        # Collect unique hosts that have run jobs
-        # Try host_metrics endpoint first (much faster), fall back to jobs if needed
         try:
             results["jobs"] = self.get_jobs_fact()
         except RequestException:
@@ -220,10 +222,6 @@ class InspectTaskRunner(AnsibleTaskRunner):
             return self.success_message, ScanTask.COMPLETED
         return self.failure_message, ScanTask.FAILED
 
-    # HTTP statuses that mean host_metrics is listed but not usable for this
-    # credential/server. Fall back to the slower /jobs/ path instead of failing.
-    HOST_METRICS_FALLBACK_HTTP_STATUSES = (401, 403, 404)
-
     def get_jobs_fact(self) -> dict:
         """
         Collect unique hosts that have run automation.
@@ -235,6 +233,8 @@ class InspectTaskRunner(AnsibleTaskRunner):
         Stored in legacy "jobs" structure for backward compatibility.
         TODO Drop fake "jobs" storage when we drop support for AAP < 2.4.
         """
+        # Collect unique hosts that have run jobs.
+        # Try host_metrics endpoint first (much faster), fall back to jobs if needed.
         use_host_metrics = (
             settings.QUIPUCORDS_AAP_USE_HOST_METRICS and self.endpoints.host_metrics
         )
@@ -251,7 +251,7 @@ class InspectTaskRunner(AnsibleTaskRunner):
                 }
             except HTTPError as error:
                 status_code = getattr(error.response, "status_code", None)
-                if status_code not in self.HOST_METRICS_FALLBACK_HTTP_STATUSES:
+                if status_code not in HOST_METRICS_FALLBACK_HTTP_STATUSES:
                     raise
                 logger.warning(
                     "host_metrics returned HTTP %(status_code)s for %(source_name)s; "
