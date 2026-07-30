@@ -10,7 +10,10 @@ from api.inspectresult.model import InspectResult
 from api.models import ScanTask
 from constants import DataSources
 from scanner.ansible.exceptions import AnsibleApiDetectionError
-from scanner.ansible.inspect import InspectTaskRunner
+from scanner.ansible.inspect import (
+    HOST_METRICS_FALLBACK_HTTP_STATUSES,
+    InspectTaskRunner,
+)
 from scanner.ansible.runner import AnsibleTaskRunner
 from scanner.exceptions import ScanFailureError
 from tests.factories import CredentialFactory, ScanTaskFactory
@@ -269,7 +272,7 @@ def test_inspect_falls_back_to_jobs_when_host_metrics_unavailable(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("status_code", (401, 403, 404))
+@pytest.mark.parametrize("status_code", HOST_METRICS_FALLBACK_HTTP_STATUSES)
 def test_inspect_falls_back_to_jobs_when_host_metrics_http_error(
     mocker, mock_client, scan_task, status_code
 ):
