@@ -1,5 +1,7 @@
 """Ingests raw facts to determine the status of JBoss Web Server on system."""
 
+import re
+
 from api.models import Product
 from fingerprinter.constants import META_DATA_KEY, PRESENCE_KEY
 from fingerprinter.utils import generate_raw_fact_members, product_entitlement_found
@@ -24,30 +26,18 @@ JWS_CLASSIFICATIONS = {
     "Apache/2.2.22 (Unix)Apache Tomcat/6.0.35": "EWS 2.0.0",
     "Apache/2.2.22 (Unix)Apache Tomcat/6.0.37": "EWS 2.0.1",
     "Apache/2.2.26 (Unix)Apache Tomcat/6.0.41": "EWS 2.1.x",
-    "JWS_3.0.1": "JWS 3.0.1",
-    "JWS_3.0.2": "JWS 3.0.2",
-    "JWS_3.0.3": "JWS 3.0.3",
-    "JWS_3.1.0": "JWS 3.1.0",
-    "JWS_3.1.1": "JWS 3.1.1",
-    "JWS_3.1.2": "JWS 3.1.2",
-    "JWS_3.1.3": "JWS 3.1.3",
-    "JWS_3.1.4": "JWS 3.1.4",
-    "JWS_3.1.5": "JWS 3.1.5",
-    "JWS_3.1.6": "JWS 3.1.6",
-    "JWS_3.1.7": "JWS 3.1.7",
-    "JWS_3.1.8": "JWS 3.1.8",
-    "JWS_3.1.9": "JWS 3.1.9",
-    "Red Hat JBoss Web Server - Version 5.0 GA": "JWS 5.0",
-    "Red Hat JBoss Web Server - Version 5.0.0 GA": "JWS 5.0.0",
-    "jws5": "JWS 5.x.x",
-    "Red Hat JBoss Web Server - Version 5.1 GA": "JWS 5.1",
-    "Red Hat JBoss Web Server - Version 5.1.0 GA": "JWS 5.1.0",
-    "Red Hat JBoss Web Server - Version 5.2 GA": "JWS 5.2",
-    "Red Hat JBoss Web Server - Version 5.2.0 GA": "JWS 5.2.0",
-    "Red Hat JBoss Web Server - Version 5.3 GA": "JWS 5.3",
-    "Red Hat JBoss Web Server - Version 5.3.0 GA": "JWS 5.3",
-    "Red Hat JBoss Web Server - Version 5.3.1 GA": "JWS 5.3.1",
 }
+
+JWS_GA_PATTERN = re.compile(
+    r"Red Hat JBoss Web Server - Version (?P<found_version>[0-9\.]+) GA"
+)
+JWS_PATCH_PATTERN = re.compile(
+    r"""Red\ Hat\ JBoss\ Web\ Server\ -\ Version
+    \ (?P<major_version>[0-9\.]+)\ SP(?P<patch_version>[0-9]+)
+    """,
+    re.VERBOSE,
+)
+JWS_UNIT_NAME_PATTERN = re.compile(r"jws(?P<major_version>[0-9]+)")
 
 
 def get_version(raw_versions):
@@ -56,12 +46,38 @@ def get_version(raw_versions):
     :param raw_versions: array of possible version strings
     """
     versions = []
+    if raw_versions is None:
+        return versions
 
-    if raw_versions is not None:
-        for version in raw_versions:
-            # Turn the found version string into a standard format
-            if version in JWS_CLASSIFICATIONS:
-                versions.append(JWS_CLASSIFICATIONS[version])
+    for version in raw_versions:
+        if std_version := JWS_CLASSIFICATIONS.get(version):
+            versions.append(std_version)
+            continue
+
+        if version.startswith("JWS_3"):
+            std_version = version.replace("_", " ", 1)
+            versions.append(std_version)
+            continue
+
+        if match := JWS_GA_PATTERN.fullmatch(version):
+            found_version = match.group("found_version")
+            std_version = f"JWS {found_version}"
+            versions.append(std_version)
+            continue
+
+        if match := JWS_PATCH_PATTERN.fullmatch(version):
+            major_version = match.group("major_version")
+            patch_version = match.group("patch_version")
+            std_version = f"JWS {major_version}.{patch_version}"
+            versions.append(std_version)
+            continue
+
+        if match := JWS_UNIT_NAME_PATTERN.fullmatch(version):
+            major_version = match.group("major_version")
+            std_version = f"JWS {major_version}.x.x"
+            versions.append(std_version)
+            continue
+
     return versions
 
 
