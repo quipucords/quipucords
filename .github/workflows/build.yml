@@ -36,7 +36,7 @@ jobs:
       - name: Build Amd64 quipucords image
         # Tags: pr-#-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
         id: build-image-amd64
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           archs: amd64
@@ -49,7 +49,7 @@ jobs:
 
       - name: Push Amd64 To quay.io
         # Tags: pr-#-amd64, latest-amd64, x.y.z-amd64, x.y-amd64
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.build-image-amd64.outputs.tags }}
@@ -74,7 +74,7 @@ jobs:
       - name: Build Arm64 quipucords image
         # Tags: pr-#-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
         id: build-image-arm64
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           archs: arm64
@@ -87,7 +87,7 @@ jobs:
 
       - name: Push Arm64 To quay.io
         # Tags: pr-#-arm64, latest-arm64, x.y.z-arm64, x.y-arm64
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.build-image-arm64.outputs.tags }}
@@ -128,7 +128,7 @@ jobs:
       - name: Push Manifest
         # Tags: pr-#, latest, x.y
         id: push-manifest
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.IMAGE_TAG }}
@@ -151,7 +151,7 @@ jobs:
         # Tags: x.y.z
         id: push-patch-version-manifest
         if: contains( env.RELEASE_TAG, '.' )
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.STABLE_TAG }}
