@@ -487,7 +487,7 @@ LOGGING = {
 }
 
 
-def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
+def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913, PLR0917
     """
     Redirect deprecation warnings to our logger.
 

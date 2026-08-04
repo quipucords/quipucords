@@ -127,6 +127,7 @@ known-first-party = [
     "S106",
     "S107",
     "S311",
+    "PLR0917", # too-many-positional-arguments
 ]
 "quipucords/api/migrations/*.py" = ["D100", "D101"]
 
