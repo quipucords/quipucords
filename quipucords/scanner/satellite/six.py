@@ -136,7 +136,7 @@ ERRATA_MAPPING = {
 }
 
 
-def request_results(  # noqa: PLR0913
+def request_results(  # noqa: PLR0913, PLR0917
     scan_task: ScanTask,
     url_template: str,
     org_id=None,
