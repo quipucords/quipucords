@@ -913,7 +913,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
 
         return priority_fingerprint
 
-    def _add_fact_to_fingerprint(  # noqa: PLR0913
+    def _add_fact_to_fingerprint(  # noqa: PLR0913, PLR0917
         self,
         source: dict,
         raw_fact_key: str,
