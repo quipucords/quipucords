@@ -34,7 +34,7 @@ certifi==2026.7.22 ; (implementation_name == 'cpython' and sys_platform == 'darw
     # via
     #   kubernetes
     #   requests
-cffi==2.1.0 ; (implementation_name == 'cpython' and platform_python_implementation != 'PyPy' and sys_platform == 'darwin') or (implementation_name == 'cpython' and platform_python_implementation != 'PyPy' and sys_platform == 'linux')
+cffi==2.1.1 ; (implementation_name == 'cpython' and platform_python_implementation != 'PyPy' and sys_platform == 'darwin') or (implementation_name == 'cpython' and platform_python_implementation != 'PyPy' and sys_platform == 'linux')
     # via
     #   cryptography
     #   pynacl
@@ -52,11 +52,11 @@ click-plugins==1.1.1.2 ; (implementation_name == 'cpython' and sys_platform == '
     # via celery
 click-repl==0.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
-cryptography==49.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+cryptography==50.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   ansible-core
     #   paramiko
-django==5.2.16 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+django==5.2.17 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
     #   django-cors-headers
@@ -76,13 +76,13 @@ django-filter==26.1 ; (implementation_name == 'cpython' and sys_platform == 'dar
     # via quipucords
 django-json-agg==0.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-djangorestframework==3.17.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+djangorestframework==3.17.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   drf-spectacular
     #   quipucords
 drf-spectacular==0.30.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-drf-spectacular-sidecar==2026.7.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+drf-spectacular-sidecar==2026.8.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via drf-spectacular
 durationpy==0.10 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via kubernetes
@@ -128,7 +128,7 @@ oauthlib==3.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     # via requests-oauthlib
 openshift==0.13.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-packaging==26.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+packaging==26.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   ansible-core
     #   ansible-runner
@@ -140,7 +140,7 @@ pexpect==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin')
     # via
     #   ansible-runner
     #   quipucords
-prompt-toolkit==3.0.52 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+prompt-toolkit==3.0.53 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via click-repl
 propcache==0.5.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
