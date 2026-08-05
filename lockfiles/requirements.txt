@@ -217,7 +217,6 @@ uritemplate==4.2.0 ; (implementation_name == 'cpython' and sys_platform == 'darw
 urllib3==2.7.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   kubernetes
-    #   quipucords
     #   requests
 vine==5.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
