@@ -273,7 +273,7 @@ class ScanTask(BaseModel):
 
     # All task types
     @transaction.atomic
-    def increment_stats(  # noqa: PLR0913
+    def increment_stats(  # noqa: PLR0913, PLR0917
         self,
         name,
         increment_sys_count=False,

@@ -219,6 +219,17 @@ CORS_ALLOWED_ORIGIN_REGEXES = env.list(
     "DJANGO_CORS_ALLOWED_ORIGIN_REGEXES", default=[".*"]
 )
 
+# Django's default DATA_UPLOAD_MAX_MEMORY_SIZE is 2.5 MB. We disable the limit
+# entirely because: (1) report uploads via POST /api/v1/reports/ are JSON bodies
+# with no defined upper bound — any fixed cap risks rejecting legitimate large
+# reports from customer environments; (2) all API endpoints require authentication,
+# so anonymous denial-of-service via oversized bodies is not a realistic threat
+# vector; (3) HashiCorp Vault CA cert bundles are allowed up to 2 MB (per
+# CA_CERT_MAX_SIZE), whose base64 representation is ~2.8 MB — already above the
+# default limit, meaning valid maximum-size submissions would be rejected before
+# reaching serializer validation.
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -487,7 +498,7 @@ LOGGING = {
 }
 
 
-def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913
+def warn_on_deprecation(message, category, filename, lineno, file=None, line=None):  # noqa: PLR0913, PLR0917
     """
     Redirect deprecation warnings to our logger.
 

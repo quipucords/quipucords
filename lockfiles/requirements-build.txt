@@ -6,13 +6,13 @@
 #
 calver==2025.10.20
     # via trove-classifiers
-cffi==2.1.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
+cffi==2.1.1 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via
     #   cryptography
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.8
+cython==3.2.9
     # via
     #   pydantic
     #   pyyaml
@@ -30,14 +30,16 @@ flit-core==3.12.0
     #   click
     #   django-filter
     #   docutils
-    #   idna
     #   jinja2
     #   more-itertools
-    #   packaging
-    #   pathspec
     #   ptyprocess
     #   typing-extensions
     #   wheel
+flit-core==4.0.2
+    # via
+    #   idna
+    #   packaging
+    #   pathspec
 hatch-fancy-pypi-readme==25.1.0
     # via
     #   attrs
@@ -66,7 +68,7 @@ maturin==1.14.1
     # via
     #   cryptography
     #   rpds-py
-packaging==26.2 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+packaging==26.3 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via
     #   hatchling
     #   setuptools-scm
@@ -112,7 +114,7 @@ trove-classifiers==2026.6.1.19
     # via hatchling
 typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
-vcs-versioning==2.2.2
+vcs-versioning==2.2.3
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
