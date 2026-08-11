@@ -51,7 +51,7 @@ hatch-vcs==0.5.0
     #   jsonschema-specifications
     #   referencing
     #   urllib3
-hatchling==1.31.0
+hatchling==1.32.0
     # via
     #   attrs
     #   expandvars
@@ -89,6 +89,7 @@ poetry-core==2.4.1
     #   django-json-agg
     #   hvac
     #   pkgconfig
+    #   tomlkit
 pycparser==3.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via cffi
 semantic-version==2.10.0
@@ -110,11 +111,13 @@ setuptools-scm==7.1.0
     # via python-dateutil
 setuptools-scm==8.1.0
     # via ansible-runner
+tomlkit==0.15.1
+    # via hatchling
 trove-classifiers==2026.6.1.19
     # via hatchling
 typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
-vcs-versioning==2.2.3
+vcs-versioning==2.2.4
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
@@ -140,19 +143,19 @@ setuptools==70.0.0
     #   setuptools-scm
 setuptools==80.3.1
     # via psycopg-c
-setuptools==82.0.1
-    # via ansible-core
 setuptools==83.0.0
+    # via charset-normalizer
+setuptools==84.0.0
     # via
     #   aiohttp
     #   aiosignal
     #   ansible
+    #   ansible-core
     #   bcrypt
     #   calver
     #   certifi
     #   cffi
     #   changelog-chug
-    #   charset-normalizer
     #   click-repl
     #   cryptography
     #   django
