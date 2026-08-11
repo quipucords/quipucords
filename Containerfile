@@ -74,8 +74,8 @@ COPY --from=builder /opt/venv /opt/venv
 # Copy server code
 COPY . .
 
-# Install quipucords as package
-RUN pip install -v -e .
+# Install quipucords as package, and remove pip afterwards
+RUN pip install -v -e . && pip uninstall pip setuptools wheel -y
 
 # Collect static files
 RUN make server-static
