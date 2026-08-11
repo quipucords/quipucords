@@ -20,6 +20,16 @@ def _sha256(content: bytes):
     return hashlib.sha256(content).hexdigest()
 
 
+def _crate_tar_filter(member: tarfile.TarInfo, dest_path: str) -> tarfile.TarInfo:
+    # Rust crates never legitimately contain hardlinks or symlinks; reject them
+    # outright rather than relying solely on the built-in 'data' filter, which
+    # has known limitations around link-based extraction path traversal.
+    # TODO: remove this wrapper once CPython's tarfile link handling is hardened.
+    if member.islnk() or member.issym():
+        raise tarfile.FilterError(f"unexpected link in crate tarball: {member.name}")
+    return tarfile.data_filter(member, dest_path)
+
+
 def generate_cargo_checksum(crate_path: Path):
     """Generate a cargo checksum dictionary for a vendored crate.
 
@@ -46,7 +56,7 @@ def prepare_crate_as_vendored_dep(crate_path: Path):
     checksums = generate_cargo_checksum(crate_path)
     with tarfile.open(crate_path) as tarball:
         folder_name = tarball.getnames()[0].split("/")[0]
-        tarball.extractall(crate_path.parent, filter="data")
+        tarball.extractall(crate_path.parent, filter=_crate_tar_filter)  # noqa: S202
     cargo_checksum = crate_path.parent / folder_name / ".cargo-checksum.json"
     json.dump(checksums, cargo_checksum.open("w"))
     print(f"Wrote {cargo_checksum}")
