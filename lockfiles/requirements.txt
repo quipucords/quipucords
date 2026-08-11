@@ -10,7 +10,7 @@ amqp==5.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or
     # via kombu
 ansible==13.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-ansible-core==2.20.7 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+ansible-core==2.20.8 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible
 ansible-runner==2.4.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
@@ -76,7 +76,7 @@ django-filter==26.1 ; (implementation_name == 'cpython' and sys_platform == 'dar
     # via quipucords
 django-json-agg==0.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-djangorestframework==3.17.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+djangorestframework==3.18.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   drf-spectacular
     #   quipucords
