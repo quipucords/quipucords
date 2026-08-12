@@ -40,6 +40,7 @@ flit-core==4.0.2
     #   idna
     #   packaging
     #   pathspec
+    #   wheel
 hatch-fancy-pypi-readme==25.1.0
     # via
     #   attrs
@@ -121,7 +122,7 @@ vcs-versioning==2.2.4
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
-wheel==0.47.0
+wheel==0.48.0
     # via
     #   bcrypt
     #   click-repl
