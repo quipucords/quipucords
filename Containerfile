@@ -58,9 +58,10 @@ RUN DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -A1000 | 
     dnf clean all
 # set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
 RUN update-crypto-policies --set LEGACY
-# cleanup unecessary 
+# cleanup unecessary
 RUN dnf remove ${BUILD_DEPS} -y && \
     dnf clean all &&\
+    rpm -e --nodeps python3.12-pip-wheel python3-pip-wheel python3-setuptools-wheel &&\
     rm -rf /usr/local/bin/yq /usr/local/bin/dnf
 
 # Create /deploy
