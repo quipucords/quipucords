@@ -144,6 +144,8 @@ required-version = ">=0.7"
 environments = [
     "implementation_name == 'cpython' and (sys_platform == 'linux' or sys_platform == 'darwin')",
 ]
+# pip-tools 7.6.1 removed generate_hashes from OutputWriter.__init__(), breaking pybuild-deps 0.5.0
+constraint-dependencies = ["pip-tools<7.6.1"]
 
 [tool.uv.sources]
 pyvmomi = { git = "https://github.com/vmware/pyvmomi.git", tag = "v9.0.0.0" }
