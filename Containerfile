@@ -16,6 +16,11 @@ RUN RPMS=$(yq '.packages | join(" ")' rpms.in.yaml) &&\
 COPY lockfiles/requirements.txt .
 RUN pip install -r requirements.txt
 
+# Install quipucords as editable package, then strip pip so the final image inherits a pip-free venv
+WORKDIR /app
+COPY . .
+RUN pip install -v -e . && pip uninstall pip setuptools wheel -y
+
 FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:7c372902c8d211db2d25c8277ba534a73b92742a334874dced829a63b0f21221
 ARG CPE_NAME="cpe:/a:redhat:discovery:2::el9"
 ARG K8S_DESCRIPTION="Quipucords"
@@ -73,9 +78,6 @@ COPY --from=builder /opt/venv /opt/venv
 
 # Copy server code
 COPY . .
-
-# Install quipucords as package, and remove pip afterwards
-RUN pip install -v -e . && pip uninstall pip setuptools wheel -y
 
 # Collect static files
 RUN make server-static
