@@ -16,6 +16,7 @@ authors = [
 license = "GPL-3.0-or-later"
 readme = "README.md"
 dependencies = [
+    "ansible-pylibssh>=1.4.0",
     "ansible-runner<3.0.0,>=2.4.0",
     "ansible<14,>=13.6.0",
     "celery[redis]<6,>=5.3.0",

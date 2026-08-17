@@ -7,9 +7,7 @@
 calver==2025.10.20
     # via trove-classifiers
 cffi==2.1.1 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
-    # via
-    #   cryptography
-    #   pynacl
+    # via cryptography
 changelog-chug==0.0.3
     # via python-daemon
 cython==3.3.0
@@ -22,6 +20,7 @@ docutils==0.23
     #   python-daemon
 expandvars==1.1.2
     # via
+    #   ansible-pylibssh
     #   frozenlist
     #   propcache
     #   yarl
@@ -98,11 +97,10 @@ semantic-version==2.10.0
 semver==3.0.4
     # via changelog-chug
 setuptools-rust==1.13.0
+    # via maturin
+setuptools-scm==10.2.3
     # via
-    #   bcrypt
-    #   maturin
-setuptools-scm==10.2.1
-    # via
+    #   ansible-pylibssh
     #   django-axes
     #   hatch-vcs
     #   pluggy
@@ -118,20 +116,18 @@ trove-classifiers==2026.6.1.19
     # via hatchling
 typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
-vcs-versioning==2.3.1
+vcs-versioning==2.3.4
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
 wheel==0.48.0
     # via
-    #   bcrypt
     #   click-repl
     #   django-axes
     #   drf-spectacular
     #   psycopg
     #   psycopg-c
     #   pycparser
-    #   pynacl
     #   python-daemon
     #   python-dateutil
     #   python-string-utils
@@ -150,7 +146,7 @@ setuptools==84.0.0
     #   aiosignal
     #   ansible
     #   ansible-core
-    #   bcrypt
+    #   ansible-pylibssh
     #   calver
     #   certifi
     #   cffi
@@ -176,7 +172,6 @@ setuptools==84.0.0
     #   psycopg
     #   pycparser
     #   pydantic
-    #   pynacl
     #   python-daemon
     #   python-dateutil
     #   pyvmomi
