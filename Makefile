@@ -57,6 +57,46 @@ UBI_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)
 UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)/ubi-minimal
 RPM_LOCKFILE_IMAGE=localhost/rpm-lockfile-prototype
 
+.PHONY: \
+	all \
+	build-container \
+	celery-worker \
+	check-db-migrations-needed \
+	check-requirements \
+	clean \
+	clean-db \
+	generate-sudo-list \
+	help \
+	lint \
+	lint-ansible \
+	lint-ruff \
+	lint-shell \
+	lock-baseimages \
+	lock-build-requirements \
+	lock-main-requirements \
+	lock-requirements \
+	lock-rpms \
+	serve \
+	server-init \
+	server-makemigrations \
+	server-migrate \
+	server-randomize-sequences \
+	server-set-superuser \
+	server-static \
+	setup-postgres \
+	setup-redis \
+	setup-rpm-lockfile \
+	setup-rpm-lockfile-if-needed \
+	swagger-valid \
+	sync \
+	test \
+	test-case \
+	test-coverage \
+	test-integration \
+	test-sudo-list \
+	update-lockfiles \
+	update-requirements
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                          to show this message"
@@ -257,7 +297,6 @@ lock-rpms: setup-rpm-lockfile-if-needed
 		rpms.in.yaml
 
 # update image digest
-.PHONY: lock-baseimages
 lock-baseimages:
 	separator="================================================================"; \
 	baseimages=($$(grep '^FROM ' Containerfile | sed 's/FROM\s*\(.*\)@.*/\1/g' | sort -u)); \
