@@ -212,6 +212,7 @@ class InspectTaskRunner(ScanTaskRunner):
             hosts=connected,
             connection_port=connection_port,
             concurrency_count=forks,
+            use_paramiko=use_paramiko,
         )
         inventory_file = write_to_yaml(inventory)
 
@@ -595,6 +596,7 @@ def _connect(  # noqa: PLR0913, PLR0915
         connection_port=connection_port,
         concurrency_count=forks,
         exclude_hosts=exclude_hosts,
+        use_paramiko=use_paramiko,
     )
     inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)

@@ -22,6 +22,7 @@ docutils==0.23
     #   python-daemon
 expandvars==1.1.2
     # via
+    #   ansible-pylibssh
     #   frozenlist
     #   propcache
     #   yarl
@@ -103,6 +104,7 @@ setuptools-rust==1.13.0
     #   maturin
 setuptools-scm==10.2.1
     # via
+    #   ansible-pylibssh
     #   django-axes
     #   hatch-vcs
     #   pluggy
@@ -152,6 +154,7 @@ setuptools==84.0.0
     #   aiosignal
     #   ansible
     #   ansible-core
+    #   ansible-pylibssh
     #   bcrypt
     #   calver
     #   certifi

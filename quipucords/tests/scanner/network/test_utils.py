@@ -74,6 +74,7 @@ def test_construct_inventory_from_source_and_credential_models(faker):
                 "ansible_port": source.port,
                 "ansible_user": credential.username,
                 "ansible_ssh_pass": vault.decrypt_data_as_unicode(credential.password),
+                "ansible_connection": "ansible.netcommon.libssh",
                 "ansible_become_pass": vault.decrypt_data_as_unicode(
                     credential.become_password
                 ),
@@ -90,6 +91,32 @@ def test_construct_inventory_from_source_and_credential_models(faker):
         concurrency_count=1,
     )
     assert inventory_dict == expected
+
+
+@pytest.mark.django_db
+def test_construct_inventory_use_paramiko_with_password(faker):
+    """Password hosts with use_paramiko=True must not set ansible_connection=libssh.
+
+    ansible_connection set in inventory takes precedence over --connection=paramiko
+    passed as a CLI flag, which would silently ignore the use_paramiko setting.
+    """
+    credential = CredentialFactory(
+        cred_type=DataSources.NETWORK,
+        password=faker.password(),
+    )
+    cred_data = {
+        "username": credential.username,
+        "password": credential.password,
+    }
+    _, inventory_dict = utils.construct_inventory(
+        hosts=[faker.ipv4_private()],
+        credential=cred_data,
+        connection_port=22,
+        concurrency_count=1,
+        use_paramiko=True,
+    )
+    vars_dict = inventory_dict["all"]["vars"]
+    assert "ansible_connection" not in vars_dict
 
 
 # TODO Convert this TestCase class to plain pytest test functions.
@@ -114,6 +141,7 @@ class TestConstructVars(unittest.TestCase):
         )
         expected = {
             "ansible_become_pass": "sudo",
+            "ansible_connection": "ansible.netcommon.libssh",
             "ansible_port": 22,
             "ansible_ssh_pass": "password",
             "ansible_ssh_private_key_file": "keyfile",
