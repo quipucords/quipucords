@@ -93,6 +93,32 @@ def test_construct_inventory_from_source_and_credential_models(faker):
     assert inventory_dict == expected
 
 
+@pytest.mark.django_db
+def test_construct_inventory_use_paramiko_with_password(faker):
+    """Password hosts with use_paramiko=True must not set ansible_connection=libssh.
+
+    ansible_connection set in inventory takes precedence over --connection=paramiko
+    passed as a CLI flag, which would silently ignore the use_paramiko setting.
+    """
+    credential = CredentialFactory(
+        cred_type=DataSources.NETWORK,
+        password=faker.password(),
+    )
+    cred_data = {
+        "username": credential.username,
+        "password": credential.password,
+    }
+    _, inventory_dict = utils.construct_inventory(
+        hosts=[faker.ipv4_private()],
+        credential=cred_data,
+        connection_port=22,
+        concurrency_count=1,
+        use_paramiko=True,
+    )
+    vars_dict = inventory_dict["all"]["vars"]
+    assert "ansible_connection" not in vars_dict
+
+
 # TODO Convert this TestCase class to plain pytest test functions.
 class TestConstructVars(unittest.TestCase):
     """Test _construct_vars."""

@@ -58,13 +58,14 @@ def _construct_vars(connection_port, credential: dict = None) -> dict:
     return ansible_vars
 
 
-def construct_inventory(
+def construct_inventory(  # noqa: PLR0913
     hosts: list,
     connection_port,
     concurrency_count: int,
     *,
     credential: dict = None,
     exclude_hosts: list | None = None,
+    use_paramiko: bool = False,
 ) -> tuple[list[str], dict]:
     """Create a dictionary inventory for Ansible to execute with.
 
@@ -73,6 +74,7 @@ def construct_inventory(
     :param connection_port: The connection port
     :param concurrency_count: The number of concurrent scans
     :param exclude_hosts: Optional. Hosts to exclude test connections
+    :param use_paramiko: Whether paramiko is in use (gates libssh inventory var)
     :returns: A dictionary of the ansible inventory
     """
     if exclude_hosts is not None:
@@ -89,6 +91,13 @@ def construct_inventory(
         group_name = f"group_{index}"
         group_names.append(group_name)
         children[group_name] = {"hosts": _format_hosts_dict(group)}
+    if use_paramiko:
+        # ansible_connection in inventory overrides --connection=paramiko (CLI flag has
+        # lower Ansible precedence). Remove it so use_paramiko is not silently ignored.
+        inventory["all"]["vars"].pop("ansible_connection", None)
+        for group in children.values():
+            for host_vars in group.get("hosts", {}).values():
+                host_vars.pop("ansible_connection", None)
     return group_names, inventory
 
 
