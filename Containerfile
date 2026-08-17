@@ -1,7 +1,7 @@
 FROM quay.io/konflux-ci/yq@sha256:9b73d39c362692d0bc5787c2b5e955cd54713e6bb97195a0fb2e87a6557040ee as yq
 # builder and the "final" stages (and any stage that install rpms) MUST be compatible and derived from
-# the same ubi base (for instance, don't use a ubi8 "builder" stage with a "final" ubi9)
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:7c372902c8d211db2d25c8277ba534a73b92742a334874dced829a63b0f21221 as builder
+# the same ubi base (for instance, don't use a ubi9 "builder" stage with a "final" ubi10)
+FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:61f820b7893b6226e499e928db99c59a0a9135aa17e4e056fdaf1015908cca14 as builder
 # Point to the default path used by cachi2-playground. For koflux this is /cachi2/output/deps/generic/
 ARG CRATES_PATH="/tmp/output/deps/generic"
 ENV PATH="/opt/venv/bin:${PATH}"
@@ -21,8 +21,8 @@ WORKDIR /app
 COPY . .
 RUN pip install -v -e . && pip uninstall pip setuptools wheel -y
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal@sha256:7c372902c8d211db2d25c8277ba534a73b92742a334874dced829a63b0f21221
-ARG CPE_NAME="cpe:/a:redhat:discovery:2::el9"
+FROM registry.access.redhat.com/ubi10/ubi-minimal@sha256:61f820b7893b6226e499e928db99c59a0a9135aa17e4e056fdaf1015908cca14
+ARG CPE_NAME="cpe:/a:redhat:discovery:2::el10"
 ARG K8S_DESCRIPTION="Quipucords"
 ARG K8S_DISPLAY_NAME="quipucords-server"
 ARG K8S_NAME="quipucords/quipucords-server"
@@ -61,7 +61,7 @@ RUN update-crypto-policies --set LEGACY
 # cleanup unecessary
 RUN dnf remove ${BUILD_DEPS} -y && \
     dnf clean all &&\
-    rpm -e --nodeps python3.12-pip-wheel python3-pip-wheel python3-setuptools-wheel &&\
+    rpm -e --nodeps python3-pip-wheel &&\
     rm -rf /usr/local/bin/yq /usr/local/bin/dnf
 
 # Create /deploy
