@@ -27,6 +27,9 @@ def _credential_vars(credential: dict) -> dict:
     ansible_dict["ansible_user"] = username
     if password:
         ansible_dict["ansible_ssh_pass"] = decrypt_data_as_unicode(password)
+        # Use libssh (via ansible-pylibssh) instead of the native ssh binary so that
+        # password auth works without requiring sshpass, which is absent on UBI 10+.
+        ansible_dict["ansible_connection"] = "ansible.netcommon.libssh"
     if ssh_keyfile:
         ansible_dict["ansible_ssh_private_key_file"] = ssh_keyfile
     if become_password:

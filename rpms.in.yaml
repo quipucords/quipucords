@@ -12,6 +12,7 @@ packages:
   - gcc-c++
   - libffi-devel
   - libpq-devel
+  - libssh-devel
   - openssl-devel
   - python3.12-devel
   - python3.12-pip
@@ -20,6 +21,7 @@ packages:
   - git
   - glibc-langpack-en
   - libpq
+  - libssh
   - make
   - nmap-ncat
   - openssh-clients

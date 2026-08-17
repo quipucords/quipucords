@@ -74,6 +74,7 @@ def test_construct_inventory_from_source_and_credential_models(faker):
                 "ansible_port": source.port,
                 "ansible_user": credential.username,
                 "ansible_ssh_pass": vault.decrypt_data_as_unicode(credential.password),
+                "ansible_connection": "ansible.netcommon.libssh",
                 "ansible_become_pass": vault.decrypt_data_as_unicode(
                     credential.become_password
                 ),
@@ -114,6 +115,7 @@ class TestConstructVars(unittest.TestCase):
         )
         expected = {
             "ansible_become_pass": "sudo",
+            "ansible_connection": "ansible.netcommon.libssh",
             "ansible_port": 22,
             "ansible_ssh_pass": "password",
             "ansible_ssh_private_key_file": "keyfile",
