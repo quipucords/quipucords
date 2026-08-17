@@ -7,7 +7,7 @@ ifeq ($(UNAME_S),Darwin)
   # that uv sync and pybuild-deps can build it. Run `brew install libssh` if unset.
   LIBSSH_PREFIX := $(shell brew --prefix libssh 2>/dev/null)
   ifneq ($(LIBSSH_PREFIX),)
-    LIBSSH_BUILD_ENV := CFLAGS="-I$(LIBSSH_PREFIX)/include" LDFLAGS="-L$(LIBSSH_PREFIX)/lib"
+    LIBSSH_BUILD_ENV := CFLAGS="$(CFLAGS) -I$(LIBSSH_PREFIX)/include" LDFLAGS="$(LDFLAGS) -L$(LIBSSH_PREFIX)/lib"
   else
     LIBSSH_BUILD_ENV :=
   endif
