@@ -12,7 +12,7 @@ cffi==2.1.1 ; (implementation_name == "cpython" and platform_python_implementati
     #   pynacl
 changelog-chug==0.0.3
     # via python-daemon
-cython==3.2.9
+cython==3.3.0
     # via
     #   pydantic
     #   pyyaml
@@ -65,7 +65,7 @@ hatchling==1.32.0
     #   sqlparse
     #   urllib3
     #   wcwidth
-maturin==1.14.1
+maturin==1.15.0
     # via
     #   cryptography
     #   rpds-py
@@ -118,7 +118,7 @@ trove-classifiers==2026.6.1.19
     # via hatchling
 typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
     # via setuptools-scm
-vcs-versioning==2.2.4
+vcs-versioning==2.3.1
     # via setuptools-scm
 wheel==0.45.1
     # via ansible-core
@@ -144,8 +144,6 @@ setuptools==70.0.0
     #   setuptools-scm
 setuptools==80.3.1
     # via psycopg-c
-setuptools==83.0.0
-    # via charset-normalizer
 setuptools==84.0.0
     # via
     #   aiohttp
@@ -157,6 +155,7 @@ setuptools==84.0.0
     #   certifi
     #   cffi
     #   changelog-chug
+    #   charset-normalizer
     #   click-repl
     #   cryptography
     #   django
