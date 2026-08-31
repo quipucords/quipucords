@@ -190,5 +190,6 @@ setuptools==84.0.0
     #   tzdata
     #   tzlocal
     #   vcs-versioning
+    #   websocket-client
     #   whitenoise
     #   yarl
