@@ -84,7 +84,7 @@ class SourceSerializerBase(ModelSerializer):
     )
 
     SSH_SOURCE_TYPES = (DataSources.NETWORK,)
-    SSL_OPTIONS = ["ssl_cert_verify", "ssl_protocol", "disable_ssl", "use_paramiko"]
+    SSL_OPTIONS = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
     class Meta:
         """Metadata for the serializer."""
@@ -106,7 +106,6 @@ class SourceSerializerBase(ModelSerializer):
         # TODO: Remove `apply_defaults` logic once V1 is fully deprecated.
         # V1 sets defaults here (e.g., ssl_cert_verify=True).
         # V2 handles this in validate_http_source() to follow DRF style.
-        valid_ssh_options = ["use_paramiko"]
         valid_http_options = ["ssl_cert_verify", "ssl_protocol", "disable_ssl"]
 
         if source_type in cls.HTTP_SOURCE_TYPES:
@@ -121,8 +120,8 @@ class SourceSerializerBase(ModelSerializer):
         elif source_type in cls.SSH_SOURCE_TYPES:
             cls._check_for_disallowed_fields(
                 options,
-                messages.NET_SSL_OPTIONS_NOT_ALLOWED,
-                valid_ssh_options,
+                messages.INVALID_OPTIONS,
+                [],
                 source_type,
             )
         else:
@@ -486,7 +485,6 @@ class SourceSerializerV1(NotEmptySerializer, SourceSerializerBase):
             instance.ssl_protocol = options.get("ssl_protocol")
             instance.ssl_cert_verify = options.get("ssl_cert_verify")
             instance.disable_ssl = options.get("disable_ssl")
-            instance.use_paramiko = options.get("use_paramiko")
             instance.save()
         return instance
 
@@ -513,7 +511,6 @@ class SourceSerializerV2(SourceSerializerBase):
     )
     ssl_cert_verify = BooleanField(allow_null=True, required=False)
     disable_ssl = BooleanField(allow_null=True, required=False)
-    use_paramiko = BooleanField(allow_null=True, required=False)
     proxy_url = CharField(required=False, allow_null=True, max_length=255)
 
     # Dropping options in preference for showing the direct ssl option attributes.
@@ -531,7 +528,6 @@ class SourceSerializerV2(SourceSerializerBase):
             "ssl_protocol",
             "ssl_cert_verify",
             "disable_ssl",
-            "use_paramiko",
             "proxy_url",
             "credentials",
             "most_recent_connect_scan",

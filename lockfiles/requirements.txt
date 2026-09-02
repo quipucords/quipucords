@@ -24,8 +24,6 @@ attrs==26.1.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') 
     #   aiohttp
     #   jsonschema
     #   referencing
-bcrypt==5.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via paramiko
 billiard==4.2.4 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
 celery==5.6.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -35,9 +33,7 @@ certifi==2026.7.22 ; (implementation_name == 'cpython' and sys_platform == 'darw
     #   kubernetes
     #   requests
 cffi==2.1.1 ; (implementation_name == 'cpython' and platform_python_implementation != 'PyPy' and sys_platform == 'darwin') or (implementation_name == 'cpython' and platform_python_implementation != 'PyPy' and sys_platform == 'linux')
-    # via
-    #   cryptography
-    #   pynacl
+    # via cryptography
 charset-normalizer==3.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests
 click==8.5.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
@@ -53,9 +49,7 @@ click-plugins==1.1.1.2 ; (implementation_name == 'cpython' and sys_platform == '
 click-repl==0.3.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via celery
 cryptography==50.0.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via
-    #   ansible-core
-    #   paramiko
+    # via ansible-core
 django==5.2.17 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   django-axes
@@ -134,8 +128,6 @@ packaging==26.3 ; (implementation_name == 'cpython' and sys_platform == 'darwin'
     #   ansible-runner
     #   gunicorn
     #   kombu
-paramiko==3.5.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via quipucords
 pexpect==4.9.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   ansible-runner
@@ -156,8 +148,6 @@ pycparser==3.0 ; (implementation_name == 'cpython' and platform_python_implement
     # via cffi
 pydantic==1.10.26 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-pynacl==1.6.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
-    # via paramiko
 python-daemon==3.1.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via ansible-runner
 python-dateutil==2.9.0.post0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')

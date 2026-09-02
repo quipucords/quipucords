@@ -282,10 +282,7 @@ class TestNetworkInspectScanner:
     @patch("ansible_runner.run")
     def test_scan_with_options(self, mock_run, mocker):
         """Setup second scan with scan and source options."""
-        # setup source with paramiko option for scan
-        self.source = Source(
-            name="source2", port=22, hosts=["1.2.3.4"], use_paramiko=True
-        )
+        self.source = Source(name="source2", port=22, hosts=["1.2.3.4"])
         self.source.save()
         self.source.credentials.add(self.cred)
 
