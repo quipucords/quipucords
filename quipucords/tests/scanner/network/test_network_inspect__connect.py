@@ -14,26 +14,6 @@ pytestmark = pytest.mark.django_db  # all tests here require the database
 
 
 @patch("ansible_runner.run")
-def test__connect_paramiko(mock_run, network_source):
-    """Test _connect use_paramiko sends arg to run."""
-    mock_run.return_value.status = "successful"
-    scan_job, scan_task = create_scan_job(network_source)
-    _connect(
-        scan_task=scan_task,
-        hosts=network_source.hosts,
-        result_store=Mock(),
-        credential=network_source.credentials.first(),
-        connection_port=network_source.port,
-        forks=Scan.DEFAULT_MAX_CONCURRENCY,
-        use_paramiko=True,
-        ssh_keyfile=None,
-    )
-    mock_run.assert_called_once()
-    calls = mock_run.mock_calls
-    assert "--connection=paramiko" in calls[0].kwargs["cmdline"]
-
-
-@patch("ansible_runner.run")
 def test__connect_raises_exception_when_ansible_runner_run_fails(
     mock_run, network_source
 ):

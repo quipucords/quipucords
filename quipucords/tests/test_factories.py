@@ -99,7 +99,6 @@ class TestSourceFactory:
         assert source.id
         assert source.ssl_cert_verify is None
         assert source.disable_ssl is None
-        assert source.use_paramiko is None
 
 
 @pytest.mark.django_db

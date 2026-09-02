@@ -45,7 +45,6 @@ class Source(BaseModel):
 
     ssl_cert_verify = models.BooleanField(null=True)
     disable_ssl = models.BooleanField(null=True)
-    use_paramiko = models.BooleanField(null=True)
     credentials = models.ManyToManyField(Credential, related_name="sources")
     hosts = models.JSONField(unique=False, null=False, default=list)
     exclude_hosts = models.JSONField(unique=False, null=True)
@@ -76,8 +75,6 @@ class Source(BaseModel):
             result_options["ssl_cert_verify"] = self.ssl_cert_verify
         if self.disable_ssl is not None:
             result_options["disable_ssl"] = self.disable_ssl
-        if self.use_paramiko is not None:
-            result_options["use_paramiko"] = self.use_paramiko
         return result_options
 
     def get_hosts(self):

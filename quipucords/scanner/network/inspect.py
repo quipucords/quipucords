@@ -192,10 +192,6 @@ class InspectTaskRunner(ScanTaskRunner):
         """
         connection_port = self.scan_task.source.port
 
-        use_paramiko = self.scan_task.source.use_paramiko
-        if use_paramiko is None:
-            use_paramiko = False
-
         if self.scan_job.options is not None:
             forks = self.scan_job.options.get(Scan.MAX_CONCURRENCY)
             extra_vars = self.scan_job.get_extra_vars()
@@ -218,8 +214,7 @@ class InspectTaskRunner(ScanTaskRunner):
         error_msg = None
         log_message = (
             "START INSPECT PROCESSING GROUPS"
-            f" with use_paramiko: {use_paramiko}, "
-            f"{forks} forks and extra_vars={extra_vars}"
+            f" with {forks} forks and extra_vars={extra_vars}"
         )
         self.scan_task.log_message(log_message)
         scan_result = ScanTask.COMPLETED
@@ -258,8 +253,6 @@ class InspectTaskRunner(ScanTaskRunner):
             cmdline_list.append(vault_file_path)
             forks_cmd = f"--forks={forks}"
             cmdline_list.append(forks_cmd)
-            if use_paramiko:
-                cmdline_list.append("--connection=paramiko")
             all_commands = " ".join(cmdline_list)
 
             if int(settings.ANSIBLE_LOG_LEVEL) == 0:
@@ -570,7 +563,6 @@ def _connect(  # noqa: PLR0913, PLR0915
     connection_port,
     forks,
     ssh_keyfile: str | None,
-    use_paramiko=False,
     exclude_hosts=None,
 ):
     """Attempt to connect to hosts using the given credential.
@@ -580,7 +572,6 @@ def _connect(  # noqa: PLR0913, PLR0915
     :param result_store: The result store to accept the results.
     :param credential: The credential used for connections
     :param connection_port: The connection port
-    :param use_paramiko: use paramiko instead of ssh for connection
     :param forks: number of forks to run with
     :param exclude_hosts: Optional. Hosts to exclude from test connections
     :param ssh_keyfile: Path to credential ssh_keyfile. Can be none if not applicable.
@@ -599,10 +590,7 @@ def _connect(  # noqa: PLR0913, PLR0915
     inventory_file = write_to_yaml(inventory)
     _handle_ssh_passphrase(cred_data)
 
-    log_message = (
-        "START CONNECT PROCESSING GROUPS"
-        f" with use_paramiko: {use_paramiko} and {forks:d} forks"
-    )
+    log_message = "START CONNECT PROCESSING GROUPS with {forks:d} forks"
     scan_task.log_message(log_message)
     any_successful_connection = False
     for idx, group_name in enumerate(group_names):
@@ -640,8 +628,6 @@ def _connect(  # noqa: PLR0913, PLR0915
         cmdline_list.append(vault_file_path)
         forks_cmd = f"--forks={forks}"
         cmdline_list.append(forks_cmd)
-        if use_paramiko:
-            cmdline_list.append("--connection=paramiko")  # paramiko conn
         all_commands = " ".join(cmdline_list)
         if int(settings.ANSIBLE_LOG_LEVEL) == 0:
             quiet_bool = True
@@ -739,10 +725,6 @@ def run_with_result_store(scan_task, scan_job, result_store: ConnectResultStore)
     else:
         forks = Scan.DEFAULT_MAX_CONCURRENCY
 
-    use_paramiko = scan_task.source.use_paramiko
-    if use_paramiko is None:
-        use_paramiko = False
-
     connection_port = source["port"]
     credentials = source["credentials"]
 
@@ -766,7 +748,6 @@ def run_with_result_store(scan_task, scan_job, result_store: ConnectResultStore)
                     credential=credential,
                     connection_port=connection_port,
                     forks=forks,
-                    use_paramiko=use_paramiko,
                     ssh_keyfile=ssh_keyfile,
                 )
                 if scan_result != ScanTask.COMPLETED:
