@@ -546,7 +546,6 @@ def test_ssl_cert_verify_defaults_true_when_ssl_fields_absent(openshift_cred_id)
     assert instance.ssl_cert_verify is True
     assert instance.ssl_protocol is None
     assert instance.disable_ssl is None
-    assert instance.use_paramiko is None
 
 
 @pytest.mark.django_db
@@ -602,7 +601,6 @@ def test_explicit_ssl_cert_verify_sets_only_itself(
     assert instance.ssl_cert_verify == ssl_cert_verify_value
     assert instance.ssl_protocol is None
     assert instance.disable_ssl is None
-    assert instance.use_paramiko is None
 
 
 @pytest.mark.django_db
@@ -638,30 +636,8 @@ def test_ssl_cert_verify_respected_when_combined_with_other_ssl_fields(
     assert getattr(instance, other_ssl_field) == other_value
 
     # Assert all remaining SSL fields are None
-    for field in {"ssl_protocol", "disable_ssl", "use_paramiko"} - {other_ssl_field}:
+    for field in {"ssl_protocol", "disable_ssl"} - {other_ssl_field}:
         assert getattr(instance, field) is None
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize("use_paramiko_value", [True, False])
-def test_network_source_ssl_fields(network_cred_id, use_paramiko_value):
-    """Ensure only use_paramiko is populated for network sources; others remain None."""
-    data = {
-        "name": f"network-paramiko-{use_paramiko_value}",
-        "source_type": DataSources.NETWORK,
-        "hosts": ["10.0.0.1"],
-        "credentials": [network_cred_id],
-        "use_paramiko": use_paramiko_value,
-    }
-
-    serializer = SourceSerializerV2(data=data)
-    assert serializer.is_valid(), serializer.errors
-    instance = serializer.save()
-
-    assert instance.use_paramiko == use_paramiko_value
-    assert instance.ssl_cert_verify is None
-    assert instance.ssl_protocol is None
-    assert instance.disable_ssl is None
 
 
 @pytest.mark.django_db
