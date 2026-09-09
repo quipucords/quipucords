@@ -43,6 +43,7 @@ UBI_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)
 UBI_MINIMAL_IMAGE=registry.access.redhat.com/ubi$(UBI_VERSION)/ubi-minimal
 RPM_LOCKFILE_IMAGE=localhost/rpm-lockfile-prototype
 
+.PHONY: help
 help:
 	@echo "Please use \`make <target>' where <target> is one of:"
 	@echo "  help                          to show this message"
@@ -70,30 +71,38 @@ help:
 	@echo "  check-db-migrations-needed    to check if new migration files are required"
 	@echo "  update-lockfiles		       update all 'lockfiles'"
 
+.PHONY: all
 all: lint test-coverage
 
+.PHONY: clean
 clean:
 	rm -rf .pytest_cache quipucords.egg-info dist build $(shell find . | grep -E '(.*\.pyc)|(\.coverage(\..+)*)$$|__pycache__')
 
+.PHONY: clean-db
 clean-db:
 	rm -rf quipucords/db.sqlite3
 	podman stop quipucords-dev-db || true
 	podman rm -f quipucords-dev-db || true
 	podman volume rm -f quipucords-dev-db
 
+.PHONY: lock-requirements
 lock-requirements: lock-main-requirements lock-build-requirements
 
+.PHONY: lock-main-requirements
 lock-main-requirements:
 	uv lock
 	uv export --no-emit-project --no-dev --frozen --no-hashes -o lockfiles/requirements.txt
 
+.PHONY: lock-build-requirements
 lock-build-requirements:
 	uv run pybuild-deps compile lockfiles/requirements.txt -o lockfiles/requirements-build.txt
 
+.PHONY: update-requirements
 update-requirements:
 	uv lock --upgrade
 	$(MAKE) lock-requirements
 
+.PHONY: check-requirements
 check-requirements:
 ifeq ($(shell git diff --exit-code lockfiles/requirements.txt >/dev/null 2>&1; echo $$?), 0)
 	@exit 0
@@ -102,13 +111,16 @@ else
 	@exit 1
 endif
 
+.PHONY: test
 test:
 	uv run pytest $(TEST_OPTS)
 
+.PHONY: test-case
 test-case:
 	echo $(pattern)
 	$(MAKE) test -e TEST_OPTS="${TEST_OPTS} $(pattern)"
 
+.PHONY: test-coverage
 test-coverage:
 	# We seem to have encountered a bug with pytest-cov or coverage.
 	# We were using --cov-append on each test run, but sometimes it failed and
@@ -123,42 +135,55 @@ test-coverage:
 	# We must run `coverage xml` explicitly to make GitHub codecov action happy.
 	uv run coverage xml
 
+.PHONY: test-integration
 test-integration:
 	$(MAKE) test TEST_OPTS="-ra -vvv --disable-warnings -m integration"
 
+.PHONY: swagger-valid
 swagger-valid:
 	node_modules/swagger-cli/swagger-cli.js validate docs/swagger.yml
 
+.PHONY: lint
 lint: lint-shell lint-ruff lint-ansible
 
+.PHONY: lint-ruff
 lint-ruff:
 	uv run ruff check .
 	uv run ruff format --check .
 
+.PHONY: lint-ansible
 lint-ansible:
 	# syntax check playbooks (related roles are loaded and validated as well)
 	uv run ansible-playbook -e variable_host=localhost -c local quipucords/scanner/network/runner/*.yml --syntax-check
 
+.PHONY: lint-shell
 lint-shell:
 	shellcheck ./deploy/*.sh
 
+.PHONY: server-makemigrations
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
 
+.PHONY: server-migrate
 server-migrate:
 	$(PYTHON) quipucords/manage.py migrate --settings quipucords.settings -v 3
 
+.PHONY: server-randomize-sequences
 server-randomize-sequences:
 	$(PYTHON) quipucords/manage.py randomize_db_sequences --settings quipucords.settings
 
+.PHONY: celery-worker
 celery-worker:
 	$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY},${QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY}
 
+.PHONY: server-set-superuser
 server-set-superuser:
 	$(PYTHON) quipucords/manage.py create_or_update_user --settings quipucords.settings -v 3
 
+.PHONY: server-init
 server-init: server-migrate server-set-superuser
 
+.PHONY: setup-postgres
 setup-postgres:
 	podman run --name quipucords-dev-db --replace \
 		-p 54321:5432 \
@@ -170,36 +195,45 @@ setup-postgres:
 	sleep $(QUIPUCORDS_POSTGRES_WAIT_TIME)
 	podman exec quipucords-dev-db psql -c 'alter role qpc with CREATEDB'
 
+.PHONY: setup-redis
 setup-redis:
 	podman run --name quipucords-dev-redis --replace \
 		-p 6379:6379 \
 		-d registry.redhat.io/rhel9/redis-7:latest
 
+.PHONY: server-static
 server-static:
 	$(PYTHON) quipucords/manage.py collectstatic --settings quipucords.settings --no-input
 
+.PHONY: serve
 serve:
 	DJANGO_DEBUG=1 $(PYTHON) quipucords/manage.py runserver
 
+.PHONY: build-container
 build-container:
 	podman build -t $(QUIPUCORDS_CONTAINER_TAG) .
 
+.PHONY: check-db-migrations-needed
 check-db-migrations-needed:
 	$(PYTHON) quipucords/manage.py makemigrations --check
 
+.PHONY: generate-sudo-list
 generate-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py docs "docs/sudo_cmd_list.txt"
 
+.PHONY: test-sudo-list
 test-sudo-list:
 	@$(PYTHON) scripts/generate_sudo_list.py compare "docs/sudo_cmd_list.txt" || exit 1
 
 # prepare rpm-lockfile-prototype tool to lock our rpms
+.PHONY: setup-rpm-lockfile
 setup-rpm-lockfile:
 	latest_digest=$$(skopeo inspect --raw "docker://$(UBI_IMAGE):latest" | sha256sum | cut -d ' ' -f1); \
 	curl https://raw.githubusercontent.com/konflux-ci/rpm-lockfile-prototype/refs/heads/main/Containerfile | \
 		podman build -t $(RPM_LOCKFILE_IMAGE) \
 		--build-arg "BASE_IMAGE=$(UBI_IMAGE)@sha256:$${latest_digest}" -
 
+.PHONY: setup-rpm-lockfile-if-needed
 setup-rpm-lockfile-if-needed:
 ifneq ($(shell podman image exists $(RPM_LOCKFILE_IMAGE) >/dev/null 2>&1; echo $$?), 0)
 	$(MAKE) setup-rpm-lockfile
@@ -213,6 +247,7 @@ else
 endif
 
 # update rpm locks
+.PHONY: lock-rpms
 lock-rpms: setup-rpm-lockfile-if-needed
 	# the last layer will be considered the base image here; 
 	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
@@ -256,4 +291,5 @@ lock-baseimages:
 	done; \
 	echo "$${separator}"
 
+.PHONY: update-lockfiles
 update-lockfiles: lock-baseimages lock-rpms update-requirements
