@@ -200,19 +200,11 @@ class TestSource:
     def test_validate_opts(self):
         """Test the validate_opts function."""
         source_type = DataSources.SATELLITE
-        options = {"use_paramiko": True}
-        with pytest.raises(ValidationError):
-            SourceSerializer.validate_opts(options, source_type)
-
         options = {}
         SourceSerializer.validate_opts(options, source_type)
         assert options["ssl_cert_verify"] is True
 
         source_type = DataSources.VCENTER
-        options = {"use_paramiko": True}
-        with pytest.raises(ValidationError):
-            SourceSerializer.validate_opts(options, source_type)
-
         options = {}
         SourceSerializer.validate_opts(options, source_type)
         assert options["ssl_cert_verify"] is True
@@ -1582,17 +1574,6 @@ class TestSource:
         }
         self.create_expect_400(data, client_logged_in)
 
-    def test_openshift_extra_unallowed_fields(self, client_logged_in, openshift_cred):
-        """Ensure unallowed fields are not accepted when creating openshift source."""
-        data = {
-            "name": "openshift_source_1",
-            "source_type": DataSources.OPENSHIFT,
-            "hosts": ["1.2.3.4"],
-            "credentials": [openshift_cred.id],
-            "options": {"use_paramiko": True},
-        }
-        self.create_expect_400(data, client_logged_in)
-
     def test_update_openshift_green_path(self, client_logged_in, openshift_cred):
         """Openshift source successful update."""
         data = {
@@ -1648,17 +1629,6 @@ class TestSource:
             "name": "acs_source_1",
             "source_type": DataSources.RHACS,
             "credentials": [rhacs_cred.id],
-        }
-        self.create_expect_400(data, client_logged_in)
-
-    def test_rhacs_extra_unallowed_fields(self, client_logged_in, rhacs_cred):
-        """Ensure unallowed fields are not accepted when creating RHACS source."""
-        data = {
-            "name": "acs_source_1",
-            "source_type": DataSources.RHACS,
-            "hosts": ["1.2.3.4"],
-            "credentials": [rhacs_cred.id],
-            "options": {"use_paramiko": True},
         }
         self.create_expect_400(data, client_logged_in)
 
@@ -1759,19 +1729,11 @@ class TestSourceV2:
     def test_validate_opts(self):
         """Test the validate_opts function."""
         source_type = DataSources.SATELLITE
-        options = {"use_paramiko": True}
-        with pytest.raises(ValidationError):
-            SourceSerializer.validate_opts(options, source_type)
-
         options = {}
         SourceSerializer.validate_opts(options, source_type)
         assert options["ssl_cert_verify"] is True
 
         source_type = DataSources.VCENTER
-        options = {"use_paramiko": True}
-        with pytest.raises(ValidationError):
-            SourceSerializer.validate_opts(options, source_type)
-
         options = {}
         SourceSerializer.validate_opts(options, source_type)
         assert options["ssl_cert_verify"] is True
@@ -2260,7 +2222,6 @@ class TestSourceV2:
                 "disable_ssl": None,
                 "ssl_cert_verify": None,
                 "ssl_protocol": None,
-                "use_paramiko": None,
             }
             results.append(result_dict)
         expected = {"count": 3, "next": None, "previous": None, "results": results}
@@ -2306,7 +2267,6 @@ class TestSourceV2:
                 "proxy_url": None,
                 "ssl_cert_verify": True,
                 "ssl_protocol": None,
-                "use_paramiko": None,
                 "disable_ssl": None,
                 "credentials": [cred_for_response],
                 "exclude_hosts": None,
@@ -2730,7 +2690,6 @@ class TestSourceV2:
                 "ssl_protocol": None,
                 "ssl_cert_verify": None,
                 "disable_ssl": None,
-                "use_paramiko": None,
                 "credentials": [cred_for_response],
                 "exclude_hosts": None,
             }
@@ -3053,7 +3012,6 @@ class TestSourceV2:
             "proxy_url": None,
             "ssl_cert_verify": False,
             "ssl_protocol": None,
-            "use_paramiko": None,
             "disable_ssl": None,
             "credentials": [{"id": sat_cred.id, "name": "sat_cred1"}],
             "exclude_hosts": None,
@@ -3163,17 +3121,6 @@ class TestSourceV2:
         }
         self.create_expect_400(data, client_logged_in)
 
-    def test_openshift_extra_unallowed_fields(self, client_logged_in, openshift_cred):
-        """Ensure unallowed fields are not accepted when creating openshift source."""
-        data = {
-            "name": "openshift_source_1",
-            "source_type": DataSources.OPENSHIFT,
-            "hosts": ["1.2.3.4"],
-            "credentials": [openshift_cred.id],
-            "use_paramiko": True,
-        }
-        self.create_expect_400(data, client_logged_in)
-
     def test_update_openshift_green_path(self, client_logged_in, openshift_cred):
         """Openshift source successful update."""
         data = {
@@ -3229,17 +3176,6 @@ class TestSourceV2:
             "name": "acs_source_1",
             "source_type": DataSources.RHACS,
             "credentials": [rhacs_cred.id],
-        }
-        self.create_expect_400(data, client_logged_in)
-
-    def test_rhacs_extra_unallowed_fields(self, client_logged_in, rhacs_cred):
-        """Ensure unallowed fields are not accepted when creating RHACS source."""
-        data = {
-            "name": "acs_source_1",
-            "source_type": DataSources.RHACS,
-            "hosts": ["1.2.3.4"],
-            "credentials": [rhacs_cred.id],
-            "use_paramiko": True,
         }
         self.create_expect_400(data, client_logged_in)
 
