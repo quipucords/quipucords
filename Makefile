@@ -70,6 +70,7 @@ help:
 	@echo "  build-container               to build the container image for quipucords"
 	@echo "  check-db-migrations-needed    to check if new migration files are required"
 	@echo "  update-lockfiles		       update all 'lockfiles'"
+	@echo "  bump-version                  to bump the project version (VERSION=x.y.z or SEGMENT=major|minor|patch)"
 
 .PHONY: all
 all: lint test-coverage
@@ -84,6 +85,23 @@ clean-db:
 	podman stop quipucords-dev-db || true
 	podman rm -f quipucords-dev-db || true
 	podman volume rm -f quipucords-dev-db
+
+.PHONY: bump-version
+bump-version:
+ifdef VERSION
+ifdef SEGMENT
+	$(error Specify either VERSION or SEGMENT, not both)
+endif
+	uv version $(VERSION)
+else ifdef SEGMENT
+ifneq ($(filter $(SEGMENT),major minor patch),$(SEGMENT))
+	$(error SEGMENT must be 'major', 'minor', or 'patch', got '$(SEGMENT)')
+endif
+	uv version --bump $(SEGMENT)
+else
+	$(error Specify either SEGMENT=<major|minor|patch> or VERSION=<x.y.z>)
+endif
+	$(MAKE) lock-requirements
 
 .PHONY: lock-requirements
 lock-requirements: lock-main-requirements lock-build-requirements
