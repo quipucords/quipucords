@@ -57,5 +57,9 @@ class RHACSApi(Session):
         session = cls(base_url=base_uri, verify=ssl_verify, auth=auth)
 
         if proxy_url:
-            session.proxies.update({protocol: proxy_url})
+            # Register the proxy for both schemes. RHACS 4.10 redirects Central
+            # OpenShift routes from HTTP to HTTPS, and requests re-selects the proxy
+            # using the redirect target's scheme. Registering only the source's own
+            # scheme would silently bypass the proxy after the redirect.
+            session.proxies.update({"http": proxy_url, "https": proxy_url})
         return session

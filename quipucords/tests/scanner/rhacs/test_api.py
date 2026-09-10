@@ -33,7 +33,10 @@ def test_rhacsapi_instantiation_with_connection_info():
     assert api.auth.auth_token == "test_token"
     assert isinstance(api.auth, HTTPBearerAuth)
     assert api.verify is False
-    assert api.proxies == {"https": "http://proxy.example.com:8080"}
+    assert api.proxies == {
+        "http": "http://proxy.example.com:8080",
+        "https": "http://proxy.example.com:8080",
+    }
 
 
 @mock.patch("requests.Session.send")
@@ -53,7 +56,10 @@ def test_rhacsapi_api_call_uses_proxy(mock_send):
 
     response = api.get("/test")
 
-    assert api.proxies == {"https": "https://proxy.example.com:8080"}
+    assert api.proxies == {
+        "http": "https://proxy.example.com:8080",
+        "https": "https://proxy.example.com:8080",
+    }
 
     assert response.status_code == 200
     assert response.json() == {"message": "ok"}
@@ -62,6 +68,43 @@ def test_rhacsapi_api_call_uses_proxy(mock_send):
     prepared_request = mock_send.call_args[0][0]
     assert prepared_request.url == "https://localhost:8080/test"
     assert prepared_request.headers["Authorization"] == "Bearer test_token"
+
+
+def test_rhacsapi_proxy_survives_http_to_https_redirect(requests_mock):
+    """Assert the proxy is still used after the Central route redirects to HTTPS.
+
+    RHACS 4.10 enables automatic HTTP to HTTPS redirection on Central OpenShift
+    routes, so a source with SSL disabled is redirected from port 80 to HTTPS.
+    requests re-selects the proxy using the redirect target's scheme, so the proxy
+    must be registered for HTTPS too. requests keeps the Authorization header on
+    its own across this standard port pair.
+    """
+    api = RHACSApi.from_connection_info(
+        host="central.apps.example.com",
+        protocol="http",
+        port=80,
+        auth_token="test_token",
+        proxy_url="http://proxy.example.com:8080",
+    )
+    requests_mock.get(
+        "http://central.apps.example.com:80/v1/auth/status",
+        status_code=302,
+        headers={"Location": "https://central.apps.example.com/v1/auth/status"},
+    )
+    requests_mock.get(
+        "https://central.apps.example.com/v1/auth/status", json={"userId": "1"}
+    )
+
+    response = api.get("/v1/auth/status")
+
+    assert response.status_code == 200
+    redirected_request = requests_mock.request_history[-1]
+    assert redirected_request.url == "https://central.apps.example.com/v1/auth/status"
+    assert redirected_request.proxies == {
+        "http": "http://proxy.example.com:8080",
+        "https": "http://proxy.example.com:8080",
+    }
+    assert redirected_request.headers["Authorization"] == "Bearer test_token"
 
 
 def test_rhacsapi_instantiation_with_ipv6_host():
