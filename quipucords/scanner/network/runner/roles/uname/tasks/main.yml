@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: gather internal_uname_processor fact
-  raw: export LANG=C LC_ALL=C; uname -p
+  raw: export LANG=C LC_ALL=C; uname -m
   register: internal_uname_processor
   ignore_errors: yes
 
