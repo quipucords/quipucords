@@ -25,7 +25,10 @@ def mocked_requests(requests_mock, live_server, max_date):
     django_url_matcher = re.compile(rf"{live_server.url}.*")
     for method in ("GET", "POST"):
         requests_mock.register_uri(method, django_url_matcher, real_http=True)
-    rhacs_host = "https://rhacs.host:443"
+    # No ":443" here: RHACSApi omits a port that is the scheme default, so that
+    # the Host header stays portless and the Central route's HTTP->HTTPS redirect
+    # cannot echo a port back into its Location.
+    rhacs_host = "https://rhacs.host"
     requests_mock.get(f"{rhacs_host}/v1/auth/status")
     requests_mock.get(
         f"{rhacs_host}/v1/administration/usage/secured-units/current",

@@ -2,6 +2,8 @@
 
 from unittest import mock
 
+import pytest
+
 from scanner.rhacs.api import HTTPBearerAuth, RHACSApi
 
 
@@ -87,7 +89,7 @@ def test_rhacsapi_proxy_survives_http_to_https_redirect(requests_mock):
         proxy_url="http://proxy.example.com:8080",
     )
     requests_mock.get(
-        "http://central.apps.example.com:80/v1/auth/status",
+        "http://central.apps.example.com/v1/auth/status",
         status_code=302,
         headers={"Location": "https://central.apps.example.com/v1/auth/status"},
     )
@@ -98,6 +100,11 @@ def test_rhacsapi_proxy_survives_http_to_https_redirect(requests_mock):
     response = api.get("/v1/auth/status")
 
     assert response.status_code == 200
+    # Port 80 goes in, but must not come back out: an explicit default port
+    # reaches the router as `Host: <host>:80`, and HAProxy's redirect echoes it,
+    # sending the HTTPS retry to port 80.
+    initial_request = requests_mock.request_history[0]
+    assert initial_request.url == "http://central.apps.example.com/v1/auth/status"
     redirected_request = requests_mock.request_history[-1]
     assert redirected_request.url == "https://central.apps.example.com/v1/auth/status"
     assert redirected_request.proxies == {
@@ -105,6 +112,33 @@ def test_rhacsapi_proxy_survives_http_to_https_redirect(requests_mock):
         "https": "http://proxy.example.com:8080",
     }
     assert redirected_request.headers["Authorization"] == "Bearer test_token"
+
+
+@pytest.mark.parametrize(
+    "protocol,port,expected",
+    (
+        ("http", 80, "http://central.apps.example.com"),
+        ("https", 443, "https://central.apps.example.com"),
+        ("http", 8080, "http://central.apps.example.com:8080"),
+        ("https", 8443, "https://central.apps.example.com:8443"),
+    ),
+)
+def test_rhacsapi_omits_default_port_from_base_url(protocol, port, expected):
+    """Assert a port that is the scheme default is left out of the base URL.
+
+    An explicit default port reaches the server as `Host: <host>:80`, and
+    HAProxy's `redirect scheme https` reuses that header verbatim. The Central
+    route would then redirect to `https://<host>:80`, whose TLS handshake hits
+    the router's plaintext listener and dies with WRONG_VERSION_NUMBER.
+    """
+    api = RHACSApi.from_connection_info(
+        host="central.apps.example.com",
+        protocol=protocol,
+        port=port,
+        auth_token="test_token",
+    )
+
+    assert api.base_url == expected
 
 
 def test_rhacsapi_instantiation_with_ipv6_host():
