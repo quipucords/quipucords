@@ -25,7 +25,7 @@ else
   DATE := date
 endif
 CACHE_DIR := $(shell [ -n "$(XDG_CACHE_HOME)" ] && echo "$(XDG_CACHE_HOME)" || echo "$(DEFAULT_CACHE_DIR)")
-TOPDIR = $(shell pwd)
+TOPDIR = $(shell pwd -P)
 DIRS	= test bin locale src
 PYDIRS	= quipucords
 PIP_COMPILE_ARGS = --no-upgrade
