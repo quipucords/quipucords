@@ -1026,7 +1026,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         raw_fact_fingerprint_fn = [
             # Common facts
             ("uname_hostname", "name", formatters.str_or_none),
-            ("uname_processor", "architecture", formatters.str_or_none),
+            ("uname_machine", "architecture", formatters.str_or_none),
             # Red Hat facts
             (
                 "redhat_packages_gpg_num_rh_packages",
@@ -1230,7 +1230,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
         )
         self._add_fact_to_fingerprint(
             source,
-            "uname_processor",
+            "uname_machine",
             fact,
             "architecture",
             fingerprint,

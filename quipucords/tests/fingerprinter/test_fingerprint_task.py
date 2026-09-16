@@ -31,7 +31,7 @@ SUBMAN_CONSUMED = [{"name": "Red Hat JBoss Fuse", "entitlement_id": "ESA0009"}]
 SAT_ENTITLEMENTS = [{"name": "Satellite Tools 6.3"}]
 
 EXPECTED_FINGERPRINT_MAP_NETWORK = {
-    "architecture": "uname_processor",
+    "architecture": "uname_machine",
     "bios_uuid": "dmi_system_uuid",
     "cloud_provider": "cloud_provider",
     "cpu_core_count": "cpu_core_count",
@@ -87,7 +87,7 @@ EXPECTED_FINGERPRINT_MAP_SATELLITE = {
     "virtualized_type": "virt_type",
 }
 EXPECTED_FINGERPRINT_MAP_VCENTER = {
-    "architecture": "uname_processor",
+    "architecture": "uname_machine",
     "cpu_count": "vm.cpu_count",
     "infrastructure_type": "vcenter_source",
     "ip_addresses": "vm.ip_addresses",
@@ -258,7 +258,7 @@ def _create_network_details_report_json(  # noqa: PLR0913, PLR0912, PLR0915, C90
     if redhat_package_count:
         fact["redhat_packages_gpg_num_rh_packages"] = redhat_package_count
     if architecture:
-        fact["uname_processor"] = architecture
+        fact["uname_machine"] = architecture
 
     fact["user_has_sudo"] = user_has_sudo
 
@@ -326,7 +326,7 @@ def _create_vcenter_details_report_json(  # noqa: PLR0913, PLR0912, C901
     if vm_cluster:
         fact["vm.cluster"] = vm_cluster
     if architecture:
-        fact["uname_processor"] = architecture
+        fact["uname_machine"] = architecture
     if "red hat enterprise linux" in vm_os.lower() or "rhel" in vm_os.lower():
         fact["is_redhat"] = is_redhat
     details_report = {"id": report_id, "facts": [fact]}
@@ -432,7 +432,7 @@ def _validate_network_result(fingerprint, fact):
         SystemFingerprint.UNKNOWN,
     ]  # We don't know exactly which because of generated fact randomness.
     assert fact.get("virt_type") == fingerprint.get("virtualized_type")
-    assert fact.get("uname_processor") == fingerprint.get("architecture")
+    assert fact.get("uname_machine") == fingerprint.get("architecture")
     assert fact.get("redhat_packages_certs") == fingerprint.get("redhat_certs")
     assert fact.get("redhat_packages_gpg_is_redhat") == fingerprint.get("is_redhat")
     assert fact.get("redhat_packages_gpg_num_rh_packages") == fingerprint.get(
@@ -474,7 +474,7 @@ def _validate_vcenter_result(fingerprint, fact):
     assert fact.get("vm.host.cpu_cores") == fingerprint.get("vm_host_core_count")
     assert fact.get("vm.datacenter") == fingerprint.get("vm_datacenter")
     assert fact.get("vm.cluster") == fingerprint.get("vm_cluster")
-    assert fact.get("uname_processor") == fingerprint.get("architecture")
+    assert fact.get("uname_machine") == fingerprint.get("architecture")
     assert fact.get("is_redhat") == fingerprint.get("is_redhat")
 
 

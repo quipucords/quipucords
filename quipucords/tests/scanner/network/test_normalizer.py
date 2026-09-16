@@ -40,7 +40,7 @@ def expected_normalized_facts(raw_facts):
         "cores_per_socket": int(raw_facts["cpu_core_per_socket"]),
         "system_memory_bytes": int(raw_facts["system_memory_bytes"]),
         "os_release": raw_facts["etc_release_release"],
-        "arch": raw_facts["uname_processor"],
+        "arch": raw_facts["uname_machine"],
         "cloud_provider": raw_facts["cloud_provider"],
         "system_purpose": raw_facts["system_purpose_json"],
         "infrastructure_type": "virtualized",

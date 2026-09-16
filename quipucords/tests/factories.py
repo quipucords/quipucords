@@ -61,7 +61,7 @@ class SystemFingerprintFactory(DjangoModelFactory):
     os_release = factory.LazyFunction(fake_rhel)
     is_redhat = True
     ip_addresses = factory.LazyAttribute(lambda o: o.ip_addresses_list)
-    architecture = factory.Iterator(["x86_64", "ARM"])
+    architecture = factory.Iterator(["x86_64", "aarch64"])
     sources = factory.LazyAttribute(format_sources)
     installed_products = factory.LazyFunction(fake_installed_products)
 
