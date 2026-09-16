@@ -136,7 +136,7 @@ def expected_network_scan_facts():
         "system_user_count",
         "uname_all",
         "uname_hostname",
-        "uname_processor",
+        "uname_machine",
         "user_has_sudo",
         "virt_num_guests",
         "virt_num_running_guests",
@@ -185,7 +185,7 @@ def expected_network_scan_facts():
 def fingerprint_fact_map(raw_facts):
     """Map fingerprint to raw fact name."""
     fact_map = {
-        "architecture": "uname_processor",
+        "architecture": "uname_machine",
         "bios_uuid": "dmi_system_uuid",
         "cloud_provider": "cloud_provider",
         "cpu_core_count": "cpu_core_count",
@@ -389,7 +389,7 @@ class TestNetworkScan(Smoker):
         # ONLY raw facts with direct map to a fingerprint
         raw_fact2fingerprint = (
             ("uname_hostname", "name"),
-            ("uname_processor", "architecture"),
+            ("uname_machine", "architecture"),
             ("redhat_packages_gpg_num_rh_packages", "redhat_package_count"),
             ("redhat_packages_certs", "redhat_certs"),
             ("redhat_packages_gpg_is_redhat", "is_redhat"),

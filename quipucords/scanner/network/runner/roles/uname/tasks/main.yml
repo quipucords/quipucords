@@ -14,14 +14,14 @@
     uname_hostname: "{{ internal_uname_hostname | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
-- name: gather internal_uname_processor fact
-  raw: export LANG=C LC_ALL=C; uname -p
-  register: internal_uname_processor
+- name: gather internal_uname_machine fact
+  raw: export LANG=C LC_ALL=C; uname -m
+  register: internal_uname_machine
   ignore_errors: yes
 
-- name: add uname_processor to dictionary
+- name: add uname_machine to dictionary
   set_fact:
-    uname_processor: "{{ internal_uname_processor | json_query('stdout_lines[-1]') | default('') }}"
+    uname_machine: "{{ internal_uname_machine | json_query('stdout_lines[-1]') | default('') }}"
   ignore_errors: yes
 
 - name: gather internal_uname_all fact

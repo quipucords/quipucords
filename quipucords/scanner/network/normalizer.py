@@ -98,7 +98,7 @@ class Normalizer(BaseNormalizer):
     )
     infrastructure_vendor = FactMapper("virt_type", formatters.str_or_none)
     os_release = FactMapper("etc_release_release", formatters.str_or_none)
-    arch = FactMapper("uname_processor", formatters.str_or_none)
+    arch = FactMapper("uname_machine", formatters.str_or_none)
     cloud_provider = FactMapper("cloud_provider", formatters.str_or_none)
     system_purpose = FactMapper("system_purpose_json", dict)
     network_interfaces = FactMapper(

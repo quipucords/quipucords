@@ -112,7 +112,7 @@ def _network_raw_facts():
         "installed_products": fake_installed_products(),
         "subscription_manager_id": _faker.uuid4(),
         "system_memory_bytes": _faker.pyint(max_value=2**63),  # max value for bigint
-        "uname_processor": _faker.random_element(["x86_64", "ARM"]),
+        "uname_machine": _faker.random_element(["x86_64", "aarch64"]),
         "virt_type": _faker.random_element(["vmware", "xen", "kvm", None]),
         "virt_what": fake_virt_what(),
     }
@@ -216,7 +216,7 @@ def _satellite_raw_facts():
     os_version = fake_major_minor_ver()
     major_ver = os_version.split(".")[0]
     satellite_date_format = "%Y-%m-%d %H:%M:%S"
-    arch = _faker.random_element(["x86_64", "ARM"])
+    arch = _faker.random_element(["x86_64", "aarch64"])
     return {
         "architecture": _faker.random_element([arch, None]),
         "connection_timestamp": _faker.date_time().strftime(satellite_date_format),
