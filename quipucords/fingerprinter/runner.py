@@ -1042,17 +1042,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("etc_release_release", "os_release", formatters.str_or_none),
             # Installed products (name + product/eng ID pairs)
             ("installed_products", "installed_products", formatters.list_of_dicts),
-            # Get IPv4 and IPv6 addresses from ifconfig's fact if present,
-            # else from ip's fact.
-            (
-                (
-                    "ifconfig_ip_addresses"
-                    if deepget(fact, "ifconfig_ip_addresses") is not None
-                    else "ip_address_show_ipv4"
-                ),
-                "ip_addresses",
-                formatters.list_or_none,
-            ),
+            # NOTE: ip_addresses is handled separately below so we can combine the
+            # ip role's IPv4 and IPv6 facts when ifconfig is unavailable.
             # Set CPU facts
             ("cpu_count", "cpu_count", formatters.int_or_none),
             # Network scan specific facts
@@ -1106,10 +1097,41 @@ class FingerprintTaskRunner(ScanTaskRunner):
                 fact_formatter=formatter_func,
             )
 
-        # Get MAC addresses from ifconfig's fact if present, else from ip's fact.
+        # Get IP addresses from ifconfig's fact if it actually found any, else fall
+        # back to the ip role's facts (which don't depend on net-tools/ifconfig being
+        # installed on the target). The ip role reports IPv4 and IPv6 as separate
+        # facts, so combine them to match ifconfig's single combined fact.
+        if fact.get("ifconfig_ip_addresses"):
+            self._add_fact_to_fingerprint(
+                source,
+                "ifconfig_ip_addresses",
+                fact,
+                "ip_addresses",
+                fingerprint,
+                fact_formatter=formatters.list_or_none,
+            )
+        else:
+            # These facts may be absent, None, or "" (NO_DATA) when the ip role
+            # did not collect them; list_or_none() coerces any non-list to None so
+            # the `or []` yields a list, keeping the concatenation safe.
+            ip_show_addresses = (
+                formatters.list_or_none(fact.get("ip_address_show_ipv4")) or []
+            ) + (formatters.list_or_none(fact.get("ip_address_show_ipv6")) or [])
+            self._add_fact_to_fingerprint(
+                source,
+                # value combines both facts; record both in metadata (same style as
+                # system_creation_date's combined raw_fact_key).
+                "ip_address_show_ipv4/ip_address_show_ipv6",
+                fact,
+                "ip_addresses",
+                fingerprint,
+                fact_value=ip_show_addresses or None,
+            )
+
+        # Get MAC addresses from ifconfig's fact if it found any, else from ip's fact.
         mac_addresses_raw_fact_key = (
             "ifconfig_mac_addresses"
-            if deepget(fact, "ifconfig_mac_addresses") is not None
+            if fact.get("ifconfig_mac_addresses")
             else "ip_address_show_mac"
         )
         self._add_fact_to_fingerprint(

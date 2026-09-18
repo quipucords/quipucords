@@ -685,6 +685,76 @@ def test_process_network_source_infrastructure_type(
 
 
 @pytest.mark.django_db
+def test_process_network_ip_mac_fall_back_to_ip_role_without_net_tools(
+    server_id, fingerprint_task_runner
+):
+    """IP/MAC come from the ip role when ifconfig (net-tools) is unavailable.
+
+    On modern RHEL, net-tools/ifconfig is often not installed, so the ifconfig
+    role produces empty facts. The fingerprinter must fall back to the ip role's
+    facts and combine its separate IPv4 and IPv6 results.
+    """
+    source = {
+        "server_id": server_id,
+        "source_name": "source1",
+        "source_type": DataSources.NETWORK,
+    }
+    facts = {
+        # ifconfig found nothing (host has no net-tools)
+        "ifconfig_ip_addresses": [],
+        "ifconfig_mac_addresses": None,
+        # ip role (iproute2) collected the real data
+        "ip_address_show_ipv4": ["10.28.72.79"],
+        "ip_address_show_ipv6": ["fe80::72:fbff:fe02:985"],
+        "ip_address_show_mac": ["02:72:fb:02:09:85"],
+    }
+    fingerprint = fingerprint_task_runner._process_network_fact(source, facts)
+
+    assert fingerprint["ip_addresses"] == ["10.28.72.79", "fe80::72:fbff:fe02:985"]
+    assert (
+        fingerprint[META_DATA_KEY]["ip_addresses"]["raw_fact_key"]
+        == "ip_address_show_ipv4/ip_address_show_ipv6"
+    )
+    assert fingerprint["mac_addresses"] == ["02:72:fb:02:09:85"]
+    assert (
+        fingerprint[META_DATA_KEY]["mac_addresses"]["raw_fact_key"]
+        == "ip_address_show_mac"
+    )
+
+
+@pytest.mark.django_db
+def test_process_network_ip_mac_prefer_ifconfig_when_available(
+    server_id, fingerprint_task_runner
+):
+    """When ifconfig collected data, it is preferred over the ip role's facts."""
+    source = {
+        "server_id": server_id,
+        "source_name": "source1",
+        "source_type": DataSources.NETWORK,
+    }
+    facts = {
+        "ifconfig_ip_addresses": ["10.28.72.5", "fe80::ea:c7ff:fef5:e8cf"],
+        "ifconfig_mac_addresses": ["02:ea:c7:f5:e8:cf"],
+        # different values from the ip role that must NOT be used
+        "ip_address_show_ipv4": ["9.9.9.9"],
+        "ip_address_show_ipv6": ["fe80::dead:beef"],
+        "ip_address_show_mac": ["00:00:00:00:00:00"],
+    }
+    fingerprint = fingerprint_task_runner._process_network_fact(source, facts)
+
+    assert fingerprint["ip_addresses"] == ["10.28.72.5", "fe80::ea:c7ff:fef5:e8cf"]
+    assert (
+        fingerprint[META_DATA_KEY]["ip_addresses"]["raw_fact_key"]
+        == "ifconfig_ip_addresses"
+    )
+    assert fingerprint["mac_addresses"] == ["02:ea:c7:f5:e8:cf"]
+    assert (
+        fingerprint[META_DATA_KEY]["mac_addresses"]["raw_fact_key"]
+        == "ifconfig_mac_addresses"
+    )
+
+
+@pytest.mark.django_db
 def test_process_network_system_purpose(server_id, fingerprint_task_runner):
     """Test process network system_purpose."""
     system_purpose_json = {
@@ -1365,12 +1435,14 @@ def test_all_facts_with_null_value_in_process_network_scan(
         for fingerprint_name, fact_name in EXPECTED_FINGERPRINT_MAP_NETWORK.items()
     }
     # Two slight changes from the default EXPECTED_FINGERPRINT_MAP_NETWORK dict:
-    # This test creates facts_dict with None for all facts, and when we fingerprint,
-    # if ifconfig_ip_addresses is None, we switch from ifconfig_ip_addresses to
-    # ip_address_show_ipv4 as the raw fact source for ip_addresses. The same logic
-    # applies for mac_addresses. Other tests that set not-None values in these raw
-    # facts continue to expect the default ifconfig-related raw fact names.
-    expected_metadata["ip_addresses"]["raw_fact_key"] = "ip_address_show_ipv4"
+    # This test creates facts_dict with None for all facts. When ifconfig_ip_addresses
+    # has no value, ip_addresses falls back to the ip role's facts, combining
+    # ip_address_show_ipv4 + ip_address_show_ipv6 (so its raw_fact_key records both).
+    # mac_addresses similarly falls back to ip_address_show_mac. Other tests that set
+    # not-None values in these raw facts continue to expect the ifconfig raw fact names.
+    expected_metadata["ip_addresses"]["raw_fact_key"] = (
+        "ip_address_show_ipv4/ip_address_show_ipv6"
+    )
     expected_metadata["mac_addresses"]["raw_fact_key"] = "ip_address_show_mac"
 
     assert set(metadata_dict.keys()) == set(EXPECTED_FINGERPRINT_MAP_NETWORK.keys())
