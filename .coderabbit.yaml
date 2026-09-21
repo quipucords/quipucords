@@ -1,0 +1,61 @@
+language: en-US
+
+reviews:
+  profile: "chill"
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "chore(deps)"
+      - "update konflux"
+    ignore_usernames:
+      - "konflux-internal-p02[bot]"
+      - "mintmaker[bot]"
+      - "dependabot[bot]"
+
+  path_filters:
+    - "!uv.lock"
+    - "!lockfiles/**"
+    - "!quipucords/staticfiles/**"
+    - "!.tekton/**"
+    - "!*.egg-info/**"
+
+  instructions: |
+    - Use DRF serializers for input validation. Never return raw database objects.
+    - All public modules, classes, and functions must have docstrings (pep257 convention).
+    - Use pathlib over os.path (ruff PTH rules are enforced).
+    - Max cyclomatic complexity is 10. Flag functions that look overly complex.
+    - User-facing error strings belong in api/messages.py, not inline in views.
+    - Ensure proper error handling with appropriate HTTP status codes.
+    - Never modify a migration file that has already been merged to main.
+
+  path_instructions:
+    - path: "quipucords/api/**"
+      instructions: |
+        - Check for proper authentication and permission classes.
+        - Ensure queryset filtering is applied correctly.
+        - Flag any N+1 query patterns (use select_related/prefetch_related).
+        - New endpoints should use API v2 patterns, not v1.
+        - Use @extend_schema decorators for OpenAPI documentation on new endpoints.
+        - Prefer direct Celery .delay() dispatch over signal-based patterns.
+    - path: "quipucords/api/auth/**"
+      instructions: |
+        - Security-critical area. Verify secrets are never logged or returned in responses.
+        - Check token expiry and rotation handling.
+        - Ensure Vault integration follows existing patterns in hashicorp_vault/.
+    - path: "quipucords/tests/**"
+      instructions: |
+        - Tests should not depend on execution order.
+        - Assertions should target specific records, not assume ordering.
+        - Flag tests that use sleep or hardcoded waits.
+        - Use standalone test functions, not test classes.
+        - Naming convention: test_<function>_<scenario>.
+        - Use @override_settings for Django settings, not the pytest settings fixture.
+        - Module-level pytestmark = pytest.mark.django_db for DB access.
+    - path: "quipucords/scanner/**"
+      instructions: |
+        - Check for proper error handling in network operations.
+        - Ensure credentials are never logged or exposed.
+        - Verify timeout handling on external connections.
+        - Celery tasks should be thin wrappers that delegate to runner classes.
+        - Flag broad "except Exception" handlers - prefer specific exception types.
