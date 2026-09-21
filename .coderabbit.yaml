@@ -49,6 +49,7 @@ reviews:
         - Assertions should target specific records, not assume ordering.
         - Flag tests that use sleep or hardcoded waits.
         - Use standalone test functions, not test classes.
+        - Use pytest patterns instead of stdlib unittest patterns.
         - Naming convention: test_<function>_<scenario>.
         - Use @override_settings for Django settings, not the pytest settings fixture.
         - Module-level pytestmark = pytest.mark.django_db for DB access.
