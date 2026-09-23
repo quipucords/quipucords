@@ -55,6 +55,7 @@ COPY rpms.in.yaml .
 ARG BUILD_DEPS="crypto-policies-scripts"
 RUN DEPS=$(yq '.packages' rpms.in.yaml | grep '# runtime dependencies' -A1000 | yq 'join(" ")') &&\
     dnf install ${DEPS} ${BUILD_DEPS} -y &&\
+    dnf -y update &&\
     dnf clean all
 # set cryptographic policy to a mode compatible with older systems (like RHEL5&6)
 RUN update-crypto-policies --set LEGACY
