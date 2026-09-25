@@ -99,3 +99,40 @@ def test_vcenter_connect_with_invalid_proxy_format():
         kwargs = mock_connect.call_args.kwargs
         assert kwargs["httpProxyHost"] is None
         assert kwargs["httpProxyPort"] is None
+
+
+@pytest.mark.django_db
+def test_vcenter_connect_with_ipv6_proxy():
+    """Test that IPv6 proxy information is passed correctly to SmartConnect."""
+    scan_task = create_scan_task(source_disable_ssl=False, source_ssl_cert_verify=True)
+    scan_task.source.proxy_url = "http://[fd12:3456:789a:1::100]:8080"
+    scan_task.source.save()
+
+    mock_vcenter = Mock()
+    with patch(
+        "scanner.vcenter.utils.SmartConnect", return_value=mock_vcenter
+    ) as mock_connect:
+        vcenter = vcenter_connect(scan_task)
+        assert mock_vcenter == vcenter
+        mock_connect.assert_called_once()
+        kwargs = mock_connect.call_args.kwargs
+        assert kwargs["httpProxyHost"] == "fd12:3456:789a:1::100"
+        assert kwargs["httpProxyPort"] == 8080
+
+
+@pytest.mark.django_db
+def test_vcenter_connect_with_ipv6_proxy_invalid():
+    """Test that IPv6 proxy information requires square bracket notation.
+
+    We pass proxy URL to urllib.parse.urlparse. When square brackets are missing,
+    it will split netloc on **first** colon - and attempt to turn large part of
+    IPv6 address into int.
+
+    This is implementation detail, but seems worth capturing in unit test.
+    """
+    scan_task = create_scan_task(source_disable_ssl=False, source_ssl_cert_verify=True)
+    scan_task.source.proxy_url = "http://fd12:3456:789a:1::100:8080"
+    scan_task.source.save()
+
+    with pytest.raises(ValueError):
+        vcenter_connect(scan_task)
