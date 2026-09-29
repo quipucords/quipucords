@@ -65,6 +65,7 @@ help:
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
 	@echo "  lint-shell                    to run the shellcheck linter"
+	@echo "  auto-fix                      to run linter auto-fix commands"
 	@echo "  lock-requirements             to lock all python dependencies"
 	@echo "  lock-rpms  		           to lock all dnf dependencies"
 	@echo "  update-requirements           to update all python dependencies"
@@ -188,6 +189,28 @@ lint-ansible:
 lint-shell:
 	shellcheck ./deploy/*.sh
 
+# auto-fix code using multiple linter commands.
+# We invoke ruff multiple times because: https://docs.astral.sh/ruff/formatter/#sorting-imports
+# "In order to both sort imports and format, call the Ruff linter and then the formatter"
+# The "find | xargs shellcheck | git apply" part is because shellcheck has no convenient "fix in place" arg.
+# The sequence is a ;-chained command with status checks so one command doesn't block another from running.
+.PHONY: auto-fix
+auto-fix:
+	@final_status=0; \
+	uv run ruff check --select I --fix quipucords/; status=$$?; \
+	if [ $$status -ne 0 ]; then final_status=$$status; fi; \
+	uv run ruff format quipucords/; status=$$?; \
+	if [ $$status -ne 0 ]; then final_status=$$status; fi; \
+	find . -type d -name .venv -prune -o -type f -iname '*.sh' -print0 | \
+	  xargs -0 -I {} -P "$(PARALLEL_NUM)" bash -c '\
+	    file=$${1#./}; \
+	    diff=$$(shellcheck -f diff "$$file"); status=$$?; \
+	    [ $$status -le 1 ] || exit $$status; \
+	    [ -z "$$diff" ] || printf "%s\n" "$$diff" | git apply \
+	  ' _ {}; status=$$?; \
+	if [ $$status -ne 0 ]; then final_status=$$status; fi; \
+	exit $$final_status
+
 .PHONY: server-makemigrations
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
@@ -277,10 +300,10 @@ endif
 # update rpm locks
 .PHONY: lock-rpms
 lock-rpms: setup-rpm-lockfile-if-needed
-	# the last layer will be considered the base image here; 
+	# the last layer will be considered the base image here;
 	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
 	# extract ubi.repo from BASE_IMAGE
-	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way 
+	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way
 	# the EC checks expect
 	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
 	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
