@@ -12,19 +12,26 @@ from scanner.network.processing import installed_products
         \tID: 69
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 7.0
+        \tArch: x86_64
     """,
         """Product:
         \tName: Red Hat Enterprise Linux Server
         \tID: 69
         \tVersion: 7.0
+        \tArch: x86_64
     """,
     ],
 )
 def test_success_found_id_and_name(stdout):
-    """ID, Name and Version match expected format."""
+    """ID, Name, Version and Arch match expected format."""
     cmd_output = {"rc": 0, "stdout": stdout}
     expected_fact = [
-        {"id": "69", "name": "Red Hat Enterprise Linux Server", "version": "7.0"}
+        {
+            "id": "69",
+            "name": "Red Hat Enterprise Linux Server",
+            "version": "7.0",
+            "arch": "x86_64",
+        }
     ]
     assert (
         installed_products.ProcessInstalledProducts.process(cmd_output) == expected_fact
@@ -82,41 +89,87 @@ def test_product_version(version_line, expected_version):
     ]
 
 
+@pytest.mark.parametrize(
+    "arch_line,expected_arch",
+    [
+        ("\tArch: x86_64", "x86_64"),
+        ("\tArch: x86_64,ppc64le", "x86_64,ppc64le"),
+        ("\tArch: ", None),
+        ("", None),
+    ],
+)
+def test_product_arch(arch_line, expected_arch):
+    """Arch is stashed verbatim, and omitted when absent."""
+    stdout = f"""Product:
+        \tID: 69
+        \tName: Red Hat Enterprise Linux Server
+        \tVersion: 7.0
+        {arch_line}
+    """
+    cmd_output = {"rc": 0, "stdout": stdout}
+    expected_fact = {
+        "id": "69",
+        "name": "Red Hat Enterprise Linux Server",
+        "version": "7.0",
+    }
+    if expected_arch:
+        expected_fact["arch"] = expected_arch
+    assert installed_products.ProcessInstalledProducts.process(cmd_output) == [
+        expected_fact
+    ]
+
+
 def test_success_multiple_products():
     """ID and Name match expected format for multiple products."""
     stdout = """\nProduct:
         \tID: 479
         \tName: Red Hat Enterprise Linux for x86_64
         \tVersion: 8.6
+        \tArch: x86_64
     --
     Product:
         \tID: 69
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 8.7
+        \tArch: x86_64
     --
     Product:
         \tID: 69
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 8.7
+        \tArch: x86_64
     --
     Product:
         \tID: 81
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 6.6
+        \tArch: ppc64le
     --
     Product:
         \tID: 81
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 6.6
+        \tArch: ppc64le
     """
     expected_fact = [
         {
             "id": "479",
             "name": "Red Hat Enterprise Linux for x86_64",
             "version": "8.6",
+            "arch": "x86_64",
         },
-        {"id": "69", "name": "Red Hat Enterprise Linux Server", "version": "8.7"},
-        {"id": "81", "name": "Red Hat Enterprise Linux Server", "version": "6.6"},
+        {
+            "id": "69",
+            "name": "Red Hat Enterprise Linux Server",
+            "version": "8.7",
+            "arch": "x86_64",
+        },
+        {
+            "id": "81",
+            "name": "Red Hat Enterprise Linux Server",
+            "version": "6.6",
+            "arch": "ppc64le",
+        },
     ]
     cmd_output = {"rc": 0, "stdout": stdout}
     assert (
