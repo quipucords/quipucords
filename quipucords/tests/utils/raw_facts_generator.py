@@ -75,6 +75,7 @@ def fake_installed_products() -> list[dict]:
             "id": str(_faker.pyint(min_value=100, max_value=999)),
             "name": f"Red Hat {_faker.name().title()} {fake_semver()}",
             "version": fake_major_minor_ver(),
+            "arch": _faker.random_element(["x86_64", "aarch64", "ppc64le", "s390x"]),
         }
         for _ in range(_faker.pyint(min_value=1, max_value=5))
     ]
