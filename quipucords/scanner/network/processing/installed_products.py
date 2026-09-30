@@ -35,6 +35,8 @@ class ProcessInstalledProducts(process.Processor):
                     product_dict[key.lower()] = value.strip()
                 elif key == "Version" and value.strip():
                     product_dict["version"] = major_minor_version(value.strip())
+                elif key == "Arch" and value.strip():
+                    product_dict["arch"] = value.strip()
             if not product_dict.get("id"):
                 # considering the command includes grep "ID:", if we don't parse product
                 # with at least ID, there's an error on the implementation.
