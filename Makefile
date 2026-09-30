@@ -189,27 +189,9 @@ lint-ansible:
 lint-shell:
 	shellcheck ./deploy/*.sh
 
-# auto-fix code using multiple linter commands.
-# We invoke ruff multiple times because: https://docs.astral.sh/ruff/formatter/#sorting-imports
-# "In order to both sort imports and format, call the Ruff linter and then the formatter"
-# The "find | xargs shellcheck | git apply" part is because shellcheck has no convenient "fix in place" arg.
-# The sequence is a ;-chained command with status checks so one command doesn't block another from running.
 .PHONY: auto-fix
 auto-fix:
-	@final_status=0; \
-	uv run ruff check --select I --fix quipucords/; status=$$?; \
-	if [ $$status -ne 0 ]; then final_status=$$status; fi; \
-	uv run ruff format quipucords/; status=$$?; \
-	if [ $$status -ne 0 ]; then final_status=$$status; fi; \
-	find . -type d -name .venv -prune -o -type f -iname '*.sh' -print0 | \
-	  xargs -0 -I {} -P "$(PARALLEL_NUM)" bash -c '\
-	    file=$${1#./}; \
-	    diff=$$(shellcheck -f diff "$$file"); status=$$?; \
-	    [ $$status -le 1 ] || exit $$status; \
-	    [ -z "$$diff" ] || printf "%s\n" "$$diff" | git apply \
-	  ' _ {}; status=$$?; \
-	if [ $$status -ne 0 ]; then final_status=$$status; fi; \
-	exit $$final_status
+	uv run scripts/auto_fix.py
 
 .PHONY: server-makemigrations
 server-makemigrations:
