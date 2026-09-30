@@ -7,6 +7,11 @@ from scanner.network.processing import process
 logger = logging.getLogger(__name__)
 
 
+def major_minor_version(version):
+    """Reduce a product certificate version to its "major.minor" form."""
+    return ".".join(version.split(".")[:2])
+
+
 class ProcessInstalledProducts(process.Processor):
     """Process the installed_products fact."""
 
@@ -28,6 +33,8 @@ class ProcessInstalledProducts(process.Processor):
                 key, value = line.strip().split(":", 1)
                 if key in ["Name", "ID"]:
                     product_dict[key.lower()] = value.strip()
+                elif key == "Version" and value.strip():
+                    product_dict["version"] = major_minor_version(value.strip())
             if not product_dict.get("id"):
                 # considering the command includes grep "ID:", if we don't parse product
                 # with at least ID, there's an error on the implementation.
