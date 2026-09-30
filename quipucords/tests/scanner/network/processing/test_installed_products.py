@@ -21,9 +21,11 @@ from scanner.network.processing import installed_products
     ],
 )
 def test_success_found_id_and_name(stdout):
-    """ID and Name match expected format."""
+    """ID, Name and Version match expected format."""
     cmd_output = {"rc": 0, "stdout": stdout}
-    expected_fact = [{"id": "69", "name": "Red Hat Enterprise Linux Server"}]
+    expected_fact = [
+        {"id": "69", "name": "Red Hat Enterprise Linux Server", "version": "7.0"}
+    ]
     assert (
         installed_products.ProcessInstalledProducts.process(cmd_output) == expected_fact
     )
@@ -55,6 +57,31 @@ def test_failure_no_relevant_info(caplog, stdout):
     assert caplog.messages[-1] == err_msg
 
 
+@pytest.mark.parametrize(
+    "version_line,expected_version",
+    [
+        ("\tVersion: 9.4.1", "9.4"),
+        ("\tVersion: 9", "9"),
+        ("\tVersion: ", None),
+        ("", None),
+    ],
+)
+def test_product_version(version_line, expected_version):
+    """Version is stashed as major.minor, and omitted when absent."""
+    stdout = f"""Product:
+        \tID: 69
+        \tName: Red Hat Enterprise Linux Server
+        {version_line}
+    """
+    cmd_output = {"rc": 0, "stdout": stdout}
+    expected_fact = {"id": "69", "name": "Red Hat Enterprise Linux Server"}
+    if expected_version:
+        expected_fact["version"] = expected_version
+    assert installed_products.ProcessInstalledProducts.process(cmd_output) == [
+        expected_fact
+    ]
+
+
 def test_success_multiple_products():
     """ID and Name match expected format for multiple products."""
     stdout = """\nProduct:
@@ -83,9 +110,13 @@ def test_success_multiple_products():
         \tVersion: 6.6
     """
     expected_fact = [
-        {"id": "479", "name": "Red Hat Enterprise Linux for x86_64"},
-        {"id": "69", "name": "Red Hat Enterprise Linux Server"},
-        {"id": "81", "name": "Red Hat Enterprise Linux Server"},
+        {
+            "id": "479",
+            "name": "Red Hat Enterprise Linux for x86_64",
+            "version": "8.6",
+        },
+        {"id": "69", "name": "Red Hat Enterprise Linux Server", "version": "8.7"},
+        {"id": "81", "name": "Red Hat Enterprise Linux Server", "version": "6.6"},
     ]
     cmd_output = {"rc": 0, "stdout": stdout}
     assert (
