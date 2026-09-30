@@ -166,6 +166,28 @@ class TestRunShellcheckFixes:
             assert "-p0" in cmd
             assert cwd == sh_files
 
+    def test_reports_and_fails_on_unfixable_shellcheck_issues(
+        self, sh_files: Path, capsys: pytest.CaptureFixture
+    ) -> None:
+        """Verify unfixable shellcheck issues are reported and exit code is nonzero."""
+        calls: list[list[str]] = []
+
+        def fake_run(cmd: list[str], **kwargs: object) -> mock.Mock:
+            """Return exit 1 with no diff for shellcheck -f diff; record plain calls."""
+            calls.append(cmd)
+            if "shellcheck" in cmd and "-f" in cmd:
+                return mock.Mock(returncode=1, stdout="")
+            return mock.Mock(returncode=0, stdout="")
+
+        with mock.patch("scripts.auto_fix.subprocess.run", side_effect=fake_run):
+            result = run_shellcheck_fixes(root=sh_files)
+
+        assert result == 1
+        captured = capsys.readouterr()
+        assert "unfixable" in captured.err
+        # plain shellcheck (without -f diff) should have been called to show details
+        assert any("shellcheck" in c and "-f" not in c for c in calls)
+
     def test_returns_zero_when_all_pass(self, sh_files: Path) -> None:
         """Verify zero is returned when shellcheck reports no issues."""
         with mock.patch("scripts.auto_fix.subprocess.run") as mock_run:
