@@ -35,6 +35,16 @@ TEST_TIMEOUT ?= 15
 TEST_OPTS := -n $(PARALLEL_NUM) -ra -m 'not slow' --timeout=$(TEST_TIMEOUT) --durations=10
 QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY ?= 10
 QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY ?= 10
+# - For the pool options when running `make celery-worker`, billiard >= 4.3.0 now defaults
+#   to the "spawn" start method on macOS. Every task in a spawned child dies with
+#   "not enough values to unpack (expected 3, got 0)".
+# - Shifting to using threads pool in macOS
+# - The threads pool has no grow()/shrink(), so using --concurrency instead of --autoscale.
+ifeq ($(shell uname -s),Darwin)
+QUIPUCORDS_CELERY_WORKER_POOL_OPTS ?= --pool=threads --concurrency=$(QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY)
+else
+QUIPUCORDS_CELERY_WORKER_POOL_OPTS ?= --autoscale=$(QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY),$(QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY)
+endif
 QUIPUCORDS_CONTAINER_TAG ?= quipucords
 QUIPUCORDS_POSTGRES_WAIT_TIME ?= 10
 
@@ -192,7 +202,7 @@ server-randomize-sequences:
 
 .PHONY: celery-worker
 celery-worker:
-	$(PYTHON) -m celery --app quipucords --workdir quipucords worker --autoscale=${QUIPUCORDS_CELERY_WORKER_MAX_CONCURRENCY},${QUIPUCORDS_CELERY_WORKER_MIN_CONCURRENCY}
+	$(PYTHON) -m celery --app quipucords --workdir quipucords worker $(QUIPUCORDS_CELERY_WORKER_POOL_OPTS)
 
 .PHONY: server-set-superuser
 server-set-superuser:
