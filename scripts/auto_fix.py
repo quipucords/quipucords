@@ -59,6 +59,15 @@ def run_shellcheck_fixes(root: Path = Path()) -> int:
                 cwd=root,
             )
             worst = max(worst, apply.returncode)
+        elif result.returncode == 1:
+            # shellcheck found issues but produced no auto-fixable diff
+            print(f"shellcheck: unfixable issues in {rel}:", file=sys.stderr)  # noqa: T201
+            subprocess.run(  # noqa: S603
+                ["shellcheck", str(rel)],  # noqa: S607
+                check=False,
+                cwd=root,
+            )
+            worst = max(worst, 1)
 
     return worst
 
