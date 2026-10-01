@@ -13,17 +13,19 @@ from scanner.network.processing import installed_products
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 7.0
         \tArch: x86_64
+        \tTags: rhel-7,rhel-7-x86_64
     """,
         """Product:
         \tName: Red Hat Enterprise Linux Server
         \tID: 69
         \tVersion: 7.0
         \tArch: x86_64
+        \tTags: rhel-7,rhel-7-x86_64
     """,
     ],
 )
 def test_success_found_id_and_name(stdout):
-    """ID, Name, Version and Arch match expected format."""
+    """ID, Name, Version, Arch and Tags match expected format."""
     cmd_output = {"rc": 0, "stdout": stdout}
     expected_fact = [
         {
@@ -31,6 +33,7 @@ def test_success_found_id_and_name(stdout):
             "name": "Red Hat Enterprise Linux Server",
             "version": "7.0",
             "arch": "x86_64",
+            "tags": ["rhel-7", "rhel-7-x86_64"],
         }
     ]
     assert (
@@ -119,6 +122,40 @@ def test_product_arch(arch_line, expected_arch):
     ]
 
 
+@pytest.mark.parametrize(
+    "tags_line,expected_tags",
+    [
+        ("\tTags: rhel-9,rhel-9-x86_64", ["rhel-9", "rhel-9-x86_64"]),
+        ("\tTags: rhel-9", ["rhel-9"]),
+        ("\tTags: rhel-9, rhel-9-x86_64", ["rhel-9", "rhel-9-x86_64"]),
+        ("\tTags: rhel-9,,rhel-9-x86_64", ["rhel-9", "rhel-9-x86_64"]),
+        ("\tTags: ", None),
+        ("", None),
+    ],
+)
+def test_product_tags(tags_line, expected_tags):
+    """Tags are split on commas, and omitted when absent."""
+    stdout = f"""Product:
+        \tID: 69
+        \tName: Red Hat Enterprise Linux Server
+        \tVersion: 9.8
+        \tArch: x86_64
+        {tags_line}
+    """
+    cmd_output = {"rc": 0, "stdout": stdout}
+    expected_fact = {
+        "id": "69",
+        "name": "Red Hat Enterprise Linux Server",
+        "version": "9.8",
+        "arch": "x86_64",
+    }
+    if expected_tags:
+        expected_fact["tags"] = expected_tags
+    assert installed_products.ProcessInstalledProducts.process(cmd_output) == [
+        expected_fact
+    ]
+
+
 def test_success_multiple_products():
     """ID and Name match expected format for multiple products."""
     stdout = """\nProduct:
@@ -126,30 +163,35 @@ def test_success_multiple_products():
         \tName: Red Hat Enterprise Linux for x86_64
         \tVersion: 8.6
         \tArch: x86_64
+        \tTags: rhel-8,rhel-8-x86_64
     --
     Product:
         \tID: 69
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 8.7
         \tArch: x86_64
+        \tTags: rhel-8,rhel-8-x86_64
     --
     Product:
         \tID: 69
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 8.7
         \tArch: x86_64
+        \tTags: rhel-8,rhel-8-x86_64
     --
     Product:
         \tID: 81
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 6.6
         \tArch: ppc64le
+        \tTags: rhel-6,rhel-6-ppc64le
     --
     Product:
         \tID: 81
         \tName: Red Hat Enterprise Linux Server
         \tVersion: 6.6
         \tArch: ppc64le
+        \tTags: rhel-6,rhel-6-ppc64le
     """
     expected_fact = [
         {
@@ -157,18 +199,21 @@ def test_success_multiple_products():
             "name": "Red Hat Enterprise Linux for x86_64",
             "version": "8.6",
             "arch": "x86_64",
+            "tags": ["rhel-8", "rhel-8-x86_64"],
         },
         {
             "id": "69",
             "name": "Red Hat Enterprise Linux Server",
             "version": "8.7",
             "arch": "x86_64",
+            "tags": ["rhel-8", "rhel-8-x86_64"],
         },
         {
             "id": "81",
             "name": "Red Hat Enterprise Linux Server",
             "version": "6.6",
             "arch": "ppc64le",
+            "tags": ["rhel-6", "rhel-6-ppc64le"],
         },
     ]
     cmd_output = {"rc": 0, "stdout": stdout}

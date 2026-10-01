@@ -22,8 +22,8 @@ class ProcessInstalledProducts(process.Processor):
         """Process installed_product fact output."""
         products = []
         installed_products_cmd_output = output.get("stdout", "")
-        # since the command is using grep with surrounding context (-C), we expect each
-        # result to be delimited by --
+        # since the command is using grep with surrounding context (-B/-A), we
+        # expect each result to be delimited by --
         grep_separator = "--"
         for product in installed_products_cmd_output.split(grep_separator):
             product_dict = {}
@@ -37,6 +37,10 @@ class ProcessInstalledProducts(process.Processor):
                     product_dict["version"] = major_minor_version(value.strip())
                 elif key == "Arch" and value.strip():
                     product_dict["arch"] = value.strip()
+                elif key == "Tags" and value.strip():
+                    product_dict["tags"] = [
+                        tag.strip() for tag in value.split(",") if tag.strip()
+                    ]
             if not product_dict.get("id"):
                 # considering the command includes grep "ID:", if we don't parse product
                 # with at least ID, there's an error on the implementation.
