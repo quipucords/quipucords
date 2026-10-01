@@ -31,6 +31,7 @@ class ResultsSerializer(serializers.ModelSerializer):
             "openshift_operators_by_name",
             "openshift_operators_by_kind",
             "os_by_name_and_version",
+            "rhel_by_version",
             "socket_pairs",
             "system_creation_date_average",
             "vmware_hosts",

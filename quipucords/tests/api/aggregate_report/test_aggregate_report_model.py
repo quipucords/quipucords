@@ -55,6 +55,7 @@ def expected_aggregate() -> dict:
                 UNKNOWN: defaultdict(int),
                 "LCARS": defaultdict(int),
             },
+            "rhel_by_version": {},
             "socket_pairs": 0,
             "system_creation_date_average": None,
             "vmware_hosts": 0,
@@ -93,6 +94,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     results = expected_aggregate["results"]
     diagnostics = expected_aggregate["diagnostics"]
     os_by_name_and_version = results["os_by_name_and_version"]
+    rhel_by_version = results["rhel_by_version"]
 
     # We construct fingerprints with different dates that should average to this:
     results["system_creation_date_average"] = str(date(2024, 4, 1))
@@ -113,6 +115,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     # virtual RHEL 9.1 w/ JBoss EAP
     fingerprint = SystemFingerprintFactory(
         os_version="9.1",
+        rhel_version="9.1",
         infrastructure_type=SystemFingerprint.VIRTUALIZED,  # instances_virtual++
         deployment_report=deployments_report,
         cpu_count=None,  # cpu_count is only relevant for openshift sources
@@ -131,10 +134,12 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     results["jboss_eap_instances"] += 1
     results["jboss_eap_cores_virtual"] += 2
     os_by_name_and_version[DEFAULT_RHEL_OS_NAME] = {"9.1": 1}
+    rhel_by_version["9.1"] = 1
 
     # physical RHEL 9.1 w/ JBoss WS
     fingerprint = SystemFingerprintFactory(
         os_version="9.1",  # same as previous fingerprint os_version
+        rhel_version="9.1",  # same as previous fingerprint rhel_version
         infrastructure_type=SystemFingerprint.BARE_METAL,  # instances_physical++
         deployment_report=deployments_report,
         cpu_count=None,  # cpu_count is only relevant for openshift sources
@@ -155,10 +160,12 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     results["jboss_ws_instances"] += 1
     results["jboss_ws_cores_physical"] += 8
     os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.1"] += 1
+    rhel_by_version["9.1"] += 1
 
     # hypervisor RHEL 9.2
     SystemFingerprintFactory(
         os_version="9.2",  # different from previous fingerprint os_version
+        rhel_version="9.2",
         infrastructure_type=SystemFingerprint.HYPERVISOR,  # instances_hypervisor++
         deployment_report=deployments_report,
         cpu_count=None,  # cpu_count is only relevant for openshift sources
@@ -176,11 +183,13 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     results["socket_pairs"] += 8
     diagnostics["missing_system_creation_date"] += 1
     os_by_name_and_version[DEFAULT_RHEL_OS_NAME]["9.2"] = 1
+    rhel_by_version["9.2"] = 1
 
     # RHEL with several important facts not set ("missing")
     SystemFingerprintFactory(
         name=None,  # missing_name++
         os_version=None,
+        rhel_version=None,  # no product cert; absent from rhel_by_version
         infrastructure_type=SystemFingerprint.UNKNOWN,  # instances_unknown++
         deployment_report=deployments_report,
         cpu_count=None,  # cpu_count is only relevant for openshift sources
@@ -204,6 +213,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     SystemFingerprintFactory(
         os_version=None,
         os_name=None,
+        rhel_version=None,
         name=None,  # missing_name++
         infrastructure_type=SystemFingerprint.UNKNOWN,  # instances_unknown++
         deployment_report=deployments_report,
@@ -223,6 +233,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     SystemFingerprintFactory(
         os_name=None,
         os_version="NCC-1701",
+        rhel_version=None,
         infrastructure_type=SystemFingerprint.VIRTUALIZED,  # instances_virtual++
         deployment_report=deployments_report,
         cpu_count=32,  # cpu_count is only relevant for openshift sources
@@ -243,6 +254,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     SystemFingerprintFactory(
         os_name="LCARS",
         os_version="NCC-1701-D",
+        rhel_version=None,
         is_redhat=False,
         infrastructure_type=SystemFingerprint.VIRTUALIZED,
         deployment_report=deployments_report,
@@ -260,6 +272,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     SystemFingerprintFactory(
         os_name=None,
         os_version=None,
+        rhel_version=None,
         name=None,  # missing_name++
         infrastructure_type=SystemFingerprint.VIRTUALIZED,
         deployment_report=deployments_report,
@@ -283,6 +296,7 @@ def report_and_expected_aggregate(expected_aggregate) -> tuple[Report, dict]:  #
     SystemFingerprintFactory(
         os_name=None,
         os_version=None,
+        rhel_version=None,
         name=None,  # missing_name++
         infrastructure_type=SystemFingerprint.VIRTUALIZED,
         deployment_report=deployments_report,
