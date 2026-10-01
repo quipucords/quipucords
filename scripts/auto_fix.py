@@ -52,7 +52,7 @@ def run_shellcheck_fixes(root: Path = Path()) -> int:
 
         if result.stdout:
             apply = subprocess.run(  # noqa: S603
-                ["git", "apply", "-p0"],  # noqa: S607
+                ["git", "apply", "-p1"],  # noqa: S607
                 input=result.stdout,
                 text=True,
                 check=False,
