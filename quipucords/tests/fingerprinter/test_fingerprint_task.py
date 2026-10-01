@@ -55,6 +55,7 @@ EXPECTED_FINGERPRINT_MAP_NETWORK = {
     "os_version": "etc_release_version",
     "redhat_certs": "redhat_packages_certs",
     "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
+    "rhel_version": "rhel_version",
     "subscription_manager_id": "subscription_manager_id",
     "system_addons": "system_purpose_json__addons",
     "system_last_checkin_date": "connection_timestamp",

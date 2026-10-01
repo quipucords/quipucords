@@ -121,6 +121,7 @@ def expected_network_scan_facts():
         "redhat_release_name",
         "redhat_release_release",
         "redhat_release_version",
+        "rhel_version",
         "subman",
         "subman_consumed",
         "subman_cpu_core_per_socket",
@@ -206,6 +207,7 @@ def fingerprint_fact_map(raw_facts):
         "os_version": "etc_release_version",
         "redhat_certs": "redhat_packages_certs",
         "redhat_package_count": "redhat_packages_gpg_num_rh_packages",
+        "rhel_version": "rhel_version",
         "subscription_manager_id": "subscription_manager_id",
         "system_addons": "system_purpose_json__addons",
         "system_creation_date": "date_filesystem_create/date_anaconda_log/registration_time/date_machine_id",  # noqa:E501
@@ -398,6 +400,7 @@ class TestNetworkScan(Smoker):
             ("etc_release_version", "os_version"),
             ("etc_release_release", "os_release"),
             ("installed_products", "installed_products"),
+            ("rhel_version", "rhel_version"),
             ("cpu_count", "cpu_count"),
             ("dmi_system_uuid", "bios_uuid"),
             ("subscription_manager_id", "subscription_manager_id"),
