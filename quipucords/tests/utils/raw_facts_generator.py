@@ -70,15 +70,20 @@ def fake_rhel(name: str | None = None, version: str | None = None) -> str:
 
 def fake_installed_products() -> list[dict]:
     """Return a list representing at least one found installed product."""
-    installed_products = [
-        {
-            "id": str(_faker.pyint(min_value=100, max_value=999)),
-            "name": f"Red Hat {_faker.name().title()} {fake_semver()}",
-            "version": fake_major_minor_ver(),
-            "arch": _faker.random_element(["x86_64", "aarch64", "ppc64le", "s390x"]),
-        }
-        for _ in range(_faker.pyint(min_value=1, max_value=5))
-    ]
+    installed_products = []
+    for _ in range(_faker.pyint(min_value=1, max_value=5)):
+        version = fake_major_minor_ver()
+        arch = _faker.random_element(["x86_64", "aarch64", "ppc64le", "s390x"])
+        major = version.split(".")[0]
+        installed_products.append(
+            {
+                "id": str(_faker.pyint(min_value=100, max_value=999)),
+                "name": f"Red Hat {_faker.name().title()} {fake_semver()}",
+                "version": version,
+                "arch": arch,
+                "tags": [f"rhel-{major}", f"rhel-{major}-{arch}"],
+            }
+        )
     return installed_products
 
 
