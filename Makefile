@@ -65,6 +65,7 @@ help:
 	@echo "  lint-ruff                     to run ultrafast ruff linter"
 	@echo "  lint-ansible                  to run the ansible linter (for now only do syntax check)"
 	@echo "  lint-shell                    to run the shellcheck linter"
+	@echo "  auto-fix                      to run linter auto-fix commands"
 	@echo "  lock-requirements             to lock all python dependencies"
 	@echo "  lock-rpms  		           to lock all dnf dependencies"
 	@echo "  update-requirements           to update all python dependencies"
@@ -188,6 +189,10 @@ lint-ansible:
 lint-shell:
 	shellcheck ./deploy/*.sh
 
+.PHONY: auto-fix
+auto-fix:
+	uv run scripts/auto_fix.py
+
 .PHONY: server-makemigrations
 server-makemigrations:
 	$(PYTHON) quipucords/manage.py makemigrations api --settings quipucords.settings
@@ -277,10 +282,10 @@ endif
 # update rpm locks
 .PHONY: lock-rpms
 lock-rpms: setup-rpm-lockfile-if-needed
-	# the last layer will be considered the base image here; 
+	# the last layer will be considered the base image here;
 	$(eval BASE_IMAGE=$(shell grep '^FROM ' Containerfile | tail -n1 | cut -d" " -f2))
 	# extract ubi.repo from BASE_IMAGE
-	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way 
+	# lots of sed substitutions requred because ubi images don't have the ubi.repo formatted in the way
 	# the EC checks expect
 	# https://github.com/release-engineering/rhtap-ec-policy/blob/main/data/known_rpm_repositories.yml
 	# more about this on downstream konflux docs https://url.corp.redhat.com/d54f834
