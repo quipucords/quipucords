@@ -69,19 +69,34 @@ def fake_rhel(name: str | None = None, version: str | None = None) -> str:
 
 
 def fake_installed_products() -> list[dict]:
-    """Return a list representing at least one found installed product."""
-    installed_products = []
-    for _ in range(_faker.pyint(min_value=1, max_value=5)):
-        version = fake_major_minor_ver()
-        arch = _faker.random_element(["x86_64", "aarch64", "ppc64le", "s390x"])
-        major = version.split(".")[0]
+    """Return a list representing at least one found installed product.
+
+    The first entry is the base operating system, carrying the bare
+    "rhel-<major>" tag that identifies it as such. Any others are layered
+    products, which share the base version and arch but only ever carry
+    qualified tags.
+    """
+    version = fake_major_minor_ver()
+    arch = _faker.random_element(["x86_64", "aarch64", "ppc64le", "s390x"])
+    major = version.split(".")[0]
+    installed_products = [
+        {
+            "id": str(_faker.pyint(min_value=100, max_value=999)),
+            "name": f"Red Hat Enterprise Linux for {arch}",
+            "version": version,
+            "arch": arch,
+            "tags": [f"rhel-{major}", f"rhel-{major}-{arch}"],
+        }
+    ]
+    for _ in range(_faker.pyint(min_value=0, max_value=4)):
+        addon = _faker.slug()
         installed_products.append(
             {
                 "id": str(_faker.pyint(min_value=100, max_value=999)),
                 "name": f"Red Hat {_faker.name().title()} {fake_semver()}",
                 "version": version,
                 "arch": arch,
-                "tags": [f"rhel-{major}", f"rhel-{major}-{arch}"],
+                "tags": [f"rhel-{major}-{addon}"],
             }
         )
     return installed_products
@@ -102,6 +117,7 @@ def fake_semver():
 
 def _network_raw_facts():
     # bare minimal network scan raw facts
+    installed_products = fake_installed_products()
     facts = {
         "connection_host": _faker.ipv4(),
         "cloud_provider": _faker.random_element(["aws", "gcp"]),
@@ -116,7 +132,8 @@ def _network_raw_facts():
         "ifconfig_ip_addresses": [_faker.ipv4(), _faker.ipv6()],
         "ifconfig_mac_addresses": [_faker.mac_address()],
         "insights_client_id": _faker.uuid4(),
-        "installed_products": fake_installed_products(),
+        "installed_products": installed_products,
+        "rhel_version": installed_products[0]["version"],
         "subscription_manager_id": _faker.uuid4(),
         "system_memory_bytes": _faker.pyint(max_value=2**63),  # max value for bigint
         "uname_machine": _faker.random_element(["x86_64", "aarch64"]),

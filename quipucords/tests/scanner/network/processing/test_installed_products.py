@@ -220,3 +220,113 @@ def test_success_multiple_products():
     assert (
         installed_products.ProcessInstalledProducts.process(cmd_output) == expected_fact
     )
+
+
+def rhel_cert(version, arch="x86_64", product_id="479"):
+    """Build a base RHEL product, tagged the way a real cert is."""
+    major = version.split(".")[0]
+    return {
+        "id": product_id,
+        "name": "Red Hat Enterprise Linux for x86_64",
+        "version": version,
+        "arch": arch,
+        "tags": [f"rhel-{major}", f"rhel-{major}-{arch}"],
+    }
+
+
+@pytest.mark.parametrize(
+    "products,expected_version",
+    [
+        pytest.param([rhel_cert("9.8")], "9.8", id="base-rhel"),
+        pytest.param(
+            [rhel_cert("10.1", arch="aarch64", product_id="419")],
+            "10.1",
+            id="base-rhel-aarch64",
+        ),
+        pytest.param(
+            [
+                rhel_cert("9.8"),
+                {
+                    "id": "83",
+                    "name": "Red Hat Enterprise Linux High Availability",
+                    "version": "9.8",
+                    "arch": "x86_64",
+                    "tags": ["rhel-9-highavailability"],
+                },
+            ],
+            "9.8",
+            id="add-on-sharing-version-and-arch-is-ignored",
+        ),
+        pytest.param(
+            [
+                {
+                    "id": "240",
+                    "name": "Oracle Java (for RHEL Server)",
+                    "version": "1.8",
+                    "arch": "x86_64",
+                    "tags": ["rhel-7-java"],
+                }
+            ],
+            None,
+            id="layered-product-only",
+        ),
+        pytest.param(
+            [rhel_cert("9.8"), rhel_cert("10.2", product_id="486")],
+            None,
+            id="two-base-certs-disagree",
+        ),
+        pytest.param([rhel_cert("9.8"), rhel_cert("9.8")], "9.8", id="duplicate-certs"),
+        pytest.param(
+            [{"id": "479", "name": "Red Hat Enterprise Linux for x86_64"}],
+            None,
+            id="no-version-or-tags",
+        ),
+        pytest.param(
+            [{"id": "479", "name": "RHEL", "tags": ["rhel-9"]}],
+            None,
+            id="tags-without-version",
+        ),
+        pytest.param(
+            [{"id": "479", "name": "RHEL", "version": "9.8"}],
+            None,
+            id="version-without-tags",
+        ),
+        pytest.param([], None, id="no-products"),
+    ],
+)
+def test_rhel_version(products, expected_version):
+    """rhel_version comes from the cert whose bare rhel-<major> tag matches."""
+    dependencies = {"installed_products": products}
+    assert (
+        installed_products.ProcessRhelVersion.process(
+            "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+        )
+        == expected_version
+    )
+
+
+@pytest.mark.parametrize("dependencies", [{}, {"installed_products": None}, None])
+def test_rhel_version_without_installed_products(dependencies):
+    """A missing installed_products dependency yields no version, not an error."""
+    assert (
+        installed_products.ProcessRhelVersion.process(
+            "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+        )
+        is None
+    )
+
+
+def test_rhel_version_logs_when_certs_disagree(caplog):
+    """Conflicting base certs are reported rather than silently resolved."""
+    caplog.set_level("WARNING")
+    dependencies = {
+        "installed_products": [rhel_cert("9.8"), rhel_cert("10.2", product_id="486")]
+    }
+    assert (
+        installed_products.ProcessRhelVersion.process(
+            "QUIPUCORDS_FORCE_POST_PROCESS", dependencies
+        )
+        is None
+    )
+    assert "product certificates disagree" in caplog.messages[-1]
+    assert "['10.2', '9.8']" in caplog.messages[-1]
