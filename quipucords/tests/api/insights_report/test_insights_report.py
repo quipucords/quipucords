@@ -56,8 +56,10 @@ def validate_data(
     )
 
     # Assert that the Insights report has all the expected installed_products.
+    # We collect more per product than HBI models (version, arch, tags); only
+    # id and name are meant to leave this server.
     expected_installed_products = [
-        installed_product
+        {"id": installed_product["id"], "name": installed_product["name"]}
         for host in deployment_report.system_fingerprints.all()
         for installed_product in host.installed_products
     ]
@@ -75,8 +77,7 @@ def validate_data(
     # Based on the specification here:
     # https://github.com/RedHatInsights/insights-host-inventory/blob/986a8323f6d5d94ad721a9746cd50f383dd2594c/swagger/system_profile.spec.yaml#L87  # noqa: E501
     for installed_product in returned_installed_products:
-        assert "id" in installed_product
-        assert "name" in installed_product
+        assert set(installed_product) == {"id", "name"}
     # We can't use sets to compare installed_products because dicts aren't hashable; so,
     # we sort them before comparing in case the list elements were ordered differently.
     expected_installed_products = sorted(
