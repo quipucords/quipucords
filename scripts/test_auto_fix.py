@@ -24,30 +24,30 @@ def sh_files(tmp_path: Path) -> Path:
 class TestRunRuffFixes:
     """Tests for run_ruff_fixes."""
 
-    def test_runs_import_sort_then_format(self) -> None:
+    def test_runs_import_sort_then_format(self, tmp_path: Path) -> None:
         """Verify both ruff import sort and ruff format commands are invoked."""
         with mock.patch("scripts.auto_fix.subprocess.run") as mock_run:
             mock_run.return_value = mock.Mock(returncode=0)
-            run_ruff_fixes()
+            run_ruff_fixes(tmp_path)
         calls = mock_run.call_args_list
         assert any(
             "--select" in str(c) and "I" in str(c) and "'.'" in str(c) for c in calls
         )
         assert any("format" in str(c) and "'.'" in str(c) for c in calls)
 
-    def test_returns_zero_when_all_pass(self) -> None:
+    def test_returns_zero_when_all_pass(self, tmp_path: Path) -> None:
         """Verify zero is returned when all ruff commands succeed."""
         with mock.patch("scripts.auto_fix.subprocess.run") as mock_run:
             mock_run.return_value = mock.Mock(returncode=0)
-            assert run_ruff_fixes() == 0
+            assert run_ruff_fixes(tmp_path) == 0
 
-    def test_returns_worst_exit_code(self) -> None:
+    def test_returns_worst_exit_code(self, tmp_path: Path) -> None:
         """Verify the highest exit code across ruff commands is returned."""
         results = [mock.Mock(returncode=0), mock.Mock(returncode=1)]
         with mock.patch("scripts.auto_fix.subprocess.run", side_effect=results):
-            assert run_ruff_fixes() == 1
+            assert run_ruff_fixes(tmp_path) == 1
 
-    def test_import_sort_runs_before_format(self) -> None:
+    def test_import_sort_runs_before_format(self, tmp_path: Path) -> None:
         """Verify ruff import sort must precede ruff format."""
         call_order = []
 
@@ -57,7 +57,7 @@ class TestRunRuffFixes:
             return mock.Mock(returncode=0)
 
         with mock.patch("scripts.auto_fix.subprocess.run", side_effect=capture):
-            run_ruff_fixes()
+            run_ruff_fixes(tmp_path)
 
         sort_idx = next(i for i, c in enumerate(call_order) if "--select" in c)
         fmt_idx = next(i for i, c in enumerate(call_order) if "format" in c)
@@ -236,7 +236,7 @@ class TestMain:
             mock.patch("scripts.auto_fix.run_ruff_fixes", return_value=1),
             mock.patch(
                 "scripts.auto_fix.run_shellcheck_fixes",
-                side_effect=lambda **kw: shellcheck_called.append(True) or 0,
+                side_effect=lambda *args, **kw: shellcheck_called.append(True) or 0,
             ),
         ):
             main()
