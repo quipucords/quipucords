@@ -9,14 +9,14 @@ import sys
 from pathlib import Path
 
 
-def run_ruff_fixes() -> int:
+def run_ruff_fixes(root: Path) -> int:
     """Run ruff import sort followed by ruff format, returning the worst exit code."""
     worst = 0
     for cmd in (
         ["uv", "run", "ruff", "check", "--select", "I", "--fix", "."],
         ["uv", "run", "ruff", "format", "."],
     ):
-        result = subprocess.run(cmd, check=False)  # noqa: S603
+        result = subprocess.run(cmd, check=False, cwd=root)  # noqa: S603
         worst = max(worst, result.returncode)
     return worst
 
@@ -76,9 +76,10 @@ def run_shellcheck_fixes(root: Path = Path()) -> int:
 
 def main() -> int:
     """Run all fixers and return the worst exit code."""
+    root = Path(__file__).parent.parent
     codes = [
-        run_ruff_fixes(),
-        run_shellcheck_fixes(),
+        run_ruff_fixes(root),
+        run_shellcheck_fixes(root),
     ]
     return max(codes)
 
