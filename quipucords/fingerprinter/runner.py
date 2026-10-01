@@ -1042,6 +1042,8 @@ class FingerprintTaskRunner(ScanTaskRunner):
             ("etc_release_release", "os_release", formatters.str_or_none),
             # Installed products (name + product/eng ID pairs)
             ("installed_products", "installed_products", formatters.list_of_dicts),
+            # Version of the product certificate identifying RHEL itself
+            ("rhel_version", "rhel_version", formatters.str_or_none),
             # NOTE: ip_addresses is handled separately below so we can combine the
             # ip role's IPv4 and IPv6 facts when ifconfig is unavailable.
             # Set CPU facts
