@@ -141,10 +141,10 @@ class TestRunShellcheckFixes:
             assert not target.startswith("/"), f"expected relative path, got {target!r}"
             assert cwd == sh_files
 
-    def test_git_apply_uses_p0_and_cwd(self, sh_files: Path) -> None:
-        """Verify git apply uses -p0 and cwd=root to preserve directory prefixes."""
+    def test_git_apply_uses_p1_and_cwd(self, sh_files: Path) -> None:
+        """Verify git apply uses -p1 to strip shellcheck's a/b/ prefixes."""
         diff_output = (
-            "--- deploy/start.sh\n+++ deploy/start.sh\n"
+            "--- a/deploy/start.sh\n+++ b/deploy/start.sh\n"
             "@@ -1 +1 @@\n-echo hello\n+echo hello\n"
         )
         apply_invocations: list[tuple[list[str], Path | None]] = []
@@ -163,7 +163,7 @@ class TestRunShellcheckFixes:
 
         assert apply_invocations, "git apply was never called"
         for cmd, cwd in apply_invocations:
-            assert "-p0" in cmd
+            assert "-p1" in cmd
             assert cwd == sh_files
 
     def test_reports_and_fails_on_unfixable_shellcheck_issues(
