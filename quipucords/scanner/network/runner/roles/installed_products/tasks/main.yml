@@ -15,3 +15,8 @@
     installed_products: "{{ internal_installed_products }}"
   ignore_errors: yes
   when: 'internal_installed_products.get("rc") == 0'
+
+- name: initialize rhel_version fact
+  set_fact:
+    rhel_version: "QUIPUCORDS_FORCE_POST_PROCESS"
+  ignore_errors: yes
