@@ -97,6 +97,7 @@ class AggregateReport(BaseModel):
     openshift_operators_by_name = models.JSONField(null=False, default=dict)
     openshift_operators_by_kind = models.JSONField(null=False, default=dict)
     os_by_name_and_version = models.JSONField(null=False, default=dict)
+    rhel_by_version = models.JSONField(null=False, default=dict)
     socket_pairs = models.PositiveIntegerField(default=0, blank=True, null=True)
     system_creation_date_average = models.DateField(blank=True, null=True)
     vmware_hosts = models.PositiveIntegerField(default=0, blank=True, null=True)
@@ -138,6 +139,7 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
     from fingerprinter import jboss_eap, jboss_web_server
 
     os_by_name_and_version = defaultdict(lambda: defaultdict(int))
+    rhel_by_version = defaultdict(int)
     system_creation_dates = []
     vmware_vms_by_host = defaultdict(list)
 
@@ -152,6 +154,11 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
         os_by_name_and_version[fingerprint.os_name or UNKNOWN][
             fingerprint.os_version or UNKNOWN
         ] += 1
+
+        # Unlike os_by_name_and_version, only systems with a rhel_version are
+        # tracked/counted here (real CERT based RHEL detection).
+        if fingerprint.rhel_version:
+            rhel_by_version[fingerprint.rhel_version] += 1
 
         source_types = [source.get("source_type") for source in fingerprint.sources]
         has_network_source = DataSources.NETWORK in source_types
@@ -239,6 +246,8 @@ def _aggregate_from_system_fingerprints(  # noqa: C901,PLR0912,PLR0915
         os_name: dict(os_versions)
         for os_name, os_versions in os_by_name_and_version.items()
     }
+
+    aggregated.rhel_by_version = dict(rhel_by_version)
 
     aggregated.system_creation_date_average = average_date(system_creation_dates)
 
