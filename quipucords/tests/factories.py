@@ -24,6 +24,7 @@ from tests.utils.raw_facts_generator import (
     DEFAULT_RHEL_OS_NAME,
     fake_installed_products,
     fake_major_minor_ver,
+    fake_rhel_version,
 )
 
 _faker = Faker()
@@ -64,6 +65,9 @@ class SystemFingerprintFactory(DjangoModelFactory):
     architecture = factory.Iterator(["x86_64", "aarch64"])
     sources = factory.LazyAttribute(format_sources)
     installed_products = factory.LazyFunction(fake_installed_products)
+    rhel_version = factory.LazyAttribute(
+        lambda o: fake_rhel_version(o.installed_products)
+    )
 
     class Params:
         """Factory parameters."""
