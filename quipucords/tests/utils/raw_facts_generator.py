@@ -102,6 +102,26 @@ def fake_installed_products() -> list[dict]:
     return installed_products
 
 
+def fake_rhel_version(installed_products: list[dict] | None) -> str | None:
+    """Return the version of the product certificate identifying RHEL itself.
+
+    Product certificates come back in whatever order the scanned system's
+    filesystem yields them, so the base operating system is found by its bare
+    "rhel-<major>" tag rather than by its position in the list. This mirrors
+    the rule the rhel_version processor applies - deliberately reimplemented
+    here, since a fixture that asks the code under test for its own expected
+    value proves nothing.
+    """
+    for product in installed_products or []:
+        version = product.get("version")
+        if not version:
+            continue
+        major = version.split(".")[0]
+        if f"rhel-{major}" in (product.get("tags") or []):
+            return version
+    return None
+
+
 def fake_major_minor_ver():
     """Return a string representing an X.Y version."""
     major = _faker.pyint(min_value=1, max_value=99)
@@ -133,7 +153,7 @@ def _network_raw_facts():
         "ifconfig_mac_addresses": [_faker.mac_address()],
         "insights_client_id": _faker.uuid4(),
         "installed_products": installed_products,
-        "rhel_version": installed_products[0]["version"],
+        "rhel_version": fake_rhel_version(installed_products),
         "subscription_manager_id": _faker.uuid4(),
         "system_memory_bytes": _faker.pyint(max_value=2**63),  # max value for bigint
         "uname_machine": _faker.random_element(["x86_64", "aarch64"]),

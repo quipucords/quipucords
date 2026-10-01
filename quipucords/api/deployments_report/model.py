@@ -218,6 +218,7 @@ class SystemFingerprint(BaseModel):
     cpu_hyperthreading = models.BooleanField(null=True)
 
     installed_products = models.JSONField(unique=False, blank=True, null=True)
+    rhel_version = models.CharField(max_length=64, unique=False, blank=True, null=True)
 
     system_creation_date = models.DateField(blank=True, null=True)
     system_last_checkin_date = models.DateField(blank=True, null=True)
