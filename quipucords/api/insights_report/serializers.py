@@ -59,6 +59,20 @@ class NetworkInterfaceSerializer(NotEmptyMixin, Serializer):
         qpc_allow_empty_fields = ["ipv6_addresses"]
 
 
+class InstalledProductSerializer(NotEmptyMixin, Serializer):
+    """Serializer for the field installed_products of HBI system profile.
+
+    HBI models an installed product as name/id/status and nothing else. We
+    collect more than that from the product certificates (version, arch, tags)
+    for our own reports, so this serializer exists to keep those extras out of
+    what we upload.
+    """
+
+    # ref: https://github.com/RedHatInsights/inventory-schemas/blob/master/schemas/system_profile/v1.yaml  # noqa: E501
+    name = fields.CharField(max_length=512, **default_kwargs)
+    id = fields.CharField(max_length=64, **default_kwargs)
+
+
 class SystemProfileSerializer(NotEmptyMixin, Serializer):
     """
     Serializer for HBI system profile.
@@ -78,7 +92,7 @@ class SystemProfileSerializer(NotEmptyMixin, Serializer):
     infrastructure_vendor = fields.CharField(
         max_length=100, **default_kwargs
     )  # TODO: Looks like virt_type might answer this, but only for virtualized infra
-    installed_products = fields.ListField(child=fields.DictField())
+    installed_products = InstalledProductSerializer(many=True)
     # yupana builds operating_system from os_release
     os_release = fields.CharField(max_length=100, **default_kwargs)
     arch = fields.CharField(source="architecture", max_length=50, **default_kwargs)
