@@ -118,7 +118,7 @@ multidict==6.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin
     # via
     #   aiohttp
     #   yarl
-oauthlib==3.3.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+oauthlib==4.0.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via requests-oauthlib
 openshift==0.13.2 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
