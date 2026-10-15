@@ -114,7 +114,7 @@ markupsafe==3.0.3 ; (implementation_name == 'cpython' and sys_platform == 'darwi
     # via jinja2
 more-itertools==10.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via quipucords
-multidict==6.8.0 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
+multidict==6.9.1 ; (implementation_name == 'cpython' and sys_platform == 'darwin') or (implementation_name == 'cpython' and sys_platform == 'linux')
     # via
     #   aiohttp
     #   yarl
