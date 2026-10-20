@@ -21,10 +21,8 @@ def validate_deployment_report_status(deployment_report):
     """Check if deployment report did complete."""
     if deployment_report.status != DeploymentsReport.STATUS_COMPLETE:
         raise FailedDependencyError(
-            {
-                "detail": _(messages.REPORT_INSIGHTS_NOT_CREATED)
-                % {"report_id": deployment_report.report.id}
-            },
+            _(messages.REPORT_INSIGHTS_NOT_CREATED)
+            % {"report_id": deployment_report.report.id}
         )
 
 
