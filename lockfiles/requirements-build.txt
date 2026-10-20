@@ -140,15 +140,17 @@ setuptools==83.0.0
     # via psycopg-c
 setuptools==84.0.0
     # via
+    #   ansible-core
+    #   charset-normalizer
+setuptools==84.2.0
+    # via
     #   aiohttp
     #   aiosignal
     #   ansible
-    #   ansible-core
     #   calver
     #   certifi
     #   cffi
     #   changelog-chug
-    #   charset-normalizer
     #   click-repl
     #   cryptography
     #   django
