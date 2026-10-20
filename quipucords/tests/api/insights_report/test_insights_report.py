@@ -148,5 +148,44 @@ def test_get_insights_report_as_tarball_sliced(client_logged_in):
 @pytest.mark.django_db
 def test_get_insights_report_unknown_id_not_found(client_logged_in):
     """Fail to get an Insights for report id that doesn't exist."""
-    response = client_logged_in.get(reverse("v1:reports-insights", args=("999",)))
+    response = client_logged_in.get(
+        reverse("v1:reports-insights", args=("999",)),
+        HTTP_ACCEPT="application/gzip",
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response["Content-Type"].startswith("application/json")
+
+
+@pytest.mark.django_db
+def test_get_insights_report_complete_no_fingerprints_returns_json_error(
+    client_logged_in,
+):
+    """Deployments complete but no fingerprints: expect JSON 404, not a tar."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_COMPLETE,
+        number_of_fingerprints=0,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(
+        reverse("v1:reports-insights", args=(report_id,)),
+        HTTP_ACCEPT="application/gzip",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response["Content-Type"].startswith("application/json")
+    assert "detail" in response.json()
+
+
+@pytest.mark.django_db
+def test_get_insights_report_not_ready_returns_json_error(client_logged_in):
+    """Report exists but deployments not complete: expect JSON 424, not a tar."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(
+        reverse("v1:reports-insights", args=(report_id,)),
+        HTTP_ACCEPT="application/gzip",
+    )
+    assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY
+    assert response["Content-Type"].startswith("application/json")
+    assert "detail" in response.json()
