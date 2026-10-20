@@ -26,7 +26,6 @@ expandvars==1.1.2
 flit-core==3.12.0
     # via
     #   click
-    #   django-filter
     #   docutils
     #   jinja2
     #   more-itertools
@@ -35,6 +34,7 @@ flit-core==3.12.0
     #   wheel
 flit-core==4.1.0
     # via
+    #   django-filter
     #   idna
     #   packaging
     #   pathspec
@@ -62,7 +62,6 @@ hatchling==1.32.4
     #   referencing
     #   sqlparse
     #   urllib3
-    #   wcwidth
 maturin==1.15.0
     # via
     #   cryptography
@@ -89,7 +88,7 @@ poetry-core==2.5.0
     #   hvac
     #   pkgconfig
     #   tomlkit
-pycparser==3.0 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
+pycparser==3.11 ; (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "darwin") or (implementation_name == "cpython" and platform_python_implementation != "PyPy" and sys_platform == "linux")
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
@@ -100,6 +99,7 @@ setuptools-rust==1.13.0
 setuptools-scm==10.3.4
     # via
     #   django-axes
+    #   fqdn
     #   hatch-vcs
     #   pluggy
     #   setuptools-rust
@@ -125,7 +125,6 @@ wheel==0.48.0
     #   drf-spectacular
     #   psycopg
     #   psycopg-c
-    #   pycparser
     #   python-daemon
     #   python-dateutil
     #   python-string-utils
@@ -158,6 +157,7 @@ setuptools==84.2.0
     #   django-cors-headers
     #   djangorestframework
     #   drf-spectacular
+    #   fqdn
     #   frozenlist
     #   gunicorn
     #   markupsafe
@@ -184,6 +184,7 @@ setuptools==84.2.0
     #   tzdata
     #   tzlocal
     #   vcs-versioning
+    #   wcwidth
     #   websocket-client
     #   whitenoise
     #   yarl
