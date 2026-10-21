@@ -11,7 +11,7 @@ from urllib3.exceptions import HTTPError as BaseHTTPError
 
 from api import messages
 from api.auth.lightspeed.auth import get_lightspeed_secure_token
-from api.insights_report.payload import generate_insights_tarball
+from api.lightspeed_report.payload import generate_lightspeed_tarball
 from api.publish.exceptions import PublishError
 from api.publish.model import PublishRequest
 
@@ -122,7 +122,7 @@ def publish_to_ingress(*, publish_request_id):
 
     try:
         auth_token = _get_auth_token(publish_request.user)
-        tarball = generate_insights_tarball(report_id)
+        tarball = generate_lightspeed_tarball(report_id)
         _post_to_ingress(report_id, tarball, auth_token)
     except PublishError as err:
         logger.error(

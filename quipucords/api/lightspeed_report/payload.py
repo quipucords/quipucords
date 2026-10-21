@@ -1,4 +1,4 @@
-"""Insights report payload generation."""
+"""Lightspeed report payload generation."""
 
 import io
 import logging
@@ -13,8 +13,8 @@ from api.common.entities import (
     ReportEntity,
 )
 from api.exceptions import FailedDependencyError
-from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
-from api.insights_report.serializers import YupanaPayloadSerializer
+from api.lightspeed_report.lightspeed_gzip_renderer import LightspeedGzipRenderer
+from api.lightspeed_report.serializers import YupanaPayloadSerializer
 from api.models import DeploymentsReport, SystemFingerprint
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ def validate_deployment_report_status(deployment_report):
     """Check if deployment report did complete."""
     if deployment_report.status != DeploymentsReport.STATUS_COMPLETE:
         raise FailedDependencyError(
-            _(messages.REPORT_INSIGHTS_NOT_CREATED)
+            _(messages.REPORT_LIGHTSPEED_NOT_CREATED)
             % {"report_id": deployment_report.report.id}
         )
 
@@ -45,11 +45,11 @@ def get_report(deployment_report):
         }
         for source_type in excluded_source_types_found:
             errors.append(
-                _(messages.REPORT_INSIGHTS_SOURCE_TYPE_NOT_SUPPORTED)
+                _(messages.REPORT_LIGHTSPEED_SOURCE_TYPE_NOT_SUPPORTED)
                 % {"source_type": source_type}
             )
         errors.append(
-            _(messages.REPORT_INSIGHTS_NOT_GENERATED)
+            _(messages.REPORT_LIGHTSPEED_NOT_GENERATED)
             % {"report_id": deployment_report.report.id}
         )
         raise NotFound(" ".join(errors)) from err
@@ -57,10 +57,10 @@ def get_report(deployment_report):
     return report
 
 
-def generate_insights_payload(report_id: int) -> dict:
-    """Generate the insights report payload dict for the given report ID.
+def generate_lightspeed_payload(report_id: int) -> dict:
+    """Generate the Lightspeed report payload dict for the given report ID.
 
-    This is the shared logic used by both the insights API view and the
+    This is the shared logic used by both the Lightspeed API view and the
     publish-to-consoledot Celery task.
     """
     deployment_report = get_object_or_404(
@@ -71,7 +71,7 @@ def generate_insights_payload(report_id: int) -> dict:
     return YupanaPayloadSerializer(report_entity).data
 
 
-def generate_insights_tarball(report_id: int) -> io.BytesIO:
-    """Generate an insights report tarball for the given report ID."""
-    payload = generate_insights_payload(report_id)
-    return InsightsGzipRenderer().render(payload)
+def generate_lightspeed_tarball(report_id: int) -> io.BytesIO:
+    """Generate a Lightspeed report tarball for the given report ID."""
+    payload = generate_lightspeed_payload(report_id)
+    return LightspeedGzipRenderer().render(payload)

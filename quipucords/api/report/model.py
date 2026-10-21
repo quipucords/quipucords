@@ -27,7 +27,7 @@ class Report(BaseModel):
     report_version = models.CharField(
         max_length=64, null=False, default=create_report_version
     )
-    # report_platform_id is a unique identifier required by yupana/insights
+    # report_platform_id is a unique identifier required by yupana/insights/lightspeed
     report_platform_id = models.UUIDField(default=uuid.uuid4, editable=False)
     inspect_groups = models.ManyToManyField("InspectGroup", related_name="reports")
     origin = models.CharField(

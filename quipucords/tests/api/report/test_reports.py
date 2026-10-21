@@ -406,7 +406,7 @@ def test_report_tarball_lightspeed_tgz(
 
     # Compare tarball lightspeed.tar.gz contents with the standalone API's response.
     api_lightspeed_response = client_logged_in.get(
-        reverse("v1:reports-insights", args=(report_id,)),
+        reverse("v1:reports-lightspeed", args=(report_id,)),
         headers={"Accept": "application/gzip"},
     )
     assert api_lightspeed_response.ok, api_lightspeed_response.text
