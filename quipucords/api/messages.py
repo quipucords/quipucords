@@ -226,11 +226,11 @@ REPORT_DEPLOYMENTS_NOT_CREATED = (
 REPORT_AGGREGATE_NOT_AVAILABLE = (
     "Aggregate report for Report %(report_id)s is not available."
 )
-REPORT_INSIGHTS_NOT_CREATED = (
-    "Insights report %(report_id)s could not be created. See server logs."
+REPORT_LIGHTSPEED_NOT_CREATED = (
+    "Lightspeed report %(report_id)s could not be created. See server logs."
 )
-REPORT_INSIGHTS_NOT_GENERATED = (
-    "Insights report %(report_id)s was not generated because"
+REPORT_LIGHTSPEED_NOT_GENERATED = (
+    "Lightspeed report %(report_id)s was not generated because"
     " there were 0 valid hosts. See server logs."
 )
 REPORT_UNSUPPORTED_REPORT_TYPE = "Unsupported report_type %(report_type)s specified."

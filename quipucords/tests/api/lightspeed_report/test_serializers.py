@@ -1,9 +1,9 @@
-"""Test Insights serializers."""
+"""Test Lightspeed serializers."""
 
 import pytest
 
 from api.common.entities import ReportEntity
-from api.insights_report.serializers import (
+from api.lightspeed_report.serializers import (
     FactsetSerializer,
     YupanaMetadataSerializer,
     YupanaPayloadSerializer,
