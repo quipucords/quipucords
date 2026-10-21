@@ -15,7 +15,7 @@ from rest_framework.reverse import reverse
         ("v1:reports-detail", {"report_id": 1}, "/api/v1/reports/1/"),
         ("v1:reports-details", {"report_id": 1}, "/api/v1/reports/1/details/"),
         ("v1:reports-deployments", {"report_id": 1}, "/api/v1/reports/1/deployments/"),
-        ("v1:reports-insights", {"report_id": 1}, "/api/v1/reports/1/insights/"),
+        ("v1:reports-lightspeed", {"report_id": 1}, "/api/v1/reports/1/lightspeed/"),
         ("v1:reports-merge", {}, "/api/v1/reports/merge/"),
         ("v1:source-list", {}, "/api/v1/sources/"),
         ("v1:source-detail", {"pk": 1}, "/api/v1/sources/1/"),

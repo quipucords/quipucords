@@ -22,8 +22,8 @@ from api.views import (
     deployments,
     details,
     download_report,
-    insights,
     jobs,
+    lightspeed,
     lightspeed_auth_login,
     lightspeed_auth_logout,
     lightspeed_auth_status,
@@ -63,7 +63,7 @@ v1_urls = [
     path(
         "reports/<int:report_id>/deployments/", deployments, name="reports-deployments"
     ),
-    path("reports/<int:report_id>/insights/", insights, name="reports-insights"),
+    path("reports/<int:report_id>/lightspeed/", lightspeed, name="reports-lightspeed"),
     path("reports/<int:report_id>/", reports, name="reports-detail"),
     path("reports/merge/", async_merge_reports, name="reports-merge"),
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),

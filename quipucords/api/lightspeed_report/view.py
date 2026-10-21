@@ -9,18 +9,18 @@ from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
 
 from api.exceptions import FailedDependencyError
-from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
-from api.insights_report.payload import generate_insights_payload
+from api.lightspeed_report.lightspeed_gzip_renderer import LightspeedGzipRenderer
+from api.lightspeed_report.payload import generate_lightspeed_payload
 
 logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
-@renderer_classes((JSONRenderer, InsightsGzipRenderer, BrowsableAPIRenderer))
-def insights(request, report_id=None):
-    """Lookup and return an Insights system report."""
+@renderer_classes((JSONRenderer, LightspeedGzipRenderer, BrowsableAPIRenderer))
+def lightspeed(request, report_id=None):
+    """Lookup and return a Lightspeed system report."""
     try:
-        payload = generate_insights_payload(report_id)
+        payload = generate_lightspeed_payload(report_id)
     except Http404:
         return JsonResponse({"detail": "Not found."}, status=404)
     except (FailedDependencyError, NotFound) as exc:
