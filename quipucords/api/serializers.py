@@ -14,11 +14,11 @@ from api.deployments_report.serializer import (
     SystemFingerprintSerializer,
 )
 from api.details_report.serializer import DetailsReportSerializer
-from api.insights_report.serializers import YupanaPayloadSerializer
 from api.inspectresult.serializer import (
     RawFactSerializer,
     SystemInspectionResultSerializer,
 )
+from api.lightspeed_report.serializers import YupanaPayloadSerializer
 from api.report.serializer_v1 import ReportUploadSerializer
 from api.scan.serializer import ScanSerializer
 from api.scanjob.serializer import ScanJobSerializer

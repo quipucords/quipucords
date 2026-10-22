@@ -1,4 +1,4 @@
-"""Insights report serializers."""
+"""Lightspeed report serializers."""
 
 import logging
 import socket
@@ -130,7 +130,7 @@ class YupanaHostSerializer(NotEmptyMixin, Serializer):
 
     def get_tags(self, host: HostEntity):
         """Format tags to appear as inventory labels."""
-        data_collector = settings.QUIPUCORDS_INSIGHTS_DATA_COLLECTOR_LABEL
+        data_collector = settings.QUIPUCORDS_LIGHTSPEED_DATA_COLLECTOR_LABEL
 
         tags = {
             "data-collector": data_collector,
@@ -181,7 +181,7 @@ class YupanaSourceSerializer(Serializer):
     """Format source_metadata for yupana payload."""
 
     report_platform_id = fields.UUIDField(source="report_uuid")
-    report_type = fields.CharField(default="insights")
+    report_type = fields.CharField(default="lightspeed")
     report_version = fields.CharField()
     qpc_server_report_id = fields.IntegerField(source="report_id")
     qpc_server_version = fields.CharField(default=server_version)

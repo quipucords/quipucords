@@ -175,14 +175,14 @@ class TestReportDownload:
         assert report_json["report_type"] == "details"
         assert report_json["report_id"] == report_id
 
-    def test_retrieve_insights_json(
+    def test_retrieve_lightspeed_json(
         self, client_logged_in, sources, deployments_report
     ):
-        """Test that report download can return the Insights JSON report."""
+        """Test that report download can return the Lightspeed JSON report."""
         report_id = deployments_report.report.id
         response = client_logged_in.get(
             reverse("v2:download-report", args=(report_id,)),
-            data={"report_type": "insights"},
+            data={"report_type": "lightspeed"},
         )
         assert response.ok
         assert response["Content-Type"] == "application/json"
@@ -190,4 +190,4 @@ class TestReportDownload:
         report_metadata = f"report_id_{report_id}/metadata.json"
         assert report_json[report_metadata]
         report_type = report_json[report_metadata]["source_metadata"]["report_type"]
-        assert report_type == "insights"
+        assert report_type == "lightspeed"

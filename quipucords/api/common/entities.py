@@ -148,17 +148,23 @@ class HostEntity:
         [1]: https://github.com/RedHatInsights/rhsm-subscriptions/blob/adbac748687724a5603d3e2dac747acb6ba13b29/src/main/java/org/candlepin/subscriptions/tally/MetricUsageCollector.java#L319-L324
         [2]: https://github.com/RedHatInsights/rhsm-subscriptions/blob/410b8a2f461588255d86a15b8fad0475e334e417/src/main/java/org/candlepin/subscriptions/tally/facts/FactNormalizer.java#L172-L180
         """  # noqa: E501
-        qpc2insights = {
+        qpc2lightspeed = {
             SystemFingerprint.BARE_METAL: "physical",
             SystemFingerprint.VIRTUALIZED: "virtual",
         }
 
         _infra_type = self._fingerprints.infrastructure_type
-        return qpc2insights.get(_infra_type, _infra_type)
+        return qpc2lightspeed.get(_infra_type, _infra_type)
 
     @property
     def insights_id(self):
-        """Retrieve insights id."""
+        """
+        Retrieve insights id.
+
+        Historic note: Red Hat Lightspeed was called Red Hat Insights before 2026, and
+        some IDs like insights_client_id and insights_id remain with the older name
+        because they are pulled from scan targets that still use "insights" clients.
+        """
         return self._fingerprints.insights_client_id
 
     @property
@@ -284,7 +290,7 @@ class ReportEntity:
     _deployment_report: DeploymentsReport
     hosts: List[HostEntity] = field(repr=False, default_factory=list)
     slice_size_limit: int = field(
-        default_factory=lambda: settings.QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE
+        default_factory=lambda: settings.QUIPUCORDS_LIGHTSPEED_REPORT_SLICE_SIZE
     )
 
     @property
@@ -334,7 +340,7 @@ class ReportEntity:
             .filter(report__id=report_id)
             .get()
         )
-        # openshift/ansible/rhacs sources won't make sense in insights reports.
+        # openshift/ansible/rhacs sources won't make sense in Lightspeed reports.
         fingerprints = list(
             SystemFingerprint.objects.filter(deployment_report=deployment_report)
             .exclude(sources__icontains=DataSources.OPENSHIFT)

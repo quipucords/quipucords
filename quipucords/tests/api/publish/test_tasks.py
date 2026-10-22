@@ -130,7 +130,7 @@ def test_publish_to_ingress_success(publish_request, secure_token_valid, mocker)
 
     mock_tarball = BytesIO(b"fake-tarball-content")
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=mock_tarball,
     )
     mock_post = mocker.patch("api.publish.tasks.requests.post")
@@ -151,7 +151,7 @@ def test_publish_to_ingress_skips_save_when_no_longer_pending(
 ):
     """Test that a stale task does not overwrite a newer publish attempt."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     mock_post = mocker.patch("api.publish.tasks.requests.post")
@@ -174,7 +174,7 @@ def test_publish_to_ingress_payload_generation_failure(
 ):
     """Test that an unexpected error during payload generation is handled."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         side_effect=RuntimeError("serializer exploded"),
     )
 
@@ -191,7 +191,7 @@ def test_publish_to_ingress_includes_bearer_token(
 ):
     """Test that the POST request includes the Bearer auth header."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     mock_post = mocker.patch("api.publish.tasks.requests.post")
@@ -229,7 +229,7 @@ def test_publish_to_ingress_expired_auth_token(publish_request, secure_token_exp
 def test_publish_to_ingress_auth_rejected(publish_request, secure_token_valid, mocker):
     """Test that a 401 response marks the request as FAILED."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     mock_post = mocker.patch("api.publish.tasks.requests.post")
@@ -252,7 +252,7 @@ def test_publish_to_ingress_connection_error(
 ):
     """Test that a ConnectionError marks the request as FAILED."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     err_message = "Connection refused"
@@ -274,7 +274,7 @@ def test_publish_to_ingress_base_http_error(
 ):
     """Test that a BaseHTTPError marks the request as FAILED."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     err_message = "urllib3 error"
@@ -294,7 +294,7 @@ def test_publish_to_ingress_base_http_error(
 def test_publish_to_ingress_client_error(publish_request, secure_token_valid, mocker):
     """Test that a 4xx response (other than 401) marks the request as FAILED."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     mock_post = mocker.patch("api.publish.tasks.requests.post")
@@ -315,7 +315,7 @@ def test_publish_to_ingress_client_error(publish_request, secure_token_valid, mo
 def test_publish_to_ingress_server_error(publish_request, secure_token_valid, mocker):
     """Test that a 5xx response marks the request as FAILED."""
     mocker.patch(
-        "api.publish.tasks.generate_insights_tarball",
+        "api.publish.tasks.generate_lightspeed_tarball",
         return_value=BytesIO(b"data"),
     )
     mock_post = mocker.patch("api.publish.tasks.requests.post")
