@@ -6,8 +6,11 @@ from io import StringIO
 from unittest import mock
 
 import pytest
+from axes.models import AccessAttempt
 from django.conf import settings
 from django.core.management import call_command
+from rest_framework import status
+from rest_framework.reverse import reverse
 
 from quipucords.user import User
 
@@ -128,3 +131,34 @@ def test_create_or_update_user_enforces_single_user(qpc_user_simple: User, faker
     assert User.objects.filter(username=new_username).exists()
     assert User.objects.count() == 1
     assert f"Created user '{new_username}'" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_create_or_update_user_unlocks_locked_out_user(
+    qpc_user_simple: User, client_logged_out, settings, faker
+):
+    """Test a locked out user can log in again after its password is reset."""
+    settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]["anon"] = "9000/second"
+    username = qpc_user_simple.username
+    password = faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)
+    AccessAttempt.objects.create(
+        username=username,
+        ip_address=faker.ipv4(),
+        user_agent=faker.user_agent(),
+        failures_since_start=settings.AXES_FAILURE_LIMIT,
+    )
+
+    # Before the reset, Axes rejects the login even with the correct password.
+    response = client_logged_out.post(
+        reverse("v1:token"), data={"username": username, "password": password}
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    with patch_environ(username, password):
+        call_command("create_or_update_user", stdout=StringIO())
+
+    assert not AccessAttempt.objects.filter(username=username).exists()
+    response = client_logged_out.post(
+        reverse("v1:token"), data={"username": username, "password": password}
+    )
+    assert response.status_code == status.HTTP_200_OK

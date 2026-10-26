@@ -20,3 +20,6 @@ TASK_UNEXPECTED_FAILURE = "UNEXPECTED FAILURE in %s. Error: %s\nAnsible result: 
 TASK_PERMISSION_DENIED = "PERMISSION DENIED %s could not connect with cred %s."
 
 USER_SINGLE_USER_ENFORCED = "There can be only one user - '%s'."
+USER_LOGIN_LOCKOUT_CLEARED = (
+    "Cleared %s login lockout record(s) for user '%s' after its password changed."
+)

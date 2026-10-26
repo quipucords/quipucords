@@ -3,12 +3,13 @@
 import logging
 import secrets
 
+from axes.utils import reset as axes_reset
 from django.conf import settings
 from django.contrib.auth import get_user_model, password_validation
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from log_messages import USER_SINGLE_USER_ENFORCED
+from log_messages import USER_LOGIN_LOCKOUT_CLEARED, USER_SINGLE_USER_ENFORCED
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +34,26 @@ def validate_password(password: str, user: User | None = None):
         raise InvalidPasswordError(error)
 
 
+def clear_login_lockout(user: User):
+    """
+    Clear any Axes login lockout records for a User.
+
+    Axes locks an account out after too many failed login attempts, and that
+    lockout outlives a password change. Since a user who just set a new password
+    has proven they control the account, drop the lockout so they can log in
+    immediately instead of waiting for the cool-off period to expire.
+    """
+    count = axes_reset(username=user.username)
+    if count:
+        logger.info(USER_LOGIN_LOCKOUT_CLEARED, count, user.username)
+
+
 def update_password(user: User, password: str):
-    """Update the password for a User."""
+    """Update the password for a User, clearing any login lockout."""
     validate_password(password, user)
     user.set_password(password)
     user.save()
+    clear_login_lockout(user)
 
 
 @transaction.atomic
