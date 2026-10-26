@@ -183,55 +183,54 @@ class TestCreateOrUpdateUser:
 
 
 @pytest.mark.django_db
-class TestClearLoginLockout:
-    """Test that changing a password clears the Axes login lockout."""
+def test_update_password_clears_lockout(faker, qpc_user_simple: User):
+    """Test update_password removes the user's Axes lockout records."""
+    make_access_attempt(qpc_user_simple.username, faker)
+    update_password(
+        qpc_user_simple,
+        faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH),
+    )
+    assert not AccessAttempt.objects.filter(username=qpc_user_simple.username).exists()
 
-    def test_update_password_clears_lockout(self, faker, qpc_user_simple: User):
-        """Test update_password removes the user's Axes lockout records."""
-        make_access_attempt(qpc_user_simple.username, faker)
-        update_password(
-            qpc_user_simple,
-            faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH),
-        )
-        assert not AccessAttempt.objects.filter(
-            username=qpc_user_simple.username
-        ).exists()
 
-    def test_update_password_keeps_other_usernames_lockout(
-        self, faker, qpc_user_simple: User
-    ):
-        """Test update_password only clears lockout records for the given user."""
-        other_username = f"{qpc_user_simple.username}_other"
-        make_access_attempt(qpc_user_simple.username, faker)
-        make_access_attempt(other_username, faker)
-        update_password(
-            qpc_user_simple,
-            faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH),
-        )
-        assert AccessAttempt.objects.filter(username=other_username).exists()
+@pytest.mark.django_db
+def test_update_password_keeps_other_usernames_lockout(faker, qpc_user_simple: User):
+    """Test update_password only clears lockout records for the given user."""
+    other_username = f"{qpc_user_simple.username}_other"
+    make_access_attempt(qpc_user_simple.username, faker)
+    make_access_attempt(other_username, faker)
+    update_password(
+        qpc_user_simple,
+        faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH),
+    )
+    assert AccessAttempt.objects.filter(username=other_username).exists()
 
-    def test_create_or_update_user_with_password_clears_lockout(
-        self, faker, qpc_user_simple: User
-    ):
-        """Test create_or_update_user clears the lockout when it sets a password."""
-        username = qpc_user_simple.username
-        make_access_attempt(username, faker)
-        created, updated, _ = create_or_update_user(
-            username,
-            None,
-            faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH),
-        )
-        assert not created
-        assert updated
-        assert not AccessAttempt.objects.filter(username=username).exists()
 
-    def test_create_or_update_user_without_password_keeps_lockout(
-        self, faker, qpc_user_simple: User
-    ):
-        """Test create_or_update_user keeps the lockout when it sets no password."""
-        username = qpc_user_simple.username
-        make_access_attempt(username, faker)
-        created, updated, _ = create_or_update_user(username, None, None)
-        assert not created
-        assert not updated
-        assert AccessAttempt.objects.filter(username=username).exists()
+@pytest.mark.django_db
+def test_create_or_update_user_with_password_clears_lockout(
+    faker, qpc_user_simple: User
+):
+    """Test create_or_update_user clears the lockout when it sets a password."""
+    username = qpc_user_simple.username
+    make_access_attempt(username, faker)
+    created, updated, _ = create_or_update_user(
+        username,
+        None,
+        faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH),
+    )
+    assert not created
+    assert updated
+    assert not AccessAttempt.objects.filter(username=username).exists()
+
+
+@pytest.mark.django_db
+def test_create_or_update_user_without_password_keeps_lockout(
+    faker, qpc_user_simple: User
+):
+    """Test create_or_update_user keeps the lockout when it sets no password."""
+    username = qpc_user_simple.username
+    make_access_attempt(username, faker)
+    created, updated, _ = create_or_update_user(username, None, None)
+    assert not created
+    assert not updated
+    assert AccessAttempt.objects.filter(username=username).exists()
