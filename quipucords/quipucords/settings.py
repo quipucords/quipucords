@@ -16,6 +16,7 @@ import random
 import stat
 import string
 import warnings
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -555,9 +556,14 @@ CELERY_RESULT_EXPIRES = 90 * 24 * 3600
 
 # See also: https://django-axes.readthedocs.io/en/latest/4_configuration.html
 AXES_ENABLED = env.bool("QUIPUCORDS_AXES_ENABLED", True)
-AXES_FAILURE_LIMIT = env.int("QUIPUCORDS_AXES_FAILURE_LIMIT", 3)
+AXES_FAILURE_LIMIT = env.int("QUIPUCORDS_AXES_FAILURE_LIMIT", 5)
 AXES_LOCK_OUT_AT_FAILURE = env.bool("QUIPUCORDS_AXES_LOCK_OUT_AT_FAILURE", True)
-AXES_COOLOFF_TIME = env.int("QUIPUCORDS_AXES_COOLOFF_TIME", 1)  # time in hours
+# The cool off time doubles as the sliding window: failures older than this are
+# no longer counted, and a lockout expires once this much time has passed since
+# the most recent failed attempt.
+AXES_COOLOFF_TIME = timedelta(
+    minutes=env.int("QUIPUCORDS_AXES_COOLOFF_MINUTES", 15),
+)
 AXES_LOCKOUT_PARAMETERS = ["ip_address", "username"]
 
 if not AXES_ENABLED or not AXES_LOCK_OUT_AT_FAILURE:
