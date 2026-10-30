@@ -987,13 +987,13 @@ paths:
           description: "Report for report id not found"
         428:
           description: "Precondition required."
-  /reports/{report_id}/insights/:
+  /reports/{report_id}/lightspeed/:
     get:
       tags:
         - "Report"
-      summary: "Retrieve an insights report for systems scanned"
-      description: "Get insights report for systems that have been scanned"
-      operationId: "getInsightsReport"
+      summary: "Retrieve a Lightspeed report for systems scanned"
+      description: "Get Lightspeed report for systems that have been scanned"
+      operationId: "getLightspeedReport"
       produces:
       - "application/gzip"
       - "application/json"
@@ -1006,9 +1006,9 @@ paths:
           format: "int64"
       responses:
         200:
-          description: "Insights report for scanned systems retrieved"
+          description: "Lightspeed report for scanned systems retrieved"
           schema:
-              $ref: "#/definitions/InsightsReport"
+              $ref: "#/definitions/LightspeedReport"
         401:
           description: "Not authorized"
         404:
@@ -1526,7 +1526,7 @@ definitions:
             "cloud_provider": "aws"
         }
       }
-  InsightsReport:
+  LightspeedReport:
     properties:
       metadata_tar_path:
         type: object
@@ -1553,7 +1553,7 @@ definitions:
               report_type:
                 type: "string"
                 description: "The report type"
-                example: "insights"
+                example: "lightspeed"
               report_version:
                 type: "string"
                 description: "The report version"
@@ -1575,7 +1575,7 @@ definitions:
             type: object
             properties:
               report_slice_id:
-                $ref: "#/definitions/InsightsReportSliceMetadata"
+                $ref: "#/definitions/LightspeedReportSliceMetadata"
             description: "Metadata for each report slice"
         description: "Metadata describing report contents"
       report_slice_tar_path:
@@ -1583,15 +1583,15 @@ definitions:
         properties:
           report_slice_id:
             type: "string"
-            description: "The Insights report slice identifier"
+            description: "The Lightspeed report slice identifier"
             example: "abc075ac-84d3-4b62-9f5c-a418a36f802d"
           hosts:
             type: "array"
             items:
               $ref: "#/definitions/Host"
             description: "List of the hosts scanned (should refer to https://github.com/RedHatInsights/insights-host-inventory/blob/system_profile_changes/swagger/api.spec.yaml"
-        description: "Slices of the Insights report"
-  InsightsReportSliceMetadata:
+        description: "Slices of the Lightspeed report"
+  LightspeedReportSliceMetadata:
     properties:
       number_hosts:
         type: "integer"

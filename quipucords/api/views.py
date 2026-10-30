@@ -13,7 +13,7 @@ from api.credential.view import CredentialViewSetV2
 from api.credential.view_v1 import CredentialViewSetV1, credential_bulk_delete
 from api.deployments_report.view import deployments
 from api.details_report.view import details
-from api.insights_report.view import insights
+from api.lightspeed_report.view import lightspeed
 from api.merge_report.view import async_merge_reports
 from api.publish.view import publish_report
 from api.report.view import RawFactsReportView, ReportViewSet, download_report

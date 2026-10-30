@@ -1,4 +1,4 @@
-"""tar.gz renderer for insights reports."""
+"""tar.gz renderer for Lightspeed reports."""
 
 import logging
 
@@ -9,8 +9,8 @@ from api.common.common_report import create_tar_buffer, encode_content
 logger = logging.getLogger(__name__)
 
 
-class InsightsGzipRenderer(renderers.BaseRenderer):
-    """Class to render insights reports as tar.gz."""
+class LightspeedGzipRenderer(renderers.BaseRenderer):
+    """Class to render Lightspeed reports as tar.gz."""
 
     media_type = "application/gzip"
     format = "tar.gz"
@@ -18,11 +18,11 @@ class InsightsGzipRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render all reports as gzip."""
-        insights_dict = data
-        if not insights_dict:
+        lightspeed_dict = data
+        if not lightspeed_dict:
             return None
-        insights_encoded = {
+        lightspeed_encoded = {
             file_name: encode_content(json_data, "json")
-            for file_name, json_data in insights_dict.items()
+            for file_name, json_data in lightspeed_dict.items()
         }
-        return create_tar_buffer(insights_encoded)
+        return create_tar_buffer(lightspeed_encoded)

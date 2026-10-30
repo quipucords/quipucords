@@ -1,4 +1,4 @@
-"""Test the insights report endpoint (/api/v1/reports/{id}/insights/)."""
+"""Test the Lightspeed report endpoint (/api/v1/reports/{id}/lightspeed/)."""
 
 import pytest
 from django.test import override_settings
@@ -14,7 +14,7 @@ from tests.report_utils import extract_files_from_tarball
 def validate_data(
     data: dict, deployment_report: DeploymentsReport, expected_number_of_slices: int = 2
 ):
-    """Validate insights report data."""
+    """Validate Lightspeed report data."""
     report_id = deployment_report.report.id
     metadata_filename = f"report_id_{report_id}/metadata.json"
     assert create_filename("metadata", "json", report_id) == metadata_filename
@@ -55,7 +55,7 @@ def validate_data(
         "unexpected hosts count"
     )
 
-    # Assert that the Insights report has all the expected installed_products.
+    # Assert that the Lightspeed report has all the expected installed_products.
     # We collect more per product than HBI models (version, arch, tags); only
     # id and name are meant to leave this server.
     expected_installed_products = [
@@ -65,7 +65,7 @@ def validate_data(
     ]
     # SystemFingerprintFactory should have created at least one installed_product.
     assert len(expected_installed_products) > 0
-    # Ugly but yes this is how you navigate to this data in our Insights report:
+    # Ugly but yes this is how you navigate to this data in our Lightspeed report:
     returned_installed_products = [
         installed_product
         for slice_key in report_slices
@@ -90,33 +90,33 @@ def validate_data(
 
 
 @pytest.mark.django_db
-def test_get_insights_report_as_json(client_logged_in):
-    """Retrieve insights report as JSON and verify it contains all data (no slicing)."""
+def test_get_lightspeed_report_as_json(client_logged_in):
+    """Retrieve Lightspeed report as JSON, verify it contains all data (no slicing)."""
     deployment_report = DeploymentReportFactory(
         status=DeploymentsReport.STATUS_COMPLETE,
     )
     report_id = deployment_report.report.id
-    response = client_logged_in.get(reverse("v1:reports-insights", args=(report_id,)))
+    response = client_logged_in.get(reverse("v1:reports-lightspeed", args=(report_id,)))
     assert response.ok, f"response was not ok; status {response.status_code}"
 
     # mock slice size so we can expect result to contain all data without slicing
-    with override_settings(QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE=99999):
+    with override_settings(QUIPUCORDS_LIGHTSPEED_REPORT_SLICE_SIZE=99999):
         response_json = response.json()
     validate_data(response_json, deployment_report, expected_number_of_slices=1)
 
 
 @pytest.mark.django_db
-def test_get_insights_report_as_json_sliced(client_logged_in):
-    """Retrieve insights report as JSON with sliced data."""
+def test_get_lightspeed_report_as_json_sliced(client_logged_in):
+    """Retrieve Lightspeed report as JSON with sliced data."""
     deployment_report = DeploymentReportFactory(
         number_of_fingerprints=3,
         status=DeploymentsReport.STATUS_COMPLETE,
     )
     report_id = deployment_report.report.id
     # mock slice size so we can expect 2 slices on this test
-    with override_settings(QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE=2):
+    with override_settings(QUIPUCORDS_LIGHTSPEED_REPORT_SLICE_SIZE=2):
         response = client_logged_in.get(
-            reverse("v1:reports-insights", args=(report_id,))
+            reverse("v1:reports-lightspeed", args=(report_id,))
         )
     assert response.ok, f"response was not ok; status {response.status_code}"
     response_json = response.json()
@@ -124,17 +124,17 @@ def test_get_insights_report_as_json_sliced(client_logged_in):
 
 
 @pytest.mark.django_db
-def test_get_insights_report_as_tarball_sliced(client_logged_in):
-    """Retrieve insights report as a tarball (.tar.gz) with sliced data."""
+def test_get_lightspeed_report_as_tarball_sliced(client_logged_in):
+    """Retrieve Lightspeed report as a tarball (.tar.gz) with sliced data."""
     deployments_report = DeploymentReportFactory(
         number_of_fingerprints=11,
         status=DeploymentsReport.STATUS_COMPLETE,
     )
     report_id = deployments_report.report.id
     # mock slice size so we can expect 2 slices on this test
-    with override_settings(QUIPUCORDS_INSIGHTS_REPORT_SLICE_SIZE=10):
+    with override_settings(QUIPUCORDS_LIGHTSPEED_REPORT_SLICE_SIZE=10):
         response = client_logged_in.get(
-            reverse("v1:reports-insights", args=(report_id,)),
+            reverse("v1:reports-lightspeed", args=(report_id,)),
             {"format": "tar.gz"},
         )
     assert response.ok, f"response was not ok; status {response.status_code}"
@@ -146,7 +146,46 @@ def test_get_insights_report_as_tarball_sliced(client_logged_in):
 
 
 @pytest.mark.django_db
-def test_get_insights_report_unknown_id_not_found(client_logged_in):
-    """Fail to get an Insights for report id that doesn't exist."""
-    response = client_logged_in.get(reverse("v1:reports-insights", args=("999",)))
+def test_get_lightspeed_report_unknown_id_not_found(client_logged_in):
+    """Fail to get a Lightspeed for report id that doesn't exist."""
+    response = client_logged_in.get(
+        reverse("v1:reports-lightspeed", args=("999",)),
+        HTTP_ACCEPT="application/gzip",
+    )
     assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response["Content-Type"].startswith("application/json")
+
+
+@pytest.mark.django_db
+def test_get_lightspeed_report_complete_no_fingerprints_returns_json_error(
+    client_logged_in,
+):
+    """Deployments complete but no fingerprints: expect JSON 404, not a tar."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_COMPLETE,
+        number_of_fingerprints=0,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(
+        reverse("v1:reports-lightspeed", args=(report_id,)),
+        HTTP_ACCEPT="application/gzip",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response["Content-Type"].startswith("application/json")
+    assert "detail" in response.json()
+
+
+@pytest.mark.django_db
+def test_get_lightspeed_report_not_ready_returns_json_error(client_logged_in):
+    """Report exists but deployments not complete: expect JSON 424, not a tar."""
+    deployment_report = DeploymentReportFactory(
+        status=DeploymentsReport.STATUS_PENDING,
+    )
+    report_id = deployment_report.report.id
+    response = client_logged_in.get(
+        reverse("v1:reports-lightspeed", args=(report_id,)),
+        HTTP_ACCEPT="application/gzip",
+    )
+    assert response.status_code == status.HTTP_424_FAILED_DEPENDENCY
+    assert response["Content-Type"].startswith("application/json")
+    assert "detail" in response.json()

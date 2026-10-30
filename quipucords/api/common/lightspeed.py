@@ -4,7 +4,7 @@ from api.auth.lightspeed.auth import get_lightspeed_secure_token
 from api.common.entities import ReportEntity
 from api.common.enumerators import AuthStatus, LightspeedCannotPublishReason
 from api.exceptions import FailedDependencyError
-from api.insights_report.payload import validate_deployment_report_status
+from api.lightspeed_report.payload import validate_deployment_report_status
 from api.models import Report, SystemFingerprint
 
 AUTH_CANNOT_PUBLISH_REASON_MAP = {

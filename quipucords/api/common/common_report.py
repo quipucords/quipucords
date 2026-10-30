@@ -52,11 +52,13 @@ def encode_content(content, file_format):
     """Encode content as bytes based on its file format."""
 
     def _lightspeed_encoder(content):
-        # insights_gzip_renderer imports create_tar_buffer, defined below.
+        # lightspeed_gzip_renderer imports create_tar_buffer, defined below.
         # Import class here to avoid circular imports.
-        from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
+        from api.lightspeed_report.lightspeed_gzip_renderer import (
+            LightspeedGzipRenderer,
+        )
 
-        rendered_content = InsightsGzipRenderer().render(content)
+        rendered_content = LightspeedGzipRenderer().render(content)
         return rendered_content.read()
 
     def _textfile_encoder(content):
