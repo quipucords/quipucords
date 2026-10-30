@@ -6,10 +6,16 @@ from io import StringIO
 from unittest import mock
 
 import pytest
+from axes.models import AccessAttempt
 from django.conf import settings
 from django.core.management import call_command
+from rest_framework import status
+from rest_framework.reverse import reverse
+from rest_framework.throttling import AnonRateThrottle
 
 from quipucords.user import User
+
+pytestmark = pytest.mark.django_db
 
 password_failed_requirements_message = (
     "QUIPUCORDS_SERVER_PASSWORD value failed password requirements"
@@ -28,7 +34,6 @@ def patch_environ(username=None, password=None):
         yield
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_create_with_no_password(faker):
     """Test creation of a user with no password."""
     out = StringIO()
@@ -40,7 +45,6 @@ def test_create_or_update_user_create_with_no_password(faker):
     assert password_failed_requirements_message not in out.getvalue()
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_create_with_valid_password(faker):
     """Test creation of a user with a valid password."""
     out = StringIO()
@@ -56,7 +60,6 @@ def test_create_or_update_user_create_with_valid_password(faker):
     assert password_failed_requirements_message not in out.getvalue()
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_fail_create_with_bad_password(faker):
     """Test creating a user with a bad password (generating a better random one)."""
     out = StringIO()
@@ -69,7 +72,6 @@ def test_create_or_update_user_fail_create_with_bad_password(faker):
     assert password_failed_requirements_message in out.getvalue()
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_update_with_no_password(qpc_user_simple: User):
     """Test updating a user with no password has no effect."""
     out = StringIO()
@@ -81,7 +83,6 @@ def test_create_or_update_user_update_with_no_password(qpc_user_simple: User):
     assert password_failed_requirements_message not in out.getvalue()
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_update_with_valid_password(qpc_user_simple: User, faker):
     """Test updating a user with a valid password."""
     out = StringIO()
@@ -97,7 +98,6 @@ def test_create_or_update_user_update_with_valid_password(qpc_user_simple: User,
     assert password_failed_requirements_message not in out.getvalue()
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_update_with_bad_password(qpc_user_simple: User):
     """Test updating a user with a bad password (generating a better random one)."""
     out = StringIO()
@@ -110,7 +110,6 @@ def test_create_or_update_user_update_with_bad_password(qpc_user_simple: User):
     assert password_failed_requirements_message in out.getvalue()
 
 
-@pytest.mark.django_db
 def test_create_or_update_user_enforces_single_user(qpc_user_simple: User, faker):
     """Test that creating a user with a different username deletes the old user."""
     old_username = qpc_user_simple.username
@@ -128,3 +127,37 @@ def test_create_or_update_user_enforces_single_user(qpc_user_simple: User, faker
     assert User.objects.filter(username=new_username).exists()
     assert User.objects.count() == 1
     assert f"Created user '{new_username}'" in out.getvalue()
+
+
+def test_create_or_update_user_unlocks_locked_out_user(
+    qpc_user_simple: User, client_logged_out, mocker, faker
+):
+    """Test a locked out user can log in again after its password is reset."""
+    # This test posts to an anonymous endpoint twice, which the default 2/second
+    # anon throttle can reject. DRF binds DEFAULT_THROTTLE_RATES to
+    # SimpleRateThrottle.THROTTLE_RATES at class definition, so patch that bound
+    # mapping instead of the setting; mock.patch.dict restores it afterward.
+    mocker.patch.dict(AnonRateThrottle.THROTTLE_RATES, {"anon": "9000/second"})
+    username = qpc_user_simple.username
+    password = faker.password(length=settings.QUIPUCORDS_MINIMUM_PASSWORD_LENGTH)
+    AccessAttempt.objects.create(
+        username=username,
+        ip_address=faker.ipv4(),
+        user_agent=faker.user_agent(),
+        failures_since_start=settings.AXES_FAILURE_LIMIT,
+    )
+
+    # Before the reset, Axes rejects the login even with the correct password.
+    response = client_logged_out.post(
+        reverse("v1:token"), data={"username": username, "password": password}
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    with patch_environ(username, password):
+        call_command("create_or_update_user", stdout=StringIO())
+
+    assert not AccessAttempt.objects.filter(username=username).exists()
+    response = client_logged_out.post(
+        reverse("v1:token"), data={"username": username, "password": password}
+    )
+    assert response.status_code == status.HTTP_200_OK
