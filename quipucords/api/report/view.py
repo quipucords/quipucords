@@ -1,5 +1,7 @@
 """Report view."""
 
+import logging
+
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
@@ -38,6 +40,8 @@ from api.serializers import (
 )
 
 from .mixins import ReportViewMixin
+
+logger = logging.getLogger(__name__)
 
 
 class RawFactsReportView(ReportViewMixin, ListAPIView):
@@ -166,7 +170,13 @@ def download_report(request, report_id):
             serializer = DetailsReportSerializer(detail_data)
             response_report = serializer.data
             response_report.pop("cached_csv", None)
-        case "lightspeed":  # v2 of /api/v1/reports/<report_id>/lightspeed
+        # TODO: remove "insights" alias after 2.10 release
+        case "lightspeed" | "insights":  # v2 of /api/v1/reports/<report_id>/lightspeed
+            if report_type == "insights":
+                logger.warning(
+                    "Deprecated report_type=insights used. "
+                    "Use report_type=lightspeed instead."
+                )
             deployment_report = get_object_or_404(
                 DeploymentsReport.objects.only("id", "status"), report__id=report_id
             )
