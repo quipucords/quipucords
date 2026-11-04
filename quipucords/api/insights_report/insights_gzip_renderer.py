@@ -2,7 +2,7 @@
 
 import logging
 
-from rest_framework import renderers
+from rest_framework import renderers, status
 
 from api.common.common_report import create_tar_buffer, encode_content
 
@@ -18,6 +18,13 @@ class InsightsGzipRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render all reports as gzip."""
+        # Return None for error responses to let JSON renderer handle it.
+        if (
+            renderer_context
+            and renderer_context.get("response")
+            and renderer_context["response"].status_code >= status.HTTP_400_BAD_REQUEST
+        ):
+            return None
         insights_dict = data
         if not insights_dict:
             return None
