@@ -8,7 +8,10 @@ from django.utils.translation import gettext as _
 from rest_framework.exceptions import NotFound
 
 from api import messages
-from api.common.entities import ReportEntity
+from api.common.entities import (
+    EXCLUDE_SOURCE_TYPES_FROM_DEPLOYMENTS_REPORTS,
+    ReportEntity,
+)
 from api.exceptions import FailedDependencyError
 from api.insights_report.insights_gzip_renderer import InsightsGzipRenderer
 from api.insights_report.serializers import YupanaPayloadSerializer
@@ -31,10 +34,25 @@ def get_report(deployment_report):
     try:
         report = ReportEntity.from_report_id(deployment_report.report.id)
     except SystemFingerprint.DoesNotExist as err:
-        raise NotFound(
+        errors = []
+        # Dig through related data to build a verbose error message if possible.
+        excluded_source_types_found = {
+            source_type
+            for source_type in deployment_report.report.inspect_groups.values_list(
+                "source_type", flat=True
+            ).distinct()
+            if source_type in EXCLUDE_SOURCE_TYPES_FROM_DEPLOYMENTS_REPORTS
+        }
+        for source_type in excluded_source_types_found:
+            errors.append(
+                _(messages.REPORT_INSIGHTS_SOURCE_TYPE_NOT_SUPPORTED)
+                % {"source_type": source_type}
+            )
+        errors.append(
             _(messages.REPORT_INSIGHTS_NOT_GENERATED)
             % {"report_id": deployment_report.report.id}
-        ) from err
+        )
+        raise NotFound(" ".join(errors)) from err
 
     return report
 
