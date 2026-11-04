@@ -233,6 +233,9 @@ REPORT_INSIGHTS_NOT_GENERATED = (
     "Insights report %(report_id)s was not generated because"
     " there were 0 valid hosts. See server logs."
 )
+REPORT_INSIGHTS_SOURCE_TYPE_NOT_SUPPORTED = (
+    "Insights reports do not support systems found via %(source_type)s sources."
+)
 REPORT_UNSUPPORTED_REPORT_TYPE = "Unsupported report_type %(report_type)s specified."
 
 # Publish messages

@@ -66,6 +66,17 @@ FINGERPRINT_FACT_NAMES_TO_SYNTHESIZE_PROVIDER_ID = {
     "etc_machine_id",
 }
 
+# openshift/ansible/rhacs sources won't make sense in insights reports,
+# and insights report is generated from deployments reports.
+# so, we exclude these types from deployments reports.
+# is that a strange decision? maybe! but it's been in use since 2023.
+# precedent for exclusion started at 1b0ba64c5174cb9d6ddb2a8a1a73c0e1da2ae525.
+EXCLUDE_SOURCE_TYPES_FROM_DEPLOYMENTS_REPORTS = (
+    DataSources.OPENSHIFT,
+    DataSources.ANSIBLE,
+    DataSources.RHACS,
+)
+
 
 def hash_system_fingerprint(fingerprint: SystemFingerprint, *, fields: set[str]) -> str:
     """Hash a SystemFingerprint to a single hopefully-unique identifier string."""
@@ -334,20 +345,18 @@ class ReportEntity:
             .filter(report__id=report_id)
             .get()
         )
+        query = SystemFingerprint.objects.filter(deployment_report=deployment_report)
         # openshift/ansible/rhacs sources won't make sense in insights reports.
+        for source_type in EXCLUDE_SOURCE_TYPES_FROM_DEPLOYMENTS_REPORTS:
+            query = query.exclude(sources__icontains=source_type)
         fingerprints = list(
-            SystemFingerprint.objects.filter(deployment_report=deployment_report)
-            .exclude(sources__icontains=DataSources.OPENSHIFT)
-            .exclude(sources__icontains=DataSources.ANSIBLE)
-            .exclude(sources__icontains=DataSources.RHACS)
-            .annotate(
+            query.annotate(
                 product_names=StringAgg(
                     "products__name",
                     default=Value(""),
                     filter=Q(products__presence=Product.PRESENT),
                 )
-            )
-            .all()
+            ).all()
         )
         return deployment_report, fingerprints
 
