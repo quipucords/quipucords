@@ -3,6 +3,7 @@
 import logging
 
 from rest_framework import renderers, status
+from rest_framework.renderers import JSONRenderer
 
 from api.common.common_report import create_tar_buffer, encode_content
 
@@ -18,13 +19,21 @@ class InsightsGzipRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """Render all reports as gzip."""
-        # Return None for error responses to let JSON renderer handle it.
+        # DRF uses this renderer for all responses when Accept: application/gzip,
+        # including framework-generated errors (401, 429, etc.) that bypass the view.
+        # For those error responses we must render as JSON explicitly; DRF will not
+        # fall back to JSONRenderer on its own.
         if (
             renderer_context
             and renderer_context.get("response")
             and renderer_context["response"].status_code >= status.HTTP_400_BAD_REQUEST
         ):
-            return None
+            renderer_context["response"]["Content-Type"] = "application/json"
+            return JSONRenderer().render(
+                data,
+                accepted_media_type="application/json",
+                renderer_context=renderer_context,
+            )
         insights_dict = data
         if not insights_dict:
             return None
