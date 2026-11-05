@@ -10,6 +10,8 @@ from api.models import DeploymentsReport
 from tests.factories import DeploymentReportFactory
 from tests.report_utils import extract_files_from_tarball
 
+pytestmark = pytest.mark.django_db
+
 
 def validate_data(
     data: dict, deployment_report: DeploymentsReport, expected_number_of_slices: int = 2
@@ -89,7 +91,6 @@ def validate_data(
     assert returned_installed_products == expected_installed_products
 
 
-@pytest.mark.django_db
 def test_get_insights_report_as_json(client_logged_in):
     """Retrieve insights report as JSON and verify it contains all data (no slicing)."""
     deployment_report = DeploymentReportFactory(
@@ -105,7 +106,6 @@ def test_get_insights_report_as_json(client_logged_in):
     validate_data(response_json, deployment_report, expected_number_of_slices=1)
 
 
-@pytest.mark.django_db
 def test_get_insights_report_as_json_sliced(client_logged_in):
     """Retrieve insights report as JSON with sliced data."""
     deployment_report = DeploymentReportFactory(
@@ -123,7 +123,6 @@ def test_get_insights_report_as_json_sliced(client_logged_in):
     validate_data(response_json, deployment_report)
 
 
-@pytest.mark.django_db
 def test_get_insights_report_as_tarball_sliced(client_logged_in):
     """Retrieve insights report as a tarball (.tar.gz) with sliced data."""
     deployments_report = DeploymentReportFactory(
@@ -145,7 +144,6 @@ def test_get_insights_report_as_tarball_sliced(client_logged_in):
     validate_data(data, deployments_report)
 
 
-@pytest.mark.django_db
 def test_get_insights_report_unknown_id_not_found(client_logged_in):
     """Fail to get an Insights for report id that doesn't exist."""
     response = client_logged_in.get(
@@ -156,7 +154,6 @@ def test_get_insights_report_unknown_id_not_found(client_logged_in):
     assert response["Content-Type"].startswith("application/json")
 
 
-@pytest.mark.django_db
 def test_get_insights_report_complete_no_fingerprints_returns_json_error(
     client_logged_in,
 ):
@@ -178,7 +175,6 @@ def test_get_insights_report_complete_no_fingerprints_returns_json_error(
     )
 
 
-@pytest.mark.django_db
 def test_get_insights_report_not_ready_returns_json_error(client_logged_in):
     """Report exists but deployments not complete: expect JSON 424, not a tar."""
     deployment_report = DeploymentReportFactory(
