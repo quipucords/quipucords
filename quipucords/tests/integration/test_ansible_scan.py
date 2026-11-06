@@ -182,9 +182,9 @@ class TestAnsibleScan(Smoker):
             "name": self.SOURCE_NAME,
         }
 
-    def test_insights_report(self, client_logged_in, report_id):
-        """Smoke test insights report."""
-        response = client_logged_in.get(f"reports/{report_id}/insights/")
+    def test_lightspeed_report(self, client_logged_in, report_id):
+        """Smoke test Lightspeed report."""
+        response = client_logged_in.get(f"reports/{report_id}/lightspeed/")
         assert response.status_code == 404, (
-            "'systems' from ansible sources should not be part of insights report"
+            "'systems' from ansible sources should not be part of Lightspeed report"
         )

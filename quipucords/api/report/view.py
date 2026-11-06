@@ -1,5 +1,7 @@
 """Report view."""
 
+import logging
+
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
@@ -26,7 +28,7 @@ from api.aggregate_report.view import (
     get_serialized_aggregate_report,
 )
 from api.deployments_report.view import deployments_report_and_status
-from api.insights_report.payload import get_report, validate_deployment_report_status
+from api.lightspeed_report.payload import get_report, validate_deployment_report_status
 from api.models import DeploymentsReport, InspectResult, Report
 from api.report.reports_gzip_renderer import ReportsGzipRenderer
 from api.report.serializer import InspectResultSerializer, ReportSerializer
@@ -38,6 +40,8 @@ from api.serializers import (
 )
 
 from .mixins import ReportViewMixin
+
+logger = logging.getLogger(__name__)
 
 
 class RawFactsReportView(ReportViewMixin, ListAPIView):
@@ -85,7 +89,7 @@ class ReportViewSet(ReadOnlyModelViewSet):
 
 
 # Report type choices for the report download API endpoint
-REPORT_TYPE_CHOICES = ["aggregate", "deployments", "details", "insights"]
+REPORT_TYPE_CHOICES = ["aggregate", "deployments", "details", "lightspeed"]
 
 
 @extend_schema(
@@ -116,8 +120,8 @@ REPORT_TYPE_CHOICES = ["aggregate", "deployments", "details", "insights"]
             description="Details Reports JSON for the Report specified",
             response=DetailsReportSerializer,
         ),
-        ("200_insights", "application/json"): OpenApiResponse(
-            description="Insights Reports JSON for the Report specified",
+        ("200_lightspeed", "application/json"): OpenApiResponse(
+            description="Lightspeed Reports JSON for the Report specified",
             response=YupanaPayloadSerializer,
         ),
     },
@@ -166,7 +170,13 @@ def download_report(request, report_id):
             serializer = DetailsReportSerializer(detail_data)
             response_report = serializer.data
             response_report.pop("cached_csv", None)
-        case "insights":  # v2 of /api/v1/reports/<report_id>/insights
+        # TODO: remove "insights" alias after 2.10 release
+        case "lightspeed" | "insights":  # v2 of /api/v1/reports/<report_id>/lightspeed
+            if report_type == "insights":
+                logger.warning(
+                    "Deprecated report_type=insights used. "
+                    "Use report_type=lightspeed instead."
+                )
             deployment_report = get_object_or_404(
                 DeploymentsReport.objects.only("id", "status"), report__id=report_id
             )

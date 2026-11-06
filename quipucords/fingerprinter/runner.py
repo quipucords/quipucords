@@ -243,7 +243,7 @@ class FingerprintTaskRunner(ScanTaskRunner):
                     if settings.QUIPUCORDS_BYPASS_BUILD_CACHED_FINGERPRINTS:
                         continue
 
-                    # Add auto-generated fields for the insights report
+                    # Add auto-generated fields for the Lightspeed report
                     fingerprint_dict["id"] = fingerprint.id
 
                     # Serialize the date
