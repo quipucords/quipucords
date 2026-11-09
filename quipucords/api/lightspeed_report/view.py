@@ -26,23 +26,3 @@ def lightspeed(request, report_id=None):
     except (FailedDependencyError, NotFound) as exc:
         return JsonResponse({"detail": str(exc.detail)}, status=exc.status_code)
     return Response(payload)
-
-
-# TODO: remove after 2.10 release when CLI no longer uses /insights/ endpoint
-@api_view(["GET"])
-@renderer_classes((JSONRenderer, LightspeedGzipRenderer, BrowsableAPIRenderer))
-def insights(request, report_id=None):
-    """Return Lightspeed report via deprecated /insights/ path."""
-    logger.warning(
-        "Deprecated endpoint /reports/%s/insights/ called. "
-        "Use /reports/%s/lightspeed/ instead.",
-        report_id,
-        report_id,
-    )
-    # We need to pass request._request because `api_view` wraps both of these
-    # functions, nesting the *original* incoming Django WSGIRequest to DRF's
-    # own Request type, and we don't want it double-nested here.
-    return lightspeed(request._request, report_id=report_id)
-
-
-# END TODO

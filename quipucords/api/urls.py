@@ -22,7 +22,6 @@ from api.views import (
     deployments,
     details,
     download_report,
-    insights,
     jobs,
     lightspeed,
     lightspeed_auth_login,
@@ -65,8 +64,6 @@ v1_urls = [
         "reports/<int:report_id>/deployments/", deployments, name="reports-deployments"
     ),
     path("reports/<int:report_id>/lightspeed/", lightspeed, name="reports-lightspeed"),
-    # TODO: remove after 2.10 release when CLI no longer uses /insights/ endpoint
-    path("reports/<int:report_id>/insights/", insights, name="reports-insights"),
     path("reports/<int:report_id>/", reports, name="reports-detail"),
     path("reports/merge/", async_merge_reports, name="reports-merge"),
     path("scans/<int:scan_id>/jobs/", jobs, name="scan-filtered-jobs"),
