@@ -179,7 +179,7 @@ class InspectTaskRunner(ScanTaskRunner):
             error_message = (
                 f"Unable to connect to VCenter source, {source.name}, "
                 f"with supplied credential, {credential.name}.\n"
-                f"Discovery scan failed for {(self.scan_task,)}. {vm_error}"
+                f"Scan failed for {(self.scan_task,)}. {vm_error}"
             )
             return error_message, ScanTask.FAILED
 

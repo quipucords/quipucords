@@ -245,7 +245,7 @@ PUBLISH_PAYLOAD_FAILED = "Failed to generate report payload: %s"
 PUBLISH_CONNECTION_ERROR = "Connection error: %s. Please try again later."
 PUBLISH_AUTH_REJECTED = "Authentication rejected by server: %s. Please log in again."
 PUBLISH_CLIENT_ERROR = (
-    "Request rejected by ingress (%s): %s. This might be a bug in Discovery."
+    "Request rejected by ingress (%s): %s. This might be a bug in our code."
 )
 PUBLISH_SERVER_ERROR = "Ingress server error (%s): %s. Please try again later."
 PUBLISH_UNEXPECTED_RESPONSE = "Unexpected response (%s): %s"
