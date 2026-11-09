@@ -309,7 +309,7 @@ def test_publish_to_ingress_client_error(publish_request, secure_token_valid, mo
     assert publish_request.error_code == PublishRequest.ErrorCode.SERVER_ERROR
     assert "404" in publish_request.error_message
     assert "Not Found" in publish_request.error_message
-    assert "bug in Discovery" in publish_request.error_message
+    assert "bug in our code" in publish_request.error_message
 
 
 def test_publish_to_ingress_server_error(publish_request, secure_token_valid, mocker):
