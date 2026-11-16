@@ -43,13 +43,11 @@ hatch-fancy-pypi-readme==25.1.0
     # via
     #   attrs
     #   jsonschema
-    #   python-dateutil
 hatch-vcs==0.5.0
     # via
     #   attrs
     #   jsonschema
     #   jsonschema-specifications
-    #   python-dateutil
     #   referencing
     #   urllib3
 hatchling==1.33.0
@@ -60,7 +58,6 @@ hatchling==1.33.0
     #   hatch-vcs
     #   jsonschema
     #   jsonschema-specifications
-    #   python-dateutil
     #   redis
     #   referencing
     #   sqlparse
@@ -95,7 +92,7 @@ pycparser==3.12 ; (implementation_name == "cpython" and platform_python_implemen
     # via cffi
 semantic-version==2.10.0
     # via setuptools-rust
-semver==3.1.0
+semver==3.1.2
     # via changelog-chug
 setuptools-rust==1.13.0
     # via maturin
@@ -107,12 +104,16 @@ setuptools-scm==10.3.4
     #   pluggy
     #   setuptools-rust
     #   urllib3
+setuptools-scm==7.1.0
+    # via python-dateutil
 setuptools-scm==8.1.0
     # via ansible-runner
 tomlkit==0.15.2
     # via hatchling
 trove-classifiers==2026.9.21.13
     # via hatchling
+typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform == "darwin") or (implementation_name == "cpython" and sys_platform == "linux")
+    # via setuptools-scm
 vcs-versioning==2.6.0
     # via setuptools-scm
 wheel==0.45.1
@@ -125,18 +126,18 @@ wheel==0.48.0
     #   psycopg
     #   psycopg-c
     #   python-daemon
+    #   python-dateutil
     #   python-string-utils
-    #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==83.0.0
-    # via psycopg-c
 setuptools==84.0.0
     # via charset-normalizer
+setuptools==84.1.0
+    # via psycopg-c
 setuptools==84.2.1
     # via
     #   aiohttp
@@ -169,6 +170,7 @@ setuptools==84.2.1
     #   pycparser
     #   pydantic
     #   python-daemon
+    #   python-dateutil
     #   pyvmomi
     #   pyyaml
     #   requests
@@ -177,7 +179,6 @@ setuptools==84.2.1
     #   setuptools-rust
     #   setuptools-scm
     #   trove-classifiers
-    #   tzdata
     #   tzlocal
     #   vcs-versioning
     #   wcwidth
