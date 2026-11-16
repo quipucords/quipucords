@@ -1947,7 +1947,7 @@ wheels = [
 
 [[package]]
 name = "quipucords"
-version = "2.9.2"
+version = "2.10.0"
 source = { editable = "." }
 dependencies = [
     { name = "ansible" },
