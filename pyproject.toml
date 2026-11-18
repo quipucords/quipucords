@@ -36,6 +36,10 @@ dependencies = [
     "pydantic<2.0.0,>=1.10.4",
     "pyyaml<7.0.0,>=6.0.1",
     "requests<3.0.0,>=2.32.2",
+    # latest celery pinned a 2.9.0.post0 of python-dateutil
+    # which does not explicitely add the tzdata dependency
+    # that we require at runtime.
+    "tzdata",
     "whitenoise<7.0.0,>=6.3.0",
     "django-json-agg>=0.0.1",
     "pyvmomi",
