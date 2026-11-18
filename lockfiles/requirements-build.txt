@@ -128,6 +128,7 @@ wheel==0.48.0
     #   python-daemon
     #   python-dateutil
     #   python-string-utils
+    #   tzdata
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==70.0.0
@@ -179,6 +180,7 @@ setuptools==84.2.1
     #   setuptools-rust
     #   setuptools-scm
     #   trove-classifiers
+    #   tzdata
     #   tzlocal
     #   vcs-versioning
     #   wcwidth

@@ -1973,6 +1973,7 @@ dependencies = [
     { name = "pyvmomi" },
     { name = "pyyaml" },
     { name = "requests" },
+    { name = "tzdata" },
     { name = "whitenoise" },
 ]
 
@@ -2025,6 +2026,7 @@ requires-dist = [
     { name = "pyvmomi", git = "https://github.com/vmware/pyvmomi.git?tag=v9.0.0.0" },
     { name = "pyyaml", specifier = ">=6.0.1,<7.0.0" },
     { name = "requests", specifier = ">=2.32.2,<3.0.0" },
+    { name = "tzdata" },
     { name = "whitenoise", specifier = ">=6.3.0,<7.0.0" },
 ]
 
