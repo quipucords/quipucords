@@ -1,4 +1,4 @@
-@Library("smqe-shared-lib@master") _
+@Library("discovery-lib@main") _
 
 def agents = [:]
 agents["failFast"] = false
