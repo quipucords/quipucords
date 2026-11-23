@@ -135,8 +135,6 @@ setuptools==70.0.0
     # via
     #   ansible-runner
     #   setuptools-scm
-setuptools==84.0.0
-    # via charset-normalizer
 setuptools==84.1.0
     # via psycopg-c
 setuptools==84.2.1
@@ -149,6 +147,7 @@ setuptools==84.2.1
     #   certifi
     #   cffi
     #   changelog-chug
+    #   charset-normalizer
     #   click-repl
     #   cryptography
     #   django
