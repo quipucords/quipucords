@@ -4,6 +4,7 @@
 [![Code Coverage](https://codecov.io/gh/quipucords/quipucords/branch/main/graph/badge.svg)](https://codecov.io/gh/quipucords/quipucords)
 
 
+
 # Overview
 
 **quipucords** is a discovery and reporting tool that scans systems across one or more networks to identify Red Hat products in an IT environment. It inspects systems using multiple methods, including direct SSH connections and APIs from platforms such as OpenShift, Red Hat Satellite, Ansible Automation Platform, and VMware vCenter.
