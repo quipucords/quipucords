@@ -116,7 +116,7 @@ typing-extensions==4.16.0 ; (implementation_name == "cpython" and sys_platform =
     # via setuptools-scm
 vcs-versioning==2.6.0
     # via setuptools-scm
-wheel==0.45.1
+wheel==0.46.2
     # via ansible-core
 wheel==0.48.0
     # via
